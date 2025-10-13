@@ -8,100 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
+import { meteorShowers2025 } from "@shared/meteorShowers";
 
 import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
 
 export default function MeteorNights() {
   const [, setLocation] = useLocation();
-
-  const meteorShowers = [
-    {
-      name: "Quadrantids",
-      peakDate: "January 3-4, 2025",
-      ratePerHour: "Up to 120",
-      bestLocation: "Northern Hemisphere",
-      description: "Sharp, bright meteors with fine trains. Best viewed in dark skies away from moonlight."
-    },
-    {
-      name: "Lyrids",
-      peakDate: "April 22-23, 2025",
-      ratePerHour: "Up to 20",
-      bestLocation: "Both Hemispheres",
-      description: "Fast meteors that can leave persistent glowing dust trails in the atmosphere."
-    },
-    {
-      name: "Eta Aquariids",
-      peakDate: "May 5-6, 2025",
-      ratePerHour: "Up to 50",
-      bestLocation: "Southern Hemisphere",
-      description: "Swift and bright meteors, remnants from Halley's Comet."
-    },
-    {
-      name: "Delta Aquariids",
-      peakDate: "July 28-29, 2025",
-      ratePerHour: "Up to 25",
-      bestLocation: "Southern Hemisphere",
-      description: "Faint meteors best viewed from tropical and southern latitudes."
-    },
-    {
-      name: "Perseids",
-      peakDate: "August 12-13, 2025",
-      ratePerHour: "Up to 100",
-      bestLocation: "Northern Hemisphere",
-      description: "The year's most popular meteor shower, known for bright fireballs and long trails.",
-      featured: true
-    },
-    {
-      name: "Draconids",
-      peakDate: "October 8-9, 2025",
-      ratePerHour: "Up to 10",
-      bestLocation: "Northern Hemisphere",
-      description: "Unusual shower best viewed in the early evening rather than after midnight."
-    },
-    {
-      name: "Orionids",
-      peakDate: "October 21-22, 2025",
-      ratePerHour: "Up to 25",
-      bestLocation: "Both Hemispheres",
-      description: "Another gift from Halley's Comet. Fast meteors with persistent trains."
-    },
-    {
-      name: "Southern Taurids",
-      peakDate: "November 4-5, 2025",
-      ratePerHour: "Up to 10",
-      bestLocation: "Both Hemispheres",
-      description: "Known for producing bright fireballs and slow-moving meteors."
-    },
-    {
-      name: "Northern Taurids",
-      peakDate: "November 11-12, 2025",
-      ratePerHour: "Up to 10",
-      bestLocation: "Both Hemispheres",
-      description: "Companion to Southern Taurids, also known for spectacular fireballs."
-    },
-    {
-      name: "Leonids",
-      peakDate: "November 17-18, 2025",
-      ratePerHour: "Up to 15",
-      bestLocation: "Both Hemispheres",
-      description: "Fast meteors known for periodic meteor storms every 33 years."
-    },
-    {
-      name: "Geminids",
-      peakDate: "December 13-14, 2025",
-      ratePerHour: "Up to 120",
-      bestLocation: "Both Hemispheres",
-      description: "Brightest and most reliable meteor shower of the year. Multicolored meteors with medium speed.",
-      featured: true
-    },
-    {
-      name: "Ursids",
-      peakDate: "December 21-22, 2025",
-      ratePerHour: "Up to 10",
-      bestLocation: "Northern Hemisphere",
-      description: "Minor shower that closes out the year. Best viewed in very dark skies."
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,15 +34,19 @@ export default function MeteorNights() {
         centered
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {meteorShowers.map((shower, index) => (
+          {meteorShowers2025.map((shower, index) => (
             <motion.div
-              key={index}
+              key={shower.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.05 }}
             >
-              <Card className={`hover-elevate ${shower.featured ? 'border-primary/50' : ''}`} data-testid={`card-meteor-${shower.name.toLowerCase().replace(/\s+/g, '-')}`}>
+              <Card 
+                className={`hover-elevate cursor-pointer ${shower.featured ? 'border-primary/50' : ''}`} 
+                data-testid={`card-meteor-${shower.id}`}
+                onClick={() => setLocation(`/meteor-shower/${shower.id}`)}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="font-serif text-xl sm:text-2xl" data-testid={`text-meteor-name-${index}`}>
@@ -158,9 +74,17 @@ export default function MeteorNights() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-muted-foreground" data-testid={`text-description-${index}`}>
+                  <p className="text-sm text-muted-foreground mb-4" data-testid={`text-description-${index}`}>
                     {shower.description}
                   </p>
+
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    data-testid={`button-view-details-${shower.id}`}
+                  >
+                    View Full Details
+                  </Button>
                 </CardContent>
               </Card>
             </motion.div>

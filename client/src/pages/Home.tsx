@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { useMemo } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
@@ -6,7 +7,10 @@ import ContentSection from "@/components/ContentSection";
 import ExperienceCard from "@/components/ExperienceCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, MapPin, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { getUpcomingMeteorShowers } from "@shared/meteorShowers";
 
 import heroImage from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
 import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
@@ -17,6 +21,9 @@ import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  
+  // Get next 3 upcoming meteor showers dynamically
+  const upcomingMeteorShowers = useMemo(() => getUpcomingMeteorShowers(3), []);
 
   const experiences = [
     {
@@ -225,6 +232,82 @@ export default function Home() {
           </Button>
         </div>
       </ContentSection>
+
+      {upcomingMeteorShowers.length > 0 && (
+        <ContentSection
+          title="Next Meteor Showers"
+          subtitle="Witness the cosmos in motion. Here are the next celestial spectacles waiting for you."
+          centered
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {upcomingMeteorShowers.map((shower, index) => (
+              <motion.div
+                key={shower.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card 
+                  className="hover-elevate cursor-pointer" 
+                  data-testid={`card-upcoming-meteor-${shower.id}`}
+                  onClick={() => setLocation(`/meteor-shower/${shower.id}`)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-serif text-xl sm:text-2xl" data-testid={`text-upcoming-name-${index}`}>
+                        {shower.name}
+                      </h3>
+                      {shower.featured && (
+                        <Badge variant="default" className="ml-2" data-testid="badge-featured-upcoming">
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span data-testid={`text-upcoming-date-${index}`}>{shower.peakDate}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Star className="h-4 w-4" />
+                        <span data-testid={`text-upcoming-rate-${index}`}>{shower.ratePerHour} meteors/hour</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span data-testid={`text-upcoming-location-${index}`}>{shower.bestLocation}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-4" data-testid={`text-upcoming-description-${index}`}>
+                      {shower.description}
+                    </p>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full"
+                      data-testid={`button-view-upcoming-${shower.id}`}
+                    >
+                      View Full Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+          <div className="text-center mt-8 sm:mt-12">
+            <Button
+              size="lg"
+              onClick={() => setLocation("/meteor-nights")}
+              data-testid="button-view-all-meteor-showers"
+              className="w-full sm:w-auto"
+            >
+              View All 2025 Meteor Showers
+            </Button>
+          </div>
+        </ContentSection>
+      )}
 
       <div className="relative py-16 sm:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div
