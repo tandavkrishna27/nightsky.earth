@@ -41,11 +41,11 @@ export default function Contact() {
       />
 
       <ContentSection>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 max-w-6xl mx-auto">
           <div>
-            <h2 className="font-serif text-3xl mb-6">Book Now</h2>
+            <h2 className="font-serif text-2xl sm:text-3xl mb-4 sm:mb-6">Book Now</h2>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -101,9 +101,9 @@ export default function Contact() {
             </Card>
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
-              <h3 className="font-serif text-2xl mb-4">Get in Touch</h3>
+              <h3 className="font-serif text-xl sm:text-2xl mb-3 sm:mb-4">Get in Touch</h3>
               <p className="text-muted-foreground mb-6">
                 Ready to embark on a journey under the stars? Whether you're interested in a specific expedition or just curious about what we offer, we'd love to hear from you.
               </p>

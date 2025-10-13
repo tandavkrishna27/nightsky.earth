@@ -68,7 +68,7 @@ export default function Experiences() {
       />
 
       <ContentSection>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {experiences.map((exp, index) => (
             <ExperienceCard
               key={index}
@@ -84,28 +84,28 @@ export default function Experiences() {
         centered
         className="bg-card/30"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <div className="space-y-4">
-            <h3 className="font-serif text-2xl">Expert Guidance</h3>
-            <p className="text-muted-foreground">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-serif text-xl sm:text-2xl">Expert Guidance</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Every expedition is led by experienced astronomers, astrophotographers, and wilderness guides who share their passion for the cosmos.
             </p>
           </div>
-          <div className="space-y-4">
-            <h3 className="font-serif text-2xl">Premium Comfort</h3>
-            <p className="text-muted-foreground">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-serif text-xl sm:text-2xl">Premium Comfort</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
               We believe wonder doesn't require sacrifice. Expect comfortable accommodations, gourmet meals, and thoughtful amenities.
             </p>
           </div>
-          <div className="space-y-4">
-            <h3 className="font-serif text-2xl">Small Groups</h3>
-            <p className="text-muted-foreground">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-serif text-xl sm:text-2xl">Small Groups</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Limited to 12-15 participants per journey to ensure intimate experiences and personalized attention.
             </p>
           </div>
-          <div className="space-y-4">
-            <h3 className="font-serif text-2xl">All Equipment Provided</h3>
-            <p className="text-muted-foreground">
+          <div className="space-y-3 sm:space-y-4">
+            <h3 className="font-serif text-xl sm:text-2xl">All Equipment Provided</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">
               From telescopes to photography gear, warm blankets to camping essentials — everything you need is included.
             </p>
           </div>

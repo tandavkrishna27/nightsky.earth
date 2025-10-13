@@ -65,27 +65,27 @@ export default function About() {
         title="What We Believe"
         centered
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
           <Card className="hover-elevate">
-            <CardContent className="p-8 text-center">
-              <h3 className="font-serif text-2xl mb-4">Connection</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="p-6 sm:p-8 text-center">
+              <h3 className="font-serif text-xl sm:text-2xl mb-3 sm:mb-4">Connection</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 The night sky connects us to something greater than ourselves — to the vastness of space and the intimacy of shared wonder.
               </p>
             </CardContent>
           </Card>
           <Card className="hover-elevate">
-            <CardContent className="p-8 text-center">
-              <h3 className="font-serif text-2xl mb-4">Preservation</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="p-6 sm:p-8 text-center">
+              <h3 className="font-serif text-xl sm:text-2xl mb-3 sm:mb-4">Preservation</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Dark skies are disappearing. We're committed to protecting the places where stars still shine bright and wild.
               </p>
             </CardContent>
           </Card>
           <Card className="hover-elevate">
-            <CardContent className="p-8 text-center">
-              <h3 className="font-serif text-2xl mb-4">Discovery</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="p-6 sm:p-8 text-center">
+              <h3 className="font-serif text-xl sm:text-2xl mb-3 sm:mb-4">Discovery</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Every journey is an opportunity to see the universe — and ourselves — with fresh eyes and renewed curiosity.
               </p>
             </CardContent>

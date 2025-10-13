@@ -17,7 +17,7 @@ export default function ContentSection({
   centered = false
 }: ContentSectionProps) {
   return (
-    <section className={`py-20 px-4 sm:px-6 lg:px-8 ${className}`}>
+    <section className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 ${className}`}>
       <div className="max-w-7xl mx-auto">
         {(title || subtitle) && (
           <motion.div
@@ -25,15 +25,15 @@ export default function ContentSection({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className={`mb-12 ${centered ? "text-center" : ""}`}
+            className={`mb-8 sm:mb-10 lg:mb-12 ${centered ? "text-center" : ""}`}
           >
             {title && (
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl mb-4" data-testid="section-title">
+              <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 sm:mb-4 leading-tight" data-testid="section-title">
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto" data-testid="section-subtitle">
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4 sm:px-0" data-testid="section-subtitle">
                 {subtitle}
               </p>
             )}

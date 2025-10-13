@@ -22,16 +22,16 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center">
-            <span className="font-serif text-xl text-foreground" data-testid="logo">
+        <div className="flex items-center justify-between h-14 sm:h-16">
+          <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+            <span className="font-serif text-lg sm:text-xl text-foreground" data-testid="logo">
               NightSky.earth
             </span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
                 <Button
@@ -46,7 +46,7 @@ export default function Navigation() {
             ))}
           </div>
 
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <Button
               variant="ghost"
               size="icon"
@@ -60,13 +60,13 @@ export default function Navigation() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="px-4 py-3 space-y-1">
+        <div className="lg:hidden border-t border-border bg-background/98 backdrop-blur-md">
+          <div className="px-4 py-3 space-y-1 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start ${isActive(link.path) ? "text-primary" : ""}`}
+                  className={`w-full justify-start text-base ${isActive(link.path) ? "text-primary bg-primary/10" : ""}`}
                   onClick={() => setMobileMenuOpen(false)}
                   data-testid={`mobile-nav-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
                 >

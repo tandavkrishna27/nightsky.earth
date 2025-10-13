@@ -35,7 +35,7 @@ export default function HeroSection({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-foreground mb-6"
+          className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-foreground mb-4 sm:mb-6 leading-tight"
           data-testid="hero-headline"
         >
           {headline}
@@ -45,7 +45,7 @@ export default function HeroSection({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-6 sm:mb-8 max-w-3xl mx-auto px-4"
           data-testid="hero-subheadline"
         >
           {subheadline}
@@ -56,14 +56,14 @@ export default function HeroSection({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
           >
             {primaryCTA && (
               <Button
                 size="lg"
                 variant="default"
                 onClick={onPrimaryCTAClick}
-                className="bg-primary text-primary-foreground border border-primary-border"
+                className="bg-primary text-primary-foreground border border-primary-border w-full sm:w-auto"
                 data-testid="button-primary-cta"
               >
                 {primaryCTA}
@@ -74,7 +74,7 @@ export default function HeroSection({
                 size="lg"
                 variant="outline"
                 onClick={onSecondaryCTAClick}
-                className="backdrop-blur-sm bg-background/20"
+                className="backdrop-blur-sm bg-background/20 w-full sm:w-auto"
                 data-testid="button-secondary-cta"
               >
                 {secondaryCTA}

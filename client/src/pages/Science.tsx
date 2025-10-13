@@ -65,18 +65,18 @@ export default function Science() {
           centered
           className="relative z-10"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto">
             {guides.map((guide, index) => (
               <Card key={index} className="hover-elevate">
-                <CardContent className="p-8 text-center">
-                  <Avatar className="w-24 h-24 mx-auto mb-4">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                <CardContent className="p-6 sm:p-8 text-center">
+                  <Avatar className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xl sm:text-2xl">
                       {guide.initials}
                     </AvatarFallback>
                   </Avatar>
-                  <h3 className="font-serif text-xl mb-1" data-testid={`text-guide-name-${index}`}>{guide.name}</h3>
-                  <p className="text-sm text-primary mb-3" data-testid={`text-guide-role-${index}`}>{guide.role}</p>
-                  <p className="text-sm text-muted-foreground" data-testid={`text-guide-bio-${index}`}>{guide.bio}</p>
+                  <h3 className="font-serif text-lg sm:text-xl mb-1" data-testid={`text-guide-name-${index}`}>{guide.name}</h3>
+                  <p className="text-xs sm:text-sm text-primary mb-3" data-testid={`text-guide-role-${index}`}>{guide.role}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground" data-testid={`text-guide-bio-${index}`}>{guide.bio}</p>
                 </CardContent>
               </Card>
             ))}
@@ -93,35 +93,35 @@ export default function Science() {
             Light pollution has robbed 80% of humanity of the ability to see the Milky Way from their homes. The night sky — our shared natural heritage — is disappearing.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mt-8 sm:mt-12">
             <Card className="hover-elevate">
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl mb-3">Conservation Partners</h3>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="font-serif text-lg sm:text-xl mb-2 sm:mb-3">Conservation Partners</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   We partner with International Dark-Sky Association and local conservation groups to protect certified dark-sky reserves.
                 </p>
               </CardContent>
             </Card>
             <Card className="hover-elevate">
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl mb-3">Eco-Travel Ethics</h3>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="font-serif text-lg sm:text-xl mb-2 sm:mb-3">Eco-Travel Ethics</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Every expedition follows leave-no-trace principles and contributes to local conservation efforts.
                 </p>
               </CardContent>
             </Card>
             <Card className="hover-elevate">
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl mb-3">Education</h3>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="font-serif text-lg sm:text-xl mb-2 sm:mb-3">Education</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   We teach participants about light pollution and how they can advocate for darker skies in their communities.
                 </p>
               </CardContent>
             </Card>
             <Card className="hover-elevate">
-              <CardContent className="p-6">
-                <h3 className="font-serif text-xl mb-3">Impact</h3>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="p-4 sm:p-6">
+                <h3 className="font-serif text-lg sm:text-xl mb-2 sm:mb-3">Impact</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   10% of every booking supports dark-sky preservation initiatives worldwide.
                 </p>
               </CardContent>
