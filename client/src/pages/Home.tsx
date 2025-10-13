@@ -24,25 +24,29 @@ export default function Home() {
       description: "Watch celestial showers paint the desert skies.",
       image: desertImage,
       season: "August–December",
-      duration: "3 nights"
+      duration: "3 nights",
+      comingSoon: false
     },
     {
       title: "Cosmic Silence",
       description: "Find stillness under a billion stars.",
       image: milkyWayImage,
-      duration: "2 nights"
+      duration: "2 nights",
+      comingSoon: false
     },
     {
       title: "Dark Sky Treks",
       description: "Hike where the Milky Way becomes your map.",
       image: starTrailsImage,
-      duration: "4 days"
+      duration: "4 days",
+      comingSoon: true
     },
     {
       title: "Eclipse Expeditions",
       description: "Witness the universe align in real time.",
       image: auroraImage,
-      season: "Special Events"
+      season: "Special Events",
+      comingSoon: true
     }
   ];
 
@@ -95,7 +99,13 @@ export default function Home() {
             <ExperienceCard
               key={index}
               {...exp}
-              onLearnMore={() => setLocation("/experiences")}
+              onLearnMore={() => {
+                if (exp.title === "Meteor Nights") {
+                  setLocation("/meteor-nights");
+                } else {
+                  setLocation("/experiences");
+                }
+              }}
             />
           ))}
         </div>

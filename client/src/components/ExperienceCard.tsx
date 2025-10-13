@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 
 interface ExperienceCardProps {
@@ -8,6 +9,7 @@ interface ExperienceCardProps {
   image: string;
   season?: string;
   duration?: string;
+  comingSoon?: boolean;
   onLearnMore?: () => void;
 }
 
@@ -17,6 +19,7 @@ export default function ExperienceCard({
   image,
   season,
   duration,
+  comingSoon = false,
   onLearnMore
 }: ExperienceCardProps) {
   return (
@@ -34,6 +37,13 @@ export default function ExperienceCard({
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+          {comingSoon && (
+            <div className="absolute top-4 right-4">
+              <Badge variant="secondary" className="bg-primary/90 text-primary-foreground" data-testid="badge-coming-soon">
+                Coming Soon
+              </Badge>
+            </div>
+          )}
         </div>
         <CardContent className="p-6">
           <h3 className="font-serif text-2xl mb-3" data-testid={`text-experience-title-${title.toLowerCase().replace(/\s+/g, "-")}`}>{title}</h3>
@@ -48,9 +58,10 @@ export default function ExperienceCard({
             variant="ghost"
             onClick={onLearnMore}
             className="w-full"
+            disabled={comingSoon}
             data-testid="button-learn-more"
           >
-            Discover More
+            {comingSoon ? "Coming Soon" : "Discover More"}
           </Button>
         </CardContent>
       </Card>

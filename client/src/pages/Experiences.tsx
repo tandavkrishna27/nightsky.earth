@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
@@ -11,48 +12,55 @@ import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.jpg"
 import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
 
 export default function Experiences() {
+  const [, setLocation] = useLocation();
   const experiences = [
     {
       title: "Meteor Nights",
       description: "Sleep under a meteor-lit sky. Our guided desert expeditions combine astronomy, photography, and silence.",
       image: desertImage,
       season: "August–December",
-      duration: "3 nights"
+      duration: "3 nights",
+      comingSoon: false
     },
     {
       title: "Cosmic Silence",
       description: "Stargazing and meditation beneath high-altitude skies where the air is thin and the stars are countless.",
       image: milkyWayImage,
       season: "Year-round",
-      duration: "2 nights"
+      duration: "2 nights",
+      comingSoon: false
     },
     {
       title: "Dark Sky Treks",
       description: "Guided hikes through certified dark-sky reserves where the Milky Way becomes your compass.",
       image: starTrailsImage,
       season: "Spring–Fall",
-      duration: "4 days"
+      duration: "4 days",
+      comingSoon: true
     },
     {
       title: "Eclipse Expeditions",
       description: "Witness rare celestial events and cosmic alignments from the world's best viewing locations.",
       image: auroraImage,
       season: "Special Events",
-      duration: "Varies"
+      duration: "Varies",
+      comingSoon: true
     },
     {
       title: "Aurora Journeys",
       description: "Chase the northern lights across pristine landscapes in Iceland, Norway, and beyond.",
       image: auroraImage,
       season: "September–March",
-      duration: "5 nights"
+      duration: "5 nights",
+      comingSoon: true
     },
     {
       title: "Astro-Photography Workshops",
       description: "Learn to capture the cosmos with guidance from master astrophotographers.",
       image: stargazingImage,
       season: "Year-round",
-      duration: "3 nights"
+      duration: "3 nights",
+      comingSoon: true
     }
   ];
 
@@ -73,7 +81,11 @@ export default function Experiences() {
             <ExperienceCard
               key={index}
               {...exp}
-              onLearnMore={() => console.log(`Learn more about ${exp.title}`)}
+              onLearnMore={() => {
+                if (exp.title === "Meteor Nights") {
+                  setLocation("/meteor-nights");
+                }
+              }}
             />
           ))}
         </div>
