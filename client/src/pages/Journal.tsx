@@ -3,7 +3,8 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import JournalCard from "@/components/JournalCard";
-import { useState } from "react";
+import LoadingPage from "@/components/LoadingPage";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,7 +24,21 @@ interface JournalEntry {
 }
 
 export default function Journal() {
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="Moments Beneath the Infinite..." />;
+  }
 
   const entries: JournalEntry[] = [
     {

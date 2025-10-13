@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
+import LoadingPage from "@/components/LoadingPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import StarField from "@/components/StarField";
@@ -9,6 +11,20 @@ import StarField from "@/components/StarField";
 import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
 
 export default function Science() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="The Universe, Explained Beautifully..." />;
+  }
   const guides = [
     {
       name: "Dr. Sarah Chen",

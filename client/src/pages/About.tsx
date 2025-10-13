@@ -1,14 +1,31 @@
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import StarField from "@/components/StarField";
+import LoadingPage from "@/components/LoadingPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
 
 export default function About() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="Born of Earth. Guided by Stars..." />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />

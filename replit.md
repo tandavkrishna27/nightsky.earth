@@ -5,6 +5,19 @@ A cinematic, minimalist website for NightSky.earth - a brand offering curated ni
 
 ## Recent Updates (October 13, 2025)
 
+### Meteor Loader (Latest)
+- **Beautiful animated meteor loader** added to ALL pages with 1-second delay
+- Loader features realistic flame trail with particle effects
+- Custom loading messages for each page:
+  - Home: "Where Earth meets the stars..."
+  - About: "Born of Earth. Guided by Stars..."
+  - Experiences: "Preparing your cosmic journey..."
+  - Meteor Nights: "Mapping the night sky for 2025..."
+  - Meteor Shower Detail: "Calculating celestial trajectories..."
+  - Science: "The Universe, Explained Beautifully..."
+  - Journal: "Moments Beneath the Infinite..."
+  - Contact: "Let's find your perfect celestial journey..."
+
 ### Dynamic Meteor Shower Features
 - **Homepage**: Dynamically displays the next 3 upcoming meteor showers based on the current date
 - **Meteor Nights Page**: Shows all 12 meteor showers for 2025 with clickable cards

@@ -1,9 +1,11 @@
 import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import ExperienceCard from "@/components/ExperienceCard";
+import LoadingPage from "@/components/LoadingPage";
 
 import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
 import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
@@ -13,6 +15,20 @@ import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.
 
 export default function Experiences() {
   const [, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="Preparing your cosmic journey..." />;
+  }
   const experiences = [
     {
       title: "Meteor Nights",

@@ -2,22 +2,37 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
+import LoadingPage from "@/components/LoadingPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
 
 export default function Contact() {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: ""
   });
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="Let's find your perfect celestial journey..." />;
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

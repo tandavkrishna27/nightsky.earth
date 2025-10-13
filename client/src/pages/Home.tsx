@@ -1,10 +1,11 @@
 import { useLocation } from "wouter";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import ExperienceCard from "@/components/ExperienceCard";
+import LoadingPage from "@/components/LoadingPage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +22,23 @@ import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
   
   // Get next 3 upcoming meteor showers dynamically
   const upcomingMeteorShowers = useMemo(() => getUpcomingMeteorShowers(3), []);
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="Where Earth meets the stars..." />;
+  }
 
   const experiences = [
     {

@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
+import LoadingPage from "@/components/LoadingPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,20 @@ import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg"
 
 export default function MeteorNights() {
   const [, setLocation] = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Show loader for 1 second on page load
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingPage message="Mapping the night sky for 2025..." />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
