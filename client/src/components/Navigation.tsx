@@ -31,7 +31,7 @@ export default function Navigation() {
             </span>
           </Link>
 
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
                 <Button
@@ -46,7 +46,7 @@ export default function Navigation() {
             ))}
           </div>
 
-          <div className="lg:hidden">
+          <div className="md:hidden">
             <Button
               variant="ghost"
               size="icon"
@@ -60,7 +60,7 @@ export default function Navigation() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-border bg-background/98 backdrop-blur-md">
+        <div className="md:hidden border-t border-border bg-background/98 backdrop-blur-md">
           <div className="px-4 py-3 space-y-1 max-h-[calc(100vh-3.5rem)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link key={link.path} href={link.path}>
