@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 interface HeroSectionProps {
   image: string;
@@ -22,13 +23,29 @@ export default function HeroSection({
   onSecondaryCTAClick,
   minHeight = "min-h-screen"
 }: HeroSectionProps) {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"]
+  });
+  
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.5]);
+
   return (
-    <div className={`relative ${minHeight} flex items-center justify-center overflow-hidden`}>
-      <div
+    <div ref={ref} className={`relative ${minHeight} flex items-center justify-center overflow-hidden`}>
+      <motion.div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${image})` }}
+        style={{ 
+          backgroundImage: `url(${image})`,
+          y,
+          scale: 1.1
+        }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"
+        style={{ opacity }}
+      />
       
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.h1
@@ -59,26 +76,30 @@ export default function HeroSection({
             className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
           >
             {primaryCTA && (
-              <Button
-                size="lg"
-                variant="default"
-                onClick={onPrimaryCTAClick}
-                className="bg-primary text-primary-foreground border border-primary-border w-full sm:w-auto"
-                data-testid="button-primary-cta"
-              >
-                {primaryCTA}
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  size="lg"
+                  variant="default"
+                  onClick={onPrimaryCTAClick}
+                  className="bg-primary text-primary-foreground border border-primary-border w-full sm:w-auto"
+                  data-testid="button-primary-cta"
+                >
+                  {primaryCTA}
+                </Button>
+              </motion.div>
             )}
             {secondaryCTA && (
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={onSecondaryCTAClick}
-                className="backdrop-blur-sm bg-background/20 w-full sm:w-auto"
-                data-testid="button-secondary-cta"
-              >
-                {secondaryCTA}
-              </Button>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={onSecondaryCTAClick}
+                  className="backdrop-blur-sm bg-background/20 w-full sm:w-auto"
+                  data-testid="button-secondary-cta"
+                >
+                  {secondaryCTA}
+                </Button>
+              </motion.div>
             )}
           </motion.div>
         )}
