@@ -1,8 +1,10 @@
 import { useParams, useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
+import LoadingPage from "@/components/LoadingPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +18,22 @@ export default function MeteorShowerDetail() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const showerId = params.id as string;
+  const [isLoading, setIsLoading] = useState(true);
   
   const shower = getMeteorShowerById(showerId);
+
+  useEffect(() => {
+    // Simulate loading for better UX
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, [showerId]);
+
+  if (isLoading) {
+    return <LoadingPage message="Calculating celestial trajectories..." />;
+  }
 
   if (!shower) {
     return (

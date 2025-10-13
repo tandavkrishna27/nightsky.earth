@@ -106,6 +106,8 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 - `ContentSection` - Reusable section wrapper
 - `Navigation` - Responsive navigation (desktop from 768px/md breakpoint)
 - `Footer` - Site-wide footer
+- `MeteorLoader` - Animated meteor with flame trail loader (sm/md/lg sizes)
+- `LoadingPage` - Full-page loading component with meteor animation
 
 ### Routing
 ```
