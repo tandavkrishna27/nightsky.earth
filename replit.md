@@ -145,8 +145,12 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 ### 6. Science (`/science`)
 - Educational content about celestial phenomena
 
-### 7. Journal (`/journal`)
-- Stories and experiences from past journeys
+### 7. Resources (`/resources`)
+- Comprehensive stargazing apps, tools, and resources
+- Mobile and desktop planetarium software
+- Essential web resources (weather, dark sky maps, planning tools)
+- Essential gear guides
+- World's best dark sky locations
 
 ### 8. Contact (`/contact`)
 - Contact form for inquiries and bookings
@@ -196,7 +200,7 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 /meteor-nights - All meteor showers 2025
 /meteor-shower/:id - Individual shower details
 /science - Science content
-/journal - Journal entries
+/resources - Apps, tools, and resources
 /contact - Contact form
 ```
 

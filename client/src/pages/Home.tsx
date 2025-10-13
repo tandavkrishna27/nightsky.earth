@@ -238,15 +238,6 @@ export default function Home() {
             </div>
           </Card>
         </div>
-        <div className="text-center mt-12">
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/journal")}
-            data-testid="button-read-journal"
-          >
-            Read Our Journal
-          </Button>
-        </div>
       </ContentSection>
 
       {upcomingMeteorShowers.length > 0 && (
