@@ -5,7 +5,45 @@ A cinematic, minimalist website for NightSky.earth - a brand offering curated ni
 
 ## Recent Updates (October 13, 2025)
 
-### Time-Lapse Night Sky Videos (Latest)
+### Comprehensive Resources Page (Latest)
+- **New Resources page** at `/resources` with complete stargazing information:
+  
+  **Mobile Apps Section:**
+  - SkySafari - Professional planetarium app (iOS/Android)
+  - Star Walk 2 - AR sky mapping (iOS/Android)
+  - PhotoPills - Astrophotography planning (iOS/Android) ⭐ Recommended
+  - Sky Tonight - Modern astronomy app (iOS/Android)
+  - NASA App - Official space news and tracking (Free)
+  
+  **Desktop Software:**
+  - Stellarium - Free open-source planetarium ⭐ Recommended
+  - SkySafari Pro - Professional desktop version
+  - Cartes du Ciel - Free with telescope control
+  
+  **Essential Web Resources:**
+  - Weather: Clear Dark Sky, Astrospheric
+  - Dark Sky Maps: Light Pollution Map ⭐, Dark Site Finder
+  - Planning Tools: Time and Date Astronomy, CalSky
+  - Satellite Tracking: Heavens Above ⭐
+  - Education: Sky & Telescope, Astronomy.com
+  - Conservation: International Dark-Sky Association ⭐
+  
+  **Essential Gear Guides:**
+  - Beginner equipment checklist
+  - Astrophotography gear recommendations
+  
+  **World's Best Dark Sky Locations:**
+  - NamibRand Nature Reserve, Namibia
+  - Mauna Kea, Hawaii, USA
+  - Atacama Desert, Chile
+  - Aoraki Mackenzie, New Zealand
+  - **Almora, Uttarakhand, India** - Himalayan dark sky site
+  - Cherry Springs State Park, Pennsylvania, USA
+  - Jasper National Park, Alberta, Canada
+  - Westhavelland, Germany
+  - Warrumbungle National Park, Australia
+
+### Time-Lapse Night Sky Videos
 - **Video background support** added for cinematic hero sections
 - Components created:
   - `VideoBackground` - Reusable video background component

@@ -11,6 +11,7 @@ import MeteorShowerDetail from "@/pages/MeteorShowerDetail";
 import Science from "@/pages/Science";
 import Journal from "@/pages/Journal";
 import Contact from "@/pages/Contact";
+import Resources from "@/pages/Resources";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/meteor-shower/:id" component={MeteorShowerDetail} />
       <Route path="/science" component={Science} />
       <Route path="/journal" component={Journal} />
+      <Route path="/resources" component={Resources} />
       <Route path="/contact" component={Contact} />
       <Route component={NotFound} />
     </Switch>
