@@ -5,7 +5,24 @@ A cinematic, minimalist website for NightSky.earth - a brand offering curated ni
 
 ## Recent Updates (October 13, 2025)
 
-### Meteor Loader & Enhanced Animations (Latest)
+### Time-Lapse Night Sky Videos (Latest)
+- **Video background support** added for cinematic hero sections
+- Components created:
+  - `VideoBackground` - Reusable video background component
+  - `HeroSectionVideo` - Hero section with video support
+- Features:
+  - Auto-loop with slow motion (0.75x speed) for cinematic effect
+  - Fallback to static image if video not available
+  - Optimized for performance with proper video formats
+  - Smooth overlay gradients
+- **To add your own videos**:
+  1. Download time-lapse night sky videos (MP4 format)
+  2. Place in `/public/videos/` folder
+  3. Reference in components: `videoUrl="/videos/your-video.mp4"`
+- See `/public/videos/README.md` for video specs and free sources
+- Home page already configured with video hero (falls back to image)
+
+### Meteor Loader & Enhanced Animations
 - **Clean meteor loader** added to ALL pages with 1-second delay
   - Removed background text for clean, minimal aesthetic
   - Features realistic flame trail with particle effects

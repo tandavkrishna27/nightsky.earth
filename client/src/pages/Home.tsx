@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useMemo, useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import HeroSection from "@/components/HeroSection";
+import HeroSectionVideo from "@/components/HeroSectionVideo";
 import ContentSection from "@/components/ContentSection";
 import ExperienceCard from "@/components/ExperienceCard";
 import LoadingPage from "@/components/LoadingPage";
@@ -76,8 +76,9 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <HeroSection
-        image={heroImage}
+      <HeroSectionVideo
+        videoUrl="/videos/night-sky.mp4"
+        fallbackImage={heroImage}
         headline="Where Earth meets the stars."
         subheadline="Journey to the darkest skies on Earth to witness the brightest moments of the universe."
         primaryCTA="Explore Experiences"
