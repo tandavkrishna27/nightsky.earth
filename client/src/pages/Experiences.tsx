@@ -1,0 +1,118 @@
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import HeroSection from "@/components/HeroSection";
+import ContentSection from "@/components/ContentSection";
+import ExperienceCard from "@/components/ExperienceCard";
+
+import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
+import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
+import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
+import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.jpg";
+import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
+
+export default function Experiences() {
+  const experiences = [
+    {
+      title: "Meteor Nights",
+      description: "Sleep under a meteor-lit sky. Our guided desert expeditions combine astronomy, photography, and silence.",
+      image: desertImage,
+      season: "August–December",
+      duration: "3 nights"
+    },
+    {
+      title: "Cosmic Silence",
+      description: "Stargazing and meditation beneath high-altitude skies where the air is thin and the stars are countless.",
+      image: milkyWayImage,
+      season: "Year-round",
+      duration: "2 nights"
+    },
+    {
+      title: "Dark Sky Treks",
+      description: "Guided hikes through certified dark-sky reserves where the Milky Way becomes your compass.",
+      image: starTrailsImage,
+      season: "Spring–Fall",
+      duration: "4 days"
+    },
+    {
+      title: "Eclipse Expeditions",
+      description: "Witness rare celestial events and cosmic alignments from the world's best viewing locations.",
+      image: auroraImage,
+      season: "Special Events",
+      duration: "Varies"
+    },
+    {
+      title: "Aurora Journeys",
+      description: "Chase the northern lights across pristine landscapes in Iceland, Norway, and beyond.",
+      image: auroraImage,
+      season: "September–March",
+      duration: "5 nights"
+    },
+    {
+      title: "Astro-Photography Workshops",
+      description: "Learn to capture the cosmos with guidance from master astrophotographers.",
+      image: stargazingImage,
+      season: "Year-round",
+      duration: "3 nights"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <HeroSection
+        image={starTrailsImage}
+        headline="Journeys Under the Infinite"
+        subheadline="Curated celestial experiences designed to reconnect you with the cosmos."
+        minHeight="min-h-[70vh]"
+      />
+
+      <ContentSection>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {experiences.map((exp, index) => (
+            <ExperienceCard
+              key={index}
+              {...exp}
+              onLearnMore={() => console.log(`Learn more about ${exp.title}`)}
+            />
+          ))}
+        </div>
+      </ContentSection>
+
+      <ContentSection
+        title="What to Expect"
+        centered
+        className="bg-card/30"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="space-y-4">
+            <h3 className="font-serif text-2xl">Expert Guidance</h3>
+            <p className="text-muted-foreground">
+              Every expedition is led by experienced astronomers, astrophotographers, and wilderness guides who share their passion for the cosmos.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <h3 className="font-serif text-2xl">Premium Comfort</h3>
+            <p className="text-muted-foreground">
+              We believe wonder doesn't require sacrifice. Expect comfortable accommodations, gourmet meals, and thoughtful amenities.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <h3 className="font-serif text-2xl">Small Groups</h3>
+            <p className="text-muted-foreground">
+              Limited to 12-15 participants per journey to ensure intimate experiences and personalized attention.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <h3 className="font-serif text-2xl">All Equipment Provided</h3>
+            <p className="text-muted-foreground">
+              From telescopes to photography gear, warm blankets to camping essentials — everything you need is included.
+            </p>
+          </div>
+        </div>
+      </ContentSection>
+
+      <Footer />
+    </div>
+  );
+}

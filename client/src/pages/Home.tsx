@@ -1,0 +1,262 @@
+import { useLocation } from "wouter";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import HeroSection from "@/components/HeroSection";
+import ContentSection from "@/components/ContentSection";
+import ExperienceCard from "@/components/ExperienceCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
+
+import heroImage from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
+import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
+import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
+import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.jpg";
+import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
+import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
+
+export default function Home() {
+  const [, setLocation] = useLocation();
+
+  const experiences = [
+    {
+      title: "Meteor Nights",
+      description: "Watch celestial showers paint the desert skies.",
+      image: desertImage,
+      season: "August–December",
+      duration: "3 nights"
+    },
+    {
+      title: "Cosmic Silence",
+      description: "Find stillness under a billion stars.",
+      image: milkyWayImage,
+      duration: "2 nights"
+    },
+    {
+      title: "Dark Sky Treks",
+      description: "Hike where the Milky Way becomes your map.",
+      image: starTrailsImage,
+      duration: "4 days"
+    },
+    {
+      title: "Eclipse Expeditions",
+      description: "Witness the universe align in real time.",
+      image: auroraImage,
+      season: "Special Events"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <HeroSection
+        image={heroImage}
+        headline="Where Earth meets the stars."
+        subheadline="Journey to the darkest skies on Earth to witness the brightest moments of the universe."
+        primaryCTA="Explore Experiences"
+        secondaryCTA="Join the Waitlist"
+        onPrimaryCTAClick={() => setLocation("/experiences")}
+        onSecondaryCTAClick={() => setLocation("/contact")}
+      />
+
+      <ContentSection
+        title="Born of Earth. Guided by Stars."
+        centered
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <p className="text-lg text-muted-foreground italic mb-8">
+            NightSky.earth was created to reconnect people with the cosmos through immersive night-sky journeys.
+            We travel beyond the glow of cities — to where silence hums and wonder feels close enough to touch.
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/about")}
+            data-testid="button-our-story"
+          >
+            Our Story
+          </Button>
+        </motion.div>
+      </ContentSection>
+
+      <ContentSection
+        title="Journeys Under the Infinite."
+        centered
+        className="bg-card/30"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {experiences.map((exp, index) => (
+            <ExperienceCard
+              key={index}
+              {...exp}
+              onLearnMore={() => setLocation("/experiences")}
+            />
+          ))}
+        </div>
+        <div className="text-center mt-12">
+          <Button
+            size="lg"
+            onClick={() => setLocation("/experiences")}
+            data-testid="button-view-all-experiences"
+          >
+            View All Experiences
+          </Button>
+        </div>
+      </ContentSection>
+
+      <ContentSection
+        title="The Universe, Explained Beautifully."
+        centered
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="max-w-3xl mx-auto text-center mb-12"
+        >
+          <p className="text-lg text-muted-foreground italic">
+            Each journey is aligned with real celestial events — meteor showers, eclipses, and planetary alignments.
+            Guided by passionate astronomers and storytellers, every experience blends exploration with understanding.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="hover-elevate">
+            <CardContent className="p-6">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-6 h-6 rounded-full bg-primary"></div>
+              </div>
+              <h3 className="font-serif text-xl mb-2">Celestial Alignment</h3>
+              <p className="text-sm text-muted-foreground">
+                We plan each journey around authentic astronomical events for the most spectacular viewing.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="hover-elevate">
+            <CardContent className="p-6">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-6 h-6 rounded-full bg-primary"></div>
+              </div>
+              <h3 className="font-serif text-xl mb-2">Expert Guides</h3>
+              <p className="text-sm text-muted-foreground">
+                Learn from astronomers and astrophotographers who bring the cosmos to life.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="hover-elevate">
+            <CardContent className="p-6">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <div className="w-6 h-6 rounded-full bg-primary"></div>
+              </div>
+              <h3 className="font-serif text-xl mb-2">Dark Sky Conservation</h3>
+              <p className="text-sm text-muted-foreground">
+                Every expedition supports the preservation of the world's remaining dark skies.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </ContentSection>
+
+      <ContentSection
+        title="Moments Beneath the Infinite."
+        centered
+        className="bg-card/30"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="overflow-hidden hover-elevate group cursor-pointer">
+            <div className="relative h-80">
+              <img src={stargazingImage} alt="Stargazing" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <p className="text-sm italic text-muted-foreground">
+                  "Under these stars, we found ourselves again."
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="overflow-hidden hover-elevate group cursor-pointer">
+            <div className="relative h-80">
+              <img src={starTrailsImage} alt="Star Trails" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <p className="text-sm italic text-muted-foreground">
+                  "Time stands still when the universe moves around you."
+                </p>
+              </div>
+            </div>
+          </Card>
+          <Card className="overflow-hidden hover-elevate group cursor-pointer">
+            <div className="relative h-80">
+              <img src={auroraImage} alt="Aurora" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <p className="text-sm italic text-muted-foreground">
+                  "Nature's light show reminded us of our place in the cosmos."
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+        <div className="text-center mt-12">
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/journal")}
+            data-testid="button-read-journal"
+          >
+            Read Our Journal
+          </Button>
+        </div>
+      </ContentSection>
+
+      <div className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${milkyWayImage})` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-[#0E1633]/80 to-black/70" />
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative z-10 max-w-3xl mx-auto text-center"
+        >
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl mb-6">
+            Ready to look up?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Join the next NightSky.earth experience.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button
+              size="lg"
+              onClick={() => setLocation("/contact")}
+              data-testid="button-book-now"
+            >
+              Book Now
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setLocation("/contact")}
+              className="backdrop-blur-sm bg-background/20"
+              data-testid="button-join-waitlist"
+            >
+              Join the Waitlist
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+}
