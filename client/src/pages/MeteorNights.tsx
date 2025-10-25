@@ -7,10 +7,11 @@ import LoadingPage from "@/components/LoadingPage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, MapPin, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocation } from "wouter";
-import { meteorShowers2025 } from "@shared/meteorShowers";
+import { meteorShowers2025, meteorShowers2026 } from "@shared/meteorShowers";
 
 import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
 
@@ -28,7 +29,7 @@ export default function MeteorNights() {
   }, []);
 
   if (isLoading) {
-    return <LoadingPage message="Mapping the night sky for 2025..." />;
+    return <LoadingPage message="Mapping the night sky for 2025 & 2026..." />;
   }
 
   return (
@@ -37,75 +38,144 @@ export default function MeteorNights() {
       
       <HeroSection
         image={desertImage}
-        headline="Meteor Nights 2025"
-        subheadline="Experience all 12 meteor showers painting the night sky throughout the year."
+        headline="Meteor Nights 2025 & 2026"
+        subheadline="Experience all 24 meteor showers painting the night sky across two incredible years."
         minHeight="min-h-[70vh]"
         primaryCTA="Book Your Night"
         onPrimaryCTAClick={() => setLocation("/contact")}
       />
 
       <ContentSection
-        title="Your Year Under the Stars"
+        title="Your Years Under the Stars"
         subtitle="Join us for guided expeditions to witness nature's most spectacular light shows. Each meteor shower offers a unique celestial experience."
         centered
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {meteorShowers2025.map((shower, index) => (
-            <motion.div
-              key={shower.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-            >
-              <Card 
-                className={`hover-elevate cursor-pointer ${shower.featured ? 'border-primary/50' : ''}`} 
-                data-testid={`card-meteor-${shower.id}`}
-                onClick={() => setLocation(`/meteor-shower/${shower.id}`)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-serif text-xl sm:text-2xl" data-testid={`text-meteor-name-${index}`}>
-                      {shower.name}
-                    </h3>
-                    {shower.featured && (
-                      <Badge variant="default" className="ml-2" data-testid="badge-featured">
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      <span data-testid={`text-peak-date-${index}`}>{shower.peakDate}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Star className="h-4 w-4" />
-                      <span data-testid={`text-rate-${index}`}>{shower.ratePerHour} meteors/hour</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      <span data-testid={`text-location-${index}`}>{shower.bestLocation}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-muted-foreground mb-4" data-testid={`text-description-${index}`}>
-                    {shower.description}
-                  </p>
-
-                  <Button
-                    variant="ghost"
-                    className="w-full"
-                    data-testid={`button-view-details-${shower.id}`}
+        <Tabs defaultValue="2025" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8" data-testid="tabs-year-selector">
+            <TabsTrigger value="2025" data-testid="tab-2025">2025 (12 Showers)</TabsTrigger>
+            <TabsTrigger value="2026" data-testid="tab-2026">2026 (12 Showers)</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="2025">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+              {meteorShowers2025.map((shower, index) => (
+                <motion.div
+                  key={shower.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                >
+                  <Card 
+                    className={`hover-elevate cursor-pointer ${shower.featured ? 'border-primary/50' : ''}`} 
+                    data-testid={`card-meteor-${shower.id}`}
+                    onClick={() => setLocation(`/meteor-shower/${shower.id}`)}
                   >
-                    View Full Details
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-serif text-xl sm:text-2xl" data-testid={`text-meteor-name-${index}`}>
+                          {shower.name}
+                        </h3>
+                        {shower.featured && (
+                          <Badge variant="default" className="ml-2" data-testid="badge-featured">
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span data-testid={`text-peak-date-${index}`}>{shower.peakDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Star className="h-4 w-4" />
+                          <span data-testid={`text-rate-${index}`}>{shower.ratePerHour} meteors/hour</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span data-testid={`text-location-${index}`}>{shower.bestLocation}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-muted-foreground mb-4" data-testid={`text-description-${index}`}>
+                        {shower.description}
+                      </p>
+
+                      <Button
+                        variant="ghost"
+                        className="w-full"
+                        data-testid={`button-view-details-${shower.id}`}
+                      >
+                        View Full Details
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="2026">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+              {meteorShowers2026.map((shower, index) => (
+                <motion.div
+                  key={shower.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                >
+                  <Card 
+                    className={`hover-elevate cursor-pointer ${shower.featured ? 'border-primary/50' : ''}`} 
+                    data-testid={`card-meteor-${shower.id}`}
+                    onClick={() => setLocation(`/meteor-shower/${shower.id}`)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-serif text-xl sm:text-2xl" data-testid={`text-meteor-name-2026-${index}`}>
+                          {shower.name}
+                        </h3>
+                        {shower.featured && (
+                          <Badge variant="default" className="ml-2" data-testid="badge-featured-2026">
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="h-4 w-4" />
+                          <span data-testid={`text-peak-date-2026-${index}`}>{shower.peakDate}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Star className="h-4 w-4" />
+                          <span data-testid={`text-rate-2026-${index}`}>{shower.ratePerHour} meteors/hour</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span data-testid={`text-location-2026-${index}`}>{shower.bestLocation}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-muted-foreground mb-4" data-testid={`text-description-2026-${index}`}>
+                        {shower.description}
+                      </p>
+
+                      <Button
+                        variant="ghost"
+                        className="w-full"
+                        data-testid={`button-view-details-${shower.id}`}
+                      >
+                        View Full Details
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </ContentSection>
 
       <ContentSection

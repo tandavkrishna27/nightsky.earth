@@ -5,7 +5,22 @@ A cinematic, minimalist website for NightSky.earth - a brand offering curated ni
 
 ## Recent Updates (October 13, 2025)
 
-### Comprehensive Resources Page (Latest)
+### Complete 2025 & 2026 Meteor Shower Calendar (Latest)
+- **Added full 2026 meteor shower calendar** - all 12 major showers
+- **Meteor Nights page updated** with year tabs (2025 & 2026)
+- Total of **24 meteor showers** across two years
+- Each year includes:
+  - Quadrantids, Lyrids, Eta Aquariids, Delta Aquariids
+  - Perseids ⭐, Draconids, Orionids
+  - Southern Taurids, Northern Taurids, Leonids
+  - Geminids ⭐, Ursids
+- **2026 Featured Showers:**
+  - Perseids (August 12-13) - Excellent dark skies
+  - Geminids (December 13-14) - Favorable moon conditions
+- Smooth tab navigation between years
+- All detail pages work for both 2025 and 2026 showers
+
+### Comprehensive Resources Page
 - **New Resources page** at `/resources` with complete stargazing information:
   
   **Mobile Apps Section:**
@@ -120,7 +135,8 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 - Call-to-action sections
 
 ### 2. Meteor Nights (`/meteor-nights`)
-- Overview of all 12 meteor showers in 2025
+- Overview of all 24 meteor showers (12 in 2025 + 12 in 2026)
+- Year tabs to switch between 2025 and 2026
 - Clickable cards for each shower
 - Featured badges for Perseids and Geminids
 - What's Included section
@@ -155,13 +171,17 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 ### 8. Contact (`/contact`)
 - Contact form for inquiries and bookings
 
-## 2025 Meteor Showers
+## Meteor Showers (2025 & 2026)
 
-### Featured Showers
+### 2025 Featured Showers
 1. **Perseids** (August 12-13) - Up to 100 meteors/hour
 2. **Geminids** (December 13-14) - Up to 120 meteors/hour
 
-### All 12 Showers
+### 2026 Featured Showers
+1. **Perseids** (August 12-13) - Up to 100 meteors/hour - Excellent conditions
+2. **Geminids** (December 13-14) - Up to 120 meteors/hour - Favorable moon
+
+### All 12 Showers (Each Year)
 1. Quadrantids - January 3-4
 2. Lyrids - April 22-23
 3. Eta Aquariids - May 5-6
@@ -175,13 +195,19 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 11. Geminids - December 13-14 ⭐
 12. Ursids - December 21-22
 
+**Total: 24 meteor showers across 2025 & 2026**
+
 ## Technical Architecture
 
 ### Data Structure
 - **Centralized meteor shower data** in `shared/meteorShowers.ts`
+- Arrays for:
+  - `meteorShowers2025` - All 12 showers for 2025
+  - `meteorShowers2026` - All 12 showers for 2026
+  - `allMeteorShowers` - Combined array of all 24 showers
 - Helper functions for:
-  - `getUpcomingMeteorShowers(count)` - Returns next N upcoming showers
-  - `getMeteorShowerById(id)` - Returns specific shower details
+  - `getUpcomingMeteorShowers(count)` - Returns next N upcoming showers from all years
+  - `getMeteorShowerById(id)` - Returns specific shower details from all years
 
 ### Key Components
 - `ExperienceCard` - Supports "Coming Soon" badges and conditional navigation
