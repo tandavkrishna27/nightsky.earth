@@ -5,7 +5,40 @@ A cinematic, minimalist website for NightSky.earth - a brand offering curated ni
 
 ## Recent Updates (October 26, 2025)
 
-### New Community Page (Latest)
+### Comprehensive SEO & GEO Optimization (Latest)
+- **Complete SEO infrastructure** implemented across entire website
+- **SEO Component** (`client/src/components/SEO.tsx`):
+  - Reusable component with react-helmet-async
+  - Meta tags: title, description, keywords
+  - Open Graph tags for social media sharing (Facebook, LinkedIn)
+  - Twitter Card tags for Twitter/X sharing
+  - Canonical URLs to prevent duplicate content
+  - Geo meta tags for location-based discovery
+  - JSON-LD structured data support (Schema.org)
+- **Structured Data (JSON-LD) Schemas**:
+  - Organization schema (Home page) - company info and contact
+  - Website schema (Home page) - site-wide search functionality
+  - AboutPage schema (About page) - mission and story
+  - ItemList schema (Experiences page) - 6 night-sky experiences
+  - Organization schema (Community page) - collaborative network
+  - CollectionPage schema (Resources page) - stargazing tools
+  - ContactPage schema (Contact page) - booking inquiries
+  - EventSeries schema (Meteor Nights page) - 24 meteor showers 2025-2026
+  - Dynamic Event schema (Individual meteor shower pages) - specific shower details
+- **Page-Specific SEO**:
+  - All 8+ pages have unique titles, descriptions, and keywords
+  - Targeted keywords for astronomy, stargazing, meteor showers, dark sky experiences
+  - Social media preview optimization
+- **Search Engine Infrastructure**:
+  - `public/robots.txt` - Crawling guidelines for search bots
+  - `public/sitemap.xml` - All major pages + meteor shower detail pages
+  - HelmetProvider wrapper in App.tsx for proper SSR support
+- **Accessibility**:
+  - All `<img>` tags have descriptive alt text
+  - CSS background images are decorative with semantic headline context
+  - Proper ARIA attributes throughout
+
+### New Community Page
 - **Added comprehensive Community/Collective page** at `/community`
 - **Added to header navigation** - Now appears between Experiences and Resources
 - **Complete content sections:**
