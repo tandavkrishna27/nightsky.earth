@@ -210,55 +210,110 @@ export default function Community() {
         subtitle="Have an idea that could make people look up again? We'll help you turn it into an experience that moves them."
         centered
       >
-        <div className="max-w-4xl mx-auto mb-12">
-          <h3 className="font-serif text-2xl sm:text-3xl mb-8 text-center">What We Offer</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="max-w-5xl mx-auto mb-16">
+          <h3 className="font-serif text-2xl sm:text-3xl mb-4 text-center">What We Provide</h3>
+          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto">
+            From concept to cosmos — we handle the complexity so you can focus on creating wonder.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
-              { icon: Rocket, text: "End-to-end operations & logistics" },
-              { icon: Palette, text: "Visual design, branding & marketing" },
-              { icon: DollarSign, text: "Funding & sponsorship opportunities" },
-              { icon: Handshake, text: "Partnerships with eco-lodges, gear brands, and observatories" },
-              { icon: Video, text: "Storytelling, documentation & PR exposure" },
+              { 
+                icon: Rocket, 
+                title: "Operations & Logistics",
+                text: "End-to-end event management, location scouting, permits, and on-ground coordination"
+              },
+              { 
+                icon: DollarSign, 
+                title: "Funding & Sponsorships",
+                text: "Connect with brands and sponsors who believe in your vision and the power of wonder"
+              },
+              { 
+                icon: Handshake, 
+                title: "Strategic Partnerships",
+                text: "Access our network of eco-lodges, observatories, gear brands, and dark sky locations worldwide"
+              },
+              { 
+                icon: Video, 
+                title: "Storytelling & Amplification",
+                text: "Professional documentation, content creation, and PR to share your experience with the world"
+              },
             ].map((offer, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="flex items-start gap-4"
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
-                  <offer.icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="text-muted-foreground pt-1" data-testid={`text-offer-${index}`}>
-                  {offer.text}
-                </p>
+                <Card className="hover-elevate h-full">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-full bg-primary/10 flex-shrink-0">
+                        <offer.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-serif text-lg sm:text-xl mb-2" data-testid={`text-offer-title-${index}`}>
+                          {offer.title}
+                        </h4>
+                        <p className="text-sm text-muted-foreground" data-testid={`text-offer-${index}`}>
+                          {offer.text}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto mb-12">
-          <h3 className="font-serif text-2xl sm:text-3xl mb-8 text-center">Who It's For</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="max-w-5xl mx-auto mb-12">
+          <h3 className="font-serif text-2xl sm:text-3xl mb-4 text-center">Who We're Looking For</h3>
+          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto">
+            Creators, educators, and explorers who share our belief that the night sky can change lives.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              "Independent astronomers",
-              "Astrophotographers",
-              "Science communicators",
-              "Outdoor educators",
-              "Travel and nature creators",
-            ].map((role, index) => (
+              { 
+                role: "Astronomers & Researchers",
+                description: "Share cosmic knowledge and inspire curiosity"
+              },
+              { 
+                role: "Astrophotographers",
+                description: "Capture the infinite and teach others your craft"
+              },
+              { 
+                role: "Science Communicators",
+                description: "Make the universe accessible and awe-inspiring"
+              },
+              { 
+                role: "Outdoor & Adventure Guides",
+                description: "Lead journeys into the wild under starlit skies"
+              },
+              { 
+                role: "Content Creators",
+                description: "Document and share celestial experiences with the world"
+              },
+              { 
+                role: "Educators & Workshop Leaders",
+                description: "Teach stargazing, navigation, or cosmic philosophy"
+              },
+            ].map((item, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
               >
-                <Card className="hover-elevate">
-                  <CardContent className="p-4 text-center">
-                    <p className="text-sm font-medium" data-testid={`text-role-${index}`}>{role}</p>
+                <Card className="hover-elevate h-full">
+                  <CardContent className="p-6">
+                    <h4 className="font-medium text-base sm:text-lg mb-2" data-testid={`text-role-${index}`}>
+                      {item.role}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {item.description}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
