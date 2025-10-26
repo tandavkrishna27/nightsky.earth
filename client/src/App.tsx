@@ -5,6 +5,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import BottomNavigation from "@/components/BottomNavigation";
+import BackgroundMusic from "@/components/BackgroundMusic";
+import FloatingMuteButton from "@/components/FloatingMuteButton";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Experiences from "@/pages/Experiences";
@@ -36,11 +38,14 @@ function App() {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <div className="pb-20 lg:pb-0">
-            <Router />
-          </div>
-          <BottomNavigation />
+          <BackgroundMusic audioUrl="/cosmic-music.mp3" volume={0.3}>
+            <Toaster />
+            <div className="pb-20 lg:pb-0">
+              <Router />
+            </div>
+            <BottomNavigation />
+            <FloatingMuteButton />
+          </BackgroundMusic>
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>
