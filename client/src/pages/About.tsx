@@ -5,6 +5,7 @@ import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import StarField from "@/components/StarField";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Sparkles, Users, Telescope, Globe } from "lucide-react";
@@ -26,8 +27,26 @@ export default function About() {
     return <LoadingPage message="Where Earth looks up..." />;
   }
 
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "name": "About NightSky.earth",
+    "description": "Learn about NightSky.earth's mission to reconnect people with the cosmos through immersive night-sky journeys and celestial experiences.",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "NightSky.earth",
+      "description": "A collaboration between astronomers, astrophotographers, and explorers helping people experience the universe through curated dark-sky journeys."
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="About - Our Story and Mission"
+        description="Discover how NightSky.earth connects astronomers, astrophotographers, and educators to create unforgettable night-sky experiences under the world's darkest skies."
+        keywords="about nightsky, astronomy community, dark sky experts, astrophotography, stargazing guides, cosmic experiences"
+        schema={aboutSchema}
+      />
       <Navigation />
       
       <HeroSection

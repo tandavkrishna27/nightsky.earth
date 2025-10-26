@@ -6,6 +6,7 @@ import HeroSectionVideo from "@/components/HeroSectionVideo";
 import ContentSection from "@/components/ContentSection";
 import ExperienceCard from "@/components/ExperienceCard";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,42 @@ export default function Home() {
   if (isLoading) {
     return <LoadingPage message="Where Earth meets the stars..." />;
   }
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NightSky.earth",
+    "url": typeof window !== 'undefined' ? window.location.origin : "https://nightsky.earth",
+    "logo": typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : "https://nightsky.earth/logo.png",
+    "description": "Curated night-sky experiences connecting people with the cosmos through immersive journeys to the world's darkest skies.",
+    "foundingDate": "2024",
+    "sameAs": [
+      "https://facebook.com/nightsky.earth",
+      "https://instagram.com/nightsky.earth",
+      "https://twitter.com/nightskyearth"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "Customer Service",
+      "email": "hello@nightsky.earth"
+    }
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NightSky.earth",
+    "url": typeof window !== 'undefined' ? window.location.origin : "https://nightsky.earth",
+    "description": "Journey to the darkest skies on Earth to witness the brightest moments of the universe.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": typeof window !== 'undefined' ? `${window.location.origin}/experiences?search={search_term_string}` : "https://nightsky.earth/experiences?search={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
 
   const experiences = [
     {
@@ -74,6 +111,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Where Earth Meets the Stars"
+        description="Journey to the darkest skies on Earth to witness the brightest moments of the universe. Curated night-sky and meteor experiences that reconnect people with the cosmos."
+        keywords="stargazing, dark sky experiences, meteor showers, astronomy tours, astrophotography, night sky, cosmic journeys, dark sky reserves"
+        schema={[organizationSchema, websiteSchema]}
+      />
       <Navigation />
       
       <HeroSectionVideo

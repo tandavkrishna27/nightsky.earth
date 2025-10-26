@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,8 +45,26 @@ export default function Contact() {
     setFormData({ name: "", email: "", message: "" });
   };
 
+  const contactSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact NightSky.earth",
+    "description": "Book your cosmic journey or join our community of astronomers and astrophotographers.",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "NightSky.earth",
+      "email": "hello@nightsky.earth"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Contact Us - Book Your Cosmic Journey"
+        description="Ready to witness the universe? Contact NightSky.earth to book meteor shower experiences, aurora journeys, or join our community of cosmic explorers."
+        keywords="book stargazing tour, astronomy contact, meteor shower booking, aurora tours, dark sky experiences contact"
+        schema={contactSchema}
+      />
       <Navigation />
       
       <HeroSection

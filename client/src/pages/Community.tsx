@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
@@ -54,8 +55,25 @@ export default function Community() {
     return <LoadingPage message="Opening the cosmic gateway..." />;
   }
 
+  const communitySchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NightSky.earth Community",
+    "description": "Join astronomers, astrophotographers, educators, and night-sky enthusiasts in creating unforgettable celestial experiences.",
+    "memberOf": {
+      "@type": "Organization",
+      "name": "NightSky.earth"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Join The Collective - Community for Astronomers & Astrophotographers"
+        description="Collaborate with astronomers, astrophotographers, educators, and cosmic explorers. Share your passion for the night sky and help others discover the universe."
+        keywords="astronomy community, astrophotography collective, stargazing community, astronomy educators, night sky guides, cosmic collaboration"
+        schema={communitySchema}
+      />
       <Navigation />
       
       <HeroSection

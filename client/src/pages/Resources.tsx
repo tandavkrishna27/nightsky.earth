@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,13 @@ export default function Resources() {
   if (isLoading) {
     return <LoadingPage message="Gathering celestial resources..." />;
   }
+
+  const resourcesSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Stargazing Resources & Tools",
+    "description": "Comprehensive collection of stargazing apps, planetarium software, astrophotography guides, and astronomy resources for enthusiasts and professionals."
+  };
 
   const mobileApps = [
     {
@@ -503,6 +511,12 @@ export default function Resources() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Essential Stargazing Resources - Apps, Tools & Guides"
+        description="Discover the best stargazing apps, planetarium software, astrophotography tutorials, and astronomy resources. From mobile apps to professional tools for night sky exploration."
+        keywords="stargazing apps, planetarium software, astrophotography guides, astronomy resources, dark sky tools, meteor shower apps, star charts, telescope guides"
+        schema={resourcesSchema}
+      />
       <Navigation />
       
       <HeroSection

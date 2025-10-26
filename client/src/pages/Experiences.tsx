@@ -6,6 +6,7 @@ import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import ExperienceCard from "@/components/ExperienceCard";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 
 import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
 import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
@@ -29,6 +30,15 @@ export default function Experiences() {
   if (isLoading) {
     return <LoadingPage message="Preparing your cosmic journey..." />;
   }
+
+  const experiencesSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Night Sky Experiences",
+    "description": "Curated astronomical experiences including meteor nights, aurora journeys, and astrophotography workshops.",
+    "numberOfItems": 6
+  };
+
   const experiences = [
     {
       title: "Meteor Nights",
@@ -82,6 +92,12 @@ export default function Experiences() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Celestial Experiences - Meteor Nights, Aurora Journeys & More"
+        description="Book curated night-sky experiences: meteor showers in the desert, aurora hunting, dark sky treks, and astrophotography workshops. Journey to the world's darkest skies."
+        keywords="meteor shower tours, aurora borealis trips, dark sky experiences, astrophotography workshops, astronomy tours, stargazing expeditions, celestial events"
+        schema={experiencesSchema}
+      />
       <Navigation />
       
       <HeroSection
