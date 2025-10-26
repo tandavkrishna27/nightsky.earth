@@ -21,6 +21,11 @@ export default function VideoBackground({
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.playbackRate = 0.75; // Slow motion for more cinematic feel
+      
+      // Programmatically play the video to ensure it starts
+      videoRef.current.play().catch((error) => {
+        console.log('Video autoplay prevented:', error);
+      });
     }
   }, []);
 
@@ -28,10 +33,10 @@ export default function VideoBackground({
     <div className={`absolute inset-0 overflow-hidden ${className}`}>
       <video
         ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
+        autoPlay={true}
+        loop={true}
+        muted={true}
+        playsInline={true}
         className="absolute inset-0 w-full h-full object-cover"
         poster={fallbackImage}
       >
