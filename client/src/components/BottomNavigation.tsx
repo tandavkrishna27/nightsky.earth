@@ -1,22 +1,9 @@
 import { Link, useLocation } from "wouter";
 import { Home, Compass, Users, BookOpen, Mail } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
 
 export default function BottomNavigation() {
   const [location] = useLocation();
-  const [isLargeScreen, setIsLargeScreen] = useState(false);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsLargeScreen(window.innerWidth >= 1024);
-    };
-
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-
-    return () => window.removeEventListener("resize", checkScreenSize);
-  }, []);
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
@@ -31,16 +18,13 @@ export default function BottomNavigation() {
     return location.startsWith(path);
   };
 
-  if (isLargeScreen) {
-    return null;
-  }
-
   return (
     <motion.nav
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border lg:hidden"
+      data-testid="bottom-navigation"
     >
       <div className="flex items-center justify-around px-2 py-3 max-w-2xl mx-auto">
         {navItems.map((item) => {

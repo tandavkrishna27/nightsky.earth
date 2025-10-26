@@ -11,7 +11,7 @@ export default function FloatingMuteButton() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1, duration: 0.5 }}
-      className="fixed bottom-6 right-6 z-50 md:bottom-8 md:right-8"
+      className="fixed bottom-24 right-6 z-50 md:right-8 lg:bottom-8"
       data-testid="floating-mute-button"
     >
       <Button
