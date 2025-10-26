@@ -8,6 +8,7 @@ import About from "@/pages/About";
 import Experiences from "@/pages/Experiences";
 import MeteorNights from "@/pages/MeteorNights";
 import MeteorShowerDetail from "@/pages/MeteorShowerDetail";
+import Community from "@/pages/Community";
 import Contact from "@/pages/Contact";
 import Resources from "@/pages/Resources";
 import NotFound from "@/pages/not-found";
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/experiences" component={Experiences} />
       <Route path="/meteor-nights" component={MeteorNights} />
       <Route path="/meteor-shower/:id" component={MeteorShowerDetail} />
+      <Route path="/community" component={Community} />
       <Route path="/resources" component={Resources} />
       <Route path="/contact" component={Contact} />
       <Route component={NotFound} />

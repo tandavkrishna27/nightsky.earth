@@ -3,9 +3,22 @@
 ## Project Overview
 A cinematic, minimalist website for NightSky.earth - a brand offering curated night-sky and meteor experiences. The design emphasizes emotion-first storytelling with a dark, cosmic aesthetic where "Earth meets the stars."
 
-## Recent Updates (October 13, 2025)
+## Recent Updates (October 26, 2025)
 
-### Complete 2025 & 2026 Meteor Shower Calendar (Latest)
+### New Community Page (Latest)
+- **Added comprehensive Community/Collective page** at `/community`
+- **Added to header navigation** - Now appears between Experiences and Resources
+- **Complete content sections:**
+  - Why Join the Collective - 3 key benefits (support, visibility, network)
+  - Under the Infinite - 5 experience types with event cards
+  - Bring Your Vision to the Horizon - What we offer & who it's for
+  - Under One Sky - Community building initiatives
+  - Talk to Us Directly - Contact CTAs
+- **WhatsApp integration** - Multiple CTAs for direct messaging
+- **Icons and animations** - Beautiful Lucide icons with Framer Motion
+- **Fully responsive** - Mobile-first design with smooth interactions
+
+### Complete 2025 & 2026 Meteor Shower Calendar
 - **Added full 2026 meteor shower calendar** - all 12 major showers
 - **Meteor Nights page updated** with year tabs (2025 & 2026)
 - Total of **24 meteor showers** across two years
@@ -158,14 +171,24 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 ### 5. About (`/about`)
 - Brand story and philosophy
 
-### 6. Resources (`/resources`)
+### 6. Community (`/community`)
+- **The Collective** - Collaboration network for astronomers, astrophotographers, and educators
+- **Why Join** - Support, visibility, and network benefits
+- **Experiences** - Meteor shower camps, astrophotography retreats, dark sky expeditions
+- **Collaborate** - End-to-end support for hosting events
+- **What We Offer** - Operations, branding, funding, partnerships, storytelling
+- **Who It's For** - Independent astronomers, astrophotographers, science communicators, outdoor educators
+- **Community Building** - Shared calendar, co-hosted events, conservation initiatives
+- Multiple CTAs including WhatsApp integration
+
+### 7. Resources (`/resources`)
 - Comprehensive stargazing apps, tools, and resources
 - Mobile and desktop planetarium software
 - Essential web resources (weather, dark sky maps, planning tools)
 - Essential gear guides
 - World's best dark sky locations
 
-### 7. Contact (`/contact`)
+### 8. Contact (`/contact`)
 - Contact form for inquiries and bookings
 
 ## Meteor Showers (2025 & 2026)
@@ -222,6 +245,7 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 /experiences - All experiences
 /meteor-nights - All meteor showers 2025 & 2026
 /meteor-shower/:id - Individual shower details
+/community - The Collective & collaboration network
 /resources - Apps, tools, and resources
 /contact - Contact form
 ```
