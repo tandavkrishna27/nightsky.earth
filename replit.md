@@ -158,17 +158,14 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 ### 5. About (`/about`)
 - Brand story and philosophy
 
-### 6. Science (`/science`)
-- Educational content about celestial phenomena
-
-### 7. Resources (`/resources`)
+### 6. Resources (`/resources`)
 - Comprehensive stargazing apps, tools, and resources
 - Mobile and desktop planetarium software
 - Essential web resources (weather, dark sky maps, planning tools)
 - Essential gear guides
 - World's best dark sky locations
 
-### 8. Contact (`/contact`)
+### 7. Contact (`/contact`)
 - Contact form for inquiries and bookings
 
 ## Meteor Showers (2025 & 2026)
@@ -223,9 +220,8 @@ All "Coming Soon" experiences display badges and have disabled booking buttons.
 / - Home
 /about - About
 /experiences - All experiences
-/meteor-nights - All meteor showers 2025
+/meteor-nights - All meteor showers 2025 & 2026
 /meteor-shower/:id - Individual shower details
-/science - Science content
 /resources - Apps, tools, and resources
 /contact - Contact form
 ```
