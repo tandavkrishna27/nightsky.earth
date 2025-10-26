@@ -7,7 +7,7 @@ interface BackgroundMusicContextType {
 }
 
 const BackgroundMusicContext = createContext<BackgroundMusicContextType>({
-  isMuted: true,
+  isMuted: false,
   toggleMute: () => {},
   isPlaying: false,
 });
@@ -26,20 +26,35 @@ export default function BackgroundMusic({
   children 
 }: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
+      audioRef.current.muted = false;
       
-      // Try to play on mount (will be muted initially due to browser policies)
+      // Try to play unmuted on first load
       audioRef.current.play()
         .then(() => {
           setIsPlaying(true);
+          console.log('🎵 Cosmic music playing...');
         })
         .catch((error) => {
-          console.log('Audio autoplay prevented, waiting for user interaction:', error);
+          console.log('🔇 Browser blocked autoplay - click anywhere to start music:', error);
+          // Add click listener to start music on first user interaction
+          const startMusic = () => {
+            if (audioRef.current && audioRef.current.paused) {
+              audioRef.current.play()
+                .then(() => {
+                  setIsPlaying(true);
+                  console.log('🎵 Music started after user interaction');
+                })
+                .catch(console.log);
+              document.removeEventListener('click', startMusic);
+            }
+          };
+          document.addEventListener('click', startMusic);
         });
     }
   }, [volume]);
