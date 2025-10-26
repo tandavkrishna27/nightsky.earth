@@ -120,7 +120,7 @@ export default function Home() {
       <Navigation />
       
       <HeroSectionVideo
-        videoUrl="/videos/night-sky.mp4"
+        videoUrl="/Nightskyearth.mp4"
         fallbackImage={heroImage}
         headline="Where Earth meets the stars."
         subheadline="Journey to the darkest skies on Earth to witness the brightest moments of the universe."
