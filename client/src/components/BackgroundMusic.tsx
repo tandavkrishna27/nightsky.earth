@@ -34,28 +34,43 @@ export default function BackgroundMusic({
       audioRef.current.volume = volume;
       audioRef.current.muted = false;
       
-      // Try to play unmuted on first load
-      audioRef.current.play()
-        .then(() => {
-          setIsPlaying(true);
-          console.log('🎵 Cosmic music playing...');
-        })
-        .catch((error) => {
-          console.log('🔇 Browser blocked autoplay - click anywhere to start music:', error);
-          // Add click listener to start music on first user interaction
-          const startMusic = () => {
-            if (audioRef.current && audioRef.current.paused) {
-              audioRef.current.play()
-                .then(() => {
-                  setIsPlaying(true);
-                  console.log('🎵 Music started after user interaction');
-                })
-                .catch(console.log);
-              document.removeEventListener('click', startMusic);
-            }
-          };
-          document.addEventListener('click', startMusic);
-        });
+      // Wait for audio to be loaded enough to set start time
+      const handleCanPlay = () => {
+        if (audioRef.current) {
+          // Skip the silent beginning - start at 5 seconds
+          audioRef.current.currentTime = 5;
+          
+          // Try to play unmuted on first load
+          audioRef.current.play()
+            .then(() => {
+              setIsPlaying(true);
+              console.log('🎵 Cosmic music playing from 5s...');
+            })
+            .catch((error) => {
+              console.log('🔇 Browser blocked autoplay - click anywhere to start music:', error);
+              // Add click listener to start music on first user interaction
+              const startMusic = () => {
+                if (audioRef.current && audioRef.current.paused) {
+                  audioRef.current.currentTime = 5;
+                  audioRef.current.play()
+                    .then(() => {
+                      setIsPlaying(true);
+                      console.log('🎵 Music started from 5s after user interaction');
+                    })
+                    .catch(console.log);
+                  document.removeEventListener('click', startMusic);
+                }
+              };
+              document.addEventListener('click', startMusic);
+            });
+        }
+      };
+      
+      audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
+      
+      return () => {
+        audioRef.current?.removeEventListener('canplay', handleCanPlay);
+      };
     }
   }, [volume]);
 
