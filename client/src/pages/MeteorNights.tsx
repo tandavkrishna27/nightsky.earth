@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,30 @@ export default function MeteorNights() {
     return <LoadingPage message="Mapping the night sky for 2025 & 2026..." />;
   }
 
+  const meteorNightsSchema = {
+    "@context": "https://schema.org",
+    "@type": "EventSeries",
+    "name": "Meteor Nights 2025-2026",
+    "description": "Guided expeditions to witness all major meteor showers across 2025 and 2026, including Perseids, Geminids, and Quadrantids.",
+    "organizer": {
+      "@type": "Organization",
+      "name": "NightSky.earth",
+      "url": typeof window !== 'undefined' ? window.location.origin : "https://nightsky.earth"
+    },
+    "location": {
+      "@type": "Place",
+      "name": "Dark Sky Reserves Worldwide"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Meteor Nights 2025 & 2026 - All 24 Major Meteor Showers"
+        description="Experience all 24 major meteor showers across 2025-2026. Join guided expeditions to witness Perseids, Geminids, Quadrantids, and more celestial light shows from dark sky locations."
+        keywords="meteor showers 2025, meteor showers 2026, Perseids, Geminids, Quadrantids, meteor watching tours, meteor shower calendar, shooting stars, celestial events"
+        schema={meteorNightsSchema}
+      />
       <Navigation />
       
       <HeroSection

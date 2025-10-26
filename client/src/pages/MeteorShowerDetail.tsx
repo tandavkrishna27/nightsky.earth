@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import LoadingPage from "@/components/LoadingPage";
+import SEO from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -53,8 +54,38 @@ export default function MeteorShowerDetail() {
     );
   }
 
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": shower.name,
+    "description": shower.description,
+    "startDate": shower.peakDate,
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+    "organizer": {
+      "@type": "Organization",
+      "name": "NightSky.earth",
+      "url": typeof window !== 'undefined' ? window.location.origin : "https://nightsky.earth"
+    },
+    "location": {
+      "@type": "Place",
+      "name": "Dark Sky Locations Worldwide"
+    },
+    "offers": {
+      "@type": "Offer",
+      "availability": "https://schema.org/InStock",
+      "url": typeof window !== 'undefined' ? `${window.location.origin}/contact` : "https://nightsky.earth/contact"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title={`${shower.name} - Peak ${shower.peakDate} | Meteor Nights`}
+        description={`${shower.description} Peak viewing: ${shower.peakDate}. Best times: ${shower.bestViewingTime}. ${shower.ratePerHour} meteors per hour. Book your guided meteor watching experience.`}
+        keywords={`${shower.name}, meteor shower, ${shower.peakDate}, stargazing, meteor watching, ${shower.radiant}, celestial events`}
+        schema={eventSchema}
+      />
       <Navigation />
       
       <HeroSection
