@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import BottomNavigation from "@/components/BottomNavigation";
 import BackgroundMusic from "@/components/BackgroundMusic";
 import FloatingMuteButton from "@/components/FloatingMuteButton";
+import EnterExperience from "@/components/EnterExperience";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import Experiences from "@/pages/Experiences";
@@ -34,11 +36,18 @@ function Router() {
 }
 
 function App() {
+  const [hasEnteredExperience, setHasEnteredExperience] = useState(false);
+
+  const handleEnterExperience = () => {
+    setHasEnteredExperience(true);
+  };
+
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <BackgroundMusic audioUrl="/cosmic-music.mp3" volume={0.3}>
+          <BackgroundMusic audioUrl="/cosmic-music.mp3" volume={0.3} shouldStart={hasEnteredExperience}>
+            <EnterExperience onEnter={handleEnterExperience} />
             <Toaster />
             <div className="pb-20 lg:pb-0">
               <Router />

@@ -4,12 +4,14 @@ interface BackgroundMusicContextType {
   isMuted: boolean;
   toggleMute: () => void;
   isPlaying: boolean;
+  startMusic: () => void;
 }
 
 const BackgroundMusicContext = createContext<BackgroundMusicContextType>({
   isMuted: false,
   toggleMute: () => {},
   isPlaying: false,
+  startMusic: () => {},
 });
 
 export const useBackgroundMusic = () => useContext(BackgroundMusicContext);
@@ -17,12 +19,14 @@ export const useBackgroundMusic = () => useContext(BackgroundMusicContext);
 interface BackgroundMusicProps {
   audioUrl: string;
   volume?: number;
+  shouldStart?: boolean;
   children: React.ReactNode;
 }
 
 export default function BackgroundMusic({ 
   audioUrl, 
   volume = 0.3,
+  shouldStart = false,
   children 
 }: BackgroundMusicProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -30,64 +34,35 @@ export default function BackgroundMusic({
   const [isPlaying, setIsPlaying] = useState(false);
   const hasStartedRef = useRef(false);
 
-  useEffect(() => {
+  // Function to start music unmuted from 5 seconds
+  const startMusic = () => {
     if (!audioRef.current || hasStartedRef.current) return;
-
-    const audio = audioRef.current;
-    audio.volume = volume;
     
-    // Function to unmute and ensure playback
-    const unmuteAndPlay = () => {
-      if (hasStartedRef.current) return;
-      hasStartedRef.current = true;
-      
-      // Set start position
-      if (audio.currentTime < 5) {
-        audio.currentTime = 5;
-      }
-      
-      // Unmute the audio
-      audio.muted = false;
-      setIsPlaying(true);
-      
-      // Ensure it's playing
-      if (audio.paused) {
-        audio.play()
-          .then(() => {
-            console.log('🎵 Cosmic music playing unmuted from 5s...');
-          })
-          .catch(console.log);
-      } else {
+    const audio = audioRef.current;
+    hasStartedRef.current = true;
+    
+    // Set volume and position
+    audio.volume = volume;
+    audio.currentTime = 5;
+    audio.muted = false;
+    
+    // Start playing
+    audio.play()
+      .then(() => {
+        setIsPlaying(true);
         console.log('🎵 Cosmic music playing unmuted from 5s...');
-      }
-    };
-
-    // Listen for when audio starts playing (from autoplay with muted attribute)
-    const handlePlay = () => {
-      // Small delay to ensure playback is stable, then unmute
-      setTimeout(unmuteAndPlay, 150);
-    };
-
-    audio.addEventListener('play', handlePlay, { once: true });
-
-    // Fallback: unmute on first user interaction
-    const handleFirstInteraction = () => {
-      unmuteAndPlay();
-    };
-
-    // Multiple interaction triggers
-    const events = ['click', 'touchstart', 'keydown', 'mousemove'];
-    events.forEach(event => {
-      document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
-    });
-
-    return () => {
-      audio.removeEventListener('play', handlePlay);
-      events.forEach(event => {
-        document.removeEventListener(event, handleFirstInteraction);
+      })
+      .catch((error) => {
+        console.log('Music playback failed:', error);
       });
-    };
-  }, [volume]);
+  };
+
+  // Start music when shouldStart becomes true
+  useEffect(() => {
+    if (shouldStart && !hasStartedRef.current) {
+      startMusic();
+    }
+  }, [shouldStart]);
 
   useEffect(() => {
     if (audioRef.current && hasStartedRef.current) {
@@ -110,14 +85,11 @@ export default function BackgroundMusic({
   };
 
   return (
-    <BackgroundMusicContext.Provider value={{ isMuted, toggleMute, isPlaying }}>
+    <BackgroundMusicContext.Provider value={{ isMuted, toggleMute, isPlaying, startMusic }}>
       <audio
         ref={audioRef}
         src={audioUrl}
         loop
-        autoPlay
-        muted
-        playsInline
         preload="auto"
       />
       {children}
