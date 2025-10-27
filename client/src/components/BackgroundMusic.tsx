@@ -28,68 +28,69 @@ export default function BackgroundMusic({
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      audioRef.current.muted = false;
+    if (!audioRef.current || hasStartedRef.current) return;
+
+    const audio = audioRef.current;
+    audio.volume = volume;
+    
+    // Function to unmute and ensure playback
+    const unmuteAndPlay = () => {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
       
-      // Function to start music from 5s
-      const startMusicFrom5s = () => {
-        if (audioRef.current && audioRef.current.paused) {
-          audioRef.current.currentTime = 5;
-          audioRef.current.play()
-            .then(() => {
-              setIsPlaying(true);
-              console.log('🎵 Cosmic music playing from 5s...');
-            })
-            .catch(console.log);
-        }
-      };
+      // Set start position
+      if (audio.currentTime < 5) {
+        audio.currentTime = 5;
+      }
       
-      // Try multiple approaches to ensure music plays
-      const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-          audioRef.current.currentTime = 5;
-        }
-      };
+      // Unmute the audio
+      audio.muted = false;
+      setIsPlaying(true);
       
-      const handleCanPlay = () => {
-        // Try to play immediately
-        startMusicFrom5s();
-      };
-      
-      // Add listeners for multiple user interaction events
-      const events = ['click', 'touchstart', 'keydown', 'scroll'];
-      const handleUserInteraction = () => {
-        startMusicFrom5s();
-        // Remove all listeners after first interaction
-        events.forEach(event => {
-          document.removeEventListener(event, handleUserInteraction);
-        });
-      };
-      
-      // Set up audio event listeners
-      audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
-      audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
-      
-      // Set up user interaction listeners (fallback if autoplay blocked)
+      // Ensure it's playing
+      if (audio.paused) {
+        audio.play()
+          .then(() => {
+            console.log('🎵 Cosmic music playing unmuted from 5s...');
+          })
+          .catch(console.log);
+      } else {
+        console.log('🎵 Cosmic music playing unmuted from 5s...');
+      }
+    };
+
+    // Listen for when audio starts playing (from autoplay with muted attribute)
+    const handlePlay = () => {
+      // Small delay to ensure playback is stable, then unmute
+      setTimeout(unmuteAndPlay, 150);
+    };
+
+    audio.addEventListener('play', handlePlay, { once: true });
+
+    // Fallback: unmute on first user interaction
+    const handleFirstInteraction = () => {
+      unmuteAndPlay();
+    };
+
+    // Multiple interaction triggers
+    const events = ['click', 'touchstart', 'keydown', 'mousemove'];
+    events.forEach(event => {
+      document.addEventListener(event, handleFirstInteraction, { once: true, passive: true });
+    });
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
       events.forEach(event => {
-        document.addEventListener(event, handleUserInteraction, { once: true });
+        document.removeEventListener(event, handleFirstInteraction);
       });
-      
-      return () => {
-        audioRef.current?.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        audioRef.current?.removeEventListener('canplay', handleCanPlay);
-        events.forEach(event => {
-          document.removeEventListener(event, handleUserInteraction);
-        });
-      };
-    }
+    };
   }, [volume]);
 
   useEffect(() => {
-    if (audioRef.current) {
+    if (audioRef.current && hasStartedRef.current) {
       audioRef.current.muted = isMuted;
     }
   }, [isMuted]);
@@ -98,8 +99,9 @@ export default function BackgroundMusic({
     setIsMuted((prev) => {
       const newMutedState = !prev;
       
-      // If unmuting for the first time, ensure audio plays
+      // If unmuting and audio hasn't started, try to start it
       if (!newMutedState && audioRef.current && audioRef.current.paused) {
+        audioRef.current.currentTime = 5;
         audioRef.current.play().catch(console.log);
       }
       
@@ -114,7 +116,8 @@ export default function BackgroundMusic({
         src={audioUrl}
         loop
         autoPlay
-        muted={isMuted}
+        muted
+        playsInline
         preload="auto"
       />
       {children}
