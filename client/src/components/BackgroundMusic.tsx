@@ -34,42 +34,56 @@ export default function BackgroundMusic({
       audioRef.current.volume = volume;
       audioRef.current.muted = false;
       
-      // Wait for audio to be loaded enough to set start time
-      const handleCanPlay = () => {
-        if (audioRef.current) {
-          // Skip the silent beginning - start at 5 seconds
+      // Function to start music from 5s
+      const startMusicFrom5s = () => {
+        if (audioRef.current && audioRef.current.paused) {
           audioRef.current.currentTime = 5;
-          
-          // Try to play unmuted on first load
           audioRef.current.play()
             .then(() => {
               setIsPlaying(true);
               console.log('🎵 Cosmic music playing from 5s...');
             })
-            .catch((error) => {
-              console.log('🔇 Browser blocked autoplay - click anywhere to start music:', error);
-              // Add click listener to start music on first user interaction
-              const startMusic = () => {
-                if (audioRef.current && audioRef.current.paused) {
-                  audioRef.current.currentTime = 5;
-                  audioRef.current.play()
-                    .then(() => {
-                      setIsPlaying(true);
-                      console.log('🎵 Music started from 5s after user interaction');
-                    })
-                    .catch(console.log);
-                  document.removeEventListener('click', startMusic);
-                }
-              };
-              document.addEventListener('click', startMusic);
-            });
+            .catch(console.log);
         }
       };
       
+      // Try multiple approaches to ensure music plays
+      const handleLoadedMetadata = () => {
+        if (audioRef.current) {
+          audioRef.current.currentTime = 5;
+        }
+      };
+      
+      const handleCanPlay = () => {
+        // Try to play immediately
+        startMusicFrom5s();
+      };
+      
+      // Add listeners for multiple user interaction events
+      const events = ['click', 'touchstart', 'keydown', 'scroll'];
+      const handleUserInteraction = () => {
+        startMusicFrom5s();
+        // Remove all listeners after first interaction
+        events.forEach(event => {
+          document.removeEventListener(event, handleUserInteraction);
+        });
+      };
+      
+      // Set up audio event listeners
+      audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata, { once: true });
       audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
       
+      // Set up user interaction listeners (fallback if autoplay blocked)
+      events.forEach(event => {
+        document.addEventListener(event, handleUserInteraction, { once: true });
+      });
+      
       return () => {
+        audioRef.current?.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audioRef.current?.removeEventListener('canplay', handleCanPlay);
+        events.forEach(event => {
+          document.removeEventListener(event, handleUserInteraction);
+        });
       };
     }
   }, [volume]);
@@ -99,6 +113,7 @@ export default function BackgroundMusic({
         ref={audioRef}
         src={audioUrl}
         loop
+        autoPlay
         muted={isMuted}
         preload="auto"
       />
