@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Grid3x3, List } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ContentSection from "@/components/ContentSection";
@@ -18,6 +18,7 @@ export default function News() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSource, setSelectedSource] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [viewMode, setViewMode] = useState<"grid" | "scroll">("grid");
   const [, setLocation] = useLocation();
 
   const ITEMS_PER_PAGE = 12;
@@ -181,18 +182,34 @@ export default function News() {
       <Navigation />
 
       <ContentSection>
-        {/* Auto-Update Banner */}
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
-            <div className="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
-            <p className="text-sm text-muted-foreground">
-              Live updates from 40+ sources • Auto-refreshing content
-            </p>
+        {/* Search and View Toggle */}
+        <div className="mb-8 space-y-4">
+          {/* View Mode Toggle */}
+          <div className="flex justify-end gap-2">
+            <Button
+              data-testid="button-view-grid"
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className="gap-2"
+            >
+              <Grid3x3 className="h-4 w-4" />
+              Grid
+            </Button>
+            <Button
+              data-testid="button-view-scroll"
+              variant={viewMode === "scroll" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("scroll")}
+              className="gap-2"
+            >
+              <List className="h-4 w-4" />
+              Scroll
+            </Button>
           </div>
-        </div>
 
-        {/* Search and Filters */}
-        <div className="mb-12 space-y-6">
+        {/* Filters */}
+        <div className="space-y-4">
           {/* Search Bar */}
           <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -209,60 +226,65 @@ export default function News() {
             />
           </div>
 
-          {/* Quick Topic Filters for Astronomical Events */}
+          {/* Quick Topic Filters - Horizontal Scroll */}
           <div className="space-y-2">
-            <p className="text-center text-sm text-muted-foreground">Quick Topics:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {topicFilters.map((topic) => (
-                <Button
-                  key={topic.label}
-                  data-testid={`button-topic-${topic.label.toLowerCase()}`}
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery(topic.search);
-                    setSelectedSource("");
-                    setCurrentPage(0);
-                  }}
-                  className="rounded-full text-xs"
-                >
-                  {topic.label}
-                </Button>
-              ))}
+            <p className="text-sm text-muted-foreground px-2">Quick Topics:</p>
+            <div className="overflow-x-auto pb-2 -mx-4 px-4">
+              <div className="flex gap-2 min-w-min">
+                {topicFilters.map((topic) => (
+                  <Button
+                    key={topic.label}
+                    data-testid={`button-topic-${topic.label.toLowerCase()}`}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery(topic.search);
+                      setSelectedSource("");
+                      setCurrentPage(0);
+                    }}
+                    className="rounded-full text-xs whitespace-nowrap"
+                  >
+                    {topic.label}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Source Filters */}
+          {/* Source Filters - Horizontal Scroll */}
           <div className="space-y-2">
-            <p className="text-center text-sm text-muted-foreground">Filter by Source:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-            <Button
-              data-testid="button-filter-all"
-              variant={selectedSource === "" ? "default" : "outline"}
-              onClick={() => {
-                setSelectedSource("");
-                setCurrentPage(0);
-              }}
-              className="rounded-full"
-            >
-              All Sources
-            </Button>
-            {popularSources.map((source) => (
-              <Button
-                key={source}
-                data-testid={`button-filter-${source.toLowerCase().replace(/\s+/g, '-')}`}
-                variant={selectedSource === source ? "default" : "outline"}
-                onClick={() => {
-                  setSelectedSource(source);
-                  setCurrentPage(0);
-                }}
-                className="rounded-full"
-              >
-                {source}
-              </Button>
-            ))}
+            <p className="text-sm text-muted-foreground px-2">Filter by Source:</p>
+            <div className="overflow-x-auto pb-2 -mx-4 px-4">
+              <div className="flex gap-2 min-w-min">
+                <Button
+                  data-testid="button-filter-all"
+                  variant={selectedSource === "" ? "default" : "outline"}
+                  onClick={() => {
+                    setSelectedSource("");
+                    setCurrentPage(0);
+                  }}
+                  className="rounded-full whitespace-nowrap"
+                >
+                  All Sources
+                </Button>
+                {popularSources.map((source) => (
+                  <Button
+                    key={source}
+                    data-testid={`button-filter-${source.toLowerCase().replace(/\s+/g, '-')}`}
+                    variant={selectedSource === source ? "default" : "outline"}
+                    onClick={() => {
+                      setSelectedSource(source);
+                      setCurrentPage(0);
+                    }}
+                    className="rounded-full whitespace-nowrap"
+                  >
+                    {source}
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Loading State */}
@@ -280,55 +302,111 @@ export default function News() {
           </div>
         )}
 
-        {/* Articles Grid */}
+        {/* Articles - Grid or Scroll View */}
         {data && data.results.length > 0 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {data.results.map((article) => (
-                <Card
-                  key={article.id}
-                  data-testid={`card-article-${article.id}`}
-                  className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer transition-all"
-                  onClick={() => setLocation(`/news/${article.id}`)}
-                >
-                  {/* Article Image */}
-                  {article.image_url && (
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={article.image_url}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
+            {viewMode === "grid" ? (
+              /* Grid View */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {data.results.map((article) => (
+                  <Card
+                    key={article.id}
+                    data-testid={`card-article-${article.id}`}
+                    className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer transition-all"
+                    onClick={() => setLocation(`/news/${article.id}`)}
+                  >
+                    {/* Article Image */}
+                    {article.image_url && (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={article.image_url}
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
 
-                  <CardHeader className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {article.news_site}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(article.published_at).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    <CardTitle className="text-lg line-clamp-2">
-                      {article.title}
-                    </CardTitle>
-                  </CardHeader>
+                    <CardHeader className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {article.news_site}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(article.published_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      <CardTitle className="text-lg line-clamp-2">
+                        {article.title}
+                      </CardTitle>
+                    </CardHeader>
 
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {article.summary}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {article.summary}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              /* Scroll View - InShorts Style */
+              <div className="max-w-2xl mx-auto space-y-4 mb-12">
+                {data.results.map((article) => (
+                  <Card
+                    key={article.id}
+                    data-testid={`card-article-scroll-${article.id}`}
+                    className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer transition-all"
+                    onClick={() => setLocation(`/news/${article.id}`)}
+                  >
+                    <div className="flex flex-col">
+                      {/* Article Image - Full Width */}
+                      {article.image_url && (
+                        <div className="relative h-64 overflow-hidden">
+                          <img
+                            src={article.image_url}
+                            alt={article.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+
+                      {/* Article Content */}
+                      <div className="p-6 space-y-3">
+                        {/* Source and Date */}
+                        <div className="flex items-center justify-between">
+                          <Badge variant="secondary" className="text-xs">
+                            {article.news_site}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(article.published_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h2 className="text-2xl font-light leading-tight">
+                          {article.title}
+                        </h2>
+
+                        {/* Summary */}
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {article.summary}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             {/* Pagination */}
             {totalPages > 1 && (
