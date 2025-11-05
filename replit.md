@@ -59,9 +59,13 @@ Enhanced the entire site with advanced SEO and GEO optimization for maximum disc
 - Explicit Allow directives for /news and /news/*
 - Transparency note about news source aggregation
 
-**Sitemap.xml:**
-- Added 10 recent news articles as samples (IDs 33768-33777)
-- Note about 30,000+ articles discoverable via ItemList schema
+**Dynamic Sitemap.xml:**
+- Dynamically generates sitemap with latest 50 news articles from API
+- Uses actual published_at dates for lastmod (auto-updates with new content)
+- Includes all 14 static pages (homepage, about, experiences, meteor showers, etc.)
+- Robust error handling for missing/invalid article data
+- Total 64 URLs: 14 static + 50 dynamic articles
+- Accessible at /sitemap.xml with proper XML formatting
 - Optimized changefreq: daily for listing, weekly for articles
 - Priority settings: 0.9 for news listing, 0.7 for articles
 
