@@ -47,6 +47,30 @@ Enhanced the entire site with advanced SEO and GEO optimization for maximum disc
 - Improved rankings for astronomy/space news queries
 - Better voice search and AI search engine discovery
 
+### Enhanced News Sources & Topics
+Expanded news coverage to include comprehensive astronomical events:
+
+**Expanded Sources** (12 total):
+- NASA, ESA, Jet Propulsion Laboratory (JPL)
+- Space.com, SpaceNews, NASASpaceflight, Spaceflight Now
+- Phys, Arstechnica, European Spaceflight
+- SpacePolicyOnline.com, Space Scout
+
+**Quick Topic Filters** for Astronomical Events:
+- Comets (including interstellar objects like 3I/ATLAS)
+- Asteroids and near-Earth objects
+- Meteor Showers
+- Planets and planetary science
+- Stars and stellar phenomena
+- Galaxies and deep space
+- Telescopes and observations
+
+**Auto-Updating Content:**
+- News refreshes automatically from 40+ sources via Spaceflight News API
+- Real-time updates multiple times daily
+- Live indicator shows content auto-refreshing status
+- No manual updates required - always current
+
 ## User Preferences
 I want the agent to use simple language and provide detailed explanations when necessary. I prefer an iterative development approach, where changes are discussed and approved before implementation. The agent should prioritize maintaining the dark, cinematic aesthetic and smooth animations. I want to be asked before any major architectural changes are made or new external dependencies are introduced.
 

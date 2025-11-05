@@ -50,16 +50,31 @@ export default function News() {
     },
   });
 
-  // Popular news sources for filtering
+  // News sources for filtering - expanded to include astronomy-focused sources
   const popularSources = [
     "NASA",
     "ESA",
-    "SpaceX",
+    "Jet Propulsion Laboratory",
     "Space.com",
     "SpaceNews",
     "NASASpaceflight",
-    "Ars Technica",
-    "The Verge"
+    "Spaceflight Now",
+    "Phys",
+    "Arstechnica",
+    "European Spaceflight",
+    "SpacePolicyOnline.com",
+    "Space Scout"
+  ];
+
+  // Quick topic filters for astronomical events
+  const topicFilters = [
+    { label: "Comets", search: "comet" },
+    { label: "Asteroids", search: "asteroid" },
+    { label: "Meteor Showers", search: "meteor" },
+    { label: "Planets", search: "planet" },
+    { label: "Stars", search: "star" },
+    { label: "Galaxies", search: "galaxy" },
+    { label: "Telescopes", search: "telescope" }
   ];
 
   if (isPageLoading) {
@@ -166,6 +181,16 @@ export default function News() {
       <Navigation />
 
       <ContentSection>
+        {/* Auto-Update Banner */}
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full">
+            <div className="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
+            <p className="text-sm text-muted-foreground">
+              Live updates from 40+ sources • Auto-refreshing content
+            </p>
+          </div>
+        </div>
+
         {/* Search and Filters */}
         <div className="mb-12 space-y-6">
           {/* Search Bar */}
@@ -184,8 +209,33 @@ export default function News() {
             />
           </div>
 
+          {/* Quick Topic Filters for Astronomical Events */}
+          <div className="space-y-2">
+            <p className="text-center text-sm text-muted-foreground">Quick Topics:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {topicFilters.map((topic) => (
+                <Button
+                  key={topic.label}
+                  data-testid={`button-topic-${topic.label.toLowerCase()}`}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery(topic.search);
+                    setSelectedSource("");
+                    setCurrentPage(0);
+                  }}
+                  className="rounded-full text-xs"
+                >
+                  {topic.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           {/* Source Filters */}
-          <div className="flex flex-wrap gap-2 justify-center">
+          <div className="space-y-2">
+            <p className="text-center text-sm text-muted-foreground">Filter by Source:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
             <Button
               data-testid="button-filter-all"
               variant={selectedSource === "" ? "default" : "outline"}
@@ -211,6 +261,7 @@ export default function News() {
                 {source}
               </Button>
             ))}
+            </div>
           </div>
         </div>
 
