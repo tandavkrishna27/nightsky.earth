@@ -43,12 +43,86 @@
     <priority>0.7</priority>
   </url>
   
-  <!-- News Page -->
+  <!-- News Page - Dynamic content from 40+ space news sources -->
+  <!-- News Listing implements ItemList JSON-LD schema for article discovery -->
+  <!-- Individual articles updated multiple times daily from NASA, ESA, SpaceX, and other sources -->
   <url>
     <loc>https://nightsky.earth/news</loc>
     <lastmod>2025-11-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
+  </url>
+  
+  <!-- Recent News Articles - Sample of latest content (30,000+ total articles) -->
+  <!-- All articles discoverable via /news listing page with pagination and ItemList schema -->
+  <url>
+    <loc>https://nightsky.earth/news/33777</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33776</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33775</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33774</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33773</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33772</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33771</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33770</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33769</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://nightsky.earth/news/33768</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   
   <!-- Resources Page -->

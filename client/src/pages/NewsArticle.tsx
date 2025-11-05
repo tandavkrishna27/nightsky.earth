@@ -83,13 +83,20 @@ export default function NewsArticle() {
     minute: '2-digit'
   });
 
-  // JSON-LD schema for the article
+  // Comprehensive JSON-LD schemas for SEO and AI search
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nightsky.earth';
+  
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     "headline": article.title,
     "description": article.summary,
-    "image": article.image_url,
+    "image": {
+      "@type": "ImageObject",
+      "url": article.image_url,
+      "width": 1200,
+      "height": 630
+    },
     "datePublished": article.published_at,
     "dateModified": article.updated_at,
     "author": article.authors && article.authors.length > 0 
@@ -103,22 +110,80 @@ export default function NewsArticle() {
         },
     "publisher": {
       "@type": "Organization",
-      "name": article.news_site
+      "name": "NightSky.earth",
+      "url": baseUrl,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/logo.png`
+      }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://nightsky.earth/news/${article.id}`
-    }
+      "@id": `${baseUrl}/news/${article.id}`
+    },
+    "url": `${baseUrl}/news/${article.id}`,
+    "inLanguage": "en-US",
+    "isAccessibleForFree": true,
+    "genre": ["Space", "Astronomy", "Science"],
+    "keywords": `${article.news_site}, astronomy, space news, ${article.title}`,
+    "articleSection": "Astronomy & Space"
   };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "News",
+        "item": `${baseUrl}/news`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": article.title,
+        "item": `${baseUrl}/news/${article.id}`
+      }
+    ]
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NightSky.earth",
+    "url": baseUrl,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${baseUrl}/logo.png`
+    },
+    "description": "Curated night-sky and meteor shower experiences connecting Earth to the stars",
+    "foundingDate": "2025",
+    "sameAs": []
+  };
+
+  const schemas = [articleSchema, breadcrumbSchema, organizationSchema];
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
         title={`${article.title} - Night Sky News`}
         description={article.summary}
-        keywords={`${article.news_site}, astronomy news, space news, ${article.title}`}
+        keywords={`${article.news_site}, astronomy news, space news, celestial events, meteor showers, rocket launches, space exploration, ${article.title}`}
         ogImage={article.image_url}
-        schema={articleSchema}
+        ogType="article"
+        schema={schemas}
+        articlePublishedTime={article.published_at}
+        articleModifiedTime={article.updated_at}
+        articleAuthor={article.authors && article.authors.length > 0 ? article.authors.map(a => a.name).join(', ') : article.news_site}
+        articleSection="Astronomy & Space"
+        articleTags={[article.news_site, "astronomy", "space", "night sky"]}
       />
       <Navigation />
 

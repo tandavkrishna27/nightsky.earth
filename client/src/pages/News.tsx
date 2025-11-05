@@ -68,24 +68,100 @@ export default function News() {
 
   const totalPages = data ? Math.ceil(data.count / ITEMS_PER_PAGE) : 0;
 
-  const newsSchema = {
+  // Comprehensive schemas for SEO and AI search
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://nightsky.earth';
+  
+  const websiteSchema = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Night Sky & Space News",
-    "description": "Latest astronomy, space exploration, and night sky news from NASA, ESA, SpaceX, and leading space agencies worldwide.",
-    "provider": {
-      "@type": "Organization",
-      "name": "NightSky.earth"
+    "@type": "WebSite",
+    "name": "NightSky.earth",
+    "url": baseUrl,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${baseUrl}/news?search={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
     }
   };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NightSky.earth",
+    "url": baseUrl,
+    "logo": `${baseUrl}/logo.png`,
+    "description": "Curated night-sky and meteor shower experiences connecting Earth to the stars",
+    "sameAs": [
+      // Add social media links when available
+    ]
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "News",
+        "item": `${baseUrl}/news`
+      }
+    ]
+  };
+
+  const itemListSchema = data && data.results.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": data.results.map((article, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "NewsArticle",
+        "headline": article.title,
+        "description": article.summary,
+        "image": article.image_url,
+        "datePublished": article.published_at,
+        "author": article.authors && article.authors.length > 0
+          ? article.authors.map(author => ({
+              "@type": "Person",
+              "name": author.name
+            }))
+          : {
+              "@type": "Organization",
+              "name": article.news_site
+            },
+        "publisher": {
+          "@type": "Organization",
+          "name": article.news_site
+        },
+        "url": `${baseUrl}/news/${article.id}`
+      }
+    })),
+    "numberOfItems": data.results.length
+  } : null;
+
+  const schemas = [
+    websiteSchema,
+    organizationSchema,
+    breadcrumbSchema,
+    ...(itemListSchema ? [itemListSchema] : [])
+  ];
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
         title="Night Sky & Space News - Latest Astronomy Updates"
-        description="Stay updated with the latest astronomy and space exploration news from NASA, ESA, SpaceX, and leading space agencies. Meteor showers, rocket launches, celestial discoveries, and more."
-        keywords="astronomy news, space news, NASA updates, ESA news, SpaceX launches, meteor showers, celestial events, space exploration, rocket launches, astronomical discoveries"
-        schema={newsSchema}
+        description="Stay updated with the latest astronomy and space exploration news from NASA, ESA, SpaceX, and leading space agencies worldwide. Discover meteor showers, rocket launches, celestial discoveries, dark sky locations, and astrophotography updates. Real-time coverage from 40+ trusted sources."
+        keywords="astronomy news, space news, NASA updates, ESA news, SpaceX launches, meteor showers, celestial events, space exploration, rocket launches, astronomical discoveries, dark sky locations, astrophotography, night sky events, stargazing news, satellite launches, planetary science"
+        schema={schemas}
       />
       <Navigation />
 
