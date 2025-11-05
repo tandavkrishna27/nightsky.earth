@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Compass, Users, BookOpen, Mail } from "lucide-react";
+import { Home, Compass, Users, Newspaper, BookOpen, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function BottomNavigation() {
@@ -8,7 +8,7 @@ export default function BottomNavigation() {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/experiences", label: "Experiences", icon: Compass },
-    { path: "/community", label: "Community", icon: Users },
+    { path: "/news", label: "News", icon: Newspaper },
     { path: "/resources", label: "Resources", icon: BookOpen },
     { path: "/contact", label: "Contact", icon: Mail },
   ];

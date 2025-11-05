@@ -15,6 +15,8 @@ import Experiences from "@/pages/Experiences";
 import MeteorNights from "@/pages/MeteorNights";
 import MeteorShowerDetail from "@/pages/MeteorShowerDetail";
 import Community from "@/pages/Community";
+import News from "@/pages/News";
+import NewsArticle from "@/pages/NewsArticle";
 import Contact from "@/pages/Contact";
 import Resources from "@/pages/Resources";
 import NotFound from "@/pages/not-found";
@@ -28,6 +30,8 @@ function Router() {
       <Route path="/meteor-nights" component={MeteorNights} />
       <Route path="/meteor-shower/:id" component={MeteorShowerDetail} />
       <Route path="/community" component={Community} />
+      <Route path="/news" component={News} />
+      <Route path="/news/:id" component={NewsArticle} />
       <Route path="/resources" component={Resources} />
       <Route path="/contact" component={Contact} />
       <Route component={NotFound} />
