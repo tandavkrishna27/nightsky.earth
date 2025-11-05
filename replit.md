@@ -3,6 +3,50 @@
 ## Overview
 NightSky.earth is a brand offering curated night-sky and meteor experiences through a cinematic, minimalist website. The project aims to provide an emotion-first storytelling experience with a dark, cosmic aesthetic, connecting Earth to the stars. Key capabilities include showcasing meteor shower calendars, providing comprehensive stargazing resources, facilitating community collaboration, and offering a dynamic astronomy news section. The platform emphasizes a premium feel, serene design, and poetic language to evoke wonder and facilitate immersive celestial experiences.
 
+## Recent Updates (November 5, 2025)
+
+### Comprehensive SEO & GEO (AI Search) Optimization
+Enhanced the entire site with advanced SEO and GEO optimization for maximum discoverability by search engines and AI assistants (ChatGPT, Claude, Perplexity, Google AI, etc.):
+
+**News Listing Page (/news):**
+- Multiple JSON-LD schemas: WebSite (with SearchAction), Organization, BreadcrumbList, ItemList
+- ItemList schema catalogs all visible articles for enhanced discovery
+- Comprehensive keywords covering astronomy, space, meteor showers, dark sky locations, astrophotography
+- Enhanced meta description highlighting 40+ trusted news sources
+
+**News Article Pages (/news/:id):**
+- Advanced NewsArticle schema with ImageObject, publisher, genre, keywords, articleSection
+- BreadcrumbList schema (Home > News > Article) for navigation context
+- Organization schema for brand recognition
+- Article-specific Open Graph tags: published_time, modified_time, author, section, tags
+- Enhanced Twitter Cards with author and publish date metadata
+- Optimized for Google Rich Results and social sharing
+
+**SEO Component:**
+- Support for article-specific meta tags
+- Conditional rendering based on content type
+- Multiple schema support (accepts arrays)
+- Enhanced Twitter card metadata with labels
+
+**Robots.txt - AI Crawler Optimization:**
+- Explicit welcome for AI crawlers: GPTBot, ChatGPT-User, CCBot, Claude-Web, anthropic-ai, PerplexityBot, YouBot, Google-Extended
+- Optimized crawl-delay: 0 for AI/Google, 1 for Bing, 2 for others
+- Explicit Allow directives for /news and /news/*
+- Transparency note about news source aggregation
+
+**Sitemap.xml:**
+- Added 10 recent news articles as samples (IDs 33768-33777)
+- Note about 30,000+ articles discoverable via ItemList schema
+- Optimized changefreq: daily for listing, weekly for articles
+- Priority settings: 0.9 for news listing, 0.7 for articles
+
+**Expected Benefits:**
+- Google Rich Results eligibility for news articles
+- Enhanced social media sharing with rich previews
+- AI assistants can discover, cite, and reference content
+- Improved rankings for astronomy/space news queries
+- Better voice search and AI search engine discovery
+
 ## User Preferences
 I want the agent to use simple language and provide detailed explanations when necessary. I prefer an iterative development approach, where changes are discussed and approved before implementation. The agent should prioritize maintaining the dark, cinematic aesthetic and smooth animations. I want to be asked before any major architectural changes are made or new external dependencies are introduced.
 
