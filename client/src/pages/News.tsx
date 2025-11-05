@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import HeroSection from "@/components/HeroSection";
 import ContentSection from "@/components/ContentSection";
 import LoadingPage from "@/components/LoadingPage";
 import SEO from "@/components/SEO";
@@ -13,8 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { PaginatedNewsResponse, NewsArticle } from "@shared/schema";
 import { useLocation } from "wouter";
-
-import spaceImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
 
 export default function News() {
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -91,12 +88,6 @@ export default function News() {
         schema={newsSchema}
       />
       <Navigation />
-
-      <HeroSection
-        image={spaceImage}
-        headline="Under the Infinite"
-        subheadline="Latest astronomy and space exploration news from across the cosmos"
-      />
 
       <ContentSection>
         {/* Search and Filters */}
