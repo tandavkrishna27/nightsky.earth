@@ -229,7 +229,7 @@ export default function News() {
           {/* Quick Topic Filters - Horizontal Scroll */}
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground px-2">Quick Topics:</p>
-            <div className="overflow-x-auto pb-2 -mx-4 px-4">
+            <div className="overflow-x-auto pb-2 -mx-4 px-4 hide-scrollbar">
               <div className="flex gap-2 min-w-min">
                 {topicFilters.map((topic) => (
                   <Button
@@ -254,7 +254,7 @@ export default function News() {
           {/* Source Filters - Horizontal Scroll */}
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground px-2">Filter by Source:</p>
-            <div className="overflow-x-auto pb-2 -mx-4 px-4">
+            <div className="overflow-x-auto pb-2 -mx-4 px-4 hide-scrollbar">
               <div className="flex gap-2 min-w-min">
                 <Button
                   data-testid="button-filter-all"
