@@ -5,6 +5,31 @@ NightSky.earth is a brand offering curated night-sky and meteor experiences thro
 
 ## Recent Updates (November 5, 2025)
 
+### News Page UI Enhancements
+Improved the news page with streamlined design and flexible viewing options:
+
+**Streamlined Design:**
+- Removed auto-update banner for cleaner, less cluttered interface
+- Focus on content-first approach with improved visual hierarchy
+
+**Horizontal Scrolling Filters:**
+- Topic filters (Comets, Asteroids, Meteor Showers, Planets, Stars, Galaxies, Telescopes) now scroll horizontally
+- Source filters (NASA, ESA, JPL, Space.com, etc.) presented in horizontal scroll layout
+- Better mobile experience with swipeable filter navigation
+- Prevents filter wrapping and maintains clean single-line presentation
+
+**View Mode Toggle:**
+- **Grid View** (default): Responsive 3-column layout (1 col mobile, 2 tablet, 3 desktop) with compact article cards
+- **Scroll View** (InShorts-style): Single column centered layout with full-width cards, larger images (h-64), expanded text, and improved readability
+- Toggle buttons with Grid3x3 and List icons for intuitive switching
+- View preference maintained during filtering and pagination
+
+**UX Improvements:**
+- Both views maintain full functionality (click-through navigation, pagination, search)
+- Smooth transitions between view modes
+- Responsive design optimized for all screen sizes
+- Touch-friendly controls for mobile devices
+
 ### Comprehensive SEO & GEO (AI Search) Optimization
 Enhanced the entire site with advanced SEO and GEO optimization for maximum discoverability by search engines and AI assistants (ChatGPT, Claude, Perplexity, Google AI, etc.):
 
@@ -80,7 +105,7 @@ The project is built with a minimalist and cinematic design philosophy, prioriti
 **Technical Implementations & Features:**
 - **Dynamic Content**: Displays upcoming meteor showers based on the current date, and a comprehensive 2025/2026 meteor shower calendar.
 - **Experience Status System**: Differentiates between "Active" and "Coming Soon" experiences with appropriate badging and CTAs.
-- **Astronomy News Section**: Integrates real-time astronomy news with grid layout, search, source filters, and pagination.
+- **Astronomy News Section**: Integrates real-time astronomy news with dual-view layouts (grid/scroll), horizontal scrolling filters, search, source filtering, and pagination. Features InShorts-style scroll view for focused reading.
 - **Comprehensive SEO**: Utilizes `react-helmet-async` for dynamic meta tags, Open Graph, Twitter Cards, canonical URLs, geo meta tags, and extensive JSON-LD structured data across all pages. Includes `robots.txt` and `sitemap.xml` generation.
 - **Video Backgrounds**: Supports time-lapse night sky videos in hero sections with auto-looping, slow motion, and static image fallbacks.
 - **Animations**: Implements a clean meteor loader, smooth navigation transitions, hero section parallax scrolling, and interactive button animations using Framer Motion.
