@@ -17,7 +17,7 @@ A group is Done only when all its lettered headings are Done. The Done groups ar
 |---|---|---|
 | 0 — sources/scale/hosting | Partial | Ten distinct MET points including Arctic/ocean; four GETs in the coverage wave including two expired conditional HTTP 200 refreshes. Real tiny OSM pilot and reviewed ERA5 sample exist. Full-season meteor rights/model, global source scale, independent forecast, VIIRS and selected host/budgets remain open. |
 | 1 — SDK/runtime compatibility | Done | Pinned SDK, transport/Inspector fixtures and local runtime evidence; production Host/proxy validation remains separate. |
-| 2 — contracts/test harness | Partial | Locale, requested units and provenance budgets implemented; Node/Python two-OS CI prepared. Exact final GitHub run/revision still required. |
+| 2 — contracts/test harness | Partial | Locale, requested units and provenance budgets implemented; Node/Python two-OS CI prepared. Actual six-job GitHub CI passed on ac80891; source-dependent contract coverage remains gated. See ci-verification.md. |
 | 3 — endpoint/registry | Partial | Twelve stateless tools, consented metadata, bounded subject/IP counters, provider controls and safe errors implemented. Minimal shared request logger captures fixed route/status/duration only. Hosted logging/retention/replica budgets remain open. |
 | 3B — hosted OpenAI connection | Not started | No staging endpoint or real assistant connection. |
 | 3C — verified publisher/endpoint | Not started | Individual India direction confirmed; exact verified legal name, project/endpoint ownership and permanent hostname missing. |
@@ -54,3 +54,7 @@ Current climate manifest is `.data/era5/tiles-2025-v3/manifest.json`, SHA-256 `9
 Windows: 367 discovered, 366 pass/one symlink skip. Clean Linux: 367 discovered, 363 pass/four ignored-artifact skips; symlink passes. Six OSM and 33 ERA5 Python tests pass on both platforms. Three TypeScript configurations and eight offline review sets pass. Actual v3 all-index capacity records 60 requests, zero errors/external calls and peak RSS 511,082,496 bytes. Exact pinned Node 24.21.0-trixie-slim Docker build and nonroot health/twelve tools/no-news checks pass. These local results do not approve a production host.
 
 The regenerated rehearsal package SHA-256 is `446433abef11b172407e32992c6341b16988a353523ad67f0f76c99c67c6a3aa`; final endpoint/legal identity and official validation remain gates. Push/GitHub CI conclusions are pending. This paragraph supersedes the earlier awaiting-final-count statement; no hosted result is inferred.
+
+## GitHub CI closure
+
+All six jobs passed on implementation revision ac8089116c35f6c744ac78d6250171f6332a455a. Windows CI: 367 passed/four installed-artifact skips; Ubuntu CI: 364 passed/seven installed-artifact or Windows-only skips; 371 discovered per platform. Both Python matrices, typechecks, package, eight review sets, production audits and both production runtimes passed. Local Windows: 370 passed/one privilege skip. Exact run and Windows checkout/path fixes are in [CI verification](ci-verification.md). Original task counts remain unchanged because remaining source/host/release criteria are not met.
