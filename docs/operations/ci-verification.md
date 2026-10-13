@@ -32,3 +32,7 @@ The source branch is pushed; no production deployment, marketplace submission, p
 The original plan still has 7 Done, 14 Partial and 6 Not started headings. CI execution is now verified, while full-season meteor catalog rights/coverage, broader spot coverage, real multi-year/global historical baseline and hosted/release acceptance remain open. See [implementation status](implementation-status.md) and [local completion checklist](local-completion-checklist.md).
 
 This evidence identifies the implementation revision above. A subsequent documentation commit adds this record and runs the same CI again; its result is reported separately rather than retroactively changing the verified revision.
+
+## Windows helper startup follow-up
+
+The documentation revision 8558bea subsequently exposed a test-only startup timeout: its PowerShell COM helper was killed at 5,024 ms before returning a result. Five other jobs passed. Commit 2de2ff3 raises only that regression helper's bounded startup allowance from five to thirty seconds; production processing deadlines and strict path assertions are unchanged. All twelve focused tile-builder checks passed locally after the correction. The successful implementation run above remains valid evidence for its named revision; final branch CI must also pass before the work is reported verified.
