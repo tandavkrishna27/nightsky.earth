@@ -29,7 +29,7 @@ Path comparisons also rejected Windows aliases. The drive-case regression fix at
 
 The source branch is pushed; no production deployment, marketplace submission, publication or pilot was performed. The rehearsal package still has an example endpoint. Publisher direction is individual/India with support `nightsky.earth2026@gmail.com`; exact verified legal identity remains a release gate.
 
-The original plan still has 7 Done, 14 Partial and 6 Not started headings. CI execution is now verified, while full-season meteor catalog rights/coverage, broader spot coverage, real multi-year/global historical baseline and hosted/release acceptance remain open. See [implementation status](implementation-status.md) and [local completion checklist](local-completion-checklist.md).
+Historical snapshot before the three-data-lanes wave: the plan had 7 Done, 14 Partial and 6 Not started headings. The current counts and acceptance evidence are in the final section below. CI execution is now verified, while full-season meteor catalog rights/coverage, broader spot coverage, real multi-year/global historical baseline and hosted/release acceptance remain open. See [implementation status](implementation-status.md) and [local completion checklist](local-completion-checklist.md).
 
 This evidence identifies the implementation revision above. A subsequent documentation commit adds this record and runs the same CI again; its result is reported separately rather than retroactively changing the verified revision.
 

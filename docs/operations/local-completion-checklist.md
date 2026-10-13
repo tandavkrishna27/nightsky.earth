@@ -64,7 +64,7 @@ A task can close its **local** column only with reviewed implementation, named a
 
 Current 27-heading status is **8 Done / 13 Partial / 6 Not started**; 19-group status is **4 Done / 12 Partial / 3 Not started**. Tasks 13/15 are Partial because their local drafts/review artifacts now exist. The implementation packets above retain dependency/acceptance guidance; items now implemented are reflected in the table. Latest final aggregate test totals and GitHub conclusions require the integration owner's exact-revision evidence. Global geographic coverage, full-season meteor planning, a real 30-year climate baseline and selected-host launch remain unfinished. See implementation-status.md and climate-tiles.md for the current v3 digest; old layouts remain immutable rollback evidence.
 
-Integration-owner final evidence: Windows 366 pass/one symlink skip out of 367; clean Linux 363 pass/four ignored-artifact skips out of 367, symlink passes; Python six OSM/33 ERA5 per platform; three TypeScript checks; eight review sets; actual v3 all-index capacity 60 requests/zero errors or external calls/511,082,496-byte peak RSS; pinned Docker nonroot runtime passes. GitHub CI/push and selected-host gates remain pending.
+Historical verification snapshot, superseded by the 14 October wave and current CI record: Integration-owner final evidence: Windows 366 pass/one symlink skip out of 367; clean Linux 363 pass/four ignored-artifact skips out of 367, symlink passes; Python six OSM/33 ERA5 per platform; three TypeScript checks; eight review sets; actual v3 all-index capacity 60 requests/zero errors or external calls/511,082,496-byte peak RSS; pinned Docker nonroot runtime passes. GitHub CI/push and selected-host gates remain pending.
 
 ## Verified branch and CI
 
