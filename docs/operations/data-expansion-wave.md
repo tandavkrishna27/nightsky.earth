@@ -30,7 +30,7 @@ Historical review checked exact requested UTC membership, leap buckets, grid/rev
 - Pinned nonroot container built and served twelve tools, actual global GeoNames resolution, ten Bhutan candidates and the exact 2025 Geminid maximum. All artifacts were read-only mounts; legacy recurring catalog and website/news routes were absent. No external provider calls.
 - Rehearsal package SHA-256: `ddc843a719415776693f5bd6e64296b775af601cc9a6a20a09d856d605c3a6f3`. Example endpoint and final publisher/official-validation gates remain.
 
-Exact pushed-revision CI conclusions belong in `ci-verification.md` after observation. Current original counts remain **8 Done / 13 Partial / 6 Not started**; this wave advances partial source tickets without declaring global/full-season/baseline completion.
+All six CI jobs passed for `756e02866c5b5a73f576511b2c4235222cf02126`: [verified implementation run](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38462293288). Exact evidence is in `ci-verification.md`; follow-up documentation CI is observed separately. Current original counts remain **8 Done / 13 Partial / 6 Not started**; this wave advances partial source tickets without declaring global/full-season/baseline completion.
 
 ## Next source request boundary
 
