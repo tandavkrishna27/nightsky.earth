@@ -69,3 +69,7 @@ Integration-owner final evidence: Windows 366 pass/one symlink skip out of 367; 
 ## Verified branch and CI
 
 Implementation revision ac80891 is pushed and all six GitHub jobs passed. See [CI verification](ci-verification.md) for exact run, 371-test per-platform counts, Windows checkout/path corrections and scope limitations. CI execution is established; source coverage and hosted/release acceptance remain separate. No deployment was performed.
+
+## Current data wave — 14 October 2026
+
+[Wave record](three-data-lanes-wave.md) supersedes earlier local gaps for the enabled NASA2026 peak catalog, regional 1,327-candidate artifact, five JPL horizon references, generic multi-year preparation, source-aware recovery and immutable historical publication. Actual older data is four of 52 checkpoints; active history remains the 2025 sample. Private repository files are not a public data offer. Task2 local criteria are independently audited and documentation aligned, awaiting this revision's CI before closure. Full-season/global/baseline/host/release criteria remain open.

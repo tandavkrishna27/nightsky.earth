@@ -3,6 +3,7 @@ import test from "node:test";
 import { GeoNamesPlaceIndex } from "../../server/places/geonames";
 import { getAstronomyWindow, getTargetVisibility } from "../../server/nightsky/astronomy";
 import { planObservingSession, type PlannerServices } from "../../server/nightsky/planner";
+import { searchSkyEvents } from "../../server/events/catalog";
 const index = new GeoNamesPlaceIndex([{ geonameId: 1, name: "London", asciiName: "London", alternateNames: "", latitude: 51.5, longitude: -.12, countryCode: "GB", countryName: "United Kingdom", featureClass: "P", featureCode: "PPLC", population: 8000000, timeZone: "Europe/London", modificationDate: "2026-10-01" }], "fixture");
 const placeId = "place:v1:geonames:1";
 const window = { startUtc: "2026-08-11T20:00:00Z", endUtc: "2026-08-12T04:00:00Z", timeZone: "Europe/London" };
@@ -57,4 +58,27 @@ test("inherited object property names remain ordinary unknown shower selections"
     assert.deepEqual(result.evidence!.meteorRadiantSamples, []);
     assert.ok(!result.gaps.some(gap => /model could not be evaluated/.test(gap)));
   }
+});
+
+test("a reviewed 2026 peak remains exact in the plan while full activity-season coverage stays a gap", async () => {
+  const peakWindow = { startUtc: "2026-12-14T12:30:00Z", endUtc: "2026-12-14T23:30:00Z", timeZone: "Europe/London" };
+  const result = await planObservingSession({ placeId, window: peakWindow, activity: "meteor-shower" }, {
+    ...services(),
+    searchEvents: (p, w) => searchSkyEvents({ placeId: p, window: w, eventTypes: ["meteor-shower"] }, index),
+  });
+  assert.equal(result.evidence!.events!.events[0]!.peakUtc, "2026-12-14T13:00:00Z");
+  assert.equal(result.evidence!.events!.events[0]!.activityCalendarDateWindow, undefined);
+  assert.equal(result.evidence!.meteorRadiantSamples!.length, 3);
+  assert.ok(result.sources.some(row => row.vintage === "NASA-MEO-2026-issued-2025-10-17"));
+  assert.ok(result.gaps.some(row => /enabled meteor calendar supplies year-specific forecast maxima/i.test(row)));
+  assert.equal(result.factors.find(row => row.name === "Meteor shower and sky events")!.impact, "unknown");
+});
+
+test("an independently referenced below-horizon eclipse is an unfavorable event factor", async () => {
+  const eclipseWindow = { startUtc: "2026-03-03T08:00:00Z", endUtc: "2026-03-03T16:00:00Z", timeZone: "Europe/London" };
+  const result = await planObservingSession({ placeId, window: eclipseWindow, activity: "eclipse" }, {
+    ...services(), searchEvents: (p, w) => searchSkyEvents({ placeId: p, window: w, eventTypes: ["eclipse"] }, index),
+  });
+  assert.equal(result.evidence!.events!.events[0]!.localVisibility, "not-visible");
+  assert.equal(result.factors.find(row => row.name === "Sky events")!.impact, "unfavorable");
 });

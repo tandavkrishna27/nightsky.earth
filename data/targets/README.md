@@ -6,7 +6,9 @@ The MCP target-visibility tool uses Astronomy Engine 2.1.19 for the Sun, Moon, a
 
 ## Meteor showers
 
-`data/events/meteor-showers-v1.json` is the old approximate eight-shower activity/peak-date compilation. Its NASA/AMS source-rights gate remains unresolved and it is excluded from enabled public meteor events. Report activity/date gaps until a compatible source is accepted; normalization alone does not clear compilation reuse.
+`data/events/meteor-peaks-nasa-2026.json` supplies 13 original forecast maxima for 2026 from Table 3, page 8 of NASA NTRS 20250009524, issued 2025-10-17. Its rights record states “Work of the US Gov. Public Use Permitted.” It contains QUA, ETA, ZPE, ARI, SSG, SDA, CAP, PER, DSX, DRA, AND, GEM and URS as exact UTC forecast instants. It supplies no activity widths, full-season intervals, visual rates or recurrence in another year. Five codes overlap the GMN radiant models: QUA, ETA, SDA, PER and GEM. LYR, ORI and LEO have radiant models but no NASA-calendar peak; the other eight NASA codes have no modeled radiant.
+
+`data/events/meteor-showers-v1.json` is retained only as an audit record of the old approximate eight-shower compilation. It is not a runtime event source and is not copied into the plugin image. Its unresolved compilation-source review does not disable the independent NASA 2026 source.
 
 `data/events/meteor-radiants-gmn-2021.json` separately selects original Table 1 fitted coefficients and Table 3 nominal windows from Moorhead, Clements and Vida's author-deposited arXiv:2205.15423v1 (CC BY 4.0). It covers PER, GEM, ORI, ETA, LYR, SDA, QUA and LEO near their reference solar longitudes. A reference longitude is a fit anchor, not an exact annual peak or activity-season boundary. Observations span 2018-12-10 through 2021-05-22. The engineering 2018–2030 evaluator bound flags annually reused calculations outside those observations as extrapolation; it is not a published accuracy guarantee.
 

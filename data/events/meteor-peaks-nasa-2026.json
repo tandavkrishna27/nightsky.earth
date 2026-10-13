@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "vintage": "NASA-MEO-2026-issued-2025-10-17",
+  "reviewedAt": "2026-10-13T19:01:17Z",
+  "sourceUrl": "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf",
+  "rightsEvidenceUrl": "https://ntrs.nasa.gov/citations/20250009524",
+  "rightsStatement": "Work of the US Gov. Public Use Permitted.",
+  "table": "Table 3, page 8",
+  "coverage": "Thirteen original 2026 forecast maxima only; no activity seasons, rates, or recurring years. Radiant support is separate.",
+  "peaks": [
+    { "code": "QUA", "id": "quadrantids", "name": "Quadrantids", "peakUtc": "2026-01-03T18:38:00Z" },
+    { "code": "ETA", "id": "eta-aquariids", "name": "Eta Aquariids", "peakUtc": "2026-05-06T16:30:00Z" },
+    { "code": "ZPE", "id": "daytime-zeta-perseids", "name": "Daytime Zeta Perseids", "peakUtc": "2026-06-03T06:48:00Z" },
+    { "code": "ARI", "id": "daytime-arietids", "name": "Daytime Arietids", "peakUtc": "2026-06-10T02:03:00Z" },
+    { "code": "SSG", "id": "southern-mu-sagittariids", "name": "Southern Mu Sagittariids", "peakUtc": "2026-06-20T03:55:00Z" },
+    { "code": "SDA", "id": "southern-delta-aquariids", "name": "Southern Delta Aquariids", "peakUtc": "2026-07-30T00:39:00Z" },
+    { "code": "CAP", "id": "alpha-capricornids", "name": "Alpha Capricornids", "peakUtc": "2026-07-31T04:30:00Z" },
+    { "code": "PER", "id": "perseids", "name": "Perseids", "peakUtc": "2026-08-13T14:09:00Z" },
+    { "code": "DSX", "id": "daytime-sextantids", "name": "Daytime Sextantids", "peakUtc": "2026-10-01T23:40:00Z" },
+    { "code": "DRA", "id": "october-draconids", "name": "October Draconids", "peakUtc": "2026-10-09T02:10:00Z" },
+    { "code": "AND", "id": "andromedids", "name": "Andromedids", "peakUtc": "2026-11-28T05:12:00Z" },
+    { "code": "GEM", "id": "geminids", "name": "Geminids", "peakUtc": "2026-12-14T13:00:00Z" },
+    { "code": "URS", "id": "ursids", "name": "Ursids", "peakUtc": "2026-12-22T15:54:00Z" }
+  ]
+}

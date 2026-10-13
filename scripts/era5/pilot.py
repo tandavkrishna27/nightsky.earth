@@ -46,6 +46,24 @@ def build_plan(year=2025):
             "retainedRawBytes": RAW_LIMIT, "scratchBytes": SCRATCH_LIMIT, "batchSeconds": BATCH_SECONDS},
         "cellCoverage": {name: {"cells": [list(cell) for cell in region["cells"]], "placeIds": region["placeIds"]} for name, region in REGIONS.items()}}
 
+def build_historical_plan(start_year, end_year):
+    """Offline plan only. Retrieval requires its explicit reviewed digest."""
+    if type(start_year) is not int or type(end_year) is not int or not 1991 <= start_year <= end_year <= 2020:
+        raise ValueError("Historical range must be within 1991–2020.")
+    plan = build_plan()
+    chunks = []
+    for name, region in REGIONS.items():
+        periods = [(start_year-1,12,[30,31],True)]
+        periods += [(year,month,list(range(1,calendar.monthrange(year,month)[1]+1)),False) for year in range(start_year,end_year+1) for month in range(1,13)]
+        periods += [(end_year+1,1,[1,2],True)]
+        for year, month, days, boundary in periods:
+            request = dict(plan["chunks"][0]["request"], year=[str(year)], month=[f"{month:02d}"], day=[f"{day:02d}" for day in days], area=region["area"])
+            chunks.append({"chunkId":f"{name}-{year}-{month:02d}"+("-boundary" if boundary else ""),"region":name,"expectedHours":len(days)*24,"request":request})
+    plan.pop("year")
+    plan.update(builderVersion="historical-plan-v1",startYear=start_year,endYear=end_year,chunks=chunks,observingNightStart=f"{start_year}-01-01",observingNightEnd=f"{end_year}-12-31",sampleKind="baseline-1991-2020" if (start_year,end_year)==(1991,2020) else "sample-only")
+    plan["limits"].update(retainedRawBytes=512*1024*1024,maximumJobs=len(chunks))
+    return plan
+
 def canonical(value): return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
 def plan_digest(plan): return hashlib.sha256(canonical(plan).encode()).hexdigest()
 
@@ -99,9 +117,9 @@ def prepare(root):
         load_state(root)
     return plan
 
-def load_state(root):
+def load_state(root, approved_plan=None):
     plan = read_json(owned(root, "manifest.json"))
-    if plan != build_plan(): raise ValueError("Unreviewed pilot manifest.")
+    if plan != (build_plan() if approved_plan is None else approved_plan): raise ValueError("Unreviewed pilot manifest.")
     ledger = read_json(owned(root, "ledger.json"))
     if ledger.get("schemaVersion") != 1 or ledger.get("manifestSha256") != plan_digest(plan) or not isinstance(ledger.get("entries"), list):
         raise ValueError("Invalid pilot checkpoint ledger.")
@@ -172,7 +190,7 @@ def checkpoint_existing(root, chunk_id, source):
     with writer_lock(root):
         return _checkpoint_existing_locked(root, chunk_id, source)
 
-def _checkpoint_existing_locked(root, chunk_id, source, *, deadline_started=None):
+def _checkpoint_existing_locked(root, chunk_id, source, *, deadline_started=None, approved_plan=None):
     root, source = Path(root).resolve(), Path(source).resolve()
     started, cpu_started = time.monotonic(), time.process_time()
     deadline_start = started if deadline_started is None else deadline_started
@@ -181,10 +199,11 @@ def _checkpoint_existing_locked(root, chunk_id, source, *, deadline_started=None
         raise ValueError("Shared checkpoint helper requires this process to own the writer lock.")
     def require_time():
         if time.monotonic() - deadline_start >= BATCH_SECONDS: raise ValueError("Pilot processing batch exceeded deadline.")
-    plan, ledger = load_state(root)
+    plan, ledger = load_state(root, approved_plan)
     chunk = next((row for row in plan["chunks"] if row["chunkId"] == chunk_id), None)
     if not chunk: raise ValueError("Chunk is outside reviewed pilot.")
-    inventory = check_inventory(root)
+    raw_limit = RAW_LIMIT if approved_plan is None else approved_plan["limits"]["retainedRawBytes"]
+    inventory = check_inventory(root, raw_limit)
     source_bytes = source.stat().st_size
     if source_bytes > MAX_RAW_BYTES: raise ValueError("Raw source chunk exceeds limit.")
     checksum = digest(source)
@@ -195,7 +214,7 @@ def _checkpoint_existing_locked(root, chunk_id, source, *, deadline_started=None
         require_time()
         if existing["rawSha256"] != checksum: raise ValueError("Source revision changed; do not replace completed checkpoint.")
         return existing
-    if inventory["retainedRawBytes"] + source_bytes > RAW_LIMIT or inventory["scratchBytes"] + source_bytes + 4 * 1024 * 1024 > SCRATCH_LIMIT:
+    if inventory["retainedRawBytes"] + source_bytes > raw_limit or inventory["scratchBytes"] + source_bytes + 4 * 1024 * 1024 > SCRATCH_LIMIT:
         raise ValueError("Insufficient pilot budget for this chunk.")
     raw = owned(root, f"raw/{chunk_id}.nc")
     decoded = owned(root, f"decoded/{chunk_id}.jsonl")
@@ -229,7 +248,7 @@ def _checkpoint_existing_locked(root, chunk_id, source, *, deadline_started=None
         export_chunk(temporary, decoded)
         if time.monotonic() - deadline_start >= BATCH_SECONDS: raise ValueError("Decode batch exceeded deadline.")
         os.replace(temporary, raw); temporary = None
-        measured = check_inventory(root)
+        measured = check_inventory(root, raw_limit)
         decoded_checksum = digest(decoded)
         memory_peak = peak_rss_bytes()
         require_time()

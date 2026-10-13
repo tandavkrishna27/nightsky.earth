@@ -12,7 +12,7 @@ function read(path: string): string { return readFileSync(join(root, path), "utf
 test("workflowSkillsReferenceOnlyRegisteredMcpTools", () => {
   for (const skill of skillNames) {
     const content = read(`plugins/nightsky/skills/${skill}/SKILL.md`);
-    assert.match(content, /^---\nname:/);
+    assert.match(content, /^---\r?\nname:/);
     for (const match of content.matchAll(/`([a-z]+_[a-z_]+)`/g)) assert.ok(tools.includes(match[1]!), `${skill} references undefined tool ${match[1]}`);
   }
 });

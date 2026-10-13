@@ -61,3 +61,8 @@ import "./providers/climate/tiledEra5.test.ts";
 import "./providers/climate/tile-builder.test.ts";
 import "./mcp/climate-tiled-installed.test.ts";
 import "./operations/plugin-entry.test.ts";
+import "./events/localHorizon.test.ts";
+import "./osm/regionalWave.test.ts";
+import "./providers/climate/history-builder.test.ts";
+import "./events/meteorPeaks.test.ts";
+import "./mcp/regional-data-journey.test.ts";

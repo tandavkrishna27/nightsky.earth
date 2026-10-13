@@ -6,10 +6,11 @@ import { resolve, join, relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import { GeoNamesPlaceIndex, geonamesCitySchema, loadGeoNamesPlaceIndex } from "../../server/places/geonames";
-import { sourceRecordSchema } from "../../shared/nightsky/common";
+import { sourceRecordSchema,utcInstantSchema } from "../../shared/nightsky/common";
 import { aggregateDarkCloudSamples, summarizeMonth, statisticsForBin, validateChunkLedger, type CloudSample, type ClimateAggregate } from "./aggregate";
 import { parseDecodedChunk } from "./chunks";
 
+import { tiledEra5ManifestSchema,tiledEra5TileSchema,validateTiledEra5Manifest,validateTiledEra5Tile } from "../../server/providers/climate/tiledEra5";
 import { sameResolvedPath } from "./pathIdentity";
 const MiB = 1024 * 1024;
 const MANIFEST_SHA = "e43315f64a34a586abda7e4f0ac434e82f0868d2f23bd124a09ba47545bd2400";
@@ -37,6 +38,17 @@ export function reviewedPilotManifest() {
   }
   return {schemaVersion:1,year:2025,sampleKind:"sample-only",dataset:"reanalysis-era5-single-levels",sourceDoi:"10.24381/cds.adbb2d47",observingNightStart:"2025-01-01",observingNightEnd:"2025-12-31",totalCells:10,chunks,limits:{oneActiveChunk:true,rawChunkBytes:32*MiB,decodedNumericBytes:32*MiB,retainedRawBytes:256*MiB,scratchBytes:1024*MiB,batchSeconds:1800},cellCoverage:Object.fromEntries(Object.entries(regions).map(([name,row])=>[name,{cells:row.cells,placeIds:row.placeIds}]))};
 }
+export function reviewedHistoricalManifest(startYear:number,endYear:number) {
+  if(!Number.isInteger(startYear)||!Number.isInteger(endYear)||startYear<1991||endYear>2020||startYear>endYear) throw Error("Historical range must be within 1991-2020.");
+  const initial=reviewedPilotManifest();const {year,...base}=initial;
+  const chunks:typeof initial.chunks=[];
+  for(const region of Object.keys(regions) as Region[]) {
+    const periods=[{year:startYear-1,month:12,days:[30,31],boundary:true},...Array.from({length:endYear-startYear+1},(_,i)=>Array.from({length:12},(_,j)=>({year:startYear+i,month:j+1,days:Array.from({length:new Date(Date.UTC(startYear+i,j+1,0)).getUTCDate()},(_,d)=>d+1),boundary:false}))).flat(),{year:endYear+1,month:1,days:[1,2],boundary:true}];
+    for(const period of periods) chunks.push({chunkId:`${region}-${period.year}-${String(period.month).padStart(2,"0")}${period.boundary?"-boundary":""}`,region,expectedHours:period.days.length*24,request:{...initial.chunks[0]!.request,year:[String(period.year)],month:[String(period.month).padStart(2,"0")],day:period.days.map(d=>String(d).padStart(2,"0")),area:regions[region].area}});
+  }
+  return {...base,builderVersion:"historical-plan-v1",startYear,endYear,chunks,observingNightStart:`${startYear}-01-01`,observingNightEnd:`${endYear}-12-31`,sampleKind:startYear===1991&&endYear===2020?"baseline-1991-2020":"sample-only",limits:{...base.limits,retainedRawBytes:512*MiB,maximumJobs:chunks.length}};
+}
+
 function canonical(value: unknown): string {
   if(Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
   if(value !== null && typeof value === "object") return `{${Object.entries(value).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([key,v])=>`${JSON.stringify(key)}:${canonical(v)}`).join(",")}}`;
@@ -60,25 +72,30 @@ function annual(aggregate:ClimateAggregate) {
   const total=aggregate.bins.reduce((a,b)=>({expected:a.expected+b.expected,valid:a.valid+b.valid,sum:a.sum+b.sum,counts:a.counts.map((v,i)=>v+b.counts[i]!) as [number,number,number],yearsMask:(a.yearsMask|b.yearsMask)>>>0,badYearsMask:(a.badYearsMask|b.badYearsMask)>>>0}),{expected:0,valid:0,sum:0,counts:[0,0,0] as [number,number,number],yearsMask:0,badYearsMask:0});
   return {...statisticsForBin(total),missingEligibleSamples:total.expected-total.valid,quality:total.expected?"sample-only":"no-astronomical-darkness"};
 }
-export async function buildPilot(options:{root:string;output?:string;index?:GeoNamesPlaceIndex;geoNamesPath?:string}) {
+export async function buildPilot(options:{root:string;output?:string;index?:GeoNamesPlaceIndex;geoNamesPath?:string;history?:{startYear:number;endYear:number;expectedManifestSha256:string;generatedAt:string}}) {
   const started=performance.now(),cpu=process.cpuUsage();
   const deadline=()=>{if(performance.now()-started>=1800*1000) throw new Error("Builder 30-minute deadline exceeded.");};
-  const root=await realpath(resolve(options.root)); const output=resolve(options.output??join(root,"full-year-sample.json"));
-  if(!sameResolvedPath(output,join(root,"full-year-sample.json"))) throw new Error("Artifact output must be the fixed pilot full-year-sample.json path.");
+  if(options.history) utcInstantSchema.parse(options.history.generatedAt);
+  const reviewed=options.history?reviewedHistoricalManifest(options.history.startYear,options.history.endYear):reviewedPilotManifest();
+  const digest=options.history?.expectedManifestSha256??MANIFEST_SHA;
+  if(manifestDigest(reviewed)!==digest) throw Error("Unreviewed historical manifest digest.");
+  const outputName=options.history?"historical-envelope.json":"full-year-sample.json";
+  const root=await realpath(resolve(options.root)); const output=resolve(options.output??join(root,outputName));
+  if(!sameResolvedPath(output,join(root,outputName))) throw new Error("Artifact output must be the fixed pilot full-year-sample.json path.");
   const lock=await open(join(root,".writer.lock"),"wx");
   let temporary:string|undefined;
   try {
     const manifestPath=await owned(root,"manifest.json"),ledgerPath=await owned(root,"ledger.json");
     const manifestText=await boundedText(manifestPath),ledgerText=await boundedText(ledgerPath);
-    const manifest=JSON.parse(manifestText) as ReturnType<typeof reviewedPilotManifest>;
-    if(manifestDigest(manifest)!==MANIFEST_SHA || manifestDigest(reviewedPilotManifest())!==MANIFEST_SHA) throw new Error("Unreviewed pilot manifest.");
+    const manifest=JSON.parse(manifestText) as typeof reviewed;
+    if(manifestDigest(manifest)!==digest || manifestDigest(reviewed)!==digest) throw new Error("Unreviewed pilot manifest.");
     const ledger=JSON.parse(ledgerText) as Ledger;
-    if(ledger.schemaVersion!==1 || ledger.manifestSha256!==MANIFEST_SHA || !Array.isArray(ledger.entries)) throw new Error("Invalid manifest/ledger version.");
+    if(ledger.schemaVersion!==1 || ledger.manifestSha256!==digest || !Array.isArray(ledger.entries)) throw new Error("Invalid manifest/ledger version.");
     if(ledger.entries.some(entry=>entry.complete!==true)) throw new Error("Checkpoint completion evidence must be true.");
     validateChunkLedger(ledger.entries.map(e=>({chunkId:e.chunkId,complete:e.complete,sha256:e.rawSha256,sourceRevision:Array.isArray(e.sourceRevision)?e.sourceRevision.join(","):""})));
     const planned=new Set(manifest.chunks.map(c=>c.chunkId));
     if(ledger.entries.some(e=>!planned.has(e.chunkId))) throw new Error("Checkpoint outside reviewed coverage.");
-    if(ledger.entries.length!==28) throw new Error(`Missing required chunks: ${28-ledger.entries.length}; full-year artifact withheld.`);
+    if(ledger.entries.length!==manifest.chunks.length) throw new Error(`Missing required chunks: ${manifest.chunks.length-ledger.entries.length}; full-year artifact withheld.`);
     const entries=new Map(ledger.entries.map(e=>[e.chunkId,e]));
     const scratchBytes=await inventory(root);
     const sources=[];let rawTotal=0;
@@ -86,7 +103,7 @@ export async function buildPilot(options:{root:string;output?:string;index?:GeoN
       deadline(); const entry=entries.get(chunk.chunkId)!;
       const raw=await owned(root,`raw/${chunk.chunkId}.nc`),decoded=await owned(root,`decoded/${chunk.chunkId}.jsonl`);
       const size=(await stat(raw)).size; rawTotal+=size;
-      if(size>32*MiB || size!==entry.rawBytes || rawTotal>256*MiB || await hashFile(raw)!==entry.rawSha256) throw new Error("Raw checkpoint missing, oversized or changed.");
+      if(size>32*MiB || size!==entry.rawBytes || rawTotal>manifest.limits.retainedRawBytes || await hashFile(raw)!==entry.rawSha256) throw new Error("Raw checkpoint missing, oversized or changed.");
       const text=await boundedText(decoded);
       if(Buffer.byteLength(text)!==entry.decodedBytes || sha(text)!==entry.decodedSha256) throw new Error("Decoded checkpoint changed.");
       const parsed=parseDecodedChunk(text),header=parsed.header;
@@ -119,24 +136,42 @@ export async function buildPilot(options:{root:string;output?:string;index?:GeoN
             for(const sample of decoded.samplesForCell(cell.cellId)) {deadline();yield sample;}
           }
         })();
-        aggregates.set(key,aggregateDarkCloudSamples(samples,mapping,{startNight:"2025-01-01",endNight:"2025-12-31"}));
+        aggregates.set(key,aggregateDarkCloudSamples(samples,mapping,{startNight:manifest.observingNightStart,endNight:manifest.observingNightEnd}));
       }
       places.push({...index.toPlaceRef(place),latitude:place.latitude,longitude:place.longitude,key,gridMapping:{method:"nearest-supplied-cell",distanceMetric:"latitude-scaled-angular-grid",approximateDisplacementKm:Math.sqrt(distance(cell))*111.195}});
     }
     const artifact={schemaVersion:1,builderVersion:"pilot-2025-v1",year:2025,sampleKind:"sample-only",historicalLabel:"historical-not-a-forecast",manifestSha256:MANIFEST_SHA,sourceProvenance,gridProvenance:{suppliedSpacingDegrees:0.25,nativeResolutionApproxKm:31,selection:"nearest-supplied-cell",description:"The supplied 0.25-degree latitude/longitude grid is distinct from ERA5's approximately 31 km native model resolution; selected cells are not site measurements."},places,sources,aggregates:[...aggregates.values()].map(aggregate=>({...aggregate,monthly:Array.from({length:12},(_,i)=>({month:i+1,...summarizeMonth(aggregate,i+1),missingEligibleSamples:aggregate.yearMonthly[0]![i]!.expected-aggregate.yearMonthly[0]![i]!.valid})),annual:annual(aggregate)})),caveats:["One year sample only; not a climate baseline or forecast.","Hourly modeled cloud fractions are not continuous clear hours or whole-night probabilities.","Coarse supplied cells do not establish conditions at a mountain observing site."]};
+    const historicalEnvelope=options.history?createHistoricalEnvelope([...aggregates.values()],sources,digest,index.vintageLabel,options.history.generatedAt):undefined;
     // Prior publication acts as an immutable source checkpoint as well.
-    try {const old=JSON.parse(await boundedText(output));if(old.manifestSha256!==MANIFEST_SHA || canonical(old.sources)!==canonical(sources)) throw new Error("Previous artifact source checkpoint changed.");} catch(error) {if((error as NodeJS.ErrnoException).code!=="ENOENT") throw error;}
+    let identicalHistorical=false;
+    try {
+      const oldText=await boundedText(output),old=JSON.parse(oldText);
+      if(options.history) {
+        if(canonical(old)!==canonical(historicalEnvelope) || oldText!==canonical(historicalEnvelope)+"\n") throw new Error("Previous immutable historical envelope changed; use a separately reviewed version directory.");
+        identicalHistorical=true;
+      } else if(old.manifestSha256!==MANIFEST_SHA || canonical(old.sources)!==canonical(sources)) throw new Error("Previous artifact source checkpoint changed.");
+    } catch(error) {if((error as NodeJS.ErrnoException).code!=="ENOENT") throw error;}
     if(await boundedText(manifestPath)!==manifestText || await boundedText(ledgerPath)!==ledgerText) throw new Error("Manifest/ledger changed during build.");
     for(const chunk of manifest.chunks) {const entry=entries.get(chunk.chunkId)!;if(await hashFile(join(root,"raw",`${chunk.chunkId}.nc`))!==entry.rawSha256 || await hashFile(join(root,"decoded",`${chunk.chunkId}.jsonl`),4*MiB)!==entry.decodedSha256) throw new Error("Source changed before publication.");deadline();}
-    const text=canonical(artifact)+"\n",artifactBytes=Buffer.byteLength(text);
+    const text=canonical(historicalEnvelope??artifact)+"\n",artifactBytes=Buffer.byteLength(text);
     if(artifactBytes>4*MiB || scratchBytes+artifactBytes>1024*MiB) throw new Error("Artifact/global scratch byte bound exceeded.");
-    temporary=join(root,`.full-year-${randomUUID()}.tmp`);const stream=await open(temporary,"wx");
-    try {await stream.writeFile(text);await stream.sync();} finally {await stream.close();}
-    deadline();await rename(temporary,output);temporary=undefined;
+    if(!identicalHistorical) {
+      temporary=join(root,`.full-year-${randomUUID()}.tmp`);const stream=await open(temporary,"wx");
+      try {await stream.writeFile(text);await stream.sync();} finally {await stream.close();}
+      deadline();await rename(temporary,output);temporary=undefined;
+    }
     const used=process.cpuUsage(cpu);
-    return {output,sha256:sha(text),artifactBytes,wallSeconds:(performance.now()-started)/1000,cpuSeconds:(used.user+used.system)/1e6,processPeakRssBytes:process.resourceUsage().maxRSS*1024,scratchBytesBefore:scratchBytes,scratchBytesWithStagedArtifact:scratchBytes+artifactBytes,scratchMeasurementKind:"prebuild-inventory-plus-staged-output-upper-bound",sampleKind:"sample-only"};
+    return {output,sha256:sha(text),artifactBytes,wallSeconds:(performance.now()-started)/1000,cpuSeconds:(used.user+used.system)/1e6,processPeakRssBytes:process.resourceUsage().maxRSS*1024,scratchBytesBefore:scratchBytes,scratchBytesWithStagedArtifact:scratchBytes+artifactBytes,scratchMeasurementKind:"prebuild-inventory-plus-staged-output-upper-bound",sampleKind:reviewed.sampleKind};
   } finally {if(temporary) await unlink(temporary).catch(()=>{});await lock.close();await unlink(join(root,".writer.lock"));}
 }
+function createHistoricalEnvelope(aggregates:ClimateAggregate[],sources:{chunkId:string;rawSha256:string;decodedSha256:string;source:{experimentVersions:string[]}}[],digest:string,vintage:string,generatedAt:string) {
+  const metadata={schemaVersion:2,methodVersion:"dark-cloud-v1",unit:"fraction",sourceDoi:"10.24381/cds.adbb2d47",thresholds:[.1,.25,.5],period:aggregates[0]!.period,versions:{builder:"historical-bounded-v1",astronomy:"2.1.19",timezone:aggregates[0]!.timezoneVersion}};
+  const tiles=aggregates.map(row=>tiledEra5TileSchema.parse({...metadata,key:row.key,mapping:row.mapping,bins:row.bins,yearMonthly:row.yearMonthly}));
+  const manifest=tiledEra5ManifestSchema.parse({...metadata,sourceProvenance,placeIndexVintage:vintage,grid:{spacingDegrees:.25,nativeResolutionApproxKm:31,mapping:"nearest-supplied-cell"},generatedAt:utcInstantSchema.parse(generatedAt),sourceRevisions:[{sha256:digest,revision:"historical-plan-v1:manifest",kind:"manifest"},...sources.flatMap(row=>[{sha256:row.rawSha256,revision:`${row.chunkId}:raw:${row.source.experimentVersions.join(",")}`,kind:"raw"},{sha256:row.decodedSha256,revision:`${row.chunkId}:decoded:${row.source.experimentVersions.join(",")}`,kind:"decoded"}])],caveats:["Historical reanalysis; not a forecast.","Hourly modeled cloud fractions are not continuous clear hours or whole-night probabilities.","Coarse supplied cells do not establish conditions at a mountain observing site.",...(metadata.period.kind==="sample-only"?["Partial-period sample only; not a climate baseline."]:[])],tiles:tiles.map((row,i)=>({...row.mapping,key:row.key,path:`tile-${i}.json`,sha256:sha(canonical(row)),bytes:Buffer.byteLength(canonical(row))}))});
+  validateTiledEra5Manifest(manifest);tiles.forEach((row,i)=>validateTiledEra5Tile(row,manifest,manifest.tiles[i]!));
+  return {schemaVersion:2,manifest,tiles};
+}
+
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
   const args=process.argv.slice(2);const value=(name:string,fallback:string)=>{const i=args.indexOf(name);return i<0?fallback:args[i+1]??fallback;};
   if(!args.includes("--worker")) {
@@ -144,5 +179,5 @@ if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url))
     if(worker.stdout) process.stdout.write(worker.stdout);if(worker.stderr) process.stderr.write(worker.stderr);
     if(worker.error) console.error("Builder worker failed or exceeded hard 30-minute deadline:",worker.error.message);
     process.exitCode=worker.status??1;
-  } else buildPilot({root:value("--root",".data/era5/pilot-2025"),geoNamesPath:value("--geonames",".data/geonames/cities500.json.gz"),...(args.includes("--output")?{output:value("--output","")}:{})}).then(result=>console.log(JSON.stringify(result,null,2))).catch(error=>{console.error(error.message);process.exitCode=1;});
+  } else buildPilot({root:value("--root",".data/era5/pilot-2025"),geoNamesPath:value("--geonames",".data/geonames/cities500.json.gz"),...(args.includes("--historical")?{history:{startYear:Number(value("--start-year","1991")),endYear:Number(value("--end-year","1992")),expectedManifestSha256:value("--expected-manifest-sha256",""),generatedAt:value("--generated-at","")}}:{}),...(args.includes("--output")?{output:value("--output","")}:{})}).then(result=>console.log(JSON.stringify(result,null,2))).catch(error=>{console.error(error.message);process.exitCode=1;});
 }

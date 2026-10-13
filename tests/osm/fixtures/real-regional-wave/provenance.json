@@ -1,0 +1,49 @@
+{
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:60][maxsize:134217728];\n(\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](12.6,77.2,13.4,78);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](12.6,77.2,13.4,78);\nnode[\"name\"][\"boundary\"=\"national_park\"](12.6,77.2,13.4,78);\nnode[\"name\"][\"protect_class\"](12.6,77.2,13.4,78);\nnode[\"name\"][\"natural\"=\"beach\"](12.6,77.2,13.4,78);\nway[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](12.6,77.2,13.4,78);\nway[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](12.6,77.2,13.4,78);\nway[\"name\"][\"boundary\"=\"national_park\"](12.6,77.2,13.4,78);\nway[\"name\"][\"protect_class\"](12.6,77.2,13.4,78);\nway[\"name\"][\"natural\"=\"beach\"](12.6,77.2,13.4,78);\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](11,76.3,11.8,77.1);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](11,76.3,11.8,77.1);\nnode[\"name\"][\"boundary\"=\"national_park\"](11,76.3,11.8,77.1);\nnode[\"name\"][\"protect_class\"](11,76.3,11.8,77.1);\nnode[\"name\"][\"natural\"=\"beach\"](11,76.3,11.8,77.1);\nway[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](11,76.3,11.8,77.1);\nway[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](11,76.3,11.8,77.1);\nway[\"name\"][\"boundary\"=\"national_park\"](11,76.3,11.8,77.1);\nway[\"name\"][\"protect_class\"](11,76.3,11.8,77.1);\nway[\"name\"][\"natural\"=\"beach\"](11,76.3,11.8,77.1);\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](9.5,76,10.3,76.8);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](9.5,76,10.3,76.8);\nnode[\"name\"][\"boundary\"=\"national_park\"](9.5,76,10.3,76.8);\nnode[\"name\"][\"protect_class\"](9.5,76,10.3,76.8);\nnode[\"name\"][\"natural\"=\"beach\"](9.5,76,10.3,76.8);\nway[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](9.5,76,10.3,76.8);\nway[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](9.5,76,10.3,76.8);\nway[\"name\"][\"boundary\"=\"national_park\"](9.5,76,10.3,76.8);\nway[\"name\"][\"protect_class\"](9.5,76,10.3,76.8);\nway[\"name\"][\"natural\"=\"beach\"](9.5,76,10.3,76.8);\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](12.7,79.9,13.5,80.4);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](12.7,79.9,13.5,80.4);\nnode[\"name\"][\"boundary\"=\"national_park\"](12.7,79.9,13.5,80.4);\nnode[\"name\"][\"protect_class\"](12.7,79.9,13.5,80.4);\nnode[\"name\"][\"natural\"=\"beach\"](12.7,79.9,13.5,80.4);\nway[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](12.7,79.9,13.5,80.4);\nway[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](12.7,79.9,13.5,80.4);\nway[\"name\"][\"boundary\"=\"national_park\"](12.7,79.9,13.5,80.4);\nway[\"name\"][\"protect_class\"](12.7,79.9,13.5,80.4);\nway[\"name\"][\"natural\"=\"beach\"](12.7,79.9,13.5,80.4);\n);\nout body center;",
+  "boxes": {
+    "Bengaluru": [
+      12.6,
+      77.2,
+      13.4,
+      78
+    ],
+    "Nilgiris": [
+      11,
+      76.3,
+      11.8,
+      77.1
+    ],
+    "Kochi": [
+      9.5,
+      76,
+      10.3,
+      76.8
+    ],
+    "Chennai": [
+      12.7,
+      79.9,
+      13.5,
+      80.4
+    ]
+  },
+  "retrievedAt": "2026-10-13T18:49:09.337Z",
+  "sourceTimestamp": "2026-10-13T18:47:51Z",
+  "responseBytes": 569376,
+  "artifactBytes": 201201,
+  "candidateCount": 1327,
+  "nodeCount": 185,
+  "wayCount": 1142,
+  "responseSha256": "ff62e1f4fc812e12ae32bb04e4fac6c78995dc6ca09d66b1ccd306e3221efff4",
+  "artifactSha256": "e542a89ac7094acbd02f18dd7ea559001e21a4778214379b08839e1e553265ef",
+  "elapsedSeconds": 24.916798800000002,
+  "peakRssBytes": 104206336,
+  "limits": {
+    "wallSeconds": 90,
+    "decodedBytes": 4194304,
+    "sourceElements": 10000,
+    "serverMaxsizeBytes": 134217728
+  },
+  "coverage": "Partial named nodes and ways intersecting Bengaluru, Nilgiris, Kochi and Chennai boxes (see provenance); ways use Overpass bounding-box centers, not entrances. Excludes relations, unnamed features and outside coverage. Access/permission unknown.",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/"
+}

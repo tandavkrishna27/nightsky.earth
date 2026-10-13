@@ -45,6 +45,11 @@ test("keepsAccessUnknownWhenUnmapped", async () => {
   const result = await searchObservingLocations({ placeId: place.placeId }, { index, place });
   assert.equal(result.candidates[0]!.accessEvidence.status, "unknown");
 });
+test("way candidate coordinates disclose representative point and unknown entrance", async () => {
+  const result = await searchObservingLocations({ placeId: place.placeId }, { index, place });
+  const way=result.candidates.find(candidate => candidate.placeId.endsWith("way:102"))!;
+  assert.match(way.caveats.join(" "), /representative.*entrance/i);
+});
 
 test("returnsNoCandidatesNearUninhabitedArea", async () => {
   const result = await searchObservingLocations({ placeId: place.placeId }, { index: { ...index, candidates: [] }, place });

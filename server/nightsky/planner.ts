@@ -102,10 +102,12 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     sourceRecords.push(...events.sources, ...events.events.map(event => event.source));
     addAll(caveats, events.caveats);
     const relevant = events.events.filter((event) => input.activity !== "meteor-shower" || event.eventType === "meteor-shower");
+    const hasEvaluatedVisibility = relevant.some(event => ["visible", "partially-visible", "not-visible"].includes(event.localVisibility));
+    const eventImpact = !relevant.length || !hasEvaluatedVisibility ? "unknown" : relevant.every(event => event.localVisibility === "not-visible") ? "unfavorable" : relevant.every(event => event.localVisibility === "visible") ? "favorable" : "mixed";
     factors.push({
       name: input.activity === "meteor-shower" ? "Meteor shower and sky events" : "Sky events",
       assessment: relevant.length ? relevant.slice(0, 6).map((event) => `${event.name}${event.peakUtc ? ` peaks ${event.peakUtc}` : ""} (visibility: ${event.localVisibility})`).join("; ") : "No supported matching event was found in the selected window.",
-      impact: relevant.length ? "favorable" : "unknown", sourceNames: sourceNames(events.sources),
+      impact: eventImpact, sourceNames: sourceNames(events.sources),
     });
     if (events.unsupportedEventTypes.length) gaps.push(`Event classes not covered by V1: ${events.unsupportedEventTypes.join(", ")}.`);
   } else {
@@ -138,7 +140,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       gaps.push(code ? meteorRadiantSamples.length ? "Meteor radiant altitude and moon-to-radiant separation are not calculated where the model is outside its nominal radiant fit window." : "Meteor radiant altitude and moon-to-radiant separation are unavailable because the local model could not be evaluated." : "Meteor radiant altitude is unknown: choose one reviewed shower (PER, GEM, ORI, ETA, LYR, SDA, QUA or LEO); an unknown or ambiguous event list cannot select a radiant.");
     }
     for (const sample of meteorRadiantSamples) if (sample.status !== "available") gaps.push(`${sample.code} radiant ${sample.status}: ${sample.reason}`);
-    gaps.push("A rights-cleared full-season meteor activity and dates catalog remains unavailable; the licensed radiant fits do not substitute for season or peak evidence.");
+    gaps.push("Complete meteor activity seasons and full-season radiant coverage remain unavailable. The enabled meteor calendar supplies year-specific forecast maxima; bounded radiant fits and forecast peaks do not establish activity-season boundaries.");
   }
 
   if (input.target && input.activity !== "meteor-shower") {

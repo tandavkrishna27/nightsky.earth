@@ -1,6 +1,12 @@
 # NightSky V1 data-source and rights register
 
-**Status:** Task 0A research draft, updated 13 October 2026. This is a source/terms screening, not legal advice or a production approval. Re-check exact product version, terms, attribution and coverage before ingest or launch. “Free” here means a zero-fee access path that appears to permit product use subject to listed conditions; it does not mean zero operating cost or an uptime guarantee.
+**Status:** Task 0A research draft, updated 14 October 2026. This is a source/terms screening, not legal advice or a production approval. Re-check exact product version, terms, attribution and coverage before ingest or launch. “Free” here means a zero-fee access path that appears to permit product use subject to listed conditions; it does not mean zero operating cost or an uptime guarantee.
+
+## Current enabled data — 14 October 2026
+
+The active meteor calendar uses the specifically rights-reviewed NASA MEO report NTRS 20250009524, all thirteen Table 3 forecast maxima for 2026 only. No annual recurrence, activity widths, future-year peaks or personal rates are inferred. The old recurring-date file is audit-only and excluded from runtime packaging. Eight independent CC BY GMN radiant fits retain their nominal bounds; only five overlap the active peak catalog. See events-completion-wave.md.
+
+Actual OSM evidence now includes 1,327 named regional nodes/ways, with explicit bounding-box-center/unknown-entrance and access limits. Historical runtime coverage remains the immutable three-place 2025 sample; four additional 1991–1992 checkpoints are incomplete-source measurements, not a new baseline. See spot-expansion-wave.md and historical-baseline-wave.md. The source table below also records prospective routes and historical gates; these current enabled-source dispositions take precedence over older recurring-catalog assumptions.
 
 ## Source disposition
 

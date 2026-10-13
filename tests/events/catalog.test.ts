@@ -18,22 +18,26 @@ test("findsMoonPhaseInRange", async () => {
   assert.ok(result.events.some((event) => event.eventType === "moon-phase" && event.name === "Full Moon" && event.peakUtc?.startsWith("2026-03-03")));
 });
 
-test("findsRecurringMeteorShower", async () => {
-  const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-10-01T00:00:00Z", "2026-11-10T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
-  const orionids = result.events.find((event) => event.name === "Orionids");
-  assert.ok(orionids);
-  assert.equal(orionids.peakCalendarDateWindow?.startDate, "2026-10-21");
-  assert.equal(orionids.localVisibility, "not-evaluated");
+test("returnsReviewedYearSpecificMeteorPeakWithoutInventedSeason", async () => {
+  const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-08-13T14:00:00Z", "2026-08-13T15:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
+  assert.equal(result.events.length, 1);
+  assert.equal(result.events[0]!.peakUtc, "2026-08-13T14:09:00Z");
+  assert.equal(result.events[0]!.activityCalendarDateWindow, undefined);
+  assert.equal(result.events[0]!.peakCalendarDateWindow, undefined);
+  assert.equal(result.events[0]!.localVisibility, "not-evaluated");
+  assert.equal(result.availability.status, "partial");
 });
 
-test("keepsCrossYearMeteorShowerPeakInTheFollowingCalendarYear", async () => {
+test("doesNotRecurForecastPeaksIntoUnreviewedYears", async () => {
   const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2027-01-02T00:00:00Z", "2027-01-05T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
-  const quadrantids = result.events.find((event) => event.name === "Quadrantids");
-  assert.ok(quadrantids);
-  assert.deepEqual(quadrantids.activityCalendarDateWindow, { startDate: "2026-12-28", endDate: "2027-01-12" });
-  assert.deepEqual(quadrantids.peakCalendarDateWindow, { startDate: "2027-01-03", endDate: "2027-01-04" });
+  assert.deepEqual(result.events, []);
+  assert.equal(result.availability.status, "partial");
 });
 
+test("calendarActivityWithoutReviewedPeakInWindowDoesNotInventMeteorEvent", async () => {
+  const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-08-12T00:00:00Z", "2026-08-13T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
+  assert.deepEqual(result.events, []);
+});
 test("calculatesEclipseLocalCircumstances", async () => {
   const result = await searchSkyEvents({ placeId: place(2).placeId, window: window("2026-08-12T00:00:00Z", "2026-08-13T00:00:00Z", "Atlantic/Reykjavik"), eventTypes: ["eclipse"] }, index);
   const eclipse = result.events.find((event) => event.name.includes("Solar Eclipse"));
@@ -67,8 +71,8 @@ test("returnsUnsupportedForUnmaintainedTransient", async () => {
 test("preservesCatalogSourceAndVintage", async () => {
   const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-10-01T00:00:00Z", "2026-11-10T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
   const source = result.events[0]?.source;
-  assert.ok(source?.url.startsWith("https://science.nasa.gov/"));
-  assert.ok(source?.vintage?.startsWith("NASA-2026"));
+  assert.ok(source?.url.startsWith("https://ntrs.nasa.gov/"));
+  assert.ok(source?.vintage?.startsWith("NASA-MEO-2026"));
   assert.equal(skyEventsResultSchema.safeParse(result).success, true);
 });
 

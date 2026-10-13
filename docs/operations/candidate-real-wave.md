@@ -1,3 +1,5 @@
+Current regional expansion evidence is in [spot-expansion-wave.md](spot-expansion-wave.md): 1,327 candidates, including ways, with deterministic offline rebuilding. The 13 October record below remains retained as earlier evidence; the regional distribution preparation follows it.
+
 # Bounded real OSM candidate wave — 13 October 2026
 
 Task 0B/8 remains partial, with a completed tiny real node pilot. The retained Geofabrik India PBF is 1,709,857,118 bytes, downloaded 11 October; its actual upstream snapshot timestamp remains unverified. No database, paid worker, global archive or production enablement was performed. One separately authorized small offline Overpass request is recorded below.
@@ -65,3 +67,17 @@ The attribution guidelines require readable credit and a route to source/licence
 Before public candidate service or artifact distribution, conservatively treat the normalized OSM artifact as a derivative database: preserve OpenStreetMap/ODbL metadata and link visible result attribution; publish the exact versioned candidate JSON plus checksum and provenance under ODbL at a durable freely accessible download, linked beside candidate results/rights documentation. Publish the reproducible selector and coverage omissions as well. Keep this OSM database separable from GeoNames/climate data and application-code licences. Resolve Gate 0A interpretation and verify the actual public offer and host attribution before release; local build alone does not close that gate.
 
 Remaining Task 8 gates: full region/way/relation coverage if required; direct OSM candidate planning integration; public rights/active-version offer verification; immutable deployment/version switching and rollback; selected 2-vCPU/4-GB host measurements with all indexes, disk headroom and concurrent cold/warm latency. Tiny node-pilot extraction, vintage/hash provenance, regional counts, repeatable normalization and named-destination candidate/plan/compare are complete locally. Default candidate discovery remains unavailable without an explicitly installed index.
+
+---
+
+# Regional data distribution preparation
+
+The regional source response and transformed candidate database are retained under ODbL 1.0 in `tests/osm/fixtures/real-regional-wave/`. The fixture README states the independent data license, original attribution, exact source and output checksums, coverage and reproducible transformation. Software license declarations do not replace this data license.
+
+Attribution text: **© OpenStreetMap contributors. Data available under the Open Database License (ODbL).** Link it to [OSM copyright](https://www.openstreetmap.org/copyright) and link distributed data directly to [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). OSM's copyright guidance requires visible attribution and identification of the data license.
+
+ODbL section 4.6 provides an access obligation for publicly used derivative databases/produced works. Preparation here retains the entire transformed database plus selected source response, query and transformation code; it is intended to support offering a machine-readable derivative database under the same license. This preparation is not a public distribution endpoint or a legal determination about combining independent datasets.
+
+Before public use, the release owner should publish a stable downloadable bundle containing `candidates.json`, `response.json`, `query.ql`, `provenance.json`, the attribution/license notice and the transformation instructions/code. Its notice should identify the matching reviewed source/output SHA-256 and link to a functioning public download. Keep this database distinct from independent climate/location data so recipients can obtain the OSM derivative separately. Verify that the deployed source attribution and actual public offer refer to the installed version. No public endpoint or deployment was created in this wave.
+
+The selected features are candidates, not permission to enter or observe at night. The source coverage says way coordinates are Overpass bounding-box centers, not entrances; access and permission are unknown. The named-place planning contract remains unchanged pending the root agent's integration decision.

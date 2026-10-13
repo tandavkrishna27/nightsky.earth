@@ -1,6 +1,6 @@
 # NightSky V1 implementation status
 
-Audit: 13 October 2026, `codex/plugin-v1` / `.worktrees/plugin-v1`. Status is local-development evidence; it does not establish deployment, official validation or launch. The individual publisher is based in India; the exact verified legal name is still absent. Monitored support is `nightsky.earth2026@gmail.com`.
+Audit: 14 October 2026, `codex/plugin-v1` / `.worktrees/plugin-v1`. Status is local-development evidence; it does not establish deployment, official validation or launch. The individual publisher is based in India; the exact verified legal name is still absent. Monitored support is `nightsky.earth2026@gmail.com`.
 
 ## Counts
 
@@ -15,20 +15,20 @@ A group is Done only when all its lettered headings are Done. The Done groups ar
 
 | Task | Status | Evidence / remaining gate |
 |---|---|---|
-| 0 — sources/scale/hosting | Partial | Ten distinct MET points including Arctic/ocean; four GETs in the coverage wave including two expired conditional HTTP 200 refreshes. Real tiny OSM pilot and reviewed ERA5 sample exist. Full-season meteor rights/model, global source scale, independent forecast, VIIRS and selected host/budgets remain open. |
+| 0 — sources/scale/hosting | Partial | Ten distinct MET points including Arctic/ocean; four GETs in the coverage wave including two expired conditional HTTP 200 refreshes. Real 1,327-candidate regional OSM artifact and reviewed ERA5 sample exist; four older historical source jobs completed without a new baseline. Full-season meteor rights/model, global source scale, independent forecast, VIIRS and selected host/budgets remain open. |
 | 1 — SDK/runtime compatibility | Done | Pinned SDK, transport/Inspector fixtures and local runtime evidence; production Host/proxy validation remains separate. |
-| 2 — contracts/test harness | Partial | Locale, requested units and provenance budgets implemented; Node/Python two-OS CI prepared. Actual six-job GitHub CI passed on ac80891; source-dependent contract coverage remains gated. See ci-verification.md. |
+| 2 — contracts/test harness | Partial | Locale, requested units and provenance budgets implemented; Node/Python two-OS CI prepared. Local acceptance independently audited: nine named tests, all twelve schemas/annotations, locale/privacy/native-evidence and current frozen documentation are verified. Current wave CI must pass before promoting this heading to Done. See three-data-lanes-wave.md. |
 | 3 — endpoint/registry | Partial | Twelve stateless tools, consented metadata, bounded subject/IP counters, provider controls and safe errors implemented. Minimal shared request logger captures fixed route/status/duration only. Hosted logging/retention/replica budgets remain open. |
 | 3B — hosted OpenAI connection | Not started | No staging endpoint or real assistant connection. |
 | 3C — verified publisher/endpoint | Not started | Individual India direction confirmed; exact verified legal name, project/endpoint ownership and permanent hostname missing. |
 | 4 — named places/time zones | Done | Global GeoNames city artifact plus reviewed Hanle supplement; named-place ambiguity, local times and metadata handling implemented. No arbitrary-coordinate boundary claim. |
 | 4B — real draft location scan | Not started | Requires actual draft and hosted endpoint. |
 | 5 — astronomy/targets | Done | Independent JPL/USNO/NASA references and bounded local calculations; horizon/terrain/date-range limits retained. |
-| 6 — events/catalogs | Partial | Eight CC BY GMN near-peak radiant models integrated with altitude/Moon separation and explicit frame/extrapolation states; lunar timing/duration reference added. Old full-season dates/compilation rights, seasonal drift and further local eclipse contacts remain open. |
+| 6 — events/catalogs | Partial | Thirteen specifically rights-reviewed NASA MEO 2026 peak instants enabled; old recurring dates are audit-only. Eight CC BY GMN bounded models and five independent JPL horizon references; lunar endpoint defect fixed. Full seasons, other-year calendars, missing radiant codes and grazing crossings remain open. |
 | 7A — weather | Partial | MET parsing/periods/missing fields/shared controls; actual expiry-driven Arctic/ocean conditional refresh returned updated 200 twice. Offline 304 validator regression fixed. No live 304 or global accuracy/host readiness claim. |
 | 7B — aurora | Done | NOAA adapter, source-shape/reuse screening, freshness/cache and local tool evidence. |
-| 8 — candidate discovery | Partial | Tiny real pilot: 59 nodes, 9,624-byte artifact with source/coverage/ODbL evidence. Two India scans stopped without a regional artifact. Public database offer, broad geographic coverage and host fit remain gates. |
-| 9 — historical context | Partial | Reviewed three-place 2025 sample now schema2 immutable tiles; mandatory thresholds, bounded readers, raw/decoded revisions and checksum publication. Real 30-year/global baseline and host capacity unfinished. |
+| 8 — candidate discovery | Partial | Real regional artifact: 1,327 named nodes/ways, 201,201 bytes, exact source/query/checksums and representative-point caveats. Deterministic strict rebuild and four-city MCP journey pass. Repository is private; a public database offer, global coverage, direct candidate plans and host fit remain gates. |
+| 9 — historical context | Partial | Immutable three-place 2025 tiles remain active. Generic multi-year schema2 builder, approved-plan recovery and exact-byte immutability verified. Four of 52 older pilot chunks measured; no full-period release. Efficient grouped acquisition, real 30-year/global baseline and host acceptance remain open. |
 | 10A — planner | Partial | Activity windows, target suggestions, timed guidance, weather/history/candidates and near-peak meteor evidence compose locally. Complete agreed geographic/seasonal journeys and hosted evidence remain open. |
 | 10B — comparison | Partial | Two-to-five options preserve gaps, exact evidence, source-specific forecasts and windows; real multi-host checks remain. |
 | 11A — guidance | Done | Original cited learning/photography guidance; no invented gear settings. |
@@ -58,3 +58,7 @@ The regenerated rehearsal package SHA-256 is `446433abef11b172407e32992c6341b169
 ## GitHub CI closure
 
 All six jobs passed on implementation revision ac8089116c35f6c744ac78d6250171f6332a455a. Windows CI: 367 passed/four installed-artifact skips; Ubuntu CI: 364 passed/seven installed-artifact or Windows-only skips; 371 discovered per platform. Both Python matrices, typechecks, package, eight review sets, production audits and both production runtimes passed. Local Windows: 370 passed/one privilege skip. Exact run and Windows checkout/path fixes are in [CI verification](ci-verification.md). Original task counts remain unchanged because remaining source/host/release criteria are not met.
+
+## Three data lanes — 14 October 2026
+
+See [wave evidence](three-data-lanes-wave.md) for source deliveries, independent review fixes, 395-test harness, measured resource limits and remaining gates. Windows latest: 394 passed/one permission skip. Clean Linux: 388 passed/seven installed-artifact or Windows-only skips; zero failures. OSM6/ERA539 pass on both platforms. Type checks, eight offline review sets, builds, production audits and both runtimes pass. Rehearsal package SHA-256: 602a8919fd7f61b7e9f623d7c52ed18a3b5dd526661c1f58e4a5e82b7930cf8b. Current wave push/CI is pending; original counts will change only after exact acceptance evidence. No deployment.

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, mkdir, writeFile, readFile, rm, realpath } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, rm, realpath,stat,utimes } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
@@ -19,10 +19,10 @@ const places = new GeoNamesPlaceIndex([
   [1266425,"Kodaikanal","Kodaikanal","",10.23925,77.48932,"IN","India",0,"Asia/Kolkata"],
   [1262463,"Munnar","Munnar","",10.08818,77.06239,"IN","India",0,"Asia/Kolkata"],
 ], "offline-fixture");
-async function fixture(api: Awaited<ReturnType<typeof builder>>) {
+async function fixture(api: Awaited<ReturnType<typeof builder>>, historical:false|{startYear:number;endYear:number}|true=false) {
   const root = await realpath(await mkdtemp(join(await realpath(tmpdir()), "era5-builder-")));
   await mkdir(join(root,"raw")); await mkdir(join(root,"decoded"));
-  const manifest = api.reviewedPilotManifest();
+  const manifest = historical ? api.reviewedHistoricalManifest(historical===true?1991:historical.startYear,historical===true?1992:historical.endYear) : api.reviewedPilotManifest();
   const entries = [];
   for (const chunk of manifest.chunks) {
     const raw = Buffer.from(`offline-${chunk.chunkId}`);
@@ -196,3 +196,69 @@ test("published sample carries licensed ERA5 attribution and supplied-grid prove
 });
 
 test("Windows pilot fixed output accepts equivalent drive-letter casing",{skip:process.platform!=="win32"},async()=>{const api=await builder();const f=await fixture(api);try{const path=f.output;const alternate=(path[0]===path[0].toUpperCase()?path[0].toLowerCase():path[0].toUpperCase())+path.slice(1);await api.buildPilot({root:f.root,output:alternate,index:places});assert.equal(JSON.parse(await readFile(f.output,"utf8")).year,2025);}finally{await rm(f.root,{recursive:true,force:true});}});
+
+
+test("historical builder requires reviewed digest and emits two independent annual denominators", async()=>{
+ const api=await builder();const f=await fixture(api,true);
+ try {
+  const history={startYear:1991,endYear:1992,generatedAt:"2026-10-13T18:00:00Z",expectedManifestSha256:api.manifestDigest(f.manifest)};
+  await assert.rejects(api.buildPilot({root:f.root,index:places,history:{...history,expectedManifestSha256:"0".repeat(64)}}),/review|manifest/i);
+  const result=await api.buildPilot({root:f.root,index:places,history});
+  const output=JSON.parse(await readFile(result.output,"utf8"));
+  assert.equal(output.schemaVersion,2);
+  assert.equal(output.manifest.generatedAt,"2026-10-13T18:00:00Z");
+  assert.equal(output.manifest.period.kind,"sample-only");
+  assert.equal(output.tiles[0].yearMonthly.length,2);
+  assert.equal(output.manifest.sourceRevisions.length,105);
+  assert.ok(output.tiles[0].bins.some((b:any)=>b.expected>b.valid));
+  const {publishClimateTiles}=await import("../../../scripts/era5/build-tiles");
+  const report=await publishClimateTiles({inputPath:result.output,expectedSha256:result.sha256,outputDirectory:join(f.root,"historical-release"),generatedAt:history.generatedAt});
+  const {createTiledEra5ClimateProvider}=await import("../../../server/providers/climate/tiledEra5");
+  const provider=createTiledEra5ClimateProvider({index:places,artifactPath:report.manifestPath,expectedSha256:report.manifestSha256});
+  const context=await provider.getClimatology("place:v1:geonames:1270426",1);
+  assert.equal(context.period.startNight,"1991-01-01");
+  assert.equal(context.period.endNight,"1992-12-31");
+  assert.equal(context.availability.status,"partial");
+  const prior=await readFile(result.output,"utf8");
+  for(const changed of [
+   {history:{...history,generatedAt:"2026-10-14T18:00:00Z"},index:places},
+   {history,index:new GeoNamesPlaceIndex([[1270426,"Hanle","Hanle","",32.78943,78.9962,"IN","India",0,"Asia/Kolkata"],[1266425,"Kodaikanal","Kodaikanal","",10.23925,77.48932,"IN","India",0,"Asia/Kolkata"],[1262463,"Munnar","Munnar","",10.08818,77.06239,"IN","India",0,"Asia/Kolkata"]],"changed-vintage")},
+   {history,index:new GeoNamesPlaceIndex([[1270426,"Hanle","Hanle","",32.78943,78.76,"IN","India",0,"Asia/Kolkata"],[1266425,"Kodaikanal","Kodaikanal","",10.23925,77.48932,"IN","India",0,"Asia/Kolkata"],[1262463,"Munnar","Munnar","",10.08818,77.06239,"IN","India",0,"Asia/Kolkata"]],"offline-fixture")},
+  ]) {
+   await assert.rejects(api.buildPilot({root:f.root,...changed}),/previous|immutable|version/i);
+   assert.equal(await readFile(result.output,"utf8"),prior);
+  }
+  await writeFile(result.output,prior+" ");
+  await assert.rejects(api.buildPilot({root:f.root,index:places,history}),/previous|immutable|version/i);
+  assert.equal(await readFile(result.output,"utf8"),prior+" ");
+  await writeFile(result.output,prior);
+  await utimes(result.output,new Date("2020-01-01"),new Date("2020-01-01"));
+  const before=(await stat(result.output)).mtimeMs;
+  await api.buildPilot({root:f.root,index:places,history});
+  assert.equal((await stat(result.output)).mtimeMs,before);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+
+test("fictional 30-year sparse builder evidence remains partial through the schema2 provider",async()=>{
+ const api=await builder();const f=await fixture(api,{startYear:1991,endYear:2020});
+ try {
+  const history={startYear:1991,endYear:2020,generatedAt:"2026-10-13T18:00:00Z",expectedManifestSha256:api.manifestDigest(f.manifest)};
+  const result=await api.buildPilot({root:f.root,index:places,history});
+  const value=JSON.parse(await readFile(result.output,"utf8"));
+  assert.equal(value.manifest.period.kind,"baseline-1991-2020");
+  assert.equal(value.tiles[0].yearMonthly.length,30);
+  // Label the synthetic publication explicitly; builder inputs are engineering fixtures.
+  value.manifest.sourceProvenance.name="Fictional engineering fixture; not real ERA5 measurements";
+  value.manifest.sourceProvenance.attribution="Fictional software validation only; contains no measured climate evidence.";
+  const fictionalBytes=JSON.stringify(value);
+  await writeFile(result.output,fictionalBytes);
+  const {publishClimateTiles}=await import("../../../scripts/era5/build-tiles");
+  const report=await publishClimateTiles({inputPath:result.output,expectedSha256:sha(fictionalBytes),outputDirectory:join(f.root,"fictional-baseline-release"),generatedAt:history.generatedAt});
+  const {createTiledEra5ClimateProvider}=await import("../../../server/providers/climate/tiledEra5");
+  const context=await createTiledEra5ClimateProvider({index:places,artifactPath:report.manifestPath,expectedSha256:report.manifestSha256}).getClimatology("place:v1:geonames:1270426",1);
+  assert.equal(context.availability.status,"partial");
+  assert.ok(context.summary!.completeness<.9);
+  assert.match(context.sources[0]!.name,/Fictional/);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});

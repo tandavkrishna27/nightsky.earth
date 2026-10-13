@@ -117,7 +117,10 @@ test("astronomy MCP tools return schema-valid structured calculations", async ()
     assert.equal(target.payload.result.structuredContent.target.name, "Jupiter");
     assert.ok(target.payload.result.structuredContent.intervals.length > 0);
     const events = await post(base, { jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "search_sky_events", arguments: { placeId, window: { startUtc: "2026-10-01T00:00:00Z", endUtc: "2026-11-10T00:00:00Z", timeZone: "Asia/Kolkata" }, eventTypes: ["meteor-shower"] } } });
-    assert.ok(events.payload.result.structuredContent.events.some((event: { name: string }) => event.name === "Orionids"));
+    assert.equal(events.payload.result.structuredContent.availability.status, "partial");
+    const reviewedPeak = events.payload.result.structuredContent.events.find((event: { name: string }) => event.name === "October Draconids");
+    assert.equal(reviewedPeak?.peakUtc, "2026-10-09T02:10:00Z");
+    assert.equal(reviewedPeak?.activityCalendarDateWindow, undefined);
     const weather = await post(base, { jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "get_night_conditions", arguments: args } });
     assert.equal(weather.payload.result.structuredContent.availability.status, "available");
     assert.equal(weather.payload.result.structuredContent.nightContext.moonIlluminationPercent >= 0, true);

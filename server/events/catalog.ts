@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
+
 import { createRequire } from "node:module";
 import type * as AstronomyTypes from "astronomy-engine";
-import * as z from "zod4";
+import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCE } from "./meteorPeaks";
 import { skyEventsResultSchema, searchSkyEventsInputSchema, type SkyEvent } from "../../shared/nightsky/events";
 import { type SourceRecord } from "../../shared/nightsky/common";
 import { resolvedCoordinatesForPlace, type GeoNamesPlaceIndex } from "../places/geonames";
@@ -22,19 +22,6 @@ const UNSUPPORTED_REASONS: Record<string, string> = {
   opposition: "No opposition event catalog is included in this V1 event tool.",
   comet: "Transient comet data needs a maintained, rights-reviewed catalog or live feed; none is enabled in V1.",
   other: "This event class has no maintained V1 source or calculation.",
-};
-
-const meteorCatalogSchema = z.strictObject({
-  schemaVersion: z.literal(1), vintage: z.string().min(1), reviewedAt: z.string().datetime({ offset: true }),
-  sourceName: z.string().min(1), sourceUrl: z.url(),
-  showers: z.array(z.strictObject({ id: z.string().min(1), name: z.string().min(1), activityStart: z.string().regex(/^\d{2}-\d{2}$/), activityEnd: z.string().regex(/^\d{2}-\d{2}$/), peakStart: z.string().regex(/^\d{2}-\d{2}$/), peakEnd: z.string().regex(/^\d{2}-\d{2}$/), sourceUrl: z.url() })).min(1),
-});
-const meteorCatalog = meteorCatalogSchema.parse(JSON.parse(readFileSync("data/events/meteor-showers-v1.json", "utf8")));
-const METEOR_SOURCE: SourceRecord = {
-  name: meteorCatalog.sourceName, url: meteorCatalog.sourceUrl,
-  attribution: "Meteor shower date ranges summarized from NASA Science and the NASA Meteoroid Environment Office; NightSky.earth maintains this normalized catalog.",
-  dataClass: "catalog", product: "Major annual meteor shower activity windows", vintage: meteorCatalog.vintage,
-  modified: true,
 };
 
 export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceIndex) {
@@ -65,13 +52,13 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
     "Event calculations use Astronomy Engine 2.1.19 and its built-in ephemeris/time model; displayed times are local to the resolved GeoNames city.",
     "Visibility uses modeled solar contact altitudes with standard atmospheric refraction for solar eclipses and geometric body altitude for lunar events; terrain, clouds, twilight brightness and naked-eye detectability are not established.",
   ];
-  if (requestedTypes.includes("meteor-shower")) caveats.push("Meteor shower windows recur from a reviewed NASA 2026/2027 date reference. Annual peak timing can shift; radiant altitude and local meteor rates are not calculated. Check the linked current-year source before traveling.");
+  if (requestedTypes.includes("meteor-shower")) caveats.push("Meteor results include only 13 NASA MEO forecast maxima for 2026. No activity-season widths or annual recurrence are established; Lyrids, Orionids and Leonids have no peak in this forecast. Empty results do not establish no shower activity. Forecast times can change, and peak timing alone does not establish local radiant visibility or personal meteor rates.");
   if (unsupportedEventTypes.length) caveats.push(`V1 does not include maintained event data or calculations for: ${unsupportedEventTypes.map((type) => `${type} (${UNSUPPORTED_REASONS[type]})`).join(" ")}`);
   if (truncated) caveats.push(`The result was limited to the first ${input.limit} events. Narrow the requested time window for a complete list.`);
-  const status = requestedTypes.every((type) => unsupportedEventTypes.includes(type)) ? "unsupported" : (unsupportedEventTypes.length || truncated ? "partial" : "available");
-  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [METEOR_SOURCE] : [])];
+  const status = requestedTypes.every((type) => unsupportedEventTypes.includes(type)) ? "unsupported" : (unsupportedEventTypes.length || truncated || requestedTypes.includes("meteor-shower") ? "partial" : "available");
+  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [REVIEWED_METEOR_PEAK_SOURCE] : [])];
   return skyEventsResultSchema.parse({
-    availability: { status, reason: status === "unsupported" ? "Only unsupported event classes were requested." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : "Supported events were calculated or loaded from the versioned catalog." },
+    availability: { status, reason: status === "unsupported" ? "Only unsupported event classes were requested." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : requestedTypes.includes("meteor-shower") ? "Meteor coverage contains year-specific 2026 forecast maxima only; complete activity seasons and other years are unavailable." : "Supported events were calculated or loaded from the versioned catalog." },
     sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
   });
 }
@@ -140,31 +127,17 @@ function findEclipses(start: number, end: number, observer: AstronomyTypes.Obser
 }
 
 function findMeteorShowers(start: number, end: number, timeZone: string, placeId: string): SkyEvent[] {
-  const localStartYear = dateInZone(start, timeZone).year;
-  const localEndYear = dateInZone(end, timeZone).year;
-  const events: SkyEvent[] = [];
-  for (const shower of meteorCatalog.showers) {
-    for (let year = localStartYear - 1; year <= localEndYear + 1; year += 1) {
-      const activity = dateRangeOccurrence(shower.activityStart, shower.activityEnd, year);
-      const peakYear = shower.peakStart < shower.activityStart ? year + 1 : year;
-      const peak = dateRangeOccurrence(shower.peakStart, shower.peakEnd, peakYear);
-      if (activity.endDate < dateInZone(start, timeZone).date || activity.startDate > dateInZone(end, timeZone).date) continue;
-      events.push({
-        eventId: `meteor:${shower.id}:${year}`, name: shower.name, eventType: "meteor-shower",
-        activityCalendarDateWindow: activity, peakCalendarDateWindow: peak,
-        localVisibility: "not-evaluated",
-        description: `Approximate recurring activity and peak dates for ${year}, based on NASA's ${meteorCatalog.vintage} reference. Annual timing can shift; local radiant altitude and expected meteor count are not calculated.`,
-        source: { ...METEOR_SOURCE, url: shower.sourceUrl },
-      });
-    }
-  }
-  return events;
+  return findReviewedMeteorPeaks(start, end).map(row => ({
+    eventId: `meteor:${row.id}:2026`, name: row.name, eventType: "meteor-shower", peakUtc: row.peakUtc,
+    localVisibility: "not-evaluated", source: row.source,
+    description: "Year-specific NASA MEO forecast maximum for 2026; no activity-season interval is inferred. Forecast timing alone does not establish local visibility, a personal meteor count, or radiant model coverage.",
+  }));
 }
-
 function intervalVisibility(body: AstronomyTypes.Body, observer: AstronomyTypes.Observer, start: number, end: number): { status: SkyEvent["localVisibility"]; description: string } {
   let above = false; let below = false;
-  for (let time = start; time <= end; time += 10 * 60_000) {
-    if (bodyAltitude(body, observer, new Date(Math.min(time, end))) >= 0) above = true; else below = true;
+  for (let time = start; ; time = Math.min(time + 10 * 60_000, end)) {
+    if (bodyAltitude(body, observer, new Date(time)) >= 0) above = true; else below = true;
+    if (time === end) break;
   }
   if (!above) return { status: "not-visible", description: "The Moon remains below the geometric horizon for the modeled event window." };
   if (below) return { status: "partially-visible", description: "Only part of the modeled event window is above the geometric horizon." };
@@ -180,27 +153,6 @@ function contactVisibility(altitudes: number[]): SkyEvent["localVisibility"] {
 function bodyAltitude(body: AstronomyTypes.Body, observer: AstronomyTypes.Observer, date: Date): number {
   const coordinates = Astronomy.Equator(body, date, observer, true, true);
   return Astronomy.Horizon(date, observer, coordinates.ra, coordinates.dec).altitude;
-}
-
-function dateInZone(instant: number, timeZone: string): { date: string; year: number } {
-  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(instant)).map(({ type, value }) => [type, value]));
-  const year = Number(parts.year); const month = Number(parts.month); const day = Number(parts.day);
-  return { date: `${year.toString().padStart(4, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`, year };
-}
-
-function dateRangeOccurrence(startMonthDay: string, endMonthDay: string, year: number) {
-  const [startMonth, startDay] = startMonthDay.split("-").map(Number);
-  const [endMonth, endDay] = endMonthDay.split("-").map(Number);
-  const startDate = `${year}-${startMonthDay}`;
-  const endYear = endMonthDay < startMonthDay ? year + 1 : year;
-  const endDate = `${endYear}-${endMonthDay}`;
-  // Validate month/day and leap-year boundaries with UTC date round-tripping.
-  for (const date of [startDate, endDate]) {
-    const parsed = new Date(`${date}T00:00:00Z`);
-    if (!Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) throw new RangeError(`Invalid meteor catalog date: ${date}`);
-  }
-  void startMonth; void startDay; void endMonth; void endDay;
-  return { startDate, endDate };
 }
 
 function eventSortTime(event: SkyEvent): number {

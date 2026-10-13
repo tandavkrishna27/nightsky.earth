@@ -18,6 +18,11 @@ export function candidateEvidenceIsValid(value: unknown, allowNotCovered = false
     return result.availability.status === "partial" && result.candidates.length > 0 ||
         allowNotCovered && result.availability.status === "not-covered" && result.candidates.length === 0;
 }
+export function capacityCandidatePlaceId(defaultPlaceId: string, configured?: string): string {
+    const value = configured ?? defaultPlaceId;
+    assert.ok(/^place:v1:geonames:[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value.split(":").at(-1))), "Invalid candidate measurement named-place ID");
+    return value;
+}
 export function percentiles(samples: number[]) {
     assert.ok(samples.length && samples.every(n => Number.isFinite(n) && n >= 0));
     const sorted = [...samples].sort((a, b) => a - b);
@@ -27,6 +32,8 @@ export async function runCapacity() {
     assert.ok(process.argv.includes("--offline"), "Explicit --offline is required.");
     assert.ok(process.env.NIGHTSKY_GEONAMES_INDEX, "Explicit real gazetteer path required.");
     assert.ok(process.env.NIGHTSKY_CLIMATE_ARTIFACT && process.env.NIGHTSKY_CLIMATE_SHA256, "Explicit reviewed historical artifact and digest required.");
+    const placeId = "place:v1:geonames:1266425";
+    const candidatePlaceId = capacityCandidatePlaceId(placeId, process.env.NIGHTSKY_CAPACITY_CANDIDATE_PLACE_ID);
     let blockedExternalCalls = 0;
     const app = express();
     app.use(express.json({ limit: "32kb" }));
@@ -38,12 +45,11 @@ export async function runCapacity() {
     let id = 0, peakRssBytes = process.memoryUsage().rss;
     const sampler = setInterval(() => { peakRssBytes = Math.max(peakRssBytes, process.memoryUsage().rss); }, 10);
     const endpoint = `http://127.0.0.1:${address.port}/mcp`;
-    const placeId = "place:v1:geonames:1266425";
     const mix = [
         { name: "resolve_place", arguments: { placeQuery: "Kodaikanal, India" } },
         { name: "get_astronomy_window", arguments: { placeId, window: { startUtc: "2026-10-13T12:00:00Z", endUtc: "2026-10-14T12:00:00Z", timeZone: "Asia/Kolkata" } } },
         { name: "get_clear_sky_climatology", arguments: { placeId, month: 10 } },
-        ...(process.env.NIGHTSKY_OSM_CANDIDATE_INDEX ? [{ name: "search_observing_locations", arguments: { placeId } }] : []),
+        ...(process.env.NIGHTSKY_OSM_CANDIDATE_INDEX ? [{ name: "search_observing_locations", arguments: { placeId: candidatePlaceId } }] : []),
     ];
     const phases: unknown[] = [];
     let totalErrors = 0, requiredArtifactFailures = 0;
@@ -89,11 +95,11 @@ export async function runCapacity() {
             totalErrors += errors;
             phases.push({ phase, concurrency, requests: samples.length, durationMs, throughputPerSecond: samples.length * 1000 / durationMs, ...percentiles(samples), errors, statuses, rssBytes: process.memoryUsage().rss, peakRssBytes });
         }
-        const report = { environment: { platform: process.platform, node: process.version, cpuLimit: "externally enforced; inspect container", memoryLimit: "externally enforced; inspect container" }, scope: "local offline read-only MCP; real configured artifacts; not staging or host capacity approval", mix: mix.map(t => t.name), phases, blockedExternalCalls, peakRssBytes, totalErrors, requiredArtifactFailures };
+        const report = { environment: { platform: process.platform, node: process.version, cpuLimit: "externally enforced; inspect container", memoryLimit: "externally enforced; inspect container" }, scope: "local offline read-only MCP; real configured artifacts; not staging or host capacity approval", historicalPlaceId: placeId, candidatePlaceId, mix: mix.map(t => t.name), phases, blockedExternalCalls, peakRssBytes, totalErrors, requiredArtifactFailures };
         console.log(JSON.stringify(report, null, 2));
         assert.equal(blockedExternalCalls, 0, "Workload must never request external providers");
         assert.equal(totalErrors, 0, "Measurement contains unexpected errors; report is not passing evidence");
-        assert.equal(requiredArtifactFailures, 0, "Required real gazetteer/history evidence is unavailable");
+        assert.equal(requiredArtifactFailures, 0, "Required real gazetteer/history/candidate evidence is unavailable");
         return report;
     }
     finally {

@@ -25,3 +25,6 @@
 **/*.log
 **/.data/**
 **/.git/**
+
+# Retained legacy recurring dates have an unresolved source review; no runtime image.
+data/events/meteor-showers-v1.json

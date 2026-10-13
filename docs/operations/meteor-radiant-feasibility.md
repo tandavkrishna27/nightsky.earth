@@ -1,5 +1,7 @@
 # Meteor radiant source feasibility
 
+**October 14 update:** the active calendar has been replaced with the rights-reviewed original NASA MEO 2026 Table 3 forecast maxima (13 peak-only rows). The old recurring activity-date file is now a nonruntime audit artifact. See [events completion wave](events-completion-wave.md) for exact source, rights evidence, calendar/radiant coverage and independent lunar/solar horizon regressions. No activity-season widths or full-season drift were inferred; the historical source investigation below remains useful audit history, while its descriptions of the old active calendar are superseded.
+
 Research packet, 13 October 2026. This packet supports the full V1 meteor journey: reviewed shower timing, local radiant altitude, and Moon separation. It does not close Task 6 or silently reduce that journey. After root review, a small internal eight-shower catalog and pure evaluator were implemented. The planner now exposes selected-shower start/midpoint/end evaluations in `evidence.meteorRadiantSamples`. Full-season activity/date clearance and full meteor completion remain open.
 
 ## Finding

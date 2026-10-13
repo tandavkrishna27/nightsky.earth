@@ -106,11 +106,11 @@ def remote_state(root, plan, *, allow_unresolved=False):
     return path, value
 
 
-def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False):
+def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False, approved_plan=None):
     root = Path(root).resolve()
     started = time.monotonic()
     with pilot.writer_lock(root):
-        plan, ledger = pilot.load_state(root)
+        plan, ledger = pilot.load_state(root, approved_plan)
         chunk = next((row for row in plan['chunks'] if row['chunkId'] == chunk_id), None)
         if chunk is None: raise ValueError('Chunk outside reviewed manifest; review required.')
         completed = next((row for row in ledger['entries'] if row['chunkId'] == chunk_id),None)
@@ -133,9 +133,10 @@ def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False):
                     raise ValueError('Untracked source/checkpoint needs explicit review.')
         elif entry is not None:
             raise ValueError('Remote/local checkpoint disagreement; review required.')
-        inventory = pilot.check_inventory(root)
+        raw_limit=pilot.RAW_LIMIT if approved_plan is None else plan['limits']['retainedRawBytes']
+        inventory = pilot.check_inventory(root,raw_limit)
         # Reserve raw staging plus retained copy and bounded decoded/metadata overhead.
-        if inventory['retainedRawBytes'] + MAX_RAW_BYTES > pilot.RAW_LIMIT or inventory['scratchBytes'] + 2*MAX_RAW_BYTES + 8*1024*1024 > pilot.SCRATCH_LIMIT:
+        if inventory['retainedRawBytes'] + MAX_RAW_BYTES > raw_limit or inventory['scratchBytes'] + 2*MAX_RAW_BYTES + 8*1024*1024 > pilot.SCRATCH_LIMIT:
             raise ValueError('Insufficient retrieval budget; review required.')
         staging = pilot.owned(root, f'{chunk_id}.download')
         if staging.exists(): raise ValueError('Interrupted staging file needs explicit review.')
@@ -203,13 +204,13 @@ def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False):
             entry['stagedRawSha256']=pilot.digest(staging)
             remaining(started)
             save('importing')
-            importer=importer or pilot._checkpoint_existing_locked
+            importer=importer or (lambda *args, **kwargs: pilot._checkpoint_existing_locked(*args, **kwargs, approved_plan=approved_plan))
             result=importer(root,chunk_id,staging,deadline_started=started)
             remaining(started)
             result=dict(result, retrievalMode='cds-api',submitSeconds=entry.get('submitSeconds'),
                 queueSeconds=entry['queueSeconds'],downloadSeconds=entry['downloadSeconds'])
             # Publish retrieval timing into completed local ledger, if real importer.
-            _, updated=pilot.load_state(root)
+            _, updated=pilot.load_state(root, approved_plan)
             for row in updated['entries']:
                 if row['chunkId']==chunk_id: row.update(result)
             pilot.atomic_json(pilot.owned(root,'ledger.json'),updated)
@@ -232,11 +233,11 @@ def resume_known(root, chunk_id, adapter=None, *, importer=None):
     return _run_one(root,chunk_id,adapter,importer=importer,resume=True)
 
 
-def reconcile_local(root, chunk_id):
+def reconcile_local(root, chunk_id, *, approved_plan=None):
     """Resolve only a proven post-download local publication, without network."""
     root=Path(root).resolve()
     with pilot.writer_lock(root):
-        plan,ledger=pilot.load_state(root)
+        plan,ledger=pilot.load_state(root,approved_plan)
         path,remote=remote_state(root,plan,allow_unresolved=True)
         entry=next((row for row in remote['entries'] if row['chunkId']==chunk_id),None)
         local=next((row for row in ledger['entries'] if row['chunkId']==chunk_id),None)
