@@ -36,7 +36,7 @@ This audits every original heading against its actual acceptance criteria. User 
 
 ## Closure and sequence
 
-Tasks 3, 7A, 10A and 10B satisfy their original local criteria after final integrated verification. Do not hold them open for unrelated host/source work; do not close the source/host tasks merely because these local tasks pass. Final status promotion and exact current CI evidence are recorded in `implementation-status.md` and `ci-verification.md` after observation.
+Tasks 3, 7A, 10A and 10B satisfy their original local criteria after final integrated verification. Do not hold them open for unrelated host/source work; do not close the source/host tasks merely because these local tasks pass. All six CI jobs passed for `c20a38190375cb29169000774aa14d3d660a32c3` (run38471282719). These four headings are now Done: total12 Done/9 Partial/6 Not started. Exact evidence is in `ci-verification.md`; final documentation CI is observed separately.
 
 No additional executable local acceptance gap was found in the reviewed journey/resilience/operations lanes. Remaining rows require the named source, owner, hosted or real-world evidence, or are the separate website scope. They are held rather than silently removed from V1.
 

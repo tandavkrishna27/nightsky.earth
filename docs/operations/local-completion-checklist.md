@@ -4,7 +4,9 @@ Audit: 13 October 2026. Source of scope: execution-ready plan, dependency map an
 
 The original V1 breadth remains: global named-place resolution, source-linked candidate discovery, historical seasonal planning, meteor planning, and all fifteen journey rows. Regional/sample artifacts are evidence for their measured coverage only. Explicit partial results are required when data is absent; they do not authorize silently dropping an agreed journey or making a global claim.
 
-## All 27 task headings
+## Earlier checklist guidance — 13 October 2026
+
+The table below retains earlier acceptance guidance and artifact snapshots. Current closed/held criteria for all 27 headings are in [local-ticket-closure.md](local-ticket-closure.md), with final verification below.
 
 | Task | Current local evidence | Local closure still required | Separate hosted/owner/release gate |
 |---|---|---|---|
@@ -62,7 +64,7 @@ A task can close its **local** column only with reviewed implementation, named a
 
 ## Latest closure snapshot
 
-Current 27-heading status is **8 Done / 13 Partial / 6 Not started**; 19-group status is **4 Done / 12 Partial / 3 Not started**. Tasks 13/15 are Partial because their local drafts/review artifacts now exist. The implementation packets above retain dependency/acceptance guidance; items now implemented are reflected in the table. Latest final aggregate test totals and GitHub conclusions require the integration owner's exact-revision evidence. Global geographic coverage, full-season meteor planning, a real 30-year climate baseline and selected-host launch remain unfinished. See implementation-status.md and climate-tiles.md for the current v3 digest; old layouts remain immutable rollback evidence.
+Current 27-heading status is **12 Done / 9 Partial / 6 Not started**; 19-group status is **6 Done / 10 Partial / 3 Not started**. Tasks 13/15 are Partial because their local drafts/review artifacts now exist. The implementation packets above retain dependency/acceptance guidance; current implemented/held criteria are reflected in local-ticket-closure.md. Latest final aggregate test totals and GitHub conclusions require the integration owner's exact-revision evidence. Global geographic coverage, full-season meteor planning, a real 30-year climate baseline and selected-host launch remain unfinished. See implementation-status.md and climate-tiles.md for the current v3 digest; old layouts remain immutable rollback evidence.
 
 Historical verification snapshot, superseded by the 14 October wave and current CI record: Integration-owner final evidence: Windows 366 pass/one symlink skip out of 367; clean Linux 363 pass/four ignored-artifact skips out of 367, symlink passes; Python six OSM/33 ERA5 per platform; three TypeScript checks; eight review sets; actual v3 all-index capacity 60 requests/zero errors or external calls/511,082,496-byte peak RSS; pinned Docker nonroot runtime passes. GitHub CI/push and selected-host gates remain pending.
 
@@ -77,3 +79,7 @@ Implementation revision ac80891 is pushed and all six GitHub jobs passed. See [C
 ## Current data expansion — 14 October 2026
 
 See [data-expansion-wave.md](data-expansion-wave.md). Events now have thirteen original NASA maxima per year for 2025 and 2026, twelve bounded GMN radiants and corresponding planner aliases. Spots have a repeat-built 134-row Bhutan offline artifact with complete-way/relation limits and cross-platform bounded processing. History has grouped-year plans, source-bound monthly partitions, chronological schema2 publication and offline recovery, but no newly retrieved real data. Previous live source allowance is exhausted; grouped cost/format acceptance and a new bounded authorization precede retrieval. Original task counts remain unchanged; these deliveries advance partial tickets without closing their global/source/host gates.
+
+## Current offline readiness closure
+
+Tasks 3, 7A, 10A and 10B meet their original local conditions: all six CI jobs passed for `c20a38190375cb29169000774aa14d3d660a32c3` ([run](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38471282719)). See [all-heading audit](local-ticket-closure.md) for finished local criteria and exact held source/owner/host/release evidence. Counts: 12 Done/9 Partial/6 Not started. Historical downloads stay deferred; no deployment occurred.

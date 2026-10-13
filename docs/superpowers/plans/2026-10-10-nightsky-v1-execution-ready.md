@@ -126,13 +126,13 @@ For an evidence-based snapshot of implemented work and current checks, see [impl
 
 **Produces:** A pinned SDK/runtime decision and a minimal MCP endpoint proof. Prefer the current stable v2 SDK packages; do not use the legacy `@modelcontextprotocol/sdk` name without documenting why.
 
-- [ ] Verify the selected SDK v2 version’s Node requirement and Express 4 compatibility. Test `@modelcontextprotocol/server` with the official Express integration or the Node transport wrapper.
-- [ ] If using the Express adapter, test Host-header validation with a test hostname and reject unexpected Host values. Recheck the exact allowlist and reverse-proxy configuration after Task 0F selects staging and production hostnames.
-- [ ] Test Zod compatibility without changing `shared/schema.ts`: update Zod to a compatible 3.25+ release and import MCP schemas from `zod/v4`, or document and test a smaller equivalent boundary. Do not migrate existing database schemas unless the compatibility test proves it necessary.
-- [ ] Exercise one `initialize`, `tools/list`, valid `tools/call`, invalid input, and concurrent stateless requests against the selected transport.
-- [ ] Confirm the Express JSON/urlencoded middleware in `server/index.ts` does not consume `/mcp` request bodies before the SDK handles them. Mount the MCP route before the parser or explicitly bypass the parser for that route.
-- [ ] Record package versions, Node version, transport mode, route-parser handling, and the reason for the chosen integration in `docs/operations/mcp-sdk-compatibility.md`.
-- [ ] Pass when `tests/mcp/transport-smoke.test.ts` passes and MCP Inspector can initialize and list the smoke tool at the local route without affecting `/api/news` or the website. Do not block this local proof on production-host or recurring-budget selection.
+- [x] Verify the selected SDK v2 version’s Node requirement and Express 4 compatibility. Test `@modelcontextprotocol/server` with the official Express integration or the Node transport wrapper.
+- [x] If using the Express adapter, test Host-header validation with a test hostname and reject unexpected Host values. Recheck the exact allowlist and reverse-proxy configuration after Task 0F selects staging and production hostnames.
+- [x] Test Zod compatibility without changing `shared/schema.ts`: update Zod to a compatible 3.25+ release and import MCP schemas from `zod/v4`, or document and test a smaller equivalent boundary. Do not migrate existing database schemas unless the compatibility test proves it necessary.
+- [x] Exercise one `initialize`, `tools/list`, valid `tools/call`, invalid input, and concurrent stateless requests against the selected transport.
+- [x] Confirm the Express JSON/urlencoded middleware in `server/index.ts` does not consume `/mcp` request bodies before the SDK handles them. Mount the MCP route before the parser or explicitly bypass the parser for that route.
+- [x] Record package versions, Node version, transport mode, route-parser handling, and the reason for the chosen integration in `docs/operations/mcp-sdk-compatibility.md`.
+- [x] Pass when `tests/mcp/transport-smoke.test.ts` passes and MCP Inspector can initialize and list the smoke tool at the local route without affecting `/api/news` or the website. Do not block this local proof on production-host or recurring-budget selection.
 
 ### Task 2: Define stable structured contracts and the offline test harness
 
@@ -160,23 +160,25 @@ Acceptance evidence: independent contract audit, Windows 394 passed/one permissi
 
 ### Task 3: Implement the read-only MCP endpoint and tool registry
 
+Closure 14 October 2026: original local acceptance independently audited and verified by current transport/Inspector, Windows/Linux suites and all six CI jobs at c20a381 (run38471282719). Source and hosted requirements remain in their owning tasks.
+
 **Files:** Create `server/mcp/index.ts`, `server/mcp/registerTools.ts`, and `server/mcp/route.ts`; modify `server/index.ts` and `server/routes.ts` only for mounting; create `tests/mcp/initialize.test.ts`, `tool-metadata.test.ts`, and `route-body.test.ts`.
 
 **Consumes:** Task 1 transport decision and Task 2 schemas.
 
 **Produces:** `createNightSkyMcpServer(dependencies)` and `mountMcpRoute(app, dependencies)`; one Streamable HTTP endpoint at `/mcp`, a written data-flow/logging contract, and baseline abuse controls before any remote client is allowed to call it.
 
-- [ ] Ensure a request rejected by the rate-limit check never consumes an `activeRequests` slot, and every slot increment for an admitted request is released when its handler settles, including thrown-handler paths. Add a regression test proving rate-limited requests do not cause a later request to receive a false concurrency rejection.
-- [ ] Implement the registry boundary and smoke-test transport. Do not expose placeholder domain tools. Add each named tool in its owning task only after its handler and output schema pass.
-- [ ] For each registered tool, define Zod v4 `inputSchema` and `outputSchema`, a useful accurate description, explicit boolean `readOnlyHint`, `destructiveHint` and `openWorldHint`, and a brief rationale for the `openWorldHint` value. Do not determine `openWorldHint` only from whether the handler calls an external provider.
-- [ ] Set shared server instructions with the cross-tool limits in the first 512 characters: candidate places do not prove access/safety, history is not a forecast, forecast sources stay separate, missing inputs must remain unknown rather than guessed, and user-supplied coordinates must never be converted into a place name; ask for a named destination. Tell the assistant to set `useApproximateHostLocation` only when the user explicitly requests “near me” or their current area; otherwise it must provide a named destination. The server ignores host-location metadata unless this flag is true.
-- [ ] Return validated `structuredContent` plus concise text for the model. Test that output schemas validate the returned data and tool metadata contains no placeholder description or unsupported claim.
-- [ ] Represent valid-but-incomplete provider outcomes in structured results with an availability state and reason. Use protocol errors for invalid input or server faults; never include stack traces or secrets in user-visible error text.
-- [ ] Add route tests for `initialize`, `tools/list`, valid call, malformed JSON-RPC, invalid arguments, body-parser bypass, unexpected Host headers, required boolean annotations on every tool, and error responses without stack traces. Assert the `search_sky_events` annotation matches the live-JPL setting frozen in `tool-contracts.md`.
-- [ ] Define and test minimum exposure controls: source-specific timeouts, a shared cache interface with provider-approved TTLs, per-provider/global request and cost caps, bounded concurrency, and upstream backoff. Start with localhost-only access; do not expose staging until these controls and redacted logging are active.
-- [ ] Document the data-flow/log policy: by default, do not log full `placeQuery`, input arguments, request `_meta`, host location fields, anonymized subject/session IDs, or exact coordinates. For “near me,” the assistant must set `useApproximateHostLocation: true`; only then may the resolver use a documented host location hint in memory, return a named place, and discard the hint. If the flag is absent, ignore the hint. Use OpenAI's documented `openai/subject` only for short-lived per-user rate-limit counters on that route; do not retain raw identifiers in logs or build query histories. State operational-log and rate-counter retention; include source attribution in both `structuredContent` and concise text; maintain the complete host-metadata/upstream recipient list for the privacy page.
-- [ ] Keep `/api/news`, dynamic sitemap, Vite development middleware, and static website serving functional.
-- [ ] Pass when `npm test` passes route tests and MCP Inspector can list/call the smoke tool; malformed or oversized requests are bounded and safe, all annotations are explicit, and the server instructions begin with the required cross-tool limits.
+- [x] Ensure a request rejected by the rate-limit check never consumes an `activeRequests` slot, and every slot increment for an admitted request is released when its handler settles, including thrown-handler paths. Add a regression test proving rate-limited requests do not cause a later request to receive a false concurrency rejection.
+- [x] Implement the registry boundary and smoke-test transport. Do not expose placeholder domain tools. Add each named tool in its owning task only after its handler and output schema pass.
+- [x] For each registered tool, define Zod v4 `inputSchema` and `outputSchema`, a useful accurate description, explicit boolean `readOnlyHint`, `destructiveHint` and `openWorldHint`, and a brief rationale for the `openWorldHint` value. Do not determine `openWorldHint` only from whether the handler calls an external provider.
+- [x] Set shared server instructions with the cross-tool limits in the first 512 characters: candidate places do not prove access/safety, history is not a forecast, forecast sources stay separate, missing inputs must remain unknown rather than guessed, and user-supplied coordinates must never be converted into a place name; ask for a named destination. Tell the assistant to set `useApproximateHostLocation` only when the user explicitly requests “near me” or their current area; otherwise it must provide a named destination. The server ignores host-location metadata unless this flag is true.
+- [x] Return validated `structuredContent` plus concise text for the model. Test that output schemas validate the returned data and tool metadata contains no placeholder description or unsupported claim.
+- [x] Represent valid-but-incomplete provider outcomes in structured results with an availability state and reason. Use protocol errors for invalid input or server faults; never include stack traces or secrets in user-visible error text.
+- [x] Add route tests for `initialize`, `tools/list`, valid call, malformed JSON-RPC, invalid arguments, body-parser bypass, unexpected Host headers, required boolean annotations on every tool, and error responses without stack traces. Assert the `search_sky_events` annotation matches the live-JPL setting frozen in `tool-contracts.md`.
+- [x] Define and test minimum exposure controls: source-specific timeouts, a shared cache interface with provider-approved TTLs, per-provider/global request and cost caps, bounded concurrency, and upstream backoff. Start with localhost-only access; do not expose staging until these controls and redacted logging are active.
+- [x] Document the data-flow/log policy: by default, do not log full `placeQuery`, input arguments, request `_meta`, host location fields, anonymized subject/session IDs, or exact coordinates. For “near me,” the assistant must set `useApproximateHostLocation: true`; only then may the resolver use a documented host location hint in memory, return a named place, and discard the hint. If the flag is absent, ignore the hint. Use OpenAI's documented `openai/subject` only for short-lived per-user rate-limit counters on that route; do not retain raw identifiers in logs or build query histories. State operational-log and rate-counter retention; include source attribution in both `structuredContent` and concise text; maintain the complete host-metadata/upstream recipient list for the privacy page.
+- [x] Keep `/api/news`, dynamic sitemap, Vite development middleware, and static website serving functional.
+- [x] Pass when `npm test` passes route tests and MCP Inspector can list/call the smoke tool; malformed or oversized requests are bounded and safe, all annotations are explicit, and the server instructions begin with the required cross-tool limits.
 
 ### Task 3B: Check the hosted OpenAI connection early
 
@@ -213,10 +215,10 @@ Acceptance evidence: independent contract audit, Windows 394 passed/one permissi
 
 **Produces:** `resolvePlace(input): Promise<ResolvePlaceResult>`, `resolveTimeZone(latitude, longitude): IanaTimeZoneResult`, and the MCP tool `resolve_place`.
 
-- [ ] Test `returnsUniquePlaceMatch`, `returnsAmbiguousMatchesWithoutChoosing`, `returnsNoMatch`, `requiresCountryQualifierWhenNeeded`, `matchesNonLatinAliasesWhenAvailable`, `rejectsCoordinateTextOnEveryHost`, `resolvesExplicitHostHintToNamedPlace`, `returnsLocationUnavailableWhenHintAbsent`, `ignoresHostHintWithoutFlag`, `rejectsMalformedGazetteerRow`, `resolvesIanaZoneAtBoundary`, `resolvesZoneAcrossDateLine`, `rejectsOutOfRangeCoordinates`, `returnsStalePlaceIdWithReresolvePath`, and `formatsLocalTimeAcrossDst`.
-- [ ] Build a versioned gazetteer/time-zone refresh process with source, vintage, attribution and error reporting. Do not call public Nominatim once per user keystroke. Make `resolve_place` return the `placeId` used by subsequent tools; do not repeat the free-text location on plan, forecast, astronomy, or candidate-search calls.
-- [ ] Use namespaced place IDs tied to source identity and index vintage. On retired or incompatible IDs, return `stale`/`not-found` plus a re-resolve path. Preserve ambiguity for clarification; keep coordinates in server-private resolution records and expose them only if a later user-facing task demonstrably needs them.
-- [ ] Record time-zone boundary data and its license/attribution obligations in the source register. Pass when `npm test` passes the place/time cases and no failed time-zone lookup silently falls back to UTC.
+- [x] Test `returnsUniquePlaceMatch`, `returnsAmbiguousMatchesWithoutChoosing`, `returnsNoMatch`, `requiresCountryQualifierWhenNeeded`, `matchesNonLatinAliasesWhenAvailable`, `rejectsCoordinateTextOnEveryHost`, `resolvesExplicitHostHintToNamedPlace`, `returnsLocationUnavailableWhenHintAbsent`, `ignoresHostHintWithoutFlag`, `rejectsMalformedGazetteerRow`, `resolvesIanaZoneAtBoundary`, `resolvesZoneAcrossDateLine`, `rejectsOutOfRangeCoordinates`, `returnsStalePlaceIdWithReresolvePath`, and `formatsLocalTimeAcrossDst`.
+- [x] Build a versioned gazetteer/time-zone refresh process with source, vintage, attribution and error reporting. Do not call public Nominatim once per user keystroke. Make `resolve_place` return the `placeId` used by subsequent tools; do not repeat the free-text location on plan, forecast, astronomy, or candidate-search calls.
+- [x] Use namespaced place IDs tied to source identity and index vintage. On retired or incompatible IDs, return `stale`/`not-found` plus a re-resolve path. Preserve ambiguity for clarification; keep coordinates in server-private resolution records and expose them only if a later user-facing task demonstrably needs them.
+- [x] Record time-zone boundary data and its license/attribution obligations in the source register. Pass when `npm test` passes the place/time cases and no failed time-zone lookup silently falls back to UTC.
 
 ### Task 4B: Scan the real OpenAI draft's location contract before adding the full tool set
 
@@ -267,18 +269,20 @@ Local progress 14 October 2026: thirteen original NASA maxima per year for 2025/
 
 ### Task 7A: Implement the short-range weather adapter
 
+Closure 14 October 2026: original local acceptance independently audited and verified by current transport/Inspector, Windows/Linux suites and all six CI jobs at c20a381 (run38471282719). Source and hosted requirements remain in their owning tasks. `jittersScheduledRefreshes` is explicitly inapplicable: there is no scheduled-refresh daemon; demand-only expiry/304 behavior is tested. Introduce jitter tests if scheduling is later added.
+
 **Files:** Create `server/providers/weather/types.ts`, `server/providers/weather/metNorway.ts`, and fixture tests under `tests/providers/weather/`.
 
 **Consumes:** Task 0D source sample and Task 2 provenance/result contracts.
 
 **Produces:** `WeatherProvider.getForecast(place, window)` with separate source/model records and the MCP tool `get_night_conditions`.
 
-- [ ] Test MET parsing with `mapsCloudAndWindFieldsWithUnits`, `keepsUnavailableFieldsMissing`, `preservesIssueAndValidTimes`, `marksStaleForecast`, `honorsExpiresBeforeRefresh`, `usesLastModifiedForConditionalFetch`, `roundsCoordinatesBeforeCacheAndRequest`, `returnsPartialOn429`, `returnsPartialOnTimeout`, `warnsOnDeprecated203Product`, `staysBelowApplicationWide20RequestsPerSecond`, `jittersScheduledRefreshes`, `rejectsMalformedPayload`, and `doesNotInventDewPoint`.
-- [ ] Send the required identifying User-Agent; honor `Expires` before refreshing and use the stored `Last-Modified` value with `If-Modified-Since`; round coordinates to the privacy-approved precision, never exceeding four decimals; use the shared cache with provider-approved TTLs. Enforce MET's 20 requests/second ceiling across the whole application, add jitter to scheduled refreshes, and surface HTTP 203 as a deprecation warning. Keep forecast source/model records separate. Do not call MET and ECMWF ensemble outputs independent confirmations where they share model guidance.
-- [ ] Add NightSky's planning value to the result: summarize each source's valid forecast steps inside the requested local astronomical-darkness interval, with Moon context and missing fields, while preserving the original source-specific forecast records. Do not return this tool as an unmodified third-party payload.
-- [ ] Test `returnsOutOfHorizonWithoutForecast` and confirm `get_night_conditions` indicates `out-of-horizon` instead of extrapolating weather.
-- [ ] Pass when `npm test` passes weather fixtures without network access and a real MCP call includes source, provider issue/update time when available, valid times, units, and missing fields. Include a retrieval/check time only when source timestamps do not give the user a usable freshness signal, and document why it is needed.
-- [ ] Keep NOAA GEFS a conditional enhancement behind Task 0D's decoder, time-alignment, operations, and budget criteria. If it is not ready, report the MET forecast and the unavailable second model honestly.
+- [x] Test MET parsing with `mapsCloudAndWindFieldsWithUnits`, `keepsUnavailableFieldsMissing`, `preservesIssueAndValidTimes`, `marksStaleForecast`, `honorsExpiresBeforeRefresh`, `usesLastModifiedForConditionalFetch`, `roundsCoordinatesBeforeCacheAndRequest`, `returnsPartialOn429`, `returnsPartialOnTimeout`, `warnsOnDeprecated203Product`, `staysBelowApplicationWide20RequestsPerSecond`, `jittersScheduledRefreshes`, `rejectsMalformedPayload`, and `doesNotInventDewPoint`.
+- [x] Send the required identifying User-Agent; honor `Expires` before refreshing and use the stored `Last-Modified` value with `If-Modified-Since`; round coordinates to the privacy-approved precision, never exceeding four decimals; use the shared cache with provider-approved TTLs. Enforce MET's 20 requests/second ceiling across the whole application, add jitter to scheduled refreshes, and surface HTTP 203 as a deprecation warning. Keep forecast source/model records separate. Do not call MET and ECMWF ensemble outputs independent confirmations where they share model guidance.
+- [x] Add NightSky's planning value to the result: summarize each source's valid forecast steps inside the requested local astronomical-darkness interval, with Moon context and missing fields, while preserving the original source-specific forecast records. Do not return this tool as an unmodified third-party payload.
+- [x] Test `returnsOutOfHorizonWithoutForecast` and confirm `get_night_conditions` indicates `out-of-horizon` instead of extrapolating weather.
+- [x] Pass when `npm test` passes weather fixtures without network access and a real MCP call includes source, provider issue/update time when available, valid times, units, and missing fields. Include a retrieval/check time only when source timestamps do not give the user a usable freshness signal, and document why it is needed.
+- [x] Keep NOAA GEFS a conditional enhancement behind Task 0D's decoder, time-alignment, operations, and budget criteria. If it is not ready, report the MET forecast and the unavailable second model honestly.
 
 ### Task 7B: Implement the short-horizon aurora adapter
 
@@ -288,9 +292,9 @@ Local progress 14 October 2026: thirteen original NASA maxima per year for 2025/
 
 **Produces:** `getAuroraOutlook(place, window)` as a time-bounded space-weather outlook kept separate from cloud and darkness conditions; register `get_aurora_outlook`.
 
-- [ ] Test `returnsCurrentOutlookWithLatitudeContext`, `marksOutlookStale`, `reportsCoverageAtRequestedLatitude`, and `returnsUnavailableOnTimeout`; do not assume aurora is categorically impossible at low latitudes.
-- [ ] Preserve product issue time, valid interval, latitude/visibility limits, and source link. Explain the outlook for the user's selected location and align it to the planned night in Task 10A; keep cloud, darkness and Moon as separate evidence. Do not convert geomagnetic activity into a guaranteed sighting or act as a raw third-party pass-through.
-- [ ] Pass when `npm test` passes the named aurora cases and an MCP call shows the valid outlook and its limitations independently from weather.
+- [x] Test `returnsCurrentOutlookWithLatitudeContext`, `marksOutlookStale`, `reportsCoverageAtRequestedLatitude`, and `returnsUnavailableOnTimeout`; do not assume aurora is categorically impossible at low latitudes.
+- [x] Preserve product issue time, valid interval, latitude/visibility limits, and source link. Explain the outlook for the user's selected location and align it to the planned night in Task 10A; keep cloud, darkness and Moon as separate evidence. Do not convert geomagnetic activity into a guaranteed sighting or act as a raw third-party pass-through.
+- [x] Pass when `npm test` passes the named aurora cases and an MCP call shows the valid outlook and its limitations independently from weather.
 
 
 ### Task 8: Build source-linked text candidate-place discovery
@@ -332,6 +336,8 @@ Local progress 14 October 2026: grouped-year decoder/partitions and chronologica
 
 ### Task 10A: Implement activity-aware plan orchestration
 
+Closure 14 October 2026: original local acceptance independently audited and verified by current transport/Inspector, Windows/Linux suites and all six CI jobs at c20a381 (run38471282719). Source and hosted requirements remain in their owning tasks.
+
 **Files:** Create `server/nightsky/planner.ts`, `tests/nightsky/planner.test.ts`, and `tests/mcp/planning-e2e.test.ts`.
 
 **Consumes:** Completed Tasks 4–7A and the supported portion of Task 6. Task 7B aurora is optional. Tasks 8 and 9 (candidate places and climatology) are optional integrations and are not prerequisites. The planner must return a useful result when an optional service is unavailable, out of coverage, or not implemented.
@@ -346,15 +352,17 @@ Local progress 14 October 2026: grouped-year decoder/partitions and chronologica
 
 ### Task 10B: Implement side-by-side option comparison
 
+Closure 14 October 2026: original local acceptance independently audited and verified by current transport/Inspector, Windows/Linux suites and all six CI jobs at c20a381 (run38471282719). Source and hosted requirements remain in their owning tasks.
+
 **Files:** Create `server/nightsky/compare.ts` and `tests/nightsky/compare.test.ts`.
 
 **Consumes:** Task 10A `PlanResult` and the provider comparison contract from Task 2.
 
 **Produces:** `compareObservingOptions(input): Promise<CompareOptionsResult>` for up to five user-selected place/date options; register `compare_observing_options`.
 
-- [ ] Test `comparesSourcesWithoutBlending`, `keepsOptionWithMissingForecast`, `explainsActivitySpecificTradeoffs`, `preservesSourceLinksAndLocalTimes`, and `comparesFiveOptionsWithoutBlending`.
-- [ ] Keep all selected options in the result, including options with missing data. Do not create an unexplained winner or universal score.
-- [ ] Pass when `npm test` passes comparison cases and conflicts, missing providers, differing valid times and activity-specific priorities remain visible in the deterministic MCP result.
+- [x] Test `comparesSourcesWithoutBlending`, `keepsOptionWithMissingForecast`, `explainsActivitySpecificTradeoffs`, `preservesSourceLinksAndLocalTimes`, and `comparesFiveOptionsWithoutBlending`.
+- [x] Keep all selected options in the result, including options with missing data. Do not create an unexplained winner or universal score.
+- [x] Pass when `npm test` passes comparison cases and conflicts, missing providers, differing valid times and activity-specific priorities remain visible in the deterministic MCP result.
 
 ### Task 11A: Add cited sky-learning and astrophotography guidance
 
