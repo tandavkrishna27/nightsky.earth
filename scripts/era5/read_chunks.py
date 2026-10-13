@@ -27,6 +27,21 @@ def digest(path):
     return hasher.hexdigest()
 
 def read_chunk(path, decoded_limit=MAX_DECODED_BYTES):
+    yield from _read_chunk(path, decoded_limit, MAX_HOURS)
+
+def read_grouped_chunk(path):
+    """Explicit grouped policy: at most 30 same-month years, ten cells, 32 MiB.
+
+    Does not widen the monthly read_chunk/export_chunk contract.
+    """
+    # Freeze the reviewed modern converter shape rather than infer provenance
+    # from extra variables, archives, or an unexpected ensemble layout.
+    with netCDF4.Dataset(path, "r") as ds:
+        if set(ds.variables)!={"tcc","valid_time","latitude","longitude","number","expver"} or ds.variables['number'].dimensions!=():
+            raise ValueError("Unreviewed grouped source variables/member layout.")
+    yield from _read_chunk(path, MAX_DECODED_BYTES, 30 * 31 * 24)
+
+def _read_chunk(path, decoded_limit, max_hours):
     path = Path(path)
     if not 0 < decoded_limit <= MAX_DECODED_BYTES or path.stat().st_size > MAX_RAW_BYTES:
         raise ValueError("Raw or decoded chunk bound exceeded.")
@@ -39,7 +54,7 @@ def read_chunk(path, decoded_limit=MAX_DECODED_BYTES):
         t, lat, lon, cloud = (ds.variables[name] for name in [time_name, "latitude", "longitude", "tcc"])
         if cloud.dimensions != (time_name, "latitude", "longitude") or t.dimensions != (time_name,) or lat.dimensions != ("latitude",) or lon.dimensions != ("longitude",):
             raise ValueError("Unsupported source dimensions; review before decoding.")
-        if not 1 <= len(t) <= MAX_HOURS or not 1 <= len(lat) * len(lon) <= MAX_CELLS:
+        if not 1 <= len(t) <= max_hours or not 1 <= len(lat) * len(lon) <= MAX_CELLS:
             raise ValueError("Chunk exceeds hourly/cell bounds.")
         if cloud.size * 8 + (len(t) + len(lat) + len(lon)) * 8 > decoded_limit:
             raise ValueError("Decoded chunk exceeds byte bound.")
@@ -51,7 +66,7 @@ def read_chunk(path, decoded_limit=MAX_DECODED_BYTES):
         if ds.variables["number"].size != 1 or int(ds.variables["number"][:]) != 0:
             raise ValueError("Only deterministic ERA5 member 0 is supported.")
         expver = ds.variables["expver"]
-        if expver.dimensions not in {(), (time_name,)} or expver.size > MAX_HOURS:
+        if expver.dimensions not in {(), (time_name,)} or expver.size > max_hours:
             raise ValueError("Unsupported source revision dimensions.")
         revisions = sorted(set(str(value) for value in np.asarray(expver[:]).reshape(-1)))
         if not revisions or any(not revision.strip() or len(revision) > 16 for revision in revisions):

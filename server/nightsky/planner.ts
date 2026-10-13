@@ -221,7 +221,7 @@ function settled<T>(callback: () => Promise<T>): Promise<T | Error> { return cal
 function isError(value: unknown): value is Error { return value instanceof Error; }
 function conciseAssessment(value: string): string { return value.length <= 500 ? value : `${value.slice(0, 410)}… Full exact values and source records are retained in structured evidence.`; }
 function meteorCode(query: string): string | undefined {
-  const aliases: Record<string, string> = { per: "PER", perseids: "PER", gem: "GEM", geminids: "GEM", ori: "ORI", orionids: "ORI", eta: "ETA", "eta aquariids": "ETA", lyr: "LYR", lyrids: "LYR", sda: "SDA", "southern delta aquariids": "SDA", "delta aquariids": "SDA", qua: "QUA", quadrantids: "QUA", leo: "LEO", leonids: "LEO" };
+  const aliases: Record<string, string> = { per: "PER", perseids: "PER", gem: "GEM", geminids: "GEM", ori: "ORI", orionids: "ORI", eta: "ETA", "eta aquariids": "ETA", lyr: "LYR", lyrids: "LYR", sda: "SDA", "southern delta aquariids": "SDA", "delta aquariids": "SDA", qua: "QUA", quadrantids: "QUA", leo: "LEO", leonids: "LEO", cap: "CAP", "alpha capricornids": "CAP", capricornids: "CAP", nta: "NTA", "northern taurids": "NTA", sta: "STA", "southern taurids": "STA", hyd: "HYD", "sigma hydrids": "HYD" };
   const key = query.trim().toLowerCase().replaceAll("-", " ").replace(/\s+(?:meteor\s+)?shower$/, "");
   return Object.hasOwn(aliases, key) ? aliases[key] : undefined;
 }

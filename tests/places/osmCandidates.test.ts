@@ -100,3 +100,21 @@ test("treatsOsmNamesAsUntrustedData", async () => {
   assert.ok(!/[\u0000-\u001f\u007f]/.test(result.candidates[0]!.name));
   assert.match(result.candidates[0]!.caveats.join(" "), /untrusted OSM data/i);
 });
+
+test("reviewed offline Bhutan artifact retains partial coverage and unknown access", async () => {
+  const { fileURLToPath } = await import('node:url');
+  const { loadOsmCandidateIndex } = await import('../../server/places/osmCandidates');
+  const path = fileURLToPath(new URL('../osm/fixtures/real-offline-bhutan/candidates.json', import.meta.url));
+  const offline = await loadOsmCandidateIndex(path, {maxArtifactBytes: 4*1024*1024, expectedSha256: 'd800a935abd54b8cda8e98d02c7e2bce50c7ca6f8e469cadfc735289704f41ff'});
+  assert.equal(offline!.candidates.length, 134);
+  for (const [latitude,longitude] of [[27.4661,89.6419],[27.591,89.877]]) {
+    const place={placeId:'place:v1:geonames:1252416',latitude,longitude};
+    const result=await searchObservingLocations({placeId:place.placeId,radiusKm:50,limit:10},{index:offline,place});
+    assert.equal(result.availability.status,'partial');
+    assert.ok(result.candidates.length > 0);
+    assert.match(result.coverage,/complete ways.*relations.*excluded/i);
+    assert.ok(result.candidates.every(row=>row.accessEvidence.status==='unknown'));
+    assert.ok(result.candidates.every((row,i)=>i===0 || row.distanceKm! >= result.candidates[i-1]!.distanceKm!));
+    for (const way of result.candidates.filter(row=>row.placeId.includes(':way:'))) assert.match(way.caveats.join(' '),/entrance is unknown/);
+  }
+});

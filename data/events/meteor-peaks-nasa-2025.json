@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "vintage": "NASA-MEO-2025-issued-2024-10-18",
+  "reviewedAt": "2026-10-13T20:12:13Z",
+  "sourceUrl": "https://ntrs.nasa.gov/api/citations/20240012381/downloads/LEO_Forecast_2025.pdf",
+  "rightsEvidenceUrl": "https://ntrs.nasa.gov/citations/20240012381",
+  "rightsStatement": "Work of the US Gov. Public Use Permitted.",
+  "table": "Table 3, page 9",
+  "coverage": "Thirteen original 2025 forecast maxima only; no activity seasons, rates, or recurring years. Radiant support is separate.",
+  "peaks": [
+    {
+      "code": "QUA",
+      "id": "quadrantids",
+      "name": "Quadrantids",
+      "peakUtc": "2025-01-03T12:27:00Z"
+    },
+    {
+      "code": "ETA",
+      "id": "eta-aquariids",
+      "name": "Eta Aquariids",
+      "peakUtc": "2025-05-06T10:16:00Z"
+    },
+    {
+      "code": "ZPE",
+      "id": "daytime-zeta-perseids",
+      "name": "Daytime Zeta Perseids",
+      "peakUtc": "2025-06-03T00:34:00Z"
+    },
+    {
+      "code": "ARI",
+      "id": "daytime-arietids",
+      "name": "Daytime Arietids",
+      "peakUtc": "2025-06-09T19:49:00Z"
+    },
+    {
+      "code": "SSG",
+      "id": "southern-mu-sagittariids",
+      "name": "Southern Mu Sagittariids",
+      "peakUtc": "2025-06-19T21:50:00Z"
+    },
+    {
+      "code": "SDA",
+      "id": "southern-delta-aquariids",
+      "name": "Southern Delta Aquariids",
+      "peakUtc": "2025-07-29T18:26:00Z"
+    },
+    {
+      "code": "CAP",
+      "id": "alpha-capricornids",
+      "name": "Alpha Capricornids",
+      "peakUtc": "2025-07-30T22:16:00Z"
+    },
+    {
+      "code": "PER",
+      "id": "perseids",
+      "name": "Perseids",
+      "peakUtc": "2025-08-13T08:01:00Z"
+    },
+    {
+      "code": "DSX",
+      "id": "daytime-sextantids",
+      "name": "Daytime Sextantids",
+      "peakUtc": "2025-10-01T17:25:00Z"
+    },
+    {
+      "code": "DRA",
+      "id": "october-draconids",
+      "name": "October Draconids",
+      "peakUtc": "2025-10-08T15:46:00Z"
+    },
+    {
+      "code": "AND",
+      "id": "andromedids",
+      "name": "Andromedids",
+      "peakUtc": "2025-12-03T09:16:00Z"
+    },
+    {
+      "code": "GEM",
+      "id": "geminids",
+      "name": "Geminids",
+      "peakUtc": "2025-12-14T06:55:00Z"
+    },
+    {
+      "code": "URS",
+      "id": "ursids",
+      "name": "Ursids",
+      "peakUtc": "2025-12-22T09:44:00Z"
+    }
+  ]
+}

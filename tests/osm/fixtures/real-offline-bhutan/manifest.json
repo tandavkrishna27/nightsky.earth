@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "reason": null,
+  "exitCode": 0,
+  "elapsedSeconds": 46.749,
+  "peakRssBytes": 179777536,
+  "wallLimitSeconds": 60,
+  "rssLimitMiB": 256,
+  "incompleteWays": 0,
+  "relationsPolicy": "excluded",
+  "wayPointPolicy": "mean complete vertices, closing vertex removed",
+  "candidateCount": 134,
+  "outputBytes": 20933,
+  "outputSha256": "d800a935abd54b8cda8e98d02c7e2bce50c7ca6f8e469cadfc735289704f41ff",
+  "sourceUrl": "https://download.geofabrik.de/asia/bhutan-261012.osm.pbf",
+  "sourcePage": "https://download.geofabrik.de/asia/bhutan.html",
+  "inputBytes": 23618779,
+  "inputSha256": "6728f46b23ab722d9713af1b4a089d7c62290d9b28baa1fcb4348cd4afd1ba87",
+  "retrievedAt": "2026-10-13T20:11:46.639424+00:00",
+  "downloadSeconds": 3.926,
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "vintage": "2026-10-12T20:21:35Z"
+}

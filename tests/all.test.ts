@@ -66,3 +66,4 @@ import "./osm/regionalWave.test.ts";
 import "./providers/climate/history-builder.test.ts";
 import "./events/meteorPeaks.test.ts";
 import "./mcp/regional-data-journey.test.ts";
+import "./providers/climate/grouped-history-builder.test.ts";

@@ -106,7 +106,7 @@ def remote_state(root, plan, *, allow_unresolved=False):
     return path, value
 
 
-def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False, approved_plan=None):
+def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False, approved_plan=None, verifier=None, maximum_submissions=None, additional_scratch_bytes=0):
     root = Path(root).resolve()
     started = time.monotonic()
     with pilot.writer_lock(root):
@@ -115,9 +115,15 @@ def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False, appro
         if chunk is None: raise ValueError('Chunk outside reviewed manifest; review required.')
         completed = next((row for row in ledger['entries'] if row['chunkId'] == chunk_id),None)
         if completed:
-            pilot.verify_entry(root,completed)
+            (verifier or pilot.verify_entry)(root,completed)
             return completed
         path, remote = remote_state(root,plan,allow_unresolved=resume)
+        if maximum_submissions is not None and (type(maximum_submissions) is not int or not 1<=maximum_submissions<=4):
+            raise ValueError('Grouped wave submission bound rejected.')
+        if not resume and maximum_submissions is not None and len(remote['entries'])>=maximum_submissions:
+            raise ValueError('Grouped wave submission allowance exhausted; review required.')
+        if type(additional_scratch_bytes) is not int or not 0<=additional_scratch_bytes<=244*1024*1024:
+            raise ValueError('Additional grouped scratch reservation rejected.')
         entry=next((row for row in remote['entries'] if row['chunkId']==chunk_id),None)
         if resume:
             unresolved=[row for row in remote['entries'] if row['state']!='complete']
@@ -136,7 +142,7 @@ def _run_one(root, chunk_id, adapter=None, *, importer=None, resume=False, appro
         raw_limit=pilot.RAW_LIMIT if approved_plan is None else plan['limits']['retainedRawBytes']
         inventory = pilot.check_inventory(root,raw_limit)
         # Reserve raw staging plus retained copy and bounded decoded/metadata overhead.
-        if inventory['retainedRawBytes'] + MAX_RAW_BYTES > raw_limit or inventory['scratchBytes'] + 2*MAX_RAW_BYTES + 8*1024*1024 > pilot.SCRATCH_LIMIT:
+        if inventory['retainedRawBytes'] + MAX_RAW_BYTES > raw_limit or inventory['scratchBytes'] + 2*MAX_RAW_BYTES + 8*1024*1024 + additional_scratch_bytes > pilot.SCRATCH_LIMIT:
             raise ValueError('Insufficient retrieval budget; review required.')
         staging = pilot.owned(root, f'{chunk_id}.download')
         if staging.exists(): raise ValueError('Interrupted staging file needs explicit review.')
@@ -233,7 +239,7 @@ def resume_known(root, chunk_id, adapter=None, *, importer=None):
     return _run_one(root,chunk_id,adapter,importer=importer,resume=True)
 
 
-def reconcile_local(root, chunk_id, *, approved_plan=None):
+def reconcile_local(root, chunk_id, *, approved_plan=None, verifier=None):
     """Resolve only a proven post-download local publication, without network."""
     root=Path(root).resolve()
     with pilot.writer_lock(root):
@@ -247,7 +253,7 @@ def reconcile_local(root, chunk_id, *, approved_plan=None):
         checksum=entry.get('stagedRawSha256')
         if not isinstance(request_id,str) or not re.fullmatch(r'[A-Za-z0-9-]{1,128}',request_id) or checksum!=local['rawSha256']:
             raise ValueError('Remote request/source identity cannot be proven; review required.')
-        pilot.verify_entry(root,local)
+        (verifier or pilot.verify_entry)(root,local)
         entry['state']='complete'
         entry['reconciledLocal']=True
         pilot.atomic_json(path,remote)

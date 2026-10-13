@@ -2,6 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { findReviewedMeteorPeaks } from "../../server/events/meteorPeaks";
 
+test("2025 forecasts are independent year-specific data with inclusive bounds and source", () => {
+  const peak = Date.parse("2025-08-13T08:01:00Z");
+  const rows = findReviewedMeteorPeaks(Date.parse("2025-01-01T00:00:00Z"), Date.parse("2026-01-01T00:00:00Z"));
+  assert.equal(rows.length, 13);
+  assert.equal(findReviewedMeteorPeaks(peak, peak)[0]?.peakUtc, "2025-08-13T08:01:00Z");
+  assert.equal(rows[0]?.source.vintage, "NASA-MEO-2025-issued-2024-10-18");
+  assert.equal(rows[0]?.source.licenseUrl, "https://ntrs.nasa.gov/citations/20240012381");
+  assert.deepEqual(findReviewedMeteorPeaks(peak + 1, peak + 1000), []);
+});
+
 test("NASA original 2026 Table 3 peaks retain all thirteen shower codes and exact UTC forecasts", () => {
   const rows = findReviewedMeteorPeaks(Date.parse("2026-01-01T00:00:00Z"), Date.parse("2026-12-31T23:59:59Z"));
   assert.deepEqual(rows.map(row => [row.code, row.peakUtc]), [

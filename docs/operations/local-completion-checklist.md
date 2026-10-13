@@ -73,3 +73,7 @@ Implementation revision ac80891 is pushed and all six GitHub jobs passed. See [C
 ## Current data wave — 14 October 2026
 
 [Wave record](three-data-lanes-wave.md) supersedes earlier local gaps for the enabled NASA2026 peak catalog, regional 1,327-candidate artifact, five JPL horizon references, generic multi-year preparation, source-aware recovery and immutable historical publication. Actual older data is four of 52 checkpoints; active history remains the 2025 sample. Private repository files are not a public data offer. Task2 local criteria are independently audited and documentation aligned, closed after all six CI jobs passed for f521065 (run 38456841770). Full-season/global/baseline/host/release criteria remain open.
+
+## Current data expansion — 14 October 2026
+
+See [data-expansion-wave.md](data-expansion-wave.md). Events now have thirteen original NASA maxima per year for 2025 and 2026, twelve bounded GMN radiants and corresponding planner aliases. Spots have a repeat-built 134-row Bhutan offline artifact with complete-way/relation limits and cross-platform bounded processing. History has grouped-year plans, source-bound monthly partitions, chronological schema2 publication and offline recovery, but no newly retrieved real data. Previous live source allowance is exhausted; grouped cost/format acceptance and a new bounded authorization precede retrieval. Original task counts remain unchanged; these deliveries advance partial tickets without closing their global/source/host gates.

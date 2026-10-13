@@ -34,6 +34,15 @@ test("doesNotRecurForecastPeaksIntoUnreviewedYears", async () => {
   assert.equal(result.availability.status, "partial");
 });
 
+test("2025 event uses its own timestamp identity and rights source", async () => {
+  const result = await searchSkyEvents({placeId:place(1).placeId, window:window("2025-08-13T08:00:00Z","2025-08-13T08:02:00Z","Asia/Kolkata"),eventTypes:["meteor-shower"]},index);
+  assert.equal(result.events[0]?.eventId,"meteor:perseids:2025");
+  assert.equal(result.events[0]?.peakUtc,"2025-08-13T08:01:00Z");
+  assert.match(result.events[0]?.description ?? "",/2025/);
+  assert.equal(result.events[0]?.source.licenseUrl,"https://ntrs.nasa.gov/citations/20240012381");
+  assert.equal(result.availability.status,"partial");
+});
+
 test("calendarActivityWithoutReviewedPeakInWindowDoesNotInventMeteorEvent", async () => {
   const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-08-12T00:00:00Z", "2026-08-13T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
   assert.deepEqual(result.events, []);

@@ -6,11 +6,11 @@ const Astronomy=createRequire(import.meta.url)("astronomy-engine") as typeof Ast
 const finite=z.number().finite();
 const uncertaintySchema=z.object({longitudeInterceptDeg:finite.positive(),longitudeSlopeDegPerSolarDeg:finite.positive(),latitudeInterceptDeg:finite.positive(),latitudeSlopeDegPerSolarDeg:finite.positive()});
 const rowSchema=z.object({code:z.string(),name:z.string(),referenceSolarLongitudeDeg:finite.min(0).max(360),longitudeInterceptDeg:finite,longitudeSlopeDegPerSolarDeg:finite,latitudeInterceptDeg:finite,latitudeSlopeDegPerSolarDeg:finite,nominalFitDays:finite.positive(),uncertainty:uncertaintySchema});
-const catalogSchema=z.object({vintage:z.string(),sourceUrl:z.string().url(),licenseUrl:z.literal("https://creativecommons.org/licenses/by/4.0/"),attribution:z.string(),frame:z.literal("J2000 mean ecliptic; Sun-centered geocentric radiant"),observationStart:z.string(),observationEnd:z.string(),localCalculationYears:z.object({first:z.number().int(),last:z.number().int()}),fitWindowConversionDegPerDay:finite.positive(),rows:z.array(rowSchema).length(8)});
+const catalogSchema=z.object({vintage:z.string(),sourceUrl:z.string().url(),licenseUrl:z.literal("https://creativecommons.org/licenses/by/4.0/"),attribution:z.string(),frame:z.literal("J2000 mean ecliptic; Sun-centered geocentric radiant"),observationStart:z.string(),observationEnd:z.string(),localCalculationYears:z.object({first:z.number().int(),last:z.number().int()}),fitWindowConversionDegPerDay:finite.positive(),rows:z.array(rowSchema).length(12)});
 // Match the project's existing event-catalog path: production starts at project
 // root, while bundled import.meta.url belongs to dist/index.js.
 const catalog=catalogSchema.parse(JSON.parse(readFileSync("data/events/meteor-radiants-gmn-2021.json","utf8")));
-if(new Set(catalog.rows.map(row=>row.code)).size!==8) throw new TypeError("Duplicate radiant catalog code.");
+if(new Set(catalog.rows.map(row=>row.code)).size!==12) throw new TypeError("Duplicate radiant catalog code.");
 export interface RadiantObserver {latitude:number;longitude:number;height?:number;}
 export interface RadiantEvidence {
  status:"available"; code:string; evaluatedAt:string; solarLongitudeJ2000Deg:number; referenceSolarLongitudeDeg:number; signedSolarOffsetDeg:number;

@@ -1,7 +1,7 @@
 
 import { createRequire } from "node:module";
 import type * as AstronomyTypes from "astronomy-engine";
-import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCE } from "./meteorPeaks";
+import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCES } from "./meteorPeaks";
 import { skyEventsResultSchema, searchSkyEventsInputSchema, type SkyEvent } from "../../shared/nightsky/events";
 import { type SourceRecord } from "../../shared/nightsky/common";
 import { resolvedCoordinatesForPlace, type GeoNamesPlaceIndex } from "../places/geonames";
@@ -52,13 +52,13 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
     "Event calculations use Astronomy Engine 2.1.19 and its built-in ephemeris/time model; displayed times are local to the resolved GeoNames city.",
     "Visibility uses modeled solar contact altitudes with standard atmospheric refraction for solar eclipses and geometric body altitude for lunar events; terrain, clouds, twilight brightness and naked-eye detectability are not established.",
   ];
-  if (requestedTypes.includes("meteor-shower")) caveats.push("Meteor results include only 13 NASA MEO forecast maxima for 2026. No activity-season widths or annual recurrence are established; Lyrids, Orionids and Leonids have no peak in this forecast. Empty results do not establish no shower activity. Forecast times can change, and peak timing alone does not establish local radiant visibility or personal meteor rates.");
+  if (requestedTypes.includes("meteor-shower")) caveats.push("Meteor results include only 13 NASA MEO forecast maxima per year for 2025 and 2026. No activity-season widths or annual recurrence are established; Lyrids, Orionids and Leonids have no peak in this forecast. Empty results do not establish no shower activity. Forecast times can change, and peak timing alone does not establish local radiant visibility or personal meteor rates.");
   if (unsupportedEventTypes.length) caveats.push(`V1 does not include maintained event data or calculations for: ${unsupportedEventTypes.map((type) => `${type} (${UNSUPPORTED_REASONS[type]})`).join(" ")}`);
   if (truncated) caveats.push(`The result was limited to the first ${input.limit} events. Narrow the requested time window for a complete list.`);
   const status = requestedTypes.every((type) => unsupportedEventTypes.includes(type)) ? "unsupported" : (unsupportedEventTypes.length || truncated || requestedTypes.includes("meteor-shower") ? "partial" : "available");
-  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [REVIEWED_METEOR_PEAK_SOURCE] : [])];
+  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? REVIEWED_METEOR_PEAK_SOURCES : [])];
   return skyEventsResultSchema.parse({
-    availability: { status, reason: status === "unsupported" ? "Only unsupported event classes were requested." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : requestedTypes.includes("meteor-shower") ? "Meteor coverage contains year-specific 2026 forecast maxima only; complete activity seasons and other years are unavailable." : "Supported events were calculated or loaded from the versioned catalog." },
+    availability: { status, reason: status === "unsupported" ? "Only unsupported event classes were requested." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : requestedTypes.includes("meteor-shower") ? "Meteor coverage contains year-specific 2025–2026 forecast maxima only; complete activity seasons and other years are unavailable." : "Supported events were calculated or loaded from the versioned catalog." },
     sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
   });
 }
@@ -128,9 +128,9 @@ function findEclipses(start: number, end: number, observer: AstronomyTypes.Obser
 
 function findMeteorShowers(start: number, end: number, timeZone: string, placeId: string): SkyEvent[] {
   return findReviewedMeteorPeaks(start, end).map(row => ({
-    eventId: `meteor:${row.id}:2026`, name: row.name, eventType: "meteor-shower", peakUtc: row.peakUtc,
+    eventId: `meteor:${row.id}:${row.peakUtc.slice(0, 4)}`, name: row.name, eventType: "meteor-shower", peakUtc: row.peakUtc,
     localVisibility: "not-evaluated", source: row.source,
-    description: "Year-specific NASA MEO forecast maximum for 2026; no activity-season interval is inferred. Forecast timing alone does not establish local visibility, a personal meteor count, or radiant model coverage.",
+    description: `Year-specific NASA MEO forecast maximum for ${row.peakUtc.slice(0, 4)}; no activity-season interval is inferred. Forecast timing alone does not establish local visibility, a personal meteor count, or radiant model coverage.`,
   }));
 }
 function intervalVisibility(body: AstronomyTypes.Body, observer: AstronomyTypes.Observer, start: number, end: number): { status: SkyEvent["localVisibility"]; description: string } {

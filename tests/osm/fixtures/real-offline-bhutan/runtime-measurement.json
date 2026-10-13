@@ -1,0 +1,13 @@
+{
+  "kind": "desktop-offline-bhutan-only",
+  "node": "v24.14.0",
+  "rows": 134,
+  "loadMs": 3.9779000000000053,
+  "coldMs": 1.7480000000000047,
+  "returned": 10,
+  "p95Ms": 0.22110000000000696,
+  "batch32Ms": 2.8856999999999857,
+  "load8Ms": 5.898899999999998,
+  "loadedCopies": 8,
+  "peakRssBytes": 79753216
+}

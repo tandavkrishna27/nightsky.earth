@@ -17,7 +17,7 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/plugin.js ./dist/plugin.js
 # Only reviewed public catalogs. Runtime climate/place artifacts are mounted
 # separately with explicit paths/digests; ignored operator data is never baked in.
-COPY data/events/meteor-radiants-gmn-2021.json data/events/meteor-peaks-nasa-2026.json ./data/events/
+COPY data/events/meteor-radiants-gmn-2021.json data/events/meteor-peaks-nasa-2025.json data/events/meteor-peaks-nasa-2026.json ./data/events/
 USER node
 EXPOSE 5000
 CMD ["node", "dist/plugin.js"]

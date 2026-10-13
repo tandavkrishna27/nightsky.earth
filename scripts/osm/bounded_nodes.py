@@ -34,7 +34,19 @@ def select_nodes(path, *, vintage, max_candidates=10000):
 
 def rss_bytes(process):
     if os.name != 'nt':
-        raise RuntimeError('This supervisor requires Windows process memory accounting.')
+        # Linux build machines expose peak/current resident memory via procfs.
+        # Exit can race the poll; no further growth is possible after exit.
+        try:
+            with open(f'/proc/{process.pid}/status', encoding='ascii') as status:
+                values = {line.split(':', 1)[0]: int(line.split()[1]) * 1024
+                          for line in status if line.startswith(('VmHWM:', 'VmRSS:'))}
+        except FileNotFoundError:
+            if process.poll() is not None: return 0
+            raise RuntimeError('Linux process memory accounting unavailable')
+        if not values:
+            if process.poll() is not None: return 0
+            raise RuntimeError('Linux process memory accounting unavailable')
+        return max(values.values())
     class Counters(ctypes.Structure):
         _fields_ = [('cb', wintypes.DWORD), ('faults', wintypes.DWORD)] + [(name, ctypes.c_size_t) for name in ('peak', 'working', 'poolpeak', 'pool', 'nonpoolpeak', 'nonpool', 'pagefile', 'pagepeak')]
     counters = Counters()
@@ -69,6 +81,9 @@ def supervise(arguments, output, *, wall_seconds=120, rss_mib=512):
             peak = max(peak, rss_bytes(process))
             if peak > rss_mib * 1024 * 1024:
                 reason = 'RSS limit'
+    except (OSError, RuntimeError, ValueError):
+        # Return a failed closed report so callers can remove unpublished staging.
+        reason = 'memory accounting unavailable'
     finally:
         if process.poll() is None:
             process.kill()

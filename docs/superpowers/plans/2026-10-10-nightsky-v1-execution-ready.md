@@ -248,6 +248,8 @@ Acceptance evidence: independent contract audit, Windows 394 passed/one permissi
 
 ### Task 6: Implement predictable events and supported target catalogs
 
+Local progress 14 October 2026: thirteen original NASA maxima per year for 2025/2026, twelve bounded GMN radiant fits and planner aliases pass independent review. Full per-shower seasons and other-year/source gaps remain open; see `docs/operations/events-season-expansion.md`.
+
 **Files:** Create `server/events/catalog.ts`, versioned `data/events/*.json`, `data/targets/README.md`, and `tests/events/catalog.test.ts`; update `shared/meteorShowers.ts` only through backward-compatible exports.
 
 **Consumes:** Task 4 place/time resolution and Task 5 astronomy calculations.
@@ -293,6 +295,8 @@ Acceptance evidence: independent contract audit, Windows 394 passed/one permissi
 
 ### Task 8: Build source-linked text candidate-place discovery
 
+Local progress 14 October 2026: 1,327 regional candidates plus a separate repeat-built 134-row Bhutan offline artifact; complete-way geometry, bounded Windows/Linux processing and cleanup verified. Global/relations/tile/public-offer/host gates remain open; see `docs/operations/offline-extract-wave.md`.
+
 **Files:** Create `server/places/osmCandidates.ts`, `server/places/importOsm.ts`, `server/places/context.ts`, and tests `tests/places/osmCandidates.test.ts`, `importOsm.test.ts`, and `context.test.ts`.
 
 **Consumes:** Task 0B OSM decision and Task 4 `PlaceRef`.
@@ -310,6 +314,8 @@ Acceptance evidence: independent contract audit, Windows 394 passed/one permissi
 - [ ] Pass when `npm test` passes the candidate/context cases, repeat import/query results are stable, and neither tool implies an access or darkness guarantee.
 
 ### Task 9: Deliver months-ahead historical cloud context
+
+Local progress 14 October 2026: grouped-year decoder/partitions and chronological schema2 publication verified offline, preserving parent raw provenance and legacy monthly limits. Two-year and full-period plan designs have thirty grouped jobs, subject to CDS cost/layout acceptance. No further live retrieval authorized/executed; real baseline/global/host gates remain open. See `docs/operations/grouped-history-wave.md`.
 
 **Files:** Create `server/providers/climate/era5.ts`, `scripts/era5/aggregate.ts`, `tests/providers/climate/era5.test.ts`, and `docs/operations/era5.md`.
 

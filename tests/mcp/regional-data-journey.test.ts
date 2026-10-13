@@ -57,6 +57,15 @@ test("regional source artifact composes named-place discovery, partial plans and
     const events = await call("search_sky_events", { placeId: options[0]!.placeId, window: { startUtc: "2026-12-14T12:00:00Z", endUtc: "2026-12-14T14:00:00Z", timeZone: "Asia/Kolkata" }, eventTypes: ["meteor-shower"] });
     assert.equal(events.availability.status, "partial"); assert.equal(events.events[0].peakUtc, "2026-12-14T13:00:00Z");
     assert.equal(events.events[0].activityCalendarDateWindow, undefined);
+    const previousYear = await call("search_sky_events", { placeId: options[0]!.placeId, window: { startUtc: "2025-12-14T06:00:00Z", endUtc: "2025-12-14T08:00:00Z", timeZone: "Asia/Kolkata" }, eventTypes: ["meteor-shower"] });
+    assert.equal(previousYear.events[0].peakUtc, "2025-12-14T06:55:00Z");
+    assert.match(previousYear.events[0].source.url, /20240012381/);
+    assert.match(previousYear.events[0].source.vintage, /NASA-MEO-2025/);
+    assert.equal(previousYear.events[0].activityCalendarDateWindow, undefined);
+    const cap = await call("plan_observing_session", { placeId: options[0]!.placeId, activity: "meteor-shower", target: "Alpha Capricornids", window: { startUtc: "2026-07-31T04:00:00Z", endUtc: "2026-07-31T12:00:00Z", timeZone: "Asia/Kolkata" } });
+    assert.equal(cap.evidence.events.events[0].peakUtc, "2026-07-31T04:30:00Z");
+    assert.ok(cap.evidence.meteorRadiantSamples.every((sample: { status: string; code: string }) => sample.status === "available" && sample.code === "CAP"));
+    assert.equal(cap.availability.status, "partial");
     const comparison = await call("compare_observing_options", { options });
     assert.equal(comparison.comparisons.length, 4);
     assert.ok(comparison.comparisons.every((row: { availability: { status: string } }) => row.availability.status === "partial"));

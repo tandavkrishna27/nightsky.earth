@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {evaluateRadiant, solarLongitudeJ2000} from "../../server/events/meteorRadiants";
 const codes=["PER","GEM","ORI","ETA","LYR","SDA","QUA","LEO"];
+const additionalCodes=["CAP","NTA","STA","HYD"];
 const observer={latitude:18.5204,longitude:73.8567,height:0};
 const catalog=()=>JSON.parse(readFileSync(new URL("../../data/events/meteor-radiants-gmn-2021.json",import.meta.url),"utf8"));
 const difference=(a:number,b:number)=>((a-b+540)%360)-180;
@@ -21,12 +22,28 @@ test("GMN catalog retains all eight original fitted rows, uncertainty, frames an
  const data=catalog();
  assert.equal(data.licenseUrl,"https://creativecommons.org/licenses/by/4.0/");
  assert.equal(data.frame,"J2000 mean ecliptic; Sun-centered geocentric radiant");
- assert.deepEqual(data.rows.map((row:any)=>row.code),codes);
+ assert.deepEqual(data.rows.slice(0,8).map((row:any)=>row.code),codes);
  const expected=[ [140.10,283.531,.068,38.362,-.059,9],[262.20,207.995,-.092,10.466,-.103,3],[209.20,246.670,-.242,-7.557,.063,7],[45.12,293.813,-.254,7.696,.063,9],[32.50,240.927,.64,56.639,-.22,3],[126.70,208.629,-.237,-7.488,-.123,5],[283,275.67,.22,63.458,.17,1],[235.50,272.525,-.295,10.225,-.169,7] ];
- data.rows.forEach((row:any,index:number)=>{
+ data.rows.slice(0,8).forEach((row:any,index:number)=>{
   assert.deepEqual([row.referenceSolarLongitudeDeg,row.longitudeInterceptDeg,row.longitudeSlopeDegPerSolarDeg,row.latitudeInterceptDeg,row.latitudeSlopeDegPerSolarDeg,row.nominalFitDays],expected[index]);
   assert.ok(row.uncertainty.longitudeInterceptDeg>0 && row.uncertainty.latitudeSlopeDegPerSolarDeg>0);
  });
+});
+
+test("additional original GMN fits preserve bounded direction at polar observers",()=>{
+ assert.deepEqual(catalog().rows.slice(8).map((row:any)=>row.code),additionalCodes);
+ for(const code of additionalCodes) {
+  const row=catalog().rows.find((entry:any)=>entry.code===code);
+  assert.ok(row);
+  for(const latitude of [-90,0,90]) {
+   const result=evaluateRadiant(code,dateAt(row.referenceSolarLongitudeDeg),{latitude,longitude:180});
+   assert.equal(result.status,"available");if(result.status!=="available") continue;
+   assert.ok(Number.isFinite(result.altitudeDeg));
+   assert.ok(result.altitudeDeg>=-90 && result.altitudeDeg<=90);
+   assert.ok(result.azimuthDeg>=0 && result.azimuthDeg<=360);
+   assert.equal(result.annualExtrapolation,true);
+  }
+ }
 });
 
 test("J2000 solar longitude matches GMN independent raw UTC reference",()=>{

@@ -82,3 +82,21 @@ test("an independently referenced below-horizon eclipse is an unfavorable event 
   assert.equal(result.evidence!.events!.events[0]!.localVisibility, "not-visible");
   assert.equal(result.factors.find(row => row.name === "Sky events")!.impact, "unfavorable");
 });
+
+test("additional reviewed shower names and codes reach their own bounded radiant models", async () => {
+  for (const [target, code, date] of [
+    ["Alpha Capricornids", "CAP", "2026-07-30"],
+    ["Northern Taurids", "NTA", "2026-11-13"],
+    ["Southern Taurids", "STA", "2026-11-04"],
+    ["Sigma Hydrids", "HYD", "2026-12-08"],
+  ]) {
+    for (const selection of [target, code]) {
+      const result = await planObservingSession({ placeId, activity: "meteor-shower", target: selection,
+        window: { startUtc: `${date}T20:00:00Z`, endUtc: `${date}T23:00:00Z`, timeZone: "Europe/London" } }, services());
+      assert.equal(result.evidence!.meteorRadiantSamples!.length, 3, selection);
+      assert.ok(result.evidence!.meteorRadiantSamples!.every(sample => sample.status === "available" && sample.code === code), selection);
+      assert.equal(result.availability.status, "partial");
+      assert.ok(result.gaps.some(gap => /full-season|season catalog/i.test(gap)));
+    }
+  }
+});
