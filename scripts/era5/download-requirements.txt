@@ -1,0 +1,6 @@
+# Official CDS client release; modern token dispatches to ECMWF datastores.
+cdsapi==0.7.7
+ecmwf-datastores-client==0.5.3
+# Retry behavior is safety critical; freeze the transport used by the adapter.
+multiurl==0.3.9
+requests==2.34.2

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "vintage": "NASA-2026-2027",
+  "reviewedAt": "2026-10-11T00:00:00.000Z",
+  "sourceName": "NASA Science / NASA Meteoroid Environment Office",
+  "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/meteor-showers/",
+  "showers": [
+    { "id": "quadrantids", "name": "Quadrantids", "activityStart": "12-28", "activityEnd": "01-12", "peakStart": "01-03", "peakEnd": "01-04", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/quadrantids/" },
+    { "id": "lyrids", "name": "Lyrids", "activityStart": "04-14", "activityEnd": "04-30", "peakStart": "04-22", "peakEnd": "04-23", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/lyrids/" },
+    { "id": "eta-aquariids", "name": "Eta Aquariids", "activityStart": "04-19", "activityEnd": "05-28", "peakStart": "05-05", "peakEnd": "05-06", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/eta-aquariids/" },
+    { "id": "southern-delta-aquariids", "name": "Southern Delta Aquariids", "activityStart": "07-12", "activityEnd": "08-23", "peakStart": "07-30", "peakEnd": "07-31", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/delta-aquariids/" },
+    { "id": "perseids", "name": "Perseids", "activityStart": "07-17", "activityEnd": "08-24", "peakStart": "08-12", "peakEnd": "08-13", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/perseids/" },
+    { "id": "orionids", "name": "Orionids", "activityStart": "10-02", "activityEnd": "11-07", "peakStart": "10-21", "peakEnd": "10-22", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/orionids/" },
+    { "id": "leonids", "name": "Leonids", "activityStart": "11-06", "activityEnd": "11-30", "peakStart": "11-16", "peakEnd": "11-17", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/leonids/" },
+    { "id": "geminids", "name": "Geminids", "activityStart": "12-04", "activityEnd": "12-17", "peakStart": "12-13", "peakEnd": "12-14", "sourceUrl": "https://science.nasa.gov/solar-system/meteors-meteorites/geminids/" }
+  ]
+}

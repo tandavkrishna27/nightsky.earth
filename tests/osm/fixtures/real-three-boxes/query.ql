@@ -1,0 +1,19 @@
+[out:json][timeout:60][maxsize:33554432];
+(
+node["name"]["leisure"~"^(park|nature_reserve)$"](32.65,78.8,32.9,79.1);
+node["name"]["tourism"~"^(viewpoint|camp_site|caravan_site)$"](32.65,78.8,32.9,79.1);
+node["name"]["boundary"="national_park"](32.65,78.8,32.9,79.1);
+node["name"]["protect_class"](32.65,78.8,32.9,79.1);
+node["name"]["natural"="beach"](32.65,78.8,32.9,79.1);
+node["name"]["leisure"~"^(park|nature_reserve)$"](10.1,77.35,10.35,77.6);
+node["name"]["tourism"~"^(viewpoint|camp_site|caravan_site)$"](10.1,77.35,10.35,77.6);
+node["name"]["boundary"="national_park"](10.1,77.35,10.35,77.6);
+node["name"]["protect_class"](10.1,77.35,10.35,77.6);
+node["name"]["natural"="beach"](10.1,77.35,10.35,77.6);
+node["name"]["leisure"~"^(park|nature_reserve)$"](9.95,76.95,10.2,77.2);
+node["name"]["tourism"~"^(viewpoint|camp_site|caravan_site)$"](9.95,76.95,10.2,77.2);
+node["name"]["boundary"="national_park"](9.95,76.95,10.2,77.2);
+node["name"]["protect_class"](9.95,76.95,10.2,77.2);
+node["name"]["natural"="beach"](9.95,76.95,10.2,77.2);
+);
+out body;

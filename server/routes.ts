@@ -1,10 +1,21 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { mountMcpRoute } from "./mcp/route";
+import { mountHealthRoute } from "./health";
 
 const SNAPI_BASE_URL = "https://api.spaceflightnewsapi.net/v4";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  mountHealthRoute(app);
+  const configuredMcpHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS
+    ?.split(",")
+    .map((host) => host.trim())
+    .filter(Boolean);
+  mountMcpRoute(app, {
+    allowedHosts: configuredMcpHosts?.length ? configuredMcpHosts : ["127.0.0.1", "localhost", "[::1]"],
+  });
+
   // News API routes - proxy to Spaceflight News API
   
   // Get list of news articles with optional filters

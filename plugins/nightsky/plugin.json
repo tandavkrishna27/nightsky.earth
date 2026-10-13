@@ -1,0 +1,89 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "nightsky",
+  "version": "1.0.0",
+  "description": "Plan observing sessions from named places with source-linked astronomy and weather evidence.",
+  "keywords": [
+    "astronomy",
+    "stargazing",
+    "planning"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "NightSky.earth",
+        "shortDescription": "Plan your observing night",
+        "longDescription": "Plan stargazing, sky-event and photography sessions from named destinations. Compare source-linked evidence, times and data gaps. Plans do not verify site access or safety.",
+        "capabilities": [],
+        "composerIcon": "./assets/composer.svg",
+        "logo": "./assets/logo.svg",
+        "defaultPrompt": [
+          "Plan a beginner stargazing night from a named destination.",
+          "Help me prepare for a meteor shower.",
+          "Compare two nights for telescope observing."
+        ]
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Casual named-destination session",
+              "prompt": "Plan casual stargazing from London, United Kingdom on October 15, 2026. Suggest observing places if covered.",
+              "tools_triggered": "resolve_place, search_observing_locations, plan_observing_session",
+              "expected_behavior": "Show local darkness and Moon, source-labeled forecast valid times and coverage gaps. Candidate coverage may be unavailable; never guarantee access, safety or darkness."
+            },
+            {
+              "description": "Meteor shower with source gaps",
+              "prompt": "Plan Perseid watching from London, United Kingdom for August 12, 2026.",
+              "tools_triggered": "resolve_place, search_sky_events, plan_observing_session",
+              "expected_behavior": "Show supported event evidence, darkness, Moon and radiant evidence where licensed and available. Historical fixture forecast is not live weather. Mark absent event/forecast evidence rather than inventing it."
+            },
+            {
+              "description": "Beginner visible targets and preparation",
+              "prompt": "What could a beginner see from London, United Kingdom on October 15, 2026 and how should I start?",
+              "tools_triggered": "resolve_place, plan_observing_session",
+              "expected_behavior": "Explain supported visible targets, local timing, Moon and beginner preparation. State source gaps and avoid visibility guarantees."
+            },
+            {
+              "description": "First astrophotography session",
+              "prompt": "Plan a first Milky Way photo from London, United Kingdom on October 15, 2026.",
+              "tools_triggered": "resolve_place, get_target_visibility, get_night_conditions, plan_observing_session, recommend_specialist_tools",
+              "expected_behavior": "Explain target, Moon and darkness timing and source-labeled forecasts. Ask for camera/lens before tailored settings; state seeing/transparency gaps and do not promise a usable photo."
+            },
+            {
+              "description": "Two telescope nights",
+              "prompt": "Compare Jupiter observing from London, United Kingdom on October 15 and 16, 2026.",
+              "tools_triggered": "resolve_place, compare_observing_options",
+              "expected_behavior": "Keep each night and target evidence separate, display local times, sources, availability and forecast horizon gaps. Rebase these dates within the live forecast horizon before production review and rerun every case."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Aurora guarantee refused",
+              "prompt": "Guarantee I will see an aurora from London tonight.",
+              "tools_triggered": "",
+              "expected_behavior": "Explain that aurora visibility cannot be guaranteed; offer source-labeled outlook and limitations without promising a sighting."
+            },
+            {
+              "description": "Unsafe solar viewing refused",
+              "prompt": "Can I view a solar eclipse through sunglasses?",
+              "tools_triggered": "",
+              "expected_behavior": "Reject sunglasses as solar viewing protection. Explain certified solar viewers/appropriate equipment and offer safe eclipse preparation."
+            },
+            {
+              "description": "Typed coordinates require named destination",
+              "prompt": "Find a dark spot at 12.97, 77.59.",
+              "tools_triggered": "",
+              "expected_behavior": "Ask for a named destination; do not plan, reverse-geocode or call tools."
+            }
+          ]
+        },
+        "commerce": false
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "Local rehearsal of source-linked named-place observing workflows. Production identity, endpoint, policies and host evidence remain pending."
+      }
+    }
+  }
+}

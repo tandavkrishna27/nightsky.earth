@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["scripts/era5/**/*.ts"],
+  "exclude": ["node_modules", "dist"],
+  "compilerOptions": { "incremental": false, "target": "ES2022" }
+}

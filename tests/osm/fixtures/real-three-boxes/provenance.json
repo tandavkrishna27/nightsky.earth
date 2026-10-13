@@ -1,0 +1,40 @@
+{
+  "endpoint": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:60][maxsize:33554432];\n(\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](32.65,78.8,32.9,79.1);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](32.65,78.8,32.9,79.1);\nnode[\"name\"][\"boundary\"=\"national_park\"](32.65,78.8,32.9,79.1);\nnode[\"name\"][\"protect_class\"](32.65,78.8,32.9,79.1);\nnode[\"name\"][\"natural\"=\"beach\"](32.65,78.8,32.9,79.1);\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](10.1,77.35,10.35,77.6);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](10.1,77.35,10.35,77.6);\nnode[\"name\"][\"boundary\"=\"national_park\"](10.1,77.35,10.35,77.6);\nnode[\"name\"][\"protect_class\"](10.1,77.35,10.35,77.6);\nnode[\"name\"][\"natural\"=\"beach\"](10.1,77.35,10.35,77.6);\nnode[\"name\"][\"leisure\"~\"^(park|nature_reserve)$\"](9.95,76.95,10.2,77.2);\nnode[\"name\"][\"tourism\"~\"^(viewpoint|camp_site|caravan_site)$\"](9.95,76.95,10.2,77.2);\nnode[\"name\"][\"boundary\"=\"national_park\"](9.95,76.95,10.2,77.2);\nnode[\"name\"][\"protect_class\"](9.95,76.95,10.2,77.2);\nnode[\"name\"][\"natural\"=\"beach\"](9.95,76.95,10.2,77.2);\n);\nout body;",
+  "boxes": {
+    "Hanle": [
+      32.65,
+      78.8,
+      32.9,
+      79.1
+    ],
+    "Kodaikanal": [
+      10.1,
+      77.35,
+      10.35,
+      77.6
+    ],
+    "Munnar": [
+      9.95,
+      76.95,
+      10.2,
+      77.2
+    ]
+  },
+  "retrievedAt": "2026-10-13T17:18:03.894Z",
+  "sourceTimestamp": "2026-10-13T17:17:04Z",
+  "responseBytes": 10239,
+  "artifactBytes": 9624,
+  "candidateCount": 59,
+  "responseSha256": "61d45828f7df9de079a61b5be10a939c3c5a0e40ff6c726133d1bf4ee407d7f4",
+  "artifactSha256": "7d07f347d8e5dfff06cdfc59a72e262b61760528bd5cac14b091f75e26f23755",
+  "elapsedSeconds": 1.0854016999999998,
+  "headers": {
+    "date": "Tue, 13 Oct 2026 17:18:02 GMT",
+    "content-type": "application/json",
+    "content-encoding": "gzip",
+    "last-modified": null
+  },
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "coverage": "Partial node-only named OSM candidates within Hanle (32.65,78.8,32.9,79.1), Kodaikanal (10.1,77.35,10.35,77.6), Munnar (9.95,76.95,10.2,77.2) boxes; excludes ways, relations, unnamed nodes and outside boxes."
+}

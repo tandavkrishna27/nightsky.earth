@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="NightSky test fixture">
+  <node id="1" lat="18.5204" lon="73.8567" />
+  <node id="2" lat="18.5214" lon="73.8567" />
+  <node id="3" lat="18.5214" lon="73.8577" />
+  <node id="4" lat="18.5204" lon="73.8577" />
+  <node id="5" lat="18.5204" lon="73.8567" />
+  <node id="6" lat="18.53" lon="73.86">
+    <tag k="tourism" v="viewpoint" />
+    <tag k="name" v="View Point" />
+  </node>
+  <node id="7" lat="18.54" lon="73.87">
+    <tag k="amenity" v="cafe" />
+    <tag k="name" v="Not an observing candidate" />
+  </node>
+  <way id="8">
+    <nd ref="1" /><nd ref="2" /><nd ref="3" /><nd ref="4" /><nd ref="5" />
+    <tag k="leisure" v="park" />
+    <tag k="name" v="Test Park" />
+  </way>
+</osm>

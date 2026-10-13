@@ -1,0 +1,27 @@
+# Allowlist the files required by Dockerfile.plugin; exclude operator/private data.
+**
+!Dockerfile.plugin
+!.dockerignore
+!package.json
+!package-lock.json
+!tsconfig.json
+!server/
+!server/**
+!shared/
+!shared/**
+!data/
+!data/events/
+!data/events/*.json
+# Keep private files excluded even if introduced beneath an allowed source tree.
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/credentials*
+**/secrets*
+**/private/**
+**/raw/**
+**/decoded/**
+**/*.log
+**/.data/**
+**/.git/**

@@ -1,0 +1,23 @@
+# Standalone plugin backend. Exact Node patch tag; no website build/runtime.
+FROM node:24.21.0-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66 AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY server ./server
+COPY shared ./shared
+COPY tsconfig.json ./
+RUN ./node_modules/.bin/esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js
+RUN npm prune --omit=dev --no-audit --no-fund
+
+FROM node:24.21.0-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66 AS runtime
+ENV NODE_ENV=production HOST=127.0.0.1 PORT=5000
+WORKDIR /app
+COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist/plugin.js ./dist/plugin.js
+# Only reviewed public catalogs. Runtime climate/place artifacts are mounted
+# separately with explicit paths/digests; ignored operator data is never baked in.
+COPY data/events ./data/events
+USER node
+EXPOSE 5000
+CMD ["node", "dist/plugin.js"]

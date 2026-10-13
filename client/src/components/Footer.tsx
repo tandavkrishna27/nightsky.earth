@@ -48,7 +48,7 @@ export default function Footer() {
                 <SiX className="h-4 w-4" />
               </a>
               <a
-                href="mailto:hello@nightsky.earth"
+                href="mailto:nightsky.earth2026@gmail.com"
                 className="text-muted-foreground hover:text-primary transition-colors"
                 aria-label="Email"
                 data-testid="link-email"
@@ -97,12 +97,12 @@ export default function Footer() {
                   Contact Us
                 </span>
               </Link>
-              <a 
-                href="mailto:hello@nightsky.earth" 
+              <a
+                href="mailto:nightsky.earth2026@gmail.com"
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                 data-testid="footer-link-email"
               >
-                hello@nightsky.earth
+                nightsky.earth2026@gmail.com
               </a>
             </div>
           </div>
@@ -123,6 +123,11 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-border pt-8 sm:pt-10">
+          <nav aria-label="Policy and support" className="flex flex-wrap justify-center gap-6 text-sm mb-6">
+            <Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</Link>
+            <Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms</Link>
+            <Link href="/support" className="text-muted-foreground hover:text-foreground">Support</Link>
+          </nav>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
               © 2025 NightSky.earth. All rights reserved.

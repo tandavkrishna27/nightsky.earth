@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "vintage": "Moorhead-Clements-Vida-2021-arxiv2205.15423v1",
+  "reviewedAt": "2026-10-13T00:00:00.000Z",
+  "sourceUrl": "https://arxiv.org/abs/2205.15423v1",
+  "sourceTables": ["Table 1 original fitted radiant coefficients", "Table 3 nominal fit windows"],
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "Moorhead, Clements and Vida, Meteor shower radiant dispersions in Global Meteor Network data (2021), author-deposited arXiv:2205.15423v1, CC BY 4.0. Selected original fitted coefficients normalized by NightSky.earth; no endorsement implied.",
+  "modified": true,
+  "frame": "J2000 mean ecliptic; Sun-centered geocentric radiant",
+  "angleUnit": "degrees",
+  "slopeUnit": "degrees per degree of J2000 solar longitude",
+  "uncertaintyKind": "published bootstrap parameter uncertainty; not output-position confidence interval",
+  "observationStart": "2018-12-10",
+  "observationEnd": "2021-05-22",
+  "localCalculationYears": {"first": 2018, "last": 2030},
+  "fitWindowConversionDegPerDay": 0.986,
+  "validityMeaning": "Nominal radiant-fit window centered on reference solar longitude; not full physical activity season or exact annual peak. Annual evaluation outside the observed years is model extrapolation.",
+  "rows": [
+    {"code":"PER","name":"Perseids","referenceSolarLongitudeDeg":140.10,"longitudeInterceptDeg":283.531,"longitudeSlopeDegPerSolarDeg":0.068,"latitudeInterceptDeg":38.362,"latitudeSlopeDegPerSolarDeg":-0.059,"nominalFitDays":9,"uncertainty":{"longitudeInterceptDeg":0.041,"longitudeSlopeDegPerSolarDeg":0.014,"latitudeInterceptDeg":0.031,"latitudeSlopeDegPerSolarDeg":0.010}},
+    {"code":"GEM","name":"Geminids","referenceSolarLongitudeDeg":262.20,"longitudeInterceptDeg":207.995,"longitudeSlopeDegPerSolarDeg":-0.092,"latitudeInterceptDeg":10.466,"latitudeSlopeDegPerSolarDeg":-0.103,"nominalFitDays":3,"uncertainty":{"longitudeInterceptDeg":0.012,"longitudeSlopeDegPerSolarDeg":0.017,"latitudeInterceptDeg":0.012,"latitudeSlopeDegPerSolarDeg":0.015}},
+    {"code":"ORI","name":"Orionids","referenceSolarLongitudeDeg":209.20,"longitudeInterceptDeg":246.670,"longitudeSlopeDegPerSolarDeg":-0.242,"latitudeInterceptDeg":-7.557,"latitudeSlopeDegPerSolarDeg":0.063,"nominalFitDays":7,"uncertainty":{"longitudeInterceptDeg":0.025,"longitudeSlopeDegPerSolarDeg":0.009,"latitudeInterceptDeg":0.017,"latitudeSlopeDegPerSolarDeg":0.006}},
+    {"code":"ETA","name":"Eta Aquariids","referenceSolarLongitudeDeg":45.12,"longitudeInterceptDeg":293.813,"longitudeSlopeDegPerSolarDeg":-0.254,"latitudeInterceptDeg":7.696,"latitudeSlopeDegPerSolarDeg":0.063,"nominalFitDays":9,"uncertainty":{"longitudeInterceptDeg":0.019,"longitudeSlopeDegPerSolarDeg":0.006,"latitudeInterceptDeg":0.021,"latitudeSlopeDegPerSolarDeg":0.007}},
+    {"code":"LYR","name":"Lyrids","referenceSolarLongitudeDeg":32.50,"longitudeInterceptDeg":240.927,"longitudeSlopeDegPerSolarDeg":0.64,"latitudeInterceptDeg":56.639,"latitudeSlopeDegPerSolarDeg":-0.22,"nominalFitDays":3,"uncertainty":{"longitudeInterceptDeg":0.086,"longitudeSlopeDegPerSolarDeg":0.16,"latitudeInterceptDeg":0.042,"latitudeSlopeDegPerSolarDeg":0.10}},
+    {"code":"SDA","name":"Southern Delta Aquariids","referenceSolarLongitudeDeg":126.70,"longitudeInterceptDeg":208.629,"longitudeSlopeDegPerSolarDeg":-0.237,"latitudeInterceptDeg":-7.488,"latitudeSlopeDegPerSolarDeg":-0.123,"nominalFitDays":5,"uncertainty":{"longitudeInterceptDeg":0.048,"longitudeSlopeDegPerSolarDeg":0.029,"latitudeInterceptDeg":0.035,"latitudeSlopeDegPerSolarDeg":0.018}},
+    {"code":"QUA","name":"Quadrantids","referenceSolarLongitudeDeg":283.00,"longitudeInterceptDeg":275.67,"longitudeSlopeDegPerSolarDeg":0.22,"latitudeInterceptDeg":63.458,"latitudeSlopeDegPerSolarDeg":0.17,"nominalFitDays":1,"uncertainty":{"longitudeInterceptDeg":0.24,"longitudeSlopeDegPerSolarDeg":0.59,"latitudeInterceptDeg":0.056,"latitudeSlopeDegPerSolarDeg":0.13}},
+    {"code":"LEO","name":"Leonids","referenceSolarLongitudeDeg":235.50,"longitudeInterceptDeg":272.525,"longitudeSlopeDegPerSolarDeg":-0.295,"latitudeInterceptDeg":10.225,"latitudeSlopeDegPerSolarDeg":-0.169,"nominalFitDays":7,"uncertainty":{"longitudeInterceptDeg":0.038,"longitudeSlopeDegPerSolarDeg":0.021,"latitudeInterceptDeg":0.043,"latitudeSlopeDegPerSolarDeg":0.021}}
+  ]
+}

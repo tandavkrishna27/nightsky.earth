@@ -40,6 +40,7 @@ coverage/
 *.tmp
 *.temp
 .cache/
+.data/
 tmp/
 server/public
 vite.config.ts.*
@@ -70,3 +71,4 @@ migrations/
 
 # Netlify
 .netlify/
+__pycache__/

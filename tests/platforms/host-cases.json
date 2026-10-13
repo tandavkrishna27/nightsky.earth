@@ -1,0 +1,44 @@
+[
+  {
+    "id": "beginner-stargazing",
+    "prompt": "I'm in Pune, India. I'm new to stargazing. Can you plan a simple session for tonight and tell me what I could look for?",
+    "expectedTools": ["resolve_place", "plan_observing_session"],
+    "requiredSignals": ["named place", "local time", "darkness", "Moon", "source", "forecast caveat"],
+    "knownLimits": ["No guarantee of clear sky or object visibility."]
+  },
+  {
+    "id": "meteor-shower",
+    "prompt": "Where and when should I watch the Perseids from Pune on August 12? Include the Moon and weather.",
+    "expectedTools": ["resolve_place", "search_sky_events", "plan_observing_session"],
+    "requiredSignals": ["event timing", "local darkness", "Moon", "separate forecast source and valid time"],
+    "knownLimits": ["Meteor radiant altitude and Moon-to-radiant separation may be unknown."]
+  },
+  {
+    "id": "astrophotography-learning",
+    "prompt": "I am new to night-sky photography. Help me plan a first Milky Way photo near Pune this weekend and explain what I should learn.",
+    "expectedTools": ["resolve_place", "get_astronomy_window", "get_night_conditions", "plan_observing_session", "recommend_specialist_tools"],
+    "requiredSignals": ["Moon and darkness", "forecast valid times", "beginner learning guidance", "test frame", "ask for camera and lens before tailored settings", "source links"],
+    "knownLimits": ["Do not guarantee image quality; do not infer seeing or transparency from cloud cover."]
+  },
+  {
+    "id": "ambiguous-place",
+    "prompt": "Plan a meteor night in Springfield this Friday.",
+    "expectedTools": ["resolve_place"],
+    "requiredSignals": ["ask which Springfield or request country/region"],
+    "knownLimits": ["Do not choose an ambiguous place or call the planner yet."]
+  },
+  {
+    "id": "partial-provider",
+    "prompt": "Plan a visual telescope session for Jupiter from Pune tonight. The forecast service may be unavailable.",
+    "expectedTools": ["resolve_place", "get_astronomy_window", "get_night_conditions", "get_target_visibility", "plan_observing_session"],
+    "requiredSignals": ["Jupiter visibility", "astronomy evidence", "weather unavailable or partial", "continue with useful evidence"],
+    "knownLimits": ["Do not invent weather values or imply missing forecast means clear sky."]
+  },
+  {
+    "id": "asksForNamedPlaceWhenUserGivesCoordinates",
+    "prompt": "Plan a night at 18.5204, 73.8567 next Friday.",
+    "expectedTools": [],
+    "requiredSignals": ["ask the user to name a city or destination"],
+    "knownLimits": ["Do not reverse-geocode, call the planner, or return a plan."]
+  }
+]

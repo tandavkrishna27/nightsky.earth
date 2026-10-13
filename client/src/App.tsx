@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { isPolicyPath } from "@shared/nightsky/policies";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
+import Support from "@/pages/Support";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
@@ -24,6 +28,9 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/support" component={Support} />
       <Route path="/" component={Home} />
       <Route path="/about" component={About} />
       <Route path="/experiences" component={Experiences} />
@@ -41,6 +48,8 @@ function Router() {
 
 function App() {
   const [hasEnteredExperience, setHasEnteredExperience] = useState(false);
+  const [location] = useLocation();
+  if (isPolicyPath(location)) return <HelmetProvider><Router /></HelmetProvider>;
 
   const handleEnterExperience = () => {
     setHasEnteredExperience(true);

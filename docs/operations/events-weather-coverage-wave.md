@@ -1,0 +1,40 @@
+# Events and weather source coverage wave
+
+Recorded 13 October 2026. Scope: Tasks 0A/0D, 6 and 7A. This is a bounded field/behavior measurement, not a geographic completeness or physical accuracy claim.
+
+## MET source measurements
+
+Two sequential GETs used `NightSky.earth/0.1 nightsky.earth2026@gmail.com`, four-decimal coordinates, shared `UpstreamControls`, a 1 MiB decoded response cap and the adapter's deadline. Both HTTP 200 payloads were retrieved at 2026-10-13 17:10:59 UTC. Raw payloads, digest, actual Last-Modified/Expires and latest run report are ignored local artifacts in `.data/met/source-coverage/`. Initial source call count: **2**. Repeat at 17:11:11 UTC: **0**, both snapshots reused while fresh. The script retains the original retrieval time when reusing evidence.
+
+| Reference | Issue time UTC | Supplied valid range UTC | Missing in requested next 24 hours | Last-Modified / Expires UTC |
+|---|---|---|---|---|
+| Longyearbyen Arctic reference 78.2232,15.6469 | Oct 13 16:13:24 | Oct 13 17:00–Oct 23 12:00 | precipitation probability | Oct 13 17:00:34 / 17:31:48 |
+| North Atlantic ocean point 40.0000,-30.0000 | Oct 13 13:19:20 | Oct 13 17:00–Oct 23 00:00 | precipitation probability, wind gust | Oct 13 17:10:59 / 17:42:17 |
+
+Both delivered total/low/middle/high cloud, temperature, dew point, relative humidity, wind speed/direction and precipitation amount; both included next_1/6/12-hour shapes. The adapter returned 25 bounded samples for each requested interval and explicit `partial` status. Ocean is a direct source coordinate measurement; it does not add an ocean place resolver or coordinate timezone capability. Longyearbyen is a named measurement reference, not evidence that a live named-place MCP journey resolved that city. Named Arctic resolver/transport coverage remains a separate check.
+
+`npx tsx scripts/verify-source-coverage.ts --live` requires an explicitly set `MET_NORWAY_USER_AGENT`. The script allows at most two GETs per invocation, verifies stored payload SHA-256, honors stored actual expiry, and sends actual stored Last-Modified after expiry. It does not sleep through provider freshness hours or manufacture a live clock. A later real invocation after Expires is necessary to record a conditional HTTP 304 or updated 200. **No live 304 is claimed in this wave.** Realtime on-demand refresh requires expiration, rather than waiting for an arbitrary number of hours. No scheduled refresh exists; future scheduling needs jitter and shared multi-instance limits.
+
+An offline fixture reproduced a cache lifecycle defect: a 304's replacement Last-Modified was passed into parsing but not persisted into shared cache. The adapter now saves it alongside renewed expiry. The regression verifies initial payload retention, conditional validator, renewed expiry, and zero fetches before either expiry. Existing offline tests cover 429 stale fallback, timeout, malformed JSON and 203; these are fixture evidence, not live error sampling.
+
+Official documentation reviewed 13 October: [data model](https://docs.api.met.no/doc/locationforecast/datamodel.html), [MET terms](https://docs.api.met.no/doc/TermsOfService.html). Product fields vary by region and horizon; the measurements do not prove all times or points include these fields. MET's regional/global model guidance must not be called independent ensemble confirmation. GEFS decoding/model independence and production operational capacity remain open.
+
+## Meteor source rights and radiant coverage
+
+Primary pages checked 13 October 2026: [NASA facts](https://science.nasa.gov/solar-system/meteors-meteorites/facts/), [AMS terms](https://www.amsmeteors.org/legal/), [IMO calendar](https://www.imo.net/resources/calendar/), [IAU Meteor Data Center](https://www.ta3.sk/IAUC22DB/MDC2022/). Count: **4 official meteor pages**. NASA's table credits AMS; AMS requires prior written permission for reproduction/storage/distribution of protected material. This is a verified unresolved reuse gate for the maintained NASA-linked catalog, not a finding that every astronomical date is individually copyright protected. The existing eight recurring entries were not republished or expanded.
+
+IMO's currently restored page offers a 2027 PDF calendar but no compatible redistribution license was established in this pass. MDC publicly offers shower lists/mean data and states its central catalog role, with a page update of October 9, 2026; this page does not establish a compatible redistribution grant. These are **possible accessible sources**, not verified free-to-redistribute replacements. No source was imported, contacted or promoted into product functionality. Exact product/field rights, coordinate frame/epoch, radiant drift against solar longitude/activity date, uncertainty and Moon-to-radiant separation need review before radiant modeling. Current radiant altitude/local meteor rate remain unknown.
+
+## Eclipse reference validation
+
+Primary source: [NASA five millennium lunar catalog](https://eclipse.gsfc.nasa.gov/LEcat5/LE2001-2100.html), read 13 October 2026; [March 3 2026 diagram](https://eclipse.gsfc.nasa.gov/LEplot/LEplot2001/LE2026Mar03T.pdf) is an identified follow-up reference. Catalog row 09708 reports March 3 2026 greatest eclipse in TD at 11:34:52, Delta T 75 seconds, total classification and 338.6-minute penumbral duration. The fixture subtracts the published Delta T to get 11:33:37 as the UT comparison, with a two-minute engineering bound for peak and duration/model differences. It validates the event result through the maintained place/event interface. The fixture passed; this is one independent global eclipse timing/duration check, not local horizon contact accuracy.
+
+Existing solar fixtures exercise Dallas daylight contacts and an equatorial below/above horizon state. This wave does not close independently measured lunar P1/P4 horizon-crossing altitudes, umbral contact times, obscuration, near-horizon refracted solar contacts, grazing polar transitions or all-coordinate visibility. The lunar visibility helper samples every ten minutes and may miss the final fractional step or short horizon crossings; a numerical source-backed endpoint/crossing audit remains needed before claiming continuous-event visibility. [NASA August 12 2026 solar reference](https://eclipse.gsfc.nasa.gov/SEsearch/SEsearchmap.php?Ecl=20260812) was inspected as a possible reference path, not integrated as a new source feed.
+
+Focused offline verification: 27 tests across event catalog, MET adapter and precipitation period tests pass after the one-line cache fix and added lunar reference. No shared schema, MCP/planner interface, deployment or external write changed. Gates left: meteor reuse/annual refresh/radiant model, local lunar/near-horizon numerical coverage, actual expired conditional live response, named Arctic MCP journey, independent second forecast and production capacity.
+
+## Expired conditional refresh — 13 October 2026 17:56 UTC
+
+Supersedes the initial no-live-refresh snapshot above. At 17:56:21.917Z the bounded script ran after both actual provider expiries and sent each previously stored Last-Modified. Both conditional requests returned updated HTTP **200**, not 304. The coverage wave now totals **four GETs**: two initial plus two expired refreshes; the intervening fresh-cache invocation made zero GETs. Longyearbyen now issued 17:13:18Z, Last-Modified 17:45:29 GMT, Expires 18:16:04 GMT. North Atlantic now issued 17:18:19Z, Expires 18:28:05 GMT. Both remain partial with precipitation probability absent; ocean gust remains absent. The latest ignored report records digests/retrieval times/headers. No live 304 is claimed; offline 304/error fixtures cover that branch. This establishes demand-driven refresh mechanics for two points, not global weather accuracy or hosted capacity.
+
+The later CC BY eight-shower pure model and planner integration are described in meteor-radiant-feasibility.md. Full-season date-compilation reuse and drift coverage remain open; near-peak nominal validity was not substituted for activity seasons.
