@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, writeFile, readFile, rm, realpath } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { GeoNamesPlaceIndex } from "../../../server/places/geonames";
 import { sourceRecordSchema } from "../../../shared/nightsky/common";
 
+if (process.env.CI && process.platform === "win32") console.error("ERA5 fixture temp path diagnostic", JSON.stringify({requested:tmpdir(),canonical:await realpath(tmpdir())}));
 const sha = (value: string | Buffer) => createHash("sha256").update(value).digest("hex");
 async function builder() {
   const loaded = await import("../../../scripts/era5/build-pilot").catch(() => undefined);
@@ -19,7 +20,7 @@ const places = new GeoNamesPlaceIndex([
   [1262463,"Munnar","Munnar","",10.08818,77.06239,"IN","India",0,"Asia/Kolkata"],
 ], "offline-fixture");
 async function fixture(api: Awaited<ReturnType<typeof builder>>) {
-  const root = await mkdtemp(join(tmpdir(), "era5-builder-"));
+  const root = await realpath(await mkdtemp(join(await realpath(tmpdir()), "era5-builder-")));
   await mkdir(join(root,"raw")); await mkdir(join(root,"decoded"));
   const manifest = api.reviewedPilotManifest();
   const entries = [];
