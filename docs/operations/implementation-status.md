@@ -6,7 +6,7 @@ Audit: 14 October 2026, `codex/plugin-v1` / `.worktrees/plugin-v1`. Status is lo
 
 | Level | Done | Partial | Not started | Total |
 |---|---:|---:|---:|---:|
-| Numbered groups 0–18 | 3 | 13 | 3 | 19 |
+| Numbered groups 0–18 | 4 | 12 | 3 | 19 |
 | Separately executable headings | 8 | 13 | 6 | 27 |
 
 A group is Done only when all its lettered headings are Done. The Done groups are 1, 2, 5 and 11; group 4 remains Partial because 4B requires a real draft. Completed headings are 1, 2, 4, 5, 7B and 11A–11C. Tasks 13 and 15 are now Partial because local policy pages and review artifacts exist. Final cross-platform counts are recorded below from the integration owner; earlier wave counts remain historical snapshots in their linked records.
@@ -17,7 +17,7 @@ A group is Done only when all its lettered headings are Done. The Done groups ar
 |---|---|---|
 | 0 — sources/scale/hosting | Partial | Ten distinct MET points including Arctic/ocean; four GETs in the coverage wave including two expired conditional HTTP 200 refreshes. Real 1,327-candidate regional OSM artifact and reviewed ERA5 sample exist; four older historical source jobs completed without a new baseline. Full-season meteor rights/model, global source scale, independent forecast, VIIRS and selected host/budgets remain open. |
 | 1 — SDK/runtime compatibility | Done | Pinned SDK, transport/Inspector fixtures and local runtime evidence; production Host/proxy validation remains separate. |
-| 2 — contracts/test harness | Partial | Locale, requested units and provenance budgets implemented; Node/Python two-OS CI prepared. Local acceptance independently audited: nine named tests, all twelve schemas/annotations, locale/privacy/native-evidence and current frozen documentation are verified. All six current-revision CI jobs passed for f521065; this heading is now Done. See three-data-lanes-wave.md. |
+| 2 — contracts/test harness | Done | Locale, requested units and provenance budgets implemented; Node/Python two-OS CI prepared. Local acceptance independently audited: nine named tests, all twelve schemas/annotations, locale/privacy/native-evidence and current frozen documentation are verified. All six current-revision CI jobs passed for f521065; this heading is now Done. See three-data-lanes-wave.md. |
 | 3 — endpoint/registry | Partial | Twelve stateless tools, consented metadata, bounded subject/IP counters, provider controls and safe errors implemented. Minimal shared request logger captures fixed route/status/duration only. Hosted logging/retention/replica budgets remain open. |
 | 3B — hosted OpenAI connection | Not started | No staging endpoint or real assistant connection. |
 | 3C — verified publisher/endpoint | Not started | Individual India direction confirmed; exact verified legal name, project/endpoint ownership and permanent hostname missing. |
