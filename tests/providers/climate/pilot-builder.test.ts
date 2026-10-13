@@ -193,3 +193,5 @@ test("published sample carries licensed ERA5 attribution and supplied-grid prove
     assert.equal(artifact.gridProvenance.nativeResolutionApproxKm,31);
   } finally {await rm(f.root,{recursive:true,force:true});}
 });
+
+test("Windows pilot fixed output accepts equivalent drive-letter casing",{skip:process.platform!=="win32"},async()=>{const api=await builder();const f=await fixture(api);try{const path=f.output;const alternate=(path[0]===path[0].toUpperCase()?path[0].toLowerCase():path[0].toUpperCase())+path.slice(1);await api.buildPilot({root:f.root,output:alternate,index:places});assert.equal(JSON.parse(await readFile(f.output,"utf8")).year,2025);}finally{await rm(f.root,{recursive:true,force:true});}});

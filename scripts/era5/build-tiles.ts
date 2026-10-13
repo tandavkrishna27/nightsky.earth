@@ -9,6 +9,7 @@ import {parseValidatedLegacyEra5Artifact} from "../../server/providers/climate/e
 import {readTrustedClimateFile,tiledEra5ManifestSchema,tiledEra5TileSchema,validateTiledEra5Tile,validateTiledEra5Manifest,type TiledEra5Manifest,type TiledEra5Tile} from "../../server/providers/climate/tiledEra5";
 import {loadGeoNamesPlaceIndex,type GeoNamesPlaceIndex} from "../../server/places/geonames";
 import {utcInstantSchema} from "../../shared/nightsky/common";
+import {sameResolvedPath} from "./pathIdentity";
 const MiB=1024*1024;
 const sha=(value:Buffer|string)=>createHash("sha256").update(value).digest("hex");
 const BUILDER="era5-tile-publication-v1";
@@ -42,7 +43,7 @@ export async function publishClimateTiles(options:TilePublicationOptions):Promis
  const generatedAt=utcInstantSchema.parse(options.generatedAt);
  if(!isAbsolute(options.outputDirectory))throw Error("Explicit absolute new output directory required");
  const output=resolve(options.outputDirectory);
- const parent=await realpath(dirname(output));if(parent!==dirname(output))throw Error("Output parent symlink path rejected");within(parent,output);
+ const parent=await realpath(dirname(output));if(!sameResolvedPath(parent,dirname(output)))throw Error("Output parent symlink path rejected");within(parent,output);
  if(await exists(output))throw Error("Output directory already exists; immutable releases are never overwritten");
  const bytes=await readTrustedClimateFile(resolve(options.inputPath),options.expectedSha256,inputLimit);deadline();
  const value=JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(bytes));
@@ -78,14 +79,14 @@ export async function publishClimateTiles(options:TilePublicationOptions):Promis
  let staging:string|undefined;
  try {
   if(await exists(output))throw Error("Output directory already exists");
-  staging=join(parent,`.${basename(output)}.staging-${randomUUID()}`);within(parent,staging);await mkdir(staging);if(await realpath(staging)!==staging||(await lstat(staging)).isSymbolicLink())throw Error("Unsafe staging directory");
+  staging=join(parent,`.${basename(output)}.staging-${randomUUID()}`);within(parent,staging);await mkdir(staging);if(!sameResolvedPath(await realpath(staging),staging)||(await lstat(staging)).isSymbolicLink())throw Error("Unsafe staging directory");
   const save=async(name:string,data:Buffer)=>{const path=join(staging!,name);within(staging!,path);const file=await open(path,"wx");try{await file.writeFile(data);await file.sync();}finally{await file.close();}deadline();};
   for(let i=0;i<sorted.length;i++)await save(manifest.tiles[i]!.path,tileBytes[i]!);
   await save("publication-report.json",reportBytes);await save("manifest.json",manifestBytes);
   await options.onProgress?.("staged",staging);deadline();
   // Exclusive directory creation prevents replacing an existing release. Only the
   // final atomic manifest rename marks this new directory as readable/completed.
-  await mkdir(output);if(await realpath(output)!==output||(await lstat(output)).isSymbolicLink())throw Error("Unsafe output directory");
+  await mkdir(output);if(!sameResolvedPath(await realpath(output),output)||(await lstat(output)).isSymbolicLink())throw Error("Unsafe output directory");
   for(const tile of manifest.tiles)await rename(join(staging,tile.path),join(output,tile.path));
   await rename(join(staging,"publication-report.json"),join(output,"publication-report.json"));
   await options.onProgress?.("before-manifest",output);deadline();

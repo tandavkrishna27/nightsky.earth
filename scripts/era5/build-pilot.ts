@@ -10,6 +10,7 @@ import { sourceRecordSchema } from "../../shared/nightsky/common";
 import { aggregateDarkCloudSamples, summarizeMonth, statisticsForBin, validateChunkLedger, type CloudSample, type ClimateAggregate } from "./aggregate";
 import { parseDecodedChunk } from "./chunks";
 
+import { sameResolvedPath } from "./pathIdentity";
 const MiB = 1024 * 1024;
 const MANIFEST_SHA = "e43315f64a34a586abda7e4f0ac434e82f0868d2f23bd124a09ba47545bd2400";
 const sourceProvenance=sourceRecordSchema.parse({
@@ -48,7 +49,7 @@ interface Ledger {schemaVersion:number;manifestSha256:string;entries:Entry[]}
 async function owned(root:string,path:string) {
   const candidate=resolve(root,path); const rel=relative(root,candidate);
   if(!rel || rel.startsWith("..") || isAbsolute(rel)) throw new Error("Path outside pilot directory.");
-  const actual=await realpath(candidate); if(actual!==candidate || (await lstat(candidate)).isSymbolicLink()) throw new Error("Symlink/checkpoint path rejected.");
+  const actual=await realpath(candidate); if(!sameResolvedPath(actual,candidate) || (await lstat(candidate)).isSymbolicLink()) throw new Error("Symlink/checkpoint path rejected.");
   return candidate;
 }
 async function boundedText(path:string,limit=4*MiB) {const blocks:Buffer[]=[];let bytes=0;for await(const block of createReadStream(path,{highWaterMark:64*1024})){bytes+=block.length;if(bytes>limit) throw new Error("File byte bound exceeded.");blocks.push(block);}return Buffer.concat(blocks).toString("utf8");}
@@ -63,7 +64,7 @@ export async function buildPilot(options:{root:string;output?:string;index?:GeoN
   const started=performance.now(),cpu=process.cpuUsage();
   const deadline=()=>{if(performance.now()-started>=1800*1000) throw new Error("Builder 30-minute deadline exceeded.");};
   const root=await realpath(resolve(options.root)); const output=resolve(options.output??join(root,"full-year-sample.json"));
-  if(output!==join(root,"full-year-sample.json")) throw new Error("Artifact output must be the fixed pilot full-year-sample.json path.");
+  if(!sameResolvedPath(output,join(root,"full-year-sample.json"))) throw new Error("Artifact output must be the fixed pilot full-year-sample.json path.");
   const lock=await open(join(root,".writer.lock"),"wx");
   let temporary:string|undefined;
   try {
