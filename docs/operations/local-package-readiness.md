@@ -51,3 +51,11 @@ Task 8/9 coverage and meteor data rights remain explicit gates. A missing datase
 Official pages were fetched on 13 October 2026. The publication country default is `[]`, reflecting global intent; this does not establish global data coverage, host availability or legal readiness.
 
 Final local package regeneration after the meteor skill reference fix: SHA-256 `446433abef11b172407e32992c6341b16988a353523ad67f0f76c99c67c6a3aa`. Eight offline review sets pass according to final integration evidence. This is the rehearsal package with an example endpoint; final identity, live endpoint, official validator/video and hosted refusal/connection evidence remain open.
+
+## 14 October offline operations update
+
+The previous package digest is historical; regenerate after current canonical skill/workflow bytes freeze. `node --import tsx scripts/verify-offline-operations.ts` produces `dist/offline-operations/readiness-report.json` with UTC run times, Node version, source revision, working-tree patch digest, untracked source digests, current ZIP inventory/digest, eight scripted review records and actual-source fresh-process rollback. The report explicitly marks official validation and host behavior false. Run the builder separately to retain the corresponding ZIP; compare its digest with the report before review. Concurrent edits require a final frozen rerun.
+
+Package lint now rejects quoted JSON credential assignments, forward-slash Windows paths, malformed UTF-8, empty files and archives over 32 MiB total, in addition to existing entry/path/secret/reference rules. Two regression groups failed before this change; all six focused package groups now pass. This remains targeted lint, not a universal secret detector or official platform validator. Official OpenAI package/submission pages were fetched again on 14 October 2026; the portable root manifest remains appropriate.
+
+See [offline operations readiness](offline-operations-readiness.md), [fresh-process rollback](artifact-rollback.md), [early connection preparation](../platforms/early-chatgpt-smoke.md), [resolver scan preparation](../platforms/location-tool-scan.md), and [host workflow instructions](../platforms/host-workflow-guide.md). The publisher's exact legal name and finalized policy copy remain open despite the confirmed individual/India/support facts.

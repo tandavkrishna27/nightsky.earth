@@ -33,3 +33,7 @@ Current route defaults: 32 KiB request body cap, 60 requests per source IP and 6
 The former unused `ProviderRequestControls` declaration was replaced by executable `upstreamControls` and `providerTimeoutsMs` dependencies. `NightSkyCache` is an optional memory-cache injection boundary; no persistent implementation was added. Multiple processes require coordinated budgets before scaling. See [provider operational evidence](provider-controls-wave.md) for defaults, fixture tests and abort-ignoring transport limitations. All twelve tools remain local-development capabilities until data, privacy and hosted release gates are passed. Historical runtime requests read only a reviewed artifact and make no CDS request; the private CDS configuration is confined to the owner's offline build environment.
 
 The MCP endpoint must remain local until Task 0F approves a host and budgets and the selected host’s protections have been verified. No OAuth or account permissions are required for V1.
+
+## Offline readiness verification
+
+Actual transport regressions cover replacement weather validators, expiry/304 refresh, stale/cold outages, abort-ignoring deadlines and recovery. Optional-service failures preserve explicit gaps rather than being mislabeled disabled capabilities. The operator's resolver-only rehearsal retains the same exposure/privacy controls; metadata cannot change registry scope. Compiled full/resolver-only smoke checks run through the existing two-OS CI production-runtime step. Host/edge retention is still unverified.

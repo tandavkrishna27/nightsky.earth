@@ -13,12 +13,16 @@ function endpointUrl(value: string) {
   return url.href;
 }
 export function validatePackageFiles(files: Record<string, Uint8Array>): void {
+  if (Object.values(files).reduce((total, bytes) => total + bytes.length, 0) > 32 * 1024 * 1024) throw Error('Package total bytes too large');
   for (const [path, bytes] of Object.entries(files)) {
     if (!/^(plugin\.json|mcp\.json|assets\/[\w.-]+|skills\/[\w-]+\/(?:[\w.-]+|references\/workflow\.md)|RELEASE-NOTES\.md)$/.test(path) || path.includes('..') || path.startsWith('skills/') && !skillNames.includes(path.split('/')[1])) throw Error(`Unsafe package path: ${path}`);
     if (bytes.length > 1024 * 1024) throw Error('Package entry too large');
-    const content = strFromU8(bytes);
-    if (/sk-[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,}|-----BEGIN .*PRIVATE KEY-----|(?:api[_-]?key|token|secret|password)\s*[=:]\s*["']?[A-Za-z0-9_-]{16,}/i.test(content)) throw Error(`Potential secret in ${path}`);
-    if (/[A-Za-z]:\\|\/(?:Users|home)\//.test(content)) throw Error(`Machine local path in ${path}`);
+    if (!bytes.length) throw Error(`Empty package entry: ${path}`);
+    let content: string;
+    try { content = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
+    catch { throw Error(`Invalid UTF-8 in ${path}`); }
+    if (/sk-[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._-]{20,}|-----BEGIN .*PRIVATE KEY-----|(?:api[_-]?key|token|secret|password)["']?\s*[=:]\s*["']?[A-Za-z0-9_./+=-]{16,}/i.test(content)) throw Error(`Potential secret in ${path}`);
+    if (/(?:^|[\s"'`(])[A-Za-z]:[\\/]|\/(?:Users|home)\//.test(content)) throw Error(`Machine local path in ${path}`);
   }
   const manifest = JSON.parse(strFromU8(files['plugin.json']));
   const mcp = JSON.parse(strFromU8(files['mcp.json']));

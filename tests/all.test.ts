@@ -67,3 +67,7 @@ import "./providers/climate/history-builder.test.ts";
 import "./events/meteorPeaks.test.ts";
 import "./mcp/regional-data-journey.test.ts";
 import "./providers/climate/grouped-history-builder.test.ts";
+import "./mcp/offline-journeys.test.ts";
+import "./mcp/offline-resilience.test.ts";
+import "./mcp/resolver-only.test.ts";
+import "./operations/offline-readiness.test.ts";

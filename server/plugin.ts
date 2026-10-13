@@ -38,10 +38,16 @@ export function pluginListenerConfiguration(environment: {
         throw Error("Invalid plugin listener configuration.");
     return { host, port };
 }
+export function pluginToolMode(environment: { NIGHTSKY_MCP_TOOL_MODE?: string }): "full" | "resolver-only" {
+    const mode = environment.NIGHTSKY_MCP_TOOL_MODE ?? "full";
+    if (mode !== "full" && mode !== "resolver-only") throw Error("Invalid MCP tool mode.");
+    return mode;
+}
 export async function startNightSkyPlugin() {
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
-    const app = createNightSkyPluginApp({ allowedHosts: allowedHosts?.length ? allowedHosts : undefined });
+    const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
+    const app = createNightSkyPluginApp({ allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode });
     const server = createServer(app);
     await new Promise<void>((done, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); done(); }); });
     console.log("NightSky plugin listener ready.");

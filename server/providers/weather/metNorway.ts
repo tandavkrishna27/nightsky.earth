@@ -461,8 +461,11 @@ export async function getMetNorwayForecast(
     }
     const expiresAt =
       Date.parse(response.headers.get("Expires") ?? "") || now() + 5 * 60000;
+    // Only 304 revalidates the stored bytes. A replacement payload cannot
+    // inherit a validator that belonged to a different response.
     const lastModified =
-      response.headers.get("Last-Modified") ?? cached?.lastModified;
+      response.headers.get("Last-Modified") ??
+      (response.status === 304 ? cached?.lastModified : undefined);
     if (response.status === 304 && cached) {
       cached.expiresAt = expiresAt;
       cached.lastModified = lastModified;

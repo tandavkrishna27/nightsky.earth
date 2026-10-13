@@ -1,0 +1,15 @@
+# Resolver scan preparation
+
+Prepared 14 October 2026 for Task 4B. No branded draft, domain challenge, production endpoint or official tool scan exists in this local record.
+
+The one-tool release exposes only `resolve_place`, using the same named-place implementation and privacy/admission controls as the full service. Build with `npm run build:plugin`; in PowerShell set `$env:NIGHTSKY_MCP_TOOL_MODE='resolver-only'`, then run `node dist/plugin.js`. Use local Inspector at the configured loopback `/mcp`, initialize and verify the sole listed tool is `resolve_place`. Stop the process and remove the temporary environment setting when finished. The default mode is full; unknown values fail startup closed. Operator dependency `toolMode: 'resolver-only'` provides the same allowlist to integration fixtures. An Inspector echo fixture is not a resolver release.
+
+`node --import tsx --test tests/mcp/resolver-only.test.ts` exercises real initialize/list with exactly one tool, named-place resolution, coordinate rejection, blocked other tools, no upstream requests and no returned coordinates. Two integration groups pass. This closes the minimal local registry preparation; the official hosted scan still remains open.
+
+Before connecting the real draft, require the verified individual publisher's exact legal name, eligible project and submission role, fixed production hostname/full URL, separate staging hostname, approved host controls and synthetic evidence of application plus edge-log redaction/retention. Confirmed facts are individual publisher based in India and support `nightsky.earth2026@gmail.com`; these do not establish legal identity. Follow the current official portal's challenge workflow without inventing a token or overwriting another plugin's challenge.
+
+Resolver scan cases use synthetic named inputs: unique place; ambiguous Springfield; absent name; coordinate-shaped `12.97, 77.59`; `useApproximateHostLocation: true` with no hint; true with a documented synthetic hint; and absent/false flag with a present hint. Expected signals are stable named-place IDs, clarification for ambiguity, no coordinate plan/reverse geocoding, `host-location-unavailable` when consented metadata is absent, and no hint coordinates/identifier/path in output or logs. Retain transport and redaction test evidence separately from the assistant's actual choices. Never retain a real location hint.
+
+Use [host record](host-run-record-template.md) and append dashboard finding ID, scan date, package/tool-schema digest, exact endpoint, verdict and correction/rerun. The same branded draft and fixed production URL must carry later full-package updates. If the scan route is unavailable, record its exact prerequisite and preserve the draft without claiming a clean scan. An unresolved location finding blocks expansion/submission.
+
+The [official submission guide](https://developers.openai.com/plugins/deploy/submission) was fetched 14 October 2026. Local lint is an internal package check and cannot be recorded as the official validator or production scan.

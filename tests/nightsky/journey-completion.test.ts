@@ -115,3 +115,32 @@ for (const [name, activity, target, expected] of journeys) test(`journey matrix:
   if (expected === "weather") assert.equal(result.evidence!.weather!.forecasts[0]!.source.issuedAt, source.issuedAt);
   if (expected === "access") assert.equal(result.evidence!.location!.access.status, "unknown");
 });
+
+test("enabled optional services that fail expose unavailable gaps instead of disabled capability claims", async () => {
+  const svc = services();
+  const fail = async (): Promise<never> => { throw new Error("Fixture unavailable"); };
+  svc.searchCandidates = fail; svc.getClimatology = fail; svc.getAuroraOutlook = fail; svc.getLocationContext = fail;
+  const result = await planObservingSession({ placeId, window, activity: "aurora" }, svc);
+  for (const name of ["Nearby observing places", "Historical context", "Aurora outlook", "Site access"]) {
+    assert.ok(result.factors.some(factor => factor.name === name && /Unavailable/.test(factor.assessment)), name);
+  }
+  for (const pattern of [/candidate.*failed/i, /historical.*failed/i, /aurora.*failed/i, /access.*failed/i]) assert.ok(result.gaps.some(gap => pattern.test(gap)), String(pattern));
+});
+
+test("conflicting forecasts preserve distinct issue times, valid times and native values in comparison evidence", async () => {
+  const svc = services(), original = svc.getNightConditions;
+  svc.getNightConditions = async (...args) => {
+    const result = await original(...args);
+    result.forecasts.push({ ...result.forecasts[0]!, source: { ...source, name: "Second fixture model", issuedAt: "2026-10-15T15:00:00Z", validStartUtc: "2026-10-15T23:00:00Z", validEndUtc: "2026-10-15T23:00:00Z" }, samples: [{validAt:"2026-10-15T23:00:00Z",values:{totalCloudCover:{value:90,unit:"%"}}}] });
+    return result;
+  };
+  const result=await compareObservingOptions({options:[{placeId,window,activity:"astrophotography",target:"Milky Way core"},{placeId,window,activity:"moon-observing",target:"Moon"}]},svc);
+  for(const option of result.comparisons) {
+    const forecasts=option.evidence!.weather!.forecasts;
+    assert.deepEqual(forecasts.map(item=>item.samples[0]!.values.totalCloudCover!.value),[12,90]);
+    assert.deepEqual(forecasts.map(item=>item.samples[0]!.validAt),["2026-10-15T22:00:00Z","2026-10-15T23:00:00Z"]);
+    assert.deepEqual(forecasts.map(item=>item.source.issuedAt),["2026-10-15T12:00:00Z","2026-10-15T15:00:00Z"]);
+    assert.ok(option.factors.some(item=>item.name.includes("Second fixture model")&&item.assessment.includes("90 %")));
+    assert.ok(option.factors.some(item=>item.name.includes("Fixture model")&&item.assessment.includes("12 %")));
+  }
+});

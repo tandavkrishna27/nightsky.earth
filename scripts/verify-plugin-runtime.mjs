@@ -4,11 +4,12 @@ import { once } from "node:events";
 import { createServer } from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
 
+async function verifyMode(mode) {
 const probe=createServer().listen(0,"127.0.0.1");
 await once(probe,"listening");
 const port=probe.address().port;
 await new Promise(done=>probe.close(done));
-const environment={...process.env,NODE_ENV:"production",HOST:"127.0.0.1",PORT:String(port),NIGHTSKY_MCP_ALLOWED_HOSTS:"127.0.0.1"};
+const environment={...process.env,NIGHTSKY_MCP_TOOL_MODE:mode,NODE_ENV:"production",HOST:"127.0.0.1",PORT:String(port),NIGHTSKY_MCP_ALLOWED_HOSTS:"127.0.0.1"};
 const child=spawn(process.execPath,["dist/plugin.js"],{env:environment,stdio:["ignore","ignore","ignore"]});
 let spawnFailed=false;child.on("error",()=>{spawnFailed=true;});
 const base=`http://127.0.0.1:${port}`;
@@ -28,11 +29,19 @@ try{
     assert.equal(response.status,200);const body=await response.text();const event=body.split("\n").find(line=>line.startsWith("data: "));const payload=JSON.parse(event?event.slice(6):body);assert.equal(payload.error,undefined);return payload.result;
   };
   const initialized=await rpc(1,"initialize",{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"standalone-plugin-runtime-check",version:"1"}});assert.equal(initialized.serverInfo.name,"nightsky-earth");
-  const listed=await rpc(2,"tools/list",{});assert.equal(listed.tools.length,12);
+  const listed=await rpc(2,"tools/list",{});assert.equal(listed.tools.length,mode === "full" ? 12 : 1);
+  if (mode === "full") {
   for(const name of ["resolve_place","get_clear_sky_climatology","plan_observing_session","compare_observing_options","recommend_specialist_tools"])assert.ok(listed.tools.some(tool=>tool.name===name));
   const suggested=await rpc(3,"tools/call",{name:"recommend_specialist_tools",arguments:{activity:"general-stargazing"}});assert.equal(suggested.isError,undefined);assert.ok(suggested.structuredContent.recommendations.length);
+  } else {
+    assert.deepEqual(listed.tools.map(tool=>tool.name),["resolve_place"]);
+  }
   const oversized=await fetch(`${base}/mcp`,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({padding:"x".repeat(33*1024)}),signal:AbortSignal.timeout(5000)});assert.equal(oversized.status,413);assert.deepEqual(await oversized.json(),{message:"Invalid request."});
-  console.log("Standalone plugin runtime verified: health, 12 MCP tools, structured recommendations, body limit and absent website/news routes. Workload makes no external provider requests.");
+  console.log(`Standalone plugin ${mode} runtime verified: health, ${listed.tools.length} MCP tools, body limit and absent website/news routes. Workload makes no external provider requests.`);
 }finally{
   if(!spawnFailed&&child.exitCode===null){const exited=once(child,"exit");child.kill();await Promise.race([exited,delay(3000)]);if(child.exitCode===null&&child.signalCode===null)child.kill("SIGKILL");}
 }
+
+}
+await verifyMode("full");
+await verifyMode("resolver-only");

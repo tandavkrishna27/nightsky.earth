@@ -158,8 +158,13 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     if (aurora && !isError(aurora)) {
       sourceRecords.push(...aurora.sources); addAll(caveats, aurora.caveats);
       const outlook = aurora.outlook;
+      if (outlook.status !== "available") gaps.push(`Aurora outlook is ${outlook.status}: ${outlook.reason}`);
       factors.push({ name: "Aurora outlook", assessment: outlook.status === "available" ? `${outlook.summary} Grid value ${outlook.gridValue} ${outlook.gridValueUnit} at ${outlook.gridCellLatitude}°, ${outlook.gridCellLongitude}°.` : `${capitalize(outlook.status)}: ${outlook.reason}`, impact: outlook.status === "available" ? "mixed" : "unknown", sourceNames: sourceNames(aurora.sources) });
-    } else factors.push({ name: "Aurora outlook", assessment: "Unsupported: no aurora provider is enabled for this plan.", impact: "unknown", sourceNames: [] });
+    } else {
+      const failed = aurora && isError(aurora);
+      factors.push({ name: "Aurora outlook", assessment: failed ? "Unavailable: the enabled aurora provider failed." : "Unsupported: no aurora provider is enabled for this plan.", impact: "unknown", sourceNames: [] });
+      gaps.push(failed ? "Aurora outlook retrieval failed; retry the official updates before travel." : "Aurora outlook is unsupported: no provider is enabled.");
+    }
   }
 
   if (locationContext && !isError(locationContext)) {
@@ -168,19 +173,31 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     if (locationContext.groundLightContext.status === "available") sourceRecords.push(locationContext.groundLightContext.source);
     const access = locationContext.access;
     factors.push({ name: "Site access", assessment: access.status === "verified" ? `Verified from source: ${access.description}` : `Unknown: ${access.description ?? "No independent access evidence is available."}`, impact: access.status === "verified" ? "mixed" : "unknown", sourceNames: access.status === "verified" ? [access.source.name] : [] });
-  } else factors.push({ name: "Site access", assessment: "Unknown: access and night opening have not been independently verified.", impact: "unknown", sourceNames: [] });
+  } else {
+    factors.push({ name: "Site access", assessment: "Unavailable: location context retrieval failed; access and night opening remain unknown.", impact: "unknown", sourceNames: [] });
+    gaps.push("Site access context retrieval failed; confirm access directly with site management.");
+  }
 
   if (candidates && !isError(candidates)) {
     sourceRecords.push(...candidates.sources, ...candidates.candidates.flatMap(candidate => candidate.sources));
+    if (candidates.availability.status !== "available") gaps.push(`Nearby candidate lookup is ${candidates.availability.status}: ${candidates.availability.reason}`);
     factors.push({ name: "Nearby observing places", assessment: candidates.availability.status === "available" ? `${candidates.candidates.length} candidate place(s) returned; access and darkness still require independent checks.` : `${capitalize(candidates.availability.status)}: ${candidates.availability.reason}`, impact: candidates.candidates.length ? "mixed" : "unknown", sourceNames: sourceNames(candidates.sources) });
-  } else factors.push({ name: "Nearby observing places", assessment: "Unsupported: no rights-reviewed local candidate index is enabled.", impact: "unknown", sourceNames: [] });
+  } else {
+    const failed = candidates && isError(candidates);
+    factors.push({ name: "Nearby observing places", assessment: failed ? "Unavailable: the enabled candidate service failed." : "Unsupported: no rights-reviewed local candidate index is enabled.", impact: "unknown", sourceNames: [] });
+    gaps.push(failed ? "Nearby candidate lookup failed; no site suitability or access is inferred." : "Nearby observing candidates are unsupported: no reviewed index is enabled.");
+  }
 
   if (climatology && !isError(climatology)) {
     sourceRecords.push(...climatology.sources);
     addAll(caveats, climatology.caveats);
     factors.push({ name: "Historical context", assessment: describeClimateContext(climatology), impact: "unknown", sourceNames: sourceNames(climatology.sources) });
     if (climatology.availability.status !== "available") gaps.push(`Historical context is ${climatology.availability.status}: ${climatology.availability.reason}`);
-  } else factors.push({ name: "Historical context", assessment: "Unsupported: no rights-reviewed historical sky-condition dataset is enabled.", impact: "unknown", sourceNames: [] });
+  } else {
+    const failed = climatology && isError(climatology);
+    factors.push({ name: "Historical context", assessment: failed ? "Unavailable: the enabled historical context service failed." : "Unsupported: no rights-reviewed historical sky-condition dataset is enabled.", impact: "unknown", sourceNames: [] });
+    gaps.push(failed ? "Historical context retrieval failed; no seasonal tendency is inferred." : "Historical context is unsupported: no reviewed dataset is enabled.");
+  }
 
   const learningGuide = ["learning", "astrophotography", "deep-sky-imaging", "eclipse"].includes(input.activity)
     ? getLearningGuidance({ activity: input.activity as "learning" | "astrophotography" | "deep-sky-imaging" | "eclipse", experience: input.experience, hemisphere: city.latitude === 0 ? "equatorial" : city.latitude > 0 ? "north" : "south" })

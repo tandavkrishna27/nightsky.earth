@@ -66,3 +66,7 @@ See [wave evidence](three-data-lanes-wave.md) for source deliveries, independent
 ## Data expansion — 14 October 2026
 
 See [data-expansion-wave.md](data-expansion-wave.md) for 2025/2026 NASA timing, twelve radiants, a repeat-built Bhutan offline artifact and end-to-end grouped historical processing. Aggregate suite has 401 cases; frozen Windows 400 passed/one permission skip and clean Linux 394 passed/seven scope skips, zero failures. All six CI jobs passed for implementation revision `756e028` (run38462293288); see `ci-verification.md`. Fourteen OSM and forty-six ERA5 Python cases pass on both platforms. No additional CDS retrieval or deployment occurred. Original counts remain 8 Done/13 Partial/6 Not started because geographic/full-season/baseline and host/release criteria remain open.
+
+## Offline readiness — 14 October 2026
+
+Journey, resilience and operations lanes passed independent review. Weather validator inheritance and silent optional-service failures were reproduced and fixed. Guarded resolver-only preparation and compiled two-mode CI smoke checks are implemented. Frozen Windows431/430passed/1skip; Linux431/424passed/7skips; Python14/46 passed on both. Local closure recommendations for Tasks3/7A/10A/10B await current CI. See `local-ticket-closure.md` for every original heading and exact held evidence. No deployment or historical downloads.

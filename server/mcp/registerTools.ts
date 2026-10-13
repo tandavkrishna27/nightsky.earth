@@ -30,6 +30,8 @@ export interface NightSkyCache {
 
 /** Runtime dependencies are shared by every stateless MCP request. */
 export interface NightSkyDependencies {
+  /** Operator-selected rehearsal scope; never controlled by request metadata. */
+  toolMode?: "full" | "resolver-only";
   climateProvider?: { getClimatology(placeId: string, month: number): Promise<ClimateContextResultV2> };
   cache?: NightSkyCache;
   fetcher?: typeof fetch;
@@ -67,6 +69,8 @@ export const V1_TOOL_ANNOTATIONS = {
 
 /** No domain tools are registered until their real handler and schema are ready. */
 export function registerNightSkyTools(server: McpServer, dependencies: NightSkyDependencies): void {
+  const toolMode = dependencies.toolMode ?? "full";
+  if (toolMode !== "full" && toolMode !== "resolver-only") throw new TypeError("Invalid MCP tool mode.");
   for (const timeout of Object.values(dependencies.providerTimeoutsMs ?? {})) {
     if (!Number.isSafeInteger(timeout) || timeout! <= 0) throw new TypeError("Provider timeouts must be positive safe integers.");
   }
@@ -121,6 +125,8 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
       : `GeoNames (CC BY 4.0). ${structuredContent.availability.reason}`;
     return { content: [{ type: "text", text }], structuredContent };
   });
+
+  if (toolMode === "resolver-only") return;
 
   server.registerTool("get_astronomy_window", {
     title: "Calculate darkness and Moon conditions",
