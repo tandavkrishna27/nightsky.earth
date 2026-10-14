@@ -1,0 +1,189 @@
+{
+  "runAt": "2026-10-14T14:50:15.058Z",
+  "cli": "codex-cli 0.154.0",
+  "requestedModel": "CLI default; no override",
+  "actualInferenceModel": null,
+  "networkPath": "Codex CLI model service; intended MCP HTTP loopback 127.0.0.1 only; synthetic providers. See records for inference/tool success.",
+  "externalProviderAttempts": 0,
+  "liveHostValidated": false,
+  "marketplaceValidated": false,
+  "records": [
+    {
+      "journey": 0,
+      "observedModel": null,
+      "latencyMs": 27867,
+      "checks": {
+        "realLocalToolCalls": true,
+        "onlyMcpCalls": true,
+        "completed": true,
+        "limitations": true,
+        "requiredTool": true
+      },
+      "pass": true,
+      "toolCalls": [
+        {
+          "journey": 0,
+          "tool": "resolve_place",
+          "args": {
+            "placeQuery": "Fictionvale, United Kingdom"
+          }
+        },
+        {
+          "journey": 0,
+          "tool": "search_sky_events",
+          "args": {
+            "placeId": "place:v1:geonames:9999001",
+            "window": {
+              "startUtc": "2027-08-12T20:00:00Z",
+              "endUtc": "2027-08-13T06:00:00Z",
+              "timeZone": "Europe/London"
+            },
+            "eventTypes": [
+              "meteor-shower"
+            ]
+          }
+        },
+        {
+          "journey": 0,
+          "tool": "plan_observing_session",
+          "args": {
+            "placeId": "place:v1:geonames:9999001",
+            "window": {
+              "startUtc": "2027-08-12T20:00:00Z",
+              "endUtc": "2027-08-13T06:00:00Z",
+              "timeZone": "Europe/London"
+            },
+            "activity": "meteor-shower",
+            "target": "Perseids"
+          }
+        }
+      ],
+      "answer": "**Fictionvale, United Kingdom** resolved in the synthetic GeoNames dataset, with time zone **Europe/London**. I used both the event-search and session-planning tools.\n\n**I cannot confirm the 2027 Perseids peak or promise clear skies.**\n\n- **Peak:** The event tool’s NASA MEO meteor maxima cover only **2025–2026**, not 2027. Its empty result means missing coverage—not no meteor activity.\n- **Session:** Your window is **21:00 BST on 12 August to 07:00 BST on 13 August 2027**.\n- **Darkness:** Astronomy Engine calculates astronomical darkness approximately **22:56–03:14 BST** (21:56–02:14 UTC), the useful dark portion of your session.\n- **Moon and radiant:** Moon illumination is **84.5%**, potentially hindering faint meteors while above the horizon. At **02:00 BST**, the modeled Moon is below the geometric horizon and the Perseid radiant is about **49.7°** high. This is a promising planning point, not a guaranteed viewing interval: radiant calculations extrapolate older Global Meteor Network observations, and full Moon timing and terrain are not modeled.\n- **Weather:** MET Norway forecast evidence is **unavailable** for this session; clouds, visibility and seeing remain unknown. Historical-context retrieval also failed, so no seasonal tendency can be inferred.\n\n**Provisional recommendation:** Plan around the calculated darkness, with particular interest near 02:00 BST. Recheck forecasts before departure, verify night access and safety, and allow 20–30 minutes for dark adaptation. Meteor sightings are never guaranteed.",
+      "exitCode": 0,
+      "timedOut": false,
+      "modelErrors": [],
+      "independentSemanticReview": "PASS: event and plan tool traces cover requested 2027 dates. Answer explicitly says cannot confirm 2027 peak and catalog covers 2025–2026, weather unavailable, no sighting guarantee."
+    },
+    {
+      "journey": 1,
+      "observedModel": null,
+      "latencyMs": 29088,
+      "checks": {
+        "realLocalToolCalls": true,
+        "onlyMcpCalls": true,
+        "completed": true,
+        "limitations": true,
+        "requiredTool": true
+      },
+      "pass": true,
+      "toolCalls": [
+        {
+          "journey": 1,
+          "tool": "resolve_place",
+          "args": {
+            "placeQuery": "Fictionvale, United Kingdom"
+          }
+        },
+        {
+          "journey": 1,
+          "tool": "compare_observing_options",
+          "args": {
+            "options": [
+              {
+                "activity": "planet-observing",
+                "placeId": "place:v1:geonames:9999001",
+                "target": "Jupiter",
+                "window": {
+                  "startUtc": "2026-10-15T18:00:00Z",
+                  "endUtc": "2026-10-16T06:00:00Z",
+                  "timeZone": "Europe/London"
+                }
+              },
+              {
+                "activity": "planet-observing",
+                "placeId": "place:v1:geonames:9999001",
+                "target": "Jupiter",
+                "window": {
+                  "startUtc": "2026-10-16T18:00:00Z",
+                  "endUtc": "2026-10-17T06:00:00Z",
+                  "timeZone": "Europe/London"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "answer": "Resolved **Fictionvale, United Kingdom** to `place:v1:geonames:9999001`, timezone **Europe/London**, using the synthetic GeoNames record.\n\n`compare_observing_options` returned a **partial comparison**. All times below are local **BST (UTC+1)**; both requested sessions run 19:00–07:00.\n\n| Factor | 15–16 October 2026 | 16–17 October 2026 |\n|---|---|---|\n| Astronomical darkness | 19:58–05:34 | 19:56–05:36 |\n| Jupiter above geometric horizon within session | 01:43–07:00 | 01:40–07:00 |\n| Maximum Jupiter altitude within session | 46.1° | 46.4° |\n| Moon illumination | 25.9% | 34.6% |\n| Weather evidence | Unavailable | Unavailable |\n\n**Neither night has confirmed good weather.** For both requested UTC windows, the MET Norway evidence contains no forecasts, cloud coverage, atmospheric visibility or seeing information. Conditions remain **unknown**, not good or bad; no forecast valid times or provider agreement can be assessed. Historical-context retrieval also failed, so no seasonal inference is justified.\n\nAstronomy Engine calculations show nearly identical geometric opportunities, with Jupiter appearing roughly three minutes earlier on the second night. That does **not** establish a better-weather night or guarantee a sighting. These calculations exclude terrain, buildings, atmospheric extinction and instrument limits. Site access and safety remain unverified.",
+      "exitCode": 0,
+      "timedOut": false,
+      "modelErrors": [],
+      "independentSemanticReview": "PASS: compare tool contains two distinct requested nights. Answer separates calculated geometry from weather, states neither has confirmed good weather, conditions unknown."
+    },
+    {
+      "journey": 2,
+      "observedModel": null,
+      "latencyMs": 27503,
+      "checks": {
+        "realLocalToolCalls": true,
+        "onlyMcpCalls": true,
+        "completed": true,
+        "limitations": true,
+        "requiredTool": true
+      },
+      "pass": true,
+      "toolCalls": [
+        {
+          "journey": 2,
+          "tool": "resolve_place",
+          "args": {
+            "placeQuery": "Fictionvale, United Kingdom"
+          }
+        },
+        {
+          "journey": 2,
+          "tool": "resolve_place",
+          "args": {
+            "useApproximateHostLocation": true
+          }
+        },
+        {
+          "journey": 2,
+          "tool": "search_observing_locations",
+          "args": {
+            "placeId": "place:v1:geonames:9999001",
+            "radiusKm": 30,
+            "limit": 5
+          }
+        },
+        {
+          "journey": 2,
+          "tool": "get_location_context",
+          "args": {
+            "placeId": "place:v1:geonames:9999001"
+          }
+        },
+        {
+          "journey": 2,
+          "tool": "get_location_context",
+          "args": {
+            "placeId": "place:v1:osm:node:9999001"
+          }
+        }
+      ],
+      "answer": "### Around Fictionvale\nThe tools found **[Fiction Park](https://www.openstreetmap.org/node/9999001)**, a park reported **0 km from the resolved Fictionvale reference point**, within a 30 km search.\n\n- **Coverage is partial:** only the installed synthetic OpenStreetMap extract was searched; this is not a complete list or dark-sky ranking.\n- **Access is unknown:** public entry, nighttime opening, permits, closures and safety are unverified. Check with the responsible authority.\n- **Sky quality is unknown:** darkness has not been measured for this candidate. Location context also reports no validated ground-light data. No good-sky or sighting guarantee is possible.\n\n### Candidate ID versus planning `placeId`\n**Do not assume they are interchangeable.** Fiction Park’s candidate ID is `place:v1:osm:node:9999001`; trying it with the location-context tool returned a generic error—not confirmation of planning compatibility.\n\nPlanning requires a previously resolved named place. Fictionvale’s resolved ID is `place:v1:geonames:9999001` (`Europe/London`). For site-specific planning, resolve the chosen observing-area name first rather than substituting its candidate ID.\n\n### “Near me”\nThe explicit near-me lookup returned **`host-location-unavailable`**, with no matches. I have not inferred your location or treated Fictionvale as your current location. Please provide a **named town or observing area** to search nearby.\n\nSources: synthetic GeoNames and OpenStreetMap records returned by NightSky.",
+      "exitCode": 0,
+      "timedOut": false,
+      "modelErrors": [],
+      "independentSemanticReview": "PASS: real candidate lookup and absent-host resolve executed. Answer separates OSM candidate namespace from GeoNames planning identity, preserves partial coverage, unknown access/sky quality and host-location-unavailable."
+    }
+  ],
+  "modelIdentityNote": "Default model successfully produced answers; CLI JSON events and stderr did not expose its identifier.",
+  "priorAttempts": [
+    "Configured gpt-6.1-sol rejected by ChatGPT-backed CLI before inference.",
+    "Default model produced answers with tool discovery disabled; zero tool calls. Enabling code-mode discovery resolved this harness issue."
+  ],
+  "restrictionEvidenceNote": "Run had all shell/apps/plugins/web/browser/computer/image/multi-agent tools disabled per invocation; loopback traces record ten NightSky calls. The recorded automatic non-MCP event checker detected command_execution only; broader event classification was added after this run and has not been model-run verified.",
+  "authPreflightObservedThisSession": "2026-10-14: Claude false; Codex ChatGPT login true; no credential contents read",
+  "cleanupUncertain": false,
+  "rejectedCalls": 0
+}

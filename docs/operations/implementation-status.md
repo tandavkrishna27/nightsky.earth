@@ -98,3 +98,7 @@ See [wave evidence](coverage-accuracy-wave.md) for adaptive lunar interval uncer
 ## Offline generic spot runner — 14 October 2026
 
 [Wave evidence](offline-spot-runner-wave.md) records exact-manifest acquisition safeguards, generic boundedgeometry/filter/partition processing, actual Windows build supervision and strict recovery/accounting. Composed fakeHTTP/genuine syntheticPBF tests exercise the real modules;66PythonOSM discovered/63passed/threeexplicit skips, Node484/483passed/onepermission skip. No provider requests/new realdata scans/runtime installation. Counts12 Done/9 Partial/6 Not started remain; actual regional/global/source/host evidence stillrequired. Retrieval remains held.
+
+## Actual-model local rehearsal — 14 October 2026
+
+[Model evidence](model-journey-test.md): three reviewed journeys, ten actual local MCP calls, zero external provider attempts. Default model identifier unobserved; hosted/marketplace compatibility untested. Stronger harness checks added after the batch are explicitly separated from executed evidence. Display name NightSky.earth confirmed; Hetzner values deferred. Counts remain12 Done/9 Partial/6 Not started and retrieval/deployment held.

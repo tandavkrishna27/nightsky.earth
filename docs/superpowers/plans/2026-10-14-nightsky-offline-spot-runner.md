@@ -35,9 +35,9 @@ Redirect/length/encoding/ETag/header mismatches; symlink/junction/exclusive-outp
 - [x] Independent lane and combinedreview; fix actionable findings.
 - [x] Root exercises actual combined fakeacquisition→syntheticPBF build→journal/recovery path and registers relevantCI coverage.
 - [x] Fresh PythonOSM suite onlocalWindows and Node/types/package/review/build/runtimes.
-- [ ] Exact-revision CI onbothOS verifies regressions afterpush.
+- [x] Exact-revision CI onbothOS verifies regressions afterpush.
 - [x] Update originalTask0/8 evidence/status without claiming realworld/globalcoverage.
-- [ ] Scopedcommit/push and watch allCIjobs; record exactrevision and explicit retrievalstillheld.
+- [x] Scopedcommit/push and watch allCIjobs; record exactrevision and explicit retrievalstillheld.
 
 ## Rulings
 
@@ -45,4 +45,4 @@ Ruling: use explicit dateline-crossing-way exclusion instead of inventing a geom
 Ruling: enforce supervisedgenericbuild workers rather than ship a budgetstub — full offlineexperience was approved — acquisition mocks remain cooperative until separately approved liveworker capability.
 Ruling: no defaultliveopener or fetchCLI — downloads are held — later enabling live retrieval requires reviewed allowance and explicit capability.
 
-Evidence: docs/operations/offline-spot-runner-wave.md. Independent reviews and final fixture checks pass; exactrevisionCI pending.
+Evidence: docs/operations/offline-spot-runner-wave.md. Independent reviews and final fixture checks pass; all six exactrevisionCI jobs pass for5181248 (run38583724276).
