@@ -7,6 +7,7 @@ import { createMcpHandler } from "@modelcontextprotocol/server";
 import { createNightSkyMcpServer } from "./index";
 import type { NightSkyDependencies } from "./registerTools";
 import { SubjectRateLimiter } from "./metadata";
+import { validateMcpForwardedClient } from "./proxyTrust";
 import { loadOsmCandidateIndex } from "../places/osmCandidates";
 
 export interface McpRouteDependencies extends NightSkyDependencies {
@@ -90,10 +91,11 @@ export function mountMcpRoute(app: Express, dependencies: McpRouteDependencies =
   let activeRequests = 0;
   const counters = new Map<string, { count: number; resetAt: number }>();
   const validateHost = hostHeaderValidation(allowedHosts);
-  const mcpHandler = toNodeHandler(createMcpHandler(() => createNightSkyMcpServer(dependencies)));
+
 
   const controls: RequestHandler[] = [
     validateHost,
+    validateMcpForwardedClient,
     (req, res, next) => {
       if (activeRequests >= maxConcurrent) {
         res.status(503).json({ jsonrpc: "2.0", error: { code: -32000, message: "NightSky is busy. Try again shortly." }, id: null });
@@ -140,10 +142,24 @@ export function mountMcpRoute(app: Express, dependencies: McpRouteDependencies =
   ];
 
   app.all("/mcp", ...controls, (req, res) => {
+    // Transport completion can precede abort-ignoring tool work settlement.
+    // Keep its admission until both finish, including after client disconnect.
+    let transportDone = false, pendingWork = 0, released = false;
+    const releaseAdmission = () => {
+      if (transportDone && pendingWork === 0 && !released) {
+        released = true; activeRequests = Math.max(0, activeRequests - 1);
+      }
+    };
+    const retainToolWork = () => {
+      if (released) throw new Error("Request work already closed.");
+      pendingWork++; let done = false;
+      return () => { if (!done) { done = true; pendingWork--; releaseAdmission(); } };
+    };
+    const mcpHandler = toNodeHandler(createMcpHandler(() => createNightSkyMcpServer(dependencies, retainToolWork)));
     void Promise.resolve().then(() => mcpHandler(req, res, req.body))
       .catch(() => {
         if (!res.headersSent) res.status(500).json({ jsonrpc: "2.0", error: { code: -32603, message: "NightSky could not complete the request." }, id: null });
       })
-      .finally(() => { activeRequests = Math.max(0, activeRequests - 1); });
+      .finally(() => { transportDone = true; releaseAdmission(); });
   });
 }

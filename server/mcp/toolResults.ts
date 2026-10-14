@@ -23,7 +23,7 @@ export function guardToolCallback<Args extends unknown[], Result>(callback: (...
 /** Registration facade preserves the SDK's generic overloads and config.
  * Only callbacks are wrapped; every server owns its own registrations.
  */
-export function boundedToolRegistration(server: McpServer): McpServer {
+export function boundedToolRegistration(server: McpServer, retainToolWork?: () => () => void): McpServer {
     return new Proxy(server, {
         get(target, property) {
             if (property !== "registerTool")
@@ -31,7 +31,11 @@ export function boundedToolRegistration(server: McpServer): McpServer {
             return (name: unknown, config: unknown, callback: unknown) => {
                 if (typeof callback !== "function")
                     throw new TypeError("A tool callback is required.");
-                const guarded = guardToolCallback((...args: unknown[]) => Reflect.apply(callback, undefined, args));
+                const guarded = guardToolCallback(async (...args: unknown[]) => {
+                    const release = retainToolWork?.();
+                    try { return await Reflect.apply(callback, undefined, args); }
+                    finally { release?.(); }
+                });
                 return Reflect.apply(target.registerTool, target, [name, config, guarded]);
             };
         },

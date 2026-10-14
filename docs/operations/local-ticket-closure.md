@@ -15,10 +15,10 @@ This audits every original heading against its actual acceptance criteria. User 
 | 4 | Global named GeoNames resolution plus licensed Hanle supplement, ambiguity/timezones/consent/privacy fixtures | Actual host-location side channel remains client-specific evidence |
 | 4B | Guarded resolver-only operator mode, two transport tests, actual compiled Inspector resolver call, scan cases/record procedure | Same real branded draft, production URL/domain challenge and official location scan |
 | 5 | Local geometry/targets, independent references, polar/DST/hemisphere tests | No general arbitrary-date, atmosphere or terrain claim |
-| 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models and independently proven all-years extrema; adaptive model-conditional intervals leave unresolved grazing geometry unevaluated |
+| 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models, apparent planet-pair events and independently validated all-years calculations; adaptive model-conditional intervals leave unresolved grazing geometry unevaluated |
 | 7A | Every applicable weather acceptance mapped; actual expiry/304/outage/validator/deadline/native-data MCP fixtures | Original local acceptance met; scheduled jitter is inapplicable to demand-only refresh. Global accuracy/host budget remain separate |
 | 7B | NOAA freshness/coverage/timeout/source fixtures and planner separation | No long-range or guaranteed sighting claim |
-| 8 | Repeat-built regional/Bhutan artifacts, strict geometry/source/digest/query caveats and local rollback | Global coverage/relations/disk-lazy tiles, selected-host deployment/rollback and public ODbL distribution; same-vintage composition/cached latitude bands are now tested locally |
+| 8 | Repeat-built regional/Bhutan artifacts, strict geometry/source/digest/query caveats and local rollback | Global coverage/relations/polygon membership, selected-host deployment/rollback and public ODbL distribution; on-demand regional serving/cache/queue and mixed-version provenance are now tested locally |
 | 9 | Active immutable 2025 sample; grouped partition/publication/recovery code exercised offline | Real grouped format/cost/baseline coverage; no new historical requests authorized |
 | 10A | All fifteen journeys via real MCP; optional failures preserve gaps; activity/polar/history/target cases | Original local acceptance met; complete data coverage remains in 6/8/9 |
 | 10B | Five named comparison cases; native conflicts/issue/valid times; five options and byte-budget fixtures | Original local acceptance met; live assistant behavior remains platform evidence |
@@ -53,3 +53,7 @@ The approved three-lane wave adds bounded lunar interval handling, checksum-pinn
 - [Operations preparation audit](offline-operations-readiness.md)
 - [Rollback rehearsal](artifact-rollback.md)
 - [Original execution plan](../superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md)
+
+## Events/regional/proxy follow-up
+
+New bounded planet alignments, checksum-pinned on-demand regional serving and opt-in narrow proxy trust with callback admission leases are independently reviewed and locally verified. See [wave evidence](events-regional-proxy-wave.md). Full sources/global/actualhost conditions remain open; counts12/9/6, no historical retrieval or deployment.

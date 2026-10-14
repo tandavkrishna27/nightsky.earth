@@ -26,7 +26,7 @@ The host must support:
 | Full production MCP URL/path | Pending; freeze before creating the real OpenAI draft |
 | Staging hostname and MCP URL | Pending; must differ from production and be available for OpenAI developer-mode testing |
 | Deploy/rollback method | Immutable standalone container and fresh-process artifact rollback are prepared locally; actual proxy, host promotion and rollback evidence remain pending before Task 3B |
-| Request limiting / abuse response | Global/IP/subject process-memory caps implemented; proxy IP trust, multi-process behavior and selected-host/provider budgets remain pending |
+| Request limiting / abuse response | Global/IP/subject process-memory caps implemented; default-disabled narrow single-proxy trust is tested locally; actual proxy topology, multi-process behavior and selected-host/provider budgets remain pending |
 | App and edge log access/retention/redaction | Pending validation; do not proceed if user location can leak into unbounded logs |
 | Monthly cost quote and assumptions | Pending owner budget/host evaluation |
 | Production access to OpenAI review traffic | Pending; apply and verify redaction/retention with synthetic traffic before linking the real draft |

@@ -699,3 +699,7 @@ Task 9 remains Partial. Its H1–H4 local dependency chain now passes: strict co
 ## Coverage and accuracy follow-up — 14 October 2026
 
 Approved parallel Tasks0/6,8,13/14 work is recorded in `docs/operations/coverage-accuracy-wave.md` and its scoped plan. Adaptive lunar intervals and bounded same-vintage candidate composition/indexed queries pass independent review; CI now exercises the fixed-seed100,000-row full-scan query reference. Concrete policy/Hetzner inputs remain pending, with no invented legal or host values. Counts remain12 Done/9 Partial/6 Not started. Historical acquisition, hosting, accounts and publication gates remain separate.
+
+## Events/regional/proxy follow-up — 14 October 2026
+
+Approved Tasks0/6,8,3/14 work adds calculated outer-planet oppositions/explicit solar alignments, on-demand mixed-vintage regional artifacts and narrowly configured single-proxy trust with cancellation work leases. See `docs/operations/events-regional-proxy-wave.md` for reviewed acceptance and actual retained-artifact/compiled/local proxy evidence. No source/global/owner/host heading closes solely from these local results; counts12 Done/9 Partial/6 Not started.

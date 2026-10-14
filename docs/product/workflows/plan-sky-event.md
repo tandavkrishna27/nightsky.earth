@@ -33,3 +33,7 @@ Pass requested supported `locale` and `units` to planning/comparison tools. Summ
 ## Optional-service failures
 
 Preserve the returned reason when an enabled candidate, history, aurora or site-context lookup fails or is outside coverage. Describe unavailable data as unavailable; do not describe an enabled service as disabled or interpret missing evidence as clear weather, safe access or no sky activity. Continue with the remaining supported evidence and show the gap.
+
+## Calculated planet alignment coverage
+
+`search_sky_events` now includes outer-planet oppositions and explicitly labeled inferior/superior solar alignments from relative heliocentric ecliptic longitude, ignoring ecliptic latitude, in the bounded engineering range 1900–2100. These are global alignment times. Every planet alignment has local visibility not-evaluated; use `get_target_visibility`, darkness and available forecast for the selected named destination before suggesting a night. Solar alignment is not an observing recommendation; never suggest unfiltered solar viewing. Do not relabel a solar alignment as an apparent planet-pair conjunction, minimum angular separation or closest-distance instant. The latter remain unsupported; conjunction coverage is partial. Preserve truncation, out-of-horizon and missing-source states. Independent 2026 comparisons are coarse event-identity checks between different definitions, not an all-years accuracy guarantee.

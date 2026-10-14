@@ -87,3 +87,7 @@ Tasks 3, 7A, 10A and 10B meet their original local conditions: all six CI jobs p
 ## Coverage/accuracy follow-up
 
 [Wave evidence](coverage-accuracy-wave.md) records reviewed bounded lunar geometry, spot composition/indexed queries, a 100,000-row synthetic CI reference probe and concrete owner/host inputs. These improve partial Tasks0/6/8/13/14. Full source/global/identity/host criteria remain open; counts12 Done/9 Partial/6 Not started. No historical downloads or deployment.
+
+## Events/regional/proxy follow-up
+
+See [wave evidence](events-regional-proxy-wave.md) for new bounded alignments, opt-in mixed-version regional serving and actual local proxy/cancellation tests. Full source/global/host/release criteria remain open; counts12 Done/9 Partial/6 Not started.

@@ -7,13 +7,26 @@ import { fileURLToPath } from "node:url";
 import { mountHealthRoute, type HealthDependencies } from "./health";
 import { mountMcpRoute, type McpRouteDependencies } from "./mcp/route";
 import { requestLogging } from "./requestLogging";
+import { configureMcpProxyTrust } from "./mcp/proxyTrust";
+import { loadRegionalOsmProvider } from "./places/regionalOsm";
 export interface PluginAppDependencies extends McpRouteDependencies {
+    trustedProxyAddresses?: string;
     health?: HealthDependencies;
     log?: (line: string) => void;
+}
+export function pluginRegionalConfiguration(environment: { NIGHTSKY_OSM_REGIONAL_MANIFEST?: string; NIGHTSKY_OSM_REGIONAL_SHA256?: string; NIGHTSKY_OSM_CANDIDATE_INDEX?: string }): { path: string; expectedSha256: string } | undefined {
+    const path = environment.NIGHTSKY_OSM_REGIONAL_MANIFEST;
+    const expectedSha256 = environment.NIGHTSKY_OSM_REGIONAL_SHA256;
+    if (path === undefined && expectedSha256 === undefined) return undefined;
+    if (!path?.trim() || path.length > 4096 || /[\x00-\x1f\x7f]/.test(path) || !expectedSha256 || !/^[a-f0-9]{64}$/i.test(expectedSha256) || environment.NIGHTSKY_OSM_CANDIDATE_INDEX !== undefined) {
+        throw Error("Invalid regional candidate configuration.");
+    }
+    return { path, expectedSha256: expectedSha256.toLowerCase() };
 }
 export function createNightSkyPluginApp(dependencies: PluginAppDependencies = {}) {
     const app = express();
     app.disable("x-powered-by");
+    configureMcpProxyTrust(app, dependencies.trustedProxyAddresses);
     app.use(requestLogging(dependencies.log ?? (line => console.log(line))));
     app.use(express.json({ limit: "32kb" }));
     mountHealthRoute(app, dependencies.health);
@@ -47,7 +60,9 @@ export async function startNightSkyPlugin() {
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
-    const app = createNightSkyPluginApp({ allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode });
+    const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });
+    const candidateProvider = regional && toolMode === "full" ? await loadRegionalOsmProvider(regional.path, { expectedSha256: regional.expectedSha256 }) : undefined;
+    const app = createNightSkyPluginApp({ allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES });
     const server = createServer(app);
     await new Promise<void>((done, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); done(); }); });
     console.log("NightSky plugin listener ready.");

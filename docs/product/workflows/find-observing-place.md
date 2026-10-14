@@ -27,3 +27,7 @@ Pass requested supported `locale` and `units` to planning/comparison tools. Summ
 ## Optional-service failures
 
 Preserve the returned reason when an enabled candidate, history, aurora or site-context lookup fails or is outside coverage. Describe unavailable data as unavailable; do not describe an enabled service as disabled or interpret missing evidence as clear weather, safe access or no sky activity. Continue with the remaining supported evidence and show the gap.
+
+## Regional artifact mode
+
+An operator may install a reviewed regional manifest instead of the flat index. Preserve each candidate's own source/vintage and the returned partial/not-covered reason. Region point bounds route searches; they do not establish complete radius coverage, administrative or polygon membership, public access, darkness or an entrance. A failed integrity/conflict query must remain unavailable rather than be replaced with another region or an old result. Direct search and the planner share the installed regional provider. The product still plans at a separately resolved named GeoNames destination; candidate IDs do not become supported planning coordinates.

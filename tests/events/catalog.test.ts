@@ -88,8 +88,10 @@ test("preservesCatalogSourceAndVintage", async () => {
 test("listsV1UnsupportedEventClasses", async () => {
   const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-01-01T00:00:00Z", "2026-12-31T00:00:00Z", "Asia/Kolkata") }, index);
   assert.ok(result.unsupportedEventTypes.includes("occultation"));
-  assert.ok(result.unsupportedEventTypes.includes("planetary-conjunction"));
-  assert.ok(result.unsupportedEventTypes.includes("opposition"));
+  assert.ok(!result.unsupportedEventTypes.includes("planetary-conjunction"));
+  assert.ok(!result.unsupportedEventTypes.includes("opposition"));
+  assert.ok(result.events.some(event => event.eventType === "opposition"));
+  assert.match(result.caveats.join(" "), /Apparent planet-pair conjunctions.*unsupported/);
   assert.ok(result.unsupportedEventTypes.includes("comet"));
 });
 

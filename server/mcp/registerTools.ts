@@ -13,9 +13,9 @@ import type { WeatherProvider } from "../providers/weather/types";
 import { controlsFor, type UpstreamControls, type UpstreamProvider } from "../providers/upstreamControls";
 import { auroraOutlookResultSchema, getAuroraOutlookInputSchema, getNightConditionsInputSchema, nightConditionsResultSchema, type AuroraOutlookResult } from "../../shared/nightsky/weather";
 import { getNoaaAuroraOutlook } from "../providers/aurora/noaaSwpc";
-import { loadOsmCandidateIndex, searchObservingLocations, type OSMCandidateIndex } from "../places/osmCandidates";
+import { loadOsmCandidateIndex, searchObservingLocations, type OSMCandidateIndex, type SearchPlace } from "../places/osmCandidates";
 import { getLocationContext } from "../places/context";
-import { getLocationContextInputSchema, getLocationContextResultSchema, searchObservingLocationsInputSchema, searchObservingLocationsResultSchema } from "../../shared/nightsky/places";
+import { getLocationContextInputSchema, getLocationContextResultSchema, searchObservingLocationsInputSchema, searchObservingLocationsResultSchema, type SearchObservingLocationsInput } from "../../shared/nightsky/places";
 import { planObservingSessionInputSchema, planResultSchema } from "../../shared/nightsky/planning";
 import { planObservingSession, type PlannerServices } from "../nightsky/planner";
 import { compareObservingOptionsInputSchema, compareObservingOptionsResultSchema, recommendSpecialistToolsInputSchema, specialistToolsResultSchema } from "../../shared/nightsky/planning";
@@ -44,6 +44,8 @@ export interface NightSkyDependencies {
   osmCandidateIndex?: OSMCandidateIndex;
   /** Route-owned immutable candidate artifact shared by direct/composed tools. */
   osmCandidateIndexLoader?: () => Promise<OSMCandidateIndex | undefined>;
+  /** Operator-installed regional provider shared by direct and composed requests. */
+  candidateProvider?: { search(input: SearchObservingLocationsInput, options: { place: SearchPlace }): ReturnType<typeof searchObservingLocations> };
   weatherProvider?: WeatherProvider;
   weatherUserAgent?: string;
   weatherRateLimiter?: MetRateLimiter;
@@ -77,6 +79,11 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   dependencies = { ...dependencies, upstreamControls: dependencies.upstreamControls ?? controlsFor(dependencies.fetcher) };
   let placeIndexPromise: Promise<GeoNamesPlaceIndex | undefined> | undefined;
   let osmCandidateIndexPromise: Promise<OSMCandidateIndex | undefined> | undefined;
+  const candidatesFor = async (input: SearchObservingLocationsInput, place: SearchPlace) => {
+    if (dependencies.candidateProvider) return searchObservingLocationsResultSchema.parse(await dependencies.candidateProvider.search(input, { place }));
+    const candidateIndex = dependencies.osmCandidateIndex ?? await (osmCandidateIndexPromise ??= (dependencies.osmCandidateIndexLoader ?? loadOsmCandidateIndex)());
+    return searchObservingLocations(input, { index: candidateIndex, place });
+  };
   let climateProvider: NightSkyDependencies["climateProvider"];
   const climateFor = (index: GeoNamesPlaceIndex): NonNullable<PlannerServices["getClimatology"]> => {
     if (dependencies.plannerServices?.getClimatology) return dependencies.plannerServices.getClimatology;
@@ -103,8 +110,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     searchCandidates: dependencies.plannerServices?.searchCandidates ?? (async (placeId: string) => {
       const city = index.getById(Number(placeId.slice("place:v1:geonames:".length)));
       if (!city) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
-      const candidateIndex = dependencies.osmCandidateIndex ?? await (osmCandidateIndexPromise ??= (dependencies.osmCandidateIndexLoader ?? loadOsmCandidateIndex)());
-      return searchObservingLocations(searchObservingLocationsInputSchema.parse({ placeId }), { index: candidateIndex, place: { placeId, latitude: city.latitude, longitude: city.longitude } });
+      return candidatesFor(searchObservingLocationsInputSchema.parse({ placeId }), { placeId, latitude: city.latitude, longitude: city.longitude });
     }),
     getClimatology: climateFor(index),
   });
@@ -224,7 +230,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("search_sky_events", {
     title: "Find sky events for this place and date range",
-    description: "Find local Moon phases, solar/lunar eclipses, equinoxes and solstices, and sourced recurring meteor shower windows. Eclipse and Moon visibility is based on geometric horizon only. Meteor radiant visibility is not calculated. Unsupported event classes are listed in the structured result.",
+    description: "Find calculated Moon phases, solar/lunar eclipses, equinoxes, solstices, outer-planet oppositions and explicitly defined inferior/superior solar alignments, plus sourced year-specific meteor forecast maxima. Solar alignments do not cover apparent planet-pair conjunctions or establish observability; never suggest unfiltered solar viewing. Planet visibility is not evaluated. Lunar intervals carry model-conditional horizon bounds; solar contacts use the stated refraction model. Meteor season and radiant coverage are limited. Unsupported classes and coverage gaps are explicit.",
     inputSchema: searchSkyEventsInputSchema,
     outputSchema: skyEventsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.search_sky_events,
@@ -237,7 +243,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("search_observing_locations", {
     title: "Find nearby observing place candidates",
-    description: "Search the locally installed, coverage-labeled OpenStreetMap candidate index near a previously resolved named place. Results include source links and dataset vintage. Candidate tags do not verify darkness, public access, night opening, safety, permits or current closures.",
+    description: "Search locally installed, coverage-labeled OpenStreetMap candidate artifacts near a previously resolved named place. Flat or regional artifacts retain source links and individual dataset vintages. Candidate tags do not verify darkness, public access, night opening, safety, permits or current closures.",
     inputSchema: searchObservingLocationsInputSchema,
     outputSchema: searchObservingLocationsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.search_observing_locations,
@@ -246,10 +252,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const cityId = Number(input.placeId.slice("place:v1:geonames:".length));
     const city = input.placeId.startsWith("place:v1:geonames:") ? index?.getById(cityId) : undefined;
     if (!city || !index) throw new RangeError("The selected named place is unavailable. Resolve it again.");
-    const result = await searchObservingLocations(input, {
-      index: dependencies.osmCandidateIndex ?? await (osmCandidateIndexPromise ??= (dependencies.osmCandidateIndexLoader ?? loadOsmCandidateIndex)()),
-      place: { placeId: input.placeId, latitude: city.latitude, longitude: city.longitude },
-    });
+    const result = await candidatesFor(input, { placeId: input.placeId, latitude: city.latitude, longitude: city.longitude });
     return { content: [{ type: "text", text: `OpenStreetMap candidates: ${result.availability.reason} Coverage: ${result.coverage}` }], structuredContent: result };
   });
 

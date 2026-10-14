@@ -8,6 +8,8 @@ The active meteor calendar uses the specifically rights-reviewed NASA MEO report
 
 Actual OSM evidence includes 1,327 regional nodes/ways and a separate 134-candidate offline Bhutan artifact. Points are explicitly bounding-box centers or mean complete-way vertices; entrance/access/darkness remain unknown. Historical runtime coverage remains the immutable three-place 2025 sample; four additional 1991–1992 checkpoints are incomplete-source measurements, not a new baseline. Grouped historical acquisition/partitioning/publication is tested offline; no new grouped requests have run. See offline-extract-wave.md and grouped-history-wave.md, alongside earlier wave records. The source table below also records prospective routes and historical gates; these current enabled-source dispositions take precedence over older recurring-catalog assumptions.
 
+Calculated outer-planet oppositions and explicitly labeled inferior/superior solar alignments now use the pinned MIT Astronomy Engine relative-heliocentric-longitude definition in1900–2100. NAOJ2026 geocentric table/reference reuse is checked with required credit for coarse independent identity tests; no NAOJ calendar is a runtime feed or all-years accuracy proof. Apparent planet-pair conjunctions remain unsupported. See planet-events-wave.md. A pinned regional manifest now serves the retained India/Bhutan versions on demand without collapsing their source dates; global coverage remains unproved.
+
 ## Source disposition
 
 | V1 journey / data | Candidate source and exact product | Fee, rights and attribution | Coverage, cadence, limits and operating work | V1 disposition and fallback |
