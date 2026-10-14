@@ -136,4 +136,3 @@ class SyntheticBuildTest(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError,'ID cap'): build_source(raw,root/'out',source)
 
 if __name__ == '__main__': unittest.main()
-

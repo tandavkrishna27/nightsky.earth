@@ -165,5 +165,3 @@ def bounded_filter(source, output, check):
                 writer.add_way(way); stats['writtenWays'] += 1
     check()
     return stats
-
-
