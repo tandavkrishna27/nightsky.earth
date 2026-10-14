@@ -47,11 +47,11 @@ Own timezone-scope-reconciliation.md. Map existing resolver assertions to propos
 - [x] Root registers tests and reconciles contracts/source register/status/evidence.
 - [x] Fresh whole-suite/type/package/offline review/build checks; preserve production runtime checks as applicable.
 - [x] Broad branch review, resolve findings, final diff/privacy/whitespace verification.
-- [ ] Scoped commit/push and observe exact-revision CI; record evidence.
+- [x] Scoped commit/push and observe exact-revision CI; record evidence.
 
 ## Rulings
 
 Ruling: preserve original full-source/global scope while adding bounded ETA/ORI support — owner requested complete experience; partial scientific evidence cannot satisfy full seasons — if additional sources emerge, extend separately.
 Ruling: Task4 stays Partial during recommendation — approval was to prepare the recommendation, not silently remove boundary criteria — later explicit disposition can close it.
 
-Evidence: docs/operations/data-gap-wave.md. Independent review passed with no actionable findings; final CI remains pending before push.
+Evidence: docs/operations/data-gap-wave.md. Independent review passed with no actionable findings; all six implementation CI jobs passed at4da8870 (run38535497812). Final documentation-only CI is observed separately.
