@@ -67,7 +67,7 @@
 - [x] Freeze canonical source bytes after all lane reviews; build both host ZIPs and compare bundled references/inventory/digests. Run full Node tests, three type configurations, public/package/eight review/build/runtime checks; OSM/ERA5 workflow remains covered by actual CI.
 - [x] Whole-wave independent review, including local endpoint/security isolation and truthful task/status docs. Correct any findings with fresh regressions where needed.
 - [x] Update tickets/status/closure and current plan checkboxes, preserving explicit source/host/publish gates and deferred interactive/accuracy findings.
-- [ ] Scoped commit/push existing branch, observe all six exact-head CI jobs and record substantive evidence. No deployment or downloads.
+- [x] Scoped commit/push existing branch, observe all six exact-head CI jobs and record substantive evidence. No deployment or downloads.
 
 ## Decisions and self-review
 
@@ -79,4 +79,4 @@ Self-review: lane1 and2 share only a read-only canonical workflow interface unti
 
 ## Current verification
 
-Fresh Windows Node24.14.0:496discovered/495passed/onepermission skip/zero failures. Three type configurations, public and both local packages, eight offline review sets, full build and standalone full/resolver-only plus compiled regional runtimes pass. Independent content/spec review and raw-byte-lint re-review pass. Root accepted5.C4/10A.C3/10A.C5 reopening and reconciled all160 original boxes89checked/71open. Installed model/plugin and final accuracy acceptance remain deferred; no download/upload/deployment occurred. Exact-head CI pending push.
+Fresh Windows Node24.14.0:496discovered/495passed/onepermission skip/zero failures. Three type configurations, public and both local packages, eight offline review sets, full build and standalone full/resolver-only plus compiled regional runtimes pass. Independent content/spec review and raw-byte-lint re-review pass. Root accepted5.C4/10A.C3/10A.C5 reopening and reconciled all160 original boxes89checked/71open. Installed model/plugin and final accuracy acceptance remain deferred; no download/upload/deployment occurred. All six CI jobs passed for5b3ebda (run38591337445); final documentation-followup is observed separately.
