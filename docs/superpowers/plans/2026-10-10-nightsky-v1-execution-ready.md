@@ -207,18 +207,20 @@ Closure 14 October 2026: original local acceptance independently audited and ver
 - [ ] Confirm the production hostname can serve the exact `/.well-known/openai-apps-challenge` token path after the dashboard creates the token. Do not replace another plugin’s token at a shared challenge URL; select an eligible parent origin or a distinct hostname if needed.
 - [ ] Pass when identity, project eligibility, the Gate 0F host choices, frozen full URL, publisher support contact owner, and challenge-host setup are recorded. Do not create a temporary or scratch plugin on the production hostname.
 
-### Task 4: Implement place resolution and local time zones
+### Task 4: Implement global named-place resolution and record-based local time zones
 
-**Files:** Create `server/places/geonames.ts`, `server/places/index.ts`, `server/nightsky/time.ts`, `tests/places/geonames.test.ts`, and `tests/nightsky/time.test.ts`; add data/license metadata to `docs/operations/data-sources.md`.
+**Scope accepted 14 October 2026:** owner approved the named-place timezone recommendation in the local-evidence wave. Coordinate-boundary lookup is deferred; previous exact wording remains in `docs/operations/v1-acceptance-audit.md` and Git history. No municipality-wide, arbitrary-point or candidate-local timezone accuracy is claimed.
 
-**Consumes:** Task 2 `PlaceRef` and Task 0 dataset/license decisions.
+**Files:** `server/places/geonames.ts`, `server/places/index.ts`, `server/nightsky/time.ts`, place/time/integration tests and source/license/runtime refresh documentation.
 
-**Produces:** `resolvePlace(input): Promise<ResolvePlaceResult>`, `resolveTimeZone(latitude, longitude): IanaTimeZoneResult`, and the MCP tool `resolve_place`.
+**Consumes:** Task2 `PlaceRef` and Task0 dataset/license decisions.
 
-- [ ] Test `returnsUniquePlaceMatch`, `returnsAmbiguousMatchesWithoutChoosing`, `returnsNoMatch`, `requiresCountryQualifierWhenNeeded`, `matchesNonLatinAliasesWhenAvailable`, `rejectsCoordinateTextOnEveryHost`, `resolvesExplicitHostHintToNamedPlace`, `returnsLocationUnavailableWhenHintAbsent`, `ignoresHostHintWithoutFlag`, `rejectsMalformedGazetteerRow`, `resolvesIanaZoneAtBoundary`, `resolvesZoneAcrossDateLine`, `rejectsOutOfRangeCoordinates`, `returnsStalePlaceIdWithReresolvePath`, and `formatsLocalTimeAcrossDst`.
-- [x] Build a versioned gazetteer/time-zone refresh process with source, vintage, attribution and error reporting. Do not call public Nominatim once per user keystroke. Make `resolve_place` return the `placeId` used by subsequent tools; do not repeat the free-text location on plan, forecast, astronomy, or candidate-search calls.
-- [x] Use namespaced place IDs tied to source identity and index vintage. On retired or incompatible IDs, return `stale`/`not-found` plus a re-resolve path. Preserve ambiguity for clarification; keep coordinates in server-private resolution records and expose them only if a later user-facing task demonstrably needs them.
-- [ ] Record time-zone boundary data and its license/attribution obligations in the source register. Pass when `npm test` passes the place/time cases and no failed time-zone lookup silently falls back to UTC.
+**Produces:** `resolvePlace(input): Promise<ResolvePlaceResult>`, `resolvePlaceTimeZone(placeId, index?): Promise<PlaceTimeZoneResult | undefined>`, and MCP `resolve_place`. Missing/unusable records require explicit recovery, not UTC substitution.
+
+- [x] Retain original named-place, ambiguity, aliases, host-hint/privacy, malformed-row, stale-ID, coordinate-range and DST tests. Replace boundary membership with `resolvesIanaZoneFromNamedPlaceRecord`; verify unsupported/missing IDs and invalid zones without UTC substitution. Assert opposing civil dates across the date line, fractional offsets, two explicit UTC instants through a DST fold, named-city caveats, remote/cross-border approximate hints and rejection of candidate IDs for planning.
+- [x] Build and document a versioned global gazetteer refresh carrying row-assigned IANA identifiers, source/checksum/vintage/attribution/error reporting. Document separate Node/ICU time-rule refresh and rollback. Preserve IDs downstream; no public Nominatim per keystroke.
+- [x] Keep namespaced IDs, retired/incompatible-ID recovery, ambiguity and private-coordinate requirements. Subsequent tools use resolved place IDs rather than repeated names or coordinates.
+- [x] Record GeoNames gazetteer and IANA/runtime-rule provenance/license obligations. Explicitly exclude timezone polygons/candidate-local assignment. Pass when mapped cases pass without UTC fallback and limitations are consistent. Production artifact installation and host capacity remain release gates.
 
 ### Task 4B: Scan the real OpenAI draft's location contract before adding the full tool set
 
@@ -713,3 +715,7 @@ Local completion does not establish global candidate/history coverage or actual 
 ## Data gap wave — 14 October 2026
 
 Approved Tasks0/6/8 and Task4 recommendation work is recorded in `docs/operations/data-gap-wave.md`. Two licensed typical solar-longitude intervals are enabled as source-only reference metadata, with no date conversion/overlap/radiant-domain extension. Global build protocol remains proposed and measured worldwide coverage unknown. Task4 replacement wording is proposed only; original acceptance and counts11 Done/10 Partial/6 Not started remain unchanged. Existing CI now exercises the new metadata in its compiled regional runtime fixture. No deployment or data acquisition.
+
+## Local evidence wave — 14 October 2026
+
+The owner accepted named-place timezone V1 with boundary lookup deferred. Task4 wording and C1/C4 checks are reconciled using timezone-acceptance-wave.md; prior original text remains in the historical audit. Current12 Done/9 Partial/6 Not started. Local-evidence-wave.md records exact retained Bhutan filter/partition equality, bounded Windows lifecycle fixes and meteor conversion investigation with no guessed dates. Existing Python discovery includes the new tests; no source acquisitions or deployment.

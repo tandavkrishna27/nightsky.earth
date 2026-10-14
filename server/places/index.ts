@@ -1,4 +1,4 @@
-import { placeIdSchema } from "../../shared/nightsky/common";
+import { ianaTimeZoneSchema, placeIdSchema } from "../../shared/nightsky/common";
 import { loadGeoNamesPlaceIndex, type GeoNamesPlaceIndex } from "./geonames";
 
 export * from "./geonames";
@@ -17,5 +17,5 @@ export async function resolvePlaceTimeZone(placeIdValue: string, index?: GeoName
   if (!placeIndex) return undefined;
   const geonameId = Number(placeId.slice("place:v1:geonames:".length));
   const city = placeIndex.getById(geonameId);
-  return city ? { placeId, timeZone: city.timeZone, indexVintage: placeIndex.vintageLabel } : undefined;
+  return city ? { placeId, timeZone: ianaTimeZoneSchema.parse(city.timeZone), indexVintage: placeIndex.vintageLabel } : undefined;
 }

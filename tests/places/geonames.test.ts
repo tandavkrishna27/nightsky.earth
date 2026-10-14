@@ -106,3 +106,39 @@ test("resolvesZoneAcrossDateLine", async () => {
   assert.equal(auckland.matches[0]?.timeZone, "Pacific/Auckland");
   assert.equal(apia.matches[0]?.timeZone, "Pacific/Apia");
 });
+
+test("nearby host hint returns a named area zone without claiming hint zone membership", async () => {
+  // Synthetic border: the hint is closer to the other named area. No polygon is involved.
+  const border = new GeoNamesPlaceIndex([
+    city({ id: 1, name: "Western town", lat: 45, lon: -67.01, country: "US", countryName: "United States", zone: "America/New_York" }),
+    city({ id: 2, name: "Eastern town", lat: 45, lon: -66.99, country: "CA", countryName: "Canada", zone: "America/Halifax" }),
+  ], vintage);
+  const result = await resolvePlace({ useApproximateHostLocation: true }, { index: border, hostLocationHint: { latitude: 45, longitude: -66.995 } });
+  assert.equal(result.matches[0]?.displayName, "Eastern town, Canada");
+  assert.equal(result.matches[0]?.timeZone, "America/Halifax");
+  assert.ok(result.caveats.some(caveat => /nearest.*named.*area/i.test(caveat) && /hint.*time zone/i.test(caveat)));
+  assert.ok(result.caveats.some(caveat => /not a polygon lookup/i.test(caveat)));
+  assert.equal(JSON.stringify(result).includes("-66.995"), false);
+});
+
+test("remote host hint yields no named place and no time zone", async () => {
+  const result = await resolvePlace({ useApproximateHostLocation: true }, { index, hostLocationHint: { latitude: 0, longitude: 0 } });
+  assert.equal(result.availability.status, "not-covered");
+  assert.deepEqual(result.matches, []);
+  assert.match(result.availability.reason, /100 km/);
+});
+
+test("invalid host hint fails without substituting a named zone", async () => {
+  await assert.rejects(() => resolvePlace({ useApproximateHostLocation: true }, { index, hostLocationHint: { latitude: 91, longitude: 181 } }));
+});
+
+test("missing named place index returns unavailable without UTC fallback", async () => {
+  const result = await resolvePlace({ placeQuery: "Pune" });
+  assert.equal(result.availability.status, "unavailable");
+  assert.deepEqual(result.matches, []);
+});
+
+test("named city result retains record-zone limitation", async () => {
+  const result = await resolvePlace({ placeQuery: "Pune" }, { index });
+  assert.ok(result.caveats.some(caveat => /named city record/i.test(caveat) && /not a polygon lookup/i.test(caveat)));
+});

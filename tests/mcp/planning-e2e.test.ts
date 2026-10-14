@@ -63,6 +63,13 @@ test("local MCP journey resolves a named place and returns an evidence-aware pla
     assert.ok(result.preparation.some((step: string) => /dark adaptation/i.test(step)));
     assert.ok(result.gaps.some((gap: string) => /visibility/i.test(gap)));
 
+    const candidatePlan = await post(base, { jsonrpc: "2.0", id: 30, method: "tools/call", params: { name: "plan_observing_session", arguments: {
+      placeId: "place:v1:osm:node:123", activity: "general-stargazing", window: { startUtc: "2026-10-15T18:00:00Z", endUtc: "2026-10-16T06:00:00Z", timeZone: "Europe/London" },
+    } } });
+    assert.equal(candidatePlan.status, 200);
+    assert.equal(candidatePlan.payload.result.isError, true);
+    assert.equal(candidatePlan.payload.result.structuredContent, undefined);
+
 
     const compared = await post(base, { jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "compare_observing_options", arguments: { options: [
       { placeId: place.placeId, activity: "meteor-shower", window: { startUtc: "2026-10-15T18:00:00Z", endUtc: "2026-10-16T06:00:00Z", timeZone: place.timeZone } },

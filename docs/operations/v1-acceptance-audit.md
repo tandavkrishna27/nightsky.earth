@@ -1,12 +1,12 @@
 # V1 original acceptance audit — 14 October 2026
 
-Audited worktree `.worktrees/plugin-v1`, branch `codex/plugin-v1`, source revision `6e4cf4ca18f57f04ea53bdca81569bfb2ac4be82`. Only this audit file is owned by this lane. All 27 original headings and every original checkbox are reproduced below with stable identities. Task 0 has six independent gates in addition to its closing checkbox. The wording is retained so compound requirements are not hidden by a short label. Named fixture clauses have their own subordinate ledger.
+Audited worktree `.worktrees/plugin-v1`, branch `codex/plugin-v1`, source revision `6e4cf4ca18f57f04ea53bdca81569bfb2ac4be82`. This is the original-wording audit snapshot; later accepted dispositions are recorded at the end. Only this audit file was owned by its audit lane. All 27 original headings and every original checkbox are reproduced below with stable identities. Task 0 has six independent gates in addition to its closing checkbox. The wording is retained so compound requirements are not hidden by a short label. Named fixture clauses have their own subordinate ledger.
 
 `satisfied` means the required local implementation/evidence is present and reviewed; it is not a fresh full-suite pass claim. `partial` means some required clauses remain. `open` means required external/implementation evidence is absent. `conditional-NA` means the original condition is currently not enabled; it is not removal of a required journey. The controller owns final Windows/Linux/CI verification. Historical test results are identified in `docs/operations/ci-verification.md` (latest recorded implementation `7e7bf400`, Windows464/Ubuntu461 passed, differing explicit artifact skips). No tests, deployment, retrieval, account changes, external messages, commit or push were performed in this audit.
 
 Applicable instruction search found no repository/ancestor AGENTS.md. Read review and verification-before-completion skills; applied acceptance-by-criterion/evidence-before-claims. No nested agents or runtime edits.
 
-## Required corrections to current closure matrix
+## Historical corrections to the pre-reconciliation closure matrix
 
 - Task 4 is **Partial under the unchanged original wording**: named-city IANA lookup is implemented, but `resolvesIanaZoneAtBoundary` and coordinate-to-boundary production interface are absent. `source-spikes.md` explicitly excludes timezone polygons. Do not implement a new polygon service solely to satisfy a stale sentence: first reconcile the named-place-only scope through an explicit reviewed disposition. A test name alias cannot prove polygon accuracy.
 - Task 6 all-years independent certification is **scope creep**. The original requirement is selected fixed authoritative reference cases, documented tolerance and explicit unsupported boundaries. Supported bounded calculations with unknown grazing cases do not require certifying every year/location. Complete licensed meteor seasons and drift throughout claimed windows are genuine remaining product/source requirements; NASA maxima and GMN fit windows are not seasons.
@@ -2184,3 +2184,7 @@ Local unresolved implementation/scope gaps: Task4 original boundary interface/fi
 }
 ```
 
+
+## Accepted Task4 disposition — local evidence wave, 14 October 2026
+
+The owner accepted global named-place timezone V1 and deferred coordinate-boundary lookup. Root replaced Task4 interfaces/C1/C4 wording explicitly, preserving previous exact criteria above and Git history. [Mapped acceptance](timezone-acceptance-wave.md) and [scope disposition](timezone-scope-reconciliation.md) cover named-record zones, missing/invalid/unsupported IDs without UTC fallback, named-area near-me limitations, opposing civil dates, fractional offsets, UTC-fold display, candidate-plan rejection and independent runtime/gazetteer refresh/rollback provenance. Fresh484 Node tests:483 passed/one permission skip/zero failures; three type configurations pass; independent timezone review clear. Task4 is Done under accepted scope; current counts12 Done/9 Partial/6 Not started. Group4 stays Partial because4B requires an actual draft. The historical JSON recommendations above describe the unchanged original boundary requirement and are not the current accepted scope.

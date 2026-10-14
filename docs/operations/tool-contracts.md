@@ -64,3 +64,7 @@ Operator-only `candidateProvider` selects bounded regional artifacts for both di
 Operator-only `NIGHTSKY_MCP_TRUSTED_PROXIES` is default-disabled, validates narrow explicit IP/CIDR values and supports one rewriting proxy. This is an admission key only, not authorization/consent. A per-request work lease holds capacity until transport and all underlying tool callbacks settle, including client disconnect; no request metadata controls trust or leases. Local fixtures are not production topology proof. See local-proxy-wave.md and regional-serving-wave.md.
 
 Planet alignment event descriptions identify their heliocentric-longitude definition and unevaluated local visibility. Apparent planet-pair conjunctions are not supplied. The engineering range 1900–2100 and partial/out-of-horizon states remain visible; no all-date numerical accuracy promise.
+
+## Accepted named-place timezone scope — 14 October 2026
+
+GeoNames named records supply IANA identifiers; the internal helper validates them before return, with no UTC fallback. Near-me selects the nearest indexed named area within its existing bound and explicitly does not establish the hint's zone membership. Public observing candidates cannot be used as named-place planning inputs. Explicit UTC inputs retain distinct offsets across fall DST folds; arbitrary-coordinate polygons and ambiguous local-wall-clock uniqueness remain outside V1. See [mapped acceptance](timezone-acceptance-wave.md).

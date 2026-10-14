@@ -99,3 +99,7 @@ Use [v1-acceptance-audit.md](v1-acceptance-audit.md) and [v1-closure-wave.md](v1
 ## Data gap wave — 14 October 2026
 
 [Wave evidence](data-gap-wave.md) records bounded source-only ETA/ORI reference intervals, the global offline-build feasibility protocol and the proposed timezone scope wording. Fresh integrated Windows tests:473 discovered/472 passed/one permission skip/zero failures; types/package/eight review sets/full build/compiled runtimes pass. Independent review found no actionable issues. Counts remain **11 Done/10 Partial/6 Not started**: complete seasons/global artifacts and unchanged Task4 boundary acceptance remain open. No acquisition or deployment.
+
+## Accepted timezone and retained evidence wave — 14 October 2026
+
+[Current evidence](local-evidence-wave.md) supersedes prior count snapshots: **12 Done/9 Partial/6 Not started**, groups6/10/3. Task4 closes under explicitly owner-accepted named-place timezone scope after mapped tests, source/runtime documentation and independent review; no point/polygon or candidate-local claim. Fresh Node484/483pass/onepermission skip/zero failures; PythonOSM20pass. Retained Bhutan filtering reproduces134 candidates exactly with measured build savings, not global capacity. Meteor date convention remains unresolved with unavailable conversion. Source/host/release gates stay open; no downloads or deployment.

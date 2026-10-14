@@ -12,7 +12,7 @@ This audits every original heading against its actual acceptance criteria. User 
 | 3 | Registry, body/Host/metadata/error/rate/concurrency/log controls; current actual transport and Inspector proof | Original local acceptance met; hosted logging/retention and replica budgets belong to 3B/14 |
 | 3B | Protected local protocol checks and concrete early connection record procedure prepared | Actual controlled staging endpoint and ChatGPT/Codex connection |
 | 3C | Individual/India/support facts retained; identity/ownership prerequisites recorded | Exact verified legal name, eligible project and permanent endpoint ownership |
-| 4 | Global named GeoNames resolution plus licensed Hanle supplement, ambiguity/timezones/consent/privacy fixtures | Original coordinate-boundary interface/fixture mismatch awaits scope reconciliation; actual host-location side channel remains client-specific evidence |
+| 4 | Global named GeoNames resolution plus licensed Hanle supplement, ambiguity/timezones/consent/privacy fixtures | Owner accepted named-place scope; mapped acceptance passes. Actual host-location side channel and current production timezone-rule validation remain client/release evidence |
 | 4B | Guarded resolver-only operator mode, two transport tests, actual compiled Inspector resolver call, scan cases/record procedure | Same real branded draft, production URL/domain challenge and official location scan |
 | 5 | Local geometry/targets, independent references, polar/DST/hemisphere tests | No general arbitrary-date, atmosphere or terrain claim |
 | 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models, explicit unsupported event classes and supported-boundary validation; adaptive model-conditional intervals leave unresolved grazing geometry unevaluated |
@@ -65,3 +65,7 @@ The [original acceptance ledger](v1-acceptance-audit.md) audits every original c
 ## Data gap wave — 14 October 2026
 
 [Wave evidence](data-gap-wave.md) records bounded source-only ETA/ORI reference intervals, the global offline-build feasibility protocol and the proposed timezone scope wording. Fresh integrated Windows tests:473 discovered/472 passed/one permission skip/zero failures; types/package/eight review sets/full build/compiled runtimes pass. Independent review found no actionable issues. Counts remain **11 Done/10 Partial/6 Not started**: complete seasons/global artifacts and unchanged Task4 boundary acceptance remain open. No acquisition or deployment.
+
+## Accepted timezone and retained evidence wave — 14 October 2026
+
+[Current evidence](local-evidence-wave.md) supersedes prior count snapshots: **12 Done/9 Partial/6 Not started**, groups6/10/3. Task4 closes under explicitly owner-accepted named-place timezone scope after mapped tests, source/runtime documentation and independent review; no point/polygon or candidate-local claim. Fresh Node484/483pass/onepermission skip/zero failures; PythonOSM20pass. Retained Bhutan filtering reproduces134 candidates exactly with measured build savings, not global capacity. Meteor date convention remains unresolved with unavailable conversion. Source/host/release gates stay open; no downloads or deployment.

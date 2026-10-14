@@ -249,7 +249,10 @@ export async function resolvePlace(inputValue: ResolvePlaceInput, options: Resol
         ? { status: "partial", reason: "More than one place matches. Choose the intended city before planning." }
         : { status: "available", reason: "A named place and its GeoNames time zone were resolved." },
     sources: refs.length ? Array.from(new Map(refs.flatMap(ref => ref.sources).map(source => [source.url, source])).values()) : sources,
-    caveats: refs.length ? ["GeoNames is provided as-is. The assigned time zone follows the named city record and is not a polygon lookup for every coordinate in the municipality."] : [],
+    caveats: refs.length ? [
+      "GeoNames is provided as-is. The assigned time zone follows the named city record and is not a polygon lookup for every coordinate in the municipality.",
+      ...(locationSource === "host-approximate-location" ? ["The nearest indexed named area is a planning reference. Its time zone does not establish the approximate host hint's time zone or municipality; verify local civil time near a border."] : []),
+    ] : [],
     matches: refs,
     selectionRequired: refs.length > 1,
     locationSource,

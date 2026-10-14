@@ -1,6 +1,6 @@
 # Task 4 timezone scope reconciliation — proposed disposition
 
-Prepared 14 October 2026. **Recommendation for owner review; not an accepted scope change.** Task 4 remains Partial under its unchanged original wording. This document does not mark it Done, alter the execution plan, or establish production readiness.
+Prepared 14 October 2026; **named-place scope accepted by the owner on 14 October 2026** after the explicit recommendation, with coordinate-boundary resolving deferred. The sections below preserve the review rationale and proposed replacement text as the decision record. Acceptance evidence and implemented safeguards are recorded in [timezone-acceptance-wave.md](timezone-acceptance-wave.md). The root acceptance audit owns the original checklist/status reconciliation; this document does not establish production readiness.
 
 ## Decision proposed
 
@@ -118,10 +118,9 @@ Recommended scoped reconciliation and targeted evidence are approximately **1–
 
 | Review | Runs | Status | Findings |
 |---|---:|---|---|
-| Engineering plan review | 1 | Recommendation prepared; acceptance open | Architecture mismatch verified; existing interface retained; code/failure limits explicit; test gaps mapped; memory evidence distinguished from host budget. |
+| Engineering plan review | 1 | Named-place recommendation accepted 14 October 2026 | Architecture mismatch verified; existing interface retained; code/failure limits explicit; test gaps mapped; memory evidence distinguished from host budget. |
 | Independent outside voice | 0 | Not run | No additional agent or model review claimed. |
 
-**VERDICT:** Recommend global named-place scope with explicit acceptance and mapped evidence. Original Task 4 remains Partial. No implementation, tests, acquisition or deployment was performed in this lane.
+**VERDICT:** Global named-place scope accepted 14 October 2026; coordinate-boundary resolving deferred. The initial review performed no implementation or acquisition; the subsequent acceptance wave implements safeguards and records fresh local evidence separately. Root audit/checklist reconciliation follows the accepted wording and verified evidence. Runtime rule refresh and production capacity remain release work.
 
-**UNRESOLVED DECISIONS:**
-- Owner acceptance of the proposed Task 4 replacement versus retaining the coordinate-boundary requirement; original checklist/status must remain unchanged until that decision and its required evidence are recorded.
+NO UNRESOLVED DECISIONS

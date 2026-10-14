@@ -7,9 +7,9 @@ Audit: 14 October 2026, `codex/plugin-v1` / `.worktrees/plugin-v1`. Status is lo
 | Level | Done | Partial | Not started | Total |
 |---|---:|---:|---:|---:|
 | Numbered groups 0–18 | 6 | 10 | 3 | 19 |
-| Separately executable headings | 11 | 10 | 6 | 27 |
+| Separately executable headings | 12 | 9 | 6 | 27 |
 
-A group is Done only when all its lettered headings are Done. The Done groups are 1, 2, 5, 7, 10 and 11; group 4 remains Partial because 4B requires a real draft. Completed headings are 1, 2, 3, 5, 7A, 7B, 10A, 10B and 11A–11C. Task 4 is reopened as Partial under the unchanged boundary-interface acceptance; the current resolver provides named-city IANA zones. See the criterion audit for the mismatch. Tasks 13 and 15 are now Partial because local policy pages and review artifacts exist. Final cross-platform counts are recorded below from the integration owner; earlier wave counts remain historical snapshots in their linked records.
+A group is Done only when all its lettered headings are Done. The Done groups are 1, 2, 5, 7, 10 and 11; group 4 remains Partial because 4B requires a real draft. Completed headings are 1, 2, 3, 4, 5, 7A, 7B, 10A, 10B and 11A–11C. Task4 closes under the owner-accepted named-place timezone scope with mapped guard/date/DST tests and source/runtime refresh evidence; coordinate-boundary lookup is deferred. Earlier original-boundary mismatch remains in the historical audit. Tasks 13 and 15 are now Partial because local policy pages and review artifacts exist. Final cross-platform counts are recorded below from the integration owner; earlier wave counts remain historical snapshots in their linked records.
 
 ## All 27 headings
 
@@ -21,7 +21,7 @@ A group is Done only when all its lettered headings are Done. The Done groups ar
 | 3 — endpoint/registry | Done | Twelve stateless tools, consented metadata, bounded subject/IP counters, provider controls and safe errors implemented. Minimal shared request logger captures fixed route/status/duration only. Original local endpoint criteria passed actual transport and Inspector checks; hosted logging/retention/replica budgets remain in Tasks 3B/14. |
 | 3B — hosted OpenAI connection | Not started | No staging endpoint or real assistant connection. |
 | 3C — verified publisher/endpoint | Not started | Individual India direction confirmed; exact verified legal name, project/endpoint ownership and permanent hostname missing. |
-| 4 — named places/time zones | Partial | Global GeoNames city artifact plus reviewed Hanle supplement; named-place ambiguity, local times and metadata handling implemented. No arbitrary-coordinate boundary claim; original boundary interface/fixture requirements await explicit scope reconciliation. |
+| 4 — named places/time zones | Done | Global GeoNames city artifact plus reviewed Hanle supplement; named-place ambiguity, local times and metadata handling implemented. Accepted named-place-only scope; invalid/missing records do not become UTC, near-me retains named-area limitation, candidate IDs cannot create plans. Opposing civil dates/fractional offsets/fold UTC inputs and separate runtime/gazetteer refresh are tested/documented. No arbitrary-coordinate boundary claim. |
 | 4B — real draft location scan | Not started | Requires actual draft and hosted endpoint. |
 | 5 — astronomy/targets | Done | Independent JPL/USNO/NASA references and bounded local calculations; horizon/terrain/date-range limits retained. |
 | 6 — events/catalogs | Partial | Thirteen specifically rights-reviewed NASA MEO peak instants in each of 2025 and 2026; old recurring dates are audit-only. Twelve CC BY GMN bounded radiant models, integrated aliases and five independent JPL horizon references. Adaptive model-conditional lunar interval bounds now detect missed excursions and mark unresolved grazing cases unevaluated. Calculated outer-planet oppositions and explicitly labeled solar alignments now have bounded1900–2100 coverage and coarse independent references; apparent planet-pair events remain unsupported. Full seasons, other-year calendars, missing radiant codes and documented validation of supported boundaries remain open; see events-regional-proxy-wave.md. |
@@ -86,3 +86,7 @@ See [wave evidence](coverage-accuracy-wave.md) for adaptive lunar interval uncer
 ## Data gap wave — 14 October 2026
 
 [Wave evidence](data-gap-wave.md) records bounded source-only ETA/ORI reference intervals, the global offline-build feasibility protocol and the proposed timezone scope wording. Fresh integrated Windows tests:473 discovered/472 passed/one permission skip/zero failures; types/package/eight review sets/full build/compiled runtimes pass. Independent review found no actionable issues. Counts remain **11 Done/10 Partial/6 Not started**: complete seasons/global artifacts and unchanged Task4 boundary acceptance remain open. No acquisition or deployment.
+
+## Accepted timezone and retained evidence wave — 14 October 2026
+
+[Current evidence](local-evidence-wave.md) supersedes prior count snapshots: **12 Done/9 Partial/6 Not started**, groups6/10/3. Task4 closes under explicitly owner-accepted named-place timezone scope after mapped tests, source/runtime documentation and independent review; no point/polygon or candidate-local claim. Fresh Node484/483pass/onepermission skip/zero failures; PythonOSM20pass. Retained Bhutan filtering reproduces134 candidates exactly with measured build savings, not global capacity. Meteor date convention remains unresolved with unavailable conversion. Source/host/release gates stay open; no downloads or deployment.
