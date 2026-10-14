@@ -5,11 +5,47 @@ import { getAstronomyWindow, getTargetVisibility } from "../../server/nightsky/a
 import { planObservingSession, type PlannerServices } from "../../server/nightsky/planner";
 import { compareObservingOptions } from "../../server/nightsky/compare";
 import { assertStructuredResultSize, MAX_STRUCTURED_RESULT_BYTES } from "../../shared/nightsky/common";
+import { composeCandidateWindows } from "../../server/nightsky/windows";
+import { suggestVisibleTargets } from "../../server/nightsky/suggestions";
 
 const index = new GeoNamesPlaceIndex([{ geonameId: 1, name: "London", asciiName: "London", alternateNames: "", latitude: 51.5, longitude: -.12, countryCode: "GB", countryName: "United Kingdom", featureClass: "P", featureCode: "PPLC", population: 8000000, timeZone: "Europe/London", modificationDate: "2026-10-01" }], "fixture");
 const placeId = "place:v1:geonames:1";
 const window = { startUtc: "2026-10-15T18:00:00Z", endUtc: "2026-10-16T06:00:00Z", timeZone: "Europe/London" };
 const source = { name: "Fixture model", url: "https://example.test/model", attribution: "Fixture", dataClass: "forecast" as const, issuedAt: "2026-10-15T12:00:00Z" };
+
+test("real split darkness preserves the evening Milky Way opportunity and excludes the daylight gap", async () => {
+  const equator = new GeoNamesPlaceIndex([[2, "Equatorial fixture", "Equatorial fixture", "", 0, 0, "GH", "Ghana", 1, "Africa/Accra"]], "split-darkness-fixture");
+  const place = { placeId: "place:v1:geonames:2", timeZone: "Africa/Accra" };
+  const day = { startUtc: "2026-10-15T00:00:00Z", endUtc: "2026-10-16T00:00:00Z", timeZone: place.timeZone };
+  const astronomy = await getAstronomyWindow(place, day, equator);
+  const target = await getTargetVisibility("Milky Way core", place, day, equator);
+  const photography = composeCandidateWindows("astrophotography", day, astronomy, [target], undefined);
+  assert.equal(photography.length, 1);
+  assert.equal(photography[0]!.window.startUtc.slice(0, 16), "2026-10-15T18:58");
+  assert.equal(photography[0]!.window.endUtc.slice(0, 16), "2026-10-15T22:09");
+  const darkWindows = composeCandidateWindows("meteor-shower", day, astronomy, [], undefined);
+  assert.equal(darkWindows.length, 2);
+  assert.equal(darkWindows[0]!.window.endUtc.slice(0, 16), "2026-10-15T04:33");
+  assert.equal(darkWindows[1]!.window.startUtc.slice(0, 16), "2026-10-15T18:58");
+  assert.ok(darkWindows.every(candidate => !(candidate.window.startUtc < "2026-10-15T12:00:00Z" && candidate.window.endUtc > "2026-10-15T12:00:00Z")));
+  assertStructuredResultSize({ photography, darkWindows });
+  const multipleDays = { ...day, endUtc: "2026-10-20T00:00:00Z" };
+  const multipleAstronomy = await getAstronomyWindow(place, multipleDays, equator);
+  const multipleTarget = await getTargetVisibility("Milky Way core", place, multipleDays, equator);
+  const bounded = composeCandidateWindows("astrophotography", multipleDays, multipleAstronomy, [multipleTarget, multipleTarget], undefined);
+  assert.equal(bounded.length, 8);
+  assertStructuredResultSize(bounded);
+  const suggestions = await suggestVisibleTargets("astrophotography", place, day, { ...services(), index: equator }, astronomy);
+  assert.equal(suggestions[0]?.target.name, "Milky Way core");
+  assert.ok(suggestions.length <= 3);
+});
+
+test("explicit empty threshold rows override a legacy first-darkness interval", async () => {
+  const astronomy = await getAstronomyWindow({ placeId, timeZone: window.timeZone }, window, index);
+  assert.deepEqual(composeCandidateWindows("meteor-shower", window, { ...astronomy, solarThresholdIntervals: [] }, [], undefined), []);
+  const { solarThresholdIntervals, ...legacy } = astronomy;
+  assert.equal(composeCandidateWindows("meteor-shower", window, legacy as typeof astronomy, [], undefined).length, 1);
+});
 function services(): PlannerServices {
   return { index, getAstronomy: (p, w) => getAstronomyWindow(p, w, index), getTargetVisibility: (p, t, w) => getTargetVisibility(t, p, w, index),
     getNightConditions: async () => ({ availability: { status: "partial", reason: "Sparse model" }, sources: [source], caveats: [], placeId, window, forecasts: [{ availability: { status: "partial", reason: "Sparse model" }, source, forecastHorizonHours: 48, samples: [{ validAt: "2026-10-15T22:00:00Z", values: { totalCloudCover: { value: 12, unit: "%" } } }], missingFields: [] }], nightContext: { darkness: { status: "unknown", reason: "Fixture" }, forecastStepsDuringDarkness: [] } }),

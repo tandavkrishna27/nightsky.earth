@@ -1,3 +1,5 @@
+import { calculationCoordinates, CalculationPlaceClarificationError } from "../places/calculationPlace";
+import type { CalculationPlace } from "../../shared/nightsky/discovery";
 
 import { boundedAltitudeVisibility } from "./intervalVisibility";
 import { findPlanetAlignments, planetWindowCovered } from "./planetAlignments";
@@ -7,7 +9,7 @@ import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCES } from "./meteorP
 import { meteorTypicalSeasons, METEOR_TYPICAL_SEASON_SOURCE } from "./meteorTypicalSeasons";
 import { skyEventsResultSchema, searchSkyEventsInputSchema, type SkyEvent } from "../../shared/nightsky/events";
 import { type SourceRecord } from "../../shared/nightsky/common";
-import { resolvedCoordinatesForPlace, type GeoNamesPlaceIndex } from "../places/geonames";
+import { type GeoNamesPlaceIndex } from "../places/geonames";
 
 const Astronomy = createRequire(import.meta.url)("astronomy-engine") as typeof AstronomyTypes;
 const LIBRARY_VERSION = "2.1.19";
@@ -25,15 +27,13 @@ const UNSUPPORTED_REASONS: Record<string, string> = {
   other: "This event class has no maintained V1 source or calculation.",
 };
 
-export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceIndex) {
+export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceIndex, calculationPlace?: CalculationPlace) {
   const input = searchSkyEventsInputSchema.parse(inputValue);
   const placeId = input.placeId;
-  const cityId = Number(placeId.slice("place:v1:geonames:".length));
-  const city = index.getById(cityId);
-  const coordinates = resolvedCoordinatesForPlace(index, placeId);
-  if (!city || !coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-  if (input.window.timeZone !== city.timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
+  const coordinates = calculationCoordinates({placeId, timeZone: input.window.timeZone}, index, calculationPlace);
 
+  if (input.catalogueRevision && input.catalogueRevision !== coordinates.catalogueRevision) throw new CalculationPlaceClarificationError("resolve-again", "The selected catalogue revision does not match the calculation point. Resolve it again.");
+  if (input.displayTimeZone && input.displayTimeZone !== coordinates.displayTimeZone) throw new CalculationPlaceClarificationError("time-zone-mismatch", "The requested display time zone must match the calculation point and window time zone.");
   const start = Date.parse(input.window.startUtc);
   const end = Date.parse(input.window.endUtc);
   const requestedTypes = input.eventTypes ?? [...SUPPORTED_TYPES, ...ALL_EVENT_TYPES.filter((type) => !SUPPORTED_TYPES.includes(type as typeof SUPPORTED_TYPES[number]))];
@@ -53,9 +53,10 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
   const limited = events.slice(0, input.limit);
   const truncated = events.length > input.limit;
   const caveats = [
-    "Event calculations use Astronomy Engine 2.1.19 and its built-in ephemeris/time model; displayed times are local to the resolved GeoNames city.",
+    "Event calculations use Astronomy Engine 2.1.19 and its built-in ephemeris/time model; displayed times use the explicitly selected display time zone.",
     "Visibility uses modeled solar contact altitudes with standard atmospheric refraction for solar eclipses and geometric body altitude for lunar events; terrain, clouds, twilight brightness and naked-eye detectability are not established.",
   ];
+  if (coordinates.timeZoneBasis === "explicit-display") caveats.push(`Times use the explicit display time zone ${coordinates.displayTimeZone}; the actual site time zone is unverified.`);
   if (requestedTypes.includes("meteor-shower")) {
     caveats.push("Dated meteor events include only 13 NASA MEO maxima per year for 2025 and 2026; Lyrids, Orionids and Leonids have no peak in this forecast. Empty events do not establish no activity. Complete seasons, other years' maxima and local visibility remain unsupported. Forecast times can change.");
     caveats.push("Meteor typical-season metadata is unfiltered source reference evidence for two showers. Requested-window overlap is not evaluated; J2000 solar longitude convention is unresolved, so no UTC dates are inferred. Typical intervals do not guarantee activity, peaks, rates or visibility and do not extend radiant fit domains.");

@@ -1,4 +1,5 @@
 import * as z from "zod4";
+import { ianaTimeZoneSchema } from "./common";
 import { placeIdSchema, resultSchema, timeWindowSchema, utcInstantSchema } from "./common";
 
 const localIntervalSchema = z.strictObject({
@@ -10,6 +11,8 @@ const localIntervalSchema = z.strictObject({
 
 export const getAstronomyWindowInputSchema = z.strictObject({
   placeId: placeIdSchema,
+  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  displayTimeZone: ianaTimeZoneSchema.optional(),
   window: timeWindowSchema,
 }).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 5 * 24 * 60 * 60 * 1000, "Astronomy windows may not exceed 5 days.");
 
@@ -38,6 +41,8 @@ export type AstronomyWindowResult = z.infer<typeof astronomyWindowResultSchema>;
 
 export const getTargetVisibilityInputSchema = z.strictObject({
   placeId: placeIdSchema,
+  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  displayTimeZone: ianaTimeZoneSchema.optional(),
   targetQuery: z.string().trim().min(1).max(120),
   window: timeWindowSchema,
 }).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 14 * 24 * 60 * 60 * 1000, "Target visibility windows may not exceed 14 days.");

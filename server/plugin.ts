@@ -9,6 +9,9 @@ import { mountMcpRoute, type McpRouteDependencies } from "./mcp/route";
 import { requestLogging } from "./requestLogging";
 import { configureMcpProxyTrust } from "./mcp/proxyTrust";
 import { loadRegionalOsmProvider } from "./places/regionalOsm";
+import { loadCatalogueFiles } from "./places/catalogueFiles";
+import { createGlobalCatalogue } from "./places/globalCatalogue";
+import { loadGeoNamesPlaceIndex } from "./places/geonames";
 export interface PluginAppDependencies extends McpRouteDependencies {
     trustedProxyAddresses?: string;
     health?: HealthDependencies;
@@ -22,6 +25,12 @@ export function pluginRegionalConfiguration(environment: { NIGHTSKY_OSM_REGIONAL
         throw Error("Invalid regional candidate configuration.");
     }
     return { path, expectedSha256: expectedSha256.toLowerCase() };
+}
+export function pluginGlobalConfiguration(environment: {NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST?: string; NIGHTSKY_GLOBAL_CATALOGUE_SHA256?: string; NIGHTSKY_OSM_REGIONAL_MANIFEST?: string; NIGHTSKY_OSM_REGIONAL_SHA256?: string; NIGHTSKY_OSM_CANDIDATE_INDEX?: string}): {path:string;expectedSha256:string}|undefined {
+    const path=environment.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST, expectedSha256=environment.NIGHTSKY_GLOBAL_CATALOGUE_SHA256;
+    if(path===undefined&&expectedSha256===undefined) return undefined;
+    if(!path?.trim()||path.length>4096||/[\x00-\x1f\x7f]/.test(path)||!expectedSha256||!/^[a-f0-9]{64}$/i.test(expectedSha256)||environment.NIGHTSKY_OSM_REGIONAL_MANIFEST!==undefined||environment.NIGHTSKY_OSM_REGIONAL_SHA256!==undefined||environment.NIGHTSKY_OSM_CANDIDATE_INDEX!==undefined) throw Error("Invalid global catalogue configuration.");
+    return {path,expectedSha256:expectedSha256.toLowerCase()};
 }
 export function createNightSkyPluginApp(dependencies: PluginAppDependencies = {}) {
     const app = express();
@@ -60,9 +69,15 @@ export async function startNightSkyPlugin() {
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
+    const global = pluginGlobalConfiguration({NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST:process.env.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST,NIGHTSKY_GLOBAL_CATALOGUE_SHA256:process.env.NIGHTSKY_GLOBAL_CATALOGUE_SHA256,NIGHTSKY_OSM_REGIONAL_MANIFEST:process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST,NIGHTSKY_OSM_REGIONAL_SHA256:process.env.NIGHTSKY_OSM_REGIONAL_SHA256,NIGHTSKY_OSM_CANDIDATE_INDEX:process.env.NIGHTSKY_OSM_CANDIDATE_INDEX});
     const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });
     const candidateProvider = regional && toolMode === "full" ? await loadRegionalOsmProvider(regional.path, { expectedSha256: regional.expectedSha256 }) : undefined;
-    const app = createNightSkyPluginApp({ allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES });
+    // Explicit pins are verified before the listener starts, including resolver-only rehearsals.
+    const files = global ? await loadCatalogueFiles(global.path,{expectedSha256:global.expectedSha256}) : undefined;
+    const placeIndex = files ? await loadGeoNamesPlaceIndex() : undefined;
+    if(files && !placeIndex) throw Error("Global catalogue requires the local GeoNames place index.");
+    const catalogue = files && placeIndex ? createGlobalCatalogue(files,{cities:placeIndex}) : undefined;
+    const app = createNightSkyPluginApp({ catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES });
     const server = createServer(app);
     await new Promise<void>((done, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); done(); }); });
     console.log("NightSky plugin listener ready.");

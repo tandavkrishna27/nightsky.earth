@@ -3,11 +3,20 @@ import type { NightConditionsResult } from "../../shared/nightsky/weather";
 import type { TimeWindow } from "../../shared/nightsky/common";
 import type { PlanResult } from "../../shared/nightsky/planning";
 
+/** Keep each clipped astronomical interval separate; older service fixtures may omit rows. */
+export function astronomicalDarknessIntervals(astronomy: AstronomyWindowResult | undefined): Pick<AstronomyWindowResult["solarThresholdIntervals"][number], "startUtc" | "endUtc" | "localStart" | "localEnd">[] {
+  if (!astronomy) return [];
+  if (astronomy.solarThresholdIntervals !== undefined) return astronomy.solarThresholdIntervals
+    .filter(row => row.kind === "astronomical")
+    .map(({ startUtc, endUtc, localStart, localEnd }) => ({ startUtc, endUtc, localStart, localEnd }));
+  const darkness = astronomy.astronomicalDarkness;
+  return darkness.status === "available" ? [{ startUtc: darkness.startUtc, endUtc: darkness.endUtc, localStart: darkness.localStart, localEnd: darkness.localEnd }] : [];
+}
+
 /** Intersect only proven geometry. Instant cloud samples cannot establish a clear interval. */
 export function composeCandidateWindows(activity: string, window: TimeWindow, astronomy: AstronomyWindowResult | undefined, targets: TargetVisibilityResult[], weather: NightConditionsResult | undefined): PlanResult["candidateWindows"] {
   const needsDarkness = !["moon-observing", "planet-observing", "eclipse"].includes(activity);
-  const darkness = astronomy?.astronomicalDarkness;
-  const base = needsDarkness ? darkness?.status === "available" ? [{ startUtc: darkness.startUtc, endUtc: darkness.endUtc }] : [] : [window];
+  const base = needsDarkness ? astronomicalDarknessIntervals(astronomy) : [window];
   const result: PlanResult["candidateWindows"] = [];
   const targetRequired = ["moon-observing", "planet-observing", "deep-sky-imaging", "astrophotography"].includes(activity);
   if (targetRequired && !targets.length) return [];

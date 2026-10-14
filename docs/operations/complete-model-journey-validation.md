@@ -1,0 +1,36 @@
+# Complete local model rehearsal
+
+Scope: installed Codex CLI and Claude Code against loopback NightSky with synthetic fixtures. This does not validate ChatGPT web, Claude chat, Gemini, public marketplace publication, real weather or visibility accuracy.
+
+The offline contracts live in `tests/platforms/complete-model-harness.test.ts`; importing the harness has no model/server side effects. Real execution requires `--run`. The runner creates a unique ignored task folder, starts a loopback synthetic catalogue/provider backend and materializes both complete packages. The shared matrix has the fifteen existing product journeys and five discovery/host/boundary cases. Answers require manual review; a successful tool transport alone is not a semantic pass.
+
+Authorized operators can use `node --import tsx scripts/complete-model-journey-test.ts --run --preflight` for the native-requested Codex preflight, add `--claude` for Claude, or add `--prompt-fed` for explicitly labelled fallback. After full-answer review, mark a successful preflight record `passed` before continuing with `--resume <existing task folder>`. Relative resume paths resolve against the invocation directory and must stay inside the task evidence base. No real-model run belongs in ordinary `npm test`.
+
+Each case allows 120 seconds plus 5 seconds for process-tree shutdown, twelve MCP calls, 250 KiB stdout and 32 KiB sanitized stderr. Clients run sequentially; twenty cases or thirty minutes per client batch. Checkpoints retain complete synthetic answers and traces in an ignored task folder. Resume skips cases explicitly marked passed. A failing case may receive one diagnostic retry after a concrete correction. Unconfirmed process cleanup ends the batch.
+
+Native Claude loading uses session-only `--plugin-dir`, strict MCP configuration, read-only skill/reference tools and disabled hooks; `--bare` is excluded because current local help says it disables OAuth. Existing authentication must be exercised privately without reading/copying tokens, global settings or account identity. No authentication setup is permitted.
+
+Codex current local help exposes local `plugin marketplace add` and `plugin add`, but no session-only `--plugin-dir`. Native proof requires a verified task-only marketplace/install and observed packaged skill loading. Until that is demonstrated, the command builder fails closed for native mode. Explicit skill-content injection is labelled `prompt-fed`, never native success. A package inventory or loopback MCP call does not demonstrate skill loading.
+
+Before model requests: assemble and validate both complete local packages; start one loopback backend with injected synthetic cities, candidates, administrative and forecast fixtures and provider functions that reject/count external attempts; inspect fourteen tools; run one skill plus tool preflight per client; inspect the whole answer and loading evidence before remaining cases. Record client/model version without account identity. A missing authentication or loading capability is a gate, not a passed case.
+
+Primary documentation checked on 2026-10-15: [OpenAI package documentation](https://developers.openai.com/plugins/build/plugins), [Claude plugin documentation](https://code.claude.com/docs/en/plugins). Local help confirms the flags described above. Root approval of the assembled package is required before this rehearsal sends real model requests.
+
+Offline TDD evidence: missing implementation exports observed red before implementation; nine focused contracts now green, including relative checkpoint resume regression, actual thirteenth HTTP call rejection and corrected empty-provider synthetic source identity. The source assertion first failed with the neutral provider fallback, then passed after the fixture supplied `WeatherProviderResult.source`. No real model requests occurred during those tests.
+
+Dated local rehearsal findings and whole-answer reviews are in ignored `.superpowers/sdd/2026-10-15-nightsky-global-discovery/model-rehearsal/complete-model-report.md` and its checkpoint/review files. Raw answers, traces and client logs remain ignored; none belong in Git.
+
+## Observed results, 2026-10-15
+
+Codex CLI 0.154.0 completed the twenty shared questions using explicitly prompt-fed complete package content. All twenty whole answers and chosen arguments were manually reviewed. Seventeen cases made 77 local MCP calls; three valid clarification/boundary answers used no tools. Total case duration was 457,983 ms, maximum case duration 33,859 ms. There were zero external provider attempts and no deadline, byte or MCP call limit breaches. CLI JSON did not expose the inference model identity; the client default was requested without inspecting global configuration.
+
+| Evidence | Result and limit |
+|---|---|
+| Initial twenty-case semantic review | Fourteen normal/boundary passes, four valid clarification passes, one current-forecast replan proxy, one attribution finding. No claim of twenty native skill passes. |
+| Weather attribution correction | Empty custom-provider output had incorrectly identified MET Norway. The provider source contract and synthetic fixture were corrected; one fresh long-ahead diagnostic retry passed with explicitly synthetic source, unavailable future forecast and failed historical retrieval. Original finding retained. |
+| Concrete advanced supplements | Both origins with minimum/maximum distance and state exclusion returned the correct empty partial result. Selected park plans retained actual site ID/revision and explicit display timezone, then revised to Moon viewing. Prior-answer context replan compared 12% to 85% cloud and 12:00Z to 15:00Z issue, preserving unknowns. These are within-turn/context-fed evidence; retained client conversation memory remains untested. |
+| Codex native installation | A unique task-only local marketplace/install/list confirmed installed/enabled version 1.0.0. A whole-table override corrected one command-only quoted-key error. Installation is proven separately from skill execution. |
+| Codex native skill read | After session-only read capability was enabled under read-only sandbox with exact package-file restrictions, the requested cached SKILL.md `Get-Content -LiteralPath` was rejected as **blocked by policy**. No file command executed and no MCP call followed. Native skill execution and remaining native skill probes are pending; policy was not bypassed. |
+| Claude Code 2.1.126 | Native initialization lists all five namespaced NightSky skills and connected fourteen-tool MCP. Inference returns `authentication_failed` / “Not logged in”; model journeys remain pending user sign-in. No auth files, keys or account setup were accessed. |
+
+Only the task-created Codex plugin and marketplace were removed successfully after preserving evidence. All model children and loopback servers ended. One accidental extra casual invocation caused by the original relative resume resolver was transparently retained, its process tree stopped, and the resolver regression fixed; the corrected batch skipped the passed preflight. No deployment, upload, remote source clone or publication occurred. These local CLI results do not validate ChatGPT web, Claude chat, Gemini, host-location integration or real forecast/visibility accuracy.

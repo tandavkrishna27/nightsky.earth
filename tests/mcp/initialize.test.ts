@@ -31,7 +31,7 @@ test("NightSky MCP initializes and lists completed domain tools", async () => {
     assert.equal(init.status, 200);
     assert.equal(init.payload.result.serverInfo.name, "nightsky-earth");
     const listed = await post(base, { jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
-    assert.deepEqual(listed.payload.result.tools.map((tool: { name: string }) => tool.name), ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]);
+    assert.deepEqual(listed.payload.result.tools.map((tool: { name: string }) => tool.name), ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "resolve_observing_region", "get_observing_location_details", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]);
   } finally {
     server.close();
     await once(server, "close");
@@ -81,7 +81,7 @@ test("resolve_place is registered with attribution and validated structured outp
   try {
     await post(base, { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion, capabilities: {}, clientInfo: { name: "test", version: "1" } } });
     const listed = await post(base, { jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
-    assert.deepEqual(listed.payload.result.tools.map((tool: { name: string }) => tool.name), ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]);
+    assert.deepEqual(listed.payload.result.tools.map((tool: { name: string }) => tool.name), ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "resolve_observing_region", "get_observing_location_details", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]);
     const call = await post(base, { jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "resolve_place", arguments: { placeQuery: "Pune" } } });
     const result = call.payload.result;
     assert.equal(result.structuredContent.matches[0].displayName, "Pune, India");

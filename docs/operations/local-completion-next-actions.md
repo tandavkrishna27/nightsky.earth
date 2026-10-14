@@ -1,5 +1,7 @@
 # Remaining work after local package assembly — 14 October 2026
 
+**15 October follow-up:** this file preserves the earlier assembly handoff. The subsequent continuous local goal, fourteen-tool discovery extension, final review and available-client model results are tracked in [current local closure](local-goal-closure.md) and [model validation](complete-model-journey-validation.md). Earlier statements that all model testing or broad audit remain deferred are historical; native-client, source and hosted acceptance gates remain open.
+
 This handoff audits the [original 27 headings and 160 checkboxes](../superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md), the [criterion ledger](v1-acceptance-audit.md), [implementation status](implementation-status.md) and [local closure record](local-ticket-closure.md). It follows the [local package completion plan](../superpowers/plans/2026-10-14-nightsky-local-package-completion.md). Root owns final acceptance dispositions, original checkboxes, integrated verification and status arithmetic. This document changes none of those records.
 
 Owner direction is to finish the whole locally achievable package/build before installation, upload or further model testing. New source and historical retrieval remain held; exact Hetzner details are deliberately deferred. NightSky.earth is the confirmed publisher display name, not verified legal identity. Local coding, source coverage, host operation and official publication have distinct evidence requirements.

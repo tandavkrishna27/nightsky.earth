@@ -2,43 +2,171 @@
   {
     "id": "beginner-stargazing",
     "prompt": "I'm in Pune, India. I'm new to stargazing. Can you plan a simple session for tonight and tell me what I could look for?",
-    "expectedTools": ["resolve_place", "plan_observing_session"],
-    "requiredSignals": ["named place", "local time", "darkness", "Moon", "source", "forecast caveat"],
-    "knownLimits": ["No guarantee of clear sky or object visibility."]
+    "expectedTools": [
+      "resolve_place",
+      "plan_observing_session"
+    ],
+    "requiredSignals": [
+      "named place",
+      "local time",
+      "darkness",
+      "Moon",
+      "source",
+      "forecast caveat"
+    ],
+    "knownLimits": [
+      "No guarantee of clear sky or object visibility."
+    ]
   },
   {
     "id": "meteor-shower",
     "prompt": "Where and when should I watch the Perseids from Pune on August 12? Include the Moon and weather.",
-    "expectedTools": ["resolve_place", "search_sky_events", "plan_observing_session"],
-    "requiredSignals": ["event timing", "local darkness", "Moon", "separate forecast source and valid time"],
-    "knownLimits": ["Meteor radiant altitude and Moon-to-radiant separation may be unknown."]
+    "expectedTools": [
+      "resolve_place",
+      "search_sky_events",
+      "plan_observing_session"
+    ],
+    "requiredSignals": [
+      "event timing",
+      "local darkness",
+      "Moon",
+      "separate forecast source and valid time"
+    ],
+    "knownLimits": [
+      "Meteor radiant altitude and Moon-to-radiant separation may be unknown."
+    ]
   },
   {
     "id": "astrophotography-learning",
     "prompt": "I am new to night-sky photography. Help me plan a first Milky Way photo near Pune this weekend and explain what I should learn.",
-    "expectedTools": ["resolve_place", "get_astronomy_window", "get_night_conditions", "plan_observing_session", "recommend_specialist_tools"],
-    "requiredSignals": ["Moon and darkness", "forecast valid times", "beginner learning guidance", "test frame", "ask for camera and lens before tailored settings", "source links"],
-    "knownLimits": ["Do not guarantee image quality; do not infer seeing or transparency from cloud cover."]
+    "expectedTools": [
+      "resolve_place",
+      "get_astronomy_window",
+      "get_night_conditions",
+      "plan_observing_session",
+      "recommend_specialist_tools"
+    ],
+    "requiredSignals": [
+      "Moon and darkness",
+      "forecast valid times",
+      "beginner learning guidance",
+      "test frame",
+      "ask for camera and lens before tailored settings",
+      "source links"
+    ],
+    "knownLimits": [
+      "Do not guarantee image quality; do not infer seeing or transparency from cloud cover."
+    ]
   },
   {
     "id": "ambiguous-place",
     "prompt": "Plan a meteor night in Springfield this Friday.",
-    "expectedTools": ["resolve_place"],
-    "requiredSignals": ["ask which Springfield or request country/region"],
-    "knownLimits": ["Do not choose an ambiguous place or call the planner yet."]
+    "expectedTools": [
+      "resolve_place"
+    ],
+    "requiredSignals": [
+      "ask which Springfield or request country/region"
+    ],
+    "knownLimits": [
+      "Do not choose an ambiguous place or call the planner yet."
+    ]
   },
   {
     "id": "partial-provider",
     "prompt": "Plan a visual telescope session for Jupiter from Pune tonight. The forecast service may be unavailable.",
-    "expectedTools": ["resolve_place", "get_astronomy_window", "get_night_conditions", "get_target_visibility", "plan_observing_session"],
-    "requiredSignals": ["Jupiter visibility", "astronomy evidence", "weather unavailable or partial", "continue with useful evidence"],
-    "knownLimits": ["Do not invent weather values or imply missing forecast means clear sky."]
+    "expectedTools": [
+      "resolve_place",
+      "get_astronomy_window",
+      "get_night_conditions",
+      "get_target_visibility",
+      "plan_observing_session"
+    ],
+    "requiredSignals": [
+      "Jupiter visibility",
+      "astronomy evidence",
+      "weather unavailable or partial",
+      "continue with useful evidence"
+    ],
+    "knownLimits": [
+      "Do not invent weather values or imply missing forecast means clear sky."
+    ]
   },
   {
     "id": "asksForNamedPlaceWhenUserGivesCoordinates",
     "prompt": "Plan a night at 18.5204, 73.8567 next Friday.",
     "expectedTools": [],
-    "requiredSignals": ["ask the user to name a city or destination"],
-    "knownLimits": ["Do not reverse-geocode, call the planner, or return a plan."]
+    "requiredSignals": [
+      "ask the user to name a city or destination"
+    ],
+    "knownLimits": [
+      "Do not reverse-geocode, call the planner, or return a plan."
+    ]
+  },
+  {
+    "id": "country-state-candidate-planning",
+    "prompt": "Find parks in Karnataka, India but outside Bengaluru, then plan a night at my selected park.",
+    "expectedTools": [
+      "resolve_observing_region",
+      "search_observing_locations",
+      "get_observing_location_details",
+      "plan_observing_session"
+    ],
+    "requiredSignals": [
+      "pinned region references",
+      "exclusions win",
+      "candidate revision",
+      "explicit display timezone",
+      "actual source point",
+      "partial coverage"
+    ],
+    "knownLimits": [
+      "Missing global edition asks for installed coverage; no capital or city fallback.",
+      "Night access and safety remain unverified."
+    ]
+  },
+  {
+    "id": "combined-origins-annulus",
+    "prompt": "Show campgrounds within 100 km of both Pune and Mumbai, at least 10 km from each city.",
+    "expectedTools": [
+      "resolve_place",
+      "search_observing_locations"
+    ],
+    "requiredSignals": [
+      "all origins",
+      "minimum distance",
+      "catalogue coverage",
+      "budget gaps"
+    ],
+    "knownLimits": [
+      "At most five origins and ten returned candidates; no driving-time inference."
+    ]
+  },
+  {
+    "id": "near-me-no-hint",
+    "prompt": "Find an observing site near me; this host has no consented location hint.",
+    "expectedTools": [
+      "resolve_place"
+    ],
+    "requiredSignals": [
+      "ask for a named town",
+      "host-location unavailable"
+    ],
+    "knownLimits": [
+      "No implicit location read, inferred GPS or fabricated location."
+    ]
+  },
+  {
+    "id": "candidate-stale-timezone",
+    "prompt": "Plan tonight at a saved catalogue candidate whose edition has changed, using an unverified timezone.",
+    "expectedTools": [
+      "get_observing_location_details"
+    ],
+    "requiredSignals": [
+      "re-search stale candidate",
+      "ask for explicit display timezone"
+    ],
+    "knownLimits": [
+      "Do not use a city centre or guess the actual site timezone."
+    ]
   }
 ]

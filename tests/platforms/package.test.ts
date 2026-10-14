@@ -57,3 +57,10 @@ test('installed skills carry exact canonical workflows with working local refere
   assert.throws(() => validatePackageFiles({ ...files, 'skills/unknown/references/workflow.md': new TextEncoder().encode('unexpected') }), /path/);
   assert.throws(() => validatePackageFiles({ ...files, 'skills/plan-sky-event/references/other.md': new TextEncoder().encode('unexpected') }), /path/);
 });
+
+test('packaged workflows only reference registered tool names',()=>{
+ const files=unzipSync(buildPluginPackage().zip);
+ const reference='skills/find-observing-place/references/workflow.md';
+ files[reference]=new TextEncoder().encode(strFromU8(files[reference])+'\nCall get_observing_magic to infer site safety.');
+ assert.throws(()=>validatePackageFiles(files),/tool inventory/);
+});

@@ -1,3 +1,5 @@
+import { resolveNamedCalculationPlace, CalculationPlaceClarificationError, type CalculationObserverPlace, type CalculationPlaceInput } from "../places/calculationPlace";
+import { calculationPlaceSchema, type SearchDiscoveryResult, type CalculationPlace } from "../../shared/nightsky/discovery";
 import { planObservingSessionInputSchema, planResultSchema, type PlanResult } from "../../shared/nightsky/planning";
 import type { TimeWindow, SourceRecord } from "../../shared/nightsky/common";
 import type { AstronomyWindowResult, TargetVisibilityResult } from "../../shared/nightsky/astronomy";
@@ -6,7 +8,7 @@ import type { NightConditionsResult, AuroraOutlookResult } from "../../shared/ni
 import type { getLocationContextResultSchema, searchObservingLocationsResultSchema } from "../../shared/nightsky/places";
 import { climateContextResultSchema, describeClimateContext, observingNightForInstant, type ClimateContextResultV2 } from "../../shared/nightsky/climate";
 import type * as z from "zod4";
-import { GeoNamesPlaceIndex, resolvedCoordinatesForPlace } from "../places/geonames";
+import { GeoNamesPlaceIndex } from "../places/geonames";
 import { getLearningGuidance } from "../content/learning";
 import { getPreparationChecklist } from "../content/checklists";
 import { suggestVisibleTargets } from "./suggestions";
@@ -20,14 +22,15 @@ type SearchObservingLocationsResult = z.infer<typeof searchObservingLocationsRes
 
 export interface PlannerServices {
   index: GeoNamesPlaceIndex;
-  getAstronomy(place: { placeId: string; timeZone: string }, window: TimeWindow): Promise<AstronomyWindowResult>;
-  getNightConditions(placeId: string, window: TimeWindow): Promise<NightConditionsResult>;
-  searchEvents(placeId: string, window: TimeWindow): Promise<EventResult>;
-  getTargetVisibility(place: { placeId: string; timeZone: string }, target: string, window: TimeWindow): Promise<TargetVisibilityResult>;
-  getLocationContext(placeId: string): Promise<GetLocationContextResult>;
-  searchCandidates?(placeId: string): Promise<SearchObservingLocationsResult>;
-  getClimatology?(placeId: string, month: number): Promise<ClimateContextResultV2>;
-  getAuroraOutlook?(placeId: string, window: TimeWindow): Promise<AuroraOutlookResult>;
+  resolveCalculationPlace?(input: CalculationPlaceInput): Promise<CalculationPlace>;
+  getAstronomy(place: CalculationObserverPlace, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<AstronomyWindowResult>;
+  getNightConditions(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<NightConditionsResult>;
+  searchEvents(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<EventResult>;
+  getTargetVisibility(place: CalculationObserverPlace, target: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<TargetVisibilityResult>;
+  getLocationContext(placeId: string, calculationPlace?: CalculationPlace): Promise<GetLocationContextResult>;
+  searchCandidates?(placeId: string, calculationPlace?: CalculationPlace): Promise<SearchObservingLocationsResult | SearchDiscoveryResult>;
+  getClimatology?(placeId: string, month: number, calculationPlace?: CalculationPlace): Promise<ClimateContextResultV2>;
+  getAuroraOutlook?(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<AuroraOutlookResult>;
 }
 
 type Factor = PlanResult["factors"][number];
@@ -35,25 +38,26 @@ type Factor = PlanResult["factors"][number];
 /** Compose source-linked evidence into a useful activity-specific plan. Provider failures remain visible gaps. */
 export async function planObservingSession(inputValue: unknown, services: PlannerServices): Promise<PlanResult> {
   const input = planObservingSessionInputSchema.parse(inputValue);
-  const cityId = input.placeId.startsWith("place:v1:geonames:") ? Number(input.placeId.slice("place:v1:geonames:".length)) : NaN;
-  const city = Number.isSafeInteger(cityId) ? services.index.getById(cityId) : undefined;
-  if (!city || !resolvedCoordinatesForPlace(services.index, input.placeId)) {
-    throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
-  }
-  if (input.window.timeZone !== city.timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
-
-  const place = services.index.toPlaceRef(city);
+  const selection = {placeId:input.placeId,catalogueRevision:input.catalogueRevision,displayTimeZone:input.displayTimeZone};
+  const calculation = calculationPlaceSchema.parse(services.resolveCalculationPlace
+    ? await services.resolveCalculationPlace(selection)
+    : resolveNamedCalculationPlace(selection, services.index));
+  if (calculation.placeId !== input.placeId || calculation.displayTimeZone !== input.window.timeZone || (input.displayTimeZone && input.displayTimeZone !== calculation.displayTimeZone) || (input.catalogueRevision && input.catalogueRevision !== calculation.catalogueRevision)) throw new CalculationPlaceClarificationError("time-zone-mismatch", "The selected calculation place, revision and requested display time zone must match. Resolve the place again.");
+  const observerPlace: CalculationObserverPlace = { placeId: input.placeId, timeZone: calculation.displayTimeZone, calculationPlace: calculation };
+  const place = calculation.catalogueRevision
+    ? {placeId:calculation.placeId, displayName:calculation.name, timeZone:calculation.displayTimeZone, indexVintage:calculation.catalogueRevision, catalogueRevision:calculation.catalogueRevision, timeZoneBasis:calculation.timeZoneBasis, sources:calculation.sources}
+    : services.index.toPlaceRef(services.index.getById(Number(input.placeId.slice("place:v1:geonames:".length)))!);
   const [astronomy, conditions, events, locationContext, targetVisibility, aurora, candidates, climatology] = await Promise.all([
-    settled(() => services.getAstronomy({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window)),
-    settled(() => services.getNightConditions(input.placeId, input.window)),
-    settled(() => services.searchEvents(input.placeId, input.window)),
-    settled(() => services.getLocationContext(input.placeId)),
-    input.target && input.activity !== "meteor-shower" ? settled(() => services.getTargetVisibility({ placeId: input.placeId, timeZone: input.window.timeZone }, input.target!, input.window)) : Promise.resolve(undefined),
-    input.activity === "aurora" ? (services.getAuroraOutlook ? settled(() => services.getAuroraOutlook!(input.placeId, input.window)) : Promise.resolve(undefined)) : Promise.resolve(undefined),
-    services.searchCandidates ? settled(() => services.searchCandidates!(input.placeId)) : Promise.resolve(undefined),
+    settled(() => services.getAstronomy(observerPlace, input.window, calculation)),
+    settled(() => services.getNightConditions(input.placeId, input.window, calculation)),
+    settled(() => services.searchEvents(input.placeId, input.window, calculation)),
+    settled(() => services.getLocationContext(input.placeId, calculation)),
+    input.target && input.activity !== "meteor-shower" ? settled(() => services.getTargetVisibility(observerPlace, input.target!, input.window, calculation)) : Promise.resolve(undefined),
+    input.activity === "aurora" ? (services.getAuroraOutlook ? settled(() => services.getAuroraOutlook!(input.placeId, input.window, calculation)) : Promise.resolve(undefined)) : Promise.resolve(undefined),
+    services.searchCandidates ? settled(() => services.searchCandidates!(input.placeId, calculation)) : Promise.resolve(undefined),
     services.getClimatology ? settled(async () => {
       const month = monthAt(input.window, input.window.timeZone);
-      const result = climateContextResultSchema.parse(await services.getClimatology!(input.placeId, month));
+      const result = climateContextResultSchema.parse(await services.getClimatology!(input.placeId, month, calculation));
       if (result.placeId !== input.placeId || result.month !== month || result.timeZone !== input.window.timeZone) throw new RangeError("Historical context does not match the requested place/month/timezone.");
       return result;
     }) : Promise.resolve(undefined),
@@ -66,6 +70,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     "This plan does not verify site access, night opening, permits, terrain, safety, or local horizon obstructions.",
     "Seeing and transparency are not supplied by the current V1 forecast; do not infer them from cloud cover.",
   ]);
+  if (calculation.timeZoneBasis === "explicit-display") caveats.add(`Times use the explicit display time zone ${calculation.displayTimeZone}; the actual site time zone is unverified.`);
   const sourceRecords: SourceRecord[] = [...place.sources];
 
   if (astronomy && !isError(astronomy)) {
@@ -121,7 +126,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     if (code) {
       const start = Date.parse(input.window.startUtc), end = Date.parse(input.window.endUtc);
       try {
-        for (const instant of [start, (start + end) / 2, end]) meteorRadiantSamples.push(meteorRadiantResultSchema.parse(evaluateRadiant(code, instant, { latitude: city.latitude, longitude: city.longitude })));
+        for (const instant of [start, (start + end) / 2, end]) meteorRadiantSamples.push(meteorRadiantResultSchema.parse(evaluateRadiant(code, instant, { latitude: calculation.latitude, longitude: calculation.longitude })));
       } catch { meteorRadiantSamples.length = 0; gaps.push("The local radiant model could not be evaluated; retry the selected shower and time."); }
     }
     const available = meteorRadiantSamples.filter(sample => sample.status === "available");
@@ -136,7 +141,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       caveats.add("Moon separation compares a modeled geocentric mean radiant with a topocentric Moon direction in equatorial-of-date coordinates; parameter uncertainties are not propagated confidence intervals.");
     } else {
       factors.push({ name: "Meteor radiant visibility", assessment: "Unknown: select a reviewed shower whose coordinates or drift model covers this date. Radiant altitude and Moon separation remain unknown outside the licensed fit windows.", impact: "unknown", sourceNames: [] });
-      gaps.push(code ? meteorRadiantSamples.length ? "Meteor radiant altitude and moon-to-radiant separation are not calculated where the model is outside its nominal radiant fit window." : "Meteor radiant altitude and moon-to-radiant separation are unavailable because the local model could not be evaluated." : "Meteor radiant altitude is unknown: choose one reviewed shower (PER, GEM, ORI, ETA, LYR, SDA, QUA or LEO); an unknown or ambiguous event list cannot select a radiant.");
+      gaps.push(code ? meteorRadiantSamples.length ? "Meteor radiant altitude and moon-to-radiant separation are not calculated where the model is outside its nominal radiant fit window." : "Meteor radiant altitude and moon-to-radiant separation are unavailable because the local model could not be evaluated." : `Meteor radiant altitude is unknown: choose one reviewed shower (${Array.from(new Set(Object.values(METEOR_ALIASES))).join(", ")}); an unknown or ambiguous event list cannot select a radiant.`);
     }
     for (const sample of meteorRadiantSamples) if (sample.status !== "available") gaps.push(`${sample.code} radiant ${sample.status}: ${sample.reason}`);
     gaps.push("Complete meteor activity seasons and full-season radiant coverage remain unavailable. The enabled meteor calendar supplies year-specific forecast maxima; bounded radiant fits and forecast peaks do not establish activity-season boundaries.");
@@ -199,14 +204,14 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   }
 
   const learningGuide = ["learning", "astrophotography", "deep-sky-imaging", "eclipse"].includes(input.activity)
-    ? getLearningGuidance({ activity: input.activity as "learning" | "astrophotography" | "deep-sky-imaging" | "eclipse", experience: input.experience, hemisphere: city.latitude === 0 ? "equatorial" : city.latitude > 0 ? "north" : "south" })
+    ? getLearningGuidance({ activity: input.activity as "learning" | "astrophotography" | "deep-sky-imaging" | "eclipse", experience: input.experience, hemisphere: calculation.latitude === 0 ? "equatorial" : calculation.latitude > 0 ? "north" : "south" })
     : undefined;
   if (learningGuide) sourceRecords.push(...learningGuide.sources);
 
   if (conditions && !isError(conditions) && conditions.availability.status !== "available") gaps.push(`Weather evidence is ${conditions.availability.status}: ${conditions.availability.reason}`);
   if (locationContext && !isError(locationContext) && locationContext.access.status === "unknown") gaps.push("Confirm public access, opening hours, permits, and current closures directly before travel.");
   if (input.activity === "astrophotography" || input.activity === "deep-sky-imaging") gaps.push("No seeing or transparency forecast is available; cloud cover alone cannot establish imaging quality.");
-  const suggestions = input.target ? [] : await suggestVisibleTargets(input.activity, { placeId: input.placeId, timeZone: input.window.timeZone }, input.window, services, astronomy && !isError(astronomy) ? astronomy : undefined);
+  const suggestions = input.target ? [] : await suggestVisibleTargets(input.activity, observerPlace, input.window, services, astronomy && !isError(astronomy) ? astronomy : undefined);
   suggestions.forEach(target => { sourceRecords.push(...target.sources); addAll(caveats, target.caveats); });
   if (!input.target && ["general-stargazing", "visual-stargazing", "learning", "planet-observing", "moon-observing", "astrophotography"].includes(input.activity) && !suggestions.length) gaps.push("No supported bright target is geometrically visible in this session; the local catalog covers Sun, Moon, planets and Milky Way core only.");
   if (input.activity === "deep-sky-imaging" && !input.target) gaps.push("No rights-reviewed deep-sky catalog is enabled. Supply a supported target or use a specialist sky catalog; global deep-sky suggestions are unsupported.");
@@ -236,10 +241,10 @@ export async function planObservingSession(inputValue: unknown, services: Planne
 function settled<T>(callback: () => Promise<T>): Promise<T | Error> { return callback().catch((error: unknown) => error instanceof Error ? error : new Error("Provider failed.")); }
 function isError(value: unknown): value is Error { return value instanceof Error; }
 function conciseAssessment(value: string): string { return value.length <= 500 ? value : `${value.slice(0, 410)}… Full exact values and source records are retained in structured evidence.`; }
+const METEOR_ALIASES: Readonly<Record<string, string>> = { per: "PER", perseids: "PER", gem: "GEM", geminids: "GEM", ori: "ORI", orionids: "ORI", eta: "ETA", "eta aquariids": "ETA", lyr: "LYR", lyrids: "LYR", sda: "SDA", "southern delta aquariids": "SDA", "delta aquariids": "SDA", qua: "QUA", quadrantids: "QUA", leo: "LEO", leonids: "LEO", cap: "CAP", "alpha capricornids": "CAP", capricornids: "CAP", nta: "NTA", "northern taurids": "NTA", sta: "STA", "southern taurids": "STA", hyd: "HYD", "sigma hydrids": "HYD" };
 function meteorCode(query: string): string | undefined {
-  const aliases: Record<string, string> = { per: "PER", perseids: "PER", gem: "GEM", geminids: "GEM", ori: "ORI", orionids: "ORI", eta: "ETA", "eta aquariids": "ETA", lyr: "LYR", lyrids: "LYR", sda: "SDA", "southern delta aquariids": "SDA", "delta aquariids": "SDA", qua: "QUA", quadrantids: "QUA", leo: "LEO", leonids: "LEO", cap: "CAP", "alpha capricornids": "CAP", capricornids: "CAP", nta: "NTA", "northern taurids": "NTA", sta: "STA", "southern taurids": "STA", hyd: "HYD", "sigma hydrids": "HYD" };
   const key = query.trim().toLowerCase().replaceAll("-", " ").replace(/\s+(?:meteor\s+)?shower$/, "");
-  return Object.hasOwn(aliases, key) ? aliases[key] : undefined;
+  return Object.hasOwn(METEOR_ALIASES, key) ? METEOR_ALIASES[key] : undefined;
 }
 function sourceNames(sources: SourceRecord[]): string[] { return Array.from(new Set(sources.map(({ name }) => name))).slice(0, 8); }
 function addAll(target: Set<string>, values: string[]): void { values.forEach((value) => target.add(value)); }

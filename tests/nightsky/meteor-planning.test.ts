@@ -34,6 +34,11 @@ test("no selected shower leaves an explicit choice gap with no fabricated radian
   const result = await planObservingSession({ placeId, window, activity: "meteor-shower" }, services());
   assert.deepEqual(result.evidence!.meteorRadiantSamples, []);
   assert.ok(result.gaps.some(gap => /choose|select/i.test(gap)));
+  const choice = result.gaps.find(gap => /choose.*reviewed shower/i.test(gap));
+  assert.ok(choice);
+  for (const code of ["PER", "GEM", "ORI", "ETA", "LYR", "SDA", "QUA", "LEO", "CAP", "HYD", "NTA", "STA"]) {
+    assert.ok(new RegExp(`\\b${code}\\b`).test(choice), `Missing selectable reviewed code ${code}`);
+  }
 });
 test("one date-only matching event can select a radiant but two events require a choice", async () => {
   const svc = services(), original = svc.searchEvents;

@@ -1,8 +1,10 @@
+import { calculationCoordinates, type CalculationObserverPlace } from "../places/calculationPlace";
+import type { CalculationPlace } from "../../shared/nightsky/discovery";
 import { createRequire } from "node:module";
 import type * as AstronomyTypes from "astronomy-engine";
 import { astronomyWindowResultSchema, targetVisibilityResultSchema, type AstronomyWindowResult, type TargetVisibilityResult } from "../../shared/nightsky/astronomy";
 import { timeWindowSchema, type TimeWindow, type SourceRecord } from "../../shared/nightsky/common";
-import { resolvedCoordinatesForPlace, type GeoNamesPlaceIndex } from "../places/geonames";
+import { type GeoNamesPlaceIndex } from "../places/geonames";
 import { formatLocalTime } from "./time";
 
 const Astronomy = createRequire(import.meta.url)("astronomy-engine") as typeof AstronomyTypes;
@@ -23,12 +25,10 @@ const BODY_NAMES: Record<string, { body: string; type: "sun" | "moon" | "planet"
 };
 const MILKY_WAY_CORE = { ra: 17 + 45 / 60 + 40 / 3600, dec: -29.0078 };
 
-export async function getAstronomyWindow(place: { placeId: string; timeZone: string }, window: TimeWindow, index: GeoNamesPlaceIndex): Promise<AstronomyWindowResult> {
+export async function getAstronomyWindow(place: CalculationObserverPlace, window: TimeWindow, index: GeoNamesPlaceIndex, calculationPlace?: CalculationPlace): Promise<AstronomyWindowResult> {
   const checkedWindow = timeWindowSchema.parse(window);
   if (checkedWindow.timeZone !== place.timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
-  const coordinates = resolvedCoordinatesForPlace(index, place.placeId);
-  if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-  assertPlaceTimeZone(place.placeId, place.timeZone, index);
+  const coordinates = calculationCoordinates(place, index, calculationPlace);
   const observer = new Astronomy.Observer(coordinates.latitude, coordinates.longitude, 0);
   const start = Date.parse(checkedWindow.startUtc);
   const end = Date.parse(checkedWindow.endUtc);
@@ -56,9 +56,9 @@ export async function getAstronomyWindow(place: { placeId: string; timeZone: str
     : clippedDarkness.length === 1 && clippedDarkness[0]!.start <= start && clippedDarkness[0]!.end >= end ? "full-window" : "partial-window";
   const selectedDarkness = clippedDarkness[0];
   const result = astronomyWindowResultSchema.parse({
-    availability: { status: "available", reason: "Calculated from a named-place coordinate and the selected IANA time zone." },
+    availability: { status: "available", reason: "Calculated from the selected place point and display IANA time zone." },
     sources: [CALCULATION_SOURCE],
-    caveats: ["Solar threshold intervals are nested Sun-below-threshold intervals at -6, -12 and -18 degrees, clipped to the requested window; they are not exclusive twilight phase bands. Astronomical darkness uses the Sun's geometric center at -18 degrees. Terrain and local horizon obstructions are not modeled.", "Moon maximum altitude is sampled at intervals, so it is an estimate; it does not establish moonrise or moonset."],
+    caveats: [...displayTimeZoneCaveats(coordinates), "Solar threshold intervals are nested Sun-below-threshold intervals at -6, -12 and -18 degrees, clipped to the requested window; they are not exclusive twilight phase bands. Astronomical darkness uses the Sun's geometric center at -18 degrees. Terrain and local horizon obstructions are not modeled.", "Moon maximum altitude is sampled at intervals, so it is an estimate; it does not establish moonrise or moonset."],
     placeId: place.placeId, window: checkedWindow, darknessState,
     astronomicalDarkness: selectedDarkness ? { status: "available", ...makeInterval(selectedDarkness.start, selectedDarkness.end, checkedWindow.timeZone) } : { status: "unavailable", reason: "The Sun does not reach 18 degrees below the geometric horizon during this window." },
     solarThresholdIntervals,
@@ -67,19 +67,17 @@ export async function getAstronomyWindow(place: { placeId: string; timeZone: str
   return result;
 }
 
-export async function getTargetVisibility(targetQuery: string, place: { placeId: string; timeZone: string }, window: TimeWindow, index: GeoNamesPlaceIndex): Promise<TargetVisibilityResult> {
+export async function getTargetVisibility(targetQuery: string, place: CalculationObserverPlace, window: TimeWindow, index: GeoNamesPlaceIndex, calculationPlace?: CalculationPlace): Promise<TargetVisibilityResult> {
   const checkedWindow = timeWindowSchema.parse(window);
   if (checkedWindow.timeZone !== place.timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
-  const coordinates = resolvedCoordinatesForPlace(index, place.placeId);
-  if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-  assertPlaceTimeZone(place.placeId, place.timeZone, index);
+  const coordinates = calculationCoordinates(place, index, calculationPlace);
   const query = targetQuery.trim().toLocaleLowerCase().replace(/\s+/g, " ");
   const match = BODY_NAMES[query];
   const milkyWay = ["milky way core", "galactic centre", "galactic center", "sagittarius a*"].includes(query);
   if (!match && !milkyWay) {
     return targetVisibilityResultSchema.parse({
       availability: { status: "unsupported", reason: "This V1 target catalog supports the Sun, Moon, named planets, and the Milky Way core. Resolve other targets in a specialist sky app." },
-      sources: [CALCULATION_SOURCE], caveats: [], placeId: place.placeId,
+      sources: [CALCULATION_SOURCE], caveats: displayTimeZoneCaveats(coordinates), placeId: place.placeId,
       target: { targetId: `unsupported:${query.slice(0, 80)}`, name: targetQuery.slice(0, 160), targetType: "deep-sky-object" }, intervals: [],
     });
   }
@@ -107,7 +105,7 @@ export async function getTargetVisibility(targetQuery: string, place: { placeId:
   const targetType = milkyWay ? "deep-sky-object" : match!.type;
   return targetVisibilityResultSchema.parse({
     availability: { status: "available", reason: "Geometric altitude calculated for the selected place and UTC window." },
-    sources: [CALCULATION_SOURCE], caveats: ["Visibility intervals use a 0-degree geometric horizon; terrain, buildings, atmospheric extinction, and instrument limits are not modeled.", ...(milkyWay ? ["Milky Way core is represented by a fixed J2000 direction near Sagittarius; this is a seasonal direction estimate, not a star-field model."] : [])],
+    sources: [CALCULATION_SOURCE], caveats: [...displayTimeZoneCaveats(coordinates), "Visibility intervals use a 0-degree geometric horizon; terrain, buildings, atmospheric extinction, and instrument limits are not modeled.", ...(milkyWay ? ["Milky Way core is represented by a fixed J2000 direction near Sagittarius; this is a seasonal direction estimate, not a star-field model."] : [])],
     placeId: place.placeId,
     target: { targetId: milkyWay ? "milky-way-core" : `body:${match!.body.toLowerCase()}`, name: milkyWay ? "Milky Way core" : match!.body, targetType },
     intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth) })),
@@ -158,8 +156,5 @@ function milkyWayCoreHorizon(observer: AstronomyTypes.Observer, date: Date) {
 function makeInterval(start: number, end: number, timeZone: string) { const startUtc = new Date(start).toISOString(); const endUtc = new Date(end).toISOString(); return { startUtc, endUtc, localStart: `${formatLocalTime(startUtc, timeZone, "en")}, ${new Intl.DateTimeFormat("en", { timeZone, year: "numeric", month: "short", day: "numeric" }).format(new Date(startUtc))}`, localEnd: `${formatLocalTime(endUtc, timeZone, "en")}, ${new Intl.DateTimeFormat("en", { timeZone, year: "numeric", month: "short", day: "numeric" }).format(new Date(endUtc))}` }; }
 function normalizeDegrees(value: number): number { return ((value % 360) + 360) % 360; }
 function clamp(value: number, min: number, max: number): number { return Math.max(min, Math.min(max, value)); }
-function assertPlaceTimeZone(placeId: string, timeZone: string, index: GeoNamesPlaceIndex): void {
-  const geonameId = Number(placeId.slice("place:v1:geonames:".length));
-  const city = index.getById(geonameId);
-  if (!city || city.timeZone !== timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
-}
+
+function displayTimeZoneCaveats(place: CalculationPlace): string[] { return place.timeZoneBasis === "explicit-display" ? [`Times use the explicit display time zone ${place.displayTimeZone}; the actual site time zone is unverified.`] : []; }

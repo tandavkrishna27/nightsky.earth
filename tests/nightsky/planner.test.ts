@@ -18,7 +18,7 @@ function astronomy(): AstronomyWindowResult {
   return {
     availability: { status: "available", reason: "Calculated for the fixture place." }, sources: [source], caveats: [], placeId, window,
     darknessState: "partial-window", astronomicalDarkness: { status: "available", startUtc: "2026-10-15T19:00:00Z", endUtc: "2026-10-16T05:00:00Z", localStart: "8 pm", localEnd: "6 am" },
-    solarThresholdIntervals: [], moon: { phaseAtUtc: "2026-10-16T00:00:00Z", phaseDegrees: 60, illuminationPercent: 25, maximumAltitudeDegrees: 20, maximumAltitudeAtUtc: "2026-10-16T01:00:00Z" },
+    solarThresholdIntervals: [{ kind: "astronomical", sunAltitudeThresholdDegrees: -18, startUtc: "2026-10-15T19:00:00Z", endUtc: "2026-10-16T05:00:00Z", localStart: "8 pm", localEnd: "6 am" }], moon: { phaseAtUtc: "2026-10-16T00:00:00Z", phaseDegrees: 60, illuminationPercent: 25, maximumAltitudeDegrees: 20, maximumAltitudeAtUtc: "2026-10-16T01:00:00Z" },
   };
 }
 function conditions(): NightConditionsResult {

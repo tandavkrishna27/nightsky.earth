@@ -1,3 +1,7 @@
+import * as z from "zod4";
+import { CatalogueRevisionError } from "../places/globalCatalogue";
+import { normalizeDiscoveryInput, searchDiscoveryInputSchema, searchDiscoveryResultSchema, candidateRefSchema, discoveryCoverageSchema, discoveryScopeSchema, originBasisSchema, resolveObservingRegionInputSchema, resolveObservingRegionResultSchema, getObservingLocationDetailsInputSchema, getObservingLocationDetailsResultSchema, type CatalogueReader, type RegionIndex, type CalculationPlace } from "../../shared/nightsky/discovery";
+import { resolveCalculationPlace, resolveNamedCalculationPlace, CalculationPlaceClarificationError } from "../places/calculationPlace";
 import { climateContextResultSchema, getClearSkyClimatologyInputSchema, describeClimateContext, type ClimateContextResultV2 } from "../../shared/nightsky/climate";
 import { createEra5ClimateProvider } from "../providers/climate/era5";
 import { consentedHostLocation } from "./metadata";
@@ -7,8 +11,11 @@ import { getAstronomyWindowInputSchema, astronomyWindowResultSchema, getTargetVi
 import { searchSkyEventsInputSchema, skyEventsResultSchema } from "../../shared/nightsky/events";
 import { loadGeoNamesPlaceIndex, resolvePlace, resolvedCoordinatesForPlace, type GeoNamesPlaceIndex } from "../places/geonames";
 import { getAstronomyWindow, getTargetVisibility } from "../nightsky/astronomy";
+import { astronomicalDarknessIntervals } from "../nightsky/windows";
 import { searchSkyEvents } from "../events/catalog";
 import { getMetNorwayForecast, MET_NORWAY_SOURCE, type MetRateLimiter } from "../providers/weather/metNorway";
+import { sourceRecordSchema } from "../../shared/nightsky/common";
+import type { WeatherProviderResult } from "../providers/weather/types";
 import type { WeatherProvider } from "../providers/weather/types";
 import { controlsFor, type UpstreamControls, type UpstreamProvider } from "../providers/upstreamControls";
 import { auroraOutlookResultSchema, getAuroraOutlookInputSchema, getNightConditionsInputSchema, nightConditionsResultSchema, type AuroraOutlookResult } from "../../shared/nightsky/weather";
@@ -39,6 +46,8 @@ export interface NightSkyDependencies {
   upstreamControls?: UpstreamControls;
   providerTimeoutsMs?: Partial<Readonly<Record<UpstreamProvider, number>>>;
   placeIndex?: GeoNamesPlaceIndex;
+  catalogue?: CatalogueReader;
+  regionIndex?: RegionIndex;
   /** Route-owned lazy index reader shared across stateless requests. */
   placeIndexLoader?: () => Promise<GeoNamesPlaceIndex | undefined>;
   osmCandidateIndex?: OSMCandidateIndex;
@@ -55,6 +64,8 @@ export interface NightSkyDependencies {
 }
 
 export const V1_TOOL_ANNOTATIONS = {
+  resolve_observing_region: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+  get_observing_location_details: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   resolve_place: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   get_astronomy_window: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   get_target_visibility: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
@@ -84,30 +95,43 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const candidateIndex = dependencies.osmCandidateIndex ?? await (osmCandidateIndexPromise ??= (dependencies.osmCandidateIndexLoader ?? loadOsmCandidateIndex)());
     return searchObservingLocations(input, { index: candidateIndex, place });
   };
+  const resolvePoint = (input: {placeId: string; catalogueRevision?: string; displayTimeZone?: string}, index: GeoNamesPlaceIndex) => dependencies.catalogue
+    ? resolveCalculationPlace({placeId:input.placeId,catalogueRevision:input.catalogueRevision,displayTimeZone:input.displayTimeZone}, {cities: index, catalogue: dependencies.catalogue})
+    : Promise.resolve(resolveNamedCalculationPlace({placeId:input.placeId,displayTimeZone:input.displayTimeZone}, index));
+  const contextForPoint = async (point: CalculationPlace, index: GeoNamesPlaceIndex) => {
+    if (!point.catalogueRevision) return getLocationContext(index.toPlaceRef(index.getById(Number(point.placeId.split(":").at(-1)))!));
+    const candidate = await dependencies.catalogue?.details({placeId: point.placeId, catalogueRevision: point.catalogueRevision});
+    return getLocationContextResultSchema.parse({availability: {status: "partial", reason: "Site source geometry is available; darkness, night opening and safety remain unverified."}, placeId: point.placeId,
+      sources: candidate?.sources ?? point.sources, caveats: candidate?.caveats ?? ["Site access is unverified."],
+      access: candidate?.accessEvidence ?? {status: "unknown"}, groundLightContext: {status: "unknown", reason: "No validated ground-light measurement is installed for this candidate."}});
+  };
   let climateProvider: NightSkyDependencies["climateProvider"];
   const climateFor = (index: GeoNamesPlaceIndex): NonNullable<PlannerServices["getClimatology"]> => {
     if (dependencies.plannerServices?.getClimatology) return dependencies.plannerServices.getClimatology;
     const provider = dependencies.climateProvider ?? (climateProvider ??= createEra5ClimateProvider({ index, artifactPath: process.env.NIGHTSKY_CLIMATE_ARTIFACT, expectedSha256: process.env.NIGHTSKY_CLIMATE_SHA256 }));
-    return (placeId, month) => provider.getClimatology(placeId, month);
+    return (placeId, month, point) => point?.catalogueRevision ? Promise.resolve(candidateClimateGap(point,month)) : provider.getClimatology(placeId, month);
   };
   const plannerServicesFor = (index: GeoNamesPlaceIndex): PlannerServices => ({
     index,
-    getAstronomy: dependencies.plannerServices?.getAstronomy ?? ((place, window) => getAstronomyWindow(place, window, index)),
-    getNightConditions: dependencies.plannerServices?.getNightConditions ?? ((placeId, window) => getNightConditionsForPlan(placeId, window, index, dependencies)),
-    searchEvents: dependencies.plannerServices?.searchEvents ?? ((placeId, window) => searchSkyEvents({ placeId, window }, index)),
-    getTargetVisibility: dependencies.plannerServices?.getTargetVisibility ?? ((place, target, window) => getTargetVisibility(target, place, window, index)),
-    getLocationContext: dependencies.plannerServices?.getLocationContext ?? (async (placeId) => {
+    resolveCalculationPlace: input => resolvePoint(input, index),
+    getAstronomy: dependencies.plannerServices?.getAstronomy ?? ((place, window, point) => getAstronomyWindow(place, window, index, point)),
+    getNightConditions: dependencies.plannerServices?.getNightConditions ?? ((placeId, window, point) => getNightConditionsForPlan(placeId, window, index, dependencies, point)),
+    searchEvents: dependencies.plannerServices?.searchEvents ?? ((placeId, window, point) => searchSkyEvents({ placeId, window }, index, point)),
+    getTargetVisibility: dependencies.plannerServices?.getTargetVisibility ?? ((place, target, window, point) => getTargetVisibility(target, place, window, index, point)),
+    getLocationContext: dependencies.plannerServices?.getLocationContext ?? (async (placeId, point) => {
+      if (point) return contextForPoint(point, index);
       const city = index.getById(Number(placeId.slice("place:v1:geonames:".length)));
       if (!city) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
       return getLocationContext(index.toPlaceRef(city));
     }),
-    getAuroraOutlook: dependencies.plannerServices?.getAuroraOutlook ?? (async (placeId, window) => {
-      const coordinates = resolvedCoordinatesForPlace(index, placeId);
+    getAuroraOutlook: dependencies.plannerServices?.getAuroraOutlook ?? (async (placeId, window, point) => {
+      const coordinates = point ?? resolvedCoordinatesForPlace(index, placeId);
       if (!coordinates) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
       const place = { placeId, ...coordinates };
       return (dependencies.auroraProvider ?? ((resolvedPlace, requestedWindow) => getNoaaAuroraOutlook(resolvedPlace, requestedWindow, { fetcher: dependencies.fetcher, cache: dependencies.cache, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.noaa })))(place, window);
     }),
-    searchCandidates: dependencies.plannerServices?.searchCandidates ?? (async (placeId: string) => {
+    searchCandidates: dependencies.plannerServices?.searchCandidates ?? (async (placeId: string, point?: CalculationPlace) => {
+      if (dependencies.catalogue && point) return dependencies.catalogue.search(normalizeDiscoveryInput({scope:{origins:[{placeId, catalogueRevision:point.catalogueRevision}]}}),{limit:5});
       const city = index.getById(Number(placeId.slice("place:v1:geonames:".length)));
       if (!city) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
       return candidatesFor(searchObservingLocationsInputSchema.parse({ placeId }), { placeId, latitude: city.latitude, longitude: city.longitude });
@@ -126,7 +150,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const result = await resolvePlace(input, { index, hostLocationHint });
     const structuredContent = resolvePlaceResultSchema.parse(result);
     const names = structuredContent.matches.map(({ displayName }) => displayName);
-    const text = names.length
+    const text = !names.length && input.useApproximateHostLocation ? "Approximate host location is unavailable. Ask the user for a named town or city." : names.length
       ? `GeoNames (CC BY 4.0; ${index?.vintageLabel ?? "index unavailable"}). ${structuredContent.availability.reason} ${names.join("; ")}`
       : `GeoNames (CC BY 4.0). ${structuredContent.availability.reason}`;
     return { content: [{ type: "text", text }], structuredContent };
@@ -136,45 +160,47 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_astronomy_window", {
     title: "Calculate darkness and Moon conditions",
-    description: "Calculate astronomical darkness coverage of the requested window, nested Sun-below-threshold intervals clipped to that window, and a Moon phase/altitude summary for a previously resolved named place. This does not classify whole-day polar conditions. Terrain and horizon obstructions are not modeled.",
+    description: "Calculate astronomical darkness coverage of the requested window, nested Sun-below-threshold intervals clipped to that window, and a Moon phase/altitude summary for a resolved named place or revision-pinned candidate with explicit display time zone. This does not classify whole-day polar conditions. Terrain and horizon obstructions are not modeled.",
     inputSchema: getAstronomyWindowInputSchema,
     outputSchema: astronomyWindowResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_astronomy_window,
   }, async (input) => {
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
-    const result = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index);
+    const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
+    const result = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, point);
     return { content: [{ type: "text", text: `Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}` }], structuredContent: result };
   });
 
   server.registerTool("get_target_visibility", {
     title: "Check when a sky target is above the horizon",
-    description: "Calculate geometric above-horizon intervals for the Sun, Moon, planets, or the Milky Way core at a previously resolved named place. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
+    description: "Calculate geometric above-horizon intervals for the Sun, Moon, planets, or the Milky Way core at a resolved named place or revision-pinned candidate with explicit display time zone. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
     inputSchema: getTargetVisibilityInputSchema,
     outputSchema: targetVisibilityResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_target_visibility,
   }, async (input) => {
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
-    const result = await getTargetVisibility(input.targetQuery, { placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index);
+    const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
+    const result = await getTargetVisibility(input.targetQuery, { placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, point);
     return { content: [{ type: "text", text: `Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}` }], structuredContent: result };
   });
 
   server.registerTool("get_night_conditions", {
     title: "Check forecast conditions during astronomical darkness",
-    description: "Fetch the MET Norway point forecast for a resolved named place. The result keeps source fields and units separate, identifies missing variables, and adds the forecast steps overlapping calculated astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
+    description: "Fetch the MET Norway point forecast at the actual selected named-place or revision-pinned candidate point. Candidate planning requires an explicit display time zone. The result keeps source fields and units separate, identifies missing variables, and adds the forecast steps overlapping calculated astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
     inputSchema: getNightConditionsInputSchema,
     outputSchema: nightConditionsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_night_conditions,
   }, async (input) => {
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
-    const coordinates = resolvedCoordinatesForPlace(index, input.placeId);
+    const coordinates = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-    const astronomy = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index);
+    const astronomy = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, coordinates);
     const userAgent = dependencies.weatherUserAgent ?? process.env.MET_NORWAY_USER_AGENT;
     const providerResult = userAgent || dependencies.weatherProvider
-      ? await (dependencies.weatherProvider ?? { getForecast: (place, window) => getMetNorwayForecast(place, window, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId: input.placeId, ...coordinates }, input.window)
+      ? await (dependencies.weatherProvider ?? { getForecast: (place, window) => getMetNorwayForecast(place, window, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId: input.placeId, latitude:coordinates.latitude, longitude:coordinates.longitude }, input.window)
       : { status: "unavailable" as const, reason: "MET Norway is not configured because its required application/contact User-Agent has not been set." };
     const forecasts = providerResult.forecast ? [providerResult.forecast] : [];
     if (!input.includeHourly) {
@@ -190,25 +216,27 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
       }
     }
     const darkness = astronomy.astronomicalDarkness;
-    const darknessRange = darkness.status === "available" ? [Date.parse(darkness.startUtc), Date.parse(darkness.endUtc)] as const : undefined;
+    const darknessIntervals = astronomicalDarknessIntervals(astronomy);
     const forecastStepsDuringDarkness = forecasts.map((forecast) => ({
       source: forecast.source.name,
-      validTimesUtc: forecast.samples.filter(({ validAt }) => darknessRange && Date.parse(validAt) >= darknessRange[0] && Date.parse(validAt) <= darknessRange[1]).map(({ validAt }) => validAt),
+      validTimesUtc: forecast.samples.filter(({ validAt }) => darknessIntervals.some(interval => Date.parse(validAt) >= Date.parse(interval.startUtc) && Date.parse(validAt) <= Date.parse(interval.endUtc))).map(({ validAt }) => validAt),
     }));
     const result = nightConditionsResultSchema.parse({
       availability: { status: providerResult.status, reason: providerResult.reason },
       placeId: input.placeId,
+      ...candidatePointMetadata(coordinates),
       window: input.window,
       forecasts,
       nightContext: {
         darkness,
+        astronomicalDarknessIntervals: darknessIntervals,
         moonIlluminationPercent: astronomy.moon.illuminationPercent,
         forecastStepsDuringDarkness,
       },
-      sources: forecasts.length ? forecasts.map(({ source }) => source) : [MET_NORWAY_SOURCE],
-      caveats: ["MET Norway forecasts are model output, not local observations. Cloud, wind, and other variables may be absent by region or forecast horizon.", ...(providerResult.deprecationWarning ? [providerResult.deprecationWarning] : [])],
+      sources: weatherSources(providerResult, dependencies.weatherProvider !== undefined),
+      caveats: [...candidateZoneCaveats(coordinates), weatherCaveat(dependencies.weatherProvider !== undefined), ...(providerResult.deprecationWarning ? [providerResult.deprecationWarning] : [])],
     });
-    return { content: [{ type: "text", text: `MET Norway: ${result.availability.reason}` }], structuredContent: result };
+    return { content: [{ type: "text", text: `${result.sources[0].name}: ${result.availability.reason}` }], structuredContent: result };
   });
 
   server.registerTool("get_aurora_outlook", {
@@ -220,11 +248,12 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   }, async (input) => {
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
-    const coordinates = resolvedCoordinatesForPlace(index, input.placeId);
+    const coordinates = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-    const place = { placeId: input.placeId, ...coordinates };
+    if (coordinates.displayTimeZone !== input.window.timeZone) throw new CalculationPlaceClarificationError("time-zone-mismatch", "The requested window time zone must match the selected display time zone.");
+    const place = { placeId: input.placeId, latitude:coordinates.latitude, longitude:coordinates.longitude };
     const result = await (dependencies.auroraProvider ?? ((resolvedPlace, window) => getNoaaAuroraOutlook(resolvedPlace, window, { fetcher: dependencies.fetcher, cache: dependencies.cache, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.noaa })))(place, input.window);
-    const checkedResult = auroraOutlookResultSchema.parse(result);
+    const checkedResult = auroraOutlookResultSchema.parse({...result,...candidatePointMetadata(coordinates),caveats:[...result.caveats,...candidateZoneCaveats(coordinates)]});
     return { content: [{ type: "text", text: `NOAA SWPC OVATION: ${checkedResult.availability.reason}` }], structuredContent: checkedResult };
   });
 
@@ -237,25 +266,53 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   }, async (input) => {
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
-    const result = await searchSkyEvents(input, index);
+    const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
+    const result = await searchSkyEvents(input, index, point);
     return { content: [{ type: "text", text: `Sky events: ${result.events.length}. ${result.availability.reason}` }], structuredContent: result };
   });
 
   server.registerTool("search_observing_locations", {
     title: "Find nearby observing place candidates",
     description: "Search locally installed, coverage-labeled OpenStreetMap candidate artifacts near a previously resolved named place. Flat or regional artifacts retain source links and individual dataset vintages. Candidate tags do not verify darkness, public access, night opening, safety, permits or current closures.",
-    inputSchema: searchObservingLocationsInputSchema,
-    outputSchema: searchObservingLocationsResultSchema,
+    inputSchema: searchDiscoveryInputSchema,
+    outputSchema: integratedSearchResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.search_observing_locations,
   }, async (input) => {
+    const scope = normalizeDiscoveryInput(input);
+    if (dependencies.catalogue) {
+      const result = searchDiscoveryResultSchema.parse(await dependencies.catalogue.search(scope, {categories:input.categories, limit:input.limit}));
+      return {content:[{type:"text", text:result.availability.reason}], structuredContent:result};
+    }
+    if (input.scope) {
+      const result = searchDiscoveryResultSchema.parse({availability:{status:"unavailable",reason:"A checksum-pinned global catalogue is not installed; this scope cannot be searched."}, candidates:[],sortBasis:"source-completeness-then-name-id",coverage:"Global discovery coverage is unavailable.", queryScope:scope,originBasis:[],
+        discoveryCoverage:{footprintStatus:"not-covered",searchCompleteness:"unavailable",mappedFeatureCompleteness:"unknown",catalogueRevision:"uninstalled"},sources:[CONFIGURATION_SOURCE], caveats:[GLOBAL_CONFIGURATION_CAVEAT]});
+      return {content:[{type:"text",text:result.availability.reason}],structuredContent:result};
+    }
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
-    const cityId = Number(input.placeId.slice("place:v1:geonames:".length));
-    const city = input.placeId.startsWith("place:v1:geonames:") ? index?.getById(cityId) : undefined;
+    const city = input.placeId!.startsWith("place:v1:geonames:") ? index?.getById(Number(input.placeId!.split(":").at(-1))) : undefined;
     if (!city || !index) throw new RangeError("The selected named place is unavailable. Resolve it again.");
-    const result = await candidatesFor(input, { placeId: input.placeId, latitude: city.latitude, longitude: city.longitude });
-    return { content: [{ type: "text", text: `OpenStreetMap candidates: ${result.availability.reason} Coverage: ${result.coverage}` }], structuredContent: result };
+    const result = await candidatesFor(searchObservingLocationsInputSchema.parse(input), {placeId:input.placeId!,latitude:city.latitude,longitude:city.longitude});
+    const structuredContent = {...result,caveats:[...result.caveats, "Legacy city-radius artifact coverage is partial and does not establish global mapped-feature completeness."]};
+    return {content:[{type:"text",text: `OpenStreetMap candidates: ${result.availability.reason} Coverage: ${result.coverage}`}],structuredContent};
   });
 
+  server.registerTool("resolve_observing_region", {
+    title:"Resolve a country or state", description:"Resolve named administrative regions in the installed pinned boundary catalogue. Missing coverage is explicit; boundaries do not verify site access or safety.",
+    inputSchema:resolveObservingRegionInputSchema,outputSchema:resolveObservingRegionResultSchema,annotations:V1_TOOL_ANNOTATIONS.resolve_observing_region,
+  }, async input => {
+    const matches = dependencies.regionIndex ? await dependencies.regionIndex.resolve(input) : [];
+    const result = resolveObservingRegionResultSchema.parse({matches,selectionRequired:matches.length>1,availability:{status:dependencies.regionIndex ? matches.length ? "available":"not-covered":"unavailable",reason:dependencies.regionIndex ? "Only installed boundary coverage is searched." : GLOBAL_CONFIGURATION_CAVEAT},sources:matches.length?matches.flatMap(x=>x.sources):[CONFIGURATION_SOURCE],caveats:["Administrative boundaries do not verify night access or site safety."]});
+    return {content:[{type:"text",text:result.availability.reason}],structuredContent:result};
+  });
+  server.registerTool("get_observing_location_details", {
+    title:"Inspect a selected observing candidate",description:"Retrieve source geometry and access evidence for a candidate ID and exact catalogue revision, or resolve a named site within installed coverage. Missing or stale coverage is explicit; choose a display time zone before planning an unverified site zone.",
+    inputSchema:getObservingLocationDetailsInputSchema,outputSchema:getObservingLocationDetailsResultSchema,annotations:V1_TOOL_ANNOTATIONS.get_observing_location_details,
+  }, async input => {
+    const candidate = input.placeId && dependencies.catalogue ? await dependencies.catalogue.details({placeId:input.placeId,catalogueRevision:input.catalogueRevision!}).catch(error => {if(error instanceof CatalogueRevisionError) return undefined;throw error;}) : undefined;
+    const matches = candidate ? [candidate] : input.placeQuery && dependencies.catalogue ? await dependencies.catalogue.findNames({placeQuery:input.placeQuery,countryCode:input.countryCode}) : [];
+    const result = getObservingLocationDetailsResultSchema.parse({matches,selectionRequired:matches.length>1,availability:{status:dependencies.catalogue ? matches.length ? "available":"not-covered":"unavailable",reason:dependencies.catalogue ? matches.length ? "Candidate source geometry found; actual site time zone and night access remain unverified." : "Candidate name, ID or revision is outside installed coverage. Search again." : GLOBAL_CONFIGURATION_CAVEAT},sources:matches.length?matches.flatMap(x=>x.sources):[CONFIGURATION_SOURCE],caveats:["Source tags do not verify public access, night opening, permits, safety or darkness."]});
+    return {content:[{type:"text",text:result.availability.reason}],structuredContent:result};
+  });
   server.registerTool("get_location_context", {
     title: "Check what is known about a named observing area",
     description: "Return source-linked place context and explicit unknown states for unverified darkness, public access, night opening and safety.",
@@ -266,6 +323,11 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
     const placeId = input.placeId;
+    if (!placeId.startsWith("place:v1:geonames:")) {
+      const point=await resolvePoint(input,index);
+      const result=await contextForPoint(point,index);
+      return {content:[{type:"text",text:result.availability.reason}],structuredContent:result};
+    }
     const city = placeId.startsWith("place:v1:geonames:") ? index.getById(Number(placeId.slice("place:v1:geonames:".length))) : undefined;
     if (!city) throw new RangeError("The selected named place is unavailable. Resolve it again.");
     const result = await getLocationContext(index.toPlaceRef(city));
@@ -281,13 +343,14 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   }, async (input) => {
     const index = dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
-    const result = climateContextResultSchema.parse(await climateFor(index)(input.placeId, input.month));
+    const point=await resolvePoint(input,index);
+    const result = climateContextResultSchema.parse(await climateFor(index)(input.placeId, input.month, point));
     return { content: [{ type: "text", text: describeClimateContext(result) }], structuredContent: result };
   });
 
   server.registerTool("plan_observing_session", {
     title: "Plan a night-sky observing session",
-    description: "Combine named-place time zone, astronomical darkness, Moon conditions, sky events, weather forecasts, and activity-specific guidance. Resolve the place first. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
+    description: "Combine the selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, weather forecasts, and activity-specific guidance. Resolve the place first. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
     inputSchema: planObservingSessionInputSchema,
     outputSchema: planResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.plan_observing_session,
@@ -324,25 +387,56 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
 }
 
-async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex, dependencies: NightSkyDependencies) {
-  const coordinates = resolvedCoordinatesForPlace(index, placeId);
+async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex, dependencies: NightSkyDependencies, point?: CalculationPlace) {
+  const coordinates = point ?? resolvedCoordinatesForPlace(index, placeId);
   if (!coordinates) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
-  const astronomy = await getAstronomyWindow({ placeId, timeZone: window.timeZone }, window, index);
+  const astronomy = await getAstronomyWindow({ placeId, timeZone: window.timeZone }, window, index, point);
   const userAgent = dependencies.weatherUserAgent ?? process.env.MET_NORWAY_USER_AGENT;
   const providerResult = userAgent || dependencies.weatherProvider
     ? await (dependencies.weatherProvider ?? { getForecast: (place, requestedWindow) => getMetNorwayForecast(place, requestedWindow, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId, ...coordinates }, window)
     : { status: "unavailable" as const, reason: "MET Norway is not configured because its required application/contact User-Agent has not been set." };
   const forecasts = providerResult.forecast ? [providerResult.forecast] : [];
   const darkness = astronomy.astronomicalDarkness;
-  const darknessRange = darkness.status === "available" ? [Date.parse(darkness.startUtc), Date.parse(darkness.endUtc)] as const : undefined;
+  const darknessIntervals = astronomicalDarknessIntervals(astronomy);
   const forecastStepsDuringDarkness = forecasts.map((forecast) => ({
     source: forecast.source.name,
-    validTimesUtc: forecast.samples.filter(({ validAt }) => darknessRange && Date.parse(validAt) >= darknessRange[0] && Date.parse(validAt) <= darknessRange[1]).map(({ validAt }) => validAt),
+    validTimesUtc: forecast.samples.filter(({ validAt }) => darknessIntervals.some(interval => Date.parse(validAt) >= Date.parse(interval.startUtc) && Date.parse(validAt) <= Date.parse(interval.endUtc))).map(({ validAt }) => validAt),
   }));
   return nightConditionsResultSchema.parse({
-    availability: { status: providerResult.status, reason: providerResult.reason }, placeId, window, forecasts,
-    nightContext: { darkness, moonIlluminationPercent: astronomy.moon.illuminationPercent, forecastStepsDuringDarkness },
-    sources: forecasts.length ? forecasts.map(({ source }) => source) : [MET_NORWAY_SOURCE],
-    caveats: ["MET Norway forecasts are model output, not local observations. Cloud, wind, and other variables may be absent by region or forecast horizon.", ...(providerResult.deprecationWarning ? [providerResult.deprecationWarning] : [])],
+    availability: { status: providerResult.status, reason: providerResult.reason }, placeId, ...candidatePointMetadata(point), window, forecasts,
+    nightContext: { darkness, astronomicalDarknessIntervals: darknessIntervals, moonIlluminationPercent: astronomy.moon.illuminationPercent, forecastStepsDuringDarkness },
+    sources: weatherSources(providerResult, dependencies.weatherProvider !== undefined),
+    caveats: [...candidateZoneCaveats(point), weatherCaveat(dependencies.weatherProvider !== undefined), ...(providerResult.deprecationWarning ? [providerResult.deprecationWarning] : [])],
   });
+}
+
+const GLOBAL_CONFIGURATION_CAVEAT = "No checksum-pinned global catalogue is installed. Ask for a named town for legacy city-radius coverage, or configure an admitted global edition.";
+const CONFIGURATION_SOURCE = {name:"NightSky local catalogue configuration",url:"https://nightsky.earth",attribution:"NightSky runtime provider configuration; this record supplies no geographic source evidence.",dataClass:"context" as const};
+// MCP output must have an object root; accept legacy rows without manufacturing a revision.
+const integratedSearchResultSchema = searchObservingLocationsResultSchema.extend({
+  candidates:z.array(candidateRefSchema.partial({catalogueRevision:true})).max(10),
+  sortBasis:searchDiscoveryResultSchema.shape.sortBasis,
+  discoveryCoverage:discoveryCoverageSchema.optional(),queryScope:discoveryScopeSchema.optional(),originBasis:z.array(originBasisSchema).max(5).optional(),truncationReason:z.string().max(300).optional(),
+});
+
+function candidateClimateGap(point: CalculationPlace,month:number):ClimateContextResultV2 {
+ return climateContextResultSchema.parse({schemaVersion:2,placeId:point.placeId,month,timeZone:point.displayTimeZone,dataClass:"reanalysis",historicalLabel:"historical-not-a-forecast",methodVersion:"dark-cloud-v1",sampleDefinition:"hourly-dark-time-samples",unit:"fraction",period:{startNight:"1991-01-01",endNight:"2020-12-31",kind:"baseline-1991-2020"},availability:{status:"not-covered",reason:"No installed historical climate artifact maps this selected candidate and display time zone. No city history has been substituted."},sources:[{name:"ERA5 dataset coverage requirement",url:"https://doi.org/10.24381/cds.adbb2d47",attribution:"ERA5 is the configured historical dataset family; no ERA5 sample or aggregation is available for this candidate.",dataClass:"reanalysis"}],caveats:["No numeric historical statistic is available for this site. The requested baseline is not installed for it."]});
+}
+
+function candidateZoneCaveats(point?: {catalogueRevision?:string;displayTimeZone?:string}):string[]{return point?.catalogueRevision?[`Times use the explicit display time zone ${point.displayTimeZone}; the actual site time zone is unverified.`]:[];}
+function candidatePointMetadata(point?: {catalogueRevision?:string;displayTimeZone?:string}) {return point?.catalogueRevision?{catalogueRevision:point.catalogueRevision,displayTimeZone:point.displayTimeZone}:{};}
+
+const UNSPECIFIED_WEATHER_SOURCE = {
+  name: "NightSky weather provider configuration",
+  url: "https://nightsky.earth",
+  attribution: "The configured weather provider returned no forecast or source identity. This configuration record supplies no forecast data or provider provenance.",
+  dataClass: "context" as const,
+};
+function weatherSources(result: WeatherProviderResult, customProvider: boolean) {
+  if (result.forecast) return [sourceRecordSchema.parse(result.forecast.source)];
+  if (customProvider) return [result.source !== undefined ? sourceRecordSchema.parse(result.source) : UNSPECIFIED_WEATHER_SOURCE];
+  return [MET_NORWAY_SOURCE];
+}
+function weatherCaveat(customProvider: boolean): string {
+  return `${customProvider ? "Weather" : "MET Norway"} forecasts are model output, not local observations. Cloud, wind, and other variables may be absent by region or forecast horizon.`;
 }

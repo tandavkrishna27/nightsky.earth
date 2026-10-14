@@ -56,7 +56,7 @@ export const climateStatisticsSchema = z.strictObject({
   }
 });
 export type ClimateStatistics = z.infer<typeof climateStatisticsSchema>;
-export const getClearSkyClimatologyInputSchema = z.strictObject({ placeId: placeIdSchema, month: z.number().int().min(1).max(12) });
+export const getClearSkyClimatologyInputSchema = z.strictObject({ placeId: placeIdSchema, month: z.number().int().min(1).max(12), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() });
 export const climateContextResultSchema = resultSchema({
   schemaVersion: z.literal(2), placeId: placeIdSchema, month: z.number().int().min(1).max(12), timeZone: ianaTimeZoneSchema,
   dataClass: z.literal("reanalysis"), historicalLabel: z.literal("historical-not-a-forecast"),

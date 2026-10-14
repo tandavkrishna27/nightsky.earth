@@ -37,6 +37,9 @@ jobs:
       - name: Run test suite
         run: npm test
 
+      - name: Exercise bounded global discovery and exact selected-site planning offline
+        run: node --import tsx --test tests/mcp/global-discovery.test.ts
+
       - name: Check TypeScript
         run: npm run check
 

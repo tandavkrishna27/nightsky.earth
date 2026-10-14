@@ -12,8 +12,8 @@
 
 ## Global constraints
 
-- This document is a proposed extension of original Tasks 0/2/4/8/10A/11C/12A/12B/15, not new completion credit. Current counts remain **12 Done / 9 Partial / 6 Not started**.
-- No downloads, deployment, account changes or model runs are authorized by this documentation wave. Implementation may use synthetic fixtures; global acquisition requires a concrete admitted source/build budget.
+- This document is the approved extension of original Tasks 0/2/4/8/10A/11C/12A/12B/15, not new completion credit. Current counts remain **12 Done / 9 Partial / 6 Not started**.
+- The subsequent continuous local goal authorizes implementation, synthetic tests, available local model rehearsals, documentation, branch pushes and CI. No deployment, publication or new geographic/historical dataset downloads are authorized. Global acquisition requires a concrete admitted source/build budget.
 - Preferred prepared input is OSM; Overture is an alternative after category/schema/license admission. Public Overpass and Nominatim are not the dependable production POI backend.
 - Keep six existing categories. Limits: five origins, five included regions, five excluded regions, ten returned candidates, five comparison options; radius default 50 km, range 1–300 km; minimum distance default zero and no greater than radius.
 - Require an origin or included region. Reject scope mixed with legacy place/radius fields. Exclusions win; any/all default to any. No world exclusion-only scan.
@@ -21,7 +21,7 @@
 - Preserve existing shared response limits: 4 MiB structured result, 64 sources and 20 caveats. Return budget/coverage gaps rather than silently trimming provenance or claiming a complete nearest list.
 - Near-me uses consented host hints only when available, currently through the named-city approximation. Raw personal GPS/address support, driving routes, exact timezone polygons and verified night access are separate scope.
 - Candidate planning requires known catalogue ID/revision and an explicit display timezone when actual site timezone is unverified. No silent city-centre calculation or guessed timezone.
-- Full registry becomes 14 tools only when both proposed tools are implemented; resolver-only mode stays one. Existing current registry remains 12 meanwhile.
+- The implemented full registry has 14 tools; resolver-only mode stays one. Original twelve-tool evidence remains a historical snapshot, not the current inventory.
 
 ## Review focus
 
@@ -79,10 +79,10 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Produces:** release inventory with exact source edition, categories/licenses, nonduplicated geographic footprints, expected build resources, approved acquisition bounds and unresolved fields clearly labelled.
 
-- [ ] Inventory OSM global extract coverage and Overture outdoor-category alternatives from primary metadata. Include islands, territories, poles and date-line footprints; do not use world record count as our subset size.
-- [ ] Record input choice and distribution obligations. Reject an input missing usable representative geometry or provenance. Do not automatically combine differing source licenses.
-- [ ] Separate free data from local hardware/build cost. Leave actual final catalogue size and capacity unverified until measured; propose exact limits for owner review before any acquisition.
-- [ ] Check every source claim against its linked primary document; commit the admission document without marking Task 8 Done.
+- [x] Inventory OSM global extract coverage and Overture outdoor-category alternatives from primary metadata. Include islands, territories, poles and date-line footprints; do not use world record count as our subset size.
+- [x] Record input choice and distribution obligations. Reject an input missing usable representative geometry or provenance. Do not automatically combine differing source licenses.
+- [x] Separate free data from local hardware/build cost. Leave actual final catalogue size and capacity unverified until measured; propose exact limits for owner review before any acquisition.
+- [x] Check every source claim against its linked primary document; commit the admission document without marking Task 8 Done.
 
 ## Original Tasks 2/8 — contracts and normalization
 
@@ -90,11 +90,11 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Produces:** shared types and `normalizeDiscoveryInput` above. Use a strict object plus exclusivity validation suitable for MCP input schemas. Do not apply a legacy radius default before detecting whether scope was supplied.
 
-- [ ] Write failing `legacyDefaultsRemain50And5`: old `{placeId}` normalizes one origin/radius 50/minimum zero; existing response fields preserved.
-- [ ] Write failing `scopeTruthTable`: any/all origins, any/all regions, exclusions, category complement and minimum-distance bounds; reject sixth origin/region, zero or 301 radius, minimum above radius, exclusion-only, mixed scope/legacy and unknown properties.
-- [ ] Run `npx tsx --test tests/places/discoveryScope.test.ts`; expected failures for missing new schemas/normalizer.
-- [ ] Implement strict schemas, default any modes, versioned reference validation and normalized result fields. Region-only sort is completeness/name/ID; origin any sorts minimum distance, all maximum distance.
-- [ ] Rerun focused tests and `npm run check`; expect zero failures; commit only owned files.
+- [x] Write failing `legacyDefaultsRemain50And5`: old `{placeId}` normalizes one origin/radius 50/minimum zero; existing response fields preserved.
+- [x] Write failing `scopeTruthTable`: any/all origins, any/all regions, exclusions, category complement and minimum-distance bounds; reject sixth origin/region, zero or 301 radius, minimum above radius, exclusion-only, mixed scope/legacy and unknown properties.
+- [x] Run `npx tsx --test tests/places/discoveryScope.test.ts`; expected failures for missing new schemas/normalizer.
+- [x] Implement strict schemas, default any modes, versioned reference validation and normalized result fields. Region-only sort is completeness/name/ID; origin any sorts minimum distance, all maximum distance.
+- [x] Rerun focused tests and `npm run check`; expect zero failures; commit only owned files.
 
 ## Original Task 8 — bounded paged storage and offline builder
 
@@ -102,13 +102,13 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Consumes:** shared references/coverage types. **Produces:** `CatalogueReader` implementation and schema-v2 root referencing bounded directory, spatial leaf, by-ID, by-name and administrative membership pages.
 
-- [ ] Write failing `readerRejectsUnsafeArtifacts`: traversal/symlink escapes, oversized pages/rows, hash/byte/count disagreement, malformed bounds, conflicting duplicate IDs and edition mismatch must reject.
-- [ ] Write failing `boundedResidentCacheAndStops`: two-leaf cache, serialized loader, queue eight, explicit 256-leaf/32 MiB/ten-second stops; no unlimited root inventory.
-- [ ] Run `npx tsx --test tests/places/catalogueFiles.test.ts`; confirm failures before implementation.
-- [ ] Implement hierarchical directory pages and shared bounded read/cache interface in `catalogueFiles.ts`. Check deadline at reads and traversal steps. Pin IDs/name/membership indexes to the same edition; no whole-catalogue RAM map.
-- [ ] Implement deterministic builder over admitted normalized inputs. Separate coverage footprint from candidate bounds; atomically publish validated manifest, preserve native source vintage and rollback edition. Quarantine conflicting same IDs instead of last-writer wins.
-- [ ] Add `rebuildIdenticalAndEmptyFootprint` fixture: repeat output hashes match; admitted empty footprint survives build; incomplete geometry cannot become accepted candidate coverage.
-- [ ] Rerun focused tests and typechecks; inspect measured synthetic peak cache/resource counters; commit. Synthetic capacity is not global build evidence.
+- [x] Write failing `readerRejectsUnsafeArtifacts`: traversal/symlink escapes, oversized pages/rows, hash/byte/count disagreement, malformed bounds, conflicting duplicate IDs and edition mismatch must reject.
+- [x] Write failing `boundedResidentCacheAndStops`: two-leaf cache, serialized loader, queue eight, explicit 256-leaf/32 MiB/ten-second stops; no unlimited root inventory.
+- [x] Run `npx tsx --test tests/places/catalogueFiles.test.ts`; confirm failures before implementation.
+- [x] Implement hierarchical directory pages and shared bounded read/cache interface in `catalogueFiles.ts`. Check deadline at reads and traversal steps. Pin IDs/name/membership indexes to the same edition; no whole-catalogue RAM map.
+- [x] Implement deterministic builder over admitted normalized inputs. Separate coverage footprint from candidate bounds; atomically publish validated manifest, preserve native source vintage and rollback edition. Reject conflicting-ID editions instead of last-writer wins; preserve failure evidence.
+- [x] Add `rebuildIdenticalAndEmptyFootprint` fixture: repeat output hashes match; admitted empty footprint survives build; incomplete geometry cannot become accepted candidate coverage.
+- [x] Rerun focused tests and typechecks; inspect measured synthetic peak cache/resource counters; commit. Synthetic capacity is not global build evidence.
 
 ## Original Tasks 4/8 — country/state resolution and membership
 
@@ -116,11 +116,11 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Consumes:** pinned gbOpen ADM0/ADM1 full geometry and metadata, already admitted offline. **Produces:** `RegionIndex` and candidate membership pages; no geographic timezone service.
 
-- [ ] Write failing `ambiguousNamesRequireSelection`: country/state collision, same-name states in different countries and ISO3 disambiguation; no capital fallback.
-- [ ] Write failing `membershipHolesBordersAndDateline`: point on exterior boundary included, hole interior/boundary excluded, multipolygon islands included, date-line geometry normalized; bounding box alone never establishes membership.
-- [ ] Run `npx tsx --test tests/places/regions.test.ts`; expect new adapter failures.
-- [ ] Implement bounded name lookup and build-time representative-point membership. Full geometry determines membership; simplified geometry only for display. Track boundary edition/license and contested-boundary caveats. Reject unknown region IDs.
-- [ ] Rerun focused tests/typechecks; commit. Alias files are names, never proof of geometry coverage.
+- [x] Write failing `ambiguousNamesRequireSelection`: country/state collision, same-name states in different countries and ISO3 disambiguation; no capital fallback.
+- [x] Write failing `membershipHolesBordersAndDateline`: point on exterior boundary included, hole interior/boundary excluded, multipolygon islands included, date-line geometry normalized; bounding box alone never establishes membership.
+- [x] Run `npx tsx --test tests/places/regions.test.ts`; expect new adapter failures.
+- [x] Implement bounded name lookup and build-time representative-point membership. Full geometry determines membership; simplified geometry only for display. Track boundary edition/license and contested-boundary caveats. Reject unknown region IDs.
+- [x] Rerun focused tests/typechecks; commit. Alias files are names, never proof of geometry coverage.
 
 ## Original Task 8 — combined search and selected-spot details
 
@@ -128,12 +128,12 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Consumes:** `CatalogueReader`, `RegionIndex`, normalized scope. **Produces:** search/details/name lookup methods defined above.
 
-- [ ] Write failing `scopeResultsMatchBruteForce`: synthetic complete reference for radius bands, country/state intersection/union, exclusion-wins, five origins any/all and category filters; deterministic ordering and per-origin distances.
-- [ ] Write failing `emptyMissingAndTruncatedAreDifferent`: installed empty footprint, missing coverage, density/time/read stop; never describe partial list as globally nearest.
-- [ ] Write failing `staleDetailsAndNamedCandidate`: stale/missing ID, name ambiguity, candidate revision and explicit point/source links; reject arbitrary path/URL IDs.
-- [ ] Run `npx tsx --test tests/places/globalCatalogue.test.ts`; expect failures.
-- [ ] Implement spherical distance routing including pole/date-line cases, membership-based broad-region traversal and bounded ranked results. Use source completeness only, not guessed darkness/access quality. Hold public candidate geometry separately from private origins.
-- [ ] Rerun focused tests/typechecks; preserve original regional tests and commit.
+- [x] Write failing `scopeResultsMatchBruteForce`: synthetic complete reference for radius bands, country/state intersection/union, exclusion-wins, five origins any/all and category filters; deterministic ordering and per-origin distances.
+- [x] Write failing `emptyMissingAndTruncatedAreDifferent`: installed empty footprint, missing coverage, density/time/read stop; never describe partial list as globally nearest.
+- [x] Write failing `staleDetailsAndNamedCandidate`: stale/missing ID, name ambiguity, candidate revision and explicit point/source links; reject arbitrary path/URL IDs.
+- [x] Run `npx tsx --test tests/places/globalCatalogue.test.ts`; expect failures.
+- [x] Implement spherical distance routing including pole/date-line cases, membership-based broad-region traversal and bounded ranked results. Use source completeness only, not guessed darkness/access quality. Hold public candidate geometry separately from private origins.
+- [x] Rerun focused tests/typechecks; preserve original regional tests and commit.
 
 ## Original Tasks 8/10A — plan at the chosen candidate point
 
@@ -141,11 +141,11 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Consumes:** details lookup and explicit display timezone. **Produces:** `resolveCalculationPlace` and consistent stateless propagation through astronomy/weather/planning/comparison.
 
-- [ ] Write failing `candidatePlanUsesCandidatePoint`: use fixture city/site with different coordinates; astronomy matches direct site calculation, weather request uses site coordinates, no city-centre substitution.
-- [ ] Write failing `candidateRequiresTimezoneAndFreshRevision`: absent timezone prompts choice; invalid IANA zone/stale revision rejected; explicit display timezone labelled; named-city behavior unchanged.
-- [ ] Run `npx tsx --test tests/mcp/global-discovery.test.ts`; confirm missing implementation failures.
-- [ ] Implement shared calculation-place adapter and thread optional revision/display timezone through all consuming tool inputs. Resolve once per request; validate revision atomically against selected edition. Do not persist user settings or infer candidate's actual timezone from nearest city.
-- [ ] Rerun focused tests/typechecks plus existing planner/comparison suites; commit. Original Task 10A stays Done; extension completion recorded separately.
+- [x] Write failing `candidatePlanUsesCandidatePoint`: use fixture city/site with different coordinates; astronomy matches direct site calculation, weather request uses site coordinates, no city-centre substitution.
+- [x] Write failing `candidateRequiresTimezoneAndFreshRevision`: absent timezone prompts choice; invalid IANA zone/stale revision rejected; explicit display timezone labelled; named-city behavior unchanged.
+- [x] Run `npx tsx --test tests/mcp/global-discovery.test.ts`; confirm missing implementation failures.
+- [x] Implement shared calculation-place adapter and thread optional revision/display timezone through all consuming tool inputs. Resolve once per request; validate revision atomically against selected edition. Do not persist user settings or infer candidate's actual timezone from nearest city.
+- [x] Rerun focused tests/typechecks plus existing planner/comparison suites; commit. Original Task 10A stays Done; extension completion recorded separately.
 
 ## Original Tasks 11C/12A/12B/15 — orchestration, package and CI
 
@@ -153,11 +153,11 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 
 **Consumes:** completed contracts/providers/planning. **Produces:** 14-tool full registry, unchanged one-tool resolver registry, offline complete-package regression evidence.
 
-- [ ] Add failing registry tests: exactly 14 full tools/one resolver tool; both additions read-only; descriptions state coverage/access limits; packaged schema and skill tool names agree.
-- [ ] Add failing `noHostHintOrConsentRequestsTown`: no implicit location read; unavailable Claude/Gemini hints prompt town rather than fabricated location. Host web search absence must not break catalogue planning.
-- [ ] Implement registry wiring and provider configuration. Default legacy artifact behavior remains valid; absent global artifacts cannot be advertised as global discovery coverage. Refresh hardcoded package inventory counts only after new tools exist.
-- [ ] Update the five canonical workflows with every row in the design matrix: direct filters, bounded planning comparisons, clarification and unsupported travel/access/raw-GPS cases. Keep forecast horizons/history and source-specific data separate.
-- [ ] Run `npm test`, `npm run check`, `npm run plugin:package`, `npm run test:review-cases`, builds and existing runtime checks. Add new tests to the discovered harness and relevant Linux/Windows jobs; all must pass with no external downloads.
+- [x] Add failing registry tests: exactly 14 full tools/one resolver tool; both additions read-only; descriptions state coverage/access limits; packaged schema and skill tool names agree.
+- [x] Add failing `noHostHintOrConsentRequestsTown`: no implicit location read; unavailable Claude/Gemini hints prompt town rather than fabricated location. Host web search absence must not break catalogue planning.
+- [x] Implement registry wiring and provider configuration. Default legacy artifact behavior remains valid; absent global artifacts cannot be advertised as global discovery coverage. Refresh hardcoded package inventory counts only after new tools exist.
+- [x] Update the five canonical workflows with every row in the design matrix: direct filters, bounded planning comparisons, clarification and unsupported travel/access/raw-GPS cases. Keep forecast horizons/history and source-specific data separate.
+- [x] Run `npm test`, `npm run check`, `npm run plugin:package`, `npm run test:review-cases`, builds and existing runtime checks. Add new tests to the discovered harness and relevant Linux/Windows jobs; all must pass with no external downloads.
 - [ ] Update existing tickets with exact implemented-versus-source/host/model gates. Commit/push the branch; watch all six CI jobs at the exact commit, fix regressions and record evidence.
 - [ ] After the complete package is assembled, run installed Codex/Claude journey matrix and owner questions as a separate explicitly scheduled verification step. No upload/deployment inferred from local packaging.
 

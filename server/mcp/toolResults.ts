@@ -1,3 +1,4 @@
+import { CalculationPlaceClarificationError } from "../places/calculationPlace";
 import type { McpServer } from "@modelcontextprotocol/server";
 import { MAX_STRUCTURED_RESULT_BYTES } from "../../shared/nightsky/common";
 function safeError(text: string) {
@@ -15,7 +16,15 @@ export function guardToolCallback<Args extends unknown[], Result>(callback: (...
             }
             return result;
         }
-        catch {
+        catch (error) {
+            if (error instanceof CalculationPlaceClarificationError) {
+                const messages = {
+                    "resolve-again": "The selected place or catalogue revision is unavailable. Search and select the place again before planning.",
+                    "display-time-zone-required": "Choose an explicit display time zone before planning this candidate; its actual site time zone is unverified.",
+                    "time-zone-mismatch": "The selected place and requested display time zone must match. Resolve the place again and use its returned named-place zone or chosen site display zone.",
+                };
+                return safeError(messages[error.code]);
+            }
             return safeError("NightSky could not complete this tool request. Try a smaller request or try again shortly.");
         }
     };

@@ -33,7 +33,7 @@ Each installed `skills/<name>/SKILL.md` points to its adjacent `references/workf
 
 Use the existing [standalone backend build/start procedure](deployment.md) and [listener configuration](v1-host-policy-handoff.md) for a separately started backend; the builder creates no launch command and changes no runtime architecture. The backend defaults to loopback port 5000; the 4010 build examples require a separately selected matching listener port. A client must be running on a surface that can reach that machine's loopback port. Saving/uploading a ZIP to an account does not establish such access on web or mobile.
 
-After separately authorized installed-plugin rehearsal, verify the complete skills and MCP together, record actual tool discovery and harmless calls, and run the full positive/negative host case matrix. Continue the original official identity, source rights/coverage, production endpoint, policy, validation, reviewer-video, submission and publication gates. Neither a deterministic ZIP nor this local validator is official host acceptance.
+The subsequent authorized local rehearsal is recorded in [model validation](complete-model-journey-validation.md): twenty Codex prompt-fed journey answers and four supplements were reviewed, Claude native initialization exposed five skills/fourteen tools but authentication blocked inference, and native Codex installation succeeded but automatic policy rejected its skill-file read. Native skills-plus-tools acceptance remains open. Continue the original official identity, source rights/coverage, production endpoint, policy, validation, reviewer-video, submission and publication gates. Neither a deterministic ZIP nor this local validator is official host acceptance.
 
 Focused offline regression command:
 

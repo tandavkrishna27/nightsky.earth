@@ -1,7 +1,8 @@
 import * as z from "zod4";
+import { ianaTimeZoneSchema } from "./common";
 import { MAX_EVENT_RESULTS, placeIdSchema, resultSchema, sourceRecordSchema, timeWindowSchema, utcInstantSchema } from "./common";
 
-export const searchSkyEventsInputSchema = z.strictObject({ placeId: placeIdSchema, window: timeWindowSchema, eventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "equinox-solstice", "moon-phase", "comet", "other"])).max(9).optional(), limit: z.number().int().min(1).max(MAX_EVENT_RESULTS).default(15) });
+export const searchSkyEventsInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, eventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "equinox-solstice", "moon-phase", "comet", "other"])).max(9).optional(), limit: z.number().int().min(1).max(MAX_EVENT_RESULTS).default(15) });
 const calendarDateWindowSchema = z.strictObject({ startDate: z.string().date(), endDate: z.string().date() }).refine(({ startDate, endDate }) => endDate >= startDate, "Calendar date window end must not precede its start.");
 export const skyEventSchema = z.strictObject({
   eventId: z.string().trim().min(1).max(160),

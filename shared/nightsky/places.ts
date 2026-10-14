@@ -15,6 +15,8 @@ export const placeRefSchema = z.strictObject({
   displayName: z.string().trim().min(1).max(160),
   timeZone: ianaTimeZoneSchema,
   indexVintage: z.string().trim().min(1).max(100),
+  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  timeZoneBasis: z.enum(["named-record", "explicit-display"]).optional(),
   sources: z.array(sourceRecordSchema).min(1).max(4),
 });
 export type PlaceRef = z.infer<typeof placeRefSchema>;
@@ -81,7 +83,7 @@ export const searchObservingLocationsResultSchema = resultSchema({
   coverage: z.string().trim().min(1).max(300),
 });
 
-export const getLocationContextInputSchema = z.strictObject({ placeId: placeIdSchema });
+export const getLocationContextInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() });
 export const getLocationContextResultSchema = resultSchema({
   placeId: placeIdSchema,
   groundLightContext: z.discriminatedUnion("status", [

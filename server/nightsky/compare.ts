@@ -1,3 +1,4 @@
+import { CalculationPlaceClarificationError } from "../places/calculationPlace";
 import { compareObservingOptionsInputSchema, compareObservingOptionsResultSchema, type CompareObservingOptionsResult } from "../../shared/nightsky/planning";
 import type { SourceRecord } from "../../shared/nightsky/common";
 import type { PlannerServices } from "./planner";
@@ -24,18 +25,21 @@ export async function compareObservingOptions(inputValue: unknown, services: Pla
       if (plan.availability.status !== "available") anyPartial = true;
       comparisons.push({
         placeId: option.placeId,
+        catalogueRevision: option.catalogueRevision, displayTimeZone: option.displayTimeZone,
         activity: option.activity,
         window: option.window,
+        timeZoneBasis: plan.place.timeZoneBasis,
         summary: plan.summary,
         factors: plan.factors,
         sources: plan.sources,
         availability: plan.availability, gaps: plan.gaps, candidateWindows: plan.candidateWindows, suggestions: plan.suggestions, evidence: plan.evidence,
       });
-    } catch {
+    } catch (error) {
       anyPartial = true;
-      const reason = "The planning services could not evaluate this option. Resolve the named place again or retry later.";
+      const reason = error instanceof CalculationPlaceClarificationError ? error.message : "The planning services could not evaluate this option. Resolve the selected place again or retry later.";
       comparisons.push({
         placeId: option.placeId,
+        catalogueRevision: option.catalogueRevision, displayTimeZone: option.displayTimeZone,
         activity: option.activity,
         window: option.window,
         summary: `This option could not be evaluated: ${reason}`.slice(0, 800),

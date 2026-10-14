@@ -1,3 +1,4 @@
+import { V1_TOOL_ANNOTATIONS } from "../../server/mcp/registerTools";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -12,7 +13,7 @@ interface HostCase {
 }
 
 const cases = JSON.parse(readFileSync(join(process.cwd(), "tests/platforms/host-cases.json"), "utf8")) as HostCase[];
-const registeredTools = new Set(["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]);
+const registeredTools = new Set(Object.keys(V1_TOOL_ANNOTATIONS));
 
 test("hostPromptCasesHaveExpectedOrderAndNoUndefinedTools", () => {
   assert.equal(new Set(cases.map(({ id }) => id)).size, cases.length);
@@ -22,8 +23,9 @@ test("hostPromptCasesHaveExpectedOrderAndNoUndefinedTools", () => {
     assert.ok(scenario.knownLimits.length > 0);
     for (const tool of scenario.expectedTools) assert.ok(registeredTools.has(tool), `${scenario.id} references undefined tool ${tool}`);
     if (scenario.expectedTools.includes("plan_observing_session")) {
-      assert.ok(scenario.expectedTools.includes("resolve_place"), `${scenario.id} must resolve a place first`);
-      assert.ok(scenario.expectedTools.indexOf("resolve_place") < scenario.expectedTools.indexOf("plan_observing_session"));
+      const resolver = scenario.expectedTools.includes("get_observing_location_details") ? "get_observing_location_details" : "resolve_place";
+      assert.ok(scenario.expectedTools.includes(resolver), `${scenario.id} must resolve a place first`);
+      assert.ok(scenario.expectedTools.indexOf(resolver) < scenario.expectedTools.indexOf("plan_observing_session"));
     }
   }
 });

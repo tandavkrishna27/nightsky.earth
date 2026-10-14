@@ -35,7 +35,7 @@ test("standalone plugin entry exposes only bounded health and MCP without websit
         };
         const initialized = await rpc(1, "initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "offline-entry", version: "1" } });
         assert.equal(initialized.serverInfo.name, "nightsky-earth");
-        assert.equal((await rpc(2, "tools/list", {})).tools.length, 12);
+        assert.equal((await rpc(2, "tools/list", {})).tools.length, 14);
         const result = await rpc(3, "tools/call", { name: "recommend_specialist_tools", arguments: { activity: "general-stargazing" } });
         assert.equal(result.isError, undefined);
         assert.ok(result.structuredContent.recommendations.length);

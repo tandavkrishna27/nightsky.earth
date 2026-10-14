@@ -29,7 +29,7 @@ try{
     assert.equal(response.status,200);const body=await response.text();const event=body.split("\n").find(line=>line.startsWith("data: "));const payload=JSON.parse(event?event.slice(6):body);assert.equal(payload.error,undefined);return payload.result;
   };
   const initialized=await rpc(1,"initialize",{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"standalone-plugin-runtime-check",version:"1"}});assert.equal(initialized.serverInfo.name,"nightsky-earth");
-  const listed=await rpc(2,"tools/list",{});assert.equal(listed.tools.length,mode === "full" ? 12 : 1);
+  const listed=await rpc(2,"tools/list",{});assert.equal(listed.tools.length,mode === "full" ? 14 : 1);
   if (mode === "full") {
   for(const name of ["resolve_place","get_clear_sky_climatology","plan_observing_session","compare_observing_options","recommend_specialist_tools"])assert.ok(listed.tools.some(tool=>tool.name===name));
   const suggested=await rpc(3,"tools/call",{name:"recommend_specialist_tools",arguments:{activity:"general-stargazing"}});assert.equal(suggested.isError,undefined);assert.ok(suggested.structuredContent.recommendations.length);
