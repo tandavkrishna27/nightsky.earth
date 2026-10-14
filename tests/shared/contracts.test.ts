@@ -193,7 +193,7 @@ test("returnsAttributionInEveryResult", () => {
     sources: [localCalculationSource],
     placeId: "place:v1:geonames:1880252",
     window: validWindow,
-    polarState: "normal",
+    darknessState: "partial-window",
     astronomicalDarkness: {
       status: "available",
       startUtc: "2026-10-11T14:10:00.000Z",
@@ -201,7 +201,7 @@ test("returnsAttributionInEveryResult", () => {
       localStart: "19:40 IST",
       localEnd: "04:15 IST",
     },
-    twilightIntervals: [],
+    solarThresholdIntervals: [],
     moon: { phaseAtUtc: "2026-10-11T18:00:00.000Z", phaseDegrees: 0, illuminationPercent: 0, maximumAltitudeDegrees: 42, maximumAltitudeAtUtc: "2026-10-11T18:00:00.000Z" },
     caveats: [],
   });
@@ -235,4 +235,26 @@ test("downstreamLocationInputsRequireVersionedPlaceIdOnly", () => {
 test("rejectsStructuredResultAboveWireBudget", () => {
   assert.doesNotThrow(() => assertStructuredResultSize({ summary: "A short plan." }));
   assert.throws(() => assertStructuredResultSize({ optionalDetail: "x".repeat(MAX_STRUCTURED_RESULT_BYTES) }));
+});
+
+
+test("astronomy schema requires requested-window state and rejects legacy keys and threshold mismatch", () => {
+  const base = {
+    availability: { status: "available", reason: "Calculated." }, sources: [metSource], caveats: [],
+    placeId: "place:v1:geonames:1", window: validWindow, darknessState: "full-window",
+    astronomicalDarkness: { status: "unknown", reason: "Fixture." },
+    solarThresholdIntervals: [{ kind: "civil", sunAltitudeThresholdDegrees: -6, startUtc: validWindow.startUtc, endUtc: validWindow.endUtc, localStart: "18:00", localEnd: "06:00" }],
+    moon: { phaseAtUtc: validWindow.startUtc, phaseDegrees: 0, illuminationPercent: 0, maximumAltitudeDegrees: 0, maximumAltitudeAtUtc: validWindow.startUtc },
+  };
+  assert.equal(astronomyWindowResultSchema.safeParse(base).success, true);
+  for (const [kind, threshold] of [["civil", -6], ["nautical", -12], ["astronomical", -18]] as const) {
+    assert.equal(astronomyWindowResultSchema.safeParse({ ...base, solarThresholdIntervals: [{ ...base.solarThresholdIntervals[0], kind, sunAltitudeThresholdDegrees: threshold }] }).success, true);
+    assert.equal(astronomyWindowResultSchema.safeParse({ ...base, solarThresholdIntervals: [{ ...base.solarThresholdIntervals[0], kind, sunAltitudeThresholdDegrees: threshold === -6 ? -12 : -6 }] }).success, false);
+  }
+  const { darknessState, solarThresholdIntervals, ...legacy } = base;
+  assert.equal(astronomyWindowResultSchema.safeParse({ ...legacy, polarState: "continuous-darkness", twilightIntervals: [] }).success, false);
+  assert.equal(astronomyWindowResultSchema.safeParse({ ...base, polarState: "normal" }).success, false);
+  assert.equal(astronomyWindowResultSchema.safeParse({ ...base, twilightIntervals: [] }).success, false);
+  assert.equal(astronomyWindowResultSchema.safeParse({ ...legacy, solarThresholdIntervals }).success, false);
+  assert.equal(astronomyWindowResultSchema.safeParse({ ...base, darknessState: "unknown" }).success, true);
 });

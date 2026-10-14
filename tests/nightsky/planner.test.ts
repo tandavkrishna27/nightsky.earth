@@ -17,8 +17,8 @@ const placeId = "place:v1:geonames:2643743";
 function astronomy(): AstronomyWindowResult {
   return {
     availability: { status: "available", reason: "Calculated for the fixture place." }, sources: [source], caveats: [], placeId, window,
-    polarState: "normal", astronomicalDarkness: { status: "available", startUtc: "2026-10-15T19:00:00Z", endUtc: "2026-10-16T05:00:00Z", localStart: "8 pm", localEnd: "6 am" },
-    twilightIntervals: [], moon: { phaseAtUtc: "2026-10-16T00:00:00Z", phaseDegrees: 60, illuminationPercent: 25, maximumAltitudeDegrees: 20, maximumAltitudeAtUtc: "2026-10-16T01:00:00Z" },
+    darknessState: "partial-window", astronomicalDarkness: { status: "available", startUtc: "2026-10-15T19:00:00Z", endUtc: "2026-10-16T05:00:00Z", localStart: "8 pm", localEnd: "6 am" },
+    solarThresholdIntervals: [], moon: { phaseAtUtc: "2026-10-16T00:00:00Z", phaseDegrees: 60, illuminationPercent: 25, maximumAltitudeDegrees: 20, maximumAltitudeAtUtc: "2026-10-16T01:00:00Z" },
   };
 }
 function conditions(): NightConditionsResult {
@@ -154,3 +154,33 @@ test("a plan window is limited to one observing session", async () => {
 test("rejects stale or unknown place IDs with a clear error", async () => {
   await assert.rejects(() => planObservingSession({ placeId: "place:v1:geonames:999", activity: "visual-stargazing", window }, services()), /selected named place is unavailable/i);
 });
+
+for (const [state, impact, meaning] of [
+  ["full-window", "favorable", /throughout the requested window/i],
+  ["partial-window", "mixed", /part of the requested window/i],
+  ["none", "unfavorable", /no astronomical darkness.*requested window/i],
+  ["unknown", "unknown", /unknown.*requested window/i],
+] as const) for (const activity of ["general-stargazing", "astrophotography", "meteor-shower"] as const) {
+  test(`${activity} describes ${state} darkness only for the requested session`, async () => {
+    const supplied = astronomy();
+    supplied.darknessState = state;
+    if (state === "full-window") supplied.astronomicalDarkness = { status: "available", startUtc: window.startUtc, endUtc: window.endUtc, localStart: "7 pm", localEnd: "7 am" };
+    if (state === "none" || state === "unknown") supplied.astronomicalDarkness = { status: state === "none" ? "unavailable" : "unknown", reason: "Fixture session calculation." };
+    const darkness = supplied.astronomicalDarkness;
+    supplied.solarThresholdIntervals = darkness.status === "available" ? [{ kind: "astronomical", sunAltitudeThresholdDegrees: -18, startUtc: darkness.startUtc, endUtc: darkness.endUtc, localStart: darkness.localStart, localEnd: darkness.localEnd }] : [];
+    const result = await planObservingSession({ placeId, activity, window, experience: "beginner" }, services({ getAstronomy: async () => supplied, getNightConditions: async () => { throw new Error("Offline forecast"); } }));
+    const factor = result.factors.find(({ name }) => name === "Astronomical darkness");
+    assert.equal(factor?.impact, impact);
+    assert.match(factor!.assessment, meaning);
+    assert.deepEqual(factor?.sourceNames, ["Fixture astronomy"]);
+    assert.equal(result.factors.some(({ name }) => /polar/i.test(name)), false);
+    assert.doesNotMatch(result.summary + result.factors.map(({ assessment }) => assessment).join(" "), /polar|continuous darkness|24.hour/i);
+    assert.deepEqual(result.evidence.astronomy, supplied);
+    assert.ok(result.factors.some(({ name, impact }) => name === "Weather forecast" && impact === "unknown"));
+    assert.ok(result.factors.some(({ name, impact }) => name === "Site access" && impact === "unknown"));
+    assert.ok(result.factors.some(({ name, impact }) => name === "Historical context" && impact === "unknown"));
+    if (state === "none" || state === "unknown") assert.equal(result.candidateWindows.length, 0);
+    if (activity === "astrophotography") assert.ok(result.gaps.some(gap => /seeing.*transparency/i.test(gap)));
+    if (activity === "meteor-shower") assert.ok(result.factors.some(({ name, impact }) => name === "Meteor radiant visibility" && impact === "unknown"));
+  });
+}

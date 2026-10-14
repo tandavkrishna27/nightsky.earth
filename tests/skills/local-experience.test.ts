@@ -57,9 +57,10 @@ test("canonical skill source references remain paired with their workflow", () =
   }
 });
 
-test("window classification contract and installed skill behavior remain pending", () => {
+test("window classification is explicit and installed skill behavior remains pending", () => {
   const text = readFileSync("docs/product/workflows/plan-stargazing-night.md", "utf8");
-  assert.match(text, /polarState.*window.*classification/i);
-  assert.match(text, /contract.*pending|pending.*contract/i);
+  assert.match(text, /darknessState.*requested window/i);
+  assert.match(text, /solarThresholdIntervals.*nested/i);
+  for (const state of ["full-window", "partial-window", "none", "unknown"]) assert.ok(text.includes(state));
   assert.match(text, /installed.*skill.*(?:deferred|pending)/i);
 });

@@ -32,16 +32,16 @@ export async function getAstronomyWindow(place: { placeId: string; timeZone: str
   const observer = new Astronomy.Observer(coordinates.latitude, coordinates.longitude, 0);
   const start = Date.parse(checkedWindow.startUtc);
   const end = Date.parse(checkedWindow.endUtc);
-  const twilightIntervals: AstronomyWindowResult["twilightIntervals"] = [];
+  const solarThresholdIntervals: AstronomyWindowResult["solarThresholdIntervals"] = [];
   const darknessIntervals: Array<{ start: number; end: number }> = [];
   let maximumMoon = { altitude: -90, at: start };
   const phaseAt = new Date((start + end) / 2);
   const moonPhase = Astronomy.MoonPhase(phaseAt);
   const moonIllumination = Astronomy.Illumination(Astronomy.Body.Moon, phaseAt).phase_fraction * 100;
-  const twilights = [{ kind: "civil" as const, altitude: -6 }, { kind: "nautical" as const, altitude: -12 }, { kind: "astronomical" as const, altitude: -18 }];
+  const twilights = [{ kind: "civil" as const, altitude: -6 as const }, { kind: "nautical" as const, altitude: -12 as const }, { kind: "astronomical" as const, altitude: -18 as const }];
   for (const twilight of twilights) {
     for (const interval of belowAltitudeIntervals(Astronomy.Body.Sun, observer, start, end, twilight.altitude)) {
-      twilightIntervals.push({ kind: twilight.kind, ...makeInterval(interval.start, interval.end, checkedWindow.timeZone) });
+      solarThresholdIntervals.push({ kind: twilight.kind, sunAltitudeThresholdDegrees: twilight.altitude, ...makeInterval(interval.start, interval.end, checkedWindow.timeZone) });
       if (twilight.kind === "astronomical") darknessIntervals.push(interval);
     }
   }
@@ -52,17 +52,16 @@ export async function getAstronomyWindow(place: { placeId: string; timeZone: str
       if (hor.altitude > maximumMoon.altitude) maximumMoon = { altitude: hor.altitude, at: date.getTime() };
   }
   const clippedDarkness = darknessIntervals.map(({ start: a, end: b }) => ({ start: Math.max(a, start), end: Math.min(b, end) })).filter((i) => i.end > i.start);
-  const polarState = clippedDarkness.length === 0
-    ? (maximumSolarAltitude(observer, start, end) > -18 ? "no-astronomical-darkness" : "continuous-darkness")
-    : clippedDarkness.length === 1 && clippedDarkness[0]!.start <= start && clippedDarkness[0]!.end >= end ? "continuous-darkness" : "normal";
-  const selectedDarkness = polarState === "continuous-darkness" ? { start, end } : clippedDarkness[0];
+  const darknessState = clippedDarkness.length === 0 ? "none"
+    : clippedDarkness.length === 1 && clippedDarkness[0]!.start <= start && clippedDarkness[0]!.end >= end ? "full-window" : "partial-window";
+  const selectedDarkness = clippedDarkness[0];
   const result = astronomyWindowResultSchema.parse({
     availability: { status: "available", reason: "Calculated from a named-place coordinate and the selected IANA time zone." },
     sources: [CALCULATION_SOURCE],
-    caveats: ["Astronomical twilight uses the Sun's geometric center at -18 degrees. Terrain and local horizon obstructions are not modeled.", "Moon maximum altitude is sampled at intervals, so it is an estimate; it does not establish moonrise or moonset."],
-    placeId: place.placeId, window: checkedWindow, polarState,
+    caveats: ["Solar threshold intervals are nested Sun-below-threshold intervals at -6, -12 and -18 degrees, clipped to the requested window; they are not exclusive twilight phase bands. Astronomical darkness uses the Sun's geometric center at -18 degrees. Terrain and local horizon obstructions are not modeled.", "Moon maximum altitude is sampled at intervals, so it is an estimate; it does not establish moonrise or moonset."],
+    placeId: place.placeId, window: checkedWindow, darknessState,
     astronomicalDarkness: selectedDarkness ? { status: "available", ...makeInterval(selectedDarkness.start, selectedDarkness.end, checkedWindow.timeZone) } : { status: "unavailable", reason: "The Sun does not reach 18 degrees below the geometric horizon during this window." },
-    twilightIntervals,
+    solarThresholdIntervals,
     moon: { phaseAtUtc: phaseAt.toISOString(), phaseDegrees: normalizeDegrees(moonPhase), illuminationPercent: clamp(moonIllumination, 0, 100), maximumAltitudeDegrees: clamp(maximumMoon.altitude, -90, 90), maximumAltitudeAtUtc: new Date(maximumMoon.at).toISOString() },
   });
   return result;
@@ -136,7 +135,6 @@ function belowAltitudeIntervals(body: AstronomyTypes.Body, observer: AstronomyTy
   }
   return intervals;
 }
-function sunAltitude(observer: AstronomyTypes.Observer, time: number): number { return horizon(Astronomy.Body.Sun, observer, new Date(time)).altitude; }
 // Always inspect the requested endpoint, including a final partial sampling step.
 function sampleInstants(start: number, end: number, step: number): number[] {
   const times: number[] = [];
@@ -152,7 +150,6 @@ function horizonCrossing(start: number, end: number, altitudeAt: (time: number) 
   }
   return (lo + hi) / 2;
 }
-function maximumSolarAltitude(observer: AstronomyTypes.Observer, start: number, end: number): number { let max = -90; for (let t = start; t <= end; t += 15 * 60_000) max = Math.max(max, sunAltitude(observer, Math.min(t, end))); return max; }
 function horizon(body: AstronomyTypes.Body, observer: AstronomyTypes.Observer, date: Date) { const coord = Astronomy.Equator(body, date, observer, true, true); return Astronomy.Horizon(date, observer, coord.ra, coord.dec); }
 function milkyWayCoreHorizon(observer: AstronomyTypes.Observer, date: Date) {
   Astronomy.DefineStar(Astronomy.Body.Star8, MILKY_WAY_CORE.ra, MILKY_WAY_CORE.dec, 26_000);

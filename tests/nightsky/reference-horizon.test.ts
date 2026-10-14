@@ -73,7 +73,7 @@ function assertInBracket(actual: string, bracket: readonly [string, string]) {
 for (const row of twilightBrackets) {
   test(`JPL geometric ${row.kind} twilight evening and morning crossing`, async () => {
     const result = await getAstronomyWindow(place(), window("2026-01-15T22:00:00Z", "2026-01-16T13:00:00Z"), index);
-    const interval = result.twilightIntervals.find((interval) => interval.kind === row.kind)!;
+    const interval = result.solarThresholdIntervals.find((interval) => interval.kind === row.kind)!;
     assert.ok(interval);
     assertInBracket(interval.startUtc, row.start);
     assertInBracket(interval.endUtc, row.end);
@@ -81,14 +81,14 @@ for (const row of twilightBrackets) {
 }
 test("JPL civil crossing in final unsampled four-minute tail is retained", async () => {
   const result = await getAstronomyWindow(place(), window("2026-01-15T22:36:00Z", "2026-01-15T22:40:00Z"), index);
-  const interval = result.twilightIntervals.find((interval) => interval.kind === "civil");
+  const interval = result.solarThresholdIntervals.find((interval) => interval.kind === "civil");
   assert.ok(interval, "Civil darkness starts inside the window, after its midpoint");
   assertInBracket(interval.startUtc, twilightBrackets[0].start);
   assert.equal(Date.parse(interval.endUtc), Date.parse("2026-01-15T22:40:00Z"));
 });
 test("JPL morning civil crossing in final four-minute tail does not extend darkness to the end", async () => {
   const result = await getAstronomyWindow(place(), window("2026-01-16T11:53:00Z", "2026-01-16T11:57:00Z"), index);
-  const interval = result.twilightIntervals.find((interval) => interval.kind === "civil")!;
+  const interval = result.solarThresholdIntervals.find((interval) => interval.kind === "civil")!;
   assert.ok(interval);
   assertInBracket(interval.endUtc, twilightBrackets[0].end);
 });
@@ -121,14 +121,14 @@ test("JPL geometric Sun rising in a short tail starts its interval at the crossi
   assertInBracket(result.intervals[0]!.startUtc, ["2026-01-16T12:29:00Z", "2026-01-16T12:30:00Z"]);
   assert.ok(Date.parse(result.intervals[0]!.endUtc) > Date.parse(result.intervals[0]!.startUtc));
 });
-for (const [id, state] of [[102, "no-astronomical-darkness"], [103, "continuous-darkness"]] as const) {
+for (const [id, state] of [[102, "none"], [103, "full-window"]] as const) {
   test(`JPL polar Sun reference: ${place(id).placeId} is ${state}`, async () => {
     // Tromso: 00/06/12/18/24 UTC elevations 4.034827,28.324903,42.480695,
     // 15.746629,4.035049. South Pole: 00/12/24=-23.433886,-23.437665,-23.439720.
     const selected = window("2026-06-20T00:00:00Z", "2026-06-21T00:00:00Z", id);
     const result = await getAstronomyWindow(place(id), selected, index);
-    assert.equal(result.polarState, state);
-    if (state === "continuous-darkness") {
+    assert.equal(result.darknessState, state);
+    if (state === "full-window") {
       assert.equal(result.astronomicalDarkness.status, "available");
       if (result.astronomicalDarkness.status === "available") {
         assert.equal(Date.parse(result.astronomicalDarkness.startUtc), Date.parse(selected.startUtc));

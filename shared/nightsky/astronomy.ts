@@ -16,15 +16,16 @@ export const getAstronomyWindowInputSchema = z.strictObject({
 export const astronomyWindowResultSchema = resultSchema({
   placeId: placeIdSchema,
   window: timeWindowSchema,
-  polarState: z.enum(["normal", "no-astronomical-darkness", "continuous-darkness", "unknown"]),
+  darknessState: z.enum(["full-window", "partial-window", "none", "unknown"]).describe("Astronomical darkness coverage of the requested window only: full-window covers all of it; partial-window covers part; none has no calculated darkness; unknown is unavailable evidence."),
   astronomicalDarkness: z.discriminatedUnion("status", [
     z.strictObject({ status: z.literal("available"), ...localIntervalSchema.shape }),
     z.strictObject({ status: z.enum(["unavailable", "unknown"]), reason: z.string().trim().min(1).max(300) }),
-  ]),
-  twilightIntervals: z.array(z.strictObject({
-    kind: z.enum(["civil", "nautical", "astronomical"]),
+  ]).describe("First calculated Sun-below-minus-18-degree interval, clipped to the requested window, or its availability reason."),
+  solarThresholdIntervals: z.array(z.strictObject({
+    kind: z.enum(["civil", "nautical", "astronomical"]).describe("Names the solar altitude threshold, not an exclusive twilight phase."),
+    sunAltitudeThresholdDegrees: z.union([z.literal(-6), z.literal(-12), z.literal(-18)]).describe("Sun geometric center threshold: civil -6, nautical -12, astronomical -18 degrees."),
     ...localIntervalSchema.shape,
-  })).max(24),
+  }).refine((interval) => interval.sunAltitudeThresholdDegrees === ({ civil: -6, nautical: -12, astronomical: -18 } as const)[interval.kind], "Solar altitude threshold must match kind.")).max(24).describe("Nested Sun-below-threshold intervals clipped to the requested window; civil, nautical and astronomical rows may overlap."),
   moon: z.strictObject({
     phaseAtUtc: utcInstantSchema,
     phaseDegrees: z.number().finite().min(0).max(360),

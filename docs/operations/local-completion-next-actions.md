@@ -6,7 +6,7 @@ Owner direction is to finish the whole locally achievable package/build before i
 
 ## Current accepted disposition
 
-The previous verified closure snapshot is **12 Done / 9 Partial / 6 Not started**. Newly observed Hanle interpretation failures are unresolved. Root accepted reopening **5 and 10A to Partial**, giving **10 Done / 11 Partial / 6 Not started**. At numbered-group level, reopening 5 and 10 makes **4 Done / 12 Partial / 3 Not started**. The current status and original checkbox records now reflect that accepted disposition. Workflow wording and a generated ZIP cannot establish a contract fix.
+Current **12 Done / 9 Partial / 6 Not started**, groups **6 Done / 10 Partial / 3 Not started**. Tasks 5 and 10A were temporarily reopened (10/11/6) and restored after the requested-window darkness correction, focused review and actual MCP regressions. Original 160 boxes now have 92 checked and 68 open. Broad final audit and installed-plugin/model acceptance remain deferred. Earlier Hanle observations below describe the pre-fix rehearsal; they are not fresh model results.
 
 The first actual Claude desktop Code connection succeeded with eight NightSky calls; the five canonical skills were absent. The earlier [Codex model sample](model-journey-test.md) covers three synthetic journeys and ten calls, with the model identifier unobserved. Neither record proves the complete installed plugin or all fifteen model journeys. The full installed-skill/model matrix remains pending; do not subtract sampled journeys from the required complete acceptance run.
 

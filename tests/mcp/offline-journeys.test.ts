@@ -59,6 +59,7 @@ test("all fifteen product journeys return validated source-linked offline MCP ev
       const args={placeId:place.placeId,window,activity,target,experience:"beginner"};
       const result=await call("plan_observing_session",args);
       assert.ok(result.sources.every((source:any)=>source.url&&source.attribution)); assert.ok(result.gaps.length); assert.equal(result.availability.status,"partial");
+      assert.equal(result.factors.some((factor:any)=>/polar/i.test(factor.name)),false);
       assert.ok(result.candidateWindows.every((candidate:any)=>candidate.score===undefined));
       if(expected==="suggestions") assert.ok(result.suggestions.length>=1&&result.suggestions.length<=3);
       if(expected==="learning") {assert.ok(result.sources.some((source:any)=>/NASA|ESO/.test(source.name))); assert.ok(result.preparation.some((step:string)=>/south|Southern/.test(step)));}
@@ -75,7 +76,7 @@ test("all fifteen product journeys return validated source-linked offline MCP ev
     });
     await t.test("polar summer never invents a dark window",async()=>{
       const result=await call("plan_observing_session",{placeId:"place:v1:geonames:3",activity:"general-stargazing",window:{startUtc:"2026-06-21T18:00:00Z",endUtc:"2026-06-22T06:00:00Z",timeZone:"Europe/Oslo"}});
-      assert.equal(result.evidence.astronomy.polarState,"no-astronomical-darkness"); assert.equal(result.candidateWindows.length,0);
+      assert.equal(result.evidence.astronomy.darknessState,"none"); assert.equal(result.candidateWindows.length,0);
     });
     await t.test("five options retain missing future forecasts through MCP",async()=>{
       const options=Array.from({length:5},(_,i)=>({placeId:"place:v1:geonames:1",activity:i===4?"astrophotography":"general-stargazing",window:{startUtc:i===4?"2027-02-15T18:00:00Z":"2026-10-15T18:00:00Z",endUtc:i===4?"2027-02-16T06:00:00Z":"2026-10-16T06:00:00Z",timeZone:"Europe/London"}}));

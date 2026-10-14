@@ -136,7 +136,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_astronomy_window", {
     title: "Calculate darkness and Moon conditions",
-    description: "Calculate astronomical twilight and darkness, polar state, and a Moon phase/altitude summary for a previously resolved named place and UTC window. Terrain and horizon obstructions are not modeled.",
+    description: "Calculate astronomical darkness coverage of the requested window, nested Sun-below-threshold intervals clipped to that window, and a Moon phase/altitude summary for a previously resolved named place. This does not classify whole-day polar conditions. Terrain and horizon obstructions are not modeled.",
     inputSchema: getAstronomyWindowInputSchema,
     outputSchema: astronomyWindowResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_astronomy_window,

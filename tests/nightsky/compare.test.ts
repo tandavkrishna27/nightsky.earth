@@ -22,9 +22,9 @@ const makeWindow = (timeZone: string, day = "2026-11-01"): TimeWindow => ({ star
 const placeId = (id: number) => `place:v1:geonames:${id}`;
 
 function makeAstronomy(id: string, window: TimeWindow): AstronomyWindowResult {
-  return { availability: { status: "available", reason: "Fixture calculation." }, sources: [source], caveats: [], placeId: id, window, polarState: "normal",
+  return { availability: { status: "available", reason: "Fixture calculation." }, sources: [source], caveats: [], placeId: id, window, darknessState: "full-window",
     astronomicalDarkness: { status: "available", startUtc: window.startUtc, endUtc: window.endUtc, localStart: "darkness begins", localEnd: "darkness ends" },
-    twilightIntervals: [], moon: { phaseAtUtc: window.startUtc, phaseDegrees: 180, illuminationPercent: 75, maximumAltitudeDegrees: 35, maximumAltitudeAtUtc: window.startUtc } };
+    solarThresholdIntervals: [], moon: { phaseAtUtc: window.startUtc, phaseDegrees: 180, illuminationPercent: 75, maximumAltitudeDegrees: 35, maximumAltitudeAtUtc: window.startUtc } };
 }
 function conditions(id: string, window: TimeWindow, values: Array<{ source: SourceRecord; cloud?: number }>): NightConditionsResult {
   const forecasts = values.filter(({ cloud }) => cloud !== undefined).map(({ source: forecastSource, cloud }) => ({
@@ -119,4 +119,25 @@ test("comparison option failures do not disclose private paths or provider token
   assert.equal(result.comparisons.length, 2);
   assert.ok(result.comparisons.every(option => option.availability?.status === "unavailable"));
   assert.doesNotMatch(JSON.stringify(result), /private\/home|secret-artifact|SECRET_PRIVATE_TOKEN|provider-token/);
+});
+
+test("comparison keeps requested-window darkness states and missing evidence distinct", async () => {
+  const states = ["full-window", "partial-window", "none", "unknown"] as const;
+  const services = serviceSet();
+  services.getAstronomy = async (place, window) => {
+    const result = makeAstronomy(place.placeId, window);
+    const state = states[Number(window.startUtc.slice(8, 10)) - 1]!;
+    result.darknessState = state;
+    if (state === "partial-window") result.astronomicalDarkness = { status: "available", startUtc: window.startUtc.replace("18:00", "19:00"), endUtc: window.endUtc, localStart: "partial darkness begins", localEnd: "darkness ends" };
+    if (state === "none" || state === "unknown") result.astronomicalDarkness = { status: state === "none" ? "unavailable" : "unknown", reason: "Fixture session calculation." };
+    return result;
+  };
+  const result = await compareObservingOptions({ options: states.map((_, i) => ({ placeId: placeId(2), activity: "astrophotography", window: makeWindow("Asia/Kolkata", `2026-11-0${i + 1}`) })) }, services);
+  assert.deepEqual(result.comparisons.map(option => option.factors.find(factor => factor.name === "Astronomical darkness")?.impact), ["favorable", "mixed", "unfavorable", "unknown"]);
+  assert.deepEqual(result.comparisons.map(option => option.evidence?.astronomy?.darknessState), ["full-window", "partial-window", "none", "unknown"]);
+  for (const option of result.comparisons) {
+    assert.doesNotMatch(option.summary + option.factors.map(factor => factor.name + factor.assessment).join(" "), /polar|continuous darkness|24.hour/i);
+    assert.ok(option.factors.some(factor => /forecast/i.test(factor.name) && factor.impact === "unknown"));
+    assert.ok(option.gaps.some(gap => /seeing|access|historical/i.test(gap)));
+  }
 });

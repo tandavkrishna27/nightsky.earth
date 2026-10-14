@@ -71,9 +71,8 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (astronomy && !isError(astronomy)) {
     sourceRecords.push(...astronomy.sources);
     addAll(caveats, astronomy.caveats);
-    factors.push({ name: "Astronomical darkness", assessment: darknessAssessment(astronomy), impact: astronomy.astronomicalDarkness.status === "available" ? "favorable" : "unfavorable", sourceNames: sourceNames(astronomy.sources) });
+    factors.push({ name: "Astronomical darkness", assessment: darknessAssessment(astronomy), impact: darknessImpact(astronomy.darknessState), sourceNames: sourceNames(astronomy.sources) });
     factors.push({ name: "Moon", assessment: `Illumination ${round(astronomy.moon.illuminationPercent)}%; maximum altitude ${round(astronomy.moon.maximumAltitudeDegrees)}° at ${astronomy.moon.maximumAltitudeAtUtc}. ${moonInterpretation(input.activity, astronomy.moon.illuminationPercent)}`, impact: moonImpact(input.activity, astronomy.moon.illuminationPercent), sourceNames: sourceNames(astronomy.sources) });
-    if (astronomy.polarState !== "normal") factors.push({ name: "Polar daylight or darkness", assessment: `Astronomy state: ${astronomy.polarState}.`, impact: astronomy.polarState === "no-astronomical-darkness" ? "unfavorable" : "mixed", sourceNames: sourceNames(astronomy.sources) });
   } else {
     factors.push({ name: "Astronomical darkness", assessment: "Unavailable: the astronomy calculation failed for this request.", impact: "unknown", sourceNames: [] });
     gaps.push("Astronomical darkness and calculated Moon conditions could not be retrieved.");
@@ -249,7 +248,19 @@ function round(value: number): string { return Number.isInteger(value) ? String(
 function capitalize(value: string): string { return value.charAt(0).toUpperCase() + value.slice(1); }
 function humanize(value: string): string { return value.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`).replace(/^./, (letter) => letter.toUpperCase()); }
 function monthAt(window: TimeWindow, timeZone: string): number { return Number(observingNightForInstant(window.startUtc, timeZone).slice(5, 7)); }
-function darknessAssessment(result: AstronomyWindowResult): string { return result.astronomicalDarkness.status === "available" ? `${result.astronomicalDarkness.localStart} to ${result.astronomicalDarkness.localEnd} local time.` : `${capitalize(result.astronomicalDarkness.status)}: ${result.astronomicalDarkness.reason}`; }
+function darknessImpact(state: AstronomyWindowResult["darknessState"]): Factor["impact"] {
+  return state === "full-window" ? "favorable" : state === "partial-window" ? "mixed" : state === "none" ? "unfavorable" : "unknown";
+}
+function darknessAssessment(result: AstronomyWindowResult): string {
+  const interval = result.astronomicalDarkness;
+  const timing = interval.status === "available" ? ` ${interval.localStart} to ${interval.localEnd} local time.` : ` ${interval.reason}`;
+  switch (result.darknessState) {
+    case "full-window": return `Astronomical darkness throughout the requested window.${timing}`;
+    case "partial-window": return `Astronomical darkness during part of the requested window.${timing}`;
+    case "none": return `No astronomical darkness in the requested window.${timing}`;
+    case "unknown": return `Unknown astronomical darkness coverage of the requested window.${timing}`;
+  }
+}
 function moonInterpretation(activity: string, illumination: number): string {
   if (activity === "moon-observing") return "Moonlight supports lunar observing; phase and altitude still determine the view.";
   if (activity === "meteor-shower") return illumination <= 25 ? "Low moonlight is generally helpful for seeing fainter meteors." : illumination >= 70 ? "Bright moonlight may reduce visibility of fainter meteors." : "Moonlight may reduce visibility of some fainter meteors.";
