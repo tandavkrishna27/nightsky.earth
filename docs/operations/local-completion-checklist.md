@@ -95,3 +95,7 @@ See [wave evidence](events-regional-proxy-wave.md) for new bounded alignments, o
 ## Latest criterion audit
 
 Use [v1-acceptance-audit.md](v1-acceptance-audit.md) and [v1-closure-wave.md](v1-closure-wave.md) for current criterion dispositions. The table above is historical preparation, not final acceptance. Current headings: **11 Done / 10 Partial / 6 Not started**; named-place timezone lookup does not satisfy the original coordinate-boundary requirement. Remaining owner/source/host decisions are listed in the closure documents.
+
+## Data gap wave — 14 October 2026
+
+[Wave evidence](data-gap-wave.md) records bounded source-only ETA/ORI reference intervals, the global offline-build feasibility protocol and the proposed timezone scope wording. Fresh integrated Windows tests:473 discovered/472 passed/one permission skip/zero failures; types/package/eight review sets/full build/compiled runtimes pass. Independent review found no actionable issues. Counts remain **11 Done/10 Partial/6 Not started**: complete seasons/global artifacts and unchanged Task4 boundary acceptance remain open. No acquisition or deployment.

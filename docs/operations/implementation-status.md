@@ -82,3 +82,7 @@ See [wave evidence](coverage-accuracy-wave.md) for adaptive lunar interval uncer
 ## Original acceptance closure audit — 14 October 2026
 
 [Closure wave](v1-closure-wave.md) and [criterion ledger](v1-acceptance-audit.md) supersede earlier count snapshots: **11 Done / 10 Partial / 6 Not started** across 27 headings; groups remain **6 / 10 / 3**. Task4 is Partial under unchanged original coordinate-boundary wording; this is an evidence correction, not a regression in the supported named-place resolver. The source packet and operator handoff preserve pending owner decisions. Original checkboxes are reconciled individually; no global coverage or hosted completion is inferred. Fresh Windows suite: 469 discovered, 468 passed, one permission skip, zero failures. CI is tracked in ci-verification.md against the pushed revision.
+
+## Data gap wave — 14 October 2026
+
+[Wave evidence](data-gap-wave.md) records bounded source-only ETA/ORI reference intervals, the global offline-build feasibility protocol and the proposed timezone scope wording. Fresh integrated Windows tests:473 discovered/472 passed/one permission skip/zero failures; types/package/eight review sets/full build/compiled runtimes pass. Independent review found no actionable issues. Counts remain **11 Done/10 Partial/6 Not started**: complete seasons/global artifacts and unchanged Task4 boundary acceptance remain open. No acquisition or deployment.

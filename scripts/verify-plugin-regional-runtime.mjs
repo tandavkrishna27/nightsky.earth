@@ -56,6 +56,17 @@ try {
   }
   const events = await call("search_sky_events", { placeId: "place:v1:geonames:9999991", window: { startUtc: "2026-01-09T00:00:00Z", endUtc: "2026-01-11T00:00:00Z", timeZone: "Asia/Kolkata" }, eventTypes: ["opposition"] });
   assert.ok(events.events.some(event => event.name.startsWith("Jupiter Opposition")));
+  const meteorReference = await call("search_sky_events", { placeId: "place:v1:geonames:9999991", window: { startUtc: "2027-01-02T00:00:00Z", endUtc: "2027-01-03T00:00:00Z", timeZone: "Asia/Kolkata" }, eventTypes: ["meteor-shower"] });
+  assert.deepEqual(meteorReference.meteorTypicalSeasons.map(row => [row.code, row.solarLongitudeStartDeg, row.solarLongitudeEndDeg]), [["ETA", 35, 60], ["ORI", 195, 220]]);
+  assert.deepEqual(meteorReference.events, []);
+  assert.equal(meteorReference.availability.status, "partial");
+  for (const row of meteorReference.meteorTypicalSeasons) {
+    assert.equal(row.requestedWindowOverlap, "not-evaluated");
+    assert.equal(row.dateConversion, "unavailable");
+    assert.equal(row.startUtc, undefined);
+    assert.equal(row.source.licenseUrl, "https://creativecommons.org/licenses/by/4.0/");
+  }
+
   const plan = await call("plan_observing_session", { placeId: "place:v1:geonames:9999991", activity: "general-stargazing", window: { startUtc: "2026-01-09T12:00:00Z", endUtc: "2026-01-10T12:00:00Z", timeZone: "Asia/Kolkata" } });
   assert.match(JSON.stringify(plan), /Fictional Park 0/); assert.equal(externalAttempts, 0);
   const malformed = await fetch(`${base}/mcp`, { method: "POST", headers: { "content-type": "application/json", "x-forwarded-for": "198.51.100.1,198.51.100.2" }, body: "{}", signal: AbortSignal.timeout(5000) });
@@ -67,7 +78,7 @@ try {
   server = await startNightSkyPlugin();
   const restored = await call("search_observing_locations", { placeId: "place:v1:geonames:9999992" });
   assert.equal(restored.candidates[0].sources[0].vintage, "fictional-region-1"); assert.equal(externalAttempts, 0);
-  console.log("Compiled regional runtime verified: two fictional vintages, direct/composed search, Jupiter alignment, strict proxy startup and checksum rejection/restoration; external attempts 0.");
+  console.log("Compiled regional runtime verified: two fictional vintages, direct/composed search, Jupiter alignment, source-only meteor seasons, strict proxy startup and checksum rejection/restoration; external attempts 0.");
 } finally {
   globalThis.fetch = originalFetch;
   if (server) { server.closeAllConnections(); await new Promise(done => server.close(done)); }

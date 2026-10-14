@@ -4,6 +4,7 @@ import { findPlanetAlignments, planetWindowCovered } from "./planetAlignments";
 import { createRequire } from "node:module";
 import type * as AstronomyTypes from "astronomy-engine";
 import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCES } from "./meteorPeaks";
+import { meteorTypicalSeasons, METEOR_TYPICAL_SEASON_SOURCE } from "./meteorTypicalSeasons";
 import { skyEventsResultSchema, searchSkyEventsInputSchema, type SkyEvent } from "../../shared/nightsky/events";
 import { type SourceRecord } from "../../shared/nightsky/common";
 import { resolvedCoordinatesForPlace, type GeoNamesPlaceIndex } from "../places/geonames";
@@ -55,7 +56,10 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
     "Event calculations use Astronomy Engine 2.1.19 and its built-in ephemeris/time model; displayed times are local to the resolved GeoNames city.",
     "Visibility uses modeled solar contact altitudes with standard atmospheric refraction for solar eclipses and geometric body altitude for lunar events; terrain, clouds, twilight brightness and naked-eye detectability are not established.",
   ];
-  if (requestedTypes.includes("meteor-shower")) caveats.push("Meteor results include only 13 NASA MEO forecast maxima per year for 2025 and 2026. No activity-season widths or annual recurrence are established; Lyrids, Orionids and Leonids have no peak in this forecast. Empty results do not establish no shower activity. Forecast times can change, and peak timing alone does not establish local radiant visibility or personal meteor rates.");
+  if (requestedTypes.includes("meteor-shower")) {
+    caveats.push("Dated meteor events include only 13 NASA MEO maxima per year for 2025 and 2026; Lyrids, Orionids and Leonids have no peak in this forecast. Empty events do not establish no activity. Complete seasons, other years' maxima and local visibility remain unsupported. Forecast times can change.");
+    caveats.push("Meteor typical-season metadata is unfiltered source reference evidence for two showers. Requested-window overlap is not evaluated; J2000 solar longitude convention is unresolved, so no UTC dates are inferred. Typical intervals do not guarantee activity, peaks, rates or visibility and do not extend radiant fit domains.");
+  }
   if (wantsPlanets) caveats.push("Planet alignments use relative heliocentric ecliptic longitude, ignoring latitude, within the bounded engineering range 1900–2100. Local visibility is not evaluated; alignment time does not establish horizon position, darkness or detectability.");
   if (requestedTypes.includes("planetary-conjunction")) caveats.push("Conjunction coverage is partial: only explicitly labeled inferior/superior solar alignments are calculated. Apparent planet-pair conjunctions and minimum sky-plane separation are unsupported. Solar alignment is not a viewing recommendation; never look at the Sun through unfiltered optics.");
   if (planetsOutOfRange) caveats.push("The requested planet window is outside 1900–2100; no planet alignment calculation was returned.");
@@ -63,10 +67,11 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
   if (truncated) caveats.push(`The result was limited to the first ${input.limit} events. Narrow the requested time window for a complete list.`);
   const onlyOutOfRangePlanets = planetsOutOfRange && requestedTypes.every(type => type === "opposition" || type === "planetary-conjunction");
   const status = onlyOutOfRangePlanets ? "out-of-horizon" : requestedTypes.every((type) => unsupportedEventTypes.includes(type)) ? "unsupported" : (unsupportedEventTypes.length || truncated || planetsOutOfRange || requestedTypes.includes("meteor-shower") || requestedTypes.includes("planetary-conjunction") ? "partial" : "available");
-  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? REVIEWED_METEOR_PEAK_SOURCES : [])];
+  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [...REVIEWED_METEOR_PEAK_SOURCES, METEOR_TYPICAL_SEASON_SOURCE] : [])];
   return skyEventsResultSchema.parse({
-    availability: { status, reason: onlyOutOfRangePlanets ? "Planet alignment windows are supported only within 1900–2100." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : status === "unsupported" ? "Only unsupported event classes were requested." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : planetsOutOfRange ? "Other supported events are shown; planet calculations are outside the supported date horizon." : requestedTypes.includes("meteor-shower") ? "Meteor coverage contains year-specific 2025–2026 forecast maxima only; complete activity seasons and other years are unavailable." : requestedTypes.includes("planetary-conjunction") ? "Only heliocentric-longitude solar alignments are calculated; apparent planet-pair conjunctions remain unsupported." : "Supported events were calculated or loaded from the versioned catalog." },
+    availability: { status, reason: onlyOutOfRangePlanets ? "Planet alignment windows are supported only within 1900–2100." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : status === "unsupported" ? "Only unsupported event classes were requested." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : planetsOutOfRange ? "Other supported events are shown; planet calculations are outside the supported date horizon." : requestedTypes.includes("meteor-shower") ? "Dated meteor coverage is limited to 2025–2026 forecast maxima; two typical longitude intervals are reference metadata only. Complete activity seasons and other years' maxima remain unavailable." : requestedTypes.includes("planetary-conjunction") ? "Only heliocentric-longitude solar alignments are calculated; apparent planet-pair conjunctions remain unsupported." : "Supported events were calculated or loaded from the versioned catalog." },
     sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
+    ...(requestedTypes.includes("meteor-shower") ? { meteorTypicalSeasons: meteorTypicalSeasons() } : {}),
   });
 }
 

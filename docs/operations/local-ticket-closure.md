@@ -61,3 +61,7 @@ New bounded planet alignments, checksum-pinned on-demand regional serving and op
 ## Criterion reconciliation
 
 The [original acceptance ledger](v1-acceptance-audit.md) audits every original checkbox and maps named criteria to semantic assertions. Current counts are **11 Done / 10 Partial / 6 Not started**; Task4 is reopened solely for its unchanged coordinate-boundary requirement. Earlier 12/9/6 snapshots are historical. The [closure wave](v1-closure-wave.md), [free-data decisions](v1-data-coverage-decisions.md) and [host/policy handoff](v1-host-policy-handoff.md) distinguish local evidence from missing source, scope and owner/host inputs. Universal polygon completeness, direct candidate plans and independent all-years certification are not added acceptance gates.
+
+## Data gap wave — 14 October 2026
+
+[Wave evidence](data-gap-wave.md) records bounded source-only ETA/ORI reference intervals, the global offline-build feasibility protocol and the proposed timezone scope wording. Fresh integrated Windows tests:473 discovered/472 passed/one permission skip/zero failures; types/package/eight review sets/full build/compiled runtimes pass. Independent review found no actionable issues. Counts remain **11 Done/10 Partial/6 Not started**: complete seasons/global artifacts and unchanged Task4 boundary acceptance remain open. No acquisition or deployment.

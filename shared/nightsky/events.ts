@@ -18,10 +18,22 @@ export const skyEventSchema = z.strictObject({
   if (dates.some((value, index) => index > 0 && value < dates[index - 1]!)) ctx.addIssue({ code: "custom", message: "Event times must be ordered start, peak, end." });
 });
 export type SkyEvent = z.infer<typeof skyEventSchema>;
+// Reference evidence is deliberately separate from date-filtered SkyEvents.
+export const meteorTypicalSeasonSchema = z.strictObject({
+  code: z.enum(["ETA", "ORI"]), name: z.string().trim().min(1).max(100),
+  evidenceKind: z.literal("typical-activity-interval"),
+  solarLongitudeStartDeg: z.number().finite().min(0).max(360),
+  solarLongitudeEndDeg: z.number().finite().min(0).max(360),
+  frame: z.literal("ecliptic J2000; solar longitude convention unspecified"),
+  dateConversion: z.literal("unavailable"), requestedWindowOverlap: z.literal("not-evaluated"),
+  caveat: z.string().trim().min(1).max(500), source: sourceRecordSchema,
+}).refine(row => row.solarLongitudeEndDeg >= row.solarLongitudeStartDeg, "Source longitude interval must be ordered.");
+export type MeteorTypicalSeason = z.infer<typeof meteorTypicalSeasonSchema>;
 export const skyEventsResultSchema = resultSchema({
   placeId: placeIdSchema,
   window: timeWindowSchema,
   events: z.array(skyEventSchema).max(MAX_EVENT_RESULTS),
+  meteorTypicalSeasons: z.array(meteorTypicalSeasonSchema).max(2).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate typical season code.").optional(),
   unsupportedEventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "equinox-solstice", "moon-phase", "comet", "other"])).max(9),
 });
 export type EventResult = z.infer<typeof skyEventsResultSchema>;

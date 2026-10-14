@@ -77,3 +77,4 @@ import "./mcp/local-proxy.test.ts";
 import "./mcp/regional-provider.test.ts";
 import "./operations/plugin-regional-config.test.ts";
 import "./mcp/regional-installed.test.ts";
+import "./events/meteorTypicalSeasons.test.ts";
