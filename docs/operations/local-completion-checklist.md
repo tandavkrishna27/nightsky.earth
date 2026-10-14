@@ -83,3 +83,7 @@ See [data-expansion-wave.md](data-expansion-wave.md). Events now have thirteen o
 ## Current offline readiness closure
 
 Tasks 3, 7A, 10A and 10B meet their original local conditions: all six CI jobs passed for `c20a38190375cb29169000774aa14d3d660a32c3` ([run](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38471282719)). See [all-heading audit](local-ticket-closure.md) for finished local criteria and exact held source/owner/host/release evidence. Counts: 12 Done/9 Partial/6 Not started. Historical downloads stay deferred; no deployment occurred.
+
+## Coverage/accuracy follow-up
+
+[Wave evidence](coverage-accuracy-wave.md) records reviewed bounded lunar geometry, spot composition/indexed queries, a 100,000-row synthetic CI reference probe and concrete owner/host inputs. These improve partial Tasks0/6/8/13/14. Full source/global/identity/host criteria remain open; counts12 Done/9 Partial/6 Not started. No historical downloads or deployment.

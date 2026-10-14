@@ -63,3 +63,59 @@ test("independent JPL Pune Moon rises during the March 2026 lunar eclipse", asyn
   assert.ok(Date.parse(event.startUtc!) < Date.parse("2026-03-03T13:10:00Z"));
   assert.ok(Date.parse(event.endUtc!) > Date.parse("2026-03-03T13:20:00Z"));
 });
+
+import { boundedAltitudeVisibility } from "../../server/events/intervalVisibility";
+
+test("bounded interval search detects a narrow interior horizon excursion", () => {
+  // Triangular dip obeys a 1 degree/ms test envelope and is missed by endpoints.
+  const result = boundedAltitudeVisibility(0, 100, t => Math.abs(t - 51) - 1, 1, 0.01, 4096);
+  assert.equal(result, "partially-visible");
+});
+test("bounded interval search leaves an unresolved tangency unevaluated", () => {
+  assert.equal(boundedAltitudeVisibility(0, 100, t => Math.abs(t - 50), 1, 1, 4096), "not-evaluated");
+});
+test("bounded interval search certifies broad signs without dense sampling", () => {
+  for (const [altitude, expected] of [[60, "visible"], [-60, "not-visible"]] as const) {
+    let calls = 0;
+    assert.equal(boundedAltitudeVisibility(0, 100, () => { calls++; return altitude; }, 1, 1, 4096), expected);
+    assert.equal(calls, 2);
+  }
+});
+test("bounded interval search stops at its evaluation budget", () => {
+  let calls = 0;
+  assert.equal(boundedAltitudeVisibility(0, 100, () => { calls++; return 0.001; }, 1, 0.001, 7), "not-evaluated");
+  assert.equal(calls, 7);
+});
+
+test("bounded interval search detects a narrow interior peak below sampled horizon", () => {
+  assert.equal(boundedAltitudeVisibility(0, 100, t => 1 - Math.abs(t - 51), 1, 0.01, 4096), "partially-visible");
+});
+test("bounded interval search includes a crossing in the final endpoint tail", () => {
+  assert.equal(boundedAltitudeVisibility(0, 101, t => t - 100.5, 1, 1, 4096), "partially-visible");
+});
+test("bounded interval search preserves uncertainty at a subsecond grazing window", () => {
+  assert.equal(boundedAltitudeVisibility(0, 1, () => 0.01, 1, 1, 4096), "not-evaluated");
+});
+test("bounded interval search rejects nonfinite modeled geometry", () => {
+  assert.equal(boundedAltitudeVisibility(0, 100, () => Number.NaN, 1, 1, 4096), "not-evaluated");
+});
+test("lunar interval model supports both polar observer directions", async () => {
+  const poles = new GeoNamesPlaceIndex([-90, 90].map((latitude, i) => ({ geonameId: 910 + i, name: `Pole ${latitude}`, asciiName: `Pole ${latitude}`, alternateNames: "", latitude, longitude: 0, countryCode: "XX", countryName: "Fixture", featureClass: "P", featureCode: "PPL", population: 1, timeZone: "UTC", modificationDate: "2026-10-14" })), "polar-event-fixture");
+  for (const [id, expected] of [[910, "not-visible"], [911, "visible"]] as const) {
+    const result = await searchSkyEvents({ placeId: `place:v1:geonames:${id}`, window: { startUtc: "2026-03-03T00:00:00Z", endUtc: "2026-03-04T00:00:00Z", timeZone: "UTC" }, eventTypes: ["eclipse"] }, poles);
+    assert.equal(result.events.find(event => event.eventId.startsWith("lunar-eclipse:"))!.localVisibility, expected);
+  }
+});
+
+test("nonfinite endpoint cannot supply an observed opposite horizon sign", () => {
+  for (const invalid of [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+    assert.equal(boundedAltitudeVisibility(0, 100, t => t === 0 ? invalid : -Math.sign(invalid), 1, 1, 4096), "not-evaluated");
+  }
+});
+test("invalid numeric interval options fail closed before geometry evaluation", () => {
+  for (const [slope, step, budget] of [[Infinity, 1, 10], [NaN, 1, 10], [1, Infinity, 10], [1, NaN, 10], [1, 1, Infinity], [1, 1, NaN], [1, 1, 2.5], [1, 1, 4097], [1, 1, Number.MAX_SAFE_INTEGER + 1]]) {
+    let calls = 0;
+    assert.equal(boundedAltitudeVisibility(0, 100, () => { calls++; return 1; }, slope, step, budget), "not-evaluated");
+    assert.equal(calls, 0);
+  }
+});

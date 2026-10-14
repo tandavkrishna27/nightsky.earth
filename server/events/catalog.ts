@@ -1,4 +1,5 @@
 
+import { boundedAltitudeVisibility } from "./intervalVisibility";
 import { createRequire } from "node:module";
 import type * as AstronomyTypes from "astronomy-engine";
 import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCES } from "./meteorPeaks";
@@ -105,7 +106,7 @@ function findEclipses(start: number, end: number, observer: AstronomyTypes.Obser
     const eventStart = peak - lunar.sd_penum * 60_000;
     const eventEnd = peak + lunar.sd_penum * 60_000;
     if (eventEnd >= start && eventStart <= end) {
-      const visibility = intervalVisibility(Astronomy.Body.Moon, observer, eventStart, eventEnd);
+      const visibility = intervalVisibility(observer, eventStart, eventEnd);
       events.push({ eventId: `lunar-eclipse:${lunar.peak.toString()}`, name: `${capitalize(lunar.kind)} Lunar Eclipse`, eventType: "eclipse", startUtc: new Date(eventStart).toISOString(), peakUtc: lunar.peak.toString(), endUtc: new Date(eventEnd).toISOString(), localVisibility: visibility.status, description: `${capitalize(lunar.kind)} lunar eclipse; modeled umbral obscuration ${(lunar.obscuration * 100).toFixed(0)}%. ${visibility.description}`, source: CALC_SOURCE });
     }
     lunar = Astronomy.NextLunarEclipse(lunar.peak);
@@ -133,15 +134,17 @@ function findMeteorShowers(start: number, end: number, timeZone: string, placeId
     description: `Year-specific NASA MEO forecast maximum for ${row.peakUtc.slice(0, 4)}; no activity-season interval is inferred. Forecast timing alone does not establish local visibility, a personal meteor count, or radiant model coverage.`,
   }));
 }
-function intervalVisibility(body: AstronomyTypes.Body, observer: AstronomyTypes.Observer, start: number, end: number): { status: SkyEvent["localVisibility"]; description: string } {
-  let above = false; let below = false;
-  for (let time = start; ; time = Math.min(time + 10 * 60_000, end)) {
-    if (bodyAltitude(body, observer, new Date(time)) >= 0) above = true; else below = true;
-    if (time === end) break;
-  }
-  if (!above) return { status: "not-visible", description: "The Moon remains below the geometric horizon for the modeled event window." };
-  if (below) return { status: "partially-visible", description: "Only part of the modeled event window is above the geometric horizon." };
-  return { status: "visible", description: "The Moon remains above the geometric horizon for the modeled event window." };
+function intervalVisibility(observer: AstronomyTypes.Observer, start: number, end: number): { status: SkyEvent["localVisibility"]; description: string } {
+  // Astronomy Engine 2.1.19 MaxAltitudeSlope uses empirical topocentric Moon
+  // RA/DEC extrema; 370 deg/day exceeds its global latitude-projected envelope.
+  // This is a model assumption, not a proof of true-sky derivatives.
+  const status = boundedAltitudeVisibility(start, end, time => bodyAltitude(Astronomy.Body.Moon, observer, new Date(time)), 370 / DAY_MS, 1000, 4096);
+  const description = status === "partially-visible"
+    ? "The Moon's geometric center is sampled on both sides of the horizon during the modeled event window."
+    : status === "not-evaluated"
+      ? "Near-horizon geometry could not be resolved within the bounded calculation; continuous visibility is not established."
+      : `The Moon's geometric center is modeled ${status === "visible" ? "above" : "below"} the horizon throughout the event window, conditional on Astronomy Engine's empirical altitude-rate envelope.`;
+  return { status, description };
 }
 
 function contactVisibility(altitudes: number[]): SkyEvent["localVisibility"] {

@@ -1,6 +1,6 @@
 # NightSky V1 MCP hosting decision
 
-**Status:** Host direction selected by owner on 11 October 2026: Hetzner for the MCP service, initially evaluating a shared 2 vCPU / 4 GB VM. This does not authorize purchase or deployment. Exact plan/region, budget, hostnames and production endpoint remain open before Task 3B/3C.
+**Status:** Host direction selected by owner on 11 October 2026: Hetzner for the MCP service, initially evaluating a shared 2 vCPU / 4 GB VM. On 14 October the owner reported having a plan, region and hostnames; their exact values have not been supplied or verified. This authorizes local preparation only. Budget and production endpoint evidence remain open before Task 3B/3C. Use the [configuration handoff](policy-host-wave.md) to collect the existing choices and rehearse locally.
 
 ## Product and deployment boundary
 
@@ -25,8 +25,8 @@ The host must support:
 | Production hostname | Pending; must be stable and owned/controlled by the publisher |
 | Full production MCP URL/path | Pending; freeze before creating the real OpenAI draft |
 | Staging hostname and MCP URL | Pending; must differ from production and be available for OpenAI developer-mode testing |
-| Deploy/rollback method | Pending host choice; document exact procedure before Task 3B |
-| Request limiting / abuse response | Pending design; must include global/per-client caps and provider-specific budgets |
+| Deploy/rollback method | Immutable standalone container and fresh-process artifact rollback are prepared locally; actual proxy, host promotion and rollback evidence remain pending before Task 3B |
+| Request limiting / abuse response | Global/IP/subject process-memory caps implemented; proxy IP trust, multi-process behavior and selected-host/provider budgets remain pending |
 | App and edge log access/retention/redaction | Pending validation; do not proceed if user location can leak into unbounded logs |
 | Monthly cost quote and assumptions | Pending owner budget/host evaluation |
 | Production access to OpenAI review traffic | Pending; apply and verify redaction/retention with synthetic traffic before linking the real draft |

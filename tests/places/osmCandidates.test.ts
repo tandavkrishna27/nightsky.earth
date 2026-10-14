@@ -118,3 +118,49 @@ test("reviewed offline Bhutan artifact retains partial coverage and unknown acce
     for (const way of result.candidates.filter(row=>row.placeId.includes(':way:'))) assert.match(way.caveats.join(' '),/entrance is unknown/);
   }
 });
+
+test("regional composition deduplicates equal identities and rejects conflicting or mixed-vintage rows", async () => {
+  const { mergeOsmCandidateShards } = await import('../../server/places/osmCandidates');
+  const merged = mergeOsmCandidateShards([index, index], 'Partial reviewed regional union');
+  assert.equal(merged.candidates.length, 2);
+  assert.throws(() => mergeOsmCandidateShards([index, {...index, candidates: [{...index.candidates[0]!, longitude: 74}]}], 'Partial union'), /conflict/i);
+  assert.throws(() => mergeOsmCandidateShards([index, {...index, vintage: '2026-09-01'}], 'Partial union'), /vintage/i);
+  assert.throws(() => mergeOsmCandidateShards(Array(33).fill(index), 'Partial union'), /32/);
+});
+
+test("regional radius search retains dateline, polar and latitude-boundary candidates", async () => {
+  const boundary = importOsmJson({elements: [
+    {type:'node',id:901,lat:0,lon:-179.95,tags:{name:'Dateline',leisure:'park'}},
+    {type:'node',id:902,lat:89.95,lon:-120,tags:{name:'Polar',leisure:'park'}},
+    {type:'node',id:903,lat:1,lon:0,tags:{name:'Boundary',leisure:'park'}},
+  ]},{vintage:index.vintage,coverage:'Partial synthetic boundary fixture'});
+  for (const [latitude,longitude,id] of [[0,179.95,901],[89.95,120,902],[0.999,0,903]]) {
+    const p={placeId:place.placeId,latitude,longitude};
+    const result=await searchObservingLocations({placeId:p.placeId,radiusKm:30},{index:boundary,place:p});
+    assert.equal(result.candidates[0]!.placeId, `place:v1:osm:node:${id}`);
+  }
+});
+
+test('regional file composition requires checksums and bounds input before publication', async () => {
+  const { buildRegionalShards }=await import('../../scripts/osm/regional_shards');
+  const { fileURLToPath }=await import('node:url');
+  const path=fileURLToPath(new URL('../osm/fixtures/real-offline-bhutan/candidates.json',import.meta.url));
+  const sha256='d800a935abd54b8cda8e98d02c7e2bce50c7ca6f8e469cadfc735289704f41ff';
+  const built=await buildRegionalShards([{path,sha256},{path,sha256}], 'Partial Bhutan retained shard union; ways are representative points; relations excluded.');
+  assert.equal(built.index.candidates.length,134);
+  assert.equal(built.provenance.shards.length,2);
+  await assert.rejects(buildRegionalShards([{path,sha256:'0'.repeat(64)}],'Partial union'),/checksum/i);
+  await assert.rejects(buildRegionalShards([{path,sha256}], 'Partial union', {maxShardBytes:10}),/byte limit/i);
+});
+
+test('candidate search rejects invalid resolved coordinates', async () => {
+  await assert.rejects(searchObservingLocations({placeId:place.placeId},{index,place:{...place,latitude:91}}),/coordinates/i);
+});
+
+test('regional composition enforces aggregate rows and source identity', async () => {
+  const {mergeOsmCandidateShards}=await import('../../server/places/osmCandidates');
+  assert.throws(()=>mergeOsmCandidateShards([{...index,candidates:Array(100001).fill(index.candidates[0])}], 'Partial union'),/100,000/);
+  assert.throws(()=>mergeOsmCandidateShards([index,{...index,source:{...index.source,product:'Different source product'}}], 'Partial union'),/source/i);
+  const reordered={...index,source:Object.fromEntries(Object.entries(index.source).reverse()) as typeof index.source,candidates:index.candidates.map(row=>Object.fromEntries(Object.entries(row).reverse()) as typeof row)};
+  assert.equal(mergeOsmCandidateShards([index,reordered], 'Partial union').candidates.length,2);
+});

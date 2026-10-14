@@ -250,7 +250,7 @@ Closure 14 October 2026: original local acceptance independently audited and ver
 
 ### Task 6: Implement predictable events and supported target catalogs
 
-Local progress 14 October 2026: thirteen original NASA maxima per year for 2025/2026, twelve bounded GMN radiant fits and planner aliases pass independent review. Full per-shower seasons and other-year/source gaps remain open; see `docs/operations/events-season-expansion.md`.
+Local progress 14 October 2026: thirteen original NASA maxima per year for 2025/2026, twelve bounded GMN radiant fits and planner aliases pass independent review. Full per-shower seasons and other-year/source gaps remain open; see `docs/operations/events-season-expansion.md`. The approved coverage/accuracy follow-up adds adaptive, model-conditional lunar horizon intervals and unresolved-grazing states; evidence in `docs/operations/event-accuracy-wave.md`.
 
 **Files:** Create `server/events/catalog.ts`, versioned `data/events/*.json`, `data/targets/README.md`, and `tests/events/catalog.test.ts`; update `shared/meteorShowers.ts` only through backward-compatible exports.
 
@@ -695,3 +695,7 @@ Next lane 3 needs real MET contact, a known validation region/visited places and
 ## Historical H4 update — 13 October 2026
 
 Task 9 remains Partial. Its H1–H4 local dependency chain now passes: strict contract, offline aggregation, verified three-place 2025 pilot, bounded runtime reader and twelfth MCP tool integrated into plans/comparisons. H5 selected-host serving/rollback/release validation and baseline/global data coverage remain open. See `docs/operations/era5-runtime-wave.md`. Windows265/265; cleanLinux263pass/2ignoredartifactskips; application/builder typecheck, build, productionruntime12tools andproductionaudit0pass. No public host connection or deployment.
+
+## Coverage and accuracy follow-up — 14 October 2026
+
+Approved parallel Tasks0/6,8,13/14 work is recorded in `docs/operations/coverage-accuracy-wave.md` and its scoped plan. Adaptive lunar intervals and bounded same-vintage candidate composition/indexed queries pass independent review; CI now exercises the fixed-seed100,000-row full-scan query reference. Concrete policy/Hetzner inputs remain pending, with no invented legal or host values. Counts remain12 Done/9 Partial/6 Not started. Historical acquisition, hosting, accounts and publication gates remain separate.

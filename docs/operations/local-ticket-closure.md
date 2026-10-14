@@ -15,10 +15,10 @@ This audits every original heading against its actual acceptance criteria. User 
 | 4 | Global named GeoNames resolution plus licensed Hanle supplement, ambiguity/timezones/consent/privacy fixtures | Actual host-location side channel remains client-specific evidence |
 | 4B | Guarded resolver-only operator mode, two transport tests, actual compiled Inspector resolver call, scan cases/record procedure | Same real branded draft, production URL/domain challenge and official location scan |
 | 5 | Local geometry/targets, independent references, polar/DST/hemisphere tests | No general arbitrary-date, atmosphere or terrain claim |
-| 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models and grazing/continuous geometry limits |
+| 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models and independently proven all-years extrema; adaptive model-conditional intervals leave unresolved grazing geometry unevaluated |
 | 7A | Every applicable weather acceptance mapped; actual expiry/304/outage/validator/deadline/native-data MCP fixtures | Original local acceptance met; scheduled jitter is inapplicable to demand-only refresh. Global accuracy/host budget remain separate |
 | 7B | NOAA freshness/coverage/timeout/source fixtures and planner separation | No long-range or guaranteed sighting claim |
-| 8 | Repeat-built regional/Bhutan artifacts, strict geometry/source/digest/query caveats and local rollback | Global coverage/relations/tiles, selected-host deployment/rollback and public ODbL distribution |
+| 8 | Repeat-built regional/Bhutan artifacts, strict geometry/source/digest/query caveats and local rollback | Global coverage/relations/disk-lazy tiles, selected-host deployment/rollback and public ODbL distribution; same-vintage composition/cached latitude bands are now tested locally |
 | 9 | Active immutable 2025 sample; grouped partition/publication/recovery code exercised offline | Real grouped format/cost/baseline coverage; no new historical requests authorized |
 | 10A | All fifteen journeys via real MCP; optional failures preserve gaps; activity/polar/history/target cases | Original local acceptance met; complete data coverage remains in 6/8/9 |
 | 10B | Five named comparison cases; native conflicts/issue/valid times; five options and byte-budget fixtures | Original local acceptance met; live assistant behavior remains platform evidence |
@@ -41,6 +41,10 @@ Tasks 3, 7A, 10A and 10B satisfy their original local criteria after final integ
 No additional executable local acceptance gap was found in the reviewed journey/resilience/operations lanes. Remaining rows require the named source, owner, hosted or real-world evidence, or are the separate website scope. They are held rather than silently removed from V1.
 
 The release sequence remains: resolve source/scope and identity/host inputs; validate authorized source expansions; prepare controlled staging; verify actual clients/logging; complete the real draft/location scan and final policies; promote only when separately authorized; run official validation/review cases/video; submit, then separately publish; run the invited pilot. This document authorizes none of those actions.
+
+## Coverage/accuracy follow-up
+
+The approved three-lane wave adds bounded lunar interval handling, checksum-pinned same-vintage candidate composition/indexed queries and a concrete policy/host input handoff. See [integration evidence](coverage-accuracy-wave.md). No remaining source/global/owner/host heading closes from these local improvements; counts remain12/9/6.
 
 ## Evidence
 

@@ -39,6 +39,9 @@ jobs:
       - name: Check TypeScript
         run: npm run check
 
+      - name: Check indexed queries against a 100000-row offline reference
+        run: node --max-old-space-size=512 --import tsx scripts/osm/benchmark_shards.ts
+
       - name: Build and lint local plugin rehearsal package
         run: npm run plugin:package
 
