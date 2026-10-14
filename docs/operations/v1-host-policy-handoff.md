@@ -6,9 +6,9 @@ This is the fill-in decision record for Tasks 13/14. Follow [policy/host procedu
 
 | Decision | Known now | Required next value / acceptance condition |
 |---|---|---|
-| Publisher | Individual based in India | Exact verified legal name; required contact/address details determined by qualified review and submission requirements. |
+| Publisher | Individual based in India; display name confirmed `NightSky.earth` | Exact verified legal name; required contact/address details determined by qualified review and submission requirements. |
 | Support | Monitored `nightsky.earth2026@gmail.com` | Named mailbox operator, access/deletion process, chosen retention and relevant mail/backup handling. No invented response SLA. |
-| MCP host | Hetzner chosen; owner reports plan/region/hostnames selected | Supply exact product, architecture, region and allocated resources, current quote and approved recurring ceiling. The earlier 2 vCPU/4 GiB and $25/month proposals are not selected/approved values. |
+| MCP host | Hetzner chosen; exact values explicitly deferred until deployment preparation | Supply exact product, architecture, region and allocated resources, current quote and approved recurring ceiling. The earlier 2 vCPU/4 GiB and $25/month proposals are not selected/approved values. |
 | Production/staging | Exact values never supplied | Two distinct controlled hostnames, full HTTPS MCP URLs and DNS/TLS/proxy topology. Freeze the production URL before real draft creation. |
 | Policy hosting | Same-repository static website intended; standalone plugin serves no policy pages | Confirm final policy host and exact privacy/terms/support HTTPS URLs, direct-route behavior, approved content and legal review. |
 | Release | Standalone image recipe exists | Exact source commit, built image digest, architecture, mode, immutable mounted artifact selections and previous release record. Base-image digest alone is not a built release digest. |
@@ -23,7 +23,7 @@ Copy this record to private operator storage and fill it with actual decisions. 
 ```json
 {
   "status": "pending-owner-inputs-not-deployable",
-  "publisher": { "type": "individual", "country": "India", "verifiedLegalName": null, "requiredContactDetails": null },
+  "publisher": { "type": "individual", "country": "India", "displayName": "NightSky.earth", "verifiedLegalName": null, "requiredContactDetails": null },
   "support": { "email": "nightsky.earth2026@gmail.com", "operator": null, "retention": null, "deletionAndAccessProcess": null, "mailAndBackupHandling": null },
   "host": { "provider": "Hetzner", "plan": null, "architecture": null, "region": null, "vCPU": null, "ramBytes": null, "diskBytes": null, "os": null, "quoteReference": null, "approvedRecurringCeiling": null },
   "endpoints": { "productionHostname": null, "productionMcpUrl": null, "stagingHostname": null, "stagingMcpUrl": null, "privacyUrl": null, "termsUrl": null, "supportUrl": null },
@@ -56,3 +56,5 @@ Reviewed `server/plugin.ts`, `server/mcp/route.ts`, `server/mcp/proxyTrust.ts`, 
 * `/health` is liveness for the default standalone app. Package generation defaults to an example endpoint and explicitly returns `submissionReady: false`; its output is rehearsal material until actual endpoint/policy/identity and other submission gates are satisfied.
 
 Existing [rollback evidence](artifact-rollback.md) pins the 59-node OSM fixture and three-place 2025 climate sample. Those digests identify existing local rehearsal artifacts; they must not be copied as the production selections without a deliberate coverage decision. The pinned Node base in `Dockerfile.plugin` is likewise not a release-image digest. No further fixture run adds evidence for the unsupplied host choices, so this handoff does not claim a new runtime rehearsal.
+
+Owner steering: finish local implementation and bounded actual-model testing first. Hosting inputs are deliberately deferred; no deployment is authorized. The confirmed display name does not independently verify a legal identity.

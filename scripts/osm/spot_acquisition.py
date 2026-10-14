@@ -1,7 +1,6 @@
 """Capability-injected acquisition safeguards. No live network entry point."""
 import hashlib
 import os
-import stat
 import time
 import urllib.request
 from datetime import datetime, timezone
@@ -24,12 +23,8 @@ def validate_source_header(path, source):
 def acquire_source(source, root, *, opener=None, deadline=None, budget_check=None):
     source = validate_source(source)
     if opener is None: raise ValueError('Explicit injected opener capability required; live acquisition disabled')
-    lexical_root = Path(os.path.abspath(root))
-    for ancestor in (lexical_root, *lexical_root.parents):
-        metadata = ancestor.lstat()
-        if stat.S_ISLNK(metadata.st_mode) or getattr(metadata, 'st_file_attributes', 0) & 0x400:
-            raise ValueError('Acquisition root or ancestor is a symlink/reparse point')
-    root = lexical_root.resolve(strict=True)
+    from spot_paths import safe_path
+    root = safe_path(root)
     if not root.is_dir(): raise ValueError('Acquisition root must be an existing directory')
     final = root / (source['id']+'.osm.pbf')
     partial = root / (source['id']+'.osm.pbf.partial')

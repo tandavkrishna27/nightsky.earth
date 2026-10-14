@@ -36,6 +36,28 @@ class MoreGeometryTest(unittest.TestCase):
             with self.assertRaises(ValueError): safe_path('fixture')
 
 class SyntheticBuildTest(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == 'win32', 'Windows short-path regression')
+    def test_build_accepts_safe_windows_short_path_alias(self):
+        import ctypes
+        from spot_build import build_source
+        get_short_path = ctypes.windll.kernel32.GetShortPathNameW
+        get_short_path.argtypes = [ctypes.c_wchar_p, ctypes.c_wchar_p, ctypes.c_uint32]
+        get_short_path.restype = ctypes.c_uint32
+        with tempfile.TemporaryDirectory(prefix='spot geometry long directory ') as temp:
+            root = Path(temp).resolve()
+            raw, source = self.fixture(root)
+            buffer = ctypes.create_unicode_buffer(32768)
+            length = get_short_path(str(root), buffer, len(buffer))
+            self.assertGreater(length, 0)
+            self.assertLess(length, len(buffer))
+            short_root = Path(buffer.value)
+            if str(short_root).casefold() == str(root).casefold():
+                self.skipTest('8.3 aliases are disabled on the fixture volume')
+            self.assertEqual(short_root.resolve(), root)
+            report = build_source(short_root / raw.name, short_root / 'out', source)
+            self.assertEqual(report['candidateRows'], 2)
+            self.assertTrue((root / 'out' / 'report.json').is_file())
+
     def fixture(self, root, vintage='2026-10-13T20:21:31Z'):
         import osmium
         raw = root / 'source.osm.pbf'

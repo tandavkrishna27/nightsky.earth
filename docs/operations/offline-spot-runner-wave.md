@@ -18,7 +18,7 @@ Independent review found and resolved: lexical reparse roots hidden by resolutio
 
 ## Fresh local verification
 
-PythonOSM: **61 discovered/58 passed/three explicit skips/zero failures** on localWindows. Skips concern unavailable symlink creation privileges and a non-Windows-only refusal case. The composed actual-module test passes; root observed32.021seconds before the final aggregate run. All fixtures are fake/synthetic; no provider calls or realsource scans.
+PythonOSM: **66 discovered/63 passed/three explicit skips/zero failures** on localWindows. Skips concern unavailable symlink creation privileges and a non-Windows-only refusal case. The composed actual-module test passes; root observed32.021seconds before the final aggregate run. All fixtures are fake/synthetic; no provider calls or realsource scans.
 
 Node:484 discovered/483 passed/one permission skip/zero failures. ThreeTypeScript configurations, package lint and eightofflineMCP review sets pass. Full build, standalone full/resolver-only runtime and compiled regional/proxy runtime checks pass locally; exactrevisionCI is pending untilpush. The existing OSM CI job discovers the new tests on Windows/Linux, now has a15-minute limit and runs the offline plan CLI. Tests explicitly distinguish platform enforcement/skips; CI does not fetch sources.
 
@@ -27,3 +27,7 @@ Node:484 discovered/483 passed/one permission skip/zero failures. ThreeTypeScrip
 Original counts remain **12 Done/9 Partial/6 Not started**. Tasks0/8 advance through offline generic-tool evidence; real source admission, worldwide candidate inventory, build budgets, ODbL offer and actual serving-host fit remain open. ExistingBhutan helpers, retained artifacts and runtime catalog were not rewritten or promoted. No historical/source download, account action, deployment/publication or website change occurred.
 
 The prerequisite implementation for the proposedMonaco→Faroe Islands→Fiji pilot is now present and tested offline. Future execution still requires explicit bounded allowance, refreshed exactmetadata/sourceheader/hash admission and a reviewed live capability. Source/body amounts and no-substitution/no-retry stops stay as specified in [proposal](global-spot-acquisition-proposal.md). This code wave grants none of those permissions. Exact pushedrevisionCI is observed before final handoff and recorded in ci-verification.md.
+
+## Windows CI path regression
+
+The first pushed CI run exposed Windows 8.3 temporary-directory aliases. All three modules now share lexical traversal/device/reparse rejection followed by canonical path identity. Genuine short-name and dangling-junction regressions pass. Independent re-review found no unresolved findings. Fresh full Windows OSM suite: 66 discovered, 63 passed, three explicit skips in 94.942 seconds. The failed run is retained as evidence; replacement exact-head CI must pass before handoff.

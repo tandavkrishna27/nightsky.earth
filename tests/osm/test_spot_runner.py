@@ -153,3 +153,28 @@ class WindowsAnchoredArtifactTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     runner._verify_artifacts(root,[dict(path=relative,bytes=4,sha256='0'*64)])
             self.assertEqual(marker.read_bytes(),b'kept')
+
+class WindowsCanonicalAliasTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform=='win32','Windows 8.3 alias semantics')
+    def test_short_and_long_root_share_canonical_identity(self):
+        import ctypes
+        from ctypes import wintypes
+        with tempfile.TemporaryDirectory() as temp:
+            parent=Path(temp)/'long directory name with spaces'; parent.mkdir()
+            kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+            kernel.GetShortPathNameW.argtypes=[wintypes.LPCWSTR,wintypes.LPWSTR,wintypes.DWORD]
+            kernel.GetShortPathNameW.restype=wintypes.DWORD
+            output=ctypes.create_unicode_buffer(32768)
+            length=kernel.GetShortPathNameW(str(parent),output,len(output))
+            if not length or length>=len(output): self.skipTest('8.3 alias unavailable')
+            short_parent=Path(output.value)
+            if str(short_parent).casefold()==str(parent).casefold(): self.skipTest('8.3 names disabled on volume')
+            short_root=short_parent/'fresh-wave'; long_root=parent/'fresh-wave'
+            self.assertEqual(runner.Budget(short_root).root,runner.Budget(long_root).root)
+            result=runner.rehearse(short_root,supervised=True)
+            self.assertEqual(result['status'],'complete')
+            self.assertEqual(runner.inspect_wave(long_root)['status'],'complete')
+            self.assertEqual(json.loads((long_root/'identity.json').read_text())['root'],str(long_root.resolve()))
+            with self.assertRaises(ValueError):
+                runner._write(short_root/'..'/'..'/'escaped.json',{},runner.Budget(long_root))
+            self.assertFalse((Path(temp)/'escaped.json').exists())

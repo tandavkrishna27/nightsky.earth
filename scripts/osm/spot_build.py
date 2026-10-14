@@ -19,15 +19,7 @@ def way_point(points):
     return (sum(p[0] for p in points)/len(points), sum(p[1] for p in points)/len(points)), None
 
 
-def safe_path(path):
-    path = Path(os.path.abspath(path))
-    for part in (path, *path.parents):
-        if part.is_symlink() or (hasattr(part, 'is_junction') and part.is_junction()):
-            raise ValueError('symlink/junction path refused')
-        if part.exists() and getattr(part.lstat(), 'st_file_attributes', 0) & 1024:
-            raise ValueError('reparse path refused')
-    if path.resolve() != path: raise ValueError('resolved path changed')
-    return path
+from spot_paths import safe_path
 
 
 def select_source(path, source, check):

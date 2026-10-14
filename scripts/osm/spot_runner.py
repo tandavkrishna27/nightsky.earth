@@ -19,23 +19,8 @@ def _manifest(value=None):
 def _payload(value):
     return (json.dumps(value, sort_keys=True, separators=(',', ':'))+'\n').encode()
 
-def _safe(path):
-    path=Path(path)
-    if '..' in path.parts: raise ValueError('path traversal refused')
-    if os.name=='nt':
-        if (path.drive and not path.root) or (path.root and not path.drive):
-            raise ValueError('drive-relative/root-relative Windows path refused')
-        if path.drive.startswith(('\\\\?\\','\\\\.\\')):
-            raise ValueError('Windows device namespace alias refused')
-        if any(':' in part for part in path.parts[1:] if path.anchor) or (not path.anchor and any(':' in part for part in path.parts)):
-            raise ValueError('Windows alternate stream path refused')
-    path=Path(os.path.abspath(path))
-    for item in (path, *path.parents):
-        if item.exists() or item.is_symlink():
-            info=item.lstat()
-            if stat.S_ISLNK(info.st_mode) or getattr(info,'st_file_attributes',0)&0x400:
-                raise ValueError('symlink/reparse point refused')
-    return path
+from spot_paths import safe_path as _safe
+
 
 def logical_bytes(root):
     root=_safe(root)
