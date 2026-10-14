@@ -69,3 +69,7 @@ The [original acceptance ledger](v1-acceptance-audit.md) audits every original c
 ## Accepted timezone and retained evidence wave — 14 October 2026
 
 [Current evidence](local-evidence-wave.md) supersedes prior count snapshots: **12 Done/9 Partial/6 Not started**, groups6/10/3. Task4 closes under explicitly owner-accepted named-place timezone scope after mapped tests, source/runtime documentation and independent review; no point/polygon or candidate-local claim. Fresh Node484/483pass/onepermission skip/zero failures; PythonOSM20pass. Retained Bhutan filtering reproduces134 candidates exactly with measured build savings, not global capacity. Meteor date convention remains unresolved with unavailable conversion. Source/host/release gates stay open; no downloads or deployment.
+
+## Acquisition decision preparation — 14 October 2026
+
+[Consolidated proposal](data-acquisition-proposal.md) defines exact pending spot/history allowances and [meteor coverage](meteor-coverage-matrix.md). Three spot source bodies total25,677,683remote-listedbytes, with generic offline acquisition/admission prerequisites before retrieval; two groupedMarchERA5jobs exclude completed checkpoints. Proposal budgets are not measured completion estimates or approval. Counts remain12 Done/9 Partial/6 Not started; no source/historical acquisition, runtime change or deployment. Local offline digest/dedup/clock/JSON/link/arithmetic checks passed; independentreview and exact-revisionCI are recorded separately.

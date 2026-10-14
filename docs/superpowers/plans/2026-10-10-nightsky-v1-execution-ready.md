@@ -719,3 +719,7 @@ Approved Tasks0/6/8 and Task4 recommendation work is recorded in `docs/operation
 ## Local evidence wave — 14 October 2026
 
 The owner accepted named-place timezone V1 with boundary lookup deferred. Task4 wording and C1/C4 checks are reconciled using timezone-acceptance-wave.md; prior original text remains in the historical audit. Current12 Done/9 Partial/6 Not started. Local-evidence-wave.md records exact retained Bhutan filter/partition equality, bounded Windows lifecycle fixes and meteor conversion investigation with no guessed dates. Existing Python discovery includes the new tests; no source acquisitions or deployment.
+
+## Acquisition proposal and meteor matrix — 14 October 2026
+
+Approved preparation is documented in `docs/operations/data-acquisition-proposal.md`, `global-spot-acquisition-proposal.md`, `historical-acquisition-proposal.md` and `meteor-coverage-matrix.md`. Exact selected sources/jobs, budgets and stop conditions are proposed only. Generic new-region tooling remains a pre-acquisition prerequisite; no download authorization is inferred. Original acceptance boxes/counts12 Done/9 Partial/6 Not started stay unchanged.
