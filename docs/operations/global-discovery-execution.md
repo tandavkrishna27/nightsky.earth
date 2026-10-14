@@ -63,3 +63,7 @@ These implementation choices do not change original ticket numbering or acquisit
 Original heading counts remain **12 Done / 9 Partial / 6 Not started**. Added local extension work is mapped to original Tasks 0/2/4/8/10A/11C/12A/12B/15. An extension does not reopen original completed acceptance or establish global source coverage, installed-model behavior, hosted capacity, publication or pilot results.
 
 No deployment, publication or new geographic/historical dataset downloads. The separate website remains a separate workstream.
+
+## CI correction follow-up
+
+The first pushed implementation run passed all four Python jobs but failed Node tests on path-fixture assumptions. Independent scoped review accepted the test-only fixes: invocation-relative resume with checkpoint/no-repeat assertions intact, and canonical direct-child scratch containment with native Windows 8.3 reproduction. The production resolver and builders are unchanged. Fresh aggregate after those corrections: **657 discovered / 656 passed / one skipped / zero failed**; all three TypeScript configurations pass. Exact follow-up CI is tracked in [CI verification](ci-verification.md).

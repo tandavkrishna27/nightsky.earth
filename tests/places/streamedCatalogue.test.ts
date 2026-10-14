@@ -1,8 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readdir,readFile} from 'node:fs/promises';
+import {mkdtemp,readdir,readFile,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import path,{join} from 'node:path';
 import {buildStreamedCatalogue} from '../../scripts/osm/build-streamed-catalogue';
 import {buildGlobalCatalogue} from '../../scripts/osm/build-global-catalogue';
 import {loadCatalogueFiles} from '../../server/places/catalogueFiles';
@@ -14,6 +14,18 @@ async function* stream<T>(rows:T[]){yield* rows;}
 const input=(rows=Array.from({length:37},(_,i)=>row(37-i)))=>({catalogueRevision:'test-v1',candidates:stream(rows),regions:stream([region]),footprints:stream([fp])});
 const dir=()=>mkdtemp(join(tmpdir(),'cat-stream-'));
 const opts={chunkRows:3,mergeFanIn:2,maxRows:4,fanout:2};
+function assertScratchChild(parent:string,scratch:string,paths=path){
+ const child=paths.relative(parent,scratch);
+ assert.ok(child&&!paths.isAbsolute(child),'Scratch evidence must be a child of the output directory');
+ assert.equal(paths.dirname(child),'.','Scratch evidence must be a direct child of the output directory');
+ assert.match(child,/^\.stream-build-/);
+}
+async function assertEvidenceChild(parent:string,scratch:string){assert.equal(await realpath(scratch),scratch);assertScratchChild(await realpath(parent),scratch);}
+test('scratch evidence containment rejects sibling prefixes and traversal',()=>{
+ const parent='C:\\Users\\runneradmin\\AppData\\Local\\Temp\\cat-stream-safe';
+ assertScratchChild(parent,`${parent}\\.stream-build-evidence`,path.win32);
+ for(const scratch of [parent,`${parent}-sibling\\.stream-build-evidence`,`${parent}\\..\\.stream-build-evidence`,`${parent}\\nested\\.stream-build-evidence`,'D:\\.stream-build-evidence'])assert.throws(()=>assertScratchChild(parent,scratch,path.win32),scratch);
+});
 test('stream sorting over several merge levels matches the array root and exact leaf pointers',async(t)=>{
  const rows=Array.from({length:37},(_,i)=>row(37-i)),d=await dir();
  const built=await buildStreamedCatalogue(input(rows),d,opts);
@@ -50,7 +62,7 @@ test('row metadata byte scratch output and deadline caps stop and do not publish
 });
 test('failed builds expose byte accounting and their verified evidence child',async()=>{
  const d=await dir();let failure:any;try{await buildStreamedCatalogue(input(),d,{...opts,maxScratchBytes:100});}catch(error){failure=error;}
- assert.ok(failure.stats);assert.ok(failure.stats.inputBytes>0);assert.ok(failure.stats.scratchBytes<=100);assert.ok(failure.scratchDir.startsWith(d));assert.ok((await readdir(failure.scratchDir)).length>0);
+ assert.ok(failure.stats);assert.ok(failure.stats.inputBytes>0);assert.ok(failure.stats.scratchBytes<=100);await assertEvidenceChild(d,failure.scratchDir);assert.ok((await readdir(failure.scratchDir)).length>0);
 });
 test('streamed catalogue serves exact named, ID and regional queries',async()=>{
  const built=await buildStreamedCatalogue(input([row(3),row(1),row(2)]),await dir(),{...opts,maxRows:2});
@@ -95,5 +107,5 @@ test('unknown footprint region IDs reject before root publication',async()=>{
 test('pages setup failure after scratch creation exposes retained failure metadata',async()=>{
  const {symlink}=await import('node:fs/promises');const d=await dir(),target=await dir();await symlink(target,join(d,'pages'),process.platform==='win32'?'junction':'dir');
  let failure:any;try{await buildStreamedCatalogue(input(),d,opts);}catch(error){failure=error;}
- assert.match(failure.message,/symlink/i);assert.ok(failure.stats);assert.ok(failure.scratchDir.startsWith(d));assert.deepEqual(await readdir(failure.scratchDir),[]);assert.deepEqual(await readdir(target),[]);
+ assert.match(failure.message,/symlink/i);assert.ok(failure.stats);await assertEvidenceChild(d,failure.scratchDir);assert.deepEqual(await readdir(failure.scratchDir),[]);assert.deepEqual(await readdir(target),[]);
 });

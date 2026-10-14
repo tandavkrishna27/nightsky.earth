@@ -11,12 +11,17 @@ test('real execution is explicit and bounded', () => {
   assert.equal(journeys.length,20);
 });
 test('relative resume resolves existing checkpoint without nested scratch or passed repeat',()=>{
- const base=mkdtempSync(join(tmpdir(),'nightsky-resume-test-'));const folder=join(base,'codex-case');
- const rel=relative(process.cwd(),folder);const legacy=resolve(base,rel);
- assert.notEqual(legacy,folder,'replays observed legacy nested-path bug');
- checkpoint(join(folder,'checkpoint.json'),[{id:'casual',status:'passed'}]);
- assert.equal(validateResume(base,rel),folder);
- assert.deepEqual(remainingCases(['casual','learner'],readCheckpoint(join(validateResume(base,rel),'checkpoint.json'))),['learner']);
+ const invocationCwd=mkdtempSync(join(tmpdir(),'nightsky-resume-test-'));
+ const base=join(invocationCwd,'model-rehearsal');const folder=join(base,'codex-case');
+ const previousCwd=process.cwd();
+ try {
+  process.chdir(invocationCwd);
+  const rel=relative(invocationCwd,folder);const legacy=resolve(base,rel);
+  assert.notEqual(legacy,folder,'replays observed legacy nested-path bug');
+  checkpoint(join(folder,'checkpoint.json'),[{id:'casual',status:'passed'}]);
+  assert.equal(validateResume(base,rel),folder);
+  assert.deepEqual(remainingCases(['casual','learner'],readCheckpoint(join(validateResume(base,rel),'checkpoint.json'))),['learner']);
+ } finally {process.chdir(previousCwd);}
 });
 test('synthetic server exposes complete tools and local-only discovery evidence',async()=>{
  const root=mkdtempSync(join(tmpdir(),'nightsky-complete-test-'));
