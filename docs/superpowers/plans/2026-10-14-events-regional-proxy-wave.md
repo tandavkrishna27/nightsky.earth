@@ -24,4 +24,4 @@ Ruling: regional manifest mode is opt-in with an expected manifest checksum and 
 
 Ruling: retain admission until all callback work actually settles after cancellation, rather than release on transport close. This bounds abort-ignoring work across every tool. The cost is reduced available capacity if a callback never settles; operator/provider deadlines and controlled recovery remain necessary.
 
-Lane and integration reviews are clear. Frozen verification and retained source/configuration limits are in [wave evidence](../../operations/events-regional-proxy-wave.md); current-revision CI is observed after push. Exact publisher identity and selected Hetzner facts remain owner inputs; no credentials are needed in chat.
+Lane and integration reviews are clear. Frozen verification and retained source/configuration limits are in [wave evidence](../../operations/events-regional-proxy-wave.md); all six CI jobs passed for implementation7e7bf40 (run38526984222); follow-up documentation CI is observed separately. Exact publisher identity and selected Hetzner facts remain owner inputs; no credentials are needed in chat.
