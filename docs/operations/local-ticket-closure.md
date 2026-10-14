@@ -81,3 +81,25 @@ The [original acceptance ledger](v1-acceptance-audit.md) audits every original c
 ## Actual-model local rehearsal — 14 October 2026
 
 [Model evidence](model-journey-test.md): three reviewed journeys, ten actual local MCP calls, zero external provider attempts. Default model identifier unobserved; hosted/marketplace compatibility untested. Stronger harness checks added after the batch are explicitly separated from executed evidence. Display name NightSky.earth confirmed; Hetzner values deferred. Counts remain12 Done/9 Partial/6 Not started and retrieval/deployment held.
+
+## Owner steering after Claude desktop rehearsal — 14 October 2026
+
+Owner defers further interactive/model-install rehearsal until complete local plugin assembly. Finish the remaining locally achievable implementation and package work, then test the complete plugin with skills and MCP together in Claude/Codex before publication. Plugin Creator/upload are later private packaging/install routes, not authorization to create, upload, deploy or publish now. No new historical/source acquisition allowance is granted. Existing host, source-coverage, identity and official review gates remain open; do not claim every original task closed through offline tests.
+
+First actual Claude desktop Code session connected successfully to the loopback backend and returned a Hanle beginner plan after eight NightSky calls. The fixture uses retained licensed city coordinates and production astronomy handlers; weather/history/aurora are explicitly disabled and real-city candidate coverage is absent. The five repository workflow skills were not installed in that session. This is transport/model evidence, not complete plugin acceptance.
+
+Deferred findings mapped to original tasks:
+
+| Original task | Required follow-up before final acceptance |
+|---|---|
+| 5 / 10A | Resolve misleading polarState/continuous-darkness interpretation for ordinary fully dark sub-windows. Direct MCP reproduction: Hanle 15 October 2026 20:00–00:00 local returns continuous-darkness; expanded full-day calculation returns normal with darkness approximately19:03–04:56 local. Twilight fields are nested below-threshold intervals clipped to the requested window, not exclusive twilight-phase bands. Claude incorrectly blamed a synthetic ephemeris; calculations were not mocked. Add regression and model-visible meanings. Same-engine reproduction is not independent ephemeris validation. |
+| 11A–11C / 12B | Test installed skills with MCP, clarify beginner equipment and conditional Milky Way advice, distinguish culmination direction from all-session direction, avoid unsupported site-specific travel claims and raw implementation detail in user-facing plans. |
+| 12A / 12B / 15 | Prepare separately validated host-compatible complete packages. Current public-package builder requires public HTTPS; do not weaken this validator to accept a loopback test artifact. Verify private/local creator or upload routes against actual client/account and install all skills/references plus MCP together before recording end-to-end pass. |
+
+Recorded heading counts are the prior verified closure snapshot, not a claim that these newly observed findings are resolved. Accuracy/contract issues require final review and correction before declaring publish-ready; optional presentation refinements may be deferred to a later version by the owner. Subsequent implementation grooming must reconcile affected acceptance dispositions explicitly.
+
+Current official route references: Claude custom-plugin upload is documented at https://support.claude.com/en/articles/13837440-use-plugins-in-claude ; OpenAI private/local packaging is documented at https://developers.openai.com/plugins/build/plugins . Uploading a Claude plugin saves it to the account; local MCP execution is a separate surface capability. The exact same ZIP is not presumed portable. No creator/upload/install/publication action occurred in this follow-up.
+
+## Current local package completion disposition — 14 October 2026
+
+Separate complete Codex/Claude local packages and updated five-workflow authoring guards pass fresh local verification and independent review. Root accepts the remaining-ticket audit:5.C4,10A.C3 and10A.C5 reopen; strict headings10 Done/11 Partial/6 Not started, groups4/12/3 and original160boxes89checked/71open supersede earlier closure snapshots. [Next-actions handoff](local-completion-next-actions.md) separates executable local preparation from held real-data/host/account/public evidence. A package was generated, not installed/uploaded; model and accuracy validation remain deferred as requested. Exact-revision CI is observed before delivery.

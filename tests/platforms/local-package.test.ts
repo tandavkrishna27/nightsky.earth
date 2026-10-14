@@ -1,0 +1,85 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { unzipSync, strFromU8, strToU8 } from 'fflate';
+import { buildLocalPluginPackage, validateLocalPackageFiles } from '../../scripts/build-local-plugin-package';
+import { buildPluginPackage } from '../../scripts/build-plugin-package';
+
+const names = ['find-observing-place', 'plan-stargazing-night', 'plan-astrophotography', 'plan-sky-event', 'prepare-outing'];
+const digest = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
+for (const host of ['codex', 'claude'] as const) {
+  test(`${host} local package has deterministic host layout and exact canonical references`, () => {
+    const options = { host, endpoint: 'http://127.0.0.1:4010/mcp' };
+    const a = buildLocalPluginPackage(options); const b = buildLocalPluginPackage(options);
+    assert.deepEqual(a.zip, b.zip); assert.equal(a.sha256, digest(a.zip));
+    assert.equal(a.submissionReady, false); assert.equal(a.hostInstallationVerified, false);
+    const files = unzipSync(a.zip);
+    const manifestPath = host === 'codex' ? 'plugin.json' : '.claude-plugin/plugin.json';
+    const mcpPath = host === 'codex' ? 'mcp.json' : '.mcp.json';
+    assert.equal(JSON.parse(strFromU8(files[manifestPath])).name, 'nightsky');
+    assert.deepEqual(JSON.parse(strFromU8(files[mcpPath])).mcpServers, { nightsky: { type: host === 'codex' ? 'streamable-http' : 'http', url: options.endpoint } });
+    assert.equal(files[host === 'codex' ? '.mcp.json' : 'mcp.json'], undefined);
+    assert.equal(files[host === 'codex' ? '.claude-plugin/plugin.json' : 'plugin.json'], undefined);
+    assert.deepEqual(a.inventory.map(x => x.path), Object.keys(files).sort());
+    for (const entry of a.inventory) { assert.equal(entry.bytes, files[entry.path].length); assert.equal(entry.sha256, digest(files[entry.path])); }
+    for (const name of names) {
+      const reference = `skills/${name}/references/workflow.md`;
+      assert.deepEqual(Buffer.from(files[reference]), readFileSync(new URL(`../../docs/product/workflows/${name}.md`, import.meta.url)));
+      assert.match(strFromU8(files[`skills/${name}/SKILL.md`]), /`references\/workflow\.md`/);
+      assert.doesNotMatch(strFromU8(files[`skills/${name}/SKILL.md`]), /docs\/product\/workflows/);
+      const missing = { ...files }; delete missing[reference];
+      assert.throws(() => validateLocalPackageFiles(missing, host), /workflow reference/);
+      assert.throws(() => validateLocalPackageFiles({ ...files, [reference]: strToU8('different canonical bytes') }, host), /reference mismatch/);
+    }
+    assert.ok(files['assets/logo.svg']); assert.ok(files['assets/composer.svg']);
+    assert.doesNotMatch(strFromU8(files['RELEASE-NOTES.md']), /uses an example endpoint/);
+  });
+  test(`${host} local validator rejects injected connections, paths and secrets`, () => {
+    const files = unzipSync(buildLocalPluginPackage({ host, endpoint: 'http://localhost:4010/mcp' }).zip);
+    const mcpPath = host === 'codex' ? 'mcp.json' : '.mcp.json';
+    const connection = { type: host === 'codex' ? 'streamable-http' : 'http', url: 'http://localhost:4010/mcp' };
+    for (const config of [{ mcpServers: { nightsky: connection, other: connection } }, { mcpServers: { nightsky: { ...connection, headers: {} } } }, { mcpServers: { nightsky: connection }, extra: {} }]) {
+      assert.throws(() => validateLocalPackageFiles({ ...files, [mcpPath]: strToU8(JSON.stringify(config)) }, host), /connection|configuration/);
+    }
+    const manifestPath = host === 'codex' ? 'plugin.json' : '.claude-plugin/plugin.json';
+    const manifest = JSON.parse(strFromU8(files[manifestPath])); manifest.mcpServers = { hidden: connection };
+    assert.throws(() => validateLocalPackageFiles({ ...files, [manifestPath]: strToU8(JSON.stringify(manifest)) }, host), /manifest/);
+    for (const path of [manifestPath, mcpPath]) {
+      assert.throws(() => validateLocalPackageFiles({ ...files, [path]: strToU8(' '.repeat(1024 * 1024) + strFromU8(files[path])) }, host), /large/);
+      assert.throws(() => validateLocalPackageFiles({ ...files, [path]: new Uint8Array([0xff]) }, host), /UTF-8/);
+      assert.throws(() => validateLocalPackageFiles({ ...files, [path]: new Uint8Array() }, host), /Empty/);
+      const clean = strFromU8(files[path]);
+      for (const value of ['sk-' + 'a'.repeat(30), 'C:\\Users\\private']) {
+        const duplicate = clean.replace('{', '{"hidden":' + JSON.stringify(value) + ',"hidden":null,');
+        assert.throws(() => validateLocalPackageFiles({ ...files, [path]: strToU8(duplicate) }, host), /secret|local path/);
+      }
+    }
+    const shadowServer = '{"mcpServers":{"hidden":{"url":"sk-' + 'a'.repeat(30) + '"}},' + strFromU8(files[mcpPath]).slice(1);
+    assert.throws(() => validateLocalPackageFiles({ ...files, [mcpPath]: strToU8(shadowServer) }, host), /secret/);
+    const oversizedTotal = { ...files };
+    for (let index = 0; index < 33; index++) oversizedTotal[`padding-${index}.md`] = new Uint8Array(1024 * 1024).fill(32);
+    assert.throws(() => validateLocalPackageFiles(oversizedTotal, host), /total bytes too large/);
+    for (const value of ['sk-' + 'a'.repeat(30), 'C:\\Users\\private', '/home/private', '-----BEGIN PRIVATE KEY-----']) {
+      assert.throws(() => validateLocalPackageFiles({ ...files, 'skills/prepare-outing/leak.md': strToU8(value) }, host), /secret|local path/);
+    }
+    for (const path of ['../escape', '.env', 'server/index.ts', 'data/raw.json', '.codex-plugin/plugin.json', 'skills/prepare-outing/model-trace.md']) {
+      assert.throws(() => validateLocalPackageFiles({ ...files, [path]: strToU8('unwanted') }, host), /path/);
+    }
+  });
+}
+test('local endpoint requires exact literal loopback, explicit valid port and /mcp', () => {
+  for (const endpoint of ['http://localhost:80/mcp', 'http://127.0.0.1:65535/mcp', 'http://[::1]:4010/mcp']) assert.equal(buildLocalPluginPackage({ host: 'codex', endpoint }).endpoint, endpoint);
+  for (const endpoint of ['http://example.com:4010/mcp', 'http://10.0.0.1:4010/mcp', 'http://0.0.0.0:4010/mcp', 'https://localhost:4010/mcp', 'http://localhost/mcp', 'http://localhost:0/mcp', 'http://localhost:65536/mcp', 'http://localhost:04010/mcp', 'http://user:pass@localhost:4010/mcp', 'http://localhost:4010/mcp?', 'http://localhost:4010/mcp#', 'http://localhost:4010/mcp/', 'http://localhost:4010/x/../mcp', 'http://127.1:4010/mcp', 'http://2130706433:4010/mcp', 'http://LOCALHOST:4010/mcp', ' http://localhost:4010/mcp', 'http://localhost.:4010/mcp']) assert.throws(() => buildLocalPluginPackage({ host: 'codex', endpoint }), /endpoint/);
+  assert.throws(() => buildLocalPluginPackage({ host: 'other' as 'codex', endpoint: 'http://localhost:4010/mcp' }), /host/);
+  assert.throws(() => buildPluginPackage({ endpoint: 'http://localhost:4010/mcp' }), /endpoint/);
+});
+test('local CLI rejects incomplete, unknown and duplicate arguments before writing', () => {
+  const script = fileURLToPath(new URL('../../scripts/build-local-plugin-package.ts', import.meta.url));
+  for (const args of [[], ['--host', 'codex'], ['--host', 'codex', '--endpoint', 'http://localhost:4010/mcp', '--host', 'claude'], ['--host', 'codex', '--endpoint', 'http://localhost:4010/mcp', '--unknown', 'x'], ['--host', 'claude', '--endpoint', 'https://localhost:4010/mcp']]) {
+    const result = spawnSync(process.execPath, ['--import', 'tsx', script, ...args], { encoding: 'utf8' });
+    assert.notEqual(result.status, 0); assert.match(result.stderr, /required|unique|endpoint/);
+  }
+});

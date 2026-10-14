@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["scripts/model-journey-test.ts", "scripts/verify-capacity.ts", "scripts/verify-artifact-rollback.ts", "scripts/verify-offline-operations.ts", "scripts/verify-source-coverage.ts", "scripts/build-plugin-package.ts", "scripts/verify-review-cases.ts", "scripts/osm/overpass_pilot.ts", "scripts/osm/regional_wave.ts", "scripts/osm/regional_shards.ts", "scripts/osm/regional_manifest.ts", "scripts/osm/measure_regional_serving.ts", "scripts/osm/benchmark_shards.ts", "scripts/osm/benchmark_regional_wave.ts", "scripts/osm/benchmark_offline_extract.ts"],
+  "include": ["scripts/build-local-plugin-package.ts", "scripts/verify-local-plugin-packages.ts", "scripts/model-journey-test.ts", "scripts/verify-capacity.ts", "scripts/verify-artifact-rollback.ts", "scripts/verify-offline-operations.ts", "scripts/verify-source-coverage.ts", "scripts/build-plugin-package.ts", "scripts/verify-review-cases.ts", "scripts/osm/overpass_pilot.ts", "scripts/osm/regional_wave.ts", "scripts/osm/regional_shards.ts", "scripts/osm/regional_manifest.ts", "scripts/osm/measure_regional_serving.ts", "scripts/osm/benchmark_shards.ts", "scripts/osm/benchmark_regional_wave.ts", "scripts/osm/benchmark_offline_extract.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": { "incremental": false, "target": "ES2022" }
 }

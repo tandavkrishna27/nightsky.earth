@@ -248,7 +248,9 @@ Closure 14 October 2026: original local acceptance independently audited and ver
 - [x] Test `calculatesTwilightAtEquatorialSite`, `calculatesTwilightAtMidLatitude`, `returnsNoAstronomicalDarknessDuringPolarSummer`, `returnsDarkWindowDuringPolarWinter`, `calculatesMoonPhaseAndAltitude`, `returnsTargetRiseSetAndAltAzSamples`, `calculatesMilkyWayCoreSeasonInBothHemispheres`, and `keepsUtcAndLocalTimesConsistentAcrossDst`.
 - [x] Select and pin a maintained astronomy library only after license and date-range review. Store calculation/library version in source metadata.
 - [x] Compare fixed reference cases with an authoritative ephemeris within a documented tolerance; document coordinate and time conventions.
-- [x] Pass when `npm test` passes the named astronomy cases, high-latitude cases return explicit polar states, and both tools return schema-valid structured content in MCP calls.
+- [ ] Pass when `npm test` passes the named astronomy cases, high-latitude cases return explicit polar states, and both tools return schema-valid structured content in MCP calls.
+
+Reopened 14 October after the actual Claude Hanle rehearsal: ordinary fully dark requested windows must not be interpreted as polar night. Prior named fixtures remain passing; affected final semantic acceptance is pending. See docs/operations/local-completion-next-actions.md.
 
 ### Task 6: Implement predictable events and supported target catalogs
 
@@ -348,9 +350,11 @@ Closure 14 October 2026: original local acceptance independently audited and ver
 
 - [x] Test `plansBeginnerStargazingWithPartialWeather`, `plansMeteorNightWithRadiantGapExplicit`, `plansAstrophotographyWithoutInventingSeeing`, `plansTelescopeTargetWithVisibilityWindow`, `returnsHistoricalContextForMonthAheadDate`, `returnsUsefulPlanWhenClimatologyIsUnsupported`, `asksForAmbiguousPlace`, `includesNightAccessCaveat`, and `returnsUsefulPlanWhenOneProviderFails`. Radiant altitude remains an explicit gap pending Task 6's source-rights and drift-model gate.
 - [x] Add a local Streamable HTTP integration test using the real registry and fixture-injected services: initialize, resolve a named place, call the planner with the returned `placeId`, and validate the structured result. Also verify explicit unavailable/unsupported states when optional candidate/climate data is absent. No external network calls are allowed in this test.
-- [x] Produce a concise summary first, then the darkness interval, per-source forecast values and valid times, missing evidence, caveats, preparation steps, and source links. Keep exact factor values accessible; do not output one unexplained universal “good sky” score. Include candidate places and historical context only when Tasks 8/9 are enabled. Otherwise return an explicit unsupported/unavailable state for each optional capability and continue the plan from the user's named destination.
+- [ ] Produce a concise summary first, then the darkness interval, per-source forecast values and valid times, missing evidence, caveats, preparation steps, and source links. Keep exact factor values accessible; do not output one unexplained universal “good sky” score. Include candidate places and historical context only when Tasks 8/9 are enabled. Otherwise return an explicit unsupported/unavailable state for each optional capability and continue the plan from the user's named destination.
 - [x] Keep outputs deterministic from fixture inputs so the same scenarios can be tested in every assistant host.
-- [x] Pass when `npm test` passes the planner cases, every exercised journey maps to a fixture or explicit unsupported/partial result, and the tool returns validated structured content. Full V1 journey coverage still depends on candidate/climatology feasibility and licensed meteor-radiant data; those remain separate gates.
+- [ ] Pass when `npm test` passes the planner cases, every exercised journey maps to a fixture or explicit unsupported/partial result, and the tool returns validated structured content. Full V1 journey coverage still depends on candidate/climatology feasibility and licensed meteor-radiant data; those remain separate gates.
+
+Reopened 14 October after the actual Claude Hanle rehearsal: ordinary fully dark requested windows must not be interpreted as polar night. Prior named fixtures remain passing; affected final semantic acceptance is pending. See docs/operations/local-completion-next-actions.md.
 
 ### Task 10B: Implement side-by-side option comparison
 
@@ -727,3 +731,7 @@ Approved preparation is documented in `docs/operations/data-acquisition-proposal
 ## Offline spot-runner prerequisites — 14 October 2026
 
 Approved offline Tasks0/8 work is in `docs/operations/offline-spot-runner-wave.md`. Generic strictmanifest/acquisition, boundedgeometry/filter/partition and journal/supervisedbuild implementations pass fake/synthetic checks and independentreview. No defaultliveopener/fetchCLI, realregionaldata, globalcoverage or runtimepromotion. CIOSMdiscovery now includes composedtests and offlineplanCLI under15-minute jobcap. Originalacceptance/counts12/9/6 remainunchanged.
+
+## Local package completion and accuracy disposition — 14 October 2026
+
+The owner defers further installed-plugin/model rehearsal until complete local assembly. [Current wave](2026-10-14-nightsky-local-package-completion.md) supplies separate host packages and workflow authoring guards; [handoff](../../operations/local-completion-next-actions.md) maps every remaining original ticket. Root accepted the independent recommendation to reopen5.C4,10A.C3 and10A.C5 for the reproduced Hanle polar interpretation issue. Current10 Done/11 Partial/6 Not started; groups4/12/3. These three original boxes are now unchecked; total160 boxes remains unchanged. No source/history retrieval, upload/install, account change, deployment or publication.

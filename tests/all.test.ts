@@ -78,3 +78,6 @@ import "./mcp/regional-provider.test.ts";
 import "./operations/plugin-regional-config.test.ts";
 import "./mcp/regional-installed.test.ts";
 import "./events/meteorTypicalSeasons.test.ts";
+
+import "./platforms/local-package.test.ts";
+import "./skills/local-experience.test.ts";
