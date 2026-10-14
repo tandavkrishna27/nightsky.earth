@@ -47,3 +47,7 @@ Next local task is diagnosing and fixing the spot build's measured time failure 
 ## Geographic continuation — 15 October 2026
 
 [Continuation evidence](geographic-continuation-wave.md): Faroe source admitted (two HTTP requests), build stopped at60.025seconds/96419840peakRSS, so Fiji was not requested. A retained-source profile shows full inventories still dominate larger-source processing. No resource increase, retry or runtime installation. Counts12Done/9Partial/6Notstarted. Next local work uses the retained Faroe file; new source acquisition remains held after this failure gate.
+
+## Final original-source pilot — 15 October 2026
+
+[Fiji evidence and combined pilot table](fiji-pilot-wave.md): after Faroe passed and six CI jobs passed, Fiji's exact source acquired with one HEAD/GET. Its worker stopped at60.025seconds/135684096RSS, so candidate equality and dateline audit remain incomplete. All three original raw sources acquired; no refetch or new region. Monaco/Faroe accepted builds remain11/73candidates. No active installation/deployment; counts12Done/9Partial/6Notstarted.

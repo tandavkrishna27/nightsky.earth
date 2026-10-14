@@ -1,0 +1,38 @@
+{
+  "sourceId": "fiji",
+  "status": "stopped",
+  "runtimeInstalled": false,
+  "globalCoverageEstablished": false,
+  "priorPilotLogicalBytes": 16990565,
+  "acquisition": {
+    "sourceId": "fiji",
+    "bytes": 17249749,
+    "sha256": "661d9a59c0aee68204c37237071e414ca758582b3aad7dd42d8be48a46f26034",
+    "expectedVintage": "2026-10-13T20:21:31Z",
+    "actualVintage": "2026-10-13T20:21:31Z",
+    "retrievedAt": "2026-10-14T19:26:58.306693+00:00",
+    "etag": "\"10735d5-65dc043e799ab\"",
+    "url": "https://download.geofabrik.de/australia-oceania/fiji-261013.osm.pbf"
+  },
+  "reason": "offline build worker failed: {'status': 'bounded-stop', 'reason': 'supervisor/accounting failure: 60 second stage deadline', 'exitCode': 1, 'elapsedSeconds': 60.025, 'peakRssBytes': 135684096, 'peakWholeWaveLogicalBytes': 17266596, 'jobCommitBytes': 268435456, 'workerRssBytes': 268435456, 'wallSeconds': 60, 'pollSeconds': 0.02, 'processPolicy': 'suspended launch; assigned single-process Windows job before resume; descendants refused', 'diskPolicy': 'sampled whole-wave logical bytes, not hard filesystem quota'}",
+  "httpRequests": 2,
+  "combinedPilotPeakLogicalBytes": 34258245,
+  "worker": {
+    "status": "bounded-stop",
+    "reason": "supervisor/accounting failure: 60 second stage deadline",
+    "exitCode": 1,
+    "elapsedSeconds": 60.025,
+    "peakRssBytes": 135684096,
+    "peakWholeWaveLogicalBytes": 17266596,
+    "jobCommitBytes": 268435456,
+    "workerRssBytes": 268435456,
+    "wallSeconds": 60,
+    "pollSeconds": 0.02,
+    "processPolicy": "suspended launch; assigned single-process Windows job before resume; descendants refused",
+    "diskPolicy": "sampled whole-wave logical bytes, not hard filesystem quota"
+  },
+  "sourceHashRechecked": true,
+  "referenceFilterPartitionAgreement": "not-established",
+  "datelineAudit": "not-completed",
+  "cleanup": "Retained; no deletion retry after earlier automatic review rejection."
+}

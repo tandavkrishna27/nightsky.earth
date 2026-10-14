@@ -126,3 +126,7 @@ Substantive revision `3c1bdb6e753e8242a30e059dd10ccab2b863cf3e`: [all six CI job
 ## Faroe local correction — 15 October 2026
 
 [Correction evidence](faroe-path-fix-wave.md) supersedes the earlier Faroe build stop: retained source passes the same supervisor in 28.004 seconds, with 73 candidates and exact reference/filter/partition agreement. Redundant metadata queries were removed while all path guards remain. No new downloads or resource increase; Fiji/global/runtime/host gates remain. Counts 12 Done / 9 Partial / 6 Not started.
+
+## Final original-source pilot — 15 October 2026
+
+[Fiji evidence and combined pilot table](fiji-pilot-wave.md): after Faroe passed and six CI jobs passed, Fiji's exact source acquired with one HEAD/GET. Its worker stopped at60.025seconds/135684096RSS, so candidate equality and dateline audit remain incomplete. All three original raw sources acquired; no refetch or new region. Monaco/Faroe accepted builds remain11/73candidates. No active installation/deployment; counts12Done/9Partial/6Notstarted.

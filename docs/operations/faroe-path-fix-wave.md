@@ -19,3 +19,7 @@ This supersedes only the prior Faroe build-time failure; the historical failed r
 Task 8 remains Partial because Fiji/global candidate coverage, public distribution obligations and selected-host fit remain open. Original counts remain 12 Done / 9 Partial / 6 Not started. Broad final audit remains deferred. Local regression/CI verification is recorded with the execution ledger and branch revision.
 
 Full local verification: 72 Python tests discovered, 69 passed/three explicit skips; 522 Node tests discovered, 521 passed/one existing skip; all three TypeScript configurations passed. One legacy test mocked the removed query rather than rejected symlink metadata; it was migrated to the same symlink input with an additional pre-resolution rejection assertion, then the full suite reran green. Existing two-OS CI discovery includes all new regressions; no dependency/CI change required.
+
+## Final original-source pilot — 15 October 2026
+
+[Fiji evidence and combined pilot table](fiji-pilot-wave.md): after Faroe passed and six CI jobs passed, Fiji's exact source acquired with one HEAD/GET. Its worker stopped at60.025seconds/135684096RSS, so candidate equality and dateline audit remain incomplete. All three original raw sources acquired; no refetch or new region. Monaco/Faroe accepted builds remain11/73candidates. No active installation/deployment; counts12Done/9Partial/6Notstarted.
