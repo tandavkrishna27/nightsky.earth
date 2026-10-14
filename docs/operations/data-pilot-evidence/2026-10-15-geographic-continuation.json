@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-15",
+  "status": "stopped",
+  "httpRequests": 2,
+  "priorPilotLogicalBytes": 1409073,
+  "continuationPeakLogicalBytes": 7739535,
+  "combinedPilotPeakLogicalBytes": 9148608,
+  "originalCombinedFileCeiling": 104857600,
+  "sources": [
+    {
+      "sourceId": "faroe-islands",
+      "status": "stopped",
+      "reason": "offline build worker failed: {'status': 'bounded-stop', 'reason': 'supervisor/accounting failure: 60 second stage deadline', 'exitCode': 1, 'elapsedSeconds': 60.025, 'peakRssBytes': 96419840, 'peakWholeWaveLogicalBytes': 7738089, 'jobCommitBytes': 268435456, 'workerRssBytes': 268435456, 'wallSeconds': 60, 'pollSeconds': 0.02, 'processPolicy': 'suspended launch; assigned single-process Windows job before resume; descendants refused', 'diskPolicy': 'sampled whole-wave logical bytes, not hard filesystem quota'}",
+      "acquisition": {
+        "actualVintage": "2026-10-13T20:21:31Z",
+        "bytes": 7735542,
+        "etag": "\"7608f6-65dc12240bee5\"",
+        "expectedVintage": "2026-10-13T20:21:31Z",
+        "retrievedAt": "2026-10-14T19:08:23.405942+00:00",
+        "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+        "sourceId": "faroe-islands",
+        "url": "https://download.geofabrik.de/europe/faroe-islands-261013.osm.pbf"
+      },
+      "worker": {
+        "status": "bounded-stop",
+        "reason": "supervisor/accounting failure: 60 second stage deadline",
+        "exitCode": 1,
+        "elapsedSeconds": 60.025,
+        "peakRssBytes": 96419840,
+        "peakWholeWaveLogicalBytes": 7738089,
+        "jobCommitBytes": 268435456,
+        "workerRssBytes": 268435456,
+        "wallSeconds": 60,
+        "pollSeconds": 0.02,
+        "processPolicy": "suspended launch; assigned single-process Windows job before resume; descendants refused",
+        "diskPolicy": "sampled whole-wave logical bytes, not hard filesystem quota"
+      }
+    }
+  ],
+  "runtimeInstalled": false,
+  "globalCoverageEstablished": false,
+  "deployment": false,
+  "fijiRequested": false,
+  "cleanup": "Retained; no deletion retry after the earlier automatic cleanup rejection.",
+  "diagnosis": {
+    "profileSeconds": 5.006,
+    "recordLoopCalls": 39306,
+    "fullInventories": 243,
+    "fullInventorySeconds": 4.032,
+    "sampledCallbackSeconds": 4.044,
+    "status": "Full inventories remain dominant for the larger source; no code or budget changed in this wave."
+  }
+}

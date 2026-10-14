@@ -118,3 +118,7 @@ Substantive revision `3c1bdb6e753e8242a30e059dd10ccab2b863cf3e`: [all six CI job
 ## Retained Monaco correction — 15 October 2026
 
 [Local correction evidence](monaco-build-fix-wave.md) supersedes the earlier60-second Monaco build stop: the retained exact source now passes the same supervisor in2.104seconds, with11candidates and exact reference/filter/partition agreement. No new source requests or budget increase. Faroe/Fiji/global coverage remain pending; counts12Done/9Partial/6Notstarted.
+
+## Geographic continuation — 15 October 2026
+
+[Continuation evidence](geographic-continuation-wave.md): Faroe source admitted (two HTTP requests), build stopped at60.025seconds/96419840peakRSS, so Fiji was not requested. A retained-source profile shows full inventories still dominate larger-source processing. No resource increase, retry or runtime installation. Counts12Done/9Partial/6Notstarted. Next local work uses the retained Faroe file; new source acquisition remains held after this failure gate.
