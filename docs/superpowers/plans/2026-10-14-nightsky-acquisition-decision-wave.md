@@ -29,7 +29,7 @@ Duplicate completed CDS jobs; unverified grouped NetCDF selection; current files
 - [x] Root consolidates budgets/sequence/dependencies and recommends one first batch; no automatic allowance.
 - [x] Independent source/spec/operational review; fix findings.
 - [x] Local documentlinks/structuredplan/dedup/count checks; originalstatus remains unchanged.
-- [ ] Scoped commit/push, watch exactCIrevision, record evidence; hand back reviewable proposal for ownerdecision.
+- [x] Scoped commit/push, watch exactCIrevision, record evidence; hand back reviewable proposal for ownerdecision.
 
 ## Rulings
 
@@ -39,3 +39,5 @@ Ruling: broad global/free scope stays intact — pilots test budgets and source 
 Evidence: docs/operations/data-acquisition-proposal.md; no runtime/source behavior changed. Local review-envelope/digest/clock/dedup/links/arithmetic checks passed.
 
 Independent lane and consolidated review found no actionable issues.
+
+All six CI jobs passed at880778a/run38575165940; final documentation-only CI is observed separately. Acquisition approval remains pending.
