@@ -158,10 +158,12 @@ Stage five is a real remaining gate, not something synthetic tests can close. We
 - [x] Implement registry wiring and provider configuration. Default legacy artifact behavior remains valid; absent global artifacts cannot be advertised as global discovery coverage. Refresh hardcoded package inventory counts only after new tools exist.
 - [x] Update the five canonical workflows with every row in the design matrix: direct filters, bounded planning comparisons, clarification and unsupported travel/access/raw-GPS cases. Keep forecast horizons/history and source-specific data separate.
 - [x] Run `npm test`, `npm run check`, `npm run plugin:package`, `npm run test:review-cases`, builds and existing runtime checks. Add new tests to the discovered harness and relevant Linux/Windows jobs; all must pass with no external downloads.
-- [ ] Update existing tickets with exact implemented-versus-source/host/model gates. Commit/push the branch; watch all six CI jobs at the exact commit, fix regressions and record evidence.
+- [x] Update existing tickets with exact implemented-versus-source/host/model gates. Commit/push the branch; watch all six CI jobs at the exact commit, fix regressions and record evidence.
 - [ ] After the complete package is assembled, run installed Codex/Claude journey matrix and owner questions as a separate explicitly scheduled verification step. No upload/deployment inferred from local packaging.
 
 ## Acceptance and deferred gates
+
+**15 October local closure:** all local implementation/checklist steps above are complete and reviewed. Fresh aggregate verification has 657 tests, 656 passed, one existing permission skip and zero failures. [All six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38642020834) on corrected substantive revision `655f747d90966072b2096aa315e7bfecf005c8b1`. The sole unchecked installed-client step is partially exercised: twenty complete-instruction Codex questions plus supplements were reviewed; native Codex skill reading was rejected by automatic policy, and Claude native initialization succeeds but inference awaits sign-in. It remains a client acceptance gate, not unimplemented local code. [Closure and remaining gates](../../operations/local-goal-closure.md) preserve original counts.
 
 Local implementation acceptance: legacy behavior preserved, all combinations have either verified contract behavior or explicit clarification, selected-site calculations use its point, bounded memory/read behavior holds, complete skills/tools package agrees and exact-revision CI passes.
 
