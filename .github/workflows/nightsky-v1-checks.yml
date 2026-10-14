@@ -70,6 +70,7 @@ jobs:
   osm-importer:
     name: OSM importer tests / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -90,8 +91,11 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get install -y libexpat1
 
-      - name: Run OSM importer tests
+      - name: Run OSM importer and offline spot runner tests
         run: python -m unittest discover -s tests/osm -v
+
+      - name: Validate the offline pinned spot plan CLI
+        run: python scripts/osm/spot_runner.py plan
 
   era5-decoder:
     name: ERA5 offline decoder, downloader and pilot tests / ${{ matrix.os }}

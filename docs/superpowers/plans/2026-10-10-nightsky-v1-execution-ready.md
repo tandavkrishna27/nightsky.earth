@@ -723,3 +723,7 @@ The owner accepted named-place timezone V1 with boundary lookup deferred. Task4 
 ## Acquisition proposal and meteor matrix — 14 October 2026
 
 Approved preparation is documented in `docs/operations/data-acquisition-proposal.md`, `global-spot-acquisition-proposal.md`, `historical-acquisition-proposal.md` and `meteor-coverage-matrix.md`. Exact selected sources/jobs, budgets and stop conditions are proposed only. Generic new-region tooling remains a pre-acquisition prerequisite; no download authorization is inferred. Original acceptance boxes/counts12 Done/9 Partial/6 Not started stay unchanged.
+
+## Offline spot-runner prerequisites — 14 October 2026
+
+Approved offline Tasks0/8 work is in `docs/operations/offline-spot-runner-wave.md`. Generic strictmanifest/acquisition, boundedgeometry/filter/partition and journal/supervisedbuild implementations pass fake/synthetic checks and independentreview. No defaultliveopener/fetchCLI, realregionaldata, globalcoverage or runtimepromotion. CIOSMdiscovery now includes composedtests and offlineplanCLI under15-minute jobcap. Originalacceptance/counts12/9/6 remainunchanged.

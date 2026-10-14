@@ -73,3 +73,7 @@ The [original acceptance ledger](v1-acceptance-audit.md) audits every original c
 ## Acquisition decision preparation — 14 October 2026
 
 [Consolidated proposal](data-acquisition-proposal.md) defines exact pending spot/history allowances and [meteor coverage](meteor-coverage-matrix.md). Three spot source bodies total25,677,683remote-listedbytes, with generic offline acquisition/admission prerequisites before retrieval; two groupedMarchERA5jobs exclude completed checkpoints. Proposal budgets are not measured completion estimates or approval. Counts remain12 Done/9 Partial/6 Not started; no source/historical acquisition, runtime change or deployment. Local offline digest/dedup/clock/JSON/link/arithmetic checks passed; independentreview and exact-revisionCI are recorded separately.
+
+## Offline generic spot runner — 14 October 2026
+
+[Wave evidence](offline-spot-runner-wave.md) records exact-manifest acquisition safeguards, generic boundedgeometry/filter/partition processing, actual Windows build supervision and strict recovery/accounting. Composed fakeHTTP/genuine syntheticPBF tests exercise the real modules;61PythonOSM discovered/58passed/threeexplicit skips, Node484/483passed/onepermission skip. No provider requests/new realdata scans/runtime installation. Counts12 Done/9 Partial/6 Not started remain; actual regional/global/source/host evidence stillrequired. Retrieval remains held.
