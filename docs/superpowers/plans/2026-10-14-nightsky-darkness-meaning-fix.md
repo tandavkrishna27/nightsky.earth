@@ -41,8 +41,10 @@ This changes private pre-release JSON fields, not tool names/inputs. All checked
 - [x] Focused review, fix any actionable findings; no broad audit.
 - [x] Fresh full Node/tests/types/public+localpackages/8reviewsets/build/runtimes and meaningful Hanle original-defect checks.
 - [x] Close only5.C4/10A.C3/C5 if evidence passes; restore12Done/9Partial/6NotStarted, groups6/10/3 and160boxes92checked68open. Hosted/model/source gates remain.
-- [ ] Scoped commit/push existing codex/plugin-v1 branch and observe all six exact-head CI jobs; record evidence.
+- [x] Scoped commit/push existing codex/plugin-v1 branch and observe all six exact-head CI jobs; record evidence.
 
 ## Decision record
 
 Ruling: remove private pre-release geographic-looking fields instead of keeping a misleading compatibility alias; no installed/released plugin has been accepted. All repository fixtures and package guidance migrate together. Schema/result correctness is checked without claiming a model followed it; further installed-plugin/model testing remains deferred as requested.
+
+Evidence: substantive commit 3c1bdb6; all six exact-head CI jobs passed in run38599328855. Further documentation-only revision is tracked separately in CI.
