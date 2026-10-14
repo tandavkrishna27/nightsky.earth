@@ -12,13 +12,13 @@ This audits every original heading against its actual acceptance criteria. User 
 | 3 | Registry, body/Host/metadata/error/rate/concurrency/log controls; current actual transport and Inspector proof | Original local acceptance met; hosted logging/retention and replica budgets belong to 3B/14 |
 | 3B | Protected local protocol checks and concrete early connection record procedure prepared | Actual controlled staging endpoint and ChatGPT/Codex connection |
 | 3C | Individual/India/support facts retained; identity/ownership prerequisites recorded | Exact verified legal name, eligible project and permanent endpoint ownership |
-| 4 | Global named GeoNames resolution plus licensed Hanle supplement, ambiguity/timezones/consent/privacy fixtures | Actual host-location side channel remains client-specific evidence |
+| 4 | Global named GeoNames resolution plus licensed Hanle supplement, ambiguity/timezones/consent/privacy fixtures | Original coordinate-boundary interface/fixture mismatch awaits scope reconciliation; actual host-location side channel remains client-specific evidence |
 | 4B | Guarded resolver-only operator mode, two transport tests, actual compiled Inspector resolver call, scan cases/record procedure | Same real branded draft, production URL/domain challenge and official location scan |
 | 5 | Local geometry/targets, independent references, polar/DST/hemisphere tests | No general arbitrary-date, atmosphere or terrain claim |
-| 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models, apparent planet-pair events and independently validated all-years calculations; adaptive model-conditional intervals leave unresolved grazing geometry unevaluated |
+| 6 | NASA 2025/2026 maxima, twelve bounded GMN models, lunar/solar references, explicit unsupported classes | Full per-shower seasons, additional calendars, missing models, explicit unsupported event classes and supported-boundary validation; adaptive model-conditional intervals leave unresolved grazing geometry unevaluated |
 | 7A | Every applicable weather acceptance mapped; actual expiry/304/outage/validator/deadline/native-data MCP fixtures | Original local acceptance met; scheduled jitter is inapplicable to demand-only refresh. Global accuracy/host budget remain separate |
 | 7B | NOAA freshness/coverage/timeout/source fixtures and planner separation | No long-range or guaranteed sighting claim |
-| 8 | Repeat-built regional/Bhutan artifacts, strict geometry/source/digest/query caveats and local rollback | Global coverage/relations/polygon membership, selected-host deployment/rollback and public ODbL distribution; on-demand regional serving/cache/queue and mixed-version provenance are now tested locally |
+| 8 | Repeat-built regional/Bhutan artifacts, strict geometry/source/digest/query caveats and local rollback | Measured intended global coverage or owner-approved narrower scope, selected-host deployment/rollback and public ODbL distribution; on-demand regional serving/cache/queue and mixed-version provenance are now tested locally |
 | 9 | Active immutable 2025 sample; grouped partition/publication/recovery code exercised offline | Real grouped format/cost/baseline coverage; no new historical requests authorized |
 | 10A | All fifteen journeys via real MCP; optional failures preserve gaps; activity/polar/history/target cases | Original local acceptance met; complete data coverage remains in 6/8/9 |
 | 10B | Five named comparison cases; native conflicts/issue/valid times; five options and byte-budget fixtures | Original local acceptance met; live assistant behavior remains platform evidence |
@@ -57,3 +57,7 @@ The approved three-lane wave adds bounded lunar interval handling, checksum-pinn
 ## Events/regional/proxy follow-up
 
 New bounded planet alignments, checksum-pinned on-demand regional serving and opt-in narrow proxy trust with callback admission leases are independently reviewed and locally verified. See [wave evidence](events-regional-proxy-wave.md). Full sources/global/actualhost conditions remain open; counts12/9/6, no historical retrieval or deployment.
+
+## Criterion reconciliation
+
+The [original acceptance ledger](v1-acceptance-audit.md) audits every original checkbox and maps named criteria to semantic assertions. Current counts are **11 Done / 10 Partial / 6 Not started**; Task4 is reopened solely for its unchanged coordinate-boundary requirement. Earlier 12/9/6 snapshots are historical. The [closure wave](v1-closure-wave.md), [free-data decisions](v1-data-coverage-decisions.md) and [host/policy handoff](v1-host-policy-handoff.md) distinguish local evidence from missing source, scope and owner/host inputs. Universal polygon completeness, direct candidate plans and independent all-years certification are not added acceptance gates.

@@ -91,3 +91,7 @@ Tasks 3, 7A, 10A and 10B meet their original local conditions: all six CI jobs p
 ## Events/regional/proxy follow-up
 
 See [wave evidence](events-regional-proxy-wave.md) for new bounded alignments, opt-in mixed-version regional serving and actual local proxy/cancellation tests. Full source/global/host/release criteria remain open; counts12 Done/9 Partial/6 Not started.
+
+## Latest criterion audit
+
+Use [v1-acceptance-audit.md](v1-acceptance-audit.md) and [v1-closure-wave.md](v1-closure-wave.md) for current criterion dispositions. The table above is historical preparation, not final acceptance. Current headings: **11 Done / 10 Partial / 6 Not started**; named-place timezone lookup does not satisfy the original coordinate-boundary requirement. Remaining owner/source/host decisions are listed in the closure documents.
