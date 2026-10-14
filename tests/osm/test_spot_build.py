@@ -157,4 +157,18 @@ class SyntheticBuildTest(unittest.TestCase):
                 with patch.dict(CAPS,{key:1}):
                     with self.assertRaisesRegex(ValueError,'ID cap'): build_source(raw,root/'out',source)
 
+class SampledBuildTest(unittest.TestCase):
+    fixture = SyntheticBuildTest.fixture
+    def test_record_callback_separate_from_io_and_preserves_candidate_bytes(self):
+        from spot_build import build_source
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);raw,source=self.fixture(root);calls={'io':0,'scan':0}
+            def io():calls['io']+=1
+            def scan():calls['scan']+=1
+            first=build_source(raw,root/'first',source,budget_check=io,scan_check=scan)
+            second=build_source(raw,root/'second',source)
+            self.assertGreater(calls['io'],10);self.assertGreater(calls['scan'],3)
+            self.assertEqual(first['canonicalSha256'],second['canonicalSha256'])
+            self.assertEqual((root/'first/candidates.json').read_bytes(),(root/'second/candidates.json').read_bytes())
+
 if __name__ == '__main__': unittest.main()

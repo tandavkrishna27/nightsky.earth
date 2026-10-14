@@ -53,11 +53,12 @@ def select_source(path, source, check):
     return doc, {**counts, 'sourceIds': {k: sorted(v) for k,v in ids.items()}, 'auditIdsTruncated': False}
 
 
-def build_source(source_path, output_dir, source, *, budget_check=None):
+def build_source(source_path, output_dir, source, *, budget_check=None, scan_check=None):
     """Return deterministic proof report for one pinned local source; raise on failure.
 
     budget_check is a zero-argument supervisor callback, called before/after IO
-    and during selection. Exceptions propagate; failed scratch remains accounted.
+    and during selection. Optional scan_check samples record-loop disk usage;
+    file IO always uses the fresh budget_check. Exceptions propagate.
     """
     output = safe_path(output_dir)
     if output.exists(): raise FileExistsError(output)
@@ -68,6 +69,7 @@ def build_source(source_path, output_dir, source, *, budget_check=None):
     if any(k not in source for k in required): raise ValueError('missing source pin')
     if type(source['declaredBytes']) is not int or not 0 < source['declaredBytes'] <= 100*1024*1024: raise ValueError('invalid source size')
     check = budget_check or (lambda: None)
+    scan = scan_check or check
     check()
     import osmium
     from retained_experiment import partition_points, serialized
@@ -89,15 +91,15 @@ def build_source(source_path, output_dir, source, *, budget_check=None):
         if len(payload) > cap: raise ValueError(name+' cap exceeded')
         with (output/name).open('xb') as stream: stream.write(payload)
         check()
-    reference, geometry = select_source(raw, source, check)
+    reference, geometry = select_source(raw, source, scan)
     reference_bytes = serialized(reference)
     write('reference.json', reference_bytes, CAPS['referenceBytes'])
     check()
     filtered = output/'filtered.osm.pbf'
-    filter_stats = bounded_filter(raw, filtered, check)
+    filter_stats = bounded_filter(raw, filtered, check, scan_check=scan)
     check()
     if filtered.stat().st_size > CAPS['filteredPbfBytes']: raise ValueError('filtered PBF cap exceeded')
-    candidate, filtered_geometry = select_source(filtered, source, check)
+    candidate, filtered_geometry = select_source(filtered, source, scan)
     candidate_bytes = serialized(candidate)
     if reference != candidate or reference_bytes != candidate_bytes or geometry != filtered_geometry:
         raise ValueError('reference/filter equality failed')
@@ -130,13 +132,14 @@ def build_source(source_path, output_dir, source, *, budget_check=None):
     return report
 
 
-def bounded_filter(source, output, check):
+def bounded_filter(source, output, check, *, scan_check=None):
+    scan = scan_check or check
     import osmium
     from import_candidates import category_for
     from retained_experiment import KEYS
     selected, refs = set(), set()
     for way in osmium.FileProcessor(str(source), entities=osmium.osm.WAY):
-        check()
+        scan()
         if category_for({t.k:t.v for t in way.tags}):
             selected.add(way.id)
             if len(selected) > CAPS['selectedWayIds']: raise ValueError('selected way ID cap exceeded')
@@ -148,11 +151,11 @@ def bounded_filter(source, output, check):
     check()
     with osmium.SimpleWriter(str(output)) as writer:
         for node in osmium.FileProcessor(str(source), entities=osmium.osm.NODE):
-            check()
+            scan()
             if node.id in refs or (any(k in node.tags for k in KEYS) and category_for({t.k:t.v for t in node.tags})):
                 writer.add_node(node); stats['writtenNodes'] += 1
         for way in osmium.FileProcessor(str(source), entities=osmium.osm.WAY):
-            check()
+            scan()
             if way.id in selected:
                 writer.add_way(way); stats['writtenWays'] += 1
     check()

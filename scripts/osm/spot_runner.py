@@ -44,13 +44,27 @@ class Budget:
         self.root=_safe(root); self.max_bytes=max_bytes; self.clock=clock
         self.started=clock() if started is None else started
         self.deadline=self.started+900; self.requests=0; self.active=False
-        self.peak_bytes=0
+        self.peak_bytes=0; self._scan_at=None; self._scan_bytes=0
     def check(self, pending=0):
         if not isinstance(pending,int) or isinstance(pending,bool) or pending<0: raise ValueError('invalid pending bytes')
         if self.clock()>=self.deadline: raise TimeoutError('900 second operator deadline')
         size=logical_bytes(self.root); self.peak_bytes=max(self.peak_bytes,size)
         if size+pending>self.max_bytes: raise ValueError('whole-pilot logical disk budget exceeded')
         return size
+    def sampled_check(self):
+        """Record-loop check: deadline always, disk inventory at 20-ms intervals.
+
+        File operation admission still uses check() and never this cached value.
+        The supervising process independently samples the whole-wave inventory.
+        """
+        now=self.clock()
+        if now>=self.deadline: raise TimeoutError('900 second operator deadline')
+        if self._scan_at is None or now-self._scan_at>=.020:
+            self._scan_bytes=self.check()
+            self._scan_at=now
+            if self.clock()>=self.deadline: raise TimeoutError('900 second operator deadline')
+        return self._scan_bytes
+
     def request(self):
         self.check()
         if self.requests>=6: raise ValueError('six request budget exceeded')
@@ -365,7 +379,7 @@ def worker_action(mode, root, output, record=None):
         if not isinstance(acquisition.get('sha256'),str) or len(acquisition['sha256'])!=64: raise ValueError('worker missing acquired digest')
         if acquisition.get('bytes')!=source['declaredBytes']: raise ValueError('worker acquired length mismatch')
         from spot_build import build_source
-        build_source(raw,output,acquisition,budget_check=budget.check)
+        build_source(raw,output,acquisition,budget_check=budget.check,scan_check=budget.sampled_check)
     else: raise ValueError('invalid internal action')
 
 

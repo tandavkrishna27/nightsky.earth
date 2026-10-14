@@ -39,3 +39,7 @@ Existing strict JSONL parsing and dark-cloud aggregation calculated each March y
 Counts remain 12 Done / 9 Partial / 6 Not started. Task9's actual grouped-response format/cost measurement now has evidence; the required full-period/global history and host gates remain. Task8 gains source admission evidence and a measured build-time stop; it remains Partial. Task0 global source/host decisions remain open. Do not reopen unrelated completed code tickets or claim worldwide fit from these tiny requests.
 
 Next local task is diagnosing and fixing the spot build's measured time failure using retained Monaco data; no further source request or resource-budget increase is authorized. Then an offline rerun can test that fix before a separately scoped continuation of the held spot sources. History can inform the next coverage strategy, but this wave authorizes no further months, years or areas. Broad audit remains deferred until implementation/data integration is complete.
+
+## Retained Monaco correction — 15 October 2026
+
+[Local correction evidence](monaco-build-fix-wave.md) supersedes the earlier60-second Monaco build stop: the retained exact source now passes the same supervisor in2.104seconds, with11candidates and exact reference/filter/partition agreement. No new source requests or budget increase. Faroe/Fiji/global coverage remain pending; counts12Done/9Partial/6Notstarted.

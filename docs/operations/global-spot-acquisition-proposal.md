@@ -126,3 +126,7 @@ The previously listed generic prerequisite is now implemented and tested in [off
 ## Execution update — 15 October 2026
 
 Owner approved the existing small measurement pilots. [Execution evidence](data-pilot-wave.md) records two completed ERA5 jobs and the Monaco build-time stop, after which the geographic pilot halted before Faroe/Fiji. This is the executed bounded allowance, not authorization for a global build or retries. Existing earlier proposal-only/no-approval statements are historical; new acquisition remains held beyond the consumed pilot. Cleanup was blocked by automatic approval review; files retained.
+
+## Retained Monaco correction — 15 October 2026
+
+[Local correction evidence](monaco-build-fix-wave.md) supersedes the earlier60-second Monaco build stop: the retained exact source now passes the same supervisor in2.104seconds, with11candidates and exact reference/filter/partition agreement. No new source requests or budget increase. Faroe/Fiji/global coverage remain pending; counts12Done/9Partial/6Notstarted.

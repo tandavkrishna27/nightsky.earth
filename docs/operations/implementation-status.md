@@ -114,3 +114,7 @@ Substantive revision `3c1bdb6e753e8242a30e059dd10ccab2b863cf3e`: [all six CI job
 ## Bounded live pilots — 15 October 2026
 
 [Wave evidence](data-pilot-wave.md): two March ERA5 grouped jobs completed, exact grids and all1488hours each validated, 280037rawbytes total, six March/place/year statistical diagnostics. No baseline/global/runtime claim. Monaco source admitted but its supervised build stopped at60seconds, so Faroe/Fiji were not requested. Cleanup was blocked by automatic approval review; disposable files retained. Current12Done/9Partial/6Notstarted. Deployment and broad final audit remain held.
+
+## Retained Monaco correction — 15 October 2026
+
+[Local correction evidence](monaco-build-fix-wave.md) supersedes the earlier60-second Monaco build stop: the retained exact source now passes the same supervisor in2.104seconds, with11candidates and exact reference/filter/partition agreement. No new source requests or budget increase. Faroe/Fiji/global coverage remain pending; counts12Done/9Partial/6Notstarted.

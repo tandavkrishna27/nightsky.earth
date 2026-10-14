@@ -1,0 +1,94 @@
+{
+  "sourceSha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+  "worker": {
+    "status": "complete",
+    "reason": null,
+    "exitCode": 0,
+    "elapsedSeconds": 2.104,
+    "peakRssBytes": 39825408,
+    "peakWholeWaveLogicalBytes": 710220,
+    "jobCommitBytes": 268435456,
+    "workerRssBytes": 268435456,
+    "wallSeconds": 60,
+    "pollSeconds": 0.02,
+    "processPolicy": "suspended launch; assigned single-process Windows job before resume; descendants refused",
+    "diskPolicy": "sampled whole-wave logical bytes, not hard filesystem quota"
+  },
+  "report": {
+    "actualVintage": "2026-10-13T20:21:31Z",
+    "candidateRows": 11,
+    "canonicalSha256": "caaf8d86b7794da73f24ccd93a7f7a001c87fcf74048bac150d36bcffe775542",
+    "caps": {
+      "auditIds": 10000,
+      "candidateRows": 10000,
+      "filteredBytes": 4194304,
+      "filteredPbfBytes": 8388608,
+      "partitionBytes": 4194304,
+      "referenceBytes": 4194304,
+      "referencedNodeIds": 1000000,
+      "reportBytes": 1048576,
+      "selectedWayIds": 10000
+    },
+    "categoryRows": {
+      "beach": 2,
+      "park": 8,
+      "viewpoint": 1
+    },
+    "completenessRows": {
+      "1": 7,
+      "2": 4
+    },
+    "filter": {
+      "referenceIds": 321,
+      "selectedWays": 18,
+      "sourcePasses": 3,
+      "writtenNodes": 343,
+      "writtenWays": 18
+    },
+    "filteredBytes": 2928,
+    "filteredPbfBytes": 5252,
+    "geometry": {
+      "auditIdsTruncated": false,
+      "datelineWays": 0,
+      "incompleteWays": 0,
+      "selectedWays": 18,
+      "sourceIds": {
+        "datelineWays": [],
+        "incompleteWays": []
+      }
+    },
+    "independentGeometryProof": false,
+    "inputBytes": 692392,
+    "inputSha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+    "partitionBytes": 2928,
+    "partitionIdentityValueEqual": true,
+    "partitions": [
+      {
+        "bytes": 2928,
+        "path": "partition-133-187-0.json",
+        "rows": 11,
+        "sha256": "caaf8d86b7794da73f24ccd93a7f7a001c87fcf74048bac150d36bcffe775542"
+      }
+    ],
+    "referenceBytes": 2928,
+    "referenceFilteredEqual": true,
+    "schemaVersion": 1,
+    "source": {
+      "actualVintage": "2026-10-13T20:21:31Z",
+      "bytes": 692392,
+      "declaredBytes": 692392,
+      "etag": "\"a90a8-65dc12ca110ea\"",
+      "expectedVintage": "2026-10-13T20:21:31Z",
+      "id": "monaco",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "retrievedAt": "2026-10-14T18:42:11.129369+00:00",
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+      "sourceId": "monaco",
+      "sourcePage": "https://download.geofabrik.de/europe/monaco.html",
+      "url": "https://download.geofabrik.de/europe/monaco-261013.osm.pbf"
+    },
+    "status": "complete"
+  },
+  "networkRequests": 0,
+  "runtimeInstalled": false
+}

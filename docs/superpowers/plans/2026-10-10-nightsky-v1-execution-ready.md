@@ -743,3 +743,7 @@ Only reopened 5.C4, 10A.C3 and 10A.C5 are restored. Fresh local suite: 522 tests
 ## Bounded source measurements — 15 October 2026
 
 Owner approved the small spot/history proposals. Actual grouped format/grid/clocks passed for the two March1991/1992 ERA5 requests, with no missing requested hours. Monaco source matched its pinned identity, but its supervised build stopped at60seconds; no subsequent region was requested. See docs/operations/data-pilot-wave.md. No original checkbox is newly closed: full data/host acceptance remains incomplete. Counts12Done/9Partial/6Notstarted;92checked/68open. Cleanup blocked by automatic approval review; existing runtime artifacts preserved.
+
+## Retained-source build correction — 15 October 2026
+
+Monaco build-time failure corrected without resource increase or new download: per-record repeated full inventory dominated the profile;20-ms sampled scan checks retain fresh admission/IO checks and parent supervision. Three new regressions RED then GREEN. Actual Monaco worker2.104seconds,11candidates, reference/filter/partition equality; full69Python/522Node discovered suites and types pass with existing skips. See docs/operations/monaco-build-fix-wave.md. Original counts and checkboxes unchanged because global/source/host Task8 gates remain.

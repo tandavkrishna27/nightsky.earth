@@ -178,3 +178,30 @@ class WindowsCanonicalAliasTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 runner._write(short_root/'..'/'..'/'escaped.json',{},runner.Budget(long_root))
             self.assertFalse((Path(temp)/'escaped.json').exists())
+
+class SampledScanBudgetTests(unittest.TestCase):
+    def test_record_scans_sample_inventory_at_twenty_ms_and_force_io_checks(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);(root/'data').write_bytes(b'1234')
+            now=[0.0];budget=runner.Budget(root,max_bytes=8,clock=lambda:now[0])
+            original=runner.logical_bytes
+            with patch.object(runner,'logical_bytes',wraps=original) as inventory:
+                for _ in range(10000):budget.sampled_check()
+                self.assertEqual(inventory.call_count,1)
+                now[0]=.019;budget.sampled_check();self.assertEqual(inventory.call_count,1)
+                now[0]=.020;budget.sampled_check();self.assertEqual(inventory.call_count,2)
+                (root/'data').write_bytes(b'123456789')
+                with self.assertRaisesRegex(ValueError,'disk budget'):budget.check()
+                self.assertEqual(inventory.call_count,3)
+                now[0]=.041
+                with self.assertRaisesRegex(ValueError,'disk budget'):budget.sampled_check()
+
+    def test_cached_record_check_still_enforces_deadline_without_disk_scan(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as temp:
+            now=[0.0];budget=runner.Budget(Path(temp),clock=lambda:now[0],started=-899.995)
+            budget.sampled_check();now[0]=.006
+            with patch.object(runner,'logical_bytes') as inventory:
+                with self.assertRaisesRegex(TimeoutError,'deadline'):budget.sampled_check()
+                inventory.assert_not_called()
