@@ -6,8 +6,9 @@ import stat
 
 def _check_ancestors(path):
     for part in (path, *path.parents):
-        if part.is_symlink() or (hasattr(part, 'is_junction') and part.is_junction()):
-            raise ValueError('symlink/reparse point refused')
+        # One non-following metadata lookup provides both POSIX link type and
+        # Windows reparse attributes (including junctions). Separate is_symlink
+        # and is_junction calls repeat the same filesystem work.
         try:
             info = part.lstat()
         except FileNotFoundError:

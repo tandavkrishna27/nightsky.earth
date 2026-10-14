@@ -122,3 +122,7 @@ Substantive revision `3c1bdb6e753e8242a30e059dd10ccab2b863cf3e`: [all six CI job
 ## Geographic continuation — 15 October 2026
 
 [Continuation evidence](geographic-continuation-wave.md): Faroe source admitted (two HTTP requests), build stopped at60.025seconds/96419840peakRSS, so Fiji was not requested. A retained-source profile shows full inventories still dominate larger-source processing. No resource increase, retry or runtime installation. Counts12Done/9Partial/6Notstarted. Next local work uses the retained Faroe file; new source acquisition remains held after this failure gate.
+
+## Faroe local correction — 15 October 2026
+
+[Correction evidence](faroe-path-fix-wave.md) supersedes the earlier Faroe build stop: retained source passes the same supervisor in 28.004 seconds, with 73 candidates and exact reference/filter/partition agreement. Redundant metadata queries were removed while all path guards remain. No new downloads or resource increase; Fiji/global/runtime/host gates remain. Counts 12 Done / 9 Partial / 6 Not started.

@@ -747,3 +747,7 @@ Owner approved the small spot/history proposals. Actual grouped format/grid/cloc
 ## Retained-source build correction — 15 October 2026
 
 Monaco build-time failure corrected without resource increase or new download: per-record repeated full inventory dominated the profile;20-ms sampled scan checks retain fresh admission/IO checks and parent supervision. Three new regressions RED then GREEN. Actual Monaco worker2.104seconds,11candidates, reference/filter/partition equality; full69Python/522Node discovered suites and types pass with existing skips. See docs/operations/monaco-build-fix-wave.md. Original counts and checkboxes unchanged because global/source/host Task8 gates remain.
+
+## Retained Faroe correction — 15 October 2026
+
+Single non-following metadata lookup per ancestor replaces redundant symlink/junction queries, preserving pre/post-resolution checks and all original guards. Performance regression observed RED, then focused shared-path suite GREEN. Real retained source passes original Windows limits in 28.004 seconds with 73 candidates and reference/filter/partition equality. See docs/operations/faroe-path-fix-wave.md. No original checkbox newly closed: Task 8 global/source/host requirements remain. No new source request or deployment.

@@ -19,3 +19,7 @@ Use the retained Faroe file for that diagnosis/fix/rerun; no new download is nee
 [Machine-readable source, worker and profile proof](data-pilot-evidence/2026-10-15-geographic-continuation.json). Test files remain isolated in `.data/osm/geographic-continuation-20261015-v1`; no cleanup retry was attempted after the earlier automatic approval rejection. Existing runtime/ERA5 artifacts were not modified. This wave ran existing acquisition/source-header/Windows supervision and hash checks against real data; no runtime source or tests changed. The tracked report JSON was parsed and checked before publication to the private development branch.
 
 Task8 remains Partial: no accepted Faroe candidate artifact, Fiji/global coverage or host fit. Original counts remain12Done/9Partial/6Notstarted. This stop does not reopen the already verified Monaco fix or imply that Faroe has no observing places.
+
+## Faroe local correction — 15 October 2026
+
+[Correction evidence](faroe-path-fix-wave.md) supersedes the earlier Faroe build stop: retained source passes the same supervisor in 28.004 seconds, with 73 candidates and exact reference/filter/partition agreement. Redundant metadata queries were removed while all path guards remain. No new downloads or resource increase; Fiji/global/runtime/host gates remain. Counts 12 Done / 9 Partial / 6 Not started.

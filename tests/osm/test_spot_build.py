@@ -32,7 +32,13 @@ class MoreGeometryTest(unittest.TestCase):
     def test_refuses_symlink_component(self):
         from spot_build import safe_path
         from unittest.mock import patch
-        with patch.object(Path, 'is_symlink', return_value=True):
+        import stat
+        from types import SimpleNamespace
+        # Mock the non-following metadata used by the guard, rather than the
+        # redundant query removed by the performance correction.
+        link=SimpleNamespace(st_mode=stat.S_IFLNK,st_file_attributes=0)
+        with patch.object(Path, 'lstat', return_value=link), \
+             patch.object(Path, 'resolve', side_effect=AssertionError('link must be rejected before resolve')):
             with self.assertRaises(ValueError): safe_path('fixture')
 
 class SyntheticBuildTest(unittest.TestCase):

@@ -1,0 +1,110 @@
+{
+  "sourceSha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+  "worker": {
+    "status": "complete",
+    "reason": null,
+    "exitCode": 0,
+    "elapsedSeconds": 28.004,
+    "peakRssBytes": 96833536,
+    "peakWholeWaveLogicalBytes": 7841957,
+    "jobCommitBytes": 268435456,
+    "workerRssBytes": 268435456,
+    "wallSeconds": 60,
+    "pollSeconds": 0.02,
+    "processPolicy": "suspended launch; assigned single-process Windows job before resume; descendants refused",
+    "diskPolicy": "sampled whole-wave logical bytes, not hard filesystem quota"
+  },
+  "networkRequests": 0,
+  "runtimeInstalled": false,
+  "priorPilotLogicalBytes": 9148608,
+  "combinedPeakLogicalBytes": 16990565,
+  "report": {
+    "actualVintage": "2026-10-13T20:21:31Z",
+    "candidateRows": 73,
+    "canonicalSha256": "b486dbe6146cc7089c0d2f093d1cd71aec92b83d7d117e468c97c2f629ceb502",
+    "caps": {
+      "auditIds": 10000,
+      "candidateRows": 10000,
+      "filteredBytes": 4194304,
+      "filteredPbfBytes": 8388608,
+      "partitionBytes": 4194304,
+      "referenceBytes": 4194304,
+      "referencedNodeIds": 1000000,
+      "reportBytes": 1048576,
+      "selectedWayIds": 10000
+    },
+    "categoryRows": {
+      "beach": 16,
+      "campground": 18,
+      "park": 10,
+      "viewpoint": 29
+    },
+    "completenessRows": {
+      "1": 60,
+      "2": 12,
+      "3": 1
+    },
+    "filter": {
+      "referenceIds": 8244,
+      "selectedWays": 245,
+      "sourcePasses": 3,
+      "writtenNodes": 8325,
+      "writtenWays": 245
+    },
+    "filteredBytes": 12383,
+    "filteredPbfBytes": 62488,
+    "geometry": {
+      "auditIdsTruncated": false,
+      "datelineWays": 0,
+      "incompleteWays": 0,
+      "selectedWays": 245,
+      "sourceIds": {
+        "datelineWays": [],
+        "incompleteWays": []
+      }
+    },
+    "independentGeometryProof": false,
+    "inputBytes": 7735542,
+    "inputSha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+    "partitionBytes": 14975,
+    "partitionIdentityValueEqual": true,
+    "partitions": [
+      {
+        "bytes": 4739,
+        "path": "partition-151-173-0.json",
+        "rows": 23,
+        "sha256": "b6eda179ffaf5a7a489be01e92a47a05aa42b4c00cc0151a7459101df32ef9d9"
+      },
+      {
+        "bytes": 5199,
+        "path": "partition-152-172-1.json",
+        "rows": 25,
+        "sha256": "b0b0cc5a2b14229ba99525debeaeed2e3489cacc79c691cdfef7ae4581dd3fd0"
+      },
+      {
+        "bytes": 5037,
+        "path": "partition-152-173-2.json",
+        "rows": 25,
+        "sha256": "a25bc4e2712344083010641dfa444e72c74ef2bfb7fd9bc4f9d7d8514f879101"
+      }
+    ],
+    "referenceBytes": 12383,
+    "referenceFilteredEqual": true,
+    "schemaVersion": 1,
+    "source": {
+      "actualVintage": "2026-10-13T20:21:31Z",
+      "bytes": 7735542,
+      "declaredBytes": 7735542,
+      "etag": "\"7608f6-65dc12240bee5\"",
+      "expectedVintage": "2026-10-13T20:21:31Z",
+      "id": "faroe-islands",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "retrievedAt": "2026-10-14T19:08:23.405942+00:00",
+      "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+      "sourceId": "faroe-islands",
+      "sourcePage": "https://download.geofabrik.de/europe/faroe-islands.html",
+      "url": "https://download.geofabrik.de/europe/faroe-islands-261013.osm.pbf"
+    },
+    "status": "complete"
+  }
+}

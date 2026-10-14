@@ -48,3 +48,34 @@ class SharedPathTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+class AncestorMetadataTests(unittest.TestCase):
+    def test_one_metadata_lookup_per_ancestor_without_redundant_link_queries(self):
+        import stat
+        from types import SimpleNamespace
+        from spot_paths import _check_ancestors
+        path=Path.cwd()/'synthetic-child'
+        metadata=SimpleNamespace(st_mode=stat.S_IFDIR,st_file_attributes=0)
+        with patch.object(Path,'lstat',return_value=metadata) as lookup, \
+             patch.object(Path,'is_symlink',side_effect=AssertionError('redundant link query')):
+            _check_ancestors(path)
+            self.assertEqual(lookup.call_count,len(path.parents)+1)
+
+    def test_lstat_symlink_mode_and_reparse_attributes_each_refused(self):
+        import stat
+        from types import SimpleNamespace
+        from spot_paths import _check_ancestors
+        for mode,attrs in [(stat.S_IFLNK,0),(stat.S_IFDIR,0x400),(stat.S_IFREG,0x400)]:
+            with self.subTest(mode=mode,attrs=attrs),patch.object(Path,'lstat',return_value=SimpleNamespace(st_mode=mode,st_file_attributes=attrs)):
+                with self.assertRaisesRegex(ValueError,'symlink/reparse'):_check_ancestors(Path.cwd()/'child')
+
+    def test_missing_leaf_does_not_skip_reparse_parent(self):
+        import stat
+        from types import SimpleNamespace
+        from spot_paths import _check_ancestors
+        path=Path.cwd()/'missing-child'
+        def metadata(item):
+            if item==path:raise FileNotFoundError()
+            return SimpleNamespace(st_mode=stat.S_IFDIR,st_file_attributes=0x400)
+        with patch.object(Path,'lstat',side_effect=metadata,autospec=True):
+            with self.assertRaisesRegex(ValueError,'symlink/reparse'):_check_ancestors(path)
