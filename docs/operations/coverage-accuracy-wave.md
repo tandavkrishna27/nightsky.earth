@@ -30,6 +30,6 @@ The first Linux verification harness used a default noexec tmpfs, blocking esbui
 
 ## Tickets and CI
 
-Counts remain **12 Done / 9 Partial / 6 Not started** across27 headings; numbered groups remain6 Done/10 Partial/3 Not started. This wave advances Partial headings without replacing their source/global/owner/host requirements. Historical downloads stay deferred. Actual pushed-revision CI is recorded in [CI verification](ci-verification.md) after observation; local results alone are not GitHub conclusions.
+Counts remain **12 Done / 9 Partial / 6 Not started** across27 headings; numbered groups remain6 Done/10 Partial/3 Not started. This wave advances Partial headings without replacing their source/global/owner/host requirements. Historical downloads stay deferred. All six CI jobs passed for implementation revision `da569129b6c1233f8acd5a79b7f0afa3b245b066` ([run38520264907](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38520264907)). Exact GitHub counts and expanded probe results are in [CI verification](ci-verification.md); a follow-up documentation commit is observed separately.
 
 Ignored verification logs are under `.superpowers/sdd/2026-10-10-nightsky-v1-execution-ready/accuracy-*`; raw artifacts, operator data, generated output and credentials are not committed.

@@ -73,4 +73,4 @@ Journey, resilience and operations lanes passed independent review. Weather vali
 
 ## Coverage and accuracy — 14 October 2026
 
-See [wave evidence](coverage-accuracy-wave.md) for adaptive lunar interval uncertainty, bounded same-vintage spot composition/indexed queries, independent review and concrete policy/Hetzner inputs. Windows447/446passed/1skip and Linux447/440passed/7skips have zero failures. Counts remain12 Done/9 Partial/6 Not started; no new source coverage, historical retrieval or deployment is inferred. Final current-revision CI is recorded separately.
+See [wave evidence](coverage-accuracy-wave.md) for adaptive lunar interval uncertainty, bounded same-vintage spot composition/indexed queries, independent review and concrete policy/Hetzner inputs. Windows447/446passed/1skip and Linux447/440passed/7skips have zero failures. Counts remain12 Done/9 Partial/6 Not started; no new source coverage, historical retrieval or deployment is inferred. All six CI jobs passed for implementation revision da56912 ([run38520264907](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38520264907)); follow-up documentation CI is observed separately.
