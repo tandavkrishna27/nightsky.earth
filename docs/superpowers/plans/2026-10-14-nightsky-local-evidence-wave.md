@@ -29,7 +29,7 @@ Wrong longitude frame/year/date conversion; reference seasons misrepresented as 
 - [x] Independent lane/spec/code review and fixes.
 - [x] Root reconciles original Task4 wording and historical audit/status, registers tests and extends relevant CI if needed.
 - [x] Fresh integrated tests/type/package/review/build/runtime checks and bounded spot evidence review.
-- [ ] Broad final review; scoped commit/push and observe allCIjobs, record exactrevision.
+- [x] Broad final review; scoped commit/push and observe allCIjobs, record exactrevision.
 
 ## Rulings
 
@@ -37,4 +37,4 @@ Ruling: scope acceptance is explicit from the immediately preceding recommendati
 Ruling: no meteor UTC conversion without defensible convention/reference validation — avoid invented precision — Task6 can remain Partial after investigation.
 Ruling: retained spot experiments may end at a budget stop — no implicit source/budget enlargement — global coverage remains unmeasured.
 
-Evidence: docs/operations/local-evidence-wave.md; exact-revision CI pending.
+Evidence: docs/operations/local-evidence-wave.md; all six implementation CI jobs passed at af3f5e1 (run38545635117); final documentation-only CI is observed separately.
