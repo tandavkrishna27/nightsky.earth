@@ -1,5 +1,7 @@
 # NightSky.earth V1 Execution Plan
 
+15 October discovery extension: [global design and combinations](../../product/global-discovery-design.md) and [implementation tasks/dependencies](2026-10-15-nightsky-global-discovery.md). Documentation only; existing ticket counts and checkboxes unchanged. Actual global acquisition, installed-model validation and deployment remain separate gates.
+
 > **For agentic workers:** Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` when the owner chooses an execution approach. Follow the [task sequence and dependency map](2026-10-12-nightsky-v1-sequence-and-dependency-map.md): complete prerequisites, work within the developer-ready packets, and parallelize only isolated lanes with stable interfaces. Do not deploy, submit, or publish without the owner’s explicit authorization.
 
 **Goal:** Build the free, assistant-first NightSky.earth V1 so a person can find source-linked candidate observing places, choose a suitable time for their activity, understand what they may see, inspect the sky and weather evidence, and prepare for the outing.
