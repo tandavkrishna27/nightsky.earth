@@ -67,3 +67,7 @@ Checked 14 October 2026: [CDS dataset overview](https://cds.climate.copernicus.e
 [Current converter documentation](https://confluence.ecmwf.int/spaces/CKB/pages/450760890/GRIB%2Bto%2BnetCDF%2Bconversion%2Bon%2Bnew%2BCDS%2Band%2BADS%2Bsystems) describes `valid_time`, latitude/longitude and scalar member/revision metadata, while warning the layout can change. A real grouped result must establish compatibility; engineering fixtures and old monthly files cannot do so. Queue completion, actual grouped bytes/RSS, source acceptance and March statistics remain unresolved.
 
 Active `.data/era5/tiles-2025-v3/manifest.json` stays pinned to `9ffc58e9033984b235241525471d4e5b6571a6f1640147502b57d014c31181e8`. This batch cannot satisfy the 1991–2020 baseline, 90% eligible-observation and 27-qualifying-year gates, or global coverage. No CDS request, authentication/account action, download, deployment or active-manifest change occurred in preparing this proposal.
+
+## Execution update — 15 October 2026
+
+Owner approved the existing small measurement pilots. [Execution evidence](data-pilot-wave.md) records two completed ERA5 jobs and the Monaco build-time stop, after which the geographic pilot halted before Faroe/Fiji. This is the executed bounded allowance, not authorization for a global build or retries. Existing earlier proposal-only/no-approval statements are historical; new acquisition remains held beyond the consumed pilot. Cleanup was blocked by automatic approval review; files retained.

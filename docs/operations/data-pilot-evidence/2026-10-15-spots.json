@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-15",
+  "authorization": "User approved the existing small spot and historical pilots; no global expansion or deployment.",
+  "spotManifestSha256": "4dd41b972465425d4fb2ffb1befdaed26cf07a458a2e57197daeea33e971b0cd",
+  "status": "failed",
+  "httpRequests": 2,
+  "peakLogicalBytes": 698853,
+  "sources": [
+    {
+      "error": "offline build worker failed: {'status': 'bounded-stop', 'reason': 'supervisor/accounting failure: 60 second stage deadline', 'exitCode': 1, 'elapsedSeconds': 60.044, 'peakRssBytes': 39616512, 'peakWholeWaveLogicalBytes': 695890, 'jobCommitBytes': 268435456, 'workerRssBytes': 268435456, 'wallSeconds': 60, 'pollSeconds': 0.02, 'processPolicy': 'suspended launch; assigned single-process Windows job before resume; descendants refused', 'diskPolicy': 'sampled whole-wave logical bytes, not hard filesystem quota'}",
+      "id": "monaco",
+      "status": "failed"
+    }
+  ],
+  "acquired": {
+    "sourceId": "monaco",
+    "url": "https://download.geofabrik.de/europe/monaco-261013.osm.pbf",
+    "bytes": 692392,
+    "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+    "etag": "\"a90a8-65dc12ca110ea\"",
+    "actualVintage": "2026-10-13T20:21:31Z",
+    "retrievedAt": "2026-10-14T18:42:11.129369+00:00"
+  },
+  "artifactInventory": [
+    {
+      "bytes": 321,
+      "path": "identity.json",
+      "sha256": "1b52392178d2909412377f5a3792f2a47527634877983d48e7859268dfebfce3"
+    },
+    {
+      "bytes": 466,
+      "path": "journal-001.json",
+      "sha256": "e1e8a47e152539192a9fdd7c0ab81300271b655e9775f9b8850631e50f4c1709"
+    },
+    {
+      "bytes": 598,
+      "path": "journal-002.json",
+      "sha256": "12c43cd608ca48d79b3f566a45307fa1736fd2d68e97657d166913a35a4b1d4d"
+    },
+    {
+      "bytes": 460,
+      "path": "journal-003.json",
+      "sha256": "e36998bef9f368384f030abe71777132c54c6de6d07c668090861e59898c53ae"
+    },
+    {
+      "bytes": 1235,
+      "path": "journal-004.json",
+      "sha256": "e809e821af72a413ef4e50cefed2e416d15dfd120d10642368b70df175300d4a"
+    },
+    {
+      "bytes": 987,
+      "path": "manifest.json",
+      "sha256": "889461fbfc71326ce48149aeeb72ea7f909e5dab25b85cff85fc268d5ceee0da"
+    },
+    {
+      "bytes": 692392,
+      "path": "monaco/monaco.osm.pbf",
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05"
+    },
+    {
+      "bytes": 666,
+      "path": "monaco/worker-acquisition.json",
+      "sha256": "359b9fcdbe8eb372c6e2f804fac0f219184b51a65a36b4d5ab3b8c142328ac27"
+    }
+  ],
+  "runtimeInstalled": false,
+  "remainingSourcesRequested": false,
+  "worker": {
+    "status": "bounded-stop",
+    "reason": "supervisor/accounting failure: 60 second stage deadline",
+    "exitCode": 1,
+    "elapsedSeconds": 60.044,
+    "peakRssBytes": 39616512,
+    "peakWholeWaveLogicalBytes": 695890,
+    "jobCommitBytes": 268435456,
+    "workerRssBytes": 268435456,
+    "wallSeconds": 60,
+    "pollSeconds": 0.02,
+    "processPolicy": "suspended launch; assigned single-process Windows job before resume; descendants refused",
+    "diskPolicy": "sampled whole-wave logical bytes, not hard filesystem quota"
+  },
+  "cleanup": "Held: automatic approval review blocked recursive deletion; files retained."
+}

@@ -51,3 +51,46 @@ Root regenerated the30-group offline1991–1992plan, checked bothMarchIDs/1,488u
 ## Offline prerequisite implementation update
 
 [Offline runner wave](offline-spot-runner-wave.md) implements the reviewed generic path and synthetic safety evidence. Sequence2 above is complete for offline code; trustedlive capability review, explicit retrievalallowance, fresh metadata and actualsource admission remain ahead. The proposal grants no automatic execution and current source/budget pins remain unchanged.
+
+## Owner discussion: what the remaining data work actually means — 14 October 2026
+
+Current implementation status is 12 Done / 9 Partial / 6 Not started after the darkness correction. This section explains existing proposals; it adds no acquisition allowance, changes no product scope and closes no source ticket. Generic spot acquisition/build supervision and grouped ERA5 planning/import are already implemented and tested offline. The older implementation prerequisite above is complete, not another development wave.
+
+| Layer | User question it supports | How it works | Current gap | Next evidence needed |
+|---|---|---|---|---|
+| Calculated astronomy | When is it dark? Where are the Moon and supported targets? | Calculate from place/time using the pinned library; no downloaded worldwide night-by-night table. | Supported target/catalog boundaries remain explicit. | Preserve current reference evidence; no bulk data acquisition needed for the darkness correction. |
+| Forecast weather / aurora | Is this coming night worth considering? | Request supported providers on demand and cache with bounded freshness; return source-specific values and gaps. | Forecast limits, unavailable values and provider coverage cannot become certainty. | Existing adapters are locally accepted; hosted operation is a separate gate. No weather-history download is needed for a near-term forecast. |
+| Meteor calendars and activity | Which showers are active during my trip? | Retained, attributed catalogs plus bounded radiant models. | Peaks are not seasons; current year-specific peaks cover 2025/2026. Missing seasons/years/models cannot be filled by repeating dates or stretching fits. | Accept reusable, scientifically appropriate season/year/model evidence before expanding runtime records. These small tables need correctness more than storage. |
+| Candidate places | Where might I observe nearby? | Build compact regional candidate files from public geographic extracts; serve selected partitions with bounded cache. | Current regional artifacts do not establish worldwide observing-place coverage or night access. | Existing three-region pilot tests dense/sparse/coastal/dateline processing. Review actual candidates and budgets before choosing global scale. |
+| Historical cloud context | Which month is usually clearer? | Process ERA5 offline into location/grid statistics, labeled historical; serve prepared files. | Existing three-place 2025 tiles and incomplete older samples are not a 30-year/global baseline. | Two March grouped jobs test real format and processing cost; they do not complete the climatology ticket. Then choose a sustainable geographic/resolution/year strategy using measurements. |
+
+### No database and no worldwide raw archive on the MCP server
+
+The current architecture has no runtime relational database. Astronomy is calculated, live provider results use bounded caches, and prepared candidate/history artifacts are files with manifests and checksums. The model runs in its provider/client; the Hetzner service executes tools and returns structured evidence.
+
+Separate raw source inputs, temporary processing space and served artifacts. A compressed download's size is neither its peak memory use nor its final served size. ERA5 acquisition records preserve raw parents/checkpoint evidence locally; there is no requirement to copy the complete acquisition directory to production. Production selects validated served artifacts and records their provenance. Decide retention and backups explicitly before deployment.
+
+### The two existing small pilots, in familiar units
+
+- Spots: three proposed extracts total about 24.5 MiB of declared raw input, within a 100 MiB combined pilot file envelope; proposed worker memory gate 256 MiB. These are ceilings/admission checks, not guaranteed actual usage or a global estimate. Fresh headers/vintages must still match the pinned proposal.
+- History: two requests, one at a time, March 1991 and 1992 for Hanle and Kodaikanal/Munnar footprints. Combined raw ceiling 64 MiB, temporary root ceiling 1 GiB, import memory gate 256 MiB and 30-minute batch deadline. These are ceilings, not predicted transfer times; provider queues can prevent completion.
+- Neither requires a paid data purchase in the existing proposal. Disk, hosting, maintenance and model usage are separate costs; a free user product does not make those costs zero.
+- A 2-vCPU/4-GiB server remains a proposed size rather than a selected, measured hosting configuration. Process heavy acquisition/build work locally and serve compact artifacts; measure the final workload before promising its capacity.
+
+### Recommended sequence and parallel work
+
+1. Resolve meteor source definitions and reuse evidence while spot/history selections are discussed. Do not import unsupported dates or create a rate/visibility guarantee.
+2. After the owner lifts the existing download hold for the exact spot proposal, run Monaco and inspect it before Faroe Islands and Fiji. No source substitutions, retries or larger budgets follow automatically.
+3. Separately, after approval of the exact two-job history proposal, run Hanle first and inspect it before Kodaikanal/Munnar. Retain job identities; uncertain submissions stop resubmission. Spot permission is not history permission.
+4. Compare measured usefulness, retained sizes and peak processing memory. Decide global serving strategy without reducing the already requested global scope by implication. Global candidate/history production is a further decision, not authorized by small pilots.
+5. Integrate accepted artifacts and their truthful coverage into existing tools; update only affected original ticket criteria. Run the broad audit at the end, followed by the complete installed-plugin/model matrix as directed.
+
+Meteor source work, spot processing and history processing have independent outputs, so their preparation can run in parallel. Within each approved acquisition pilot, requests/stages run sequentially. Start with one acquisition batch at a time on the local machine until combined memory/disk limits are measured.
+
+### What remains to decide with the owner
+
+The immediate decision is whether to lift the explicit acquisition hold for the existing small spot pilot, the separate two-job historical pilot, or neither. Nothing in this discussion activates either. Worldwide history coverage, long-term raw retention, exact hosting and publication remain later decisions informed by measurements. Complete local plugin testing is technically possible with current limited artifacts and explicit gaps; it would not certify global data coverage.
+
+## Execution update — 15 October 2026
+
+Owner approved the existing small measurement pilots. [Execution evidence](data-pilot-wave.md) records two completed ERA5 jobs and the Monaco build-time stop, after which the geographic pilot halted before Faroe/Fiji. This is the executed bounded allowance, not authorization for a global build or retries. Existing earlier proposal-only/no-approval statements are historical; new acquisition remains held beyond the consumed pilot. Cleanup was blocked by automatic approval review; files retained.

@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "rows": [
+    {
+      "place": "Hanle",
+      "year": 1991,
+      "cellId": "era5:32.75:79",
+      "sourceRows": 744,
+      "sourceSha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+      "expectedEligibleSamples": 279,
+      "validEligibleSamples": 279,
+      "representedYears": 1,
+      "badYearCount": 0,
+      "completeness": 1,
+      "meanCloudFraction": 0.6050089080701165,
+      "thresholds": [
+        {
+          "fraction": 0.1,
+          "count": 54,
+          "frequency": 0.1935483870967742
+        },
+        {
+          "fraction": 0.25,
+          "count": 73,
+          "frequency": 0.2616487455197133
+        },
+        {
+          "fraction": 0.5,
+          "count": 98,
+          "frequency": 0.35125448028673834
+        }
+      ],
+      "quality": "sample-only",
+      "label": "March sample only; historical, not a forecast; boundary hours from February/April absent"
+    },
+    {
+      "place": "Hanle",
+      "year": 1992,
+      "cellId": "era5:32.75:79",
+      "sourceRows": 744,
+      "sourceSha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+      "expectedEligibleSamples": 279,
+      "validEligibleSamples": 279,
+      "representedYears": 1,
+      "badYearCount": 0,
+      "completeness": 1,
+      "meanCloudFraction": 0.6155266437051972,
+      "thresholds": [
+        {
+          "fraction": 0.1,
+          "count": 55,
+          "frequency": 0.1971326164874552
+        },
+        {
+          "fraction": 0.25,
+          "count": 82,
+          "frequency": 0.2939068100358423
+        },
+        {
+          "fraction": 0.5,
+          "count": 103,
+          "frequency": 0.36917562724014336
+        }
+      ],
+      "quality": "sample-only",
+      "label": "March sample only; historical, not a forecast; boundary hours from February/April absent"
+    },
+    {
+      "place": "Kodaikanal",
+      "year": 1991,
+      "cellId": "era5:10.25:77.5",
+      "sourceRows": 744,
+      "sourceSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+      "expectedEligibleSamples": 279,
+      "validEligibleSamples": 279,
+      "representedYears": 1,
+      "badYearCount": 0,
+      "completeness": 1,
+      "meanCloudFraction": 0.3643044092321909,
+      "thresholds": [
+        {
+          "fraction": 0.1,
+          "count": 106,
+          "frequency": 0.37992831541218636
+        },
+        {
+          "fraction": 0.25,
+          "count": 148,
+          "frequency": 0.5304659498207885
+        },
+        {
+          "fraction": 0.5,
+          "count": 187,
+          "frequency": 0.6702508960573477
+        }
+      ],
+      "quality": "sample-only",
+      "label": "March sample only; historical, not a forecast; boundary hours from February/April absent"
+    },
+    {
+      "place": "Kodaikanal",
+      "year": 1992,
+      "cellId": "era5:10.25:77.5",
+      "sourceRows": 744,
+      "sourceSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+      "expectedEligibleSamples": 279,
+      "validEligibleSamples": 279,
+      "representedYears": 1,
+      "badYearCount": 0,
+      "completeness": 1,
+      "meanCloudFraction": 0.17721360729586694,
+      "thresholds": [
+        {
+          "fraction": 0.1,
+          "count": 185,
+          "frequency": 0.6630824372759857
+        },
+        {
+          "fraction": 0.25,
+          "count": 203,
+          "frequency": 0.7275985663082437
+        },
+        {
+          "fraction": 0.5,
+          "count": 232,
+          "frequency": 0.8315412186379928
+        }
+      ],
+      "quality": "sample-only",
+      "label": "March sample only; historical, not a forecast; boundary hours from February/April absent"
+    },
+    {
+      "place": "Munnar",
+      "year": 1991,
+      "cellId": "era5:10:77",
+      "sourceRows": 744,
+      "sourceSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+      "expectedEligibleSamples": 279,
+      "validEligibleSamples": 279,
+      "representedYears": 1,
+      "badYearCount": 0,
+      "completeness": 1,
+      "meanCloudFraction": 0.38527632956009183,
+      "thresholds": [
+        {
+          "fraction": 0.1,
+          "count": 65,
+          "frequency": 0.23297491039426524
+        },
+        {
+          "fraction": 0.25,
+          "count": 141,
+          "frequency": 0.5053763440860215
+        },
+        {
+          "fraction": 0.5,
+          "count": 187,
+          "frequency": 0.6702508960573477
+        }
+      ],
+      "quality": "sample-only",
+      "label": "March sample only; historical, not a forecast; boundary hours from February/April absent"
+    },
+    {
+      "place": "Munnar",
+      "year": 1992,
+      "cellId": "era5:10:77",
+      "sourceRows": 744,
+      "sourceSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+      "expectedEligibleSamples": 279,
+      "validEligibleSamples": 279,
+      "representedYears": 1,
+      "badYearCount": 0,
+      "completeness": 1,
+      "meanCloudFraction": 0.2010607428875448,
+      "thresholds": [
+        {
+          "fraction": 0.1,
+          "count": 164,
+          "frequency": 0.5878136200716846
+        },
+        {
+          "fraction": 0.25,
+          "count": 206,
+          "frequency": 0.7383512544802867
+        },
+        {
+          "fraction": 0.5,
+          "count": 235,
+          "frequency": 0.8422939068100358
+        }
+      ],
+      "quality": "sample-only",
+      "label": "March sample only; historical, not a forecast; boundary hours from February/April absent"
+    }
+  ],
+  "runtimeInstalled": false,
+  "baselineEstablished": false
+}

@@ -739,3 +739,7 @@ The owner defers further installed-plugin/model rehearsal until complete local a
 ## Targeted darkness correction closure — 14 October 2026
 
 Only reopened 5.C4, 10A.C3 and 10A.C5 are restored. Fresh local suite: 522 tests, 521 passed, one existing skip; types, public/both local packages, eight offline review sets, build and three runtime modes pass. Focused independent review found no actionable issue. Current 12 Done / 9 Partial / 6 Not started; groups 6 / 10 / 3; original 160 boxes: 92 checked, 68 open. No broad audit, model rehearsal, downloads or deployment.
+
+## Bounded source measurements — 15 October 2026
+
+Owner approved the small spot/history proposals. Actual grouped format/grid/clocks passed for the two March1991/1992 ERA5 requests, with no missing requested hours. Monaco source matched its pinned identity, but its supervised build stopped at60seconds; no subsequent region was requested. See docs/operations/data-pilot-wave.md. No original checkbox is newly closed: full data/host acceptance remains incomplete. Counts12Done/9Partial/6Notstarted;92checked/68open. Cleanup blocked by automatic approval review; existing runtime artifacts preserved.

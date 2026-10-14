@@ -122,3 +122,7 @@ Engineering review: the three-source manifest is a small extension of measured l
 ## Offline implementation disposition — 14 October 2026
 
 The previously listed generic prerequisite is now implemented and tested in [offline-spot-runner-wave.md](offline-spot-runner-wave.md). CurrentBhutan scripts remain intact; generic modules are separate. This is code/fixture evidence only: no defaultliveopener or liveCLI, no source retrieval allowance, no actualregionalheader/hash admission or runtimecatalog promotion. Proposed request/file/budget/policy values remain unchanged; actualdata validation and explicitapproval are still required.
+
+## Execution update — 15 October 2026
+
+Owner approved the existing small measurement pilots. [Execution evidence](data-pilot-wave.md) records two completed ERA5 jobs and the Monaco build-time stop, after which the geographic pilot halted before Faroe/Fiji. This is the executed bounded allowance, not authorization for a global build or retries. Existing earlier proposal-only/no-approval statements are historical; new acquisition remains held beyond the consumed pilot. Cleanup was blocked by automatic approval review; files retained.

@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-15",
+  "manifestSha256": "5eb57ba09de53fd9c8881d66444e2aecf868b9640bc9e2ccaff982f132cc565d",
+  "newSubmissions": 2,
+  "remoteStates": [
+    {
+      "chunkId": "hanle-03-1991-1992",
+      "state": "complete"
+    },
+    {
+      "chunkId": "kodaikanal-munnar-03-1991-1992",
+      "state": "complete"
+    }
+  ],
+  "entries": [
+    {
+      "chunkId": "hanle-03-1991-1992",
+      "complete": true,
+      "decodedBytes": 617,
+      "decodedSha256": "0fe6423d9f99f0c09724c639c2420c2e08ca1dcd3d561e3ddf5d80d7b0c7726b",
+      "decoderVersions": {
+        "netCDF4": "1.7.3",
+        "numpy": "2.5.4"
+      },
+      "downloadSeconds": 1.3599999999860302,
+      "expectedRows": 1488,
+      "missingSourceHours": 0,
+      "partitions": [
+        {
+          "chunkId": "hanle-1991-03",
+          "decodedBytes": 87403,
+          "decodedSha256": "61b18fd11d5d42e46e25597edf65d105abd5604a05ed81c54f07d775e4826ae7",
+          "expectedRows": 744,
+          "missingSourceHours": 0,
+          "path": "decoded/hanle-1991-03.jsonl",
+          "rawSha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+          "sourceRows": 744
+        },
+        {
+          "chunkId": "hanle-1992-03",
+          "decodedBytes": 87975,
+          "decodedSha256": "d80149c620b6d170977959aff8d3f16cf6f35dad129b82d6848ef674347b5564",
+          "expectedRows": 744,
+          "missingSourceHours": 0,
+          "path": "decoded/hanle-1992-03.jsonl",
+          "rawSha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+          "sourceRows": 744
+        }
+      ],
+      "processPeakRssBytes": 75386880,
+      "processingSeconds": 155.64100000006147,
+      "queueSeconds": 147.78100000007544,
+      "rawBytes": 136897,
+      "rawSha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+      "retrievalMode": "cds-api",
+      "sourceRevision": [
+        "0001"
+      ],
+      "sourceRows": 1488,
+      "submitSeconds": 3.25
+    },
+    {
+      "chunkId": "kodaikanal-munnar-03-1991-1992",
+      "complete": true,
+      "decodedBytes": 666,
+      "decodedSha256": "13b8a26cf5a55a3159df24922b541787ba828d08ae28cff94e52f034b8bfd6c3",
+      "decoderVersions": {
+        "netCDF4": "1.7.3",
+        "numpy": "2.5.4"
+      },
+      "downloadSeconds": 1.1089999999385327,
+      "expectedRows": 1488,
+      "missingSourceHours": 0,
+      "partitions": [
+        {
+          "chunkId": "kodaikanal-munnar-1991-03",
+          "decodedBytes": 116711,
+          "decodedSha256": "fe34db508a92939008678ca5fb4ec386d9e8e840116459999c0f93409a813137",
+          "expectedRows": 744,
+          "missingSourceHours": 0,
+          "path": "decoded/kodaikanal-munnar-1991-03.jsonl",
+          "rawSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+          "sourceRows": 744
+        },
+        {
+          "chunkId": "kodaikanal-munnar-1992-03",
+          "decodedBytes": 97032,
+          "decodedSha256": "f02bac039e387e479efe50c0adddddfffc410567363df7f1cfd21b8589f7bbfe",
+          "expectedRows": 744,
+          "missingSourceHours": 0,
+          "path": "decoded/kodaikanal-munnar-1992-03.jsonl",
+          "rawSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+          "sourceRows": 744
+        }
+      ],
+      "processPeakRssBytes": 75132928,
+      "processingSeconds": 142.25,
+      "queueSeconds": 138.09299999999348,
+      "rawBytes": 143140,
+      "rawSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+      "retrievalMode": "cds-api",
+      "sourceRevision": [
+        "0001"
+      ],
+      "sourceRows": 1488,
+      "submitSeconds": 0.734000000054948
+    }
+  ],
+  "rawTotalBytes": 280037,
+  "artifactInventory": [
+    {
+      "path": "raw/hanle-03-1991-1992.nc",
+      "bytes": 136897,
+      "sha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b"
+    },
+    {
+      "path": "raw/kodaikanal-munnar-03-1991-1992.nc",
+      "bytes": 143140,
+      "sha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906"
+    },
+    {
+      "path": "decoded/hanle-03-1991-1992.json",
+      "bytes": 617,
+      "sha256": "0fe6423d9f99f0c09724c639c2420c2e08ca1dcd3d561e3ddf5d80d7b0c7726b"
+    },
+    {
+      "path": "decoded/hanle-1991-03.jsonl",
+      "bytes": 87403,
+      "sha256": "61b18fd11d5d42e46e25597edf65d105abd5604a05ed81c54f07d775e4826ae7"
+    },
+    {
+      "path": "decoded/hanle-1992-03.jsonl",
+      "bytes": 87975,
+      "sha256": "d80149c620b6d170977959aff8d3f16cf6f35dad129b82d6848ef674347b5564"
+    },
+    {
+      "path": "decoded/kodaikanal-munnar-03-1991-1992.json",
+      "bytes": 666,
+      "sha256": "13b8a26cf5a55a3159df24922b541787ba828d08ae28cff94e52f034b8bfd6c3"
+    },
+    {
+      "path": "decoded/kodaikanal-munnar-1991-03.jsonl",
+      "bytes": 116711,
+      "sha256": "fe34db508a92939008678ca5fb4ec386d9e8e840116459999c0f93409a813137"
+    },
+    {
+      "path": "decoded/kodaikanal-munnar-1992-03.jsonl",
+      "bytes": 97032,
+      "sha256": "f02bac039e387e479efe50c0adddddfffc410567363df7f1cfd21b8589f7bbfe"
+    }
+  ],
+  "runtimeInstalled": false,
+  "baselineEstablished": false,
+  "cleanup": "Held: automatic approval review blocked recursive deletion; files retained."
+}
