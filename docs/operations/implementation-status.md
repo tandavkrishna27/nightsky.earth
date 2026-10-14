@@ -6,6 +6,8 @@ Audit: 14 October 2026, `codex/plugin-v1` / `.worktrees/plugin-v1`. Status is lo
 
 15 October discovery planning handoff: [researched design and combination matrix](../product/global-discovery-design.md) and [implementation sequence](../superpowers/plans/2026-10-15-nightsky-global-discovery.md). Covers country/state/nearby, multiple origins, inclusions/exclusions and selected-candidate planning. Prepared files are recommended; public Overpass is not the dependable production backend. This is documentation, not global coverage or new completion credit. No additional geographic downloads or deployment; counts below unchanged.
 
+Implementation has started under the approved continuous local goal; [wave evidence](global-discovery-execution.md) tracks the extensions and [source admission](global-catalogue-source-admission.md) keeps acquisition unapproved. Existing counts remain unchanged until original acceptance gates are actually met.
+
 | Level | Done | Partial | Not started | Total |
 |---|---:|---:|---:|---:|
 | Numbered groups 0–18 | 6 | 10 | 3 | 19 |

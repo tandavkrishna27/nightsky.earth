@@ -1,6 +1,6 @@
 # Global spot acquisition proposal
 
-**Status: PROPOSAL ONLY — NO OWNER APPROVAL, NO ACQUISITION, NO EXECUTION.**
+**Historical pilot proposal, with execution updates below. Global acquisition/build remains unapproved.** The original proposal-only status is superseded only by the bounded pilot evidence recorded later in this document. The [15 October global source admission](global-catalogue-source-admission.md) now records the metadata inventory, unresolved worldwide footprints/licences/resources and a separate proposed full-build budget. It authorizes no source body or retry.
 
 Prepared 14 October 2026 against baseline `f6d043b`. This is the next decision following [global-candidate-feasibility.md](global-candidate-feasibility.md) and the successful [retained Bhutan experiment](retained-spot-experiment.md). Research used publication pages, tiny geographic extent metadata and HEAD requests only; no PBF body, historical archive, account or installed tool was acquired. The global/free product objective remains unchanged.
 
@@ -117,7 +117,7 @@ Successful pilots would inform an independently budgeted worldwide source-union 
 
 Engineering review: the three-source manifest is a small extension of measured local mechanics; generic source admission is essential because current commands are hardcoded. Byte lengths establish possible disk admission only, not runtime/RAM success. The per-file ceilings fit the shared budget conservatively and can stop useful outputs without changing the global scope. The strongest uncertainty is sparse/coastal raw geometry versus candidate density; measuring reference volume addresses it. The strongest correctness gap is equal-but-wrong Fiji way points; its independent geometry audit addresses it. Later geometry or infrastructure expansion needs a new concrete proposal.
 
-**Owner review decision requested by this document:** approve this exact three-source measurement wave and its prerequisite implementation, or revise the source set/budget. No approval is inferred from preparing or reading the proposal. The current state remains **NO APPROVAL / NO PBF ACQUISITION / NO EXECUTION**.
+**Historical owner review decision:** this exact three-source measurement wave required separate approval; its subsequent bounded execution is recorded below. Reading this proposal gives no new authority. Current full-build review belongs to [global-catalogue-source-admission.md](global-catalogue-source-admission.md); global acquisition remains unapproved.
 
 ## Offline implementation disposition — 14 October 2026
 

@@ -1,4 +1,6 @@
 import "./shared/contracts.test.ts";
+import "./places/discoveryScope.test.ts";
+import "./skills/host-capability-workflows.test.ts";
 import "./mcp/transport-smoke.test.ts";
 import "./mcp/initialize.test.ts";
 import "./mcp/tool-metadata.test.ts";
