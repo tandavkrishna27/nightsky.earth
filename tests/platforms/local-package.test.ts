@@ -110,3 +110,10 @@ test('every native skill and workflow explicitly reject inferred Moon timing and
     }
   }
 });
+
+test('discovery workflow does not advertise a historical fixture as runtime coverage', () => {
+  const files = unzipSync(buildLocalPluginPackage({ host: 'claude', endpoint: 'http://localhost:4010/mcp' }).zip);
+  const workflow = strFromU8(files['skills/find-observing-place/references/workflow.md']);
+  assert.doesNotMatch(workflow, /1,327 named nodes/);
+  assert.match(workflow, /Determine installed coverage only from current tool results/);
+});

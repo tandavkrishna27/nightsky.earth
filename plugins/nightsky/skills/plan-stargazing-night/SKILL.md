@@ -58,4 +58,3 @@ Create a reminder or calendar entry only if the host supports that action and th
 ## Moon timing and sampled directions
 
 Do not infer moonrise, moonset or a moonless window from illumination or sampled altitude. Low Moon altitude does not establish negligible moonlight. Report illumination and sampled altitude as calculated values; Moon timing requires explicit supported rise/set or below-horizon interval evidence. Keep light pollution, transparency and the local horizon unknown unless supplied. An azimuth sampled at maximum altitude is not a rise-time or whole-session bearing. Say no supported event was returned rather than no event occurs when calendar coverage is incomplete. Preserve relevant returned source links.
-
