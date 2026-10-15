@@ -104,3 +104,4 @@ import './places/geographicCoverage.test';
 import './providers/climate/production-history-plan.test';
 import './providers/climate/retained-history-measurement.test';
 import './operations/retained-source-adapters.test';
+import './providers/climate/global-history-plan.test';

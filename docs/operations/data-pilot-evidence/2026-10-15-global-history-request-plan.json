@@ -1,0 +1,79 @@
+{
+  "status": "PROPOSED-FULL-REQUEST-INVENTORY-VERIFIED-OFFLINE-NO-SOURCE-REQUEST",
+  "validatedAtUtc": "2026-10-15T18:33:12.269Z",
+  "plan": {
+    "path": ".data/history-global-proposed-20261015-v1.json",
+    "sha256": "0b296d22142fea417a71299e17009536f82b14417f33eb4b38baa2ff307d2b12",
+    "bytes": 7098093
+  },
+  "counts": {
+    "acquisitionCells": 99914,
+    "destinations": 236042,
+    "distinctProspectiveRawPins": 9016688,
+    "fillerCells": 45092,
+    "minimumProspectiveDecodedPins": 9016688,
+    "missingRequiredCellHours": 14422993920,
+    "proposedScalarCellHours": 26286148944,
+    "prospectiveRawAndDecodedUnionLowerBound": 18033376,
+    "requests": 9016688,
+    "requiredSourceCellHours": 14423010336,
+    "retainedAllAcquisitionCellHours": 25488,
+    "retainedDecodedPins": 8,
+    "retainedMetadataPins": 2,
+    "retainedRawPins": 6,
+    "retainedRequiredCellHours": 16416,
+    "tiles": 24908,
+    "uniqueCellZonePairs": 56039,
+    "uniqueRequiredCells": 54822
+  },
+  "independentCompactChecks": {
+    "allAcquisitionNodesUnique": 99914,
+    "allRequiredNodesUnique": 54822,
+    "expandedRequestCountByTemplateArithmetic": 9016688,
+    "proposedScalarCellHoursByTemplateArithmetic": 26286148944,
+    "minimumRectangleExtentDegrees": 0.25,
+    "retainedSourceOverlapCellHours": 0
+  },
+  "attempts": [
+    {
+      "result": "stopped-before-publication",
+      "reason": "caller passed32MiB to existing8MiB-cap trusted reader",
+      "readBytes": 90448058,
+      "outputBytes": 0
+    },
+    {
+      "result": "published-exclusively",
+      "recovery": "explicit parent correction; unchanged conservative original18:38:55UTC deadline; no automatic reset",
+      "maxDurationMs": 350000,
+      "readBytes": 91681124,
+      "outputBytes": 7098093
+    }
+  ],
+  "physicalReadBytesAcrossTwoAttempts": 182129182,
+  "budgets": {
+    "uniqueInputBytes": 134217728,
+    "readBytesPerAttempt": 134217728,
+    "readBytesAcrossTwoExplicitAttempts": 268435456,
+    "newOutputBytes": 268435456,
+    "originalCooperativeWindowMs": 600000
+  },
+  "postPins": [
+    {
+      "path": "scripts/era5/plan-global-history.ts",
+      "sha256": "2d86db35178367e2d047a2f70936f8aa3909b225c2dae452a3de8fe99388fcdc"
+    },
+    {
+      "path": ".data/history-source-proposed-20261015-v1/manifest.json",
+      "sha256": "82ab5ef0be1cba9e1b184df95d4db1468e64ba458d12b7d32069912f28206675"
+    },
+    {
+      "path": ".data/history-source-proposed-20261015-v1/local-verification.json",
+      "sha256": "373d0ce9e803efe0828ce24651c91a0858be62e96a491ee634508bca19351276"
+    }
+  ],
+  "limitations": [
+    "Request-identity counts are prospective revision-object counts; actual raw/decoded content SHA256 values do not exist before acquisition.",
+    "Existing10k flat lineage union remains a blocker; bounded radix schema/provider/operator migration is designed but not implemented.",
+    "No request submitted; provider acceptance, transfer size, scientific completeness and global runtime admission remain unproved."
+  ]
+}

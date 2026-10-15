@@ -1,0 +1,19 @@
+# Admission resolution, global schedule and sample executor
+
+Owner authorized three parallel lanes with subagents, review, local tests, ticket/docs updates, push and exact-revision CI. Starting branch `codex/plugin-v1`, revision `f911e5f`, existing isolated worktree. Sample executor is preparation only: no CDS job, dataset/geometry body, credential read, model, installation, deletion or deployment. Metadata/documentation inspection continues under the finite lane allowance below.
+
+## Lanes
+
+1. **Geography admission:** inspect at most 20 new explicit public metadata/documentation requests, 8 MiB total / 2 MiB each, no automatic redirects/retries. Resolve IND metadata/provenance where evidence permits, inspect exact original licence conditions and official extraction-polygon association evidence. Preserve quarantine and unknowns where metadata cannot resolve them. Geometry LFS pointer metadata is allowed; geometry payloads are not. Freeze exact sample identity/size if observed, without downloading it.
+2. **Global history schedule:** stream frozen global cells/mappings and hash-verified retained observations into a compact, globally deduplicated proposed full schedule. No 14-billion-hour materialization. Spatial rectangles must respect provider minimum extent, avoid duplicated nodes, label filler cells and subtract every retained cell/hour, including fillers. Input <=128 MiB, new output <=256 MiB, one <=10-minute local run. Preserve all named targets and the full-world scope distinction. Count actual prospective raw/decoded/metadata lineage against the current global 10,000-entry bound and specify a bounded remedy; do not raise caps or drop coverage silently.
+3. **Sample executor preparation:** fixed legacy request for the exact previously proposed 4-cell/24-hour/96-scalar check. Default CLI performs offline plan/validation only. Future live execution requires separate exact-plan owner allowance, one submission, finite polls/deadline/2 MiB transfer/new-output and scratch limits, persisted uncertainty/no automatic resubmission, authentication confined to CDS and secret-free evidence, strict download origin/redirect rules and contained decoder validation. Implement using inspected installed client source and offline transports only; do not read the local private configuration during preparation. Unsupported packaging/revision/shape never becomes accepted data.
+
+## Integration and evidence
+
+Each lane owns new files and its focused regressions. Review independently; correct important findings before considering the lane complete. One heavy schedule/measurement at a time; lightweight/static work may continue in parallel. Maintain ignored identity-first ledger and raw metadata evidence, sanitized public projections (including credential-shaped source URL redaction), exact input/code pins before local measured runs and post-run checks. No completion credit for merely proposed samples or unknown admission fields.
+
+Run affected and aggregate suites, all type configurations and relevant build/package/runtime checks; verify docs/evidence arithmetic/links and unchanged runtime source data where required. Review the combined result, update original ticket evidence without invented Done counts, commit/push to the existing branch and watch all six CI jobs on that SHA. Any later sample/body execution remains an explicit owner decision after a concrete executor/allowance is reviewable.
+
+## Explicit corrective-run clarification
+
+After the first full planner attempt failed before publishing on a known invalid caller bound, one corrected manual attempt was authorized within the original ten-minute/new-output limits. Unique admitted inputs <=128 MiB; physical reads <=128 MiB per attempt and <=256 MiB across the two attempts. No third automatic attempt. Actual combined reads: 182,129,182 bytes; this is local read amplification, not downloaded data.
