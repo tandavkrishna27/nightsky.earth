@@ -4,6 +4,8 @@ Owner direction: complete locally before deployment; use parallel agents where w
 
 The current offline implementation is delivered in the [build preparation execution record](offline-build-preparation-wave.md). The following rows describe the remaining sequence after it; data and host gates are not marked complete by software fixtures.
 
+**Retained measurement outcome:** [characterization evidence](retained-source-characterization-wave.md) now establishes legacy ERA5 replay/aggregation/planning behavior on retained samples, but the current geographic raw producer hit its ten-minute cap before completing both sources. A profile identifies repeated resource/ancestor checks as the dominant cost. Insert a focused bounded performance correction and successful retained producer-to-bridge acceptance **before the acquisition decision**. Do not erase the failed baseline or interpret completed measurement as completed geography. ARCO and real clipping/boundary admission remain open.
+
 | Sequence | Work and parallel opportunities | Exit evidence / decision |
 | --- | --- | --- |
 | Current: offline build preparation | A: explicit bounded catalogue configuration. B: geographic normalization/full-cell coverage with residuals. C: historical mapping and retained-hour subtraction. | Reviewed code, actual fixture integration, local suites, docs and exact branch CI. No production coverage inferred. |

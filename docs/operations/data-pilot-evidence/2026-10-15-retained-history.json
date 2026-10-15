@@ -1,0 +1,483 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-history-offline-sample-measurement",
+  "date": "2026-10-15",
+  "baselineCommit": "1201c6da96d561cf58c47ab92c7e1c61e87a2399",
+  "selectedSourcePins": [
+    {
+      "path": "scripts/era5/measure_retained_process.py",
+      "sha256": "e643c0bc871b664de2abeda0ae4ed0f6db90e751105a7920bdf8c2bf6195593f"
+    },
+    {
+      "path": "scripts/era5/measure_retained_decode.py",
+      "sha256": "22608a64aeed5b0a349c4b7cd68158c743d97eee54922a27b57acc839927d7e2"
+    },
+    {
+      "path": "scripts/era5/measure-retained-history.ts",
+      "sha256": "aac650efa97fa395280485724a39e7653a56f87033e98d45415eb013277565b1"
+    },
+    {
+      "path": "scripts/era5/read_chunks.py",
+      "sha256": "a9ba9259efab3f92a88b2ce6763d1cae03e5cc8f8862c0b6f2de3bf9928ebb8b"
+    },
+    {
+      "path": "scripts/era5/chunks.ts",
+      "sha256": "db43fdef9990d686fe3d6a35837ade37c8982147ab0df33a81da091e01e9d13c"
+    },
+    {
+      "path": "scripts/era5/aggregate.ts",
+      "sha256": "74941fd64ea2198157b24087600d228ef283c7f698a528ee14e2f4938d5e8900"
+    },
+    {
+      "path": "scripts/era5/build-observation-aggregates.ts",
+      "sha256": "36eb214df36d683d1af4cb1d0d4b50cf2f9a51c96143d17ff76410305df999ec"
+    },
+    {
+      "path": "scripts/era5/build-release.ts",
+      "sha256": "8eb4f544bce6b7a56fb0f2d561f2b0d127285ef7fdc7f0978c39819f06dcfd42"
+    },
+    {
+      "path": "scripts/era5/build-tiles.ts",
+      "sha256": "7773f1b6b4393148040c7cad4e9aaee867d55e0eccbbdcae9e2b0d08c7e0a911"
+    },
+    {
+      "path": "scripts/era5/plan-production-history.ts",
+      "sha256": "7f8015832282c3ea9298ed18b5f9e10da9bc9074015f57bc5e3d68f57abe516c"
+    },
+    {
+      "path": "server/providers/climate/tiledEra5.ts",
+      "sha256": "1c371cd3e44acb6dfa7fd7fd09f350c4a34badbae295630e339f20dc982b7d7b"
+    },
+    {
+      "path": "server/providers/climate/releaseEra5.ts",
+      "sha256": "96b20107c7e446e1c59f45ce03f7bd327424f93d68e52f44219578f6860b9c28"
+    },
+    {
+      "path": "shared/nightsky/climate.ts",
+      "sha256": "a6b2e097106555d99a41761c2817575bf6ad8008f2adabd6ad982ebdee74255f"
+    },
+    {
+      "path": "shared/nightsky/common.ts",
+      "sha256": "0a8cd81bdda53f13502cb4913640b5759957d19c94e69d5b2ee255ffddb14856"
+    },
+    {
+      "path": "scripts/osm/global_source_supervisor.py",
+      "sha256": "b668dde2c7c254a95203410569794c2cf371658b9816aa0d97ca845e74088c3c"
+    },
+    {
+      "path": "scripts/osm/global_source.py",
+      "sha256": "52033a5cc1166222e1832cbdd3bace4867954d0194e24fda8a2eccabf990861e"
+    },
+    {
+      "path": "scripts/osm/spot_paths.py",
+      "sha256": "a8b644b51f05bd08f080c9023f92fc65389b83f0a68f5969f4387512d669cdf0"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "4ad863ba3cbb5faa7f6d4e78c6c15ef7ccf9410d5197907cacfbadb771330bbc"
+    }
+  ],
+  "sourcePinScope": "Selected harness/core files and package lock; not complete transitive import closure",
+  "preflight": {
+    "unixTime": 1792080041.4452753,
+    "freeDiskBytes": 310886748160,
+    "totalDiskBytes": 999185969152,
+    "physicalMemoryTotalBytes": 66094223360,
+    "physicalMemoryAvailableBytes": 16443969536,
+    "logicalProcessors": 24,
+    "scope": "Snapshot only; resources are not reserved"
+  },
+  "originalDeadlineUnix": 1792081778.152115,
+  "priorAttempt": {
+    "name": "retained-measurement-20261015-v1",
+    "outcome": "OpenBLAS startup allocation failure under unchanged hard tree commit; before decoder/data validation",
+    "preflight": {
+      "resources": {
+        "unixTime": 1792079978.152115,
+        "freeDiskBytes": 310887854080,
+        "totalDiskBytes": 999185969152,
+        "physicalMemoryTotalBytes": 66094223360,
+        "physicalMemoryAvailableBytes": 16433885184,
+        "logicalProcessors": 24,
+        "scope": "Snapshot only; resources are not reserved"
+      },
+      "batchSecondsLimit": 1800,
+      "newFileBytesLimit": 536870912,
+      "freeDiskFloorBytes": 103079215104,
+      "decoderRssCeilingBytes": 268435456,
+      "pipelineRssCeilingBytes": 402653184,
+      "hardTreeCommitCeilingBytes": 536870912,
+      "hardActiveProcessCeiling": 2,
+      "selectedSourcePins": [
+        {
+          "path": "scripts/era5/measure_retained_process.py",
+          "sha256": "d77a673c22e465624ab5fb74e0c8f1f10681506eaaa16f600a9f6f1e711712d7"
+        },
+        {
+          "path": "scripts/era5/measure_retained_decode.py",
+          "sha256": "22608a64aeed5b0a349c4b7cd68158c743d97eee54922a27b57acc839927d7e2"
+        },
+        {
+          "path": "scripts/era5/measure-retained-history.ts",
+          "sha256": "aac650efa97fa395280485724a39e7653a56f87033e98d45415eb013277565b1"
+        },
+        {
+          "path": "scripts/era5/read_chunks.py",
+          "sha256": "a9ba9259efab3f92a88b2ce6763d1cae03e5cc8f8862c0b6f2de3bf9928ebb8b"
+        },
+        {
+          "path": "scripts/era5/chunks.ts",
+          "sha256": "db43fdef9990d686fe3d6a35837ade37c8982147ab0df33a81da091e01e9d13c"
+        },
+        {
+          "path": "scripts/era5/aggregate.ts",
+          "sha256": "74941fd64ea2198157b24087600d228ef283c7f698a528ee14e2f4938d5e8900"
+        },
+        {
+          "path": "scripts/era5/build-observation-aggregates.ts",
+          "sha256": "36eb214df36d683d1af4cb1d0d4b50cf2f9a51c96143d17ff76410305df999ec"
+        },
+        {
+          "path": "scripts/era5/build-release.ts",
+          "sha256": "8eb4f544bce6b7a56fb0f2d561f2b0d127285ef7fdc7f0978c39819f06dcfd42"
+        },
+        {
+          "path": "scripts/era5/build-tiles.ts",
+          "sha256": "7773f1b6b4393148040c7cad4e9aaee867d55e0eccbbdcae9e2b0d08c7e0a911"
+        },
+        {
+          "path": "scripts/era5/plan-production-history.ts",
+          "sha256": "7f8015832282c3ea9298ed18b5f9e10da9bc9074015f57bc5e3d68f57abe516c"
+        },
+        {
+          "path": "server/providers/climate/tiledEra5.ts",
+          "sha256": "1c371cd3e44acb6dfa7fd7fd09f350c4a34badbae295630e339f20dc982b7d7b"
+        },
+        {
+          "path": "server/providers/climate/releaseEra5.ts",
+          "sha256": "96b20107c7e446e1c59f45ce03f7bd327424f93d68e52f44219578f6860b9c28"
+        },
+        {
+          "path": "shared/nightsky/climate.ts",
+          "sha256": "a6b2e097106555d99a41761c2817575bf6ad8008f2adabd6ad982ebdee74255f"
+        },
+        {
+          "path": "shared/nightsky/common.ts",
+          "sha256": "0a8cd81bdda53f13502cb4913640b5759957d19c94e69d5b2ee255ffddb14856"
+        },
+        {
+          "path": "scripts/osm/global_source_supervisor.py",
+          "sha256": "b668dde2c7c254a95203410569794c2cf371658b9816aa0d97ca845e74088c3c"
+        },
+        {
+          "path": "scripts/osm/global_source.py",
+          "sha256": "52033a5cc1166222e1832cbdd3bace4867954d0194e24fda8a2eccabf990861e"
+        },
+        {
+          "path": "scripts/osm/spot_paths.py",
+          "sha256": "a8b644b51f05bd08f080c9023f92fc65389b83f0a68f5969f4387512d669cdf0"
+        },
+        {
+          "path": "package-lock.json",
+          "sha256": "4ad863ba3cbb5faa7f6d4e78c6c15ef7ccf9410d5197907cacfbadb771330bbc"
+        }
+      ]
+    },
+    "bytes": 3434
+  },
+  "fixedChildThreadSettings": {
+    "OPENBLAS_NUM_THREADS": 1,
+    "OMP_NUM_THREADS": 1,
+    "MKL_NUM_THREADS": 1,
+    "NUMEXPR_NUM_THREADS": 1
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "platform": "Windows 11",
+    "decoderLaunch": "Existing direct base interpreter with retained venv Lib/site-packages on explicit PYTHONPATH; avoids Windows venv launcher subprocess"
+  },
+  "batchSecondsLimit": 1800,
+  "batchWallSeconds": 2.421043499954976,
+  "newFileBytesLimit": 536870912,
+  "freeDiskFloorBytes": 103079215104,
+  "networkRequests": 0,
+  "decoder": [
+    {
+      "wallSecondsIncludingStartup": 0.4280524000059813,
+      "externallyObservedPeakMainRssBytes": 54591488,
+      "mainRssCeilingBytes": 268435456,
+      "observedJobPeakCommitBytes": 41009152,
+      "hardTreeCommitCeilingBytes": 536870912,
+      "hardActiveProcessCeiling": 2,
+      "pollSeconds": 0.02,
+      "enforcement": "Windows Job hard tree commit/process ceilings, suspended launch before assignment/resume, whole-tree kill/drain; sampled main RSS/disk/deadline",
+      "exitCode": 0,
+      "result": {
+        "id": "hanle-03-1991-1992",
+        "rawSha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+        "rawBytes": 136897,
+        "cells": 4,
+        "sourceHours": 1488,
+        "scalarCellHours": 5952,
+        "wallSeconds": 0.2308361999457702,
+        "cpuSeconds": 0.234375,
+        "scalarCellHoursPerWallSecond": 25784.517339127437,
+        "scalarCellHoursPerCpuSecond": 25395.2,
+        "logicalRawHashBytes": 547588,
+        "actualPhysicalReadBytes": null,
+        "processPeakRssBytes": 54591488,
+        "partitions": [
+          {
+            "id": "hanle-1991-03",
+            "sha256": "61b18fd11d5d42e46e25597edf65d105abd5604a05ed81c54f07d775e4826ae7",
+            "bytes": 87403,
+            "rows": 744
+          },
+          {
+            "id": "hanle-1992-03",
+            "sha256": "d80149c620b6d170977959aff8d3f16cf6f35dad129b82d6848ef674347b5564",
+            "bytes": 87975,
+            "rows": 744
+          }
+        ],
+        "decoderVersions": {
+          "netCDF4": "1.7.3",
+          "numpy": "2.5.4"
+        },
+        "revision": [
+          "0001"
+        ],
+        "byteIdentical": true,
+        "readBytesMeaning": "raw file size is logical input bytes; decoder hashes raw before/after, physical OS/cache IO not measured"
+      }
+    },
+    {
+      "wallSecondsIncludingStartup": 0.4527239000890404,
+      "externallyObservedPeakMainRssBytes": 54870016,
+      "mainRssCeilingBytes": 268435456,
+      "observedJobPeakCommitBytes": 41246720,
+      "hardTreeCommitCeilingBytes": 536870912,
+      "hardActiveProcessCeiling": 2,
+      "pollSeconds": 0.02,
+      "enforcement": "Windows Job hard tree commit/process ceilings, suspended launch before assignment/resume, whole-tree kill/drain; sampled main RSS/disk/deadline",
+      "exitCode": 0,
+      "result": {
+        "id": "kodaikanal-munnar-03-1991-1992",
+        "rawSha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+        "rawBytes": 143140,
+        "cells": 6,
+        "sourceHours": 1488,
+        "scalarCellHours": 8928,
+        "wallSeconds": 0.23869090003427118,
+        "cpuSeconds": 0.234375,
+        "scalarCellHoursPerWallSecond": 37404.02335706187,
+        "scalarCellHoursPerCpuSecond": 38092.8,
+        "logicalRawHashBytes": 572560,
+        "actualPhysicalReadBytes": null,
+        "processPeakRssBytes": 54870016,
+        "partitions": [
+          {
+            "id": "kodaikanal-munnar-1991-03",
+            "sha256": "fe34db508a92939008678ca5fb4ec386d9e8e840116459999c0f93409a813137",
+            "bytes": 116711,
+            "rows": 744
+          },
+          {
+            "id": "kodaikanal-munnar-1992-03",
+            "sha256": "f02bac039e387e479efe50c0adddddfffc410567363df7f1cfd21b8589f7bbfe",
+            "bytes": 97032,
+            "rows": 744
+          }
+        ],
+        "decoderVersions": {
+          "netCDF4": "1.7.3",
+          "numpy": "2.5.4"
+        },
+        "revision": [
+          "0001"
+        ],
+        "byteIdentical": true,
+        "readBytesMeaning": "raw file size is logical input bytes; decoder hashes raw before/after, physical OS/cache IO not measured"
+      }
+    }
+  ],
+  "pipeline": {
+    "wallSecondsIncludingStartup": 1.4187342999503016,
+    "externallyObservedPeakMainRssBytes": 180617216,
+    "mainRssCeilingBytes": 402653184,
+    "observedJobPeakCommitBytes": 257445888,
+    "hardTreeCommitCeilingBytes": 536870912,
+    "hardActiveProcessCeiling": 2,
+    "pollSeconds": 0.02,
+    "enforcement": "Windows Job hard tree commit/process ceilings, suspended launch before assignment/resume, whole-tree kill/drain; sampled main RSS/disk/deadline",
+    "exitCode": 0,
+    "result": {
+      "schemaVersion": 1,
+      "runtime": {
+        "node": "v24.14.0",
+        "icu": "78.2",
+        "tz": "2025c",
+        "astronomy": "2.1.19",
+        "timezone": "node-24.14.0/icu-78.2/tz-2025c"
+      },
+      "status": "offline-retained-sample-only",
+      "period": {
+        "startNight": "1991-03-01",
+        "endNight": "1992-03-31"
+      },
+      "benchmarkZone": "Asia/Kolkata; selected engineering zone, geographic assignment unverified",
+      "pairCount": 10,
+      "paddedPairHours": 96240,
+      "sourceScalarCellHours": 14880,
+      "aggregate": {
+        "cpuScope": "Main Node process; esbuild service CPU excluded",
+        "wallSeconds": 0.8992791,
+        "cpuSeconds": 1.031,
+        "pairHoursPerSecond": 107019.05559686643,
+        "pairHoursPerCpuSecond": 93346.26576139672,
+        "producerPreflightInputBytes": 391366,
+        "logicalDecodedBytesPerPass": 389121,
+        "logicalProducerReadBytes": 2766702,
+        "actualPhysicalReadBytes": null,
+        "outputBytes": 252508,
+        "outputSha256": "360ff1b9d5ca1227916fbc6f9874237aed6c37be76550c5c331a12d110b58388",
+        "expectedDarkHours": 36302,
+        "validDarkHours": 5580,
+        "missingDarkHours": 30722
+      },
+      "release": {
+        "manifestSha256": "8f3070cb1906852c102eadd1379a1c32fa57bea53a635050576434e30e192940",
+        "tileCount": 10,
+        "shardCount": 1,
+        "bytes": 258035
+      },
+      "planner": {
+        "status": "unapproved-nonexecuting",
+        "sha256": "1522631fae497fba074c1ca282580d0c3e7c137e0579211c7d4ef8f7335887e5",
+        "requirements": {
+          "uniqueCells": 10,
+          "uniqueCellZonePairs": 10,
+          "sourceCellHours": 2630880,
+          "pairHours": 2630880,
+          "verifiedCompletedCellHours": 25488,
+          "remainingCellHours": 2605392
+        },
+        "prefixJobs": 100,
+        "checkedProposalCellHours": 72288,
+        "retainedOverlap": 0
+      },
+      "inputs": [
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/ledger.json",
+          "sha256": "8bf5743b973d2800822e5799950248de7c2089f03b1750700303251caa2fe600",
+          "bytes": 2591
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/manifest.json",
+          "sha256": "97016bd43f7aa55cbd7a86696cee54262ff2b6c8afc25f3f2e72ea321c38a122",
+          "bytes": 51694
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/raw/hanle-03-1991-1992.nc",
+          "sha256": "cfb197b39f6948b106e26c42485ba7fb8f8c00555edb0621ff6a504eab66604b",
+          "bytes": 136897
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/decoded/hanle-03-1991-1992.json",
+          "sha256": "0fe6423d9f99f0c09724c639c2420c2e08ca1dcd3d561e3ddf5d80d7b0c7726b",
+          "bytes": 617
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/decoded/hanle-1991-03.jsonl",
+          "sha256": "61b18fd11d5d42e46e25597edf65d105abd5604a05ed81c54f07d775e4826ae7",
+          "bytes": 87403
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/decoded/hanle-1992-03.jsonl",
+          "sha256": "d80149c620b6d170977959aff8d3f16cf6f35dad129b82d6848ef674347b5564",
+          "bytes": 87975
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/raw/kodaikanal-munnar-03-1991-1992.nc",
+          "sha256": "9587e69f729ab42e0de9efaec3f80d8423979daadeac2dadd1c812ee76710906",
+          "bytes": 143140
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/decoded/kodaikanal-munnar-03-1991-1992.json",
+          "sha256": "13b8a26cf5a55a3159df24922b541787ba828d08ae28cff94e52f034b8bfd6c3",
+          "bytes": 666
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/decoded/kodaikanal-munnar-1991-03.jsonl",
+          "sha256": "fe34db508a92939008678ca5fb4ec386d9e8e840116459999c0f93409a813137",
+          "bytes": 116711
+        },
+        {
+          "path": ".data/era5/grouped-pilot-20261015-v1/decoded/kodaikanal-munnar-1992-03.jsonl",
+          "sha256": "f02bac039e387e479efe50c0adddddfffc410567363df7f1cfd21b8589f7bbfe",
+          "bytes": 97032
+        },
+        {
+          "path": ".data/era5/history-1991-1992/ledger.json",
+          "sha256": "f4dbddb91631d6280a449adfabccbc8e97991077ff8eeff2ec59f13e968b94fc",
+          "bytes": 2859
+        },
+        {
+          "path": ".data/era5/history-1991-1992/manifest.json",
+          "sha256": "bcce5139be9f9cec968a4242b927cbebf35442d2915007f40c73effc2c884973",
+          "bytes": 32654
+        },
+        {
+          "path": ".data/era5/history-1991-1992/raw/hanle-1990-12-boundary.nc",
+          "sha256": "033db13c0abcfa044acaee1d17b0b036502958f903a383934a4db7b7a3a96db2",
+          "bytes": 25261
+        },
+        {
+          "path": ".data/era5/history-1991-1992/decoded/hanle-1990-12-boundary.jsonl",
+          "sha256": "3bfdcfdbf2cc70017138f8557d869fd69eae16a0bed5e08144ba2ec23cc8035b",
+          "bytes": 6479
+        },
+        {
+          "path": ".data/era5/history-1991-1992/raw/hanle-1991-01.nc",
+          "sha256": "1c707255af3f01c4bc468bd292159b59e843b3af92b9776329cf5252eaff25b2",
+          "bytes": 81449
+        },
+        {
+          "path": ".data/era5/history-1991-1992/decoded/hanle-1991-01.jsonl",
+          "sha256": "65ee40012acb3e80f83f5772c5111cf26f83ffbc020899bc5ded13fba731a888",
+          "bytes": 89197
+        },
+        {
+          "path": ".data/era5/history-1991-1992/raw/hanle-1992-01.nc",
+          "sha256": "45e4a840adcc34cdfbd13ae4388a75c069ed8c0b63156be56e0cda5cccf63ffa",
+          "bytes": 80615
+        },
+        {
+          "path": ".data/era5/history-1991-1992/decoded/hanle-1992-01.jsonl",
+          "sha256": "d8a873b6b125357a79380e2367d66569fbe6d4013f4353fa02ac258eff30ab17",
+          "bytes": 83802
+        },
+        {
+          "path": ".data/era5/history-1991-1992/raw/kodaikanal-munnar-1991-01.nc",
+          "sha256": "b02848ef1132210227f61977d782509904e5799469dd13ccfa84edb48e95d3a4",
+          "bytes": 84930
+        },
+        {
+          "path": ".data/era5/history-1991-1992/decoded/kodaikanal-munnar-1991-01.jsonl",
+          "sha256": "94d2520950d5550af7f33ef2b414788acdb93acce1bdb98bfd325efba113e402",
+          "bytes": 113204
+        }
+      ],
+      "retainedPinsUnchanged": true,
+      "wallSeconds": 1.14326,
+      "cpuSeconds": 1.39,
+      "processPeakRssBytes": 180617216,
+      "newBytesBeforeReport": 1284864
+    }
+  },
+  "newFileBytesBeforeBatchReport": 1703592,
+  "newFormatAdmission": {
+    "ARCO/time-series": "unavailable actual response body; unadmitted; no adapter execution"
+  },
+  "limits": "Local retained tiny samples; warm cache and uncontrolled host load; no worldwide throughput, provider queue, transfer, cost, compression or serving fit inference"
+}

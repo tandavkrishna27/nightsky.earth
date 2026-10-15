@@ -102,3 +102,5 @@ import './places/boundaryMetadata.test';
 import './providers/climate/observation-aggregates.test';
 import './places/geographicCoverage.test';
 import './providers/climate/production-history-plan.test';
+import './providers/climate/retained-history-measurement.test';
+import './operations/retained-source-adapters.test';

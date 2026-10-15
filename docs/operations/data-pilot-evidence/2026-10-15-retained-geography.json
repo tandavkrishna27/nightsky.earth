@@ -1,0 +1,674 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "scenario": "actual retained PBF plus explicitly synthetic clipping CONTROL metadata; NOT source admitted",
+  "sourceAdmission": false,
+  "clipProofAvailable": false,
+  "regionsRows": 0,
+  "footprintRows": 0,
+  "coverage": "unknown",
+  "sources": [
+    {
+      "attribution": "© OpenStreetMap contributors",
+      "bytes": 692392,
+      "clipSha256": "99bb34fa5a7caf06f3c6e9d16eb162ac5264c03532998dff93babbf4911fc4c5",
+      "format": "pbf",
+      "id": "monaco",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+      "url": "https://download.geofabrik.de/europe/monaco-261013.osm.pbf",
+      "vintage": "2026-10-13T20:21:31Z"
+    },
+    {
+      "attribution": "© OpenStreetMap contributors",
+      "bytes": 7735542,
+      "clipSha256": "99bb34fa5a7caf06f3c6e9d16eb162ac5264c03532998dff93babbf4911fc4c5",
+      "format": "pbf",
+      "id": "faroe-islands",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+      "url": "https://download.geofabrik.de/europe/faroe-islands-261013.osm.pbf",
+      "vintage": "2026-10-13T20:21:31Z"
+    }
+  ],
+  "syntheticClippingControl": {
+    "coverage": "unknown",
+    "note": "No extraction polygon or recorded clipping digest exists in the scoped retained inventory.",
+    "scenario": "actual retained PBF plus synthetic control metadata; NOT source admitted",
+    "syntheticControl": true
+  },
+  "preflight": {
+    "commitHeadroomBytes": 7296720896,
+    "diskFreeBytes": 311878520832,
+    "inventoryScope": ".data/osm only; no user-file or credential scan",
+    "limits": {
+      "commitBytes": 2147483648,
+      "freeReserveBytes": 103079215104,
+      "maxProcesses": 2,
+      "newWriteBytes": 1073741824,
+      "overallSeconds": 600,
+      "rssBytes": 1073741824
+    },
+    "observedUtc": "2026-10-15T15:46:37Z",
+    "physicalAvailableBytes": 17007697920,
+    "retainedOsmFileCount": 1256,
+    "retainedOsmLogicalBytes": 1813210869,
+    "scenario": "actual retained PBF plus synthetic control metadata; NOT source admitted"
+  },
+  "versions": {
+    "python": "3.14.3 (tags/v3.14.3:323c59a, Feb  3 2026, 16:04:56) [MSC v.1944 64 bit (AMD64)]",
+    "osmium": "4.3.1",
+    "node": "v24.14.0",
+    "baseline": "1201c6d",
+    "executedHarnessSha256Reconstructed": "934728606a22484031f3fc91a787511a23ade570b8e9e58d188adaddcddedcc3",
+    "executedHarnessHashNote": "reconstructed after launch and unverified at launch; not an authoritative prelaunch pin; original reconstructed copy retained locally"
+  },
+  "coreSha256": {
+    "global_source.py": "52033a5cc1166222e1832cbdd3bace4867954d0194e24fda8a2eccabf990861e",
+    "global_source_supervisor.py": "b668dde2c7c254a95203410569794c2cf371658b9816aa0d97ca845e74088c3c",
+    "build-source-catalogue.ts": "3ce128edc5d71940efad9c3a413948affe28419e0bcd3532e0708a431ab0fc79",
+    "build-streamed-catalogue.ts": "d6bf2db9853733bff07f7c40811cc718e5841160d4daa457c55d9783cabfa25d"
+  },
+  "measurement": {
+    "coverage": "unknown; no regions or extraction footprints admitted",
+    "finalFileBytes": {
+      "journalBytes": 1183232,
+      "otherBytes": 782,
+      "sqliteBytes": 1204224,
+      "totalBytes": 2388238
+    },
+    "hashPassNote": "included within producer/bridge wall; not separately instrumented",
+    "hashPassSeconds": null,
+    "ioNote": "Windows Job transfer counters include cached and metadata I/O; not physical raw-source read volume",
+    "jobStageMetrics": [
+      {
+        "jobKernelCpuSeconds": 467.640625,
+        "jobReadTransferBytes": 32237921,
+        "jobUserCpuSeconds": 120.578125,
+        "jobWriteTransferBytes": 3087334,
+        "peakJobCommitBytes": 70348800
+      }
+    ],
+    "measurementWallSeconds": 600.055,
+    "networkRequests": 0,
+    "runtimeInstalled": false,
+    "sampledFilePeaks": {
+      "journalBytes": 1183232,
+      "otherBytes": 281,
+      "sqliteBytes": 1204224,
+      "totalBytes": 2387737
+    },
+    "schemaVersion": 1,
+    "status": "bounded-stop",
+    "supervisor": {
+      "elapsedSeconds": 600.019,
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "limits": {
+        "commitBytes": 2147483648,
+        "diskBytes": 1082171955,
+        "freeBytes": 103079215104,
+        "maxProcesses": 2,
+        "rssBytes": 1073741824,
+        "wallSeconds": 600
+      },
+      "peakLogicalBytes": 10817868,
+      "peakRssBytes": 4386816,
+      "platform": "win32",
+      "reason": "whole-job deadline limit",
+      "stages": [
+        {
+          "elapsedSeconds": 600.01,
+          "exitCode": 1,
+          "stage": 0
+        }
+      ],
+      "status": "bounded-stop"
+    },
+    "cacheState": "uncontrolled; no cold-read guarantee",
+    "backgroundHostLoad": "uncontrolled",
+    "rssInterpretation": "sampled suspended-launch main PID only; Windows venv redirector may be the main PID, not the actual producer worker; not tree RSS"
+  },
+  "postRun": {
+    "postRunSourceHashes": [
+      {
+        "id": "monaco",
+        "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+        "bytes": 692392,
+        "matches": true,
+        "elapsedSeconds": 0.0006619000341743231,
+        "cpuSeconds": 0.0
+      },
+      {
+        "id": "faroe-islands",
+        "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+        "bytes": 7735542,
+        "matches": true,
+        "elapsedSeconds": 0.00489069998729974,
+        "cpuSeconds": 0.0
+      }
+    ],
+    "checkpoint": {
+      "catalogueRevision": "osm-9ab73d8f11ed317af0a1128a34f7d910877ab5fb7cd8050487f901e0c1f0654e",
+      "completedSources": 1,
+      "databaseSha256": "37d0656e73330a7c3171ce20f87a24e028a67af2d8be7afe10b0052322192344",
+      "manifestSha256": "c9c8787252b9e3ba0a317e428553302283ec353211e8a4430684a3a0f4bdab14"
+    },
+    "canonicalCompletionAvailable": false,
+    "readOnlySqliteProgressUnavailable": "attempt to write a readonly database"
+  },
+  "stagesNotReached": [
+    "configured catalogue bridge",
+    "canonical candidate/exclusion/lineage JSONL publication",
+    "producer complete.json"
+  ],
+  "legacyComparison": {
+    "monacoCandidateRows": 11,
+    "faroeCandidateRows": 73,
+    "currentCanonicalComparison": "unavailable: no complete normalized candidate stream; no category/identity equality asserted"
+  },
+  "diagnostic": {
+    "status": "bounded-stop-before-parser",
+    "supervisor": {
+      "elapsedSeconds": 0.158,
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "limits": {
+        "commitBytes": 2147483648,
+        "diskBytes": 67802257,
+        "freeBytes": 103079215104,
+        "maxProcesses": 2,
+        "rssBytes": 1073741824,
+        "wallSeconds": 30
+      },
+      "peakLogicalBytes": 784493,
+      "peakRssBytes": 4767744,
+      "platform": "win32",
+      "reason": "stage failed: 1",
+      "stages": [
+        {
+          "elapsedSeconds": 0.155,
+          "exitCode": 1,
+          "stage": 0
+        }
+      ],
+      "status": "bounded-stop"
+    },
+    "reason": "diagnostic preparation used default Windows text decoding on UTF-8 manifest and corrupted attribution; OSM rights preflight rejected before raw workload",
+    "profileAvailable": true,
+    "profileBytes": 88988,
+    "usefulWorkloadProfile": false,
+    "repeat": "one explicitly authorized correction only; failed original retained"
+  },
+  "networkRequests": 0,
+  "runtimeInstalled": false,
+  "globalFitClaim": false,
+  "newRetainedMeasurementLogicalBytes": 2674136,
+  "correctedDiagnostic": {
+    "supervisor": {
+      "elapsedSeconds": 10.167,
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "limits": {
+        "commitBytes": 2147483648,
+        "diskBytes": 67802275,
+        "freeBytes": 103079215104,
+        "maxProcesses": 2,
+        "rssBytes": 1073741824,
+        "wallSeconds": 30
+      },
+      "peakLogicalBytes": 851452,
+      "peakRssBytes": 4775936,
+      "platform": "win32",
+      "reason": "stage failed: 1",
+      "stages": [
+        {
+          "elapsedSeconds": 10.163,
+          "exitCode": 1,
+          "stage": 0
+        }
+      ],
+      "status": "bounded-stop"
+    },
+    "profileTotalSeconds": 10.049983899999994,
+    "profileTotalCalls": 11200672,
+    "topCumulative": [
+      {
+        "file": "<built-in>",
+        "line": 0,
+        "function": "<built-in method builtins.exec>",
+        "primitiveCalls": 1,
+        "calls": 50,
+        "selfSeconds": 0.0018402000000000002,
+        "cumulativeSeconds": 10.051049200000001
+      },
+      {
+        "file": "global_source.py",
+        "line": 1,
+        "function": "<module>",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 6.37e-05,
+        "cumulativeSeconds": 10.0510412
+      },
+      {
+        "file": "global_source.py",
+        "line": 149,
+        "function": "build",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 0.0104166,
+        "cumulativeSeconds": 10.0058758
+      },
+      {
+        "file": "global_source.py",
+        "line": 89,
+        "function": "entities",
+        "primitiveCalls": 2742,
+        "calls": 2742,
+        "selfSeconds": 0.022748800000000003,
+        "cumulativeSeconds": 9.8688578
+      },
+      {
+        "file": "global_source.py",
+        "line": 154,
+        "function": "check",
+        "primitiveCalls": 2755,
+        "calls": 2755,
+        "selfSeconds": 0.052782600000000006,
+        "cumulativeSeconds": 9.7282963
+      },
+      {
+        "file": "spot_paths.py",
+        "line": 20,
+        "function": "safe_path",
+        "primitiveCalls": 10993,
+        "calls": 10993,
+        "selfSeconds": 0.36047660000000004,
+        "cumulativeSeconds": 9.175978
+      },
+      {
+        "file": "spot_paths.py",
+        "line": 7,
+        "function": "_check_ancestors",
+        "primitiveCalls": 21986,
+        "calls": 21986,
+        "selfSeconds": 0.24501070000000003,
+        "cumulativeSeconds": 7.2335925
+      },
+      {
+        "file": "__init__.py",
+        "line": 656,
+        "function": "lstat",
+        "primitiveCalls": 302290,
+        "calls": 302290,
+        "selfSeconds": 0.0582101,
+        "cumulativeSeconds": 5.6096157
+      },
+      {
+        "file": "<built-in>",
+        "line": 0,
+        "function": "<built-in method nt.lstat>",
+        "primitiveCalls": 302290,
+        "calls": 302290,
+        "selfSeconds": 5.4184712,
+        "cumulativeSeconds": 5.551405600000001
+      },
+      {
+        "file": "<frozen _collections_abc>",
+        "line": 1011,
+        "function": "__iter__",
+        "primitiveCalls": 302304,
+        "calls": 302304,
+        "selfSeconds": 0.066489,
+        "cumulativeSeconds": 1.2080047
+      },
+      {
+        "file": "__init__.py",
+        "line": 63,
+        "function": "__getitem__",
+        "primitiveCalls": 302304,
+        "calls": 302304,
+        "selfSeconds": 0.1930135,
+        "cumulativeSeconds": 1.1415157
+      },
+      {
+        "file": "__init__.py",
+        "line": 932,
+        "function": "resolve",
+        "primitiveCalls": 10993,
+        "calls": 10993,
+        "selfSeconds": 0.009805000000000001,
+        "cumulativeSeconds": 1.0022643
+      },
+      {
+        "file": "<frozen ntpath>",
+        "line": 661,
+        "function": "realpath",
+        "primitiveCalls": 10993,
+        "calls": 10993,
+        "selfSeconds": 0.0349444,
+        "cumulativeSeconds": 0.9616517000000001
+      },
+      {
+        "file": "<built-in>",
+        "line": 0,
+        "function": "<built-in method nt._getfinalpathname>",
+        "primitiveCalls": 21994,
+        "calls": 21994,
+        "selfSeconds": 0.8590738,
+        "cumulativeSeconds": 0.8590738
+      },
+      {
+        "file": "__init__.py",
+        "line": 269,
+        "function": "_from_parsed_parts",
+        "primitiveCalls": 280317,
+        "calls": 280317,
+        "selfSeconds": 0.1018425,
+        "cumulativeSeconds": 0.7171883
+      },
+      {
+        "file": "__init__.py",
+        "line": 276,
+        "function": "_from_parsed_string",
+        "primitiveCalls": 280317,
+        "calls": 280317,
+        "selfSeconds": 0.055311500000000006,
+        "cumulativeSeconds": 0.49998600000000004
+      },
+      {
+        "file": "__init__.py",
+        "line": 157,
+        "function": "with_segments",
+        "primitiveCalls": 299538,
+        "calls": 299538,
+        "selfSeconds": 0.14347890000000002,
+        "cumulativeSeconds": 0.49654250000000005
+      },
+      {
+        "file": "__init__.py",
+        "line": 135,
+        "function": "__init__",
+        "primitiveCalls": 329751,
+        "calls": 329751,
+        "selfSeconds": 0.1846121,
+        "cumulativeSeconds": 0.2968679
+      },
+      {
+        "file": "<frozen ntpath>",
+        "line": 311,
+        "function": "isreserved",
+        "primitiveCalls": 10993,
+        "calls": 10993,
+        "selfSeconds": 0.0343337,
+        "cumulativeSeconds": 0.26591380000000003
+      },
+      {
+        "file": "__init__.py",
+        "line": 190,
+        "function": "__fspath__",
+        "primitiveCalls": 370970,
+        "calls": 370970,
+        "selfSeconds": 0.09120360000000001,
+        "cumulativeSeconds": 0.2501047
+      }
+    ],
+    "selectedFunctions": [
+      {
+        "file": "global_source.py",
+        "line": 1,
+        "function": "<module>",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 6.37e-05,
+        "cumulativeSeconds": 10.0510412
+      },
+      {
+        "file": "global_source.py",
+        "line": 149,
+        "function": "build",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 0.0104166,
+        "cumulativeSeconds": 10.0058758
+      },
+      {
+        "file": "global_source.py",
+        "line": 89,
+        "function": "entities",
+        "primitiveCalls": 2742,
+        "calls": 2742,
+        "selfSeconds": 0.022748800000000003,
+        "cumulativeSeconds": 9.8688578
+      },
+      {
+        "file": "global_source.py",
+        "line": 154,
+        "function": "check",
+        "primitiveCalls": 2755,
+        "calls": 2755,
+        "selfSeconds": 0.052782600000000006,
+        "cumulativeSeconds": 9.7282963
+      },
+      {
+        "file": "spot_paths.py",
+        "line": 20,
+        "function": "safe_path",
+        "primitiveCalls": 10993,
+        "calls": 10993,
+        "selfSeconds": 0.36047660000000004,
+        "cumulativeSeconds": 9.175978
+      },
+      {
+        "file": "spot_paths.py",
+        "line": 7,
+        "function": "_check_ancestors",
+        "primitiveCalls": 21986,
+        "calls": 21986,
+        "selfSeconds": 0.24501070000000003,
+        "cumulativeSeconds": 7.2335925
+      },
+      {
+        "file": "__init__.py",
+        "line": 656,
+        "function": "lstat",
+        "primitiveCalls": 302290,
+        "calls": 302290,
+        "selfSeconds": 0.0582101,
+        "cumulativeSeconds": 5.6096157
+      },
+      {
+        "file": "<built-in>",
+        "line": 0,
+        "function": "<built-in method nt.lstat>",
+        "primitiveCalls": 302290,
+        "calls": 302290,
+        "selfSeconds": 5.4184712,
+        "cumulativeSeconds": 5.551405600000001
+      },
+      {
+        "file": "<built-in>",
+        "line": 0,
+        "function": "<built-in method nt.stat>",
+        "primitiveCalls": 11297,
+        "calls": 11297,
+        "selfSeconds": 0.1868623,
+        "cumulativeSeconds": 0.1903717
+      },
+      {
+        "file": "__init__.py",
+        "line": 649,
+        "function": "stat",
+        "primitiveCalls": 10969,
+        "calls": 10969,
+        "selfSeconds": 0.0037465000000000003,
+        "cumulativeSeconds": 0.1879942
+      },
+      {
+        "file": "shutil.py",
+        "line": 1460,
+        "function": "disk_usage",
+        "primitiveCalls": 2754,
+        "calls": 2754,
+        "selfSeconds": 0.0035776000000000002,
+        "cumulativeSeconds": 0.0492331
+      },
+      {
+        "file": "<built-in>",
+        "line": 0,
+        "function": "<built-in method _stat.S_ISLNK>",
+        "primitiveCalls": 302282,
+        "calls": 302282,
+        "selfSeconds": 0.0245007,
+        "cumulativeSeconds": 0.0245007
+      },
+      {
+        "file": "global_source.py",
+        "line": 25,
+        "function": "digest",
+        "primitiveCalls": 2,
+        "calls": 2,
+        "selfSeconds": 3.6400000000000004e-05,
+        "cumulativeSeconds": 0.0123409
+      },
+      {
+        "file": "global_source.py",
+        "line": 168,
+        "function": "verify_sources",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 7.3e-06,
+        "cumulativeSeconds": 0.0099851
+      },
+      {
+        "file": "global_source.py",
+        "line": 145,
+        "function": "valid",
+        "primitiveCalls": 2741,
+        "calls": 2741,
+        "selfSeconds": 0.005041400000000001,
+        "cumulativeSeconds": 0.007770900000000001
+      },
+      {
+        "file": "global_source.py",
+        "line": 21,
+        "function": "canonical",
+        "primitiveCalls": 948,
+        "calls": 948,
+        "selfSeconds": 0.0005217,
+        "cumulativeSeconds": 0.006424200000000001
+      },
+      {
+        "file": "<frozen importlib._bootstrap_external>",
+        "line": 145,
+        "function": "_path_stat",
+        "primitiveCalls": 328,
+        "calls": 328,
+        "selfSeconds": 8.16e-05,
+        "cumulativeSeconds": 0.0062056
+      },
+      {
+        "file": "global_source.py",
+        "line": 195,
+        "function": "save",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 2.4800000000000003e-05,
+        "cumulativeSeconds": 0.005834000000000001
+      },
+      {
+        "file": "global_source.py",
+        "line": 146,
+        "function": "<genexpr>",
+        "primitiveCalls": 8223,
+        "calls": 8223,
+        "selfSeconds": 0.0018756,
+        "cumulativeSeconds": 0.0027295
+      },
+      {
+        "file": "global_source.py",
+        "line": 39,
+        "function": "validate_manifest",
+        "primitiveCalls": 2,
+        "calls": 2,
+        "selfSeconds": 4.55e-05,
+        "cumulativeSeconds": 0.0021409000000000003
+      },
+      {
+        "file": "global_source.py",
+        "line": 68,
+        "function": "manifest_revision",
+        "primitiveCalls": 1,
+        "calls": 1,
+        "selfSeconds": 9.9e-06,
+        "cumulativeSeconds": 0.0009577
+      },
+      {
+        "file": "global_source.py",
+        "line": 151,
+        "function": "<genexpr>",
+        "primitiveCalls": 2,
+        "calls": 2,
+        "selfSeconds": 3.4e-06,
+        "cumulativeSeconds": 0.0008128
+      },
+      {
+        "file": "<frozen importlib._bootstrap_external>",
+        "line": 966,
+        "function": "path_stats",
+        "primitiveCalls": 43,
+        "calls": 43,
+        "selfSeconds": 2.1300000000000003e-05,
+        "cumulativeSeconds": 0.000671
+      },
+      {
+        "file": "inspect.py",
+        "line": 1725,
+        "function": "getattr_static",
+        "primitiveCalls": 8,
+        "calls": 8,
+        "selfSeconds": 7.3e-06,
+        "cumulativeSeconds": 3.1100000000000004e-05
+      },
+      {
+        "file": "global_source.py",
+        "line": 44,
+        "function": "<genexpr>",
+        "primitiveCalls": 20,
+        "calls": 20,
+        "selfSeconds": 5.4e-06,
+        "cumulativeSeconds": 5.4e-06
+      }
+    ],
+    "postRunMonacoSha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+    "coreProducerSha256": "52033a5cc1166222e1832cbdd3bace4867954d0194e24fda8a2eccabf990861e",
+    "plan": {
+      "commitBytes": 2147483648,
+      "coreProducerSha256": "52033a5cc1166222e1832cbdd3bace4867954d0194e24fda8a2eccabf990861e",
+      "correction": "explicit UTF8 read of original manifest; ASCII-escaped JSON encoding; core unchanged",
+      "freeReserveBytes": 103079215104,
+      "manifestSha256": "2843d49ae3b154e7fe1e0204ed989242344d865168155c799c2ca43d94801f04",
+      "maxProcesses": 2,
+      "newWriteBytes": 67108864,
+      "processNote": "venv redirector plus real Python worker; no other stages",
+      "producerSeconds": 10,
+      "profileCommand": "existing-python -m cProfile -o NEW_JOB/profile.pstats scripts/osm/global_source.py PINNED_MANIFEST NEW_JOB/normalized",
+      "purpose": "ONE conditional cost diagnostic, not repeated benchmark",
+      "rssBytes": 1073741824,
+      "scheduling": "explicit parent corrected-diagnostic authorization after known UTF8 preparation failure; no further repeats",
+      "supervisorWallSeconds": 30
+    },
+    "preflight": {
+      "commitHeadroomBytes": 6942892032,
+      "diskFreeBytes": 310888001536,
+      "observedUtc": "2026-10-15T15:58:56Z",
+      "physicalAvailableBytes": 15942602752
+    },
+    "interpretation": "10s aborted instrumented partial Monaco workload; profiling overhead uncontrolled; not throughput benchmark"
+  },
+  "writeAccountingScope": {
+    "measured": "logical files under the job directory; exact raw/manifest/metadata retained-file accounting; reported newRetainedMeasurementLogicalBytes covers known retained-geography roots only",
+    "outsideScope": "owning Python imports before child supervision could update existing scripts/osm/__pycache__ outside the measured job; not inventoried as new bytes",
+    "tsxBridgeExecuted": false,
+    "hardFilesystemQuota": false,
+    "futureHarnessChange": "disable owning-module bytecode before local imports and TSX cache; child supervisor already sets PYTHONDONTWRITEBYTECODE and job-local TEMP/TMP/SQLITE_TMPDIR; this change did not produce the recorded native measurements"
+  }
+}

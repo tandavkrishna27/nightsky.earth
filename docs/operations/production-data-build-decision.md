@@ -4,6 +4,8 @@ Prepared 15 October 2026 against branch `codex/plugin-v1`, implementation baseli
 
 **Subsequent implementation:** [offline build preparation](offline-build-preparation-wave.md) now supplies the pinned configuration route, conservative geometry/footprint preparation and retained-hour mapping planner proposed here. This supersedes their absence in the preparation snapshot; actual source compatibility, complete footprint residuals, scale, new-format adapter and real production data remain unadmitted. See the [following-wave sequence](v1-completion-wave-sequence.md); no download/build allowance follows from these additions.
 
+**Subsequent retained measurement:** [actual characterization](retained-source-characterization-wave.md) preserves a geographic deadline failure and identifies costly per-entity filesystem checking. The proposed larger acquisition must wait for a safe optimization and successful retained producer/bridge run. Legacy historical replay is byte-identical on four retained monthly files, and sample aggregation/planning is measured, with missing periods and source-admission limits explicit. These results supply no global ETA, full baseline, actual new-format compatibility or host fit.
+
 ## Recommended decisions
 
 | Area | Recommendation | What remains a decision / evidence gate |

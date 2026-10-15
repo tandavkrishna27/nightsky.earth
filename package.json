@@ -27,7 +27,8 @@
     "data:build-boundary-metadata": "tsx scripts/osm/boundary-metadata.ts",
     "data:aggregate-observations": "tsx scripts/era5/build-observation-aggregates.ts",
     "data:prepare-geographic-coverage": "tsx scripts/osm/prepare-geographic-coverage.ts",
-    "data:plan-production-history": "tsx scripts/era5/plan-production-history.ts"
+    "data:plan-production-history": "tsx scripts/era5/plan-production-history.ts",
+    "data:validate-retained-adapters": "tsx scripts/validate-retained-source-adapters.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
