@@ -98,3 +98,5 @@ import './mcp/climate-release-configuration.test';
 import './places/sourceCatalogue.test';
 import './providers/climate/release-publication.test';
 import './operations/operator-preflight.test';
+import './places/boundaryMetadata.test';
+import './providers/climate/observation-aggregates.test';

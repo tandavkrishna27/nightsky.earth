@@ -1,3 +1,4 @@
+import { validateOperatorReleaseClosure } from './operatorClosure';
 /** Offline operator admission only. Never mutates runtime, reads environment or contacts hosts. */
 import { z } from 'zod';
 import { createHash } from 'node:crypto';
@@ -142,6 +143,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
             fail('ARTIFACT_ID_CONFLICT');
         ids.add(a.id);
         const previous = paths.get(a.path.toLowerCase());
+        if (previous) fail('ARTIFACT_PATH_ALIAS');
         if (previous && (previous.sha256 !== a.sha256 || previous.bytes !== a.bytes || previous.version !== a.version || previous.kind !== a.kind)) fail('ARTIFACT_PATH_CONFLICT');
         paths.set(a.path.toLowerCase(), a);
     }
@@ -191,6 +193,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
                 }
             }
     }
+    if (!invalid && b) for (const r of [current, rollback]) if (r) { try { await validateOperatorReleaseClosure(artifactRoot, c.artifacts.filter(a => r.artifactIds.includes(a.id))); } catch { fail('RELEASE_CLOSURE_INVALID'); } }
     findings.push('HOST_CHECKS_NOT_PERFORMED');
     return output();
 }

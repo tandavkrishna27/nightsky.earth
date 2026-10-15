@@ -48,7 +48,7 @@ function emptyBin(): BinCounts { return { expected: 0, valid: 0, counts: [0, 0, 
 
 /** Stream sorted source instants against an independently generated hourly clock.
  * Missing source timestamps still enter the expected dark-time denominator. */
-export function aggregateDarkCloudSamples(samples: Iterable<CloudSample>, mapping: GridMapping, method: AggregateMethod): ClimateAggregate {
+export function aggregateDarkCloudSamples(samples: Iterable<CloudSample>, mapping: GridMapping, method: AggregateMethod, checkBudget?: () => void): ClimateAggregate {
   const period = climatePeriodSchema.parse({ ...method, kind: method.startNight === "1991-01-01" && method.endNight === "2020-12-31" ? "baseline-1991-2020" : "sample-only" });
   ianaTimeZoneSchema.parse(mapping.timeZone);
   if (!mapping.cellId || mapping.cellId.length > 80 || !Number.isFinite(mapping.latitude) || mapping.latitude < -90 || mapping.latitude > 90 || !Number.isFinite(mapping.longitude) || mapping.longitude < -180 || mapping.longitude > 180 || !Number.isInteger(mapping.latitude * 4) || !Number.isInteger(mapping.longitude * 4))
@@ -77,6 +77,7 @@ export function aggregateDarkCloudSamples(samples: Iterable<CloudSample>, mappin
   try {
     let next = take();
     for (let time = start; time < end; time += HOUR) {
+      checkBudget?.();
       const value = next?.at === time ? next.value : null;
       if (next?.at === time) next = take();
       const at = new Date(time);

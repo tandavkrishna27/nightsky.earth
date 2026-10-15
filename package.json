@@ -23,7 +23,9 @@
     "mcp:inspector-smoke": "tsx tests/mcp/inspector-smoke-server.ts",
     "data:build-catalogue-source": "tsx scripts/osm/build-source-catalogue.ts",
     "data:publish-history-release": "tsx scripts/era5/build-release.ts",
-    "plugin:preflight": "tsx scripts/plugin-operator-preflight.ts"
+    "plugin:preflight": "tsx scripts/plugin-operator-preflight.ts",
+    "data:build-boundary-metadata": "tsx scripts/osm/boundary-metadata.ts",
+    "data:aggregate-observations": "tsx scripts/era5/build-observation-aggregates.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

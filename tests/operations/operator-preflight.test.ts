@@ -87,3 +87,77 @@ test('full rollback cannot omit the product artifacts retained for recovery',asy
 test('artifact changed during verification fails without exposing its path',async()=>{const root=await mkdtemp(join(tmpdir(),'operator-mutation-'));try{const body=Buffer.alloc(4*1024*1024,1),path=join(root,'file');await writeFile(path,body);const c=config();c.budget.maxArtifactBytes=body.length;c.budget.currentBytes=body.length;c.budget.diskAvailableBytes=body.length*2;c.artifacts=[{id:'file',kind:'component',path:'file',sha256:createHash('sha256').update(body).digest('hex'),bytes:body.length,version:'v1'}];c.releases.current.artifactIds=['file'];const checking=operatorPreflight(c,root);await writeFile(path,Buffer.alloc(body.length,2));const result=await checking;assert.equal(result.status,'invalid');assert.ok(!JSON.stringify(result).includes(root));}finally{await rm(root,{recursive:true,force:true});}});
 test('release selection redacts unknown property names in errors',()=>{const c=config();c['secret-value-as-unknown-key']='also-secret';assert.throws(()=>selectRelease(c,'rollback'),error=>{assert.equal((error as Error).message,'Release selection invalid.');assert.ok(!String(error).includes('secret-value'));return true;});});
 test('unassigned inventory cannot pass without a release allocation',async()=>{const root=await mkdtemp(join(tmpdir(),'operator-unassigned-'));try{await writeFile(join(root,'file'),'data');const c=config();c.artifacts=[{id:'orphan',kind:'component',path:'file',sha256:hash,bytes:4,version:'v1'}];const result=await operatorPreflight(c,root);assert.equal(result.status,'invalid');assert.ok(result.findings.includes('ARTIFACT_UNASSIGNED'));}finally{await rm(root,{recursive:true,force:true});}});
+
+test('published catalogue closure requires every pinned child in the same release inventory',async()=>{
+ const {buildStreamedCatalogue}=await import('../../scripts/osm/build-streamed-catalogue');
+ const {readFile,readdir,realpath}=await import('node:fs/promises');
+ const root=await realpath(await mkdtemp(join(tmpdir(),'operator-closure-')));
+ try {
+  async function* empty():AsyncGenerator<any>{}
+  await buildStreamedCatalogue({catalogueRevision:'closure-v1',candidates:empty(),regions:empty(),footprints:empty()},join(root,'catalogue'));
+  const c=config();c.budget.currentBytes=1000000;c.budget.diskAvailableBytes=2000000;c.budget.maxArtifactBytes=1000000;
+  for(const name of await readdir(join(root,'catalogue'),{recursive:true})){if(!name.endsWith('.json'))continue;const body=await readFile(join(root,'catalogue',name));c.artifacts.push({id:name,kind:name.startsWith('catalogue-')?'global-catalogue':'component',path:'catalogue/'+name.replaceAll('\\','/'),sha256:createHash('sha256').update(body).digest('hex'),bytes:body.length,version:'closure-v1'});}
+  c.releases.current.artifactIds=c.artifacts.map((a:any)=>a.id);
+  assert.ok(c.artifacts.some((a:any)=>a.kind==='global-catalogue'));
+  assert.equal((await operatorPreflight(c,root)).status,'offline-pass');
+  const child=c.artifacts.find((a:any)=>a.kind==='component');
+  c.releases.current.artifactIds=c.releases.current.artifactIds.filter((id:string)=>id!==child.id);c.releases.rollback.artifactIds=[child.id];
+  const result=await operatorPreflight(c,root);assert.ok(result.findings.includes('RELEASE_CLOSURE_INVALID'));
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+
+
+test('history publisher recovery closure rejects missing unlisted mutated and cross-release tiles',async(t)=>{
+ const {publishClimateRelease}=await import('../../scripts/era5/build-release');const {releaseClosureSample}=await import('./release-closure-fixture');
+ const {readFile,readdir,realpath}=await import('node:fs/promises');const root=await realpath(await mkdtemp(join(tmpdir(),'history-closure-')));
+ try{const body=JSON.stringify(releaseClosureSample()),inputPath=join(root,'input.json');await writeFile(inputPath,body);const options={inputs:[{inputPath,expectedSha256:createHash('sha256').update(body).digest('hex')}],outputDirectory:join(root,'history'),generatedAt:'2026-10-13T18:00:00Z'};
+ await assert.rejects(publishClimateRelease({...options,onProgress(){throw Error('rehearsal interruption');}}),/rehearsal/);
+ await publishClimateRelease(options);const c=config();c.budget.currentBytes=1000000;c.budget.diskAvailableBytes=2000000;c.budget.maxArtifactBytes=1000000;
+ for(const name of await readdir(options.outputDirectory,{recursive:true})){if(!name.endsWith('.json'))continue;const data=await readFile(join(options.outputDirectory,name));c.artifacts.push({id:name,kind:name==='manifest.json'?'era5-release':'component',path:'history/'+name.replaceAll('\\','/'),sha256:createHash('sha256').update(data).digest('hex'),bytes:data.length,version:'history-v1'});}
+ c.releases.current.artifactIds=c.artifacts.map((a:any)=>a.id);const pristine=structuredClone(c),started=performance.now();assert.equal((await operatorPreflight(c,root)).status,'offline-pass');t.diagnostic(JSON.stringify({evidence:'offline-fictional-history-recovery',inventoryFiles:c.artifacts.length,inventoryBytes:c.artifacts.reduce((n:number,a:any)=>n+a.bytes,0),preflightDurationMs:performance.now()-started,hostChecksPerformed:false}));
+ const tile=c.artifacts.find((a:any)=>a.path.includes('tile-'));assert.ok(tile);
+ for(const variant of ['unlisted','cross-release','pin']){const candidate=structuredClone(pristine);if(variant==='unlisted'){candidate.artifacts=candidate.artifacts.filter((a:any)=>a.id!==tile.id);candidate.releases.current.artifactIds=candidate.releases.current.artifactIds.filter((id:string)=>id!==tile.id);}else if(variant==='cross-release'){candidate.releases.current.artifactIds=candidate.releases.current.artifactIds.filter((id:string)=>id!==tile.id);candidate.releases.rollback.artifactIds=[tile.id];}else candidate.artifacts.find((a:any)=>a.id===tile.id).sha256='f'.repeat(64);assert.equal((await operatorPreflight(candidate,root)).status,'invalid',variant);}
+ await writeFile(join(root,tile.path),'{}');assert.equal((await operatorPreflight(pristine,root)).status,'invalid');await rm(join(root,tile.path));assert.equal((await operatorPreflight(pristine,root)).status,'invalid');
+ assert.equal(selectRelease(pristine,'rollback').id,'previous');assert.equal((await operatorPreflight(pristine,root)).hostChecksPerformed,false);
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('distinct inventory ids cannot alias one physical release path',async()=>{const c=config();c.artifacts=[{id:'a',kind:'component',path:'file',sha256:hash,bytes:4,version:'v1'},{id:'b',kind:'component',path:'file',sha256:hash,bytes:4,version:'v1'}];c.releases.current.artifactIds=['a'];c.releases.rollback.artifactIds=['b'];assert.ok((await operatorPreflight(c,'.')).findings.includes('ARTIFACT_PATH_ALIAS'));});
+
+test('catalogue closure rejects correctly pinned wrong-kind nested descendants',async(t)=>{
+ const {readFile,realpath}=await import('node:fs/promises');const {loadCatalogueFiles}=await import('../../server/places/catalogueFiles');
+ const root=await realpath(await mkdtemp(join(tmpdir(),'operator-tree-kind-')));const c=config();c.budget.currentBytes=1000000;c.budget.diskAvailableBytes=2000000;c.budget.maxArtifactBytes=1000000;
+ try{async function put(path:string,value:unknown,kind='component'){const body=JSON.stringify(value);await writeFile(join(root,path),body);const sha256=createHash('sha256').update(body).digest('hex'),bytes=Buffer.byteLength(body);c.artifacts.push({id:path,kind,path,sha256,bytes,version:'tree-v1'});return {path,sha256,bytes};}
+ const trees:any={};for(const [tree,kind] of Object.entries({spatial:'candidates',id:'ids',name:'names',membership:'memberships',regions:'regions',footprints:'footprints'})){trees[tree]={...await put(tree+'.json',{schemaVersion:2,catalogueRevision:'tree-v1',kind,rows:[]}),kind,rows:0};}
+ const wrong={...await put('directory.json',{schemaVersion:2,catalogueRevision:'tree-v1',kind:'directory',entries:[trees.name]}),kind:'directory',rows:1};trees.spatial=wrong;
+ const rootPin=await put('root.json',{schemaVersion:2,catalogueRevision:'tree-v1',trees},'global-catalogue');c.releases.current.artifactIds=c.artifacts.map((a:any)=>a.id);
+ const files=await loadCatalogueFiles(join(root,'root.json'),{expectedSha256:rootPin.sha256});await assert.rejects(async()=>{for await(const _ of files.walk('spatial')){}},/Unexpected spatial tree leaf kind/);
+ const before=performance.now(),result=await operatorPreflight(c,root);t.diagnostic(JSON.stringify({evidence:'offline-fictional-fixture',inventoryFiles:c.artifacts.length,inventoryBytes:c.artifacts.reduce((n:number,a:any)=>n+a.bytes,0),durationMs:performance.now()-before,hostChecksPerformed:result.hostChecksPerformed}));assert.ok(result.findings.includes('RELEASE_CLOSURE_INVALID'));
+ }finally{await rm(root,{recursive:true,force:true});}
+});
+
+test('catalogue closure matches repeated-page walks while allowing shared candidate pointers',async()=>{
+ const {realpath}=await import('node:fs/promises');const {loadCatalogueFiles}=await import('../../server/places/catalogueFiles');
+ const root=await realpath(await mkdtemp(join(tmpdir(),'operator-repeated-page-')));
+ try{
+  const c=config();c.budget.currentBytes=1000000;c.budget.diskAvailableBytes=2000000;c.budget.maxArtifactBytes=1000000;
+  async function put(path:string,value:any,kind='component'){
+   const body=JSON.stringify(value),sha256=createHash('sha256').update(body).digest('hex'),bytes=Buffer.byteLength(body);
+   await writeFile(join(root,path),body);c.artifacts=c.artifacts.filter((a:any)=>a.path!==path);c.artifacts.push({id:path,kind,path,sha256,bytes,version:'repeat-v1'});
+   return {path,sha256,bytes,kind:value.kind,rows:value.kind==='directory'?value.entries.length:value.rows?.length};
+  }
+  const base={schemaVersion:2,catalogueRevision:'repeat-v1'},trees:any={};
+  for(const [tree,kind] of Object.entries({spatial:'candidates',id:'ids',name:'names',membership:'memberships',regions:'regions',footprints:'footprints'}))trees[tree]=await put(tree+'.json',{...base,kind,rows:[]});
+  const leaf=trees.spatial;
+  trees.id=await put('id.json',{...base,kind:'ids',rows:[{key:'place:v1:osm:node:1',page:leaf},{key:'place:v1:osm:node:2',page:leaf}]});
+  trees.membership=await put('membership.json',{...base,kind:'memberships',rows:[{key:'region:v1:country:IN',placeId:'place:v1:osm:node:1',page:leaf}]});
+  async function pin(){const ref=await put('root.json',{...base,trees},'global-catalogue');c.releases.current.artifactIds=c.artifacts.map((a:any)=>a.id);return ref;}
+  await pin();assert.equal((await operatorPreflight(c,root)).status,'offline-pass','separate index pointers can share a candidate page');
+  const a=await put('dir-a.json',{...base,kind:'directory',entries:[leaf]}),b=await put('dir-b.json',{...base,kind:'directory',entries:[leaf]});
+  trees.spatial=await put('top.json',{...base,kind:'directory',entries:[a,b]});const rootPin=await pin();
+  const files=await loadCatalogueFiles(join(root,'root.json'),{expectedSha256:rootPin.sha256});
+  await assert.rejects(async()=>{for await(const _ of files.walk('spatial')){}},/Repeated or cyclic catalogue page/);
+  const result=await operatorPreflight(c,root);assert.ok(result.findings.includes('RELEASE_CLOSURE_INVALID'));
+ }finally{await rm(root,{recursive:true,force:true});}
+});

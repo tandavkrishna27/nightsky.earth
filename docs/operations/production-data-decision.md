@@ -64,3 +64,7 @@ Approval of a completed future record authorizes only its exact stated acquisiti
 - Lane C: [package and client readiness](local-package-readiness.md), [host/policy operator handoff](v1-host-policy-handoff.md).
 
 The website remains separate. Completing these preparation records closes no global-data, hosting, client-publication or pilot acceptance gate by itself.
+
+### Subsequent local producer integration
+
+[The next offline wave](offline-producer-integration-wave.md) implements strict boundary membership enrichment, bounded decoded hourly aggregation into existing historical envelopes, and supported release-manifest dependency closure. These consume pinned local inputs and produce the existing catalogue/history formats. Administrative boundaries still do not prove extraction footprints; explicit cell/timezone mapping is required. Actual source admission, coverage construction, production-scale build measurements and historical data acquisition remain separate decisions. Synthetic baseline tests do not install or claim a real baseline. No acquisition or deployment authority changes.
