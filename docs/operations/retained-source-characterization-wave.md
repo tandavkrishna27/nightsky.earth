@@ -31,7 +31,7 @@ Three task reviews and a fresh integrated review approved the corrected implemen
 | --- | --- |
 | Complete Node aggregate | **794 discovered / 793 passed / one existing permission skip / zero failed** |
 | Pinned OSM Python suite | **92 discovered / 89 passed / three existing skips / zero failed** |
-| Pinned ERA5 Python suite | **51 passed / zero failed** |
+| Pinned ERA5 Python suite | **52 passed / zero failed** |
 | Three TypeScript configurations | Pass |
 | Website/service/standalone plugin build | Pass; existing website build warnings remain |
 | Public rehearsal and both local package validators | Pass; no installation/publication |
@@ -39,6 +39,8 @@ Three task reviews and a fresh integrated review approved the corrected implemen
 | Actual retained adapter CLI and focused fixture tests | Both actual entries pass; eight adapter plus three history Node fixtures pass |
 
 New Python tests are discovered by existing two-OS suites; new Node fixtures and validator type checking are registered. Real retained measurements are opt-in, not invoked in CI; CI uses generated tiny fixtures. Existing native NetCDF/NumPy dependency deprecation warnings in synthetic file assignment are disclosed, with no global suppression or scientific output changes. Exact pushed SHA/CI outcome is recorded after observation in the ignored wave ledger and delivery response.
+
+The first Windows CI attempt exposed a fixture dependency on the runner having 96 GiB free disk. The containment fixture now mocks its disk snapshot; a separate low-disk regression proves the unchanged production guard rejects before process creation or output writes. All six focused tests and the 52-test ERA5 suite passed locally; an independent review approved the test-only correction.
 
 ## Decision and next work
 

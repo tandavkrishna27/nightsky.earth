@@ -86,10 +86,26 @@ class RetainedReplayTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d); (root/'tmp').mkdir(); output = root/'monitor'; output.mkdir()
             code = 'import subprocess,sys,json; subprocess.Popen([sys.executable,"-c","import time;time.sleep(30)"]); print(json.dumps({"fixture":True}))'
-            report = monitor([sys._base_executable,'-c',code],output,time.time()+10,128*1024*1024)
+            # Exercise process containment independently of CI runner disk capacity.
+            # The production 96 GiB reserve is covered separately below.
+            disk = mock.Mock(total=256*1024**3, used=128*1024**3, free=128*1024**3)
+            with mock.patch('measure_retained_process.shutil.disk_usage',return_value=disk):
+                report = monitor([sys._base_executable,'-c',code],output,time.time()+10,128*1024*1024)
             self.assertEqual(report['exitCode'],0); self.assertTrue(report['result']['fixture'])
             self.assertEqual(report['hardActiveProcessCeiling'],2)
             self.assertGreater(report['observedJobPeakCommitBytes'],0)
+
+    def test_supervisor_rejects_low_disk_before_launch(self):
+        with tempfile.TemporaryDirectory() as d:
+            output = Path(d)
+            disk = mock.Mock(total=128*1024**3, used=33*1024**3, free=95*1024**3)
+            with mock.patch('measure_retained_process.shutil.disk_usage',return_value=disk):
+                with mock.patch('measure_retained_process.WindowsJob') as job:
+                    with mock.patch('measure_retained_process.subprocess.Popen') as launch:
+                        with self.assertRaisesRegex(ValueError,'Shared disk reserve below 96 GiB'):
+                            monitor([sys._base_executable,'-c','pass'],output,time.time()+10,128*1024*1024)
+                        job.assert_not_called(); launch.assert_not_called()
+            self.assertEqual(list(output.iterdir()),[])
 
 
 if __name__ == '__main__': unittest.main()
