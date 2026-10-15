@@ -4,6 +4,8 @@
 
 This integrates the three lanes of the [production-data plan](../superpowers/plans/2026-10-15-v1-production-data-readiness.md). The existing source-admission and operator records remain authoritative; this document joins their decisions rather than creating a competing source/configuration format.
 
+**Current concrete preparation:** [integrated build decision and sequence](production-data-build-decision.md), [geography sources/budgets](production-geography-build-proposal.md), [history access/coverage/budgets](production-history-build-proposal.md), and [remaining original ticket matrix](v1-remaining-ticket-release-matrix.md) incorporate the implemented producers and fresh available-memory/disk snapshot. They propose staged limits and identify source-specific glue before acquisition; no full-world source admission, budget permission, scope reduction or dataset request is implied. Earlier statements below are dated preparation evidence, superseded where the later implementation and these packets explicitly say so.
+
 ## Candidate release inventory
 
 | Component | Existing selection / evidence | Decision still required before production admission |
