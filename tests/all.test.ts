@@ -91,3 +91,4 @@ import "./events/meteorTypicalSeasons.test.ts";
 import "./platforms/local-package.test.ts";
 import "./skills/local-experience.test.ts";
 import "./mcp/darkness-meaning.test.ts";
+import "./mcp/answer-text.test.ts";

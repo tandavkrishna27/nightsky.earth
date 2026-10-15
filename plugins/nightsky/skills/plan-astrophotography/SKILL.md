@@ -7,6 +7,12 @@ description: Plan an astrophotography session and teach an appropriate next step
 
 Use the canonical workflow in `docs/product/workflows/plan-astrophotography.md`.
 
+## First decision and answer rules
+
+Before a candidate-site plan: obtain get_observing_location_details. If its actual timezone is unverified and the user has not explicitly named a display timezone, stop and ask one display-time-zone question. Wait for the reply; do not calculate a candidate or substitute city plan in this turn. A nearby city's timezone, the requested UTC window, or “use its timezone” is not a user choice of an unknown site timezone. Offer the base-city timezone as a question, never silently select it. If details are unavailable, explain that gap and ask whether the user wants a separately labelled named-city plan.
+
+Do not give compass-direction setup advice in a planning answer. Say to use an on-site sky chart for orientation; a maximum-altitude sample is not a rising or session-wide bearing. Use the tool's answer-ready planning text for exact intervals and unknowns. Include the complete source links returned for every source used, rather than names alone or shortened URLs. Moon below the geometric horizon does not establish minimal moonlight; leave its observing impact unknown. Do not assert an uncalculated alternative night's visibility.
+
 Ask for a named place, date, and target/image goal. Ask before assuming host location for “near me.” If given coordinates, ask for a named city or destination and do not reverse-geocode or plan. Ask camera/lens/support details only when needed for tailored learning guidance.
 
 For a complete named-city plan, resolve_place then plan_observing_session provides the combined evidence; use focused tools only as needed, as specified below.

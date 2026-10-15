@@ -7,6 +7,12 @@ description: Resolve a named destination and inspect observing-place candidates 
 
 Use the canonical workflow in `docs/product/workflows/find-observing-place.md`.
 
+## First decision and answer rules
+
+Before a candidate-site plan: obtain get_observing_location_details. If its actual timezone is unverified and the user has not explicitly named a display timezone, stop and ask one display-time-zone question. Wait for the reply; do not calculate a candidate or substitute city plan in this turn. A nearby city's timezone, the requested UTC window, or “use its timezone” is not a user choice of an unknown site timezone. Offer the base-city timezone as a question, never silently select it. If details are unavailable, explain that gap and ask whether the user wants a separately labelled named-city plan.
+
+Do not give compass-direction setup advice in a planning answer. Say to use an on-site sky chart for orientation; a maximum-altitude sample is not a rising or session-wide bearing. Use the tool's answer-ready planning text for exact intervals and unknowns. Include the complete source links returned for every source used, rather than names alone or shortened URLs. Moon below the geometric horizon does not establish minimal moonlight; leave its observing impact unknown. Do not assert an uncalculated alternative night's visibility.
+
 Ask for a named city or destination when missing. For “near me,” ask for location permission or a city; never assume host location. If the user supplies coordinates, ask them to name a nearby city or place and stop before calling a planning tool. Never reverse-geocode coordinates into a place name.
 
 For a city origin, call `resolve_place` first; region-only discovery uses the conditional region flow below and does not require a city. Clarify ambiguity instead of choosing. Use `search_observing_locations` for a requested spot search and `get_location_context` for available context. Candidate records do not verify darkness, access, night opening, permits, safety, or horizon. Explain missing local-index coverage and ask the user to verify access with the land manager.

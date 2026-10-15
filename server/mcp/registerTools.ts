@@ -1,3 +1,4 @@
+import { planAnswerText, sourceLinkedText } from "./answerText";
 import * as z from "zod4";
 import { CatalogueRevisionError } from "../places/globalCatalogue";
 import { normalizeDiscoveryInput, searchDiscoveryInputSchema, searchDiscoveryResultSchema, candidateRefSchema, discoveryCoverageSchema, discoveryScopeSchema, originBasisSchema, resolveObservingRegionInputSchema, resolveObservingRegionResultSchema, getObservingLocationDetailsInputSchema, getObservingLocationDetailsResultSchema, type CatalogueReader, type RegionIndex, type CalculationPlace } from "../../shared/nightsky/discovery";
@@ -153,7 +154,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const text = !names.length && input.useApproximateHostLocation ? "Approximate host location is unavailable. Ask the user for a named town or city." : names.length
       ? `GeoNames (CC BY 4.0; ${index?.vintageLabel ?? "index unavailable"}). ${structuredContent.availability.reason} ${names.join("; ")}`
       : `GeoNames (CC BY 4.0). ${structuredContent.availability.reason}`;
-    return { content: [{ type: "text", text }], structuredContent };
+    return { content: [{ type: "text", text: sourceLinkedText(text, structuredContent.sources) }], structuredContent };
   });
 
   if (toolMode === "resolver-only") return;
@@ -169,7 +170,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
     const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     const result = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, point);
-    return { content: [{ type: "text", text: `Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}` }], structuredContent: result };
+    return { content: [{ type: "text", text: sourceLinkedText(`Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}`, result.sources) }], structuredContent: result };
   });
 
   server.registerTool("get_target_visibility", {
@@ -183,7 +184,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
     const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     const result = await getTargetVisibility(input.targetQuery, { placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, point);
-    return { content: [{ type: "text", text: `Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}` }], structuredContent: result };
+    return { content: [{ type: "text", text: sourceLinkedText(`Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}`, result.sources) }], structuredContent: result };
   });
 
   server.registerTool("get_night_conditions", {
@@ -254,7 +255,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const place = { placeId: input.placeId, latitude:coordinates.latitude, longitude:coordinates.longitude };
     const result = await (dependencies.auroraProvider ?? ((resolvedPlace, window) => getNoaaAuroraOutlook(resolvedPlace, window, { fetcher: dependencies.fetcher, cache: dependencies.cache, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.noaa })))(place, input.window);
     const checkedResult = auroraOutlookResultSchema.parse({...result,...candidatePointMetadata(coordinates),caveats:[...result.caveats,...candidateZoneCaveats(coordinates)]});
-    return { content: [{ type: "text", text: `NOAA SWPC OVATION: ${checkedResult.availability.reason}` }], structuredContent: checkedResult };
+    return { content: [{ type: "text", text: sourceLinkedText(`Aurora outlook: ${checkedResult.availability.reason}`, checkedResult.sources) }], structuredContent: checkedResult };
   });
 
   server.registerTool("search_sky_events", {
@@ -311,7 +312,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const candidate = input.placeId && dependencies.catalogue ? await dependencies.catalogue.details({placeId:input.placeId,catalogueRevision:input.catalogueRevision!}).catch(error => {if(error instanceof CatalogueRevisionError) return undefined;throw error;}) : undefined;
     const matches = candidate ? [candidate] : input.placeQuery && dependencies.catalogue ? await dependencies.catalogue.findNames({placeQuery:input.placeQuery,countryCode:input.countryCode}) : [];
     const result = getObservingLocationDetailsResultSchema.parse({matches,selectionRequired:matches.length>1,availability:{status:dependencies.catalogue ? matches.length ? "available":"not-covered":"unavailable",reason:dependencies.catalogue ? matches.length ? "Candidate source geometry found; actual site time zone and night access remain unverified." : "Candidate name, ID or revision is outside installed coverage. Search again." : GLOBAL_CONFIGURATION_CAVEAT},sources:matches.length?matches.flatMap(x=>x.sources):[CONFIGURATION_SOURCE],caveats:["Source tags do not verify public access, night opening, permits, safety or darkness."]});
-    return {content:[{type:"text",text:result.availability.reason}],structuredContent:result};
+    return {content:[{type:"text",text:sourceLinkedText(`${result.availability.reason} ${matches.length ? "Ask the user to choose an explicit display time zone before planning if they have not already supplied one; do not infer it from a nearby city or window.timeZone. A request to use the site timezone is not a display-zone choice when that timezone is unverified." : ""}`, result.sources)}],structuredContent:result};
   });
   server.registerTool("get_location_context", {
     title: "Check what is known about a named observing area",
@@ -350,7 +351,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("plan_observing_session", {
     title: "Plan a night-sky observing session",
-    description: "Combine the selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, weather forecasts, and activity-specific guidance. Resolve the place first. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
+    description: "Combine the selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, weather forecasts, and activity-specific guidance. Resolve the place first. For an unverified candidate site zone, use a user-chosen display time zone; if the user has not chosen one, ask and wait before calling. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
     inputSchema: planObservingSessionInputSchema,
     outputSchema: planResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.plan_observing_session,
@@ -359,7 +360,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index) throw new Error("The local GeoNames place index is unavailable.");
     const services = plannerServicesFor(index);
     const result = await planObservingSession(input, services);
-    return { content: [{ type: "text", text: result.summary }], structuredContent: result };
+    return { content: [{ type: "text", text: planAnswerText(result) }], structuredContent: result };
   });
 
   server.registerTool("compare_observing_options", {
