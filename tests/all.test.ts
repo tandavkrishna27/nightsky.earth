@@ -93,3 +93,4 @@ import "./skills/local-experience.test.ts";
 import "./mcp/darkness-meaning.test.ts";
 import "./mcp/answer-text.test.ts";
 import './discovery/country-code-contract.test';
+import './planning/optional-event-evidence.test';

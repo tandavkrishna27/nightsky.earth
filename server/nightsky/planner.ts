@@ -102,7 +102,9 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     gaps.push("Weather data is unavailable. Check the provider again closer to the observing date.");
   }
 
-  if (events && !isError(events)) {
+  // Empty event inventory is useful only for an explicit event plan; positive events remain relevant to every activity.
+  const includeEventEvidence = input.activity === "meteor-shower" || input.activity === "eclipse" || Boolean(events && !isError(events) && events.events.length);
+  if (includeEventEvidence && events && !isError(events)) {
     sourceRecords.push(...events.sources, ...events.events.map(event => event.source));
     addAll(caveats, events.caveats);
     const relevant = events.events.filter((event) => input.activity !== "meteor-shower" || event.eventType === "meteor-shower");
@@ -114,7 +116,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       impact: eventImpact, sourceNames: sourceNames(events.sources),
     });
     if (events.unsupportedEventTypes.length) gaps.push(`Event classes not covered by V1: ${events.unsupportedEventTypes.join(", ")}.`);
-  } else {
+  } else if (includeEventEvidence) {
     factors.push({ name: "Sky events", assessment: "Unavailable: event lookup failed.", impact: "unknown", sourceNames: [] });
     gaps.push("Sky events could not be checked.");
   }
@@ -233,7 +235,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     availability: { status: gaps.length ? "partial" : "available", reason: gaps.length ? "A useful plan was assembled, with missing evidence listed explicitly." : "The requested planning evidence was assembled." },
     sources: uniqueSources.length ? uniqueSources : [place.sources[0]!], caveats: Array.from(caveats).slice(0, 20), goal: input.activity, place, requestedWindow: input.window,
     summary, candidateWindows, factors: factors.slice(0, 20).map(factor => ({ ...factor, name: factor.name.slice(0, 120), assessment: conciseAssessment(factor.assessment) })), gaps: Array.from(new Set(gaps)), preparation: prep.map(item => item.length <= 300 ? item : `${item.slice(0, 230)}… Review the full equipment list you supplied before departure.`),
-    suggestions, timedPreparation, evidence: { ...(astronomy && !isError(astronomy) ? { astronomy } : {}), ...(target ? { target } : {}), ...(conditions && !isError(conditions) ? { weather: conditions } : {}), ...(events && !isError(events) ? { events } : {}), ...(aurora && !isError(aurora) ? { aurora } : {}), ...(climatology && !isError(climatology) ? { history: climatology } : {}), ...(locationContext && !isError(locationContext) ? { location: locationContext } : {}), ...(candidates && !isError(candidates) ? { candidates } : {}), ...(input.activity === "meteor-shower" ? { meteorRadiantSamples } : {}) },
+    suggestions, timedPreparation, evidence: { ...(astronomy && !isError(astronomy) ? { astronomy } : {}), ...(target ? { target } : {}), ...(conditions && !isError(conditions) ? { weather: conditions } : {}), ...(includeEventEvidence && events && !isError(events) ? { events } : {}), ...(aurora && !isError(aurora) ? { aurora } : {}), ...(climatology && !isError(climatology) ? { history: climatology } : {}), ...(locationContext && !isError(locationContext) ? { location: locationContext } : {}), ...(candidates && !isError(candidates) ? { candidates } : {}), ...(input.activity === "meteor-shower" ? { meteorRadiantSamples } : {}) },
   });
   return result;
 }

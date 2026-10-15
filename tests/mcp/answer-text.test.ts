@@ -66,3 +66,92 @@ test('empty dark-session suggestions do not deny targets above the geometric hor
   assert.match(result.gaps.join('\n'),/No target suggestions.*does not establish.*below the horizon/);
  }finally{await server.close();}
 });
+
+test('answer brief leads with issued forecast values and exclusive Sydney twilight phases',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-brief-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990002',activity:'astrophotography',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Australia/Sydney'}}});
+  const plan=response.result.structuredContent;
+  // Long geometry previously pushed provider facts outside the bounded text entirely.
+  plan.candidateWindows=Array.from({length:8},()=>({window:plan.requestedWindow,localStart:'geometry '.repeat(50),localEnd:'geometry '.repeat(50)}));
+  const text=planAnswerText(plan);
+  const front=text.split('No compass-direction')[0];
+  assert.match(front,/Synthetic forecast issued 2026-10-15T12:00:00Z/);
+  assert.match(front,/valid 2026-10-15T22:00:00Z.*totalCloudCover 12 %.*instant sample/i);
+  assert.match(front,/visibility unknown/);
+  assert.match(front,/Civil twilight phase:.*05:47.*06:17/);
+  assert.match(front,/Nautical twilight phase:.*05:17.*05:47/);
+  assert.match(front,/Astronomical twilight phase:.*05:00.*05:17/);
+  assert.match(front,/clipped.*not.*sunrise.*sunset/i);
+  assert.match(front,/Moon illumination.*impact remains unknown/);
+  assert.ok(Buffer.byteLength(text,'utf8')<11500);
+ }finally{await server.close();}
+});
+
+test('answer brief preserves unknown issue time and missing astronomy evidence',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-unknown-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'general-stargazing',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent;
+  delete plan.evidence.astronomy;
+  delete plan.evidence.weather.forecasts[0].source.issuedAt;
+  const text=planAnswerText(plan);
+  assert.match(text,/issued at an unavailable time/);
+  assert.match(text,/Twilight phases unknown/);
+  assert.doesNotMatch(text,/Civil twilight phase:/);
+ }finally{await server.close();}
+});
+
+test('many forecast samples keep essential phases and Moon warning inside the bounded brief',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-many-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990002',activity:'astrophotography',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Australia/Sydney'}}});
+  const plan=response.result.structuredContent;
+  const base=plan.evidence.weather.forecasts[0];
+  plan.evidence.weather.forecasts=Array.from({length:4},(_,provider)=>({...base,source:{...base.source,name:`Provider ${provider} ${'long name '.repeat(15)}`},samples:Array.from({length:48},(_,i)=>({validAt:new Date(Date.parse('2026-10-15T00:00:00Z')+i*3600000).toISOString(),values:{totalCloudCover:{value:i===0?12:99,unit:'%'+ 'long unit '.repeat(3)},temperature:{value:20,unit:'C'},windSpeed:{value:3,unit:'m/s'},visibility:{value:100,unit:'m'},relativeHumidity:{value:80,unit:'%'},dewPoint:{value:12,unit:'C'}}}))}));
+  const before=JSON.stringify(plan);
+  const text=planAnswerText(plan),body=text.split('\n\nSources:')[0];
+  assert.equal(JSON.stringify(plan),before,'formatting leaves structured evidence unchanged');
+  for(let provider=0;provider<4;provider++)assert.match(body,new RegExp(`Provider ${provider}.*issued 2026-10-15T12:00:00Z.*48 samples.*2026-10-15T00:00:00.000Z.*2026-10-16T23:00:00.000Z`));
+  assert.match(body,/First sample example.*totalCloudCover 12/);
+  assert.match(body,/remaining samples.*structuredContent/i);
+  assert.match(body,/Civil twilight phase:.*05:47.*06:17/);
+  assert.match(body,/Nautical twilight phase:.*05:17.*05:47/);
+  assert.match(body,/Astronomical twilight phase:.*05:00.*05:17/);
+  assert.match(body,/Moon illumination.*impact remains unknown/);
+  assert.ok(Buffer.byteLength(body,'utf8')<4200);
+  assert.match(text,/https:\/\/example.test\/forecast/);
+ }finally{await server.close();}
+});
+
+test('empty forecast samples retain issue and availability while validity and values stay unknown',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-empty-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'general-stargazing',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent;
+  plan.evidence.weather.forecasts[0].samples=[];
+  plan.evidence.weather.forecasts[0].source.name='Provider '+ 'long name '.repeat(15);
+  const text=planAnswerText(plan);
+  assert.match(text,/issued 2026-10-15T12:00:00Z.*0 samples.*valid times unknown.*values unknown.*availability available/);
+  assert.doesNotMatch(text,/undefined|\uFFFD/);
+ }finally{await server.close();}
+});
+
+test('forecast synopsis labels distinguish identical Unicode name prefixes without splitting codepoints',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-unicode-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'general-stargazing',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent,base=plan.evidence.weather.forecasts[0];
+  const prefix='A'+'\u{1f30c}'.repeat(40);
+  plan.evidence.weather.forecasts=[{...base,source:{...base.source,name:prefix+'one'}},{...base,source:{...base.source,name:prefix+'two'}}];
+  const text=planAnswerText(plan),body=text.split('\n\nSources:')[0];
+  assert.match(body,/Forecast 1:/);assert.match(body,/Forecast 2:/);
+  assert.ok(body.includes('A'+'\u{1f30c}'.repeat(39)+'...'));
+  assert.doesNotMatch(body,/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|\uFFFD/);
+ }finally{await server.close();}
+});

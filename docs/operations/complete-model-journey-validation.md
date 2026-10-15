@@ -192,3 +192,39 @@ The complete matrices above ran against the pre-correction server module. Claude
 Ignored evidence retains `claude-aggUq6` checkpoint/package inventories, both Codex answer/trace folders, loading-order proof and separate machine-readable independent reviews. Review verdicts are copied into the Claude checkpoint only after review. The normal retained-subset local listener has been restored for owner testing; it includes Hanle/London but no real weather/history/aurora or admitted global candidate edition. Both packages remain 1.0.7. Start a fresh client session to pick up installed files.
 
 Original counts remain **12 Done / 9 Partial / 6 Not started**. The installed-client acceptance checkbox stays open. No deployment, publication or new dataset downloads occurred. Further acceptance work must address the recorded factual/reporting failures; passing transport, installation or deterministic tests does not erase them.
+
+## Known-failure corrections — 15 October 2026, local package 1.0.11
+
+This follow-up addresses the twelve affected Claude cases and Codex meteor citation case from 1.0.7. Independent agents implemented answer formatting, workflow guidance and optional event-evidence selection; a separate reviewer inspected source changes and full actual answers against returned results. Existing scope, source limits and original ticket gates remain unchanged.
+
+### Corrections and regression evidence
+
+| Area | Change | Verification |
+| --- | --- | --- |
+| Weather facts | Compact per-provider issue time, valid range, deterministic first supplied sample/value/unit, instant or period semantics and missing fields precede bulky geometry. Full structured results remain available. | Answer-text regressions include four providers with 48 samples, empty samples, long Unicode names and distinct provider ordinals. |
+| Twilight | Exclusive civil, nautical and astronomical phases are derived by subtracting nested geometric Sun-altitude intervals and clipping to the session. A clipped boundary is not a sunrise/sunset event. | Sydney fixture establishes civil 05:47–06:17, nautical 05:17–05:47 and astronomical 05:00–05:17 local; unavailable evidence stays unknown. |
+| Event relevance | Unrequested empty/failed event lookups no longer add negative event claims, sources, gaps or evidence to unrelated plans. Explicit meteor/eclipse requests and positive matches for other activities retain event evidence. Lookup itself still runs; this does not prove no real events exist. | Eleven additive planner tests cover omission, retained weather/history/access unknowns, explicit empty/failure cases and positive matches. |
+| Skills and references | All five packaged workflows emphasize complete relevant links, forecast issuance/validity, unknown Moon impact, actual host capabilities, solar safety, no invented setup bearing or alternative overlap, concise answers, and photography versus dark-sky opportunity. | Additive package guards witnessed RED before correction and GREEN afterwards; prior safety/host assertions remain intact. |
+
+The event source records were already present in the failed aggregate results: missing citations were model omissions, not a missing backend source aggregation. Suppressing incidental empty event sections reduces irrelevant claims; event-focused answers still require citations.
+
+Final local verification: **710 discovered / 709 passed / one existing permission skip / zero failures**; all three TypeScript checks, plugin build/package, full 14-tool and resolver-only one-tool production runtime checks, and eight offline review assertion sets pass. Runtime/review assertions made zero external provider attempts. Claude validates the installed 1.0.11 manifest with the existing missing-author warning. Both supported local installers were refreshed through their normal commands. Package archive SHA-256 is recorded in the ignored `known-failure-111-package.log`; packaging still declares submissionReady false.
+
+### Actual model follow-up, with retained intermediate failures
+
+| Package | Claude scope | Independent result |
+| --- | --- | --- |
+| 1.0.8 | Seven affected cases | Three pass, four findings. |
+| 1.0.9 | All twelve affected cases | Six pass, six findings. |
+| 1.0.10 | Six remaining cases | Five pass, first-photo remains a finding. |
+| 1.0.11 | First-photo only after a narrow instruction correction | Still a finding: incorrect morning twilight labels and Moon maximum sample time. |
+
+Latest reviewed evidence across versions clears **eleven of twelve affected Claude cases**: urban, meteor, aurora, eclipse, replan and host-boundary at 1.0.9; learner, family, Milky Way, Moon and unsupported-boundary at 1.0.10. This is mixed-version affected-case evidence, not a fresh complete 1.0.11 matrix. The final first-photo answer is 231 words and fixes the blanket claim that photography is impossible, retains issue/valid times, instant limits, unknown Moon impact and complete source URLs. However, it calls 05:47/05:17 the civil/nautical twilight endings instead of beginnings and places the Moon maximum at 05:00 rather than the returned 17:00 Sydney local time. The backend's exclusive phases and maximum timestamp are correct. **First-photo acceptance remains open.** No further retry was used to relabel it as passed.
+
+Three separate fresh Codex-host meteor checks at 1.0.8/1.0.9/1.0.10 independently pass, including the final 139-word answer and full returned event source URLs. Each agent read both actual installed skill and complete packaged reference in separate untruncated reads before native MCP calls. These demonstrate deliberate workflow loading and native tool use, not automatic skill discovery or desktop chat UI acceptance.
+
+Across this correction sequence, 26 Claude case invocations used 44 product tool calls; all recorded native skill/reference/allowed-tool checks are true. Three Codex meteor checks used seven native product calls. Claude runs use fresh local CLI sessions and synthetic fixture weather/places with real astronomy calculations; no external data-provider calls or datasets were authorized. Internal shorter core/family/boundary word targets are guidance controls, not replacements for the original 250-word review criterion. Some passing answers exceed those shorter targets.
+
+Ignored evidence retains all answers, result traces, loading proof and independent verdicts: `known-failure-108-review.json`, `known-failure-109-review.json`, `known-failure-110-review.json`, `known-failure-111-review.json`; Claude rehearsal folders `claude-9w5IMB`, `claude-RQ4Bpa`, `claude-OifWRN`, `claude-VrJGTk`, `claude-EWdKNR`, `claude-L0dvKJ`, `claude-mD75mu`; and `codex-meteor-108/109/110`. Earlier failures remain evidence. The owner listener was restored to the retained named-place offline subset, including Hanle/London, rather than leaving the three-city synthetic global test profile active. Restart the client to load 1.0.11.
+
+Original counts remain **12 Done / 9 Partial / 6 Not started**. Installed-client acceptance remains open, as do actual global dataset, historical, hosting and publication gates. No deployment, publication or new dataset downloads occurred.

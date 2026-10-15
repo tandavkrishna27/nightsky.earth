@@ -138,10 +138,56 @@ test('each packaged skill puts clarification and no-direction rules ahead of his
 test('every packaged workflow ends with a final orientation and source audit',()=>{
  const files=unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
  for(const name of names)for(const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]){
-  const tail=strFromU8(files[path]).slice(-1800);
+  const text=strFromU8(files[path]); const tail=text.slice(text.lastIndexOf('## Final answer audit'));
   assert.match(tail,/Final answer audit/);
   assert.match(tail,/including parenthetical advice/);
   assert.match(tail,/candidate distance or access/);
   assert.match(tail,/Shorten advice before dropping a source/);
+ }
+});
+
+test('packaged answer procedure reserves evidence and safety within a bounded answer', () => {
+ const files = unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
+ for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+  const text = strFromU8(files[path]); const audit = text.slice(text.indexOf('## Final answer audit'));
+  for (const rule of [/1\. Core answer/, /2\. Evidence/, /3\. Next step/, /issuedAt.*valid.*value.*instant/, /120 words.*before Sources/, /count.*whitespace/, /both years.*both.*URLs/, /pole-facing/, /Moon-free.*favourable/, /clipped.*sunset/, /Ordinary sunglasses are unsafe/, /Omit optional unrelated events and catalogue counts/]) assert.match(audit, rule, path);
+  assert.match(text, /If no location capability or supplied hint is exposed.*ask only for town and country/);
+  assert.doesNotMatch(text, /For “near me,” ask for location permission or a city/);
+ }
+});
+
+test('packaged aggregate citation procedure preserves the complete source block and treats empty events as claims', () => {
+ const files = unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
+ for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+  const text = strFromU8(files[path]); const audit = text.slice(text.indexOf('## Final answer audit'));
+  assert.match(audit, /aggregate plan.*copy.*complete Sources URL block.*answer-ready text/);
+  assert.match(audit, /Negative or empty-event claims use sources/);
+  assert.match(audit, /Omit incidental empty-event sentences from non-event plans/);
+  assert.match(audit, /focused tool answers.*relevant sources only/);
+  assert.match(audit, /URLs without long labels.*mandatory safety/);
+ }
+});
+
+test('packaged answers reserve citations with scenario budgets and explicit Moon unknowns', () => {
+ const files = unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
+ for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+  const audit = strFromU8(files[path]).split('## Final answer audit')[1];
+  assert.match(audit, /mandatory factual core.*120 words.*before Sources/i);
+  assert.match(audit, /family.*150 words total.*URLs/i);
+  assert.match(audit, /one 20–30 minute block.*returned opportunity/);
+  assert.match(audit, /unsupported or clarification.*100 words total/i);
+  assert.match(audit, /one boundary sentence per request.*one question or next step/);
+  assert.match(audit, /Moon impact unknown.*even for Moon viewing/);
+  assert.match(audit, /Do not invent later-night or next-night darkness comparisons/);
+ }
+});
+
+test('packaged guides distinguish absent dark targets from impossible photography', () => {
+ const files = unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
+ for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+  const text = strFromU8(files[path]);
+  assert.match(text, /No astronomical darkness or no selected targets does not make photography impossible/);
+  assert.match(text, /Preserve any returned predawn or twilight interval/);
+  assert.match(text, /Twilight Moon or landscape photography is only a general possibility/);
  }
 });
