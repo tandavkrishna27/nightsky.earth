@@ -142,3 +142,32 @@ Owner approved the existing small measurement pilots. [Execution evidence](data-
 ## Final original-source pilot — 15 October 2026
 
 [Fiji evidence and combined pilot table](fiji-pilot-wave.md): after Faroe passed and six CI jobs passed, Fiji's exact source acquired with one HEAD/GET. Its worker stopped at60.025seconds/135684096RSS, so candidate equality and dateline audit remain incomplete. All three original raw sources acquired; no refetch or new region. Monaco/Faroe accepted builds remain11/73candidates. No active installation/deployment; counts12Done/9Partial/6Notstarted.
+
+## Current lane A handoff — 15 October 2026 (prepared, frozen)
+
+This section supersedes the pilot sequence above as a proposal for the next action. All three original raw sources were acquired; Monaco/Faroe have accepted 11/73-candidate builds, while Fiji timed out and its equality/date-line audit is incomplete. Do not refetch them or run another country wave. The proposed next release route, producer interfaces, footprint/ADM gaps and public-offer fields are in [current source admission packet](global-catalogue-source-admission.md#lane-a-preparation-packet--15-october-2026-current-local-evidence-only). Packet prepared does not mean data admitted. Original counts remain **12 Done / 9 Partial / 6 Not started**.
+
+### Bounded offline work before any acquisition proposal is executable
+
+Future code work should deliver the separate global manifest, disk-backed raw producer, identity/lineage merge, full-geometry membership/coverage producers, normalized stream bridge and whole-job supervisor described there. Preserve the pilot constants, retained regression identities and failed-stage evidence. No implementation or test execution was authorized in this preparation lane.
+
+The following is a proposed no-download verification specification for that later code work, not a test run or an authority to increase pilot budgets:
+
+1. Use existing retained Monaco/Bhutan records and small synthetic OSM fixtures only, in a new isolated evidence directory with an explicitly counted local byte/time/process budget. No retained source rewrite, automatic cleanup or runtime selection. Compare producer candidate values to the strict existing complete-way selection, retaining the named-node/category/text policy.
+2. Feed bounded canonical JSONL through the proposed bridge to `buildStreamedCatalogue`; verify deterministic root/page hashes, duplicate collapse with retained source lineage, conflicting vintage/geometry rejection, invalid row/schema/region-reference failure, and backpressure/cancellation. Compare equivalent admitted values rather than assuming source-specific rows are byte-identical across overlapping extracts.
+3. Use small synthetic seam/island/hole/pole/±180 cases to prove split geometry, conservative full cells, ownership intersections and residual accounting. A bounding box containing a hole or gap must not become coverage. Verify admitted empty cells separately from absent/failed cells. This proves algorithms only, never real-world coverage.
+4. Exercise incomplete ways, repeated closure, crossing longitudes, missing coordinates and polar policy; count exact exclusion identities, refuse truncated audit lists, and distinguish correct exclusions from both paths agreeing on wrong geometry. Retained Fiji's prior timeout supplies no successful geometry proof.
+5. Validate boundary fixture membership for ADM0/ADM1, holes, multipolygons, shared edges, country/name ambiguity and missing levels; retain source revision/dispute policy. No synthetic boundary or city name closes the real gbOpen admission gap.
+6. Demonstrate process-tree stop, bounded open files/row buffers, stalled input, scratch/report/rollback aggregation, reserve check, source mutation, output collision, cancellation/restart and immutable-root handling. Record measured peak RAM/commit, total logical disk and wall time independently from queue/wait time. Tiny fixtures do not predict continent/global performance.
+
+The integration owner's read-only hardware snapshot at **2026-10-15T13:36:15Z** observed **66,094,223,360 physical RAM bytes**, **24 logical CPUs**, C volume **999,185,969,152 capacity bytes** and **316,288,774,144 free bytes**. It cannot admit the historical 64-GiB-worker / 1-TiB-combined / 128-GiB-reserve envelope as written on that volume. Throughput, actual producer memory/scratch, retained release size and serving fit remain unknown; other drives were not inspected. A revised measured sequential/streamed budget or an existing owner-hardware proposal is needed before acquisition. No hardware purchase, paid worker, smaller product claim or alternative source is selected.
+
+### Decisive inputs still missing
+
+- Revalidated exact dated eight-source identities and pinned clipping metadata; approved metadata/body request list and stop conditions. Existing dated bytes remain unrevalidated historical metadata.
+- Computed complete footprint union, overlap ownership, land/island/territory inventory and polar/date-line residual dispositions; no new source selection is implicit.
+- Exact real gbOpen ADM0/ADM1 release/geometry/metadata/license inventory and counted acquisition/build allowances, including absent levels and disputes.
+- Reviewed implemented producer/supervisor interfaces and bounded local evidence, then a machine-specific resource proposal. The paged builder alone does not implement raw ingestion.
+- Actual complete derivative offer URL/package/availability owner fields and separate intended-host admission.
+
+Freeze record: only the two owning geography documents were edited in this lane. Local source/code contracts and historical evidence were read; no network/source body, tests, models, acquisition, deployment or commit ran. Later implementation and acquisition remain separate decisions.

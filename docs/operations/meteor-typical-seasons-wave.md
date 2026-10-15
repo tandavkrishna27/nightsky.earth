@@ -32,3 +32,27 @@ These bounded leads do not establish a free complete catalog. Continue source-by
 ## Verification
 
 TDD: the dedicated tests first failed because typical-season evidence was absent. Then the focused meteor/catalog tests passed (27 before the composed test; 28 with it). The four new tests check original bounds/provenance, absent fabricated dates/overlap, omission for nonmeteor queries, strict limits/order/required source and composed planner preservation without fabricated radiant evidence. `npx tsc --noEmit` passed. Existing `npm test` completed: 469 total, 468 pass, zero fail, one skip. The dedicated file is run separately; the root integrator owns `tests/all.test.ts` registration.
+
+## Production preparation handoff — 15 October 2026
+
+The accepted runtime remains two source-only entries: ETA 35–60 degrees and ORI 195–220 degrees in ecliptic J2000. `dateConversion: unavailable` and `requestedWindowOverlap: not-evaluated` remain required. These are typical source intervals, not annual dated forecasts or full-season radiant support. This preparation changes no data, code, original ticket status or global/free V1 scope.
+
+### Conversion decision record to complete offline first
+
+| Required field | Current retained evidence / disposition |
+| --- | --- |
+| Source identity/rights | Egal et al. (2020), A&A 640 A58, accepted final author copy and CC BY 4.0 attribution recorded above. |
+| Longitude frame | Ecliptic J2000 established; origin, correction convention and input time-scale linkage to the analysis unresolved. |
+| Endpoint meaning/precision | Typical reported activity intervals from a binned analysis; not precise physical onset/cessation guarantees. Retain source precision separately from any future numerical solver tolerance. |
+| Matching implementation | Existing geometric reversed-Earth J2000 helper and apparent-of-date solar search differ. Neither accepted for these bounds merely because it exists. |
+| Independent oracle | No equivalent year-qualified boundary reference accepted. Existing GMN comparisons and a solver's own outputs cannot validate this separate paper. |
+| Calculation years | No converted-season year horizon accepted. The radiant horizon 2018–2030 is unrelated to accepted seasonal date coverage. |
+| Runtime transition | Requires all fields resolved, explicit method/version, numerical error and presentation rounding, supported years and independent boundary evidence; otherwise retain unavailable/not-evaluated. |
+
+The next local deliverable can transcribe this worksheet into a reviewable conversion design from retained evidence, identify exact missing primary-reference fields and specify bounded later research. It cannot fill missing conventions with astronomy intuition. [Date feasibility](meteor-date-feasibility.md) retains the inspected reference chain and explains why broad calendar wording or common authors are insufficient. No new primary source was searched in this preparation wave.
+
+Once the scientific gate clears, future implementation must use year-qualified longitude crossings with explicit endpoint inclusion and wrapping/year handling, independently compare each retained boundary over the chosen supported years with equivalent settings, and check leap years, year transitions, local date-line display, outside-range states and inclusive query overlap. Keep typical derived intervals distinct from NASA maxima, rates, outbursts and instantaneous visibility; retain original source precision and radiant fit bounds. This is an acceptance specification only: no solver, dates, tests or model calls were created or run.
+
+For the remaining 17 retained shower codes, season-definition, scientific applicability and reusable source evidence remain absent. The 19-code union is an inventory, not the whole requested global catalog. [Current event-class/year ledger and priorities](meteor-coverage-matrix.md#production-event-preparation--15-october-2026) preserves occultation/comet/planet-pair and other gaps; no reduced launch scope is implied. Original counts remain **12 Done / 9 Partial / 6 Not started**.
+
+Freeze report: append-only documentation, local evidence reviewed; no network/download/CDS/account/credential action, tests, calculations, models, commit or deployment. Remaining decisions are exact scientific convention/independent reference acceptance, then bounded evidence acquisition and implementation authorization under the integrated plan.

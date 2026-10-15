@@ -80,3 +80,37 @@ The planner samples **one** selected shower. An explicit target is resolved thro
 ## Local audit checks
 
 Local JSON inspection confirmed 13 unique rows in each peak year with identical code sets, 12 unique model codes, a six-code intersection and a 19-code deduplicated union. All 26 timestamps and 12 nominal windows above were compared with retained artifacts; half-widths were computed from the existing 0.986 rule. Typical codes/bounds, planner alias selection, three-sample behavior, event partial/not-evaluated flags and structured schema limits were checked against source code. No new external source requests, code/tests, deployment, commit or push occurred. This document alone is the deliverable; counts describe retained evidence rather than a completeness claim.
+
+## Production event preparation — 15 October 2026
+
+This append-only reconciliation retains the 19-code union, 26 exact peaks (13 in each of 2025/2026), 12 bounded radiants and two source-only intervals. Counts remain **12 Done / 9 Partial / 6 Not started**. No new event evidence was acquired, dates calculated or code/test changed.
+
+### Event class and temporal coverage ledger
+
+Read against current `server/events/catalog.ts`, `planetAlignments.ts` and the retained source records above. A calculation path is distinct from a complete observational catalog or launch acceptance.
+
+| Event class | Current temporal/source basis | Scientific / coverage gate |
+| --- | --- | --- |
+| Meteor shower maxima | NASA MEO exact 2025 and 2026 catalogs only | All other requested years unavailable; no annual recurrence. Seven peak-only codes lack radiants, six model-only codes lack retained peaks, and all 19 lack complete accepted UTC seasons. |
+| Meteor radiant geometry | GMN fits, observations 2018-12-10–2021-05-22; chosen calculation horizon 2018–2030, restricted to each fit interval | Horizon is not yearly peak/season evidence; extrapolation and fit boundaries remain explicit. |
+| Meteor typical activity | ETA 35–60 degrees and ORI 195–220 degrees, source J2000 intervals only | Convention, independent boundary references and UTC overlap unresolved; no supported calendar-year range for converted seasons exists. |
+| Eclipse | Astronomy Engine 2.1.19 local solar contacts and lunar event intervals, bounded requested windows | Model/contact/horizon definitions preserved; no terrain/weather/detectability guarantee. No new independently validated universal year horizon declared by this packet. |
+| Moon phase | Astronomy Engine quarter instants; modeled Moon altitude at phase | Instant geometry is not continuous visibility or a dated observed source catalog. |
+| Equinox/solstice | Astronomy Engine seasons for requested years | Time markers, no viewing visibility claim; library model and input date limits apply. |
+| Opposition | Relative heliocentric-longitude calculation, engineering horizon 1900–2100 | Local visibility not evaluated; source/model validation domain distinct from meteor years. |
+| Planetary conjunction | Inferior/superior solar alignments, engineering horizon 1900–2100 | Partial class: apparent planet-pair conjunctions and minimum sky-plane separation unavailable. |
+| Occultation | Explicit unsupported state | No maintained admitted catalog. |
+| Comet | Explicit unsupported state | No maintained rights-reviewed catalog/feed or detectability route. |
+| Other/transient | Explicit unsupported state | No generic event source; aurora provider context does not establish a complete dated transient-event catalog. |
+
+Event requests remain bounded (at most 366 days, default 15 and maximum 25 dated results, with truncation). They do not certify all events in all years. Existing per-shower rows remain the source of exact shower/year coverage; an empty peak result does not mean no activity.
+
+### Prioritized implementable offline preparation
+
+1. Freeze an ETA/ORI conversion evidence worksheet using [the date investigation](meteor-date-feasibility.md): original section/version and rights; origin/frame/equinox; geometric/apparent and correction terms; input time scale; boundary definition and precision; supported year horizon; independent equivalent reference and expected accuracy. Current status is unresolved, not “use existing J2000 helper.” No guessed dates or author contact.
+2. Write the future conversion acceptance contract before implementation: separate typical derived season from year-specific maxima; root brackets/year assignment, endpoint inclusion, longitude wrapping, timestamp rounding/tolerance, independent reference comparisons, leap-year/year-transition/date-line cases and inclusive requested-window overlap. These are future validation requirements, not tests run here. The source's one-degree analysis and typical bounds must constrain claimed precision.
+3. Prepare a per-code/per-capability admission table from the retained matrix: first ORI/LYR/LEO/NTA/STA/HYD missing maxima and seven peak-only missing radiants; then accepted activity evidence for the other 17 codes. Include visual/radar/daytime applicability and reuse rights. Additional years require exact year-specific evidence. Source-only intervals never widen radiant domains.
+4. Prepare separate admission packets for apparent planet-pair events, occultations, comets and maintained transients, with algorithm/catalog definitions, year horizon, source rights, freshness and local-visibility limits. No substitution of solar alignments or shower parent associations.
+5. Plan later regression journeys around no-peak-but-in-season windows, missing year/model, season endpoints, ambiguous family names, daytime showers, truncation and partial-class results. Preserve generic learning/preparation while evidence is missing; no personal rates from ZHR or geometry alone.
+
+Freeze report: only local retained documents/source contracts read and this dated section appended; no external requests, calculations, tests, data import, models, commit, deployment or scope reduction. Remaining owner decisions concern evidence acquisition routes and resource/time bounds, not whether to silently drop missing event classes. Scientific convention acceptance must precede any ETA/ORI implementation claim.
