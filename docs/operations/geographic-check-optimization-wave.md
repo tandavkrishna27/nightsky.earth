@@ -64,5 +64,3 @@ Require exit zero and a `validated-lineage` canonical finding. This checks actua
 ## Parent validation and review
 
 After the timed job drained, the parent recorded the full OSM suite: **99 discovered / 95 passed / four skips / zero failures**, 40.946 seconds. Focused checks with actual installed pyosmium recorded **17 discovered / 16 passed / one symlink skip**, 2.086 seconds. The parent reports task review and fresh final review approved. These checks validate implementation behavior and bounded fixtures; they do not turn the incomplete retained attempt into a successful producer or bridge. Tests use existing automatic CI discovery; no workflow modification was required.
-
-
