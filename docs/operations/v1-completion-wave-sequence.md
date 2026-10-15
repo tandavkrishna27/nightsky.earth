@@ -1,5 +1,7 @@
 # Sequence after offline build preparation
 
+**Geographic check optimization, 15 October:** [bounded acceptance record](geographic-check-optimization-wave.md) preserves a second deadline stop: 600.012 s supervisor, Monaco checkpoint only, Faroe incomplete, no bridge or canonical adapter validation. All 924 selected prelaunch pins match after drain. Prior profiling describes the earlier diagnostic; this attempt establishes no speedup or new cost attribution. A reviewed bounded resource-check architecture change and successful retained producer-to-bridge acceptance remain before larger acquisition. Original **12 Done / 9 Partial / 6 Not started** stays unchanged; no new inputs or source admission.
+
 Owner direction: complete locally before deployment; use parallel agents where work is independent. Downloads, provider requests, model runs and deployment are not authorized by this sequence. Original ticket accounting stays tied to original acceptance, not wave count.
 
 The current offline implementation is delivered in the [build preparation execution record](offline-build-preparation-wave.md). The following rows describe the remaining sequence after it; data and host gates are not marked complete by software fixtures.

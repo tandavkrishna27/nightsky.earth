@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "status": "bounded-stop",
+  "sourceAdmission": false,
+  "syntheticClippingControl": true,
+  "coverage": "unknown",
+  "selectedPinsNotFullImportClosure": true,
+  "prelaunch": {
+    "observedUtc": "2026-10-15T16:19:05Z",
+    "selectedPinCount": 924,
+    "diskFreeBytes": 310687027200,
+    "availableRamBytes": 15425269760,
+    "commitHeadroomBytes": 6551318528
+  },
+  "selectedPins": [
+    {
+      "path": ".data/osm/retained-geography-20261015-v1-input/manifest.json",
+      "bytes": 1593,
+      "sha256": "c9c8787252b9e3ba0a317e428553302283ec353211e8a4430684a3a0f4bdab14"
+    },
+    {
+      "path": ".data/osm/geographic-continuation-20261015-v1/faroe-islands/faroe-islands.osm.pbf",
+      "bytes": 7735542,
+      "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859"
+    },
+    {
+      "path": ".data/osm/global-pilot-20261015-v1/monaco/monaco.osm.pbf",
+      "bytes": 692392,
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05"
+    },
+    {
+      "path": "scripts/osm/build-source-catalogue.ts",
+      "bytes": 7380,
+      "sha256": "3ce128edc5d71940efad9c3a413948affe28419e0bcd3532e0708a431ab0fc79"
+    },
+    {
+      "path": "scripts/osm/build-streamed-catalogue.ts",
+      "bytes": 17581,
+      "sha256": "d6bf2db9853733bff07f7c40811cc718e5841160d4daa457c55d9783cabfa25d"
+    },
+    {
+      "path": "scripts/osm/global_source_supervisor.py",
+      "bytes": 18469,
+      "sha256": "b668dde2c7c254a95203410569794c2cf371658b9816aa0d97ca845e74088c3c"
+    },
+    {
+      "path": "scripts/osm/global_source.py",
+      "bytes": 19757,
+      "sha256": "24d1370f9ac5af9a47b934564679fc49c80d07cb518667f3f6efc3af2ed6e1c1"
+    },
+    {
+      "path": "scripts/osm/measure-retained-source.py",
+      "bytes": 8775,
+      "sha256": "06ff2c17095f321123c5bfe6206eb9b1553fd258766d5d93998347b6abb41e65"
+    },
+    {
+      "path": "scripts/osm/source-build-config.ts",
+      "bytes": 2704,
+      "sha256": "24bf24dbe1b2dd3b8a0cbabfa444d73a94094d3b73482d2c01c14be2f2e0d7f9"
+    },
+    {
+      "path": "scripts/osm/spot_paths.py",
+      "bytes": 2389,
+      "sha256": "a8b644b51f05bd08f080c9023f92fc65389b83f0a68f5969f4387512d669cdf0"
+    }
+  ],
+  "measurement": {
+    "backgroundHostLoad": "uncontrolled",
+    "cacheState": "uncontrolled; no cold-read guarantee",
+    "coverage": "unknown; no regions or extraction footprints admitted",
+    "finalFileBytes": {
+      "journalBytes": 1183232,
+      "otherBytes": 783,
+      "sqliteBytes": 25317376,
+      "totalBytes": 26501391
+    },
+    "hashPassNote": "included within producer/bridge wall; not separately instrumented",
+    "hashPassSeconds": null,
+    "ioNote": "Windows Job transfer counters include cached and metadata I/O; not physical raw-source read volume",
+    "jobStageMetrics": [
+      {
+        "jobKernelCpuSeconds": 482.890625,
+        "jobReadTransferBytes": 35692967,
+        "jobUserCpuSeconds": 105.734375,
+        "jobWriteTransferBytes": 27761638,
+        "peakJobCommitBytes": 70918144
+      }
+    ],
+    "measurementWallSeconds": 600.05,
+    "networkRequests": 0,
+    "runtimeInstalled": false,
+    "sampledFilePeaks": {
+      "journalBytes": 1183232,
+      "otherBytes": 281,
+      "sqliteBytes": 25317376,
+      "totalBytes": 26500889
+    },
+    "schemaVersion": 1,
+    "status": "bounded-stop",
+    "supervisor": {
+      "elapsedSeconds": 600.012,
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "limits": {
+        "commitBytes": 2147483648,
+        "diskBytes": 1082171955,
+        "freeBytes": 103079215104,
+        "maxProcesses": 2,
+        "rssBytes": 1073741824,
+        "wallSeconds": 600
+      },
+      "peakLogicalBytes": 34931020,
+      "peakRssBytes": 4390912,
+      "platform": "win32",
+      "reason": "whole-job deadline limit",
+      "stages": [
+        {
+          "elapsedSeconds": 600.004,
+          "exitCode": 1,
+          "stage": 0
+        }
+      ],
+      "status": "bounded-stop"
+    }
+  },
+  "postRun": {
+    "selectedPinsChecked": 924,
+    "selectedPinMismatchCount": 0,
+    "checkpoint": {
+      "catalogueRevision": "osm-9ab73d8f11ed317af0a1128a34f7d910877ab5fb7cd8050487f901e0c1f0654e",
+      "completedSources": 1,
+      "databaseSha256": "37d0656e73330a7c3171ce20f87a24e028a67af2d8be7afe10b0052322192344",
+      "manifestSha256": "c9c8787252b9e3ba0a317e428553302283ec353211e8a4430684a3a0f4bdab14"
+    },
+    "canonicalCompletionAvailable": false,
+    "bridgeLaunched": false,
+    "canonicalAdapterRun": false,
+    "databaseRecoveryOrQueryAttempted": false,
+    "relatedRootsLogicalBytes": 29178607,
+    "ignoredLedgerLogicalBytes": 528996,
+    "combinedLogicalBytes": 29707603,
+    "diskFreeBytesObserved": 309952626688
+  },
+  "originalBaseline": {
+    "preserved": true,
+    "supervisorSeconds": 600.019,
+    "completedSources": 1,
+    "bridgeLaunched": false
+  },
+  "speedupClaim": false,
+  "globalFitClaim": false,
+  "newProfile": false,
+  "nextStep": "review bounded resource-check architecture; successful retained producer-to-bridge and actual canonical validation still required",
+  "parentValidation": {
+    "fullOsm": {
+      "discovered": 99,
+      "passed": 95,
+      "skipped": 4,
+      "failed": 0,
+      "seconds": 40.946
+    },
+    "focusedWithInstalledPyosmium": {
+      "discovered": 17,
+      "passed": 16,
+      "skipped": 1,
+      "seconds": 2.086
+    },
+    "taskReview": "approved per parent",
+    "freshFinalReview": "approved per parent",
+    "workflowModified": false
+  }
+}

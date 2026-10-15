@@ -1,5 +1,7 @@
 # NightSky V1 implementation status
 
+**Geographic check optimization, 15 October:** [bounded acceptance record](geographic-check-optimization-wave.md) preserves a second deadline stop: 600.012 s supervisor, Monaco checkpoint only, Faroe incomplete, no bridge or canonical adapter validation. All 924 selected prelaunch pins match after drain. Prior profiling describes the earlier diagnostic; this attempt establishes no speedup or new cost attribution. A reviewed bounded resource-check architecture change and successful retained producer-to-bridge acceptance remain before larger acquisition. Original **12 Done / 9 Partial / 6 Not started** stays unchanged; no new inputs or source admission.
+
 Audit: original acceptance snapshot 14 October 2026, updated local extension evidence 15 October 2026, `codex/plugin-v1` / `.worktrees/plugin-v1`. Status is local-development evidence; it does not establish deployment, official validation or launch. The individual publisher is based in India; the exact verified legal name is still absent. Monitored support is `nightsky.earth2026@gmail.com`.
 
 ## Counts

@@ -5,9 +5,12 @@ import sys
 import tempfile
 import unittest
 import importlib.util
+from unittest.mock import patch
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts' / 'osm'))
 from global_source import build, manifest_revision
+import global_source
 
 
 class Pipeline(unittest.TestCase):
@@ -134,6 +137,84 @@ class Pipeline(unittest.TestCase):
         scratch=sum(p.stat().st_size for p in out.iterdir() if p.name.startswith('scratch.sqlite'))
         self.assertLessEqual(physical-scratch,m['limits']['outputBytes'])
         self.assertLessEqual(physical,m['limits']['scratchBytes']+m['limits']['outputBytes'])
+
+    def test_inventory_counts_nested_files_and_rechecks_after_mutation(self):
+        out=self.root/'inventory'; out.mkdir(); nested=out/'nested'; nested.mkdir()
+        (nested/'scratch.sqlite-journal').write_bytes(b'123')
+        (nested/'evidence').write_bytes(b'12345')
+        self.assertEqual(global_source.output_usage(out),(8,3))
+        (nested/'scratch.sqlite-journal').unlink();(nested/'evidence').unlink();nested.rmdir()
+        moved=self.root/'moved'; scan=global_source.os.scandir
+        def mutate(path):
+            iterator=scan(path)
+            if Path(path)==out:
+                out.rename(moved); out.mkdir()
+            return iterator
+        with patch.object(global_source.os,'scandir',side_effect=mutate):
+            with self.assertRaisesRegex(ValueError,'output ancestry mutation'):
+                global_source.output_usage(out)
+
+    def test_inventory_propagates_scan_failure(self):
+        out=self.root/'scan-error';out.mkdir()
+        with patch.object(global_source.os,'scandir',side_effect=PermissionError('unreadable')):
+            with self.assertRaises(PermissionError): global_source.output_usage(out)
+
+    def test_inventory_rechecks_queued_directory_before_descent(self):
+        out=self.root/'queued';out.mkdir();nested=out/'nested';nested.mkdir()
+        (nested/'deep').mkdir()
+        original=Path.lstat
+        for threshold in (2,3):
+            with self.subTest(replacement_at_nested_lstat=threshold):
+                calls=0
+                def replaced(path,*args,**kwargs):
+                    nonlocal calls
+                    info=original(path,*args,**kwargs)
+                    if path==nested:
+                        calls+=1
+                        if calls>=threshold:
+                            return SimpleNamespace(st_mode=info.st_mode,st_file_attributes=0x400,
+                                                   st_dev=info.st_dev,st_ino=info.st_ino)
+                    return info
+                # First lookup pins the queued directory. Replacement is
+                # reported before its own descent, or before deeper descent.
+                with patch.object(Path,'lstat',replaced):
+                    with self.assertRaisesRegex(ValueError,'symlink/reparse'):
+                        global_source.output_usage(out)
+
+    def test_new_nested_evidence_counts_at_next_operation(self):
+        m=self.manifest([self.node()]);m['limits']['outputBytes']=2000
+        def inject(stage):
+            nested=self.root/'injected'/'nested';nested.mkdir()
+            (nested/'extra-evidence').write_bytes(b'x'*2001)
+        with self.assertRaisesRegex(ValueError,'output/evidence byte limit'):
+            self.run_build(m,'injected',hook=inject)
+        self.assertFalse((self.root/'injected'/'complete.json').exists())
+
+    def test_inventory_rejects_nested_and_ancestor_links(self):
+        out=self.root/'linked';out.mkdir();target=self.root/'target';target.mkdir()
+        link=out/'nested'
+        try: link.symlink_to(target,target_is_directory=True)
+        except OSError as exc: self.skipTest(str(exc))
+        with self.assertRaisesRegex(ValueError,'symlink/reparse'):
+            global_source.output_usage(out)
+        link.unlink();out.rmdir();out.symlink_to(target,target_is_directory=True)
+        with self.assertRaisesRegex(ValueError,'symlink/reparse'):
+            global_source.output_usage(out/'child')
+
+    def test_reserve_is_checked_for_pending_checkpoint_bytes(self):
+        m=self.manifest([self.node()]);m['limits']['freeBytes']=100
+        usage=global_source.shutil.disk_usage(self.root)
+        with patch.object(global_source.shutil,'disk_usage',return_value=type(usage)(usage.total,usage.used,100)):
+            with self.assertRaisesRegex(ValueError,'free reserve'):
+                self.run_build(m,'reserve')
+        self.assertFalse((self.root/'reserve'/'checkpoint.json').exists())
+
+    def test_deadline_rechecked_during_source_digest(self):
+        m=self.manifest([self.node()]);m['limits']['seconds']=1
+        with patch.object(global_source.time,'monotonic',side_effect=[0,1]):
+            with self.assertRaisesRegex(ValueError,'deadline'):
+                self.run_build(m,'deadline')
+        self.assertFalse((self.root/'deadline'/'complete.json').exists())
 
     @unittest.skipUnless(importlib.util.find_spec('osmium'),'optional existing pyosmium unavailable')
     def test_optional_pbf_same_contract(self):

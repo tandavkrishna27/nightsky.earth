@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import shutil
 import sqlite3
+import stat
 import time
 import unicodedata
 import xml.etree.ElementTree as ET
@@ -146,21 +147,60 @@ def valid(point):
     return point is not None and all(math.isfinite(v) for v in point) and -90<=point[0]<=90 and -180<=point[1]<=180
 
 
+def output_usage(output):
+    """Inventory an already-canonical output; no filesystem verdict is cached.
+
+    scandir names are supplied by the filesystem, not caller path spellings.
+    Validate the shared ancestry once at either boundary, and each child with
+    non-following metadata before reading its size or descending into it.
+    """
+    def reject_link(info):
+        if stat.S_ISLNK(info.st_mode) or getattr(info,'st_file_attributes',0)&0x400:
+            raise ValueError('symlink/reparse point refused')
+    def ancestry():
+        identities=[]
+        # Check outermost first so a newly linked ancestor is rejected before
+        # inspecting a descendant through it. Missing/unreadable paths fail closed.
+        for path in reversed((output,*output.parents)):
+            info=path.lstat(); reject_link(info)
+            identities.append((info.st_dev,info.st_ino))
+        return identities
+    before=ancestry(); total=0; scratch=0
+    identities={output:before[-1]}; pending=[output]
+    while pending:
+        directory=pending.pop()
+        # A queued directory or one of its local ancestors may have changed
+        # since enumeration. Revalidate the local chain immediately before
+        # descent; identities last only for this inventory, never across checks.
+        chain=[directory]
+        while chain[-1]!=output: chain.append(chain[-1].parent)
+        for path in reversed(chain):
+            info=path.lstat(); reject_link(info)
+            if (info.st_dev,info.st_ino)!=identities[path]:
+                raise ValueError('output ancestry mutation')
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                info=entry.stat(follow_symlinks=False); reject_link(info)
+                if stat.S_ISDIR(info.st_mode):
+                    # Windows DirEntry.stat can report zero inode/device; use
+                    # lstat for directory identity on both sides of the queue.
+                    path=Path(entry.path);directory_info=path.lstat();reject_link(directory_info)
+                    identities[path]=(directory_info.st_dev,directory_info.st_ino);pending.append(path)
+                elif stat.S_ISREG(info.st_mode):
+                    total+=info.st_size
+                    if entry.name.startswith('scratch.sqlite'): scratch+=info.st_size
+    if ancestry()!=before: raise ValueError('output ancestry mutation')
+    return total,scratch
+
+
 def build(manifest, output, *, resume=False, hook=lambda stage: None):
     m=validate_manifest(manifest); revision=manifest_revision(m); limits=m['limits']; output=safe_path(output)
     if any(safe_path(s['path']).is_relative_to(output) for s in m['sources']): raise ValueError('source inside output')
     if output.exists() and not resume: raise FileExistsError(output)
     output.mkdir(parents=True,exist_ok=resume); start=time.monotonic()
     def check(pending_output=0):
-        safe_path(output)
         if time.monotonic()-start>=limits['seconds']: raise ValueError('deadline limit')
-        total=0; scratch=0
-        for root, dirs, files in os.walk(output,followlinks=False):
-            for name in dirs+files:
-                p=safe_path(Path(root)/name)
-                if p.is_file():
-                    size=p.stat().st_size; total+=size
-                    if p.name.startswith('scratch.sqlite'): scratch+=size
+        total,scratch=output_usage(output)
         if scratch>limits['scratchBytes']: raise ValueError('scratch byte limit')
         if total-scratch+pending_output>limits['outputBytes']: raise ValueError('output/evidence byte limit')
         if total+pending_output>limits['scratchBytes']+limits['outputBytes']: raise ValueError('combined disk limit')
