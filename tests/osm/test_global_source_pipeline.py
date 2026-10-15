@@ -216,6 +216,86 @@ class Pipeline(unittest.TestCase):
                 self.run_build(m,'deadline')
         self.assertFalse((self.root/'deadline'/'complete.json').exists())
 
+    def test_resource_inventory_operation_and_clock_boundaries(self):
+        out=self.root/'bounded';out.mkdir(); limits=self.manifest([self.node()])['limits']
+        now=[0.0]
+        with patch.object(global_source.time,'monotonic',side_effect=lambda:now[0]), patch.object(global_source,'output_usage',wraps=global_source.output_usage) as inventory:
+            guard=global_source.ResourceGuard(out,limits,0)
+            guard.check(force=True)
+            for _ in range(255): guard.check()
+            self.assertEqual(inventory.call_count,1)
+            guard.check();self.assertEqual(inventory.call_count,2)
+            now[0]=.1;guard.check();self.assertEqual(inventory.call_count,3)
+            guard.check(1);self.assertEqual(inventory.call_count,4)
+
+    def test_xml_deadline_checked_between_entities_in_one_chunk(self):
+        body=''.join(f'<node id="{i}" lat="10" lon="20"/>' for i in range(20))
+        m=self.manifest([body]);self.assertLess(m['sources'][0]['bytes'],4096)
+        out=self.root/'xml-yield-deadline';out.mkdir();m['limits']['seconds']=1;now=[0.0]
+        with patch.object(global_source.time,'monotonic',side_effect=lambda:now[0]):
+            guard=global_source.ResourceGuard(out,m['limits'],0)
+            records=global_source.entities(m['sources'][0],m['limits'],guard.check)
+            self.addCleanup(records.close)
+            self.assertEqual(next(records)[1],0)
+            self.assertEqual(next(records)[1],1)
+            now[0]=1
+            with self.assertRaisesRegex(ValueError,'deadline'):next(records)
+
+    def test_bounded_inventory_finds_added_bytes_and_reparse(self):
+        out=self.root/'bounded-mutation';out.mkdir();limits=self.manifest([self.node()])['limits']
+        limits['outputBytes']=10
+        with patch.object(global_source.time,'monotonic',return_value=0):
+            guard=global_source.ResourceGuard(out,limits,0);guard.check(force=True)
+            (out/'extra').write_bytes(b'x'*11)
+            for _ in range(255): guard.check()
+            with self.assertRaisesRegex(ValueError,'output/evidence'): guard.check()
+            (out/'extra').unlink()
+            original=Path.lstat
+            def linked(path,*args,**kwargs):
+                info=original(path,*args,**kwargs)
+                if path==out:return SimpleNamespace(st_mode=info.st_mode,st_file_attributes=0x400)
+                return info
+            with patch.object(Path,'lstat',linked):
+                with self.assertRaisesRegex(ValueError,'symlink/reparse'): guard.check(force=True)
+
+    def test_inventory_rechecks_deadline_after_scan(self):
+        out=self.root/'slow-inventory';out.mkdir();limits=self.manifest([self.node()])['limits'];limits['seconds']=1
+        now=[0]
+        def scan(path):now[0]=1;return (0,0)
+        with patch.object(global_source.time,'monotonic',side_effect=lambda:now[0]),patch.object(global_source,'output_usage',side_effect=scan):
+            guard=global_source.ResourceGuard(out,limits,0)
+            with self.assertRaisesRegex(ValueError,'deadline'):guard.check(force=True)
+
+    def test_inventory_interval_starts_after_completed_scan(self):
+        out=self.root/'scan-reset';out.mkdir();limits=self.manifest([self.node()])['limits'];now=[0.0]
+        def scan(path):now[0]+=.2;return (0,0)
+        with patch.object(global_source.time,'monotonic',side_effect=lambda:now[0]),patch.object(global_source,'output_usage',side_effect=scan) as inventory:
+            guard=global_source.ResourceGuard(out,limits,0);guard.check(force=True)
+            guard.check();self.assertEqual(inventory.call_count,1)
+            now[0]+=.101;guard.check();self.assertEqual(inventory.call_count,2)
+
+    def test_pending_write_reserves_missing_bytes_without_waiting(self):
+        out=self.root/'pending';out.mkdir();limits=self.manifest([self.node()])['limits'];limits['outputBytes']=10;limits['freeBytes']=100
+        usage=global_source.shutil.disk_usage(out)
+        with patch.object(global_source.time,'monotonic',return_value=0):
+            guard=global_source.ResourceGuard(out,limits,0);guard.check(force=True)
+            with self.assertRaisesRegex(ValueError,'output/evidence'):guard.check(11)
+            with patch.object(global_source.shutil,'disk_usage',return_value=type(usage)(usage.total,usage.used,104)):
+                with self.assertRaisesRegex(ValueError,'free reserve'):guard.check(5)
+
+    def test_bounded_scan_fails_closed_when_output_disappears(self):
+        out=self.root/'missing-scan';out.mkdir();limits=self.manifest([self.node()])['limits']
+        with patch.object(global_source.time,'monotonic',return_value=0):
+            guard=global_source.ResourceGuard(out,limits,0);guard.check(force=True);out.rmdir()
+            for _ in range(255):guard.check()
+            with self.assertRaises(FileNotFoundError):guard.check()
+
+    def test_sqlite_main_database_page_cap(self):
+        m=self.manifest([self.node()]);m['limits']['scratchBytes']=4096
+        with self.assertRaisesRegex((ValueError,global_source.sqlite3.DatabaseError),'scratch|full'):
+            self.run_build(m,'page-cap')
+        self.assertLessEqual((self.root/'page-cap'/'scratch.sqlite').stat().st_size,4096)
+
     @unittest.skipUnless(importlib.util.find_spec('osmium'),'optional existing pyosmium unavailable')
     def test_optional_pbf_same_contract(self):
         import osmium

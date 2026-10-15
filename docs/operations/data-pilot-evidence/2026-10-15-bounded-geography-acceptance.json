@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "observedUtc": "2026-10-15T17:43:46.519074Z",
+  "status": "retained-producer-bridge-and-canonical-validation-complete",
+  "sourceAdmitted": false,
+  "runtimeInstalled": false,
+  "coverage": "unknown; synthetic clip identity and empty region/footprint controls",
+  "selection": {
+    "scope": "841 selected local code/runtime/dependency/input pins; not a full import closure",
+    "before": 841,
+    "after": 841,
+    "matched": 841,
+    "corePins": [
+      {
+        "path": ".data/osm/retained-geography-20261015-v1-input/manifest.json",
+        "bytes": 1593,
+        "sha256": "c9c8787252b9e3ba0a317e428553302283ec353211e8a4430684a3a0f4bdab14"
+      },
+      {
+        "path": "scripts/osm/build-source-catalogue.ts",
+        "bytes": 7380,
+        "sha256": "3ce128edc5d71940efad9c3a413948affe28419e0bcd3532e0708a431ab0fc79"
+      },
+      {
+        "path": "scripts/osm/build-streamed-catalogue.ts",
+        "bytes": 17581,
+        "sha256": "d6bf2db9853733bff07f7c40811cc718e5841160d4daa457c55d9783cabfa25d"
+      },
+      {
+        "path": "scripts/osm/global_source_supervisor.py",
+        "bytes": 18469,
+        "sha256": "b668dde2c7c254a95203410569794c2cf371658b9816aa0d97ca845e74088c3c"
+      },
+      {
+        "path": "scripts/osm/global_source.py",
+        "bytes": 21275,
+        "sha256": "3890790db705ccdc35a9fb744f5f6d54a235d3d46359adb2cb28c1f9bec9613f"
+      },
+      {
+        "path": "scripts/osm/measure-retained-source.py",
+        "bytes": 8775,
+        "sha256": "06ff2c17095f321123c5bfe6206eb9b1553fd258766d5d93998347b6abb41e65"
+      },
+      {
+        "path": "scripts/osm/source-build-config.ts",
+        "bytes": 2704,
+        "sha256": "24bf24dbe1b2dd3b8a0cbabfa444d73a94094d3b73482d2c01c14be2f2e0d7f9"
+      },
+      {
+        "path": "scripts/osm/spot_paths.py",
+        "bytes": 2389,
+        "sha256": "a8b644b51f05bd08f080c9023f92fc65389b83f0a68f5969f4387512d669cdf0"
+      }
+    ]
+  },
+  "rawSources": [
+    {
+      "id": "monaco",
+      "path": ".data/osm/global-pilot-20261015-v1/monaco/monaco.osm.pbf",
+      "format": "pbf",
+      "url": "https://download.geofabrik.de/europe/monaco-261013.osm.pbf",
+      "bytes": 692392,
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+      "vintage": "2026-10-13T20:21:31Z",
+      "clipSha256": "99bb34fa5a7caf06f3c6e9d16eb162ac5264c03532998dff93babbf4911fc4c5",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "attribution": "© OpenStreetMap contributors"
+    },
+    {
+      "id": "faroe-islands",
+      "path": ".data/osm/geographic-continuation-20261015-v1/faroe-islands/faroe-islands.osm.pbf",
+      "format": "pbf",
+      "url": "https://download.geofabrik.de/europe/faroe-islands-261013.osm.pbf",
+      "bytes": 7735542,
+      "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+      "vintage": "2026-10-13T20:21:31Z",
+      "clipSha256": "99bb34fa5a7caf06f3c6e9d16eb162ac5264c03532998dff93babbf4911fc4c5",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "attribution": "© OpenStreetMap contributors"
+    }
+  ],
+  "producerLimits": {
+    "candidates": 10000,
+    "freeBytes": 103079215104,
+    "nodes": 2000000,
+    "outputBytes": 67108864,
+    "referencesPerWay": 10000,
+    "rowBytes": 65536,
+    "scratchBytes": 536870912,
+    "seconds": 600,
+    "sourceBytes": 16777216
+  },
+  "measurement": {
+    "backgroundHostLoad": "uncontrolled",
+    "cacheState": "uncontrolled; no cold-read guarantee",
+    "coverage": "unknown; no regions or extraction footprints admitted",
+    "finalFileBytes": {
+      "journalBytes": 0,
+      "otherBytes": 415138,
+      "sqliteBytes": 33828864,
+      "totalBytes": 34244002
+    },
+    "hashPassNote": "included within producer/bridge wall; not separately instrumented",
+    "hashPassSeconds": null,
+    "ioNote": "Windows Job transfer counters include cached and metadata I/O; not physical raw-source read volume",
+    "jobStageMetrics": [
+      {
+        "jobKernelCpuSeconds": 7.109375,
+        "jobReadTransferBytes": 113757751,
+        "jobUserCpuSeconds": 37.5,
+        "jobWriteTransferBytes": 36452507,
+        "peakJobCommitBytes": 75902976
+      },
+      {
+        "jobKernelCpuSeconds": 0.1875,
+        "jobReadTransferBytes": 1534594,
+        "jobUserCpuSeconds": 0.140625,
+        "jobWriteTransferBytes": 450713,
+        "peakJobCommitBytes": 170786816
+      }
+    ],
+    "measurementWallSeconds": 44.982,
+    "networkRequests": 0,
+    "nodeCountNote": "nodes is final source table only; each source clears it before loading",
+    "normalized": {
+      "candidateRows": 84,
+      "categoryRows": {
+        "beach": 18,
+        "campground": 18,
+        "park": 18,
+        "viewpoint": 30
+      },
+      "exclusionsBySource": {
+        "faroe-islands": {
+          "relation": 9,
+          "unnamed": 253
+        },
+        "monaco": {
+          "relation": 4,
+          "unnamed": 29
+        }
+      },
+      "nonemptyRegionRows": 0
+    },
+    "runtimeInstalled": false,
+    "sampledFilePeaks": {
+      "journalBytes": 1207856,
+      "otherBytes": 414593,
+      "sqliteBytes": 33828864,
+      "totalBytes": 35037001
+    },
+    "schemaVersion": 1,
+    "sqliteRows": {
+      "candidates": 84,
+      "exclusions": 295,
+      "lineage": 84,
+      "nodes": 1198456
+    },
+    "status": "complete",
+    "supervisor": {
+      "elapsedSeconds": 44.917,
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "limits": {
+        "commitBytes": 2147483648,
+        "diskBytes": 1082171955,
+        "freeBytes": 103079215104,
+        "maxProcesses": 2,
+        "rssBytes": 1073741824,
+        "wallSeconds": 600
+      },
+      "peakLogicalBytes": 42673588,
+      "peakRssBytes": 98299904,
+      "platform": "win32",
+      "reason": null,
+      "stages": [
+        {
+          "elapsedSeconds": 44.569,
+          "exitCode": 0,
+          "stage": 0
+        },
+        {
+          "elapsedSeconds": 0.315,
+          "exitCode": 0,
+          "stage": 1
+        }
+      ],
+      "status": "complete"
+    }
+  },
+  "canonicalAdapter": {
+    "schemaVersion": 1,
+    "sourceAdmissionChanged": false,
+    "gbOpen": "not-admitted",
+    "arco": "not-admitted",
+    "findings": [
+      {
+        "adapter": "retained-osm-canonical-v1",
+        "status": "validated-lineage",
+        "sourceAdmitted": false,
+        "nativeParserRerun": false,
+        "code": "PINNED_LINEAGE_CONSISTENT"
+      }
+    ]
+  },
+  "catalogueValidation": {
+    "status": "validated",
+    "rootSha256": "4023f933a5c39dc60bf92eb0d2611c8919f6da3d9cfbf53d61fb4c931d0a1a3a",
+    "revision": "osm-9ab73d8f11ed317af0a1128a34f7d910877ab5fb7cd8050487f901e0c1f0654e",
+    "trees": {
+      "spatial": 84,
+      "id": 84,
+      "name": 84,
+      "membership": 0,
+      "regions": 0,
+      "footprints": 0
+    },
+    "candidateEquality": true,
+    "cache": {
+      "residentPages": 2,
+      "residentBytes": 6079,
+      "residentRows": 84,
+      "loads": 4,
+      "evictions": 2,
+      "queuedReads": 0,
+      "maxConcurrentLoads": 1
+    },
+    "coverage": "unknown; empty benchmark region/footprint controls",
+    "runtimeInstalled": false
+  },
+  "limitations": [
+    "Single retained two-source run; prior two 600-second deadline stops remain immutable; no speedup ratio or global throughput claim.",
+    "Main PID RSS is sampled and may observe a venv redirector; it is not tree RSS.",
+    "Windows Job transfer bytes include cached/metadata I/O and are not physical disk reads or cumulative physical writes.",
+    "Resource checks and supervisor disk/reserve/RSS sampling can overshoot; SQLite max_page_count caps only the main database.",
+    "Node table count describes final Faroe source only; sources clear the table between loads.",
+    "Cache and host load uncontrolled; hash passes not separately timed.",
+    "Canonical adapter validates actual normalized lineage without rerunning native parser; preceding producer parsed native PBF.",
+    "No source admission, geographic coverage, clipping footprint admission, download, runtime installation or deployment follows."
+  ]
+}

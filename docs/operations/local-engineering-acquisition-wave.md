@@ -1,0 +1,36 @@
+# Local engineering and consolidated acquisition wave
+
+15 October 2026, branch `codex/plugin-v1`, starting at `a24a037`. This wave implements the three approved local lanes and assembles one conditional acquisition packet. No dataset or source-metadata requests, new dependencies, model runs, runtime artifact selection, deployment or publication.
+
+## Delivered work and evidence boundaries
+
+| Lane | Delivered | Actual evidence and remaining boundary |
+| --- | --- | --- |
+| Geography | Bounded resource inventory: cheap deadline checkpoints per PBF/XML entity; full inventory at 100ms/256-call cooperative checkpoints, immediate pending-write and phase checks; SQLite main-page cap. | Both actual retained PBFs and configured catalogue bridge complete within the original 600-second allowance. Actual canonical lineage validation and six-tree catalogue validation pass. Synthetic clip identity and empty administrative/footprint inputs do not admit coverage or membership. |
+| History | Schema-4 catalogue above existing bounded releases; shared metadata, source-union and coverage identities; two-child LRU sharing the 32 MiB tile budget; pinned CLI publication. | Generated 10,010-pair descriptors exercise routing above the former 10,000-pair root bound. Existing configured provider dispatches legacy or catalogue roots. No real worldwide baseline or ARCO format is admitted. |
+| Operator dependency admission | Schema-4 pinned roots authorize contained checksum/byte-pinned children; child/shard/tile traversal is streamed, with whole-allocation, per-file, reference-count and cooperative-time checks. | Flat legacy inventory remains strict and capped at 10,000 entries. Absent derived descriptor occurrences are charged conservatively; matching explicit components are already charged. Current and rollback retain separate allocations and receive no physical-sharing discount. No global dependency map or serving database introduced. |
+| Events/release and acquisition | One source/rights/coverage/requirements packet, supported-event matrix, retained-hour subtraction, resource proposals and release checklist. | Packet is **not executable or acquisition-ready** while exact boundary/clip identities, production mappings, selected requests and transfer allowances remain missing. No source identities or rights were invented to close those gates. |
+
+Owning records: [geography engineering and measurement](geographic-bounded-inventory-wave.md), [history and operator engineering](history-local-completion-wave.md), [consolidated acquisition proposal](v1-consolidated-acquisition-proposal.md), [plan](../superpowers/plans/2026-10-15-local-engineering-and-acquisition.md).
+
+## Actual retained geography acceptance
+
+One fresh supervised attempt reused the unchanged Monaco/Faroe manifest and raw pins. Before launch, the parent recorded **841 selected source/runtime/input pins**, scoped to geography dependencies while independent history development continued. These are not a full import closure. All matched after drain. The prior two 600-second failures remain unchanged.
+
+Supervisor wall was **44.917 seconds**; raw producer **44.569 seconds**, bridge **0.315 seconds**, both exit zero. Measurement wall was **44.982 seconds**. Output contains **84 candidates, 84 lineage rows and 295 exclusions**. Final-source node count is **1,198,456**, not the total across both sources. Candidate categories: 18 beaches, 18 campgrounds, 18 parks and 30 viewpoints.
+
+The actual canonical validator returns `validated-lineage`, `sourceAdmitted:false`, `nativeParserRerun:false`. The producer itself ran the native PBF parser; that validator does not independently rerun it. All six catalogue trees were read with their actual owning integrity checks, no query budget stopped, and the spatial IDs match the normalized 84 candidates exactly. ID/name trees each contain 84 rows; membership/regions/footprints each contain zero. Catalogue root SHA256 is `4023f933a5c39dc60bf92eb0d2611c8919f6da3d9cfbf53d61fb4c931d0a1a3a`.
+
+Actual Job peak commit was 75,902,976 bytes raw and 170,786,816 bytes bridge. SQLite final logical length was 33,828,864 bytes; sampled journal peak 1,207,856 bytes. Full resource metrics and selected pins are in [sanitized evidence](data-pilot-evidence/2026-10-15-bounded-geography-acceptance.json). Main-PID RSS can describe a venv redirector, not producer/tree RSS; Job transfer counters include cache/metadata traffic, not physical disk volume. Cache and host load were uncontrolled, and preflight/hash setup is outside the supervised stage window. These results support this finite retained workload, not a global speedup ratio, global build ETA or selected Hetzner fit.
+
+## Review corrections
+
+Geography review retained bounded mutation/reserve semantics and added the XML per-entity checkpoint. History review corrected cross-child conflicting source revisions and validation of root provenance/index vintage before missing-route responses. Operator review corrected documentation of derived authorization and added exact reference-limit boundaries. Combined type checking caught two target-compatibility issues in the operator traversal; both were corrected without changing semantics. Review and focused reruns distinguish those corrections from earlier measurements.
+
+## Verification and remaining work
+
+Final local checks: **798 Node cases / 797 passed / one existing skip / zero failures**; **107 OSM Python cases / 103 passed / four skips / zero failures**; **52 ERA5 Python cases passed**. All three TypeScript configurations, website/service/standalone build, rehearsal package and both local package validators pass. Eight offline review assertion sets and production/full/resolver/regional runtime checks pass with no upstream provider attempts. The aggregate Node run preceded the target-only BigInt/block-function compatibility corrections; all 37 affected history/operator cases and all three type configurations passed afterward. Exact pushed SHA and six-job CI outcome are recorded after observation in the ignored identity-first wave ledger and final handoff.
+
+The catalogue admits at most 256 children and 2,560,000 explicit cell/timezone pairs. That descriptor capacity does not prove full worldwide coverage: actual pair inventory, source-format/revision admission, statistical quality, publication size, refresh cost and selected host/client performance remain unmeasured. The unchanged 10,000 distinct source-revision identity union is an additional gate if selected real data exceeds it. A bounded lineage hierarchy would be needed in that case; this wave does not silently raise it.
+
+Next is the **source-identity and acquisition decision**, not another default country benchmark. Resolve the exact boundary edition/layers and extraction geometry, production cell/timezone inventory, missing-hour request identity and finite metadata/body allowances. Any new acquisition still needs approval. Actual production releases, complete local/model acceptance, host configuration, official platform validation/submission, invited pilot and separate website remain in their owning stages. Original heading counts remain **12 Done / 9 Partial / 6 Not started** until original acceptance is met.

@@ -193,7 +193,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
                 }
             }
     }
-    if (!invalid && b) for (const r of [current, rollback]) if (r) { try { await validateOperatorReleaseClosure(artifactRoot, c.artifacts.filter(a => r.artifactIds.includes(a.id))); } catch { fail('RELEASE_CLOSURE_INVALID'); } }
+    if (!invalid && b) for (const r of [current, rollback]) if (r) { try { await validateOperatorReleaseClosure(artifactRoot, c.artifacts.filter(a => r.artifactIds.includes(a.id)), {maxTotalBytes:r===current?b.currentBytes:b.rollbackBytes,maxArtifactBytes:b.maxArtifactBytes}); } catch { fail('RELEASE_CLOSURE_INVALID'); } }
     findings.push('HOST_CHECKS_NOT_PERFORMED');
     return output();
 }

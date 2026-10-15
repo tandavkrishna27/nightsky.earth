@@ -138,6 +138,7 @@ def entities(source, limit, check):
                 if kind=='node':
                     try: point=(float(e.get('lat')),float(e.get('lon')))
                     except (ValueError,TypeError): pass
+                check()
                 yield kind,int(e.get('id')),tags,point,refs
                 root.remove(e); e.clear(); pending=0
         parser.close()
@@ -193,24 +194,46 @@ def output_usage(output):
     return total,scratch
 
 
+class ResourceGuard:
+    """Deadline each call; filesystem inventory every 100ms or 256 calls.
+
+    These are cooperative checkpoint bounds, not bounds on blocking I/O time.
+    Pending explicit writes and phase boundaries always request a fresh scan.
+    """
+    def __init__(self, output, limits, start):
+        self.output=output; self.limits=limits; self.start=start
+        self.last_scan=None; self.calls=0
+
+    def deadline(self):
+        now=time.monotonic()
+        if now-self.start>=self.limits['seconds']: raise ValueError('deadline limit')
+        return now
+
+    def check(self, pending_output=0, *, force=False):
+        now=self.deadline(); self.calls+=1
+        if not (force or pending_output or self.last_scan is None or self.calls>=256 or now-self.last_scan>=.1): return
+        total,scratch=output_usage(self.output); limits=self.limits
+        if scratch>limits['scratchBytes']: raise ValueError('scratch byte limit')
+        if total-scratch+pending_output>limits['outputBytes']: raise ValueError('output/evidence byte limit')
+        if total+pending_output>limits['scratchBytes']+limits['outputBytes']: raise ValueError('combined disk limit')
+        if shutil.disk_usage(self.output).free<limits['freeBytes']+pending_output: raise ValueError('free reserve limit')
+        self.last_scan=self.deadline(); self.calls=0
+
+
 def build(manifest, output, *, resume=False, hook=lambda stage: None):
     m=validate_manifest(manifest); revision=manifest_revision(m); limits=m['limits']; output=safe_path(output)
     if any(safe_path(s['path']).is_relative_to(output) for s in m['sources']): raise ValueError('source inside output')
     if output.exists() and not resume: raise FileExistsError(output)
     output.mkdir(parents=True,exist_ok=resume); start=time.monotonic()
-    def check(pending_output=0):
-        if time.monotonic()-start>=limits['seconds']: raise ValueError('deadline limit')
-        total,scratch=output_usage(output)
-        if scratch>limits['scratchBytes']: raise ValueError('scratch byte limit')
-        if total-scratch+pending_output>limits['outputBytes']: raise ValueError('output/evidence byte limit')
-        if total+pending_output>limits['scratchBytes']+limits['outputBytes']: raise ValueError('combined disk limit')
-        if shutil.disk_usage(output).free<limits['freeBytes']+pending_output: raise ValueError('free reserve limit')
+    guard=ResourceGuard(output,limits,start); check=guard.check
     def verify_sources():
+        check(force=True)
         for s in m['sources']:
             p=safe_path(s['path']); before=p.stat()
             if before.st_size!=s['bytes'] or digest(p,check)!=s['sha256']: raise ValueError('source hash/size mismatch')
             after=p.stat()
             if (before.st_ino,before.st_mtime_ns,before.st_size)!=(after.st_ino,after.st_mtime_ns,after.st_size): raise ValueError('source mutation')
+        check(force=True)
     verify_sources()
     manifest_hash=hashlib.sha256(canonical(m).encode()).hexdigest(); dbpath=safe_path(output/'scratch.sqlite'); checkpoint=safe_path(output/'checkpoint.json')
     completed=0
@@ -224,20 +247,29 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
             if done.get('catalogueRevision')!=revision or done.get('manifestSha256')!=manifest_hash or done.get('policy')!=POLICY or set(done.get('files',{}))!={'candidates.jsonl','exclusions.jsonl','lineage.jsonl'}: raise ValueError('published identity mismatch')
             for name, pin in done['files'].items():
                 if name not in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl') or digest(output/name,check)!=pin['sha256'] or (output/name).stat().st_size!=pin['bytes']: raise ValueError('published digest mismatch')
-            return output
+            check(force=True); return output
         for name in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl'):
             if (output/name).exists(): raise ValueError('partial output present; preserve evidence and use fresh output')
     elif dbpath.exists(): raise ValueError('unexpected scratch')
     db=sqlite3.connect(dbpath)
     try:
         db.execute('PRAGMA journal_mode=DELETE'); db.execute('PRAGMA cache_size=-2048'); db.execute('PRAGMA temp_store=FILE')
+        page_size=db.execute('PRAGMA page_size').fetchone()[0]
+        max_pages=limits['scratchBytes']//page_size
+        if max_pages<1 or db.execute('PRAGMA page_count').fetchone()[0]>max_pages: raise ValueError('scratch byte limit')
+        # Hard cap for the main database only. DELETE journal and other scratch
+        # files are accounted by the bounded inventories, not by this pragma.
+        db.execute(f'PRAGMA max_page_count={max_pages}')
         db.executescript('CREATE TABLE IF NOT EXISTS nodes(id INTEGER PRIMARY KEY, lat REAL, lon REAL); CREATE TABLE IF NOT EXISTS candidates(id TEXT PRIMARY KEY, body TEXT, vintage TEXT); CREATE TABLE IF NOT EXISTS lineage(id TEXT, source TEXT, PRIMARY KEY(id,source)); CREATE TABLE IF NOT EXISTS exclusions(source TEXT,id TEXT,reason TEXT); CREATE INDEX IF NOT EXISTS exclusion_order ON exclusions(source,id,reason);')
         def save(count):
+            check(force=True)
             db.commit(); payload={'manifestSha256':manifest_hash,'databaseSha256':digest(dbpath,check),'completedSources':count,'catalogueRevision':revision}
             temp=output/'checkpoint.tmp'
             encoded=canonical(payload).encode();check(len(encoded))
             with safe_path(temp).open('xb') as f: f.write(encoded)
+            safe_path(temp); safe_path(checkpoint)
             os.replace(temp,checkpoint)
+            check(force=True)
         if not resume: save(0)
         for index,s in enumerate(m['sources']):
             if index<completed: continue
@@ -249,7 +281,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
                 previous=db.execute('SELECT lat,lon FROM nodes WHERE id=?',(oid,)).fetchone()
                 if previous is not None and tuple(point)!=previous: raise ValueError('node identity conflict')
                 db.execute('INSERT OR IGNORE INTO nodes VALUES(?,?,?)',(oid,*point))
-                if dbpath.stat().st_size>limits['scratchBytes']: raise ValueError('scratch byte limit')
+            check(force=True)
             for kind, oid, tags, point, refs in entities(s,limits,check):
                 cat=category(tags); name=clean(tags.get('name') or tags.get('name:en') or tags.get('official_name'))
                 if not cat: continue
@@ -274,11 +306,12 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
                 db.execute('INSERT OR IGNORE INTO lineage VALUES(?,?)',(identity,s['id']))
                 if candidate_count>limits['candidates']: raise ValueError('candidate limit')
                 if db.execute('SELECT count(*) FROM lineage WHERE id=?',(identity,)).fetchone()[0]>4: raise ValueError('candidate source limit')
-            save(index+1); hook('source-complete'); verify_sources(); check()
+            check(force=True); save(index+1); hook('source-complete'); verify_sources(); check(force=True)
         verify_sources()
         sources={s['id']:s for s in m['sources']}; written=0; inventory={}
         def write(name, rows):
             nonlocal written
+            check(force=True)
             p=safe_path(output/name)
             with p.open('xb',buffering=0) as f:
                 for row in rows:
@@ -287,6 +320,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
                     check(len(chunk))
                     written+=len(chunk); f.write(chunk)
             inventory[name]={'bytes':p.stat().st_size,'sha256':digest(p,check)}
+            check(force=True)
         def candidates():
             for identity,body in db.execute('SELECT id,body FROM candidates ORDER BY id'):
                 row=json.loads(body); row['catalogueRevision']=revision; row['sources']=[]
@@ -301,6 +335,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
         payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'])).encode()
         check(len(payload))
         with safe_path(output/'complete.json').open('xb') as f: f.write(payload)
+        check(force=True)
         return output
     finally:
         db.close()

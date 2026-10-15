@@ -5,6 +5,7 @@ import {dirname,resolve,isAbsolute,relative,sep} from 'node:path';
 import * as z from 'zod4';
 import {createTiledEra5ClimateProvider,readTrustedClimateFile,tiledEra5ManifestSchema,validateTiledEra5Manifest,type TiledEra5Manifest} from './tiledEra5';
 import type {Era5ClimateProviderOptions} from './era5';
+import {createCatalogEra5ClimateProvider} from './catalogEra5';
 const MiB=1024*1024;
 const digest=z.string().regex(/^[a-f0-9]{64}$/);
 export const releaseEra5Schema=z.strictObject({schemaVersion:z.literal(3),releaseId:digest,metadata:tiledEra5ManifestSchema.omit({tiles:true}),coverage:z.literal('explicit-cell-timezone-pairs; missing-is-unknown'),shards:z.array(z.strictObject({path:z.string().min(1).max(300),sha256:digest,bytes:z.number().int().min(1).max(4*MiB),sourceRevisions:tiledEra5ManifestSchema.shape.sourceRevisions,keys:z.array(z.string().min(1).max(150)).min(1).max(10)})).min(1).max(1000)});
@@ -22,6 +23,9 @@ export async function releasePath(root:string,path:string){if(isAbsolute(path)||
 export function validateRelease(data:Era5Release){const keys=new Set<string>(),paths=new Set<string>();for(const shard of data.shards){if(paths.has(shard.path))throw Error('Duplicate shard');paths.add(shard.path);if(isAbsolute(shard.path)||shard.path.includes('\\')||shard.path.includes(':')||shard.path.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Release path');for(const key of shard.keys){if(keys.has(key))throw Error('Duplicate coverage');keys.add(key);}}validateTiledEra5Manifest({...data.metadata,tiles:[]});if(canonicalRelease(mergeReleaseRevisions(data.shards.map(s=>s.sourceRevisions)))!==canonicalRelease(data.metadata.sourceRevisions))throw Error('Release source union mismatch');}
 export interface ReleaseEra5Options extends Era5ClimateProviderOptions {maxManifestBytes?:number;maxShardCacheEntries?:number;onTileRead?:(key:string)=>void|Promise<void>}
 export function createReleaseEra5ClimateProvider(options:ReleaseEra5Options){
+ return createCatalogEra5ClimateProvider(options,createLeafReleaseEra5ClimateProvider);
+}
+export function createLeafReleaseEra5ClimateProvider(options:ReleaseEra5Options){
  const slots=options.maxShardCacheEntries??2,budget=options.maxCacheBytes??32*MiB,manifestLimit=options.maxManifestBytes??4*MiB;
  if(!Number.isInteger(slots)||slots<1||slots>8||!Number.isInteger(budget)||budget<slots||budget>32*MiB||!Number.isInteger(manifestLimit)||manifestLimit<1||manifestLimit>4*MiB)throw Error('Release cache bounds');
  type Provider=ReturnType<typeof createTiledEra5ClimateProvider>;
