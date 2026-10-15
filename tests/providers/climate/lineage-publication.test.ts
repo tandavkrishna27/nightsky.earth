@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,readFile,mkdir} from 'node:fs/promises';
+import {mkdtemp,realpath,writeFile,readFile,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {releaseClosureSample} from '../../operations/release-closure-fixture';
@@ -9,7 +9,7 @@ import {publishClimateRelease} from '../../../scripts/era5/build-release';
 import {publishClimateCatalog} from '../../../scripts/era5/build-catalog';
 
 async function fixture(counts=[6000,4001]){
- const root=await mkdtemp(join(tmpdir(),'nightsky-lineage-'));
+ const root=await realpath(await mkdtemp(join(tmpdir(),'nightsky-lineage-')));
  const inputs=[];
  for(let i=0;i<2;i++){
   const dir=join(root,'shard'+i);await mkdir(dir);const sample=releaseClosureSample();sample.tiles=sample.tiles.slice(i,i+1);sample.manifest.tiles=sample.manifest.tiles.slice(i,i+1);
@@ -54,7 +54,7 @@ test('operator schema5 exhaustively derives closure and requires reserved explic
  const {root,inputs}=await fixture([2,2]),published=await publishClimateRelease({schemaVersion:6,outputPath:join(root,'release.json'),inputs,budgets} as any),catalog=await publishClimateCatalog({schemaVersion:5,outputPath:join(root,'catalog.json'),inputs:[{path:'release.json',sha256:published.manifestSha256}],budgets} as any);
  const {validateOperatorReleaseClosure}=await import('../../../shared/nightsky/operatorClosure');const body=await readFile(catalog.manifestPath),pin={id:'catalog',kind:'era5-release' as const,path:'catalog.json',sha256:catalog.manifestSha256,bytes:body.length,version:'fictional'};
  await assert.rejects(validateOperatorReleaseClosure(root,[pin]),/explicit/i);
- const scratchParent=await mkdtemp(join(tmpdir(),'nightsky-closure-'));const options={lineageValidation:{scratchDirectory:join(scratchParent,'audit'),budgets}};
+ const scratchParent=await realpath(await mkdtemp(join(tmpdir(),'nightsky-closure-')));const options={lineageValidation:{scratchDirectory:join(scratchParent,'audit'),budgets}};
  const proof=await validateOperatorReleaseClosure(root,[pin],options);assert(proof.references>10);assert(proof.accountedBytes>body.length);
  await assert.rejects(validateOperatorReleaseClosure(root,[pin],options),/exist/i);
  await assert.rejects(validateOperatorReleaseClosure(root,[pin],{lineageValidation:{scratchDirectory:join(root,'unsafe'),budgets}}),/overlap/i);
@@ -70,7 +70,7 @@ test('unknown schemas and missing membership pins fail closed',async()=>{
 
 test('operator shares the declared scratch ceiling across multiple schema6 roots',async()=>{
  const {root,inputs}=await fixture([2,2]),published=await publishClimateRelease({schemaVersion:6,outputPath:join(root,'release.json'),inputs,budgets} as any);const body=await readFile(published.manifestPath);await writeFile(join(root,'second.json'),body);
- const inventory=['release.json','second.json'].map(path=>({id:path,kind:'era5-release' as const,path,sha256:published.manifestSha256,bytes:body.length,version:'fixture'}));const parent=await mkdtemp(join(tmpdir(),'nightsky-multi-closure-'));
+ const inventory=['release.json','second.json'].map(path=>({id:path,kind:'era5-release' as const,path,sha256:published.manifestSha256,bytes:body.length,version:'fixture'}));const parent=await realpath(await mkdtemp(join(tmpdir(),'nightsky-multi-closure-')));
  const {validateOperatorReleaseClosure}=await import('../../../shared/nightsky/operatorClosure');
  await assert.rejects(validateOperatorReleaseClosure(root,inventory,{lineageValidation:{scratchDirectory:join(parent,'audit'),budgets:{...budgets,maxScratchBytes:600}}}),/scratch.*budget/i);
 });
@@ -83,13 +83,13 @@ test('schema6 publication rejects pinned invalid UTF-8 instead of admitting repl
 });
 
 test('operator scratch rejects dot-dot-prefixed descendants rather than treating them as outside artifacts',async()=>{
- const {prepareLineageScratch}=await import('../../../shared/nightsky/operatorLineageClosure');const root=await mkdtemp(join(tmpdir(),'nightsky-scratch-boundary-'));
+ const {prepareLineageScratch}=await import('../../../shared/nightsky/operatorLineageClosure');const root=await realpath(await mkdtemp(join(tmpdir(),'nightsky-scratch-boundary-')));
  await assert.rejects(prepareLineageScratch(root,{scratchDirectory:join(root,'..audit'),budgets}),/overlap/i);
 });
 
 test('operator preflight creates its explicitly reserved current and rollback scratch directories',async()=>{
  const {root,inputs}=await fixture([2,2]),published=await publishClimateRelease({schemaVersion:6,outputPath:join(root,'release.json'),inputs,budgets} as any),body=await readFile(published.manifestPath),pin={id:'release',kind:'era5-release',path:'release.json',sha256:published.manifestSha256,bytes:body.length,version:'fixture'};
- const scratchParent=await mkdtemp(join(tmpdir(),'nightsky-preflight-'));const config:any={schemaVersion:1,status:'selected',lineageValidation:{scratchDirectory:join(scratchParent,'working'),budgets},endpoints:{production:'https://mcp.nightsky.earth/mcp',staging:'https://stage.nightsky.earth/mcp',privacy:'https://nightsky.earth/privacy',terms:'https://nightsky.earth/terms',support:'https://nightsky.earth/support'},topology:{kind:'direct',headerRewriteEvidence:null,restrictedBackendEvidence:null},runtimeEnvironment:{NODE_ENV:'production',HOST:'127.0.0.1',PORT:'5000',NIGHTSKY_MCP_TOOL_MODE:'resolver-only',NIGHTSKY_MCP_ALLOWED_HOSTS:'mcp.nightsky.earth,stage.nightsky.earth'},releases:{current:{id:'current',sourceCommit:'a'.repeat(40),imageDigest:'sha256:'+'a'.repeat(64),architecture:'amd64',packageVersion:'1.0.12',artifactIds:['release']},rollback:{id:'previous',sourceCommit:'b'.repeat(40),imageDigest:'sha256:'+'b'.repeat(64),architecture:'amd64',packageVersion:'1.0.11',artifactIds:['release']}},artifacts:[pin],budget:{processes:1,memoryBytes:budgets.maxMemoryBytes,diskAvailableBytes:512*1024**2,currentBytes:64*1024**2,rollbackBytes:64*1024**2,scratchBytes:128*1024**2,reserveBytes:0,maxArtifactBytes:8*1024**2,capacityEvidence:'fixture',rollbackEvidence:'fixture'},ownerEvidence:{identity:'fixture',policies:'fixture',retention:'fixture',host:'fixture',providerBudget:'fixture'}};
+ const scratchParent=await realpath(await mkdtemp(join(tmpdir(),'nightsky-preflight-')));const config:any={schemaVersion:1,status:'selected',lineageValidation:{scratchDirectory:join(scratchParent,'working'),budgets},endpoints:{production:'https://mcp.nightsky.earth/mcp',staging:'https://stage.nightsky.earth/mcp',privacy:'https://nightsky.earth/privacy',terms:'https://nightsky.earth/terms',support:'https://nightsky.earth/support'},topology:{kind:'direct',headerRewriteEvidence:null,restrictedBackendEvidence:null},runtimeEnvironment:{NODE_ENV:'production',HOST:'127.0.0.1',PORT:'5000',NIGHTSKY_MCP_TOOL_MODE:'resolver-only',NIGHTSKY_MCP_ALLOWED_HOSTS:'mcp.nightsky.earth,stage.nightsky.earth'},releases:{current:{id:'current',sourceCommit:'a'.repeat(40),imageDigest:'sha256:'+'a'.repeat(64),architecture:'amd64',packageVersion:'1.0.12',artifactIds:['release']},rollback:{id:'previous',sourceCommit:'b'.repeat(40),imageDigest:'sha256:'+'b'.repeat(64),architecture:'amd64',packageVersion:'1.0.11',artifactIds:['release']}},artifacts:[pin],budget:{processes:1,memoryBytes:budgets.maxMemoryBytes,diskAvailableBytes:512*1024**2,currentBytes:64*1024**2,rollbackBytes:64*1024**2,scratchBytes:128*1024**2,reserveBytes:0,maxArtifactBytes:8*1024**2,capacityEvidence:'fixture',rollbackEvidence:'fixture'},ownerEvidence:{identity:'fixture',policies:'fixture',retention:'fixture',host:'fixture',providerBudget:'fixture'}};
  const {operatorPreflight}=await import('../../../shared/nightsky/operator');assert.equal((await operatorPreflight(config,root)).status,'offline-pass');
  const insufficient=structuredClone(config);insufficient.lineageValidation.scratchDirectory=join(scratchParent,'second');insufficient.budget.scratchBytes=64*1024**2;assert((await operatorPreflight(insufficient,root)).findings.includes('LINEAGE_VALIDATION_BUDGET_UNRESERVED'));
 });

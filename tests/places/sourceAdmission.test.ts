@@ -1,12 +1,13 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile, writeFile, mkdtemp, mkdir} from 'node:fs/promises';
+import {readFile, writeFile, mkdtemp, mkdir, access} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {buildRetainedSourceAdmissionInventory, buildRetainedSourceAdmissionPolicy, admissionSubjectDigest, validateSourceAdmission, validateSourceAdmissionFiles, sourceAdmissionBundleSchema, retainedSourceEvidencePin, sourceAdmissionOutputPath} from '../../scripts/osm/source-admission';
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 const pin=(name:string)=>({path:`synthetic/${name}.json`,bytes:64,sha256:hash(name)});
+async function scratchDirectory(prefix:string,parent=resolve('.cache')) {await mkdir(parent,{recursive:true});return mkdtemp(join(parent,prefix));}
 // Entirely fictional review evidence; these are no permission or source grants.
 function fixture(kind:'boundary'|'osm-extract'='boundary') {
  const payload={url:'https://example.org/immutable/edition-1/data',bytes:1234,sha256:hash('payload'),identityEvidence:pin('payload-identity')};
@@ -72,7 +73,7 @@ test('strict bounded schema rejects unexpected approval, unsafe paths, secret UR
  const {bundle}=fixture();for(const change of [(b:any)=>b.approved=true,(b:any)=>b.source.manifest.path='../escape.json',(b:any)=>b.source.payload.url='https://example.org/data?token=secret',(b:any)=>b.source.payload.url='https://user:password@example.org/data',(b:any)=>b.source.payload.bytes=Number.MAX_SAFE_INTEGER,(b:any)=>b.source.payload.url='https://example.org/latest/data']){const bad=structuredClone(bundle);change(bad);assert.equal(sourceAdmissionBundleSchema.safeParse(bad).success,false);}
 });
 test('offline file gate verifies metadata pins, exact manifest membership and receipt contents',async()=>{
- const dir=await mkdtemp(resolve('.cache','source-admission-test-'));
+ const dir=await scratchDirectory('source-admission-test-');
  const {bundle,trust}=fixture();
  const evidencePins=[bundle.source.manifest,bundle.source.originalSource.provenanceEvidence,bundle.source.payload.identityEvidence,bundle.source.rights.licenceEvidence,...bundle.source.rights.conditions.map(c=>c.evidence),...bundle.reviews.map(r=>r.evidence)];
  const records=[{sourceKey:bundle.source.key,kind:bundle.source.kind,edition:bundle.source.edition,recordSha256:bundle.source.recordSha256,payload:{url:bundle.source.payload.url,bytes:bundle.source.payload.bytes,sha256:bundle.source.payload.sha256}}];
@@ -94,7 +95,8 @@ test('offline file gate verifies metadata pins, exact manifest membership and re
  const other=fixture();records[0].payload.sha256=hash('wrong');const changed=JSON.stringify({schemaVersion:1,kind:'source-admission-manifest',records});other.bundle.source.manifest={path:'wrong-manifest.json',bytes:Buffer.byteLength(changed),sha256:hash(changed)};await writeFile(join(dir,'wrong-manifest.json'),changed);await writeFile(bp,JSON.stringify(other.bundle));await assert.rejects(validateSourceAdmissionFiles(bp,tp),/manifest membership/);
 });
 test('inventory CLI writes a bounded complete packet once and refuses overwrite or workspace escape',async()=>{
- const dir=await mkdtemp(resolve('.cache','source-admission-cli-')),output=join(dir,'inventory.json');
+ const absentParent=join(await scratchDirectory('source-admission-clean-parent-'),'initially-absent');await assert.rejects(access(absentParent),{code:'ENOENT'});
+ const dir=await scratchDirectory('source-admission-cli-',absentParent),output=join(dir,'inventory.json');
  const command=(path:string)=>spawnSync(process.execPath,['--import','tsx','scripts/osm/source-admission.ts','inventory',path],{encoding:'utf8',timeout:10000});
  assert.equal(command(output).status,0);const value=JSON.parse(await readFile(output,'utf8'));assert.equal(value.layers.length,429);assert.equal(value.osmExtracts.length,8);
  assert.notEqual(command(output).status,0);assert.notEqual(command('../source-admission-escape.json').status,0);
@@ -105,7 +107,7 @@ test('output path gate rejects Windows streams, devices and aliases on every pla
  for(const path of ['.cache/existing.json:stream','.cache/parent:stream/result.json','.cache/CON','.cache/nul.json','.cache/COM1.log','.cache/lpt9.any','.cache/COM¹.txt','.cache/CONOUT$','.cache/NUL .txt','.cache/parent./result.json','.cache/parent /result.json','.cache/result.json.','.cache/result.json ','.cache/control\u0001.json','.cache/control\u0000.json','.cache/parent/../result.json','C:relative.json','\\\\?\\C:\\result.json','\\\\.\\NUL','.cache//result.json']) assert.throws(()=>sourceAdmissionOutputPath(path),/Unsafe output|traversal/);
 });
 test('retained public artifact identity and regenerated inventory survive LF and Windows CRLF checkout',async()=>{
- const dir=await mkdtemp(resolve('.cache','source-admission-line-endings-'));await mkdir(join(dir,'docs','operations'),{recursive:true});
+ const dir=await scratchDirectory('source-admission-line-endings-');await mkdir(join(dir,'docs','operations'),{recursive:true});
  for(const name of ['geography-source-metadata-evidence.json','geography-admission-resolution-evidence.json']){const data=(await readFile(resolve('docs','operations',name),'utf8')).replaceAll('\r\n','\n');await writeFile(join(dir,'docs','operations',name),data);}
  const lf=await buildRetainedSourceAdmissionInventory(dir);assert.equal(lf.retainedManifest.bytes,2480339);assert.equal(lf.retainedManifest.sha256,'e84cf663e02aa0fed3cd0bcb424d423f06a1bab6f4b119bf104d8c7371b23ffb');
  for(const name of ['geography-source-metadata-evidence.json','geography-admission-resolution-evidence.json']){const path=join(dir,'docs','operations',name);await writeFile(path,(await readFile(path,'utf8')).replaceAll('\n','\r\n'));}

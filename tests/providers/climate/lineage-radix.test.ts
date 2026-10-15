@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,writeFile} from 'node:fs/promises';
+import {mkdtemp,realpath,readFile,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -9,7 +9,7 @@ import {createLineageReader,createLineageCache,type SourceRow,type MembershipRow
 
 const budgets={maxInputBytes:16*1024*1024,maxMemoryBytes:32*1024*1024,maxScratchBytes:64*1024*1024,maxOutputBytes:64*1024*1024,maxDurationMs:60_000};
 async function* stream(rows:(SourceRow|MembershipRow)[]){yield* rows;}
-async function destination(){return join(await mkdtemp(join(tmpdir(),'era5-radix-')),'tree');}
+async function destination(){return join(await realpath(await mkdtemp(join(tmpdir(),'era5-radix-'))),'tree');}
 const row=(revision:string,sha256='a'.repeat(64)):SourceRow=>({kind:'raw',revision,sha256});
 
 test('lineage union retains over 10,000 pins, deduplicates and reads five bounded objects',async()=>{
