@@ -4,12 +4,26 @@
 
 Turn a named place, date window, and observing goal into a useful plan from local astronomy calculations and available event, weather, and place-context sources. Plans describe evidence, not a guarantee that the sky will be clear or an object will be visible.
 
+## Evidence contract for the final answer
+
+Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives and recommend_specialist_tools for a concrete specialist-app need. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
+
+For a complete session use aggregate planning evidence: resolve the named city, then call plan_observing_session with the requested activity/target/window. It already retrieves astronomy, weather, event, location and enabled optional evidence. Separate astronomy/weather/target/event tools are for focused questions, missing details or explicit refreshes; repeating every provider call is not required. Discovery and selected-candidate identity/timezone checks still apply before planning. If the user supplied an already resolved named place, reuse it only when its identity and timezone are current.
+
+Before answering, check every place-specific and time-specific claim against returned evidence. Copy returned localStart and localEnd for candidate windows and darknessOverlapIntervals; do not recompute those intersections or relabel UTC endpoints as local. Preserve dates and display timezone; omit weekday labels unless verified. Solar-below-minus-6/minus-12 interval endpoints are not sunrise: no astronomical darkness does not mean the entire window is daytime. Use sunBelowGeometricHorizonIntervals when provided to distinguish predawn twilight from Sun-above-horizon time. Geometry does not establish daytime visual detectability of a planet. Describe the returned thresholds without inventing daylight or an alternative night's conditions.
+
+For Moon timing use explicitly returned belowHorizonIntervals (geometric Moon center, not apparent limb rise/set) or Moon target intervals; otherwise leave timing unknown. Report azimuth only at its returned maximumAltitudeAtUtc/maximumAltitudeLocal and label it a maximum-altitude sample, never a rise-time direction. Without a sample time, omit directional setup instructions. A geometric opportunity is not the best seeing/altitude-quality window. Illumination alone and isolated cloud samples do not establish favorable observing conditions.
+
+Do not name a failed provider unless returned evidence identifies it. Preserve the returned failure reason and distinguish unavailable from unconfigured or outside coverage. Never add permit requirements or an uncalculated target from memory. General preparation is advice; local restrictions need verified official evidence. Do not prescribe magnification or camera settings without relevant equipment details. Link the complete returned source URLs for calculation and each provider/event used; do not invent, shorten with ellipses or replace them with unrelated guidance. Identify synthetic forecast/catalogue fixtures without describing actual calculated astronomy as an observation.
+
+If a compound city query fails, retry the user's unambiguous bare city name with supported country context before abandoning a recoverable query; clarify genuine ambiguity. Preserve every requested geography constraint or ask about the unresolved constraint rather than silently dropping it. For a selected site, get details and use its ID/revision; if the actual site timezone is unknown, ask the user to choose an explicit display timezone before planning. A city-centre alternative must be explicitly labeled and offered separately.
+
 ## Conversation and tool sequence
 
 1. Ask only for missing essentials: named place, date/night, activity or target, and whether “near me” location use is intended. Ask experience/equipment only when it changes the guidance.
 2. For a named-city plan or city-origin search: Resolve the named place with `resolve_place`. Clarify ambiguous matches. If the user supplies coordinates, ask for a named place; do not reverse-geocode or make a plan. Ask before assuming host location for “near me.” For region-only discovery and selected-candidate planning, use the conditional flow below instead.
-3. Call `get_astronomy_window` for darkness and Moon context; use `get_target_visibility` when a target is named; call `get_night_conditions` for forecast details.
-4. Call `search_sky_events` when the date or user goal involves an event. Call `get_location_context` only to report available location evidence.
+3. For a complete plan, use the planner in step 5 for combined evidence. Use `get_astronomy_window`, `get_target_visibility` or `get_night_conditions` separately only for focused questions, missing details or refreshes.
+4. Use `search_sky_events` for independent event discovery and `get_location_context` for focused place evidence; a complete plan already includes these checks.
 5. Call `plan_observing_session` with the resolved place ID, exact activity, local timezone returned for that place, requested UTC interval, and supplied target/experience/equipment. Use `compare_observing_options` only after the user supplies two or more alternatives.
 6. Use `recommend_specialist_tools` only when an optional sky chart or other specialist app would help the stated activity.
 
@@ -52,7 +66,7 @@ Lead with the outcome in one sentence, then at most three bullets: useful local 
 
 The darknessState field describes only the requested window: full-window means the entire session is astronomically dark, partial-window means some of it is dark, none means no astronomical darkness in that session, and unknown means the calculation is unavailable. It does not identify polar night or the whole day's solar behavior. solarThresholdIntervals contains nested civil (-6 degrees), nautical (-12 degrees) and astronomical (-18 degrees) Sun-below-threshold intervals clipped to that same window. astronomicalDarkness identifies the first astronomical interval when several occur; consult the threshold rows for the remaining intervals.
 
-The Hanle rehearsal did not load these five skills. Installed-skill behavior checks and further model tests remain deferred until the assembled product review; authoring checks alone cannot show that an assistant uses this guidance.
+Installed skill acceptance remains pending until reviewed native behavior passes; authoring checks alone cannot prove it. Follow the current operational acceptance report.
 
 ## Discovery combinations and site planning
 

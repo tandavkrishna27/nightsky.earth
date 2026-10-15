@@ -218,14 +218,14 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (input.target && targetVisibility && !isError(targetVisibility) && targetVisibility.availability.status !== "available") gaps.push(`Target visibility is ${targetVisibility.availability.status}: ${targetVisibility.availability.reason}`);
   if (input.activity === "eclipse") gaps.push("A general session interval cannot establish eclipse contacts or safe viewing; use the selected event's source-linked visibility and safety guidance.");
   if (conditions && !isError(conditions) && conditions.forecasts.some(forecast => forecast.samples.some(sample => sample.values.totalCloudCover && !sample.values.totalCloudCover.periodEndUtc))) gaps.push("Cloud forecasts contain instant or sparse samples, not cloud coverage intervals; no continuous weather window is inferred.");
-  if (["meteor-shower", "deep-sky-imaging", "astrophotography", "aurora"].includes(input.activity)) gaps.push("Moon illumination is whole-session context; Moon-above-horizon timing is not supplied for the entire candidate window.");
+  if (["meteor-shower", "deep-sky-imaging", "astrophotography", "aurora"].includes(input.activity) && !(astronomy && !isError(astronomy) && astronomy.moon.horizonBasis === "geometric-center-zero-degrees" && astronomy.moon.belowHorizonIntervals !== undefined)) gaps.push("Moon illumination is whole-session context; Moon-above-horizon timing is not supplied for the entire candidate window.");
   const cloudCoverMax = conditions && !isError(conditions)
     ? maxForecastValue(conditions, "totalCloudCover")
     : undefined;
   const prep = [...getPreparationChecklist(input.activity, { experience: input.experience, equipment: input.equipment, cloudCoverMax }), ...(learningGuide?.guidance ?? [])].slice(0, 20);
   const summary = makeSummary(input.activity, factors, conditions && !isError(conditions) ? conditions.availability.status : "unavailable", gaps);
   const target = targetVisibility && !isError(targetVisibility) ? targetVisibility : undefined;
-  const candidateWindows = composeCandidateWindows(input.activity, input.window, astronomy && !isError(astronomy) ? astronomy : undefined, target ? [target] : suggestions, conditions && !isError(conditions) ? conditions : undefined);
+  const candidateWindows = composeCandidateWindows(input.activity, input.window, astronomy && !isError(astronomy) ? astronomy : undefined, target ? [target] : suggestions, conditions && !isError(conditions) ? conditions : undefined, input.locale);
   if (candidateWindows.length === 8) gaps.push("The bounded display contains eight candidate windows; all target intervals remain in exact structured target evidence for additional evaluation.");
   const uniqueSources = dedupeSources(sourceRecords);
   const timedPreparation = input.experience === "beginner" || ["learning", "general-stargazing", "visual-stargazing"].includes(input.activity) ? timedSteps(candidateWindows[0]?.window.startUtc ?? input.window.startUtc, input.window, input.locale) : [];
@@ -267,15 +267,13 @@ function darknessAssessment(result: AstronomyWindowResult): string {
   }
 }
 function moonInterpretation(activity: string, illumination: number): string {
-  if (activity === "moon-observing") return "Moonlight supports lunar observing; phase and altitude still determine the view.";
-  if (activity === "meteor-shower") return illumination <= 25 ? "Low moonlight is generally helpful for seeing fainter meteors." : illumination >= 70 ? "Bright moonlight may reduce visibility of fainter meteors." : "Moonlight may reduce visibility of some fainter meteors.";
-  if (["astrophotography", "deep-sky-imaging"].includes(activity)) return illumination >= 50 ? "Moonlight can brighten the sky background, especially near the Moon." : "Moonlight is lower, though target separation and sky brightness still matter.";
+  if (activity === "moon-observing") return "For lunar observing, illumination is phase context, not a moonlight rating; visibility requires target geometry.";
+  if (activity === "meteor-shower") return illumination <= 25 ? "Low illumination is phase context, not measured moonlight; moonlight impact is unknown without timing and observing conditions." : illumination >= 70 ? "Bright moonlight may reduce visibility of fainter meteors." : "Moonlight may reduce visibility of some fainter meteors.";
+  if (["astrophotography", "deep-sky-imaging"].includes(activity)) return illumination >= 50 ? "Moonlight can brighten the sky background, especially near the Moon." : "Low illumination does not establish low moonlight; timing, target separation and sky brightness still matter.";
   return illumination >= 70 ? "Bright moonlight can reduce contrast for faint objects." : "Moonlight is one factor; local sky brightness and target choice also matter.";
 }
-function moonImpact(activity: string, illumination: number): Factor["impact"] {
-  if (activity === "moon-observing") return "favorable";
-  if (activity === "meteor-shower" || activity === "astrophotography" || activity === "deep-sky-imaging") return illumination >= 70 ? "unfavorable" : illumination <= 25 ? "favorable" : "mixed";
-  return illumination >= 70 ? "unfavorable" : "mixed";
+function moonImpact(_activity: string, _illumination: number): Factor["impact"] {
+  return "unknown"; // Phase alone cannot establish observing impact; target geometry is assessed separately.
 }
 function weatherFactors(result: NightConditionsResult, activity: string, units: "metric" | "imperial", locale: string): Factor[] {
   const skyFields = ["totalCloudCover", "lowCloudCover", "mediumCloudCover", "highCloudCover", "precipitationProbability", "precipitationAmount"] as const;
@@ -309,8 +307,21 @@ function weatherFactors(result: NightConditionsResult, activity: string, units: 
       const periodEnds = forecast.samples.flatMap(({ values }) => Object.values(values).flatMap((value) => value?.periodEndUtc ? [value.periodEndUtc] : []));
       const periodEnd = periodEnds.length ? periodEnds.sort().at(-1) : undefined;
       const validRange = `${first === last ? `valid ${first}` : `valid ${first} to ${last}`}${periodEnd && group.label === "cloud and precipitation" ? `; aggregation through ${periodEnd}` : ""}`;
+      const ratedFields = ["totalCloudCover", "lowCloudCover", "precipitationProbability"] as const;
+      const ratedGroups = ratedFields.map(field => forecast.samples.flatMap(sample => sample.values[field] ? [sample.values[field]!] : [])).filter(values => values.length);
+      const hasCloudIntervals = ratedGroups.length > 0 && ratedGroups.every(values => {
+        if (values.some(value => !value.periodStartUtc || !value.periodEndUtc)) return false;
+        let through = Date.parse(result.window.startUtc);
+        for (const value of [...values].sort((a,b) => Date.parse(a.periodStartUtc!) - Date.parse(b.periodStartUtc!))) {
+          if (Date.parse(value.periodStartUtc!) > through) return false;
+          through = Math.max(through, Date.parse(value.periodEndUtc!));
+        }
+        return through >= Date.parse(result.window.endUtc);
+      });
+      const hasInstantValues = group.fields.some(field => forecast.samples.some(sample => sample.values[field] && (!sample.values[field]!.periodStartUtc || !sample.values[field]!.periodEndUtc)));
+      const sampleNote = !hasCloudIntervals && group.label === "cloud and precipitation" ? (hasInstantValues ? " Instant samples present; not continuous coverage or a clear-night assessment." : " Whole-window cloud coverage is not established.") : "";
       const cloudNote = activity === "aurora" && group.label === "cloud and precipitation" ? " Clouds can obstruct the view independently of aurora activity." : "";
-      factors.push({ name: `${forecast.source.name} ${group.label} forecast`, assessment: `${parts.join("; ")}; ${forecast.samples.length} sample(s), ${validRange}.${cloudNote}`, impact: group.label === "cloud and precipitation" ? aggregateImpact(impacts) : "unknown", sourceNames: [forecast.source.name] });
+      factors.push({ name: `${forecast.source.name} ${group.label} forecast`, assessment: `${parts.join("; ")}; ${forecast.samples.length} sample(s), ${validRange}.${sampleNote}${cloudNote}`, impact: group.label === "cloud and precipitation" && hasCloudIntervals ? aggregateImpact(impacts) : "unknown", sourceNames: [forecast.source.name] });
     }
   }
   return factors;

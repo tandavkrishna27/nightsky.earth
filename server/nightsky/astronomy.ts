@@ -6,6 +6,7 @@ import { astronomyWindowResultSchema, targetVisibilityResultSchema, type Astrono
 import { timeWindowSchema, type TimeWindow, type SourceRecord } from "../../shared/nightsky/common";
 import { type GeoNamesPlaceIndex } from "../places/geonames";
 import { formatLocalTime } from "./time";
+import { formatLocalInstant } from "../../shared/nightsky/format";
 
 const Astronomy = createRequire(import.meta.url)("astronomy-engine") as typeof AstronomyTypes;
 
@@ -62,7 +63,8 @@ export async function getAstronomyWindow(place: CalculationObserverPlace, window
     placeId: place.placeId, window: checkedWindow, darknessState,
     astronomicalDarkness: selectedDarkness ? { status: "available", ...makeInterval(selectedDarkness.start, selectedDarkness.end, checkedWindow.timeZone) } : { status: "unavailable", reason: "The Sun does not reach 18 degrees below the geometric horizon during this window." },
     solarThresholdIntervals,
-    moon: { phaseAtUtc: phaseAt.toISOString(), phaseDegrees: normalizeDegrees(moonPhase), illuminationPercent: clamp(moonIllumination, 0, 100), maximumAltitudeDegrees: clamp(maximumMoon.altitude, -90, 90), maximumAltitudeAtUtc: new Date(maximumMoon.at).toISOString() },
+    sunBelowGeometricHorizonIntervals: belowAltitudeIntervals(Astronomy.Body.Sun, observer, start, end, 0).map(row => ({...makeInterval(row.start,row.end,checkedWindow.timeZone), localStart:formatLocalInstant(new Date(row.start).toISOString(),checkedWindow.timeZone,"en"),localEnd:formatLocalInstant(new Date(row.end).toISOString(),checkedWindow.timeZone,"en")})),
+    moon: { phaseAtUtc: phaseAt.toISOString(), phaseDegrees: normalizeDegrees(moonPhase), illuminationPercent: clamp(moonIllumination, 0, 100), maximumAltitudeDegrees: clamp(maximumMoon.altitude, -90, 90), maximumAltitudeAtUtc: new Date(maximumMoon.at).toISOString(), horizonBasis: "geometric-center-zero-degrees", belowHorizonIntervals: belowAltitudeIntervals(Astronomy.Body.Moon, observer, start, end, 0).map(row => ({...makeInterval(row.start, row.end, checkedWindow.timeZone), localStart: formatLocalInstant(new Date(row.start).toISOString(), checkedWindow.timeZone, "en"), localEnd: formatLocalInstant(new Date(row.end).toISOString(), checkedWindow.timeZone, "en")})) },
   });
   return result;
 }
@@ -73,7 +75,7 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
   const coordinates = calculationCoordinates(place, index, calculationPlace);
   const query = targetQuery.trim().toLocaleLowerCase().replace(/\s+/g, " ");
   const match = BODY_NAMES[query];
-  const milkyWay = ["milky way core", "galactic centre", "galactic center", "sagittarius a*"].includes(query);
+  const milkyWay = ["milky way", "milky way core", "galactic centre", "galactic center", "sagittarius a*"].includes(query);
   if (!match && !milkyWay) {
     return targetVisibilityResultSchema.parse({
       availability: { status: "unsupported", reason: "This V1 target catalog supports the Sun, Moon, named planets, and the Milky Way core. Resolve other targets in a specialist sky app." },
@@ -84,7 +86,7 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
   const observer = new Astronomy.Observer(coordinates.latitude, coordinates.longitude, 0);
   const start = Date.parse(checkedWindow.startUtc); const end = Date.parse(checkedWindow.endUtc);
   const stepMs = 10 * 60_000;
-  const groups: Array<{ start: number; end: number; maxAltitude: number; azimuth: number }> = [];
+  const groups: Array<{ start: number; end: number; maxAltitude: number; azimuth: number; maximumAt: number }> = [];
   let group: typeof groups[number] | undefined;
   let previousUp = false;
   let previousTime = start;
@@ -92,10 +94,10 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
   for (const time of sampleInstants(start, end, stepMs)) {
     const position = positionAt(time);
     const up = position.altitude > 0;
-    if (up && !previousUp) group = { start: time === start ? start : horizonCrossing(previousTime, time, (instant) => positionAt(instant).altitude, true), end: time, maxAltitude: position.altitude, azimuth: position.azimuth };
+    if (up && !previousUp) group = { start: time === start ? start : horizonCrossing(previousTime, time, (instant) => positionAt(instant).altitude, true), end: time, maxAltitude: position.altitude, azimuth: position.azimuth, maximumAt: time };
     if (up && group) {
       group.end = Math.min(time, end);
-      if (position.altitude > group.maxAltitude) { group.maxAltitude = position.altitude; group.azimuth = position.azimuth; }
+      if (position.altitude > group.maxAltitude) { group.maxAltitude = position.altitude; group.azimuth = position.azimuth; group.maximumAt = time; }
     }
     if (!up && previousUp && group) { group.end = horizonCrossing(previousTime, time, (instant) => positionAt(instant).altitude, false); if (group.end > group.start) groups.push(group); group = undefined; }
     previousUp = up;
@@ -108,7 +110,7 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
     sources: [CALCULATION_SOURCE], caveats: [...displayTimeZoneCaveats(coordinates), "Visibility intervals use a 0-degree geometric horizon; terrain, buildings, atmospheric extinction, and instrument limits are not modeled.", ...(milkyWay ? ["Milky Way core is represented by a fixed J2000 direction near Sagittarius; this is a seasonal direction estimate, not a star-field model."] : [])],
     placeId: place.placeId,
     target: { targetId: milkyWay ? "milky-way-core" : `body:${match!.body.toLowerCase()}`, name: milkyWay ? "Milky Way core" : match!.body, targetType },
-    intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth) })),
+    intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth), azimuthBasis: "maximum-altitude-sample", maximumAltitudeAtUtc: new Date(row.maximumAt).toISOString(), maximumAltitudeLocal: formatLocalInstant(new Date(row.maximumAt).toISOString(), checkedWindow.timeZone, "en") })),
   });
 }
 

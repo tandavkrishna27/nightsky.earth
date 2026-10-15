@@ -184,3 +184,49 @@ for (const [state, impact, meaning] of [
     if (activity === "meteor-shower") assert.ok(result.factors.some(({ name, impact }) => name === "Meteor radiant visibility" && impact === "unknown"));
   });
 }
+
+test('phase alone and an instant cloud sample do not rate observing conditions as favorable', async () => {
+  const result = await planObservingSession({placeId,activity:'meteor-shower',window}, services());
+  assert.equal(result.factors.find(f => f.name === 'Moon')?.impact, 'unknown');
+  assert.match(result.factors.find(f => f.name === 'Moon')!.assessment, /illumination.*not.*moonlight|moonlight.*unknown/i);
+  assert.equal(result.factors.find(f => /cloud and precipitation forecast/.test(f.name))?.impact, 'unknown');
+  assert.match(result.factors.find(f => /cloud and precipitation forecast/.test(f.name))!.assessment, /instant.*not.*continuous/i);
+});
+
+test('candidate windows provide server-formatted endpoints in their explicit time zone', async () => {
+  const result = await planObservingSession({placeId,activity:'general-stargazing',window}, services());
+  assert.ok(result.candidateWindows.length);
+  for (const row of result.candidateWindows as any[]) {
+    assert.match(row.localStart, /Europe\/London/);
+    assert.match(row.localEnd, /Europe\/London/);
+    assert.match(row.localEnd, /06:00/);
+  }
+});
+
+test('Moon timing gap is omitted when geometric below-horizon evidence is supplied including empty intervals', async () => {
+  for(const below of [[],[{startUtc:window.startUtc,endUtc:window.endUtc,localStart:'start',localEnd:'end'}]]) {
+    const a=astronomy(); a.moon.horizonBasis='geometric-center-zero-degrees'; a.moon.belowHorizonIntervals=below;
+    const result=await planObservingSession({placeId,activity:'meteor-shower',window},services({getAstronomy:async()=>a}));
+    assert.ok(!result.gaps.some(g=>/Moon-above-horizon timing is not supplied/.test(g)));
+  }
+});
+
+test('mixed cloud periods and instant samples cannot produce a whole-window favorable assessment', async () => {
+  const weather=conditions(); weather.forecasts[0]!.samples.push({validAt:window.startUtc,values:{totalCloudCover:{value:10,unit:'%',periodStartUtc:window.startUtc,periodEndUtc:window.endUtc}}});
+  const result=await planObservingSession({placeId,activity:'general-stargazing',window},services({getNightConditions:async()=>weather}));
+  assert.equal(result.factors.find(f=>/cloud and precipitation forecast/.test(f.name))?.impact,'unknown');
+});
+
+test('precipitation-only periods are not described as instant samples', async () => {
+  const weather=conditions(); weather.forecasts[0]!.samples=[{validAt:window.startUtc,values:{precipitationAmount:{value:0,unit:'mm',periodStartUtc:window.startUtc,periodEndUtc:window.endUtc}}}];
+  const result=await planObservingSession({placeId,activity:'general-stargazing',window},services({getNightConditions:async()=>weather}));
+  assert.doesNotMatch(result.factors.find(f=>/cloud and precipitation forecast/.test(f.name))!.assessment,/Instant sample evidence/);
+});
+
+test('planet windows expose an explicitly formatted darkness overlap without shortening geometric visibility', async()=>{
+ const result=await planObservingSession({placeId,activity:'planet-observing',target:'Jupiter',window},services({getTargetVisibility:async()=>({availability:{status:'available',reason:'fixture'},sources:[source],caveats:[],placeId,target:{targetId:'body:jupiter',name:'Jupiter',targetType:'planet'},intervals:[{startUtc:'2026-10-16T00:00:00Z',endUtc:window.endUtc,localStart:'1 am',localEnd:'7 am',maximumAltitudeDegrees:40,azimuthDegrees:130}]})}));
+ const row=result.candidateWindows[0] as any;
+ assert.equal(Date.parse(row.window.endUtc),Date.parse(window.endUtc));
+ assert.equal(row.darknessOverlapIntervals[0].endUtc,'2026-10-16T05:00:00.000Z');
+ assert.match(row.darknessOverlapIntervals[0].localEnd,/06:00.*Europe\/London/);
+});

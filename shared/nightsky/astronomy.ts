@@ -24,6 +24,7 @@ export const astronomyWindowResultSchema = resultSchema({
     z.strictObject({ status: z.literal("available"), ...localIntervalSchema.shape }),
     z.strictObject({ status: z.enum(["unavailable", "unknown"]), reason: z.string().trim().min(1).max(300) }),
   ]).describe("First calculated Sun-below-minus-18-degree interval, clipped to the requested window, or its availability reason."),
+  sunBelowGeometricHorizonIntervals: z.array(localIntervalSchema).max(24).optional().describe("Sun center below zero degrees, clipped to the window; may include twilight. Not apparent sunrise/set. No astronomical darkness does not imply all daytime."),
   solarThresholdIntervals: z.array(z.strictObject({
     kind: z.enum(["civil", "nautical", "astronomical"]).describe("Names the solar altitude threshold, not an exclusive twilight phase."),
     sunAltitudeThresholdDegrees: z.union([z.literal(-6), z.literal(-12), z.literal(-18)]).describe("Sun geometric center threshold: civil -6, nautical -12, astronomical -18 degrees."),
@@ -35,6 +36,8 @@ export const astronomyWindowResultSchema = resultSchema({
     illuminationPercent: z.number().finite().min(0).max(100),
     maximumAltitudeDegrees: z.number().finite().min(-90).max(90),
     maximumAltitudeAtUtc: utcInstantSchema,
+    horizonBasis: z.literal("geometric-center-zero-degrees").optional(),
+    belowHorizonIntervals: z.array(localIntervalSchema).max(24).optional().describe("Calculated Moon-center-below-zero intervals clipped to the session. Not apparent limb moonset, not a guarantee of negligible moonlight."),
   }),
 });
 export type AstronomyWindowResult = z.infer<typeof astronomyWindowResultSchema>;
@@ -54,6 +57,9 @@ export const targetVisibilityResultSchema = resultSchema({
     ...localIntervalSchema.shape,
     maximumAltitudeDegrees: z.number().finite().min(-90).max(90),
     azimuthDegrees: z.number().finite().min(0).max(360),
+    azimuthBasis: z.literal("maximum-altitude-sample").optional(),
+    maximumAltitudeAtUtc: utcInstantSchema.optional(),
+    maximumAltitudeLocal: z.string().max(120).optional(),
     moonSeparationDegrees: z.number().finite().min(0).max(180).optional(),
   })).max(24),
 });

@@ -117,3 +117,15 @@ test('discovery workflow does not advertise a historical fixture as runtime cove
   assert.doesNotMatch(workflow, /1,327 named nodes/);
   assert.match(workflow, /Determine installed coverage only from current tool results/);
 });
+
+test('all complete workflows prefer aggregate planning and require evidence checks before answering', () => {
+  const files = unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
+  for (const name of names) for(const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+    const text=strFromU8(files[path]);
+    assert.match(text,/aggregate planning evidence/);
+    assert.match(text,/Do not name a failed provider unless returned evidence identifies it/);
+    assert.match(text,/Copy returned localStart and localEnd/);
+    assert.match(text,/Never add permit requirements or an uncalculated target from memory/);
+    assert.match(text,/complete returned source URLs/);
+  }
+});

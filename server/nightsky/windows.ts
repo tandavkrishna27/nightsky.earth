@@ -1,3 +1,4 @@
+import { formatLocalInstant } from "../../shared/nightsky/format";
 import type { AstronomyWindowResult, TargetVisibilityResult } from "../../shared/nightsky/astronomy";
 import type { NightConditionsResult } from "../../shared/nightsky/weather";
 import type { TimeWindow } from "../../shared/nightsky/common";
@@ -14,7 +15,7 @@ export function astronomicalDarknessIntervals(astronomy: AstronomyWindowResult |
 }
 
 /** Intersect only proven geometry. Instant cloud samples cannot establish a clear interval. */
-export function composeCandidateWindows(activity: string, window: TimeWindow, astronomy: AstronomyWindowResult | undefined, targets: TargetVisibilityResult[], weather: NightConditionsResult | undefined): PlanResult["candidateWindows"] {
+export function composeCandidateWindows(activity: string, window: TimeWindow, astronomy: AstronomyWindowResult | undefined, targets: TargetVisibilityResult[], weather: NightConditionsResult | undefined, locale = "en"): PlanResult["candidateWindows"] {
   const needsDarkness = !["moon-observing", "planet-observing", "eclipse"].includes(activity);
   const base = needsDarkness ? astronomicalDarknessIntervals(astronomy) : [window];
   const result: PlanResult["candidateWindows"] = [];
@@ -40,7 +41,11 @@ export function composeCandidateWindows(activity: string, window: TimeWindow, as
         const a = Math.max(start, Date.parse(cloud.periodStartUtc)), b = Math.min(end, Date.parse(cloud.periodEndUtc));
         return b > a ? [{ window: { startUtc: new Date(a).toISOString(), endUtc: new Date(b).toISOString(), timeZone: window.timeZone }, forecastIndex, sampleIndex }] : [];
       })) ?? [];
-      result.push({ window: { startUtc: new Date(start).toISOString(), endUtc: new Date(end).toISOString(), timeZone: window.timeZone }, ...(target ? { targetId: target.target.targetId } : {}), weatherCoverage, weatherIntervals,
+      const darknessOverlapIntervals = astronomy?.availability.status === "available" ? astronomicalDarknessIntervals(astronomy).flatMap(darkness => {
+        const a=Math.max(start,Date.parse(darkness.startUtc)), b=Math.min(end,Date.parse(darkness.endUtc));
+        return b>a ? [{startUtc:new Date(a).toISOString(),endUtc:new Date(b).toISOString(),localStart:formatLocalInstant(new Date(a).toISOString(),window.timeZone,locale),localEnd:formatLocalInstant(new Date(b).toISOString(),window.timeZone,locale)}] : [];
+      }) : undefined;
+      result.push({ darknessOverlapIntervals, localStart: formatLocalInstant(new Date(start).toISOString(), window.timeZone, locale), localEnd: formatLocalInstant(new Date(end).toISOString(), window.timeZone, locale), window: { startUtc: new Date(start).toISOString(), endUtc: new Date(end).toISOString(), timeZone: window.timeZone }, ...(target ? { targetId: target.target.targetId } : {}), weatherCoverage, weatherIntervals,
         moonConstraint: activity === "moon-observing" ? "target" : target?.intervals.some(item => item.moonSeparationDegrees !== undefined) ? "separation-available" : "context-only",
         rationale: `${needsDarkness ? "Astronomical darkness interval" : "Requested session"}${target ? ` intersected with ${target.target.name} geometric visibility` : ""}. Cloud interval coverage ${weatherCoverage}; provider values remain separate. Moon timing/separation is ${activity === "moon-observing" ? "the target geometry" : "context only unless supplied in target evidence"}; no clear-night probability is inferred.` });
       if (result.length === 8) return result;

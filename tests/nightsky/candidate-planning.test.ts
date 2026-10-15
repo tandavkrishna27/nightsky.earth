@@ -54,7 +54,7 @@ test('candidate plans label display timezone as unverified and radiant uses sele
 test('candidate target visibility preserves geometry across display zones',async()=>{
  const p=await point();const a=await getTargetVisibility('Moon',{placeId:p.placeId,timeZone:p.displayTimeZone},window,index,p);
  const b=await getTargetVisibility('Moon',{placeId:p.placeId,timeZone:'UTC'},{...window,timeZone:'UTC'},index,{...p,displayTimeZone:'UTC'});
- assert.ok(a.intervals.length);assert.deepEqual(a.intervals.map(({localStart,localEnd,...geometry})=>geometry),b.intervals.map(({localStart,localEnd,...geometry})=>geometry));assert.notEqual(a.intervals[0].localStart,b.intervals[0].localStart);
+ assert.ok(a.intervals.length);assert.deepEqual(a.intervals.map(({localStart,localEnd,maximumAltitudeLocal,...geometry})=>geometry),b.intervals.map(({localStart,localEnd,maximumAltitudeLocal,...geometry})=>geometry));assert.notEqual(a.intervals[0].localStart,b.intervals[0].localStart);assert.notEqual(a.intervals[0].maximumAltitudeLocal,b.intervals[0].maximumAltitudeLocal);
 });
 test('comparison stale candidate preserves a clear resolve again explanation',async()=>{
  const option={...input,activity:'moon-observing',window};const result=await compareObservingOptions({options:[option,{...option,catalogueRevision:'old'}]},services());assert.equal(result.comparisons[1].availability?.status,'unavailable');assert.match(result.comparisons[1].summary,/resolve.*again/i);assert.equal(result.comparisons[1].catalogueRevision,'old');

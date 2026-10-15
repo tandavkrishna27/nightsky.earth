@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildClientCommand, EvidenceBudget, remainingCases, sanitize, validateExecution, journeys, boundedChild, assertContained, createFixtureServer, materializePackages, validateResume, checkpoint, readCheckpoint } from '../../scripts/complete-model-journey-test';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
 
@@ -72,4 +72,46 @@ test('byte and call limits reject before retaining extra evidence', () => {
 test('checkpoints skip completed successes and sanitize account/path secrets', () => {
   assert.deepEqual(remainingCases(['a','b'],[{id:'a',status:'passed'}]),['b']);
   assert.ok(!sanitize('Bearer abcdefghijklmnopqrstuvwxyz C:\\Users\\Person\\foo person@example.com').includes('Person'));
+});
+
+test('native Claude prompt requests the actual namespaced skill and bundled reference', async () => {
+  const h = await import('../../scripts/complete-model-journey-test');
+  assert.equal(typeof (h as any).nativeClaudePrompt,'function');
+  const prompt=(h as any).nativeClaudePrompt('moon','Plan Moon viewing');
+  assert.match(prompt,/Skill.*nightsky:plan-stargazing-night/);
+  assert.match(prompt,/references\/workflow\.md/);
+  assert.match((h as any).nativeClaudePrompt('milky-way','Photo'),/nightsky:plan-astrophotography/);
+});
+
+test('native loading requires successful Skill/Read results inside the exact package', async()=>{
+ const {nativeClaudeLoading}=await import('../../scripts/complete-model-journey-test');
+ const pkg=mkdtempSync(join(tmpdir(),'nightsky-loading-'));
+ mkdirSync(resolve(pkg,'skills/plan-stargazing-night/references'),{recursive:true});
+ writeFileSync(resolve(pkg,'skills/plan-stargazing-night/references/workflow.md'),'workflow');
+ const skill={type:'tool_use',id:'s',name:'Skill',input:{skill:'nightsky:plan-stargazing-night'}};
+ const read={type:'tool_use',id:'r',name:'Read',input:{file_path:resolve(pkg,'skills/plan-stargazing-night/references/workflow.md')}};
+ const event=(content:any[])=>({message:{content}});
+ const success=[event([skill,read]),event([{type:'tool_result',tool_use_id:'s',content:'launched'},{type:'tool_result',tool_use_id:'r',content:'workflow'}])];
+ assert.deepEqual(nativeClaudeLoading(success,'casual',pkg),{skillInvoked:true,referenceRead:true,allowedOnly:true});
+ assert.equal(nativeClaudeLoading([event([skill,read])],'casual',pkg).referenceRead,false);
+ assert.equal(nativeClaudeLoading([event([skill,read]),event([{type:'tool_result',tool_use_id:'r',is_error:true}])],'casual',pkg).referenceRead,false);
+ assert.equal(nativeClaudeLoading([event([skill,{...read,input:{file_path:resolve('other/workflow.md')}}])],'casual',pkg).allowedOnly,false);
+});
+
+test('affected-case selection is explicit, known and non-duplicated', async()=>{
+ const h=await import('../../scripts/complete-model-journey-test');
+ assert.equal(typeof (h as any).selectJourneyIds,'function');
+ assert.deepEqual((h as any).selectJourneyIds(['--cases','moon,selected']),['moon','selected']);
+ assert.throws(()=>(h as any).selectJourneyIds(['--cases','moon,moon']),/unique/);
+ assert.throws(()=>(h as any).selectJourneyIds(['--cases','imaginary']),/known/);
+ assert.throws(()=>(h as any).selectJourneyIds(['--cases']),/known/);
+});
+
+test('native proof rejects partial reference reads and empty or EOF payloads', async()=>{
+ const {nativeClaudeLoading}=await import('../../scripts/complete-model-journey-test');
+ const pkg=resolve('fixture-plugin'); const ref=resolve(pkg,'skills/plan-stargazing-night/references/workflow.md');
+ for(const [input,content] of [[{file_path:ref,offset:100000,limit:1},'one line'],[{file_path:ref},''],[{file_path:ref},'Warning: file is shorter than requested offset. EOF']]){
+  const events=[{message:{content:[{type:'tool_use',id:'r',name:'Read',input}]}},{message:{content:[{type:'tool_result',tool_use_id:'r',content}]}}];
+  assert.equal(nativeClaudeLoading(events,'casual',pkg).referenceRead,false);
+ }
 });

@@ -123,3 +123,53 @@ for (const [id, start, end, state] of [
     assert.equal(result.astronomicalDarkness.status, state === "none" ? "unavailable" : "available");
   });
 }
+
+test('Moon horizon evidence is calculated separately from sampled maximum altitude', async () => {
+  const selected = window('2026-10-15T14:30:00Z','2026-10-15T18:30:00Z','Asia/Kolkata');
+  const result = await getAstronomyWindow(place(7), selected, index);
+  const moon = result.moon as any;
+  assert.equal(moon.horizonBasis, 'geometric-center-zero-degrees');
+  assert.ok(moon.belowHorizonIntervals.length > 0);
+  assert.ok(Date.parse(moon.belowHorizonIntervals[0].startUtc) > Date.parse(selected.startUtc));
+  assert.equal(Date.parse(moon.belowHorizonIntervals[0].endUtc), Date.parse(selected.endUtc));
+  assert.match(moon.belowHorizonIntervals[0].localStart, /Asia\/Kolkata/);
+});
+
+test('target bearing explicitly identifies its maximum-altitude sample and local time', async () => {
+  const selected = window('2026-10-15T14:30:00Z','2026-10-15T18:30:00Z','Asia/Kolkata');
+  const result = await getTargetVisibility('Saturn', place(7), selected, index);
+  const interval = result.intervals[0] as any;
+  assert.equal(interval.azimuthBasis, 'maximum-altitude-sample');
+  assert.ok(Date.parse(interval.maximumAltitudeAtUtc) >= Date.parse(interval.startUtc));
+  assert.ok(Date.parse(interval.maximumAltitudeAtUtc) <= Date.parse(interval.endUtc));
+  assert.match(interval.maximumAltitudeLocal, /Asia\/Kolkata/);
+});
+
+test('common Milky Way wording resolves explicitly to the supported core model', async()=>{
+ const result=await getTargetVisibility('Milky Way',place(3),window('2026-10-15T18:00:00Z','2026-10-16T06:00:00Z',place(3).timeZone),index);
+ assert.equal(result.availability.status,'available');
+ assert.equal(result.target.name,'Milky Way core');
+ assert.ok(result.caveats.some(c=>/not a star-field model/.test(c)));
+});
+
+test('calculated lunar below-horizon intervals complement target geometry across latitudes', async()=>{
+ for(const id of [1,2,6,7]) {
+  const selected=window('2026-10-15T00:00:00Z','2026-10-16T00:00:00Z',place(id).timeZone);
+  const a=await getAstronomyWindow(place(id),selected,index);
+  const target=await getTargetVisibility('Moon',place(id),selected,index);
+  const rows=[...a.moon.belowHorizonIntervals!,...target.intervals];
+  const duration=rows.reduce((sum,row)=>sum+Date.parse(row.endUtc)-Date.parse(row.startUtc),0);
+  assert.ok(Math.abs(duration-86400000)<1000,`Moon horizon partition at ${id}`);
+  for(const row of rows){assert.ok(Date.parse(row.startUtc)>=Date.parse(selected.startUtc));assert.ok(Date.parse(row.endUtc)<=Date.parse(selected.endUtc));}
+ }
+});
+
+test('no astronomical darkness is distinguished from Sun below geometric horizon at dawn', async()=>{
+ const selected=window('2026-10-15T00:00:00Z','2026-10-15T04:00:00Z','Asia/Kolkata');
+ const result=await getAstronomyWindow(place(7),selected,index);
+ assert.equal(result.darknessState,'none');
+ const rows=(result as any).sunBelowGeometricHorizonIntervals;
+ assert.ok(rows.length);
+ assert.equal(Date.parse(rows[0].startUtc),Date.parse(selected.startUtc));
+ assert.ok(Date.parse(rows[0].endUtc)<Date.parse(selected.endUtc));
+});

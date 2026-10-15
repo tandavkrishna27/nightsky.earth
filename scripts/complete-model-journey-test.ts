@@ -90,8 +90,52 @@ export function materializePackages(root:string,endpoint:string){
  for(const host of ['codex','claude'] as const){const pkg=buildLocalPluginPackage({host,endpoint});const directory=assertContained(root,`plugins/${host}`);mkdirSync(directory,{recursive:true});for(const [path,bytes]of Object.entries(unzipSync(pkg.zip))){const target=assertContained(directory,path);mkdirSync(resolve(target,'..'),{recursive:true});writeFileSync(target,bytes);}result[host]={directory,sha256:pkg.sha256};}
  return result;
 }
+export function nativeSkillFor(id: string): string {
+ return ['milky-way','first-photo','deep-sky'].includes(id) ? 'plan-astrophotography'
+  : ['meteor','eclipse'].includes(id) ? 'plan-sky-event'
+  : id === 'family' ? 'prepare-outing'
+  : ['access','intersection','multi-origin','host-boundary','unsupported-boundary'].includes(id) ? 'find-observing-place'
+  : 'plan-stargazing-night';
+}
+export function nativeClaudePrompt(id: string, prompt: string): string {
+ return `First invoke the Skill tool with skill="nightsky:${nativeSkillFor(id)}" and Read its entire bundled references/workflow.md without offset or limit. Follow that actual packaged workflow, not copied prompt-fed instructions. Then answer: ${prompt}`;
+}
+export function selectJourneyIds(args: string[]): string[] {
+ if (!args.includes('--cases')) return journeys.map(journey => journey.id);
+ if (args.filter(arg => arg === '--cases').length !== 1) throw Error('Select unique known journey IDs');
+ const ids = (args[args.indexOf('--cases') + 1] ?? '').split(',');
+ if (!ids.length || ids.some(id => !journeys.some(journey => journey.id === id))) throw Error('Select known journey IDs');
+ if (new Set(ids).size !== ids.length) throw Error('Select unique journey IDs');
+ return ids;
+}
+export function nativeClaudeLoading(events: any[], id: string, packageDirectory: string) {
+ const blocks = events.flatMap(event => Array.isArray(event.message?.content) ? event.message.content : []);
+ const uses = blocks.filter(block => block.type === 'tool_use');
+ const results = blocks.filter(block => block.type === 'tool_result');
+ const succeeded = (use: any) => results.some(result => result.tool_use_id === use.id && !result.is_error);
+ const skill = nativeSkillFor(id);
+ const reference = resolve(packageDirectory, `skills/${skill}/references/workflow.md`);
+ const skillFile = resolve(packageDirectory, `skills/${skill}/SKILL.md`);
+ const reads = uses.filter(use => use.name === 'Read');
+ const readPath = (use: any) => typeof use.input?.file_path === 'string' ? resolve(use.input.file_path) : '';
+ const normalizeRead = (text: string) => text.split(/\r?\n/).map(line => line.replace(/^\s*\d+[→\t]\s?/, '').trim()).filter(Boolean).join('\n');
+ const expected = existsSync(reference) ? normalizeRead(readFileSync(reference, 'utf8')) : '';
+ const completeReference = (use: any) => {
+  if (use.input?.offset !== undefined || use.input?.limit !== undefined || !expected) return false;
+  return results.some(result => {
+   if (result.tool_use_id !== use.id || result.is_error) return false;
+   const text = typeof result.content === 'string' ? result.content : Array.isArray(result.content) ? result.content.filter((block: any) => block.type === 'text').map((block: any) => block.text).join('\n') : '';
+   return normalizeRead(text).includes(expected);
+  });
+ };
+ return {
+  skillInvoked: uses.some(use => use.name === 'Skill' && use.input?.skill === `nightsky:${skill}` && succeeded(use)),
+  referenceRead: reads.some(use => readPath(use) === reference && completeReference(use)),
+  allowedOnly: reads.every(use => [reference, skillFile].includes(readPath(use))) && uses.every(use => use.name === 'Read' || use.name.startsWith('mcp__nightsky__') || (use.name === 'Skill' && use.input?.skill === `nightsky:${skill}`)),
+ };
+}
 async function main(){
- const args=process.argv.slice(2);validateExecution(args,journeys.length);
+ const args=process.argv.slice(2);const selectedIds=selectJourneyIds(args);validateExecution(args,selectedIds.length);
  const client=args.includes('--claude')?'claude':'codex';const mode:LoadingMode=args.includes('--prompt-fed')?'prompt-fed':'native';
  const base=resolve('.superpowers/sdd/2026-10-15-nightsky-global-discovery/model-rehearsal');mkdirSync(base,{recursive:true});const resume=args[args.indexOf('--resume')+1];const root=args.includes('--resume')?validateResume(base,resume):mkdtempSync(resolve(base,`${client}-`));
  const server=await createFixtureServer(root);const records:any[]=args.includes('--resume')?readCheckpoint(resolve(root,'checkpoint.json')):[];const started=Date.now();
@@ -106,18 +150,21 @@ async function main(){
    writeFileSync(resolve(root,'.codex/config.toml'),'[plugins."nightsky@nightsky-model-rehearsal"]\nenabled = true\n');
   }
   const cli=resolve(process.env.APPDATA??'',client==='codex'?'npm/node_modules/@openai/codex/bin/codex.js':'npm/node_modules/@anthropic-ai/claude-code/bin/claude.exe');
-  const pending=remainingCases(journeys.map(j=>j.id),records);const selected=(args.includes('--preflight')?journeys.slice(0,1):journeys).filter(j=>pending.includes(j.id));
+  const pending=remainingCases(selectedIds,records);const requested=journeys.filter(j=>selectedIds.includes(j.id));const selected=(args.includes('--preflight')?requested.slice(0,1):requested).filter(j=>pending.includes(j.id));
   for(const journey of selected){
    if(Date.now()-started>limits.batchMs)break;server.beginCase(journey.id);
    const config=client==='claude'?cfg:`mcp_servers={nightsky={url="${server.endpoint}",required=true,tool_timeout_sec=15}}`;
-   const commandArgs=buildClientCommand(client,mode,mode==='native'?packages[client].directory:client==='claude'?readFileSync(instructions,'utf8'):instructions,config,journey.prompt,mode==='native');
+   const prompt=client==='claude'&&mode==='native'?nativeClaudePrompt(journey.id,journey.prompt):journey.prompt;
+   const commandArgs=buildClientCommand(client,mode,mode==='native'?packages[client].directory:client==='claude'?readFileSync(instructions,'utf8'):instructions,config,prompt,mode==='native');
    const result=await boundedChild(client==='codex'?process.execPath:cli,client==='codex'?[cli,...commandArgs]:commandArgs,root);
    const events=result.stdout.split(/\r?\n/).flatMap(l=>{try{return[JSON.parse(l)];}catch{return[];}});
    const answer=client==='codex'?events.filter(e=>e.type==='item.completed'&&e.item?.type==='agent_message').map(e=>e.item.text).join('\n'):events.filter(e=>e.type==='result').map(e=>e.result??'').join('\n');
    const loadingEvidence=events.filter(e=>e.type==='system'||e.item?.type==='tool_search'||e.item?.type==='mcp_tool_call'||e.message?.content?.some?.((c:any)=>c.type==='tool_use'&&c.name==='Skill'));
-   records.push({id:journey.id,attempt:records.filter(r=>r.id===journey.id).length+1,runAt:new Date().toISOString(),client,loadingMode:mode,status:result.code===0&&answer?'manual-review':'blocked',transportComplete:result.code===0&&!result.reason,answer:sanitize(answer),traces:server.budget.traces,loadingEvidence:JSON.parse(sanitize(JSON.stringify(loadingEvidence))),model:events.find(e=>e.model)?.model??null,...result,stdout:sanitize(result.stdout),externalAttempts:server.externalAttempts()});
+   const nativeLoading=client==='claude'&&mode==='native'?nativeClaudeLoading(events,journey.id,packages.claude.directory):undefined;
+   const loadingComplete=!nativeLoading||(nativeLoading.skillInvoked&&nativeLoading.referenceRead&&nativeLoading.allowedOnly);
+   records.push({id:journey.id,attempt:records.filter(r=>r.id===journey.id).length+1,runAt:new Date().toISOString(),client,loadingMode:mode,status:result.code===0&&answer&&loadingComplete?'manual-review':'blocked',transportComplete:result.code===0&&!result.reason,nativeLoading,answer:sanitize(answer),traces:server.budget.traces,loadingEvidence:JSON.parse(sanitize(JSON.stringify(loadingEvidence))),model:events.find(e=>e.model)?.model??null,...result,stdout:sanitize(result.stdout),externalAttempts:server.externalAttempts()});
    checkpoint(resolve(root,'checkpoint.json'),records);console.log(JSON.stringify({client,id:journey.id,status:records.at(-1).status,toolCalls:server.budget.traces.length,reason:result.reason}));
-   if(!answer||result.reason)break;
+   if(!answer||result.reason||!loadingComplete)break;
   }
   writeFileSync(resolve(root,'complete-model-report.md'),`# Complete model rehearsal\n\nDate: ${new Date().toISOString()}\nClient: ${client}; requested loading: ${mode}.\nComplete packages: five skills each; backend: fourteen tools.\nExternal provider attempts: ${server.externalAttempts()}.\nCases recorded: ${records.length}. Whole answers and skill loading require manual review in checkpoint.json; transport success is not semantic success. Native loading has not been claimed by this runner.\n`);console.log(JSON.stringify({evidenceFolder:root,client,mode,cases:records.length}));
  }finally{await server.close();}
