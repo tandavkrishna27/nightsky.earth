@@ -52,4 +52,3 @@ test('source link text bounds UTF-8 bytes without emitting partial URL lines',as
  assert.match(text,/Additional source records/);
  for(const line of text.split('\n').filter(line=>line.startsWith('- [')))assert.match(line,/>\)$/);
 });
-
