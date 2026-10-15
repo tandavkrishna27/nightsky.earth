@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import ntpath
 import os
 from pathlib import Path
 import sys
@@ -15,7 +16,12 @@ class Supervisor(unittest.TestCase):
     def test_relative_manifest_source_rejected_before_job_creation(self):
         fixture=fixtures.Pipeline(); fixture.setUp()
         try:
-            m=fixture.manifest([fixture.node()]);m['sources'][0]['path']=os.path.relpath(m['sources'][0]['path'])
+            # CI keeps temporary fixtures on C: and the repository on D:.
+            # Deliberately form a source-relative basename without consulting cwd.
+            with self.assertRaises(ValueError):
+                ntpath.relpath(r'C:\runner-temp\fixture\0.osm',r'D:\a\repo')
+            self.assertEqual(ntpath.relpath(r'C:\runner-temp\fixture\0.osm',r'C:\runner-temp\fixture'),'0.osm')
+            m=fixture.manifest([fixture.node()]);m['sources'][0]['path']=os.path.relpath(m['sources'][0]['path'],start=fixture.root)
             manifest=fixture.root/'relative.json';manifest.write_text(json.dumps(m),encoding='utf8')
             metadata=fixture.root/'empty.jsonl';metadata.write_text('')
             with self.assertRaisesRegex(ValueError,'absolute'):

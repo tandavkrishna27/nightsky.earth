@@ -28,7 +28,7 @@ All three task re-reviews approved their fixes. A fresh final whole-wave reviewe
 
 | Check | Observed result |
 | --- | --- |
-| Complete Node aggregate (`npm test`) | **743 discovered / 742 passed / one existing permission skip / zero failed**. Includes all new TypeScript cases. |
+| Complete Node aggregate (`npm test`) | **744 discovered / 743 passed / one existing permission skip / zero failed** after the Windows fixture correction below. Includes all new TypeScript cases. |
 | Pinned OSM Python discovery | **86 discovered / 83 passed / three existing skips / zero failed**. All 14 new geography tests pass, including optional PBF and actual Windows source-to-pages integration. |
 | Pinned ERA5 Python discovery | **46 passed / zero failures**; no account or source requests. |
 | Three TypeScript configurations | Pass, including new scripts and runtime provider. |
@@ -41,6 +41,12 @@ All three task re-reviews approved their fixes. A fresh final whole-wave reviewe
 CI now includes the new aggregate tests, an explicit operator-template check, and Node 24/locked dependencies in both OSM Python jobs so Windows can execute the actual raw-source-to-TypeScript bridge. The Python discovery pattern already includes the new producer/supervisor tests. The exact final commit and observed six-job CI outcome are recorded after pushing in the delivery response and ignored wave ledger; this document does not claim unobserved CI success.
 
 Ignored local evidence is scoped to `.superpowers/sdd/2026-10-15-offline-production-pipelines/`, including the progress ledger, integrated review diff and final Node/OSM/ERA5/package logs. New code tests use synthetic fixtures and no new source bodies; existing baseline suites may read retained artifacts under their original checks.
+
+### First CI run and Windows fixture correction
+
+The initial implementation commit `5ebc733` passed all four Linux/ERA5 jobs but failed the Windows OSM and Node jobs in [run 38748213474](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38748213474). The OSM regression tried `relpath` from a C-drive temporary fixture against the D-drive checkout and failed before its intended absolute-path assertion. The history fixtures passed an uncanonicalized `RUNNER~1` temporary path into a publisher that intentionally rejects aliases. Neither was resolved by weakening production guards.
+
+The Python fixture now computes its relative path against the explicit fixture directory, retaining rejection before job creation and a C/D-drive counterexample. The history fixture canonicalizes the temporary parent and directory using `realpath`, matching the existing publisher tests. A new native Windows 8.3 test proves the alias is rejected while the canonical twelve-tile publication succeeds. Independent scoped re-reviews approved both test-only fixes. Fresh aggregate checks are **744/743/one skip**, OSM **86/83/three skips**, and all three type configurations pass. Production code is unchanged by this follow-up; prior build/runtime and ERA5 results still describe that same substantive code. Both failed CI evidence and the fresh local logs remain retained; final exact-revision CI is observed separately after the correction push.
 
 ## Remaining production gates
 
