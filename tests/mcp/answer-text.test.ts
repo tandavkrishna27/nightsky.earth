@@ -52,3 +52,17 @@ test('source link text bounds UTF-8 bytes without emitting partial URL lines',as
  assert.match(text,/Additional source records/);
  for(const line of text.split('\n').filter(line=>line.startsWith('- [')))assert.match(line,/>\)$/);
 });
+
+test('empty dark-session suggestions do not deny targets above the geometric horizon',async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-no-suggestion-')));
+ const window={startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Australia/Sydney'};
+ try{
+  const target=await server.rpc('tools/call',{name:'get_target_visibility',arguments:{placeId:'place:v1:geonames:990002',targetQuery:'Jupiter',window}});
+  assert.ok(target.result.structuredContent.intervals.length>0,'fixture has geometric Jupiter intervals');
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990002',activity:'astrophotography',window}});
+  const result=response.result.structuredContent;
+  assert.equal(result.suggestions.length,0);
+  assert.doesNotMatch(result.gaps.join('\n'),/No supported bright target is geometrically visible/);
+  assert.match(result.gaps.join('\n'),/No target suggestions.*does not establish.*below the horizon/);
+ }finally{await server.close();}
+});

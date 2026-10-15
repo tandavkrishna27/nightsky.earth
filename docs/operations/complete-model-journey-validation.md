@@ -137,3 +137,58 @@ A second fresh Codex-host agent read the discovery skill/reference and checked t
 Regression verification: **683 discovered, 682 passed, one existing permission skip, zero failures**. All three TypeScript configurations, plugin packaging, plugin build and eight offline review assertion sets pass. The six added tests cover response text/source links, candidate-zone schema guidance, unsafe/duplicate links, UTF-8 bounds and early packaged skill rules. Code review reported no Important or Critical defects. Both local packages were refreshed through supported installers to 1.0.6; the actual Claude cache validates with its existing missing-author warning.
 
 Original ticket counts remain **12 Done / 9 Partial / 6 Not started**. The installed-client acceptance checkbox stays open because two affected Claude answers still have findings and the complete client matrix has not passed. No deployment, publication, real weather/history/aurora request or new dataset download occurred.
+
+## Country contract and full-matrix follow-up — 15 October 2026, local package 1.0.7
+
+The discovery country filter already enforced uppercase three-letter ISO3 format. Its schema now describes the convention with GBR/IND/USA examples, and validation errors repeat those examples. Both details and region-resolution inputs retain their regex and optional-filter behavior; this does not add country conversion or change the catalogue format. A witnessed failing description regression preceded the fix. Five tests cover schema guidance, accepted/rejected formats and the actual loopback MCP `tools/list` projection.
+
+The five skills and their canonical references now end with a final answer audit: remove parenthetical compass setup advice, distinguish geometric opportunity from best seeing, include the catalogue URL with candidate distance/access claims, and shorten optional advice before dropping a used source. An earlier sampled-azimuth paragraph is scoped to explicit bearing questions so it does not invite compass advice in ordinary plans. The packaged-text regression failed before this edit and passes afterward. These instructions are not an enforcement layer over the host model's final prose.
+
+Fresh deterministic verification: **690 discovered, 689 passed, one existing permission skip, zero failures**; all three TypeScript checks pass. Plugin package/build, both standalone runtime modes and eight offline review assertion sets also pass. Independent code/workflow review found no actionable regression. Both local packages were refreshed through supported installers to 1.0.7; Claude validates with its existing missing-author warning.
+
+Affected-case review: the new Claude urban answer omits the unsupported direction, and the meteor answer now includes the missing catalogue URL. Both still omit returned forecast issue time; urban also makes an optional event claim without event-source links. The meteor wording “dark-sky slot” should be more precisely tied to astronomical darkness, since measured sky brightness is unavailable. These are findings, not full acceptance passes.
+
+### Complete question-matrix results and limits
+
+All twenty question IDs were exercised and independently reviewed for each client. This is a first-response functional rehearsal: a justified clarification can pass without completing an outing or creating a reminder. It is not proof of every multi-turn follow-up, host action, automatic skill discovery or positive observing scenario. In particular, the shared UTC window is mostly daytime in Sydney, so those cases exercise that boundary rather than a successful night-imaging session. The clients use different session arrangements; this is not a controlled model-quality benchmark.
+
+- **Codex host:** twenty original case evaluations plus nine diagnostic replays, sixty-two native MCP calls. The original stargazing reference was fully read before its cases, but an initially truncated SKILL read was completed only afterward. A fresh agent therefore replayed all nine stargazing-mapped questions after two separate complete installed-file reads. The other eleven cases had complete skill/reference reads before execution. Final coverage uses those nine replays and eleven original cases: **19 pass, one citation finding, zero blocked**. The original answers and loading qualification remain retained. The meteor answer discusses both NASA years but omits the returned 2025 PDF link. A recovered local evidence-save error did not repeat product calls.
+- **Claude Code:** twenty original fresh CLI invocations plus one bounded first-photo diagnostic after the source wording correction below; forty-five native MCP calls. All twenty-one prove namespaced Skill invocation and complete exact packaged reference retrieval with allowed tools only. Original and latest twenty-case coverage both have **eight pass, twelve with findings, zero blocked**. Total child duration is 814,434 ms, maximum 55,336 ms; no configured bound was breached. Model identity recorded by the CLI is `claude-opus-4-7[1m]`; no model override was applied.
+
+The Codex host used a separate loopback instance of the same synthetic global-catalogue factory as Claude, not the older legacy Fiction Park fixture. Data-provider attempts are zero. Installed files were deliberately read/invoked for the rehearsals; these are not a restarted desktop UI or ChatGPT/Gemini acceptance matrix. The rejected nested Codex CLI read was not retried, and no security policy changed. Actual global data admission, live forecast accuracy, site access and publication remain outside this evidence.
+
+
+| Question ID | Codex host, reviewed coverage | Claude original matrix |
+|---|---|---|
+| casual | Pass | Pass |
+| learner | Pass | Finding |
+| family | Pass | Finding |
+| urban | Pass | Finding |
+| meteor | Finding | Finding |
+| milky-way | Pass | Finding |
+| first-photo | Pass | Finding |
+| telescope | Pass | Pass |
+| deep-sky | Pass | Pass |
+| moon | Pass | Finding |
+| aurora | Pass | Finding |
+| eclipse | Pass | Finding |
+| long-ahead | Pass | Pass |
+| replan | Pass | Finding |
+| access | Pass | Pass |
+| intersection | Pass | Pass |
+| multi-origin | Pass | Pass |
+| selected | Pass | Pass |
+| host-boundary | Pass | Finding |
+| unsupported-boundary | Pass | Finding |
+
+Findings are retained precisely, rather than equating every finding with a wrong calculation. Claude omissions include forecast issuance times and relevant event URLs; family/first-photo/unsupported-boundary exceed the requested 250-word limit. Factual or unsupported-language findings include favorable Moon-free wording, a guessed next-night alternative, an unsupported sunset reference, pole-facing setup advice, twelve modeled GMN showers described as thirteen, and a conditional promise to request an unavailable host-location capability. Eclipse filter guidance is present, but the workflow's explicit ordinary-sunglasses warning is omitted. No unsupported host action was actually executed. Intersection recovers from one invalid mixed legacy/scope request; its final geography and coverage answer passes with that recovery recorded.
+
+### Source wording correction and its diagnostic
+
+Review identified one inherited server error: an empty suggestion list was described as no geometrically visible bright target, although astrophotography suggestions are also filtered by astronomical darkness. A witnessed failing MCP regression proves Jupiter has above-horizon intervals while suggestions are empty. The corrected gap says no suggestions met the selection rules and does not imply all targets are below the horizon or visually undetectable. Only that text changed; calculations, schemas and selection rules did not. Independent code review approved the change.
+
+The complete matrices above ran against the pre-correction server module. Claude's sole first-photo diagnostic used the corrected server, preserved the new gap and removed the false geometric statement. It also included forecast issue/valid times and relevant URLs and met the word limit. It remains a finding because morning Sun-below-minus-6/minus-12 interval endings are mislabeled as twilight endings rather than the beginnings of those morning twilight phases. Its suggested before-05:47 cutoff is not a calculated end of the overall twilight opportunity; the Sun-center-below-horizon interval continues until 06:17. The original failed answer is retained; the diagnostic is not used to declare the whole matrix passed. Final 690-test/type/build/runtime verification includes the corrected source.
+
+Ignored evidence retains `claude-aggUq6` checkpoint/package inventories, both Codex answer/trace folders, loading-order proof and separate machine-readable independent reviews. Review verdicts are copied into the Claude checkpoint only after review. The normal retained-subset local listener has been restored for owner testing; it includes Hanle/London but no real weather/history/aurora or admitted global candidate edition. Both packages remain 1.0.7. Start a fresh client session to pick up installed files.
+
+Original counts remain **12 Done / 9 Partial / 6 Not started**. The installed-client acceptance checkbox stays open. No deployment, publication or new dataset downloads occurred. Further acceptance work must address the recorded factual/reporting failures; passing transport, installation or deterministic tests does not erase them.

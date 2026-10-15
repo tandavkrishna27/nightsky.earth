@@ -134,3 +134,14 @@ test('each packaged skill puts clarification and no-direction rules ahead of his
  const files=unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
  for(const name of names){const text=strFromU8(files[`skills/${name}/SKILL.md`]);const primary=text.slice(0,2500);assert.match(primary,/Do not give compass-direction setup advice/);assert.match(primary,/stop and ask one display-time-zone question/);assert.match(primary,/complete source links/);}
 });
+
+test('every packaged workflow ends with a final orientation and source audit',()=>{
+ const files=unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
+ for(const name of names)for(const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]){
+  const tail=strFromU8(files[path]).slice(-1800);
+  assert.match(tail,/Final answer audit/);
+  assert.match(tail,/including parenthetical advice/);
+  assert.match(tail,/candidate distance or access/);
+  assert.match(tail,/Shorten advice before dropping a source/);
+ }
+});

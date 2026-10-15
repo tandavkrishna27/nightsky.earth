@@ -20,7 +20,9 @@ export const regionIdSchema = z.string().regex(
   /^region:v1:[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/,
   "Expected a versioned NightSky region ID.",
 );
-export const countryCodeSchema = z.string().regex(/^[A-Z]{3}$/, "Expected an uppercase ISO3 country code.");
+export const countryCodeSchema = z.string()
+  .regex(/^[A-Z]{3}$/, "Expected an uppercase ISO3 country code, for example GBR, IND, or USA.")
+  .describe("An uppercase ISO3 country code (three letters), for example GBR, IND, or USA.");
 export const regionRefSchema = z.strictObject({
   regionId: regionIdSchema,
   name: z.string().trim().min(1).max(160),
