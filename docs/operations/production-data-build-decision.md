@@ -2,6 +2,8 @@
 
 Prepared 15 October 2026 against branch `codex/plugin-v1`, implementation baseline `c64d9fdd4504d9d83d4ed6492ee92ae39f55b0df`. **No acquisition, model testing, deployment or publication is authorized by this record.** This is the integrated result of the owner's three preparation lanes, not another implementation wave.
 
+**Subsequent implementation:** [offline build preparation](offline-build-preparation-wave.md) now supplies the pinned configuration route, conservative geometry/footprint preparation and retained-hour mapping planner proposed here. This supersedes their absence in the preparation snapshot; actual source compatibility, complete footprint residuals, scale, new-format adapter and real production data remain unadmitted. See the [following-wave sequence](v1-completion-wave-sequence.md); no download/build allowance follows from these additions.
+
 ## Recommended decisions
 
 | Area | Recommendation | What remains a decision / evidence gate |

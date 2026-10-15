@@ -1,0 +1,7 @@
+{
+ "schemaVersion":1.0,
+ "catalogueRevision":"test-v1",
+ "stream":{"maxRowBytes":1e3,"maxBytes":1e4,"maxRows":1e3},
+ "catalogue":{"chunkRows":1.0,"mergeFanIn":2.0,"maxRows":1e3,"fanout":2.0,"maxInputRows":1e3,"maxMetadataRows":1e3,"maxInputBytes":1e4,"maxOutputBytes":1e6,"maxScratchBytes":1e6,"timeoutMs":5e3},
+ "files":{"regions":{"bytes":0.0,"sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"footprints":{"bytes":0e0,"sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}}
+}

@@ -2,6 +2,9 @@
 OS primitives adapted verbatim from retained_experiment.WindowsJob and bounded_nodes.rss_bytes,
 kept here dependency-free so synthetic XML does not require optional pyosmium.
 """
+import math
+import hashlib
+import re
 import ctypes
 from ctypes import wintypes
 import json
@@ -133,12 +136,13 @@ def supervise(commands, root, limits, *, retained=()):
     if len(set(retained))!=len(retained): raise ValueError('duplicate retained accounting')
     for i,p in enumerate(retained):
         if any(p.is_relative_to(q) or q.is_relative_to(p) for q in retained[:i]): raise ValueError('overlapping retained accounting')
-    root.mkdir(); began=time.monotonic(); peak_disk=peak_rss=0; stages=[]; reason=None
+    began=time.monotonic(); peak_disk=peak_rss=0; stages=[]; reason=None
     def check():
         nonlocal peak_disk
         size=0
         for p in [root,*retained]:
             p=safe_path(p)
+            if not p.exists(): continue
             if p.is_file(): size+=p.stat().st_size; continue
             for parent,dirs,files in os.walk(p,followlinks=False):
                 for name in dirs+files:
@@ -149,11 +153,16 @@ def supervise(commands, root, limits, *, retained=()):
                         pass  # SQLite may remove a rollback journal between enumeration and stat.
         peak_disk=max(size,peak_disk)
         if size>limits['diskBytes']: raise ValueError('whole-job disk limit')
-        if shutil.disk_usage(root).free<limits['freeBytes']: raise ValueError('whole-job reserve limit')
+        if shutil.disk_usage(root if root.exists() else root.parent).free<limits['freeBytes']: raise ValueError('whole-job reserve limit')
         if time.monotonic()-began>=limits['wallSeconds']: raise ValueError('whole-job deadline limit')
+    check()
+    root.mkdir()
     try:
         check()
         for index,command in enumerate(commands):
+            stage_began=time.monotonic()
+            stage=dict(stage=index,exitCode=None,elapsedSeconds=0);stages.append(stage)
+            check()
             job=WindowsJob(limits['commitBytes'],limits['maxProcesses']); process=None
             try:
                 environment=dict(os.environ,PYTHONDONTWRITEBYTECODE='1',TEMP=str(root),TMP=str(root),SQLITE_TMPDIR=str(root))
@@ -166,7 +175,7 @@ def supervise(commands, root, limits, *, retained=()):
                         if process.poll() is not None: break
                         time.sleep(.02)
                     if process.returncode: raise ValueError('stage failed: '+str(process.returncode))
-                    stages.append(dict(stage=index,exitCode=process.returncode))
+                    stage['exitCode']=process.returncode
             finally:
                 try:
                     if process is not None and process.poll() is None:
@@ -175,7 +184,10 @@ def supervise(commands, root, limits, *, retained=()):
                 finally:
                     job.close()
                     if process is not None: process._handle.Close()
-                wait_for_directory_release(root,timeout=3)
+                try: wait_for_directory_release(root,timeout=3)
+                finally:
+                    stage['elapsedSeconds']=round(time.monotonic()-stage_began,3)
+                    stage['exitCode']=process.returncode if process else None
         check()
     except Exception as error: reason=str(error)[:1000]
     report=dict(status='bounded-stop' if reason else 'complete',reason=reason,stages=stages,elapsedSeconds=round(time.monotonic()-began,3),peakRssBytes=peak_rss,peakLogicalBytes=peak_disk,limits=limits,
@@ -192,22 +204,79 @@ def supervise(commands, root, limits, *, retained=()):
     return report
 
 
-def pipeline(manifest_path, root, regions, footprints, limits, *, node='node', python=None):
+def load_build_config(path, sha256):
+    """Mirror the bridge strict v1 controls before any job/output creation."""
+    path=safe_path(path)
+    if not isinstance(sha256,str) or not re.fullmatch('[a-f0-9]{64}',sha256): raise ValueError('build config digest required')
+    with path.open('rb') as handle:
+        initial=os.fstat(handle.fileno()); body=handle.read(65537); final=os.fstat(handle.fileno())
+    if len(body)>65536 or initial.st_size!=len(body) or (initial.st_size,initial.st_mtime_ns)!=(final.st_size,final.st_mtime_ns): raise ValueError('build config size/mutation')
+    if hashlib.sha256(body).hexdigest()!=sha256: raise ValueError('build config digest mismatch')
+    def integer_number(token):
+        # JSON has one number type. Match JavaScript's finite safe integer
+        # semantics for integral decimal/exponent spellings, while excluding
+        # booleans through the existing exact-type checks below.
+        number=float(token)
+        if not math.isfinite(number) or not number.is_integer() or abs(number)>9007199254740991:
+            raise ValueError('finite safe integral build config number required')
+        return int(number)
+    def invalid_constant(token):
+        raise ValueError('nonfinite build config number refused')
+    config=json.loads(body,parse_int=integer_number,parse_float=integer_number,parse_constant=invalid_constant)
+    def exact(value, keys):
+        if not isinstance(value,dict) or set(value)!=set(keys): raise ValueError('unknown/missing build config fields')
+    exact(config,('schemaVersion','catalogueRevision','stream','catalogue','files'))
+    if type(config['schemaVersion']) is not int or config['schemaVersion']!=1: raise ValueError('build config version')
+    ceilings={'stream':dict(maxRowBytes=4*1024**2,maxBytes=10*1024**3,maxRows=10000000), 'catalogue':dict(chunkRows=10000,mergeFanIn=16,maxRows=10000,fanout=256,maxInputRows=10000000,maxMetadataRows=10000,maxInputBytes=10*1024**3,maxOutputBytes=10*1024**3,maxScratchBytes=10*1024**3,timeoutMs=1800000)}
+    for section, caps in ceilings.items():
+        values=config[section]
+        if not isinstance(values,dict) or set(values)-set(caps): raise ValueError('unknown build controls')
+        for key,value in values.items():
+            if type(value) is not int or not (2 if key in ('mergeFanIn','fanout') else 1)<=value<=caps[key]: raise ValueError('invalid '+key)
+    if not isinstance(config['catalogueRevision'],str) or not 1<=len(config['catalogueRevision'].strip())<=100: raise ValueError('invalid catalogueRevision')
+    config['catalogueRevision']=config['catalogueRevision'].strip()
+    exact(config['files'],('regions','footprints'))
+    for pin in config['files'].values():
+        exact(pin,('bytes','sha256'))
+        if type(pin['bytes']) is not int or not 0<=pin['bytes']<=10*1024**3 or not isinstance(pin['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',pin['sha256']): raise ValueError('invalid metadata pin')
+    return config
+
+def verify_metadata_pin(path, pin, stream):
+    maximum=stream.get('maxBytes',128*1024**2)
+    if path.stat().st_size!=pin['bytes'] or pin['bytes']>maximum: raise ValueError('metadata size/pin limit')
+    digest=hashlib.sha256()
+    with path.open('rb') as handle:
+        initial=os.fstat(handle.fileno())
+        for chunk in iter(lambda:handle.read(65536),b''): digest.update(chunk)
+        final=os.fstat(handle.fileno())
+    if (initial.st_size,initial.st_mtime_ns)!=(final.st_size,final.st_mtime_ns) or digest.hexdigest()!=pin['sha256']: raise ValueError('metadata mutation/digest mismatch')
+
+def pipeline(manifest_path, root, regions, footprints, limits, *, node='node', python=None, build_config=None, build_config_sha256=None):
     """Complete local raw → normalized → paged stages under one deadline/accounting."""
     from global_source import validate_manifest
     manifest_path=safe_path(manifest_path); root=safe_path(root); regions=safe_path(regions); footprints=safe_path(footprints)
     if manifest_path.stat().st_size>1024*1024: raise ValueError('manifest byte limit')
     m=validate_manifest(json.loads(manifest_path.read_text(encoding='utf8')))
+    retained_config=[]; bridge_controls=[]
+    if (build_config is None)!=(build_config_sha256 is None): raise ValueError('config path and digest required together')
+    if build_config is not None:
+        from global_source import manifest_revision
+        config=load_build_config(build_config,build_config_sha256)
+        if config['catalogueRevision']!=manifest_revision(m): raise ValueError('build config revision mismatch')
+        verify_metadata_pin(regions,config['files']['regions'],config['stream'])
+        verify_metadata_pin(footprints,config['files']['footprints'],config['stream'])
+        retained_config=[safe_path(build_config)]
+        bridge_controls=['--config',str(retained_config[0]),build_config_sha256]
     scripts=Path(__file__).resolve().parent
     commands=[[python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(manifest_path),str(root/'normalized')],
-              [node,'--import',(scripts.parents[1]/'node_modules'/'tsx'/'dist'/'loader.mjs').as_uri(),str(scripts/'build-source-catalogue.ts'),str(root/'normalized'),str(regions),str(footprints),str(root/'catalogue')]]
-    return supervise(commands,root,limits,retained=[manifest_path,regions,footprints,*[safe_path(s['path']) for s in m['sources']]])
+              [node,'--import',(scripts.parents[1]/'node_modules'/'tsx'/'dist'/'loader.mjs').as_uri(),str(scripts/'build-source-catalogue.ts'),str(root/'normalized'),str(regions),str(footprints),str(root/'catalogue'),*bridge_controls]]
+    return supervise(commands,root,limits,retained=[manifest_path,regions,footprints,*retained_config,*[safe_path(s['path']) for s in m['sources']]])
 
 
 if __name__=='__main__':
     import argparse
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('manifest');p.add_argument('root');p.add_argument('regions');p.add_argument('footprints');p.add_argument('limits');a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('manifest');p.add_argument('root');p.add_argument('regions');p.add_argument('footprints');p.add_argument('limits');p.add_argument('--config',nargs=2,metavar=('FILE','SHA256'));a=p.parse_args()
     limit_path=safe_path(a.limits)
     if limit_path.stat().st_size>4096: raise ValueError('limits byte cap')
-    result=pipeline(a.manifest,a.root,a.regions,a.footprints,json.loads(limit_path.read_text()))
+    result=pipeline(a.manifest,a.root,a.regions,a.footprints,json.loads(limit_path.read_text()),build_config=a.config[0] if a.config else None,build_config_sha256=a.config[1] if a.config else None)
     sys.exit(0 if result['status']=='complete' else 1)

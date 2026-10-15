@@ -5,12 +5,14 @@ import {fileURLToPath} from 'node:url';
 import {catalogueCandidateSchema,footprintSchema} from '../../server/places/catalogueFormat';
 import {catalogueRevisionSchema,regionRefSchema} from '../../shared/nightsky/discovery';
 import {buildStreamedCatalogue,type StreamedCatalogueOptions} from './build-streamed-catalogue';
+import {buildConfigSchema,catalogueOptionsSchema,streamLimitsSchema,loadBuildConfig,verifyMetadata,type SourceBuildConfig} from './source-build-config';
 
 interface RowLimits {maxRowBytes?:number;maxBytes?:number;maxRows?:number;signal?:AbortSignal;pin?:{bytes:number;sha256:string}}
-async function safe(path:string){
+export async function safe(path:string,missingLeaf=false){
  const absolute=resolve(path);let cursor=parse(absolute).root;
- if(path.split(/[\\/]/).includes('..'))throw new TypeError('Path traversal refused');
- for(const part of absolute.slice(cursor.length).split(/[\\/]/).filter(Boolean)){cursor=join(cursor,part);const info=await lstat(cursor);if(info.isSymbolicLink())throw new TypeError('Symlink path refused');}
+ if(/^(?:\\\\[?.]\\)/.test(path)||path.split(/[\\/]/).includes('..'))throw new TypeError('Path traversal refused');
+ if(process.platform==='win32'){const parsed=parse(path),rest=path.slice(parsed.root.length);if(rest.includes(':')||/^[a-z]:[^\\/]/i.test(path)||/^[\\/](?![\\/])/.test(path))throw new TypeError('Ambiguous Windows path refused');for(const part of rest.split(/[\\/]/)){if(/[ .]$/.test(part)||/^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(part))throw new TypeError('Reserved Windows path refused');}}
+ for(const part of absolute.slice(cursor.length).split(/[\\/]/).filter(Boolean)){cursor=join(cursor,part);try{const info=await lstat(cursor);if(info.isSymbolicLink())throw new TypeError('Symlink path refused');}catch(error){if(!(missingLeaf&&cursor===absolute&&(error as NodeJS.ErrnoException).code==='ENOENT'))throw error;}}
  return absolute;
 }
 /** Pulls one bounded record at a time; finally closes on validation, abort or consumer return. */
@@ -34,19 +36,28 @@ export async function* jsonlRows(path:string,options:RowLimits={}):AsyncGenerato
  }finally{await h.close();}
 }
 async function smallJson(path:string){const h=await open(await safe(path),'r');try{const stat=await h.stat();if(!stat.isFile()||stat.size>1024*1024)throw new RangeError('Descriptor byte limit');const b=Buffer.alloc(stat.size);let count=0;while(count<b.length){const r=await h.read(b,count,b.length-count,null);if(!r.bytesRead)throw new TypeError('Descriptor mutation');count+=r.bytesRead;}return JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(b));}finally{await h.close();}}
-export interface SourceCatalogueInput {producerDir:string;regions:string;footprints:string;signal?:AbortSignal;maxRowBytes?:number;maxBytes?:number;maxRows?:number}
+export interface SourceCatalogueInput {producerDir:string;regions:string;footprints:string;signal?:AbortSignal;maxRowBytes?:number;maxBytes?:number;maxRows?:number;config?:SourceBuildConfig}
 export async function buildSourceCatalogue(input:SourceCatalogueInput,output:string,options:StreamedCatalogueOptions={}){
+ const config=input.config?buildConfigSchema.parse(input.config):undefined;
+ catalogueOptionsSchema.parse(options);streamLimitsSchema.parse({maxRowBytes:input.maxRowBytes,maxBytes:input.maxBytes,maxRows:input.maxRows});
+ if(config){options={...config.catalogue,...options};input={...input,...config.stream};}
  const producer=await safe(input.producerDir),done=await smallJson(join(producer,'complete.json'));
  if(done.schemaVersion!==1)throw new TypeError('Producer descriptor version');
  const revision=catalogueRevisionSchema.parse(done.catalogueRevision),pin=done.files?.['candidates.jsonl'];
  if(!pin||!Number.isSafeInteger(pin.bytes)||pin.bytes<0||!/^[a-f0-9]{64}$/.test(pin.sha256))throw new TypeError('Producer digest required');
+ if(config&&config.catalogueRevision!==revision)throw new TypeError('Build config revision mismatch');
  const limits={maxRowBytes:input.maxRowBytes,maxBytes:input.maxBytes,maxRows:input.maxRows,signal:input.signal};
- async function* admitted<T>(path:string,schema:{parse(value:unknown):T},candidate=false){for await(const raw of jsonlRows(path,{...limits,...(candidate?{pin}:{maxRows:10000})})){const row=schema.parse(raw);if(candidate&&(row as {catalogueRevision?:string}).catalogueRevision!==revision)throw new TypeError('Producer revision mismatch');yield row;}}
+ async function* admitted<T>(path:string,schema:{parse(value:unknown):T},candidate=false){for await(const raw of jsonlRows(path,{...limits,...(candidate?{pin}:{maxRows:10000,...(config?{pin:path===input.regions?config.files.regions:config.files.footprints}:{})})})){const row=schema.parse(raw);if(candidate&&(row as {catalogueRevision?:string}).catalogueRevision!==revision)throw new TypeError('Producer revision mismatch');yield row;}}
+ // Verify bounded stream pins and paths before creating any output. Stream again during publication.
+ for await(const raw of jsonlRows(join(producer,'candidates.jsonl'),{...limits,pin})){const row=catalogueCandidateSchema.parse(raw);if(row.catalogueRevision!==revision)throw new TypeError('Producer revision mismatch');}
+ await safe(input.regions);await safe(input.footprints);
+ if(config){await verifyMetadata(input.regions,config.files.regions,config.stream);await verifyMetadata(input.footprints,config.files.footprints,config.stream);}
  // Exclusive output directory: never append to an existing published edition.
- const absolute=resolve(output);await safe(parse(absolute).dir);await mkdir(absolute);
+ const absolute=await safe(output,true);await mkdir(absolute);
  return buildStreamedCatalogue({catalogueRevision:revision,candidates:admitted(join(producer,'candidates.jsonl'),catalogueCandidateSchema,true),regions:admitted(input.regions,regionRefSchema),footprints:admitted(input.footprints,footprintSchema)},absolute,options);
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- const [producerDir,regions,footprints,output]=process.argv.slice(2);if(!output)throw new TypeError('Usage: build-source-catalogue.ts PRODUCER REGIONS.jsonl FOOTPRINTS.jsonl NEW_OUTPUT');
- await buildSourceCatalogue({producerDir,regions,footprints},output);
+ const [producerDir,regions,footprints,output,...extra]=process.argv.slice(2);if(!output||!(extra.length===0||extra.length===3&&extra[0]==='--config'))throw new TypeError('Usage: build-source-catalogue.ts PRODUCER REGIONS.jsonl FOOTPRINTS.jsonl NEW_OUTPUT');
+ const config=extra.length?await loadBuildConfig(extra[1],extra[2]):undefined;
+ await buildSourceCatalogue({producerDir,regions,footprints,config},output);
 }

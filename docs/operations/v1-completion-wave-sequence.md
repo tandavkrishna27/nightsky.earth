@@ -1,0 +1,22 @@
+# Sequence after offline build preparation
+
+Owner direction: complete locally before deployment; use parallel agents where work is independent. Downloads, provider requests, model runs and deployment are not authorized by this sequence. Original ticket accounting stays tied to original acceptance, not wave count.
+
+The current offline implementation is delivered in the [build preparation execution record](offline-build-preparation-wave.md). The following rows describe the remaining sequence after it; data and host gates are not marked complete by software fixtures.
+
+| Sequence | Work and parallel opportunities | Exit evidence / decision |
+| --- | --- | --- |
+| Current: offline build preparation | A: explicit bounded catalogue configuration. B: geographic normalization/full-cell coverage with residuals. C: historical mapping and retained-hour subtraction. | Reviewed code, actual fixture integration, local suites, docs and exact branch CI. No production coverage inferred. |
+| Next: retained-input characterization and selected source adapters | Measure existing raw/normalized producer and historical aggregation separately, sequential heavy jobs. In parallel prepare source-specific boundary and chosen historical access contracts, and current release evidence. | Actual stage CPU/wall/RSS/disk/read-volume measurements under a finite local plan; exact missing adapter and source-revision assurance disposition. No extra country pilot by default. |
+| Then: exact acquisition decision | Freeze files/coordinates/time sets, source/rights/metadata, completed-coverage subtraction, request identities, byte/time/process/reserve budgets and first-result stops. | Present a finite reviewable request packet for owner approval. No blanket global download authority. |
+| After approval: first bounded data tranche | Execute only approved identities; inspect returned format/revision/hour/geometry/integrity and resource use before continuation. Distinct geography/history preparation may proceed in parallel; heavy work shares the machine. | Source accepted or explicit stop/revision. Each continuation needs its finite approved allowance; uncertain requests resume by identity. |
+| Production release construction | Acquire admitted continuation data, construct geography membership/footprints/residuals and historical aggregates, publish immutable releases and verify full dependency inventory. | Actual measured coverage/quality/build/refresh/serving size; no fabricated or silently reduced worldwide coverage. |
+| Complete local product acceptance | Assemble exact plugin package with five workflows/fourteen tools and admitted artifacts. Run the full journey matrix and available native model/client tests, clearly distinguishing live, cached, fixture and unavailable data. Review remaining supported events/source claims. | Useful reviewed end-to-end experience, closed known failures, explicit unavailable coverage. Claude remains deferred until owner resumes it. |
+| Host preparation | Owner supplies selected Hetzner details when ready; freeze verified publisher facts, hostnames, policy/retention and artifact/current-rollback tuples. Prepare exact TLS/proxy/logging/capacity/promotion plan. | Concrete reviewable staging plan and separate deployment approval. Source construction does not run on the small serving host by default. |
+| Staging and release | After approval deploy staging, measure actual capacity/streaming/retention/rollback and intended client connection, complete official package/reviewer evidence. | Owner authorizes submission and later publication separately; real pilot outcomes follow usable access. Website remains a separately scoped parallel project. |
+
+## Full historical-grid dependency
+
+Complete quarter-degree whole-world history exceeds the current 10,000-pair release limit. If required before launch, a reviewed bounded serving hierarchy and its measured capacity must precede production-release/local acceptance for that claim. An incrementally covered-cell release is an owner decision with explicit not-covered responses; this sequence accepts no scope reduction. Neither path changes the existing scientific completeness rules.
+
+There is no fixed number of acquisition waves or defensible total ETA until actual source limits, throughput and final coverage are measured. Failed source admission can require a bounded correction; it does not justify repeatedly reopening completed generic components. Each wave must name concrete original acceptance evidence it advances.

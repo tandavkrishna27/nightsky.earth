@@ -100,3 +100,5 @@ import './providers/climate/release-publication.test';
 import './operations/operator-preflight.test';
 import './places/boundaryMetadata.test';
 import './providers/climate/observation-aggregates.test';
+import './places/geographicCoverage.test';
+import './providers/climate/production-history-plan.test';

@@ -93,3 +93,81 @@ npx tsc -p tsconfig.tools.json --noEmit
 ```
 
 Fixtures cover duplicate lineage/conflicts, complete closure/incomplete/dateline/polar ways, relation exclusion, source identity/native vintage/mutation, limits, interruption/resume/corrupt outputs, actual schema validation, abort and bounded rows. Windows integration executes the real XML producer and bridge into immutable pages; supervisor failure tests retain evidence without a completion marker. Optional PBF parity runs only where existing pyosmium is present. This is synthetic correctness evidence; it establishes no global throughput, total working size, real-data completeness or serving-host fit.
+
+## Pinned bridge controls and single-edition plan
+
+The existing four positional bridge paths retain their defaults. Add exactly
+`--config BUILD.json SHA256` to either the bridge or supervisor command to select
+reviewed controls. `SHA256` is the lowercase SHA-256 of the exact configuration
+file bytes; it is a required independent argument, never a value read from that
+same file. Configuration is at most 64 KiB, strict JSON, with no unknown fields.
+For example (replace the revision and hashes with admitted identities):
+
+```json
+{
+  "schemaVersion": 1,
+  "catalogueRevision": "osm-EXACT_PRODUCER_REVISION",
+  "stream": {"maxRowBytes": 65536, "maxBytes": 134217728, "maxRows": 100000},
+  "catalogue": {
+    "chunkRows": 1000, "mergeFanIn": 8, "maxRows": 1000, "fanout": 128,
+    "maxInputRows": 100000, "maxMetadataRows": 10000,
+    "maxInputBytes": 134217728, "maxOutputBytes": 134217728,
+    "maxScratchBytes": 134217728, "timeoutMs": 60000
+  },
+  "files": {
+    "regions": {"bytes": 0, "sha256": "EXACT_METADATA_SHA256"},
+    "footprints": {"bytes": 0, "sha256": "EXACT_METADATA_SHA256"}
+  }
+}
+```
+
+`stream` and `catalogue` are required objects whose individual numeric controls
+are optional; omitted values preserve the existing defaults. Stream controls
+apply per file; metadata has a fixed maximum of 10,000 rows per stream and the
+publisher additionally counts both metadata streams against `maxMetadataRows`.
+The producer completion descriptor already pins candidates. Configuration adds
+exact metadata pins and requires the producer revision to match. The supervisor
+checks that revision against the raw manifest before creating its job directory;
+the bridge checks it again against actual producer output. Metadata pins are
+checked before job creation and before bridge output creation, and during final
+stream consumption. The config digest is checked independently in both processes.
+The bridge checks candidate size/hash/rows before output creation, then checks
+again while publishing. This extra bounded pass incurs local I/O; it is not a
+throughput claim. Mutation or a failed late check retains failed output evidence
+without publishing a valid catalogue root.
+
+| Control | Existing hard maximum |
+| --- | --- |
+| Stream row bytes / file bytes / candidate rows | 4 MiB / 10 GiB / 10,000,000 |
+| Chunk rows / merge fan-in / page rows / directory fanout | 10,000 / 16 / 10,000 / 256 |
+| Publisher input rows / combined metadata rows | 10,000,000 / 10,000 |
+| Publisher input / output / scratch bytes | 10 GiB each |
+| Publisher time | 1,800,000 ms (30 minutes) |
+
+All numeric controls must be safe integers within the existing bounds; merge
+fan-in and directory fanout require at least two. Zero, fractions, booleans,
+unknown keys, command lists and partition lists are rejected. The supervisor
+continues to construct exactly two sequential local stages: the current Python
+producer and installed TypeScript bridge. The configuration cannot supply commands,
+programs, resume flags or output paths. APIs retain their existing explicit local
+interpreter parameters and the generic low-level supervisor API; this config is
+only a route through the fixed pipeline.
+
+An edition is one ordered admitted source manifest, one coherent producer revision,
+one pair of admitted metadata streams and one fresh output directory. The 12 GiB
+aggregate allocation and proposed 48-hour raw-production stop do not raise the
+10 GiB individual publisher limits or its 30-minute deadline. The supervisor's
+shared wall limit counts raw production, bridge preflight and publication, child
+startup and cleanup. Stage records include actual exit codes and measured elapsed
+time, including failed child stages. Windows Job committed-memory/process limits
+cover child processes; sampled RSS remains main-process RSS as stated above.
+
+There is no partition merger in this route. Independently building Antarctica and
+other extracts produces different source-derived revisions, so concatenating or
+appending their outputs would break a coherent global edition. A proposed split
+must preserve one admitted revision, identity conflicts, global name ambiguity,
+metadata and coverage semantics through a separately reviewed merge design.
+Until that exists, reject an edition that exceeds a single build's ceilings and
+retain its evidence. Do not label successful source partitions as a complete
+worldwide catalogue. Fresh job/output directories are mandatory; this fixed
+pipeline never resumes or appends to a previous catalogue.
