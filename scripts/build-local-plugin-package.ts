@@ -25,7 +25,8 @@ function claudeManifest(portable: any) {
     name: portable.name, version: portable.version, description: portable.description,
     keywords: portable.keywords,
     ...(portable.author ? { author: portable.author } : {}),
-    displayName: portable.extensions['com.openai'].interface.displayName,
+    // Optional displayName is supported by newer Claude clients, but rejected
+    // by the installed 2.1.126 validator. Keep the compatible metadata subset.
   };
 }
 function paths(host: LocalPluginHost) {

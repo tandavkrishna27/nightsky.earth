@@ -10,6 +10,19 @@ import { buildPluginPackage } from '../../scripts/build-plugin-package';
 
 const names = ['find-observing-place', 'plan-stargazing-night', 'plan-astrophotography', 'plan-sky-event', 'prepare-outing'];
 const digest = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
+test('Claude manifest uses the metadata subset accepted by Code 2.1.126', () => {
+  const files = unzipSync(buildLocalPluginPackage({ host: 'claude', endpoint: 'http://localhost:4010/mcp' }).zip);
+  const manifest = JSON.parse(strFromU8(files['.claude-plugin/plugin.json']));
+  const allowed = new Set(['name', 'version', 'description', 'keywords', 'author']);
+  assert.deepEqual(Object.keys(manifest).filter(key => !allowed.has(key)), []);
+  assert.equal(manifest.name, 'nightsky');
+});
+test('Claude validator rejects optional UI fields unsupported by the compatibility target', () => {
+  const files = unzipSync(buildLocalPluginPackage({ host: 'claude', endpoint: 'http://localhost:4010/mcp' }).zip);
+  const manifest = JSON.parse(strFromU8(files['.claude-plugin/plugin.json']));
+  manifest.displayName = 'NightSky.earth';
+  assert.throws(() => validateLocalPackageFiles({ ...files, '.claude-plugin/plugin.json': strToU8(JSON.stringify(manifest)) }, 'claude'), /manifest/);
+});
 for (const host of ['codex', 'claude'] as const) {
   test(`${host} local package has deterministic host layout and exact canonical references`, () => {
     const options = { host, endpoint: 'http://127.0.0.1:4010/mcp' };
