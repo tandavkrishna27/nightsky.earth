@@ -24,11 +24,12 @@ class Configuration(unittest.TestCase):
         (root / 'package-lock.json').write_text('{}', encoding='utf-8')
         bundle = root / 'worker.mjs'
         bundle.write_text('// bundled synthetic fixture', encoding='utf-8')
-        value = dict(repository=str(root), node=sys.executable, output=str(root / 'output'),
+        interpreter = Path(sys.executable).resolve()
+        value = dict(repository=str(root), node=str(interpreter), output=str(root / 'output'),
                      pins=[dict(path=name, sha256=runner.digest(root / name)) for name in
                            ['scripts/era5/verify-lineage-scale.ts', 'package-lock.json']],
                      workerArguments=[], workerBundle=str(bundle), runtimePins=[
-                         dict(path=sys.executable, sha256=runner.digest(Path(sys.executable))),
+                         dict(path=str(interpreter), sha256=runner.digest(interpreter)),
                          dict(path=str(bundle), sha256=runner.digest(bundle))])
         config = root / 'config.json'
         config.write_text(json.dumps(value), encoding='utf-8')

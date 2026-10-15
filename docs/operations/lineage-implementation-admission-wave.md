@@ -24,6 +24,8 @@ Fresh task reviews covered primitives/supervisor, source admission, publisher/pr
 - OSM Python: **107 tests / 103 passed / four skips** in an isolated invocation.
 - All three TypeScript configurations, website/service build, plugin package, both local package validators, eight offline review sets and production/standalone/regional runtime checks passed.
 
+The Linux CI run exposed a portability issue in the new supervisor test helper: `sys.executable` can be a symlink, while pinned runtime admission correctly rejects aliases. The test now resolves the interpreter once and uses that physical path consistently for the executable, runtime pin and digest. All seven supervisor fixtures passed locally after this test-only correction; the measured supervisor, core implementation and full-scale evidence are unchanged.
+
 The initial concurrent OSM invocation stopped at an existing bounded measurement test while Node tests/builds also ran. The unchanged suite then passed in isolation; no limit was increased or source downloaded. Logs are retained under ignored `.cache/lineage-wave-*`.
 
 ## Full synthetic scale acceptance
