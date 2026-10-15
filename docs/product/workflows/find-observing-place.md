@@ -63,3 +63,8 @@ If browsing is available, check official land-manager or observatory evidence fo
 Use host maps or a specialist routing app if available for driving time or a route corridor, with user travel mode and origin clarified. Never convert straight-line distance to road hours or claim NightSky supplies routes, tolls, fuel or transport costs. For between two towns, clarify radius overlap versus an on-road stop. Keep external route evidence separate from catalogue distance.
 
 Create a reminder or calendar entry only if the host supports that action and the user requests it. Confirm the selected date, local time, timezone and reminder intent before using the actual exposed capability; report success only after confirmation from that capability. When unavailable or failed, provide a copyable schedule instead of promising a notification. Rechecking forecasts later also requires an available, explicitly requested scheduling capability.
+
+## Moon timing and sampled directions
+
+Do not infer moonrise, moonset or a moonless window from illumination or sampled altitude. Low Moon altitude does not establish negligible moonlight. Report illumination and sampled altitude as calculated values; Moon timing requires explicit supported rise/set or below-horizon interval evidence. Keep light pollution, transparency and the local horizon unknown unless supplied. An azimuth sampled at maximum altitude is not a rise-time or whole-session bearing. Say no supported event was returned rather than no event occurs when calendar coverage is incomplete. Preserve relevant returned source links.
+

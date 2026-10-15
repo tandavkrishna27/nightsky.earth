@@ -96,3 +96,17 @@ test('local CLI rejects incomplete, unknown and duplicate arguments before writi
     assert.notEqual(result.status, 0); assert.match(result.stderr, /required|unique|endpoint/);
   }
 });
+
+test('every native skill and workflow explicitly reject inferred Moon timing and visibility guarantees', () => {
+  const files = unzipSync(buildLocalPluginPackage({ host: 'claude', endpoint: 'http://localhost:4010/mcp' }).zip);
+  for (const name of names) {
+    for (const path of [`skills/${name}/SKILL.md`, `skills/${name}/references/workflow.md`]) {
+      const text = strFromU8(files[path]);
+      assert.match(text, /Do not infer moonrise, moonset or a moonless window from illumination or sampled altitude/);
+      assert.match(text, /Low Moon altitude does not establish negligible moonlight/);
+      assert.match(text, /not a rise-time or whole-session bearing/);
+      assert.match(text, /no supported event was returned/);
+      assert.match(text, /Preserve relevant returned source links/);
+    }
+  }
+});
