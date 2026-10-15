@@ -1,0 +1,208 @@
+{
+  "requests": 16,
+  "bytes": 413795,
+  "rows": [
+    {
+      "id": "ntrs2027",
+      "url": "https://ntrs.nasa.gov/api/citations/search?keyword=2027%20meteoroid",
+      "checkedAt": "2026-10-15T18:06:08.562473+00:00",
+      "status": 200,
+      "bytes": 1181,
+      "sha256": "30607cde56cf2312e48fa6c2add4633bf51a2e2302b51f448cadc196db920d5b",
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "ntrs2026",
+      "url": "https://ntrs.nasa.gov/api/citations/20250009524",
+      "checkedAt": "2026-10-15T18:06:09.752123+00:00",
+      "status": 200,
+      "bytes": 3890,
+      "sha256": "d61f491d0baf97e1b56c6bb7b9832a24138b3c05d5efa09947acd032f9c76ac7",
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "egal",
+      "url": "https://www.aanda.org/articles/aa/full_html/2020/08/aa38115-20/aa38115-20.html",
+      "checkedAt": "2026-10-15T18:06:10.838160+00:00",
+      "status": 403,
+      "bytes": 772,
+      "sha256": "1a88228ed9a764376c56eeaf9e08a22b4eb9e3b46df3a03ff17fcbc3901f54d4",
+      "contentType": null,
+      "location": null,
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "met-terms",
+      "url": "https://docs.api.met.no/doc/TermsOfService.html",
+      "checkedAt": "2026-10-15T18:06:11.621913+00:00",
+      "status": 200,
+      "bytes": 27044,
+      "sha256": "60a7b5c0ea1ce5d221140070a2333190904fa09f4af73254723fcca9421fa4e1",
+      "contentType": "text/html; charset=utf-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "met-location",
+      "url": "https://docs.api.met.no/doc/Locationforecast.html",
+      "checkedAt": "2026-10-15T18:06:12.228517+00:00",
+      "status": 404,
+      "bytes": 14093,
+      "sha256": "35ec10f85452599afca80b039759aeaee04e2047f8b1414741ef59d5be1928a8",
+      "contentType": "text/html; charset=utf-8",
+      "location": null,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "nws-api",
+      "url": "https://www.weather.gov/documentation/services-web-api",
+      "checkedAt": "2026-10-15T18:06:12.520062+00:00",
+      "status": 200,
+      "bytes": 48939,
+      "sha256": "56f1c16a3f625715e21eda011aaab80d233a885e320d64d1035ffcc938361b7e",
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "nws-rights",
+      "url": "https://www.weather.gov/disclaimer",
+      "checkedAt": "2026-10-15T18:06:13.076075+00:00",
+      "status": 200,
+      "bytes": 41679,
+      "sha256": "c08c1597ebd52b31e3ba749f76d2217c290dcd16dc894cb4c109655566ecbbd1",
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "gefs",
+      "url": "https://www.ncei.noaa.gov/products/weather-climate-models/global-ensemble-forecast",
+      "checkedAt": "2026-10-15T18:06:13.410817+00:00",
+      "status": 200,
+      "bytes": 39141,
+      "sha256": "ca29ee8abb9f383b2153c1f1e2f210dfddd0f2cbfec248e5575a20da55881c15",
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "blackmarble",
+      "url": "https://viirsland.gsfc.nasa.gov/Products/NASA/BlackMarble.html",
+      "checkedAt": "2026-10-15T18:06:14.770911+00:00",
+      "status": 200,
+      "bytes": 17363,
+      "sha256": "3089a8a3b436e5ce8300cc870e151cb6abf9fa0894ed5cd69d0243f2c0a537ba",
+      "contentType": "text/html",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "vnp46a2",
+      "url": "https://ladsweb.modaps.eosdis.nasa.gov/missions-and-measurements/products/VNP46A2",
+      "checkedAt": "2026-10-15T18:06:15.884742+00:00",
+      "status": 200,
+      "bytes": 45776,
+      "sha256": "3f8283333d56502b92f09a5dd0cfe386bc3a8f7787681f76e12e1e61c196e67c",
+      "contentType": "text/html;charset=UTF-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "nasa-rights",
+      "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software/data-use-policy",
+      "checkedAt": "2026-10-15T18:06:17.759693+00:00",
+      "status": 301,
+      "bytes": 494,
+      "sha256": "9c3cd3d1f17b34d756e1e1798e0bc9559149c12b55d7036ea947ff037ee973de",
+      "contentType": "text/html; charset=utf-8",
+      "location": "/engage/open-data-services-software-policies/data-use-guidance",
+      "error": "HTTP Error 301: Moved Permanently"
+    },
+    {
+      "id": "nasa-rights-current",
+      "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+      "checkedAt": "2026-10-15T18:06:40.485179+00:00",
+      "status": 200,
+      "bytes": 139577,
+      "sha256": "b9f1f5f0554dafde54cd1ca38a1c02f8aae8ed638d82fedc99622aeff749c9fb",
+      "contentType": "text/html; charset=UTF-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "met-license",
+      "url": "https://docs.api.met.no/doc/License.html",
+      "checkedAt": "2026-10-15T18:06:41.876658+00:00",
+      "status": 200,
+      "bytes": 17492,
+      "sha256": "4d60bc3bcd386bdf18dc1e13725cc681a020939c0eeb219978bb17dba36080f8",
+      "contentType": "text/html; charset=utf-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "met-location-current",
+      "url": "https://docs.api.met.no/doc/locationforecast/Locationforecast.html",
+      "checkedAt": "2026-10-15T18:06:42.160875+00:00",
+      "status": 200,
+      "bytes": 14401,
+      "sha256": "54f14059a136b982578d2983a5d225d2d69a0d3eec23afc2d3fd907a19491ce7",
+      "contentType": "text/html; charset=utf-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "ntrs2027-broad",
+      "url": "https://ntrs.nasa.gov/api/citations/search?keyword=2027",
+      "checkedAt": "2026-10-15T18:06:42.450701+00:00",
+      "status": 200,
+      "bytes": 1181,
+      "sha256": "1fa366b7fb612a69d53ccb0e6040e4f6f5b004ee61f3582c49167455de2551ff",
+      "contentType": "application/json; charset=utf-8",
+      "location": null,
+      "error": null
+    },
+    {
+      "id": "egal-abstract",
+      "url": "https://www.aanda.org/articles/aa/abs/2020/08/aa38115-20/aa38115-20.html",
+      "checkedAt": "2026-10-15T18:06:43.508754+00:00",
+      "status": 403,
+      "bytes": 772,
+      "sha256": "29c773cde8da99094bc6442b468f84d0fc1d4e5a7a7798a2a715baf216dd6477",
+      "contentType": null,
+      "location": null,
+      "error": "HTTP Error 403: Forbidden"
+    }
+  ],
+  "scope": "public documentation/catalogue metadata only; no dataset bodies or samples",
+  "baseline": "a16e8b1",
+  "requestLimit": 16,
+  "cumulativeByteLimit": 8388608,
+  "perResponseByteLimit": 2097152,
+  "automaticRetries": false,
+  "automaticRedirects": false,
+  "findings": {
+    "ntrs2027": "Two exact keyword searches returned zero; not proof of publication absence or validated API recall.",
+    "ntrs2026": {
+      "id": "20250009524",
+      "determinationType": "GOV_PUBLIC_USE_PERMITTED",
+      "belongsToUsGov": false,
+      "containsThirdPartyMaterial": false,
+      "distribution": "PUBLIC"
+    },
+    "vnp46a2": {
+      "doi": "10.5067/VIIRS/VNP46A2.002",
+      "version": "2.0",
+      "archiveSet": "5200",
+      "nominalFileBytes": "~40 MB provider label, not measured transfer",
+      "quality": "0 high;1-5 poor;new lunar-eclipse3,aurora4,glint5",
+      "coverage": "land and water;daily;global"
+    },
+    "admission": "No new scientific/model/provider acceptance; no gate completion credit"
+  }
+}

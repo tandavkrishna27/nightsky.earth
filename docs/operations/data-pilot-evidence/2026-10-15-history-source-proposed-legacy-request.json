@@ -1,0 +1,79 @@
+{
+  "status": "PROPOSED-NOT-RUN-UNAPPROVED",
+  "dataset": "reanalysis-era5-single-levels",
+  "revisionRequirement": "final expver0001/member0; must verify response",
+  "destinationId": "place:v1:geonames:12",
+  "targetCell": "era5:32:48.75",
+  "request": {
+    "product_type": [
+      "reanalysis"
+    ],
+    "variable": [
+      "total_cloud_cover"
+    ],
+    "year": [
+      "1990"
+    ],
+    "month": [
+      "12"
+    ],
+    "day": [
+      "30"
+    ],
+    "time": [
+      "00:00",
+      "01:00",
+      "02:00",
+      "03:00",
+      "04:00",
+      "05:00",
+      "06:00",
+      "07:00",
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+      "19:00",
+      "20:00",
+      "21:00",
+      "22:00",
+      "23:00"
+    ],
+    "data_format": "netcdf",
+    "download_format": "unarchived",
+    "area": [
+      32.25,
+      48.75,
+      32,
+      49
+    ]
+  },
+  "expectedCells": [
+    "era5:32:48.75",
+    "era5:32:49",
+    "era5:32.25:48.75",
+    "era5:32.25:49"
+  ],
+  "extraCells": [
+    "era5:32:49",
+    "era5:32.25:48.75",
+    "era5:32.25:49"
+  ],
+  "extraCellPolicy": "Three filler cells explicitly acquired by minimal0.25degree rectangle; they do not create additional timezone pairs or coverage claims",
+  "expectedHours": 24,
+  "scalarCellHours": 96,
+  "overlapWithVerifiedRetainedCellHours": 0,
+  "decodedFloat32ValueBytesLowerBound": 384,
+  "proposedRawTransferStopBytes": 2097152,
+  "automaticRetries": 0,
+  "providerAcceptance": "unproved; fresh current publicform supports this minextent but no request submitted",
+  "inventoryManifestSha256": "82ab5ef0be1cba9e1b184df95d4db1468e64ba458d12b7d32069912f28206675",
+  "verifiedRetainedEvidenceSha256": "373d0ce9e803efe0828ce24651c91a0858be62e96a491ee634508bca19351276"
+}

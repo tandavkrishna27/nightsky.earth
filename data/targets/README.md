@@ -6,7 +6,7 @@ The MCP target-visibility tool uses Astronomy Engine 2.1.19 for the Sun, Moon, a
 
 ## Meteor showers
 
-`data/events/meteor-peaks-nasa-2026.json` supplies 13 original forecast maxima for 2026 from Table 3, page 8 of NASA NTRS 20250009524, issued 2025-10-17. Its rights record states “Work of the US Gov. Public Use Permitted.” It contains QUA, ETA, ZPE, ARI, SSG, SDA, CAP, PER, DSX, DRA, AND, GEM and URS as exact UTC forecast instants. It supplies no activity widths, full-season intervals, visual rates or recurrence in another year. Five codes overlap the GMN radiant models: QUA, ETA, SDA, PER and GEM. LYR, ORI and LEO have radiant models but no NASA-calendar peak; the other eight NASA codes have no modeled radiant.
+`data/events/meteor-peaks-nasa-2026.json` supplies 13 original forecast maxima for 2026 from Table 3, page 8 of NASA NTRS 20250009524, issued 2025-10-17. Fresh 2026 NTRS metadata records PUBLIC distribution and GOV_PUBLIC_USE_PERMITTED, with belongsToUsGov false; ownership is not inferred. The 2025 rights record was not freshly rechecked in this metadata wave. It contains QUA, ETA, ZPE, ARI, SSG, SDA, CAP, PER, DSX, DRA, AND, GEM and URS as exact UTC forecast instants. It supplies no activity widths, full-season intervals, visual rates or recurrence in another year. Five codes overlap the GMN radiant models: QUA, ETA, SDA, PER and GEM. LYR, ORI and LEO have radiant models but no NASA-calendar peak; the other eight NASA codes have no modeled radiant.
 
 `data/events/meteor-showers-v1.json` is retained only as an audit record of the old approximate eight-shower compilation. It is not a runtime event source and is not copied into the plugin image. Its unresolved compilation-source review does not disable the independent NASA 2026 source.
 

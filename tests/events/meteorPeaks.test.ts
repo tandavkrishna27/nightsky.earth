@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { findReviewedMeteorPeaks } from "../../server/events/meteorPeaks";
 
 test("2025 forecasts are independent year-specific data with inclusive bounds and source", () => {
@@ -32,4 +33,13 @@ test("reviewed peaks are inclusive instants and never recur into unsupported yea
   assert.deepEqual(findReviewedMeteorPeaks(Date.parse("2027-01-01T00:00:00Z"), Date.parse("2028-01-01T00:00:00Z")), []);
   assert.throws(() => findReviewedMeteorPeaks(NaN, peak), /finite/);
   assert.throws(() => findReviewedMeteorPeaks(peak + 1, peak), /ordered/);
+});
+
+test("2026 rights preserve public-use metadata without inferring ownership", () => {
+  const catalog = JSON.parse(readFileSync("data/events/meteor-peaks-nasa-2026.json", "utf8"));
+  assert.equal(catalog.rightsStatement, "NASA NTRS PUBLIC distribution; GOV_PUBLIC_USE_PERMITTED. Ownership not inferred.");
+  assert.equal(catalog.sourceUrl, "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf");
+  assert.equal(catalog.rightsEvidenceUrl, "https://ntrs.nasa.gov/citations/20250009524");
+  assert.equal(catalog.peaks.length, 13);
+  assert.equal(findReviewedMeteorPeaks(Date.parse("2026-01-01T00:00:00Z"), Date.parse("2026-12-31T23:59:59Z")).length, 13);
 });

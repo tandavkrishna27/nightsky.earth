@@ -1,0 +1,98 @@
+{
+  "recordedAtUtc": "2026-10-15T18:07:42.901451+00:00",
+  "timeWindow": "2026-10-15 before18:06:16UTC; individual tool transport timestamps unavailable",
+  "attempts": [
+    {
+      "ordinal": 1,
+      "operation": "open",
+      "exactUrlOrQuery": "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview",
+      "result": "success",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 2,
+      "operation": "open",
+      "exactUrlOrQuery": "https://confluence.ecmwf.int/pages/viewpage.action?pageId=704944501",
+      "result": "tool400 timeout",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 3,
+      "operation": "click",
+      "exactUrlOrQuery": "https://cds.climate.copernicus.eu/stac-browser/collections/reanalysis-era5-single-levels",
+      "result": "success JS-only",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 4,
+      "operation": "search",
+      "exactUrlOrQuery": "site.confluence.ecmwf.int \"ERA5\" \"ARCO\" \"704944501\"",
+      "result": "empty",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 5,
+      "operation": "search",
+      "exactUrlOrQuery": "site.ecmwf.int ERA5 ARCO Zarr time series licence",
+      "result": "success",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 6,
+      "operation": "search",
+      "exactUrlOrQuery": "site.confluence.ecmwf.int ERA5 ARCO point time series request constraints",
+      "result": "success",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 7,
+      "operation": "open",
+      "exactUrlOrQuery": "https://confluence.ecmwf.int/spaces/CKB/pages/505390919/ERA5%2Bhourly%2BAnalysis%2BReady%2BCloud%2BOptimised%2BARCO%2Bdata%2Bon%2Bsingle%2Blevels%2Bfrom%2B1940%2Bto%2Bpresent%2BProduct%2BUser%2BGuide%2BPUG",
+      "result": "success",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 8,
+      "operation": "open",
+      "exactUrlOrQuery": "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-timeseries?tab=overview",
+      "result": "success",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    },
+    {
+      "ordinal": 9,
+      "operation": "open",
+      "exactUrlOrQuery": "https://forum.ecmwf.int/t/access-to-our-arco-era5-data-lake-zarr-store/15123",
+      "result": "success",
+      "statusCode": null,
+      "wireBytes": null,
+      "responseSha256": null,
+      "reasonMetricsUnknown": "web tool does not expose transport body or timing"
+    }
+  ],
+  "logicalAttempts": 9,
+  "strictCumulative8MiBNetworkAssertion": "unavailable because web transport bytes unknown; bounded direct metadata requests separately metered"
+}

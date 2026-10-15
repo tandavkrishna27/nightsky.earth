@@ -1,0 +1,50 @@
+{
+  "observedAt": "2026-10-15T18:06:16.486783+00:00",
+  "path": ".data\\geonames\\cities500.json.gz",
+  "bytes": 10396747,
+  "sha256": "7ed9817515a419c96ee2ba84b92735f77651c158d1390584fb55d5025c764a9c",
+  "metadata": {
+    "schemaVersion": 2,
+    "vintage": "geonames-cities500-2026-10-11+hanle-v1",
+    "sourceLastModified": "Sun, 11 Oct 2026 03:00:13 GMT",
+    "sourceChecksum": "52cd097abe516fccc5749f4e88f558ac358e63f2bfa1700dd1b8059bc00d8e5a",
+    "generatedAt": "2026-10-13T08:19:50.808Z",
+    "supplementalSources": [
+      {
+        "version": "hanle-v1",
+        "sourceKey": "geonames-country-IN-hanle-v1",
+        "url": "https://download.geonames.org/export/dump/IN.zip",
+        "entry": "IN.txt",
+        "geonameId": 1270426,
+        "rowChecksum": "aaa42b3448db57247c8ae71d03f5e818ef285cd162f9292ee6ae21e339b73ba2",
+        "archiveChecksum": "738f48ab5bc86a4325beaf013ce0a0f25119eceeeff9cd3d96f86991690df998",
+        "sourceLastModified": "Tue, 13 Oct 2026 01:52:59 GMT"
+      }
+    ]
+  },
+  "destinations": 236042,
+  "uniqueCells": 54822,
+  "uniqueCellZonePairs": 56039,
+  "distinctZones": 394,
+  "firstByNumericGeoNameId": [
+    12,
+    "Takht-e Qey\u015far",
+    "Takht-e Qeysar",
+    "Takht-e Azadi,Takht-e Qeysar,Takht-e Qey\u015far,Takht-e \u0100z\u0101d\u012b,tkht qysr,\u062a\u062e\u062a \u0642\u06cc\u0635\u0631",
+    32.05908,
+    48.86752,
+    "IR",
+    "Iran",
+    1266,
+    "Asia/Tehran"
+  ],
+  "firstCell": {
+    "latitude": 32.0,
+    "longitude": 48.75,
+    "cellId": "era5:32:48.75"
+  },
+  "clockHours": 263088,
+  "sourceCellHours": 14423010336,
+  "pairHours": 14743188432,
+  "retainedSubtraction": "not performed; no body decoded in this metadata lane"
+}

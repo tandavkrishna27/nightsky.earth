@@ -1,0 +1,77 @@
+{
+  "scope": "public documentation and .zmetadata only; no auth or dataset chunks",
+  "records": [
+    {
+      "url": "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=overview",
+      "startedAtUtc": "2026-10-15T18:06:32.966371+00:00",
+      "automaticRetries": 0,
+      "redirectsFollowed": 0,
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytesRead": 433534,
+      "sha256": "499923faf9333f684e94ea13f802902e3c3c3d92e59fbb1b4530759d3917f4a4",
+      "location": null,
+      "etag": "\"3qsk5mn0899agv\"",
+      "lastModified": null,
+      "retainedPublicBody": ".superpowers/sdd/2026-10-15-source-metadata-admission/history/2026-10-15-history-source-public-0.txt",
+      "finishedAtUtc": "2026-10-15T18:06:34.904986+00:00"
+    },
+    {
+      "url": "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-timeseries?tab=overview",
+      "startedAtUtc": "2026-10-15T18:06:34.905003+00:00",
+      "automaticRetries": 0,
+      "redirectsFollowed": 0,
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "bytesRead": 128312,
+      "sha256": "be890909dbeb3e6db71b3842e9d8cfb13a458c80deecb27b6dd9995dafa1a360",
+      "location": null,
+      "etag": "\"16w680ghq72qzx\"",
+      "lastModified": null,
+      "retainedPublicBody": ".superpowers/sdd/2026-10-15-source-metadata-admission/history/2026-10-15-history-source-public-1.txt",
+      "finishedAtUtc": "2026-10-15T18:06:37.115006+00:00"
+    },
+    {
+      "url": "https://confluence.ecmwf.int/pages/viewpage.action?pageId=505390919",
+      "startedAtUtc": "2026-10-15T18:06:37.115020+00:00",
+      "automaticRetries": 0,
+      "redirectsFollowed": 0,
+      "status": 302,
+      "contentType": "text/html;charset=UTF-8",
+      "bytesRead": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "location": "/spaces/CKB/pages/505390919/ERA5+hourly+Analysis+Ready+Cloud+Optimised+ARCO+data+on+single+levels+from+1940+to+present+Product+User+Guide+PUG",
+      "etag": null,
+      "lastModified": null,
+      "finishedAtUtc": "2026-10-15T18:06:37.935300+00:00"
+    },
+    {
+      "url": "https://arco.datastores.ecmwf.int/cadl-arco-geo-002/arco/reanalysis_era5_single_levels/sfc/geoChunked.zarr/.zmetadata",
+      "startedAtUtc": "2026-10-15T18:06:37.935310+00:00",
+      "automaticRetries": 0,
+      "redirectsFollowed": 0,
+      "status": 401,
+      "contentType": "application/json; charset=utf-8",
+      "bytesRead": 128,
+      "sha256": "89d324d8a632f1e95c90d71f5e896529afe95dfd5a5078033e92cc3e72a4d6eb",
+      "location": null,
+      "etag": null,
+      "lastModified": null,
+      "finishedAtUtc": "2026-10-15T18:06:38.659759+00:00"
+    },
+    {
+      "url": "https://confluence.ecmwf.int/spaces/CKB/pages/505390919/ERA5+hourly+Analysis+Ready+Cloud+Optimised+ARCO+data+on+single+levels+from+1940+to+present+Product+User+Guide+PUG",
+      "startedAtUtc": "2026-10-15T18:07:16.272616+00:00",
+      "automaticRetries": 0,
+      "redirectsFollowed": 0,
+      "status": 200,
+      "bytesRead": 956634,
+      "sha256": "15992ed6eee0afbf9646941ecb4c5b376178bebdc3d127f367a99a82c0da8cfd",
+      "contentType": "text/html;charset=UTF-8",
+      "finishedAtUtc": "2026-10-15T18:07:20.427398+00:00",
+      "retainedPublicBody": ".superpowers/sdd/2026-10-15-source-metadata-admission/history/2026-10-15-history-source-public-guide.txt"
+    }
+  ],
+  "totalBytesRead": 1518608,
+  "rawBodyRetention": "All successful public HTML retained only in ignored local workspace; public ledger retains hashes and metadata extraction."
+}

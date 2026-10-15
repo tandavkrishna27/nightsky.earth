@@ -1,0 +1,331 @@
+{
+  "dataset": {
+    "type": "Collection",
+    "id": "reanalysis-era5-single-levels-timeseries",
+    "stac_version": "1.1.0",
+    "title": "ERA5 hourly time-series data on single levels from 1940 to present",
+    "summaries": {},
+    "providers": [
+      {
+        "name": "ECMWF"
+      }
+    ],
+    "keywords": [
+      "Product type: Reanalysis",
+      "Temporal coverage: Past",
+      "Spatial coverage: Global",
+      "Variable domain: Atmosphere (surface)",
+      "Variable domain: Atmosphere (upper air)",
+      "Provider: Copernicus C3S",
+      "Data type: Time-series"
+    ],
+    "license": "CC-BY-4.0",
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -180,
+            -89,
+            180,
+            89
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            "1940-01-01T00:00:00+00:00",
+            "2024-12-06T00:00:00+00:00"
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "rel": "self",
+        "type": "application/json",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/reanalysis-era5-single-levels-timeseries"
+      },
+      {
+        "rel": "parent",
+        "type": "application/json",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/"
+      },
+      {
+        "rel": "root",
+        "type": "application/json",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/"
+      },
+      {
+        "rel": "license",
+        "href": "https://spdx.org/licenses/CC-BY-4.0",
+        "title": "CC-BY licence",
+        "rev": 1,
+        "id": "cc-by"
+      },
+      {
+        "rel": "form",
+        "href": "https://object-store.os-api.cci2.ecmwf.int:443/cci2-prod-catalogue/resources/reanalysis-era5-single-levels-timeseries/form_f4bd1f277931f85b0061917980c01b77514037ba78b2ad7aa762806f07c257cc.json",
+        "type": "application/json"
+      },
+      {
+        "rel": "constraints",
+        "href": "https://object-store.os-api.cci2.ecmwf.int:443/cci2-prod-catalogue/resources/reanalysis-era5-single-levels-timeseries/constraints_2719754b4509f237e580884cf094ae8f8a9830fcb4eb93dc23bc4d6c031102c6.json",
+        "type": "application/json"
+      },
+      {
+        "rel": "retrieve",
+        "href": "https://cds.climate.copernicus.eu/api/retrieve/v1/processes/reanalysis-era5-single-levels-timeseries",
+        "type": "application/json"
+      },
+      {
+        "rel": "costing_api",
+        "href": "https://cds.climate.copernicus.eu/api/retrieve/v1/processes/reanalysis-era5-single-levels-timeseries/costing",
+        "type": "application/json"
+      },
+      {
+        "rel": "layout",
+        "href": "https://object-store.os-api.cci2.ecmwf.int:443/cci2-prod-catalogue/resources/reanalysis-era5-single-levels-timeseries/layout_40d5c6cbcadcea112e89331ae6b02ddd1ee45977b3dab8e628741993979ae0ba.json",
+        "type": "application/json"
+      },
+      {
+        "rel": "related",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/reanalysis-era5-pressure-levels-timeseries",
+        "title": "ERA5 hourly time-series data on pressure levels from 1940 to present"
+      },
+      {
+        "rel": "related",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/sis-european-risk-extreme-precipitation-indicators",
+        "title": "Extreme precipitation risk indicators for Europe and European cities from 1950 to 2019"
+      },
+      {
+        "rel": "related",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/derived-era5-single-levels-daily-statistics",
+        "title": "ERA5 post-processed daily statistics on single levels from 1940 to present"
+      },
+      {
+        "rel": "related",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/derived-utci-historical-timeseries",
+        "title": "Thermal comfort indices time-series derived from ERA5 reanalysis"
+      },
+      {
+        "rel": "related",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/reanalysis-era5-single-levels",
+        "title": "ERA5 hourly data on single levels from 1940 to present"
+      },
+      {
+        "rel": "messages",
+        "href": "https://cds.climate.copernicus.eu/api/catalogue/v1/collections/reanalysis-era5-single-levels-timeseries/messages",
+        "title": "All active messages on ERA5 hourly time-series data on single levels from 1940 to present"
+      }
+    ],
+    "assets": {
+      "thumbnail": {
+        "href": "https://object-store.os-api.cci2.ecmwf.int:443/cci2-prod-catalogue/resources/reanalysis-era5-single-levels-timeseries/overview_d9a171109cee68a5dab12ba883fe32b5867f52ca4d64e9f6d5b6f25998d4735c.png",
+        "type": "image/jpg",
+        "roles": [
+          "thumbnail"
+        ]
+      }
+    },
+    "published": "2025-03-17T00:00:00Z",
+    "updated": "2026-10-15T00:00:00Z",
+    "sci:doi": "10.24381/1cf1ad76",
+    "cads:disabled_reason": null,
+    "cads:sanity_check": {
+      "status": "available",
+      "timestamp": "2026-10-15T17:15:48.725146+00:00"
+    },
+    "cads:fair": 92
+  },
+  "formFields": [
+    {
+      "name": "variable",
+      "label": "Variable",
+      "help": "Please, consult the product user guide in the documentation section for more information on these variables.",
+      "required": true,
+      "css": "todo",
+      "type": "StringListWidget",
+      "details": {
+        "values": [
+          "100m_u_component_of_wind",
+          "100m_v_component_of_wind",
+          "10m_u_component_of_wind",
+          "10m_v_component_of_wind",
+          "10m_wind_gust_since_previous_post_processing",
+          "2m_dewpoint_temperature",
+          "2m_temperature",
+          "boundary_layer_height",
+          "cloud_base_height",
+          "mean_sea_level_pressure",
+          "mean_wave_direction",
+          "mean_wave_period",
+          "sea_surface_temperature",
+          "significant_height_of_combined_wind_waves_and_swell",
+          "skin_temperature",
+          "surface_latent_heat_flux",
+          "surface_pressure",
+          "surface_sensible_heat_flux",
+          "surface_solar_radiation_downwards",
+          "surface_thermal_radiation_downwards",
+          "total_cloud_cover",
+          "total_precipitation",
+          "total_sky_direct_solar_radiation_at_surface"
+        ],
+        "columns": 2,
+        "labels": {
+          "100m_u_component_of_wind": "100m u-component of wind",
+          "100m_v_component_of_wind": "100m v-component of wind",
+          "10m_u_component_of_wind": "10m u-component of wind",
+          "10m_v_component_of_wind": "10m v-component of wind",
+          "10m_wind_gust_since_previous_post_processing": "10m wind gust since previous post-processing",
+          "2m_dewpoint_temperature": "2m dewpoint temperature",
+          "2m_temperature": "2m temperature",
+          "boundary_layer_height": "Boundary layer height",
+          "cloud_base_height": "Cloud base height",
+          "mean_sea_level_pressure": "Mean sea level pressure",
+          "mean_wave_direction": "Mean wave direction",
+          "mean_wave_period": "Mean wave period",
+          "sea_surface_temperature": "Sea surface temperature",
+          "significant_height_of_combined_wind_waves_and_swell": "Significant height of combined wind waves and swell",
+          "skin_temperature": "Skin temperature",
+          "surface_latent_heat_flux": "Surface latent heat flux",
+          "surface_pressure": "Surface pressure",
+          "surface_sensible_heat_flux": "Surface sensible heat flux",
+          "surface_solar_radiation_downwards": "Surface solar radiation downwards",
+          "surface_thermal_radiation_downwards": "Surface thermal radiation downwards",
+          "total_cloud_cover": "Total cloud cover",
+          "total_precipitation": "Total precipitation",
+          "total_sky_direct_solar_radiation_at_surface": "Total sky direct solar radiation at surface"
+        }
+      },
+      "id": "variable"
+    },
+    {
+      "type": "ExclusiveGroupAccordionWidget",
+      "details": {
+        "default": "location",
+        "titles": {
+          "location": "Location selection",
+          "area": "Area selection"
+        }
+      },
+      "order": [
+        "location",
+        "area"
+      ],
+      "help": "**Location** selection returns a time series for the nearest grid point to the selected location. Output formats: NetCDF (recommended) or CSV.\n\n**Area** selection returns a time series for each grid point within the selected small area. No spatial aggregation is performed. Output formats: NetCDF (recommended) or CSV.\n",
+      "name": "geo_group",
+      "label": "Geographical area",
+      "children": [
+        "location",
+        "area"
+      ]
+    },
+    {
+      "name": "date",
+      "label": "Date",
+      "help": null,
+      "required": true,
+      "css": "todo",
+      "type": "DateRangeWidget",
+      "details": {
+        "minStart": "1940-01-01",
+        "maxEnd": "2026-10-09",
+        "defaultStart": "1940-01-01",
+        "defaultEnd": "2026-10-09"
+      },
+      "id": "date"
+    },
+    {
+      "name": "data_format",
+      "label": "Data format",
+      "help": "<p><strong>NetCDF</strong>: available with Area and Location.<br> <strong>CSV</strong>: available only with Location.<br></p>",
+      "required": true,
+      "css": "todo",
+      "type": "StringChoiceWidget",
+      "details": {
+        "values": [
+          "netcdf",
+          "csv"
+        ],
+        "columns": 2,
+        "labels": {
+          "netcdf": "NetCDF",
+          "csv": "CSV"
+        },
+        "default": [
+          "netcdf"
+        ]
+      },
+      "id": "data_format"
+    },
+    {
+      "details": {
+        "stepX": 0.25,
+        "stepY": 0.25,
+        "default": {
+          "n": 52,
+          "e": 1,
+          "s": 51,
+          "w": 0
+        },
+        "range": {
+          "n": 90,
+          "s": -90,
+          "e": 180,
+          "w": -180
+        },
+        "maximum_extent": {
+          "lat": 2,
+          "lon": 2
+        },
+        "minimum_extent": {
+          "lat": 0.25,
+          "lon": 0.25
+        },
+        "enableMap": true
+      },
+      "help": "Returns a timeseries of grid points in the selected area.",
+      "name": "area",
+      "type": "GeographicExtentWidget",
+      "label": "Area selection"
+    },
+    {
+      "details": {
+        "range": {
+          "n": 90,
+          "s": -90,
+          "e": 179.9,
+          "w": -180
+        },
+        "enableMap": true,
+        "stepX": 0.25,
+        "stepY": 0.25
+      },
+      "help": "Returns a time series for the nearest grid point to the selected location. Output formats: NetCDF (recommended) or CSV.",
+      "name": "location",
+      "type": "GeographicLocationWidget",
+      "label": "Location selection"
+    },
+    {
+      "type": "LicenceWidget",
+      "name": "licences",
+      "label": "Terms of use",
+      "help": null,
+      "details": {
+        "licences": [
+          {
+            "id": "cc-by",
+            "revision": 1,
+            "label": "CC-BY licence",
+            "contents_url": "https://object-store.os-api.cci2.ecmwf.int:443/cci2-prod-catalogue/licences/cc-by/cc-byv1_2b61eb0b42e053566cb9447c1d2847a69a275c095e00fca00bad1bf5326a9432.md",
+            "attachment_url": "https://spdx.org/licenses/CC-BY-4.0",
+            "spdx_identifier": "CC-BY-4.0"
+          }
+        ]
+      }
+    }
+  ],
+  "extractionNote": "Public catalogue collection metadata and form configuration; publisher descriptive prose omitted, original HTML hash in fetch ledger."
+}

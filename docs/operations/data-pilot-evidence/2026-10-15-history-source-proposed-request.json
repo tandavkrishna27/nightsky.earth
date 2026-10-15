@@ -1,0 +1,44 @@
+{
+  "status": "PROPOSED-NOT-RUN-UNAPPROVED",
+  "selection": "Smallest numeric GeoNames ID in entire pinned retained named-place catalogue; not selected by user",
+  "gazetteerSha256": "7ed9817515a419c96ee2ba84b92735f77651c158d1390584fb55d5025c764a9c",
+  "destination": {
+    "id": "place:v1:geonames:12",
+    "name": "Takht-e Qey\u015far",
+    "latitude": 32.05908,
+    "longitude": 48.86752,
+    "timeZone": "Asia/Tehran",
+    "timeZoneAuthority": "explicit GeoNames record; no boundary suitability validation"
+  },
+  "mappedCell": {
+    "latitude": 32.0,
+    "longitude": 48.75,
+    "cellId": "era5:32:48.75"
+  },
+  "dataset": "reanalysis-era5-single-levels-timeseries",
+  "doi": "10.24381/1cf1ad76",
+  "semanticRequest": {
+    "variable": [
+      "total_cloud_cover"
+    ],
+    "location": {
+      "latitude": 32.0,
+      "longitude": 48.75
+    },
+    "date": "1990-12-30/1990-12-30",
+    "data_format": "netcdf"
+  },
+  "wireShape": "NOT ADMITTED: location/date widget transport serialization and returned encoding require separate reviewed request/body admission",
+  "expectedSourceHours": 24,
+  "expectedScalarValues": 24,
+  "decodedFloat32ValueBytesLowerBound": 96,
+  "proposedTransferStopBytes": 2097152,
+  "automaticRetry": false,
+  "sourceRevision": "UNKNOWN: do not label ARCO final expver0001 without evidence",
+  "whyBodyNeeded": [
+    "Inspect exact returned coordinate, UTC time units/calendar and dtype/missing-value handling",
+    "Establish provenance from ARCO homogeneous store to final ERA5 revision and pin response bytes",
+    "Validate existing decoder compatibility or identify adapter work; no adapter has been created"
+  ],
+  "authorization": "Dataset request/body fetch requires explaining this identity/bound/purpose and asking user first"
+}

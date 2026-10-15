@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "status": "PROPOSED-NOT-RUN-NOT-RUNTIME-INSTALLED",
+  "createdAtUtc": "2026-10-15T18:09:55.467844+00:00",
+  "provenance": {
+    "index": {
+      "path": ".data/geonames/cities500.json.gz",
+      "bytes": 10396747,
+      "sha256": "7ed9817515a419c96ee2ba84b92735f77651c158d1390584fb55d5025c764a9c"
+    },
+    "recordFields": {
+      "coordinate": [
+        4,
+        5
+      ],
+      "timeZone": 9
+    },
+    "mapping": "suppliedCellKey quarterdegree half ties toward positive; seam -180",
+    "status": "PROPOSED-NOT-RUNTIME-INSTALLED",
+    "timezoneBoundarySuitability": "not checked; explicit GeoNames record only"
+  },
+  "sourceMetadata": {
+    "schemaVersion": 2,
+    "vintage": "geonames-cities500-2026-10-11+hanle-v1",
+    "sourceLastModified": "Sun, 11 Oct 2026 03:00:13 GMT",
+    "sourceChecksum": "52cd097abe516fccc5749f4e88f558ac358e63f2bfa1700dd1b8059bc00d8e5a",
+    "generatedAt": "2026-10-13T08:19:50.808Z",
+    "supplementalSources": [
+      {
+        "version": "hanle-v1",
+        "sourceKey": "geonames-country-IN-hanle-v1",
+        "url": "https://download.geonames.org/export/dump/IN.zip",
+        "entry": "IN.txt",
+        "geonameId": 1270426,
+        "rowChecksum": "aaa42b3448db57247c8ae71d03f5e818ef285cd162f9292ee6ae21e339b73ba2",
+        "archiveChecksum": "738f48ab5bc86a4325beaf013ce0a0f25119eceeeff9cd3d96f86991690df998",
+        "sourceLastModified": "Tue, 13 Oct 2026 01:52:59 GMT"
+      }
+    ]
+  },
+  "counts": {
+    "destinations": 236042,
+    "uniqueCells": 54822,
+    "uniqueCellZonePairs": 56039,
+    "sourceHoursPerCell": 263088,
+    "sourceCellHours": 14423010336,
+    "pairHours": 14743188432
+  },
+  "scope": "all retained named GeoNames destinations; not all global grid nodes or arbitrary candidate coordinates",
+  "files": {
+    "destinations": {
+      "path": ".data/history-source-proposed-20261015-v1/destinations.jsonl.gz",
+      "bytes": 6290563,
+      "sha256": "f46a0c0d71288f92a987758248a2b089434833a675d1f10714afc425f49b8912"
+    },
+    "cells": {
+      "path": ".data/history-source-proposed-20261015-v1/cells.jsonl",
+      "bytes": 3460954,
+      "sha256": "7835ff290602ec088af46e99d353a03b114f2d44f343d48acd3842cc12976dca"
+    },
+    "pairs": {
+      "path": ".data/history-source-proposed-20261015-v1/pairs.jsonl",
+      "bytes": 2287432,
+      "sha256": "7787139c32c0f4d00bd35f8c5df841eeadd21ec39bdcee4a668bf8137e108e64"
+    }
+  },
+  "uncompressedCanonicalDestinationSha256": "3883d251e7bfdb9da919caa0db5fe05508d8bacc0e9eca416497f7f2aac3c2b3",
+  "batches": {
+    "count": 48,
+    "totalBytes": 84667019,
+    "maximumBytes": 1865248
+  },
+  "batchPlan": "48 deterministic numeric-ID ranges, max5000 destinations and4MiB each; no source planner or provider called; globalcellset owns acquisition dedup",
+  "sourceClock": {
+    "startInclusive": "1990-12-30T00:00:00Z",
+    "endExclusive": "2021-01-03T00:00:00Z"
+  },
+  "manifest": {
+    "path": ".data/history-source-proposed-20261015-v1/manifest.json",
+    "bytes": 14786,
+    "sha256": "82ab5ef0be1cba9e1b184df95d4db1468e64ba458d12b7d32069912f28206675"
+  },
+  "newOutputBytes": 96720754,
+  "elapsedSeconds": 3.637359100044705,
+  "localVerification": {
+    "path": ".data/history-source-proposed-20261015-v1/local-verification.json",
+    "bytes": 11388,
+    "sha256": "373d0ce9e803efe0828ce24651c91a0858be62e96a491ee634508bca19351276",
+    "validatedBatches": 48,
+    "verifiedRetainedProductionCellHours": 16416,
+    "remainingSourceCellHours": 14422993920,
+    "retainedProductionPairHours": 16416,
+    "pairMultiplicityAtRetainedCells": {
+      "era5:32.75:79": 1,
+      "era5:10.25:77": 1,
+      "era5:10.25:77.25": 1,
+      "era5:10.25:77.5": 1,
+      "era5:10:77": 1,
+      "era5:10:77.25": 1,
+      "era5:10:77.5": 1
+    },
+    "remainingPairHours": 14743172016,
+    "scope": "global actualnamedcellset intersected with8verified historical partitions;2025outsideclockexcluded"
+  },
+  "plannerBatchWarning": "Nonexecuting perbatch mapping templates have completed=[]; do not run as acquisition schedule. Globalretainedsubtraction and globalcell-dedup evidence are in localverification; integrate verified completedpins before any future planner/executor admission."
+}

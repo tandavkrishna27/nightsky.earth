@@ -4,12 +4,15 @@ import type { SourceRecord } from "../../shared/nightsky/common";
 
 const catalogSchema = z.strictObject({
   schemaVersion: z.literal(1), vintage: z.string(), reviewedAt: z.string().datetime(),
-  sourceUrl: z.url(), rightsEvidenceUrl: z.url(), rightsStatement: z.literal("Work of the US Gov. Public Use Permitted."),
+  sourceUrl: z.url(), rightsEvidenceUrl: z.url(),
   table: z.string(), coverage: z.string(),
   peaks: z.array(z.strictObject({ code: z.string(), id: z.string(), name: z.string(), peakUtc: z.string().datetime() })).length(13),
 });
 const catalogs = [2025, 2026].map(year => {
-  const catalog = catalogSchema.parse(JSON.parse(readFileSync(`data/events/meteor-peaks-nasa-${year}.json`, "utf8")));
+  const reviewedSchema = catalogSchema.extend({ rightsStatement: z.literal(year === 2025
+    ? "Work of the US Gov. Public Use Permitted."
+    : "NASA NTRS PUBLIC distribution; GOV_PUBLIC_USE_PERMITTED. Ownership not inferred.") });
+  const catalog = reviewedSchema.parse(JSON.parse(readFileSync(`data/events/meteor-peaks-nasa-${year}.json`, "utf8")));
   if (new Set(catalog.peaks.map(row => row.code)).size !== 13 || catalog.peaks.some(row => !row.peakUtc.startsWith(`${year}-`))) throw new TypeError(`Invalid reviewed ${year} peak coverage.`);
   const source: SourceRecord = {
     name: "NASA Meteoroid Environment Office", url: catalog.sourceUrl,
