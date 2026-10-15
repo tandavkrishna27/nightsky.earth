@@ -34,7 +34,7 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Run offline suite including retained measurement harness and adapter fixtures
+      - name: Run offline suite including bounded lineage and source admission fixtures
         run: npm test
 
       - name: Exercise bounded global discovery and exact selected-site planning offline

@@ -1,3 +1,5 @@
+import {publicationBudget} from '../../scripts/era5/build-lineage-release';
+import {prepareLineageScratch,validateHierarchicalClosure,type LineageClosureValidation} from './operatorLineageClosure';
 import {catalogEra5Schema,validateCatalog,coverageIdentity} from '../../server/providers/climate/catalogEra5';
 import {loadCatalogueFiles} from '../../server/places/catalogueFiles';
 /** Exhaustive offline traversal of published formats; never promotes or contacts a host. */
@@ -6,10 +8,10 @@ import {catalogueRootSchema,catalogueTreeLeafKinds,type PageRef} from '../../ser
 import {releaseEra5Schema,validateRelease,releaseMetadata,sharedReleaseMetadata,canonicalRelease,releasePath,releaseSha,mergeReleaseRevisions} from '../../server/providers/climate/releaseEra5';
 import {readTrustedClimateFile,tiledEra5ManifestSchema,tiledEra5TileSchema,validateTiledEra5Manifest,validateTiledEra5Tile} from '../../server/providers/climate/tiledEra5';
 import type {OperatorArtifact} from './operator';
-export interface OperatorClosureLimits { maxTotalBytes?:number; maxArtifactBytes?:number; maxReferences?:number; maxElapsedMs?:number }
+export interface OperatorClosureLimits { maxTotalBytes?:number; maxArtifactBytes?:number; maxReferences?:number; maxElapsedMs?:number;lineageValidation?:LineageClosureValidation }
 export async function validateOperatorReleaseClosure(root:string,inventory:OperatorArtifact[],limits:OperatorClosureLimits={}){
- const maxTotal=limits.maxTotalBytes??Number.MAX_SAFE_INTEGER,maxArtifact=limits.maxArtifactBytes??16*1024**3,maxReferences=limits.maxReferences??3_000_000,maxElapsedMs=limits.maxElapsedMs??30*60*1000;
- if([maxTotal,maxArtifact,maxReferences,maxElapsedMs].some(n=>!Number.isSafeInteger(n)||n<0)||maxArtifact>16*1024**3||maxReferences>3_000_000||maxElapsedMs>30*60*1000)throw Error('Closure limits');
+ const maxTotal=limits.maxTotalBytes??Number.MAX_SAFE_INTEGER,maxArtifact=limits.maxArtifactBytes??16*1024**3,maxReferences=limits.maxReferences??3_000_000,maxElapsedMs=limits.maxElapsedMs??limits.lineageValidation?.budgets.maxDurationMs??30*60*1000;
+ if([maxTotal,maxArtifact,maxReferences,maxElapsedMs].some(n=>!Number.isSafeInteger(n)||n<0)||maxArtifact>16*1024**3||maxReferences>3_000_000||maxElapsedMs>(limits.lineageValidation?60:30)*60*1000)throw Error('Closure limits');
  const started=performance.now();let references=0,totalBytes=inventory.reduce((n,a)=>n+BigInt(a.bytes),BigInt(0));
  function bound(){if(totalBytes>BigInt(maxTotal)||performance.now()-started>maxElapsedMs)throw Error('Closure budget');}
  bound();
@@ -18,6 +20,7 @@ export async function validateOperatorReleaseClosure(root:string,inventory:Opera
  if(new Set(inventory.map(a=>a.path.toLowerCase())).size!==inventory.length)throw Error('Closure inventory alias');
  async function json(a:OperatorArtifact,limit:number){bound();if(++references>maxReferences||a.bytes>limit||a.bytes>maxArtifact)throw Error('Closure bound');const path=await releasePath(resolve(root),a.path);const body=await readTrustedClimateFile(path,a.sha256,limit);bound();if(body.length!==a.bytes)throw Error('Closure bytes');return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(body));}
  function child(base:string,ref:{path:string;sha256:string;bytes:number},derived=false){if(ref.path.includes('\\')||ref.path.includes(':')||ref.path.startsWith('/')||ref.path.split('/').some(p=>!p||p==='.'||p==='..'))throw Error('Closure path');const path=posix.join(base,ref.path),a=byPath.get(path);if(a){if(a.sha256!==ref.sha256||a.bytes!==ref.bytes)throw Error('Closure inventory');return a;}if(!derived)throw Error('Closure inventory');totalBytes+=BigInt(ref.bytes);bound();return {id:path,kind:'component' as const,path,sha256:ref.sha256,bytes:ref.bytes,version:'manifest-derived'};}
+ let lineageBudget:ReturnType<typeof publicationBudget>|undefined;let lineageScratch:string|undefined;let lineageClosureIndex=0;
  for(const a of inventory){
   if(a.kind==='global-catalogue'){
    const manifest=catalogueRootSchema.parse(await json(a,1024*1024)),base=posix.dirname(a.path),seen=new Map<string,string>();
@@ -48,6 +51,7 @@ export async function validateOperatorReleaseClosure(root:string,inventory:Opera
   }
   if(a.kind==='era5-release'){
    const parsed=await json(a,4*1024*1024);
+   if(parsed.schemaVersion===5||parsed.schemaVersion===6){if(!limits.lineageValidation)throw Error('Explicit lineage validation scratch and budgets required');lineageBudget??=publicationBudget(limits.lineageValidation.budgets);lineageBudget.read(a.bytes);lineageScratch??=await prepareLineageScratch(root,limits.lineageValidation);const scratch=(await import('node:path')).join(lineageScratch,'closure-'+lineageClosureIndex++);await (await import('node:fs/promises')).mkdir(scratch);await validateHierarchicalClosure({root,artifact:a,parsed,validation:limits.lineageValidation,scratch,budget:lineageBudget,json,child,account(base,ref,body){child(base,ref,true);if(++references>maxReferences||ref.bytes>maxArtifact||body.length!==ref.bytes)throw Error('Closure bound');bound();}});continue;}
    const walkRelease=async(item:OperatorArtifact,release:ReturnType<typeof releaseEra5Schema.parse>,derived:boolean)=>{
     validateRelease(release);const base=posix.dirname(item.path);
     for(const ref of release.shards){

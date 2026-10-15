@@ -1,0 +1,455 @@
+{
+  "schemaVersion": 1,
+  "status": "SYNTHETIC-BOUNDED-LINEAGE-ACCEPTANCE-PASSED",
+  "scope": "Offline synthetic schema-6 release and schema-5 catalog publication, complete global source-pin inspection, and selected runtime membership routing.",
+  "baselineCommit": "6baa178cfd73474b2d36812bcddb5be00029dae8",
+  "startedAt": "2026-10-15T19:20:56.565Z",
+  "completedAt": "2026-10-15T20:04:12.502Z",
+  "measurements": {
+    "workerElapsedMs": 2595988.0408,
+    "supervisorElapsedSeconds": 2604.625,
+    "peakMainProcessRssBytes": 337317888,
+    "peakSampledLogicalOutputBytes": 14554578378
+  },
+  "limits": {
+    "wallSeconds": 3600,
+    "hardTreeCommitBytes": 2147483648,
+    "hardActiveProcesses": 2,
+    "sampledDiskBytes": 34359738368,
+    "reserveBytes": 103079215104,
+    "diskSampleStartIntervalSeconds": 60
+  },
+  "counts": {
+    "prospectiveRawAndDecodedRevisionKeys": 18033376,
+    "additionalRetainedRawRows": 6,
+    "additionalRetainedDecodedRows": 8,
+    "retainedAndNewManifestRows": 3,
+    "uniquePinsInspected": 18033393,
+    "raw": 9016694,
+    "decoded": 9016696,
+    "manifest": 3,
+    "actualCoveragePairs": 56039,
+    "coverageChildren": 6,
+    "schema2Shards": 5604,
+    "globalLeaves": 65536,
+    "maxGlobalLeafRows": 346,
+    "maxGlobalLeafBytes": 41411
+  },
+  "validation": {
+    "supervisorStatus": "complete",
+    "supervisorReason": null,
+    "processExitCode": 0,
+    "globalSourcePinsIndividuallyRecomputedAndCompared": true,
+    "childUnionsIndependentlyComparedWithActualShardArrays": true,
+    "allCoveragePairsPublished": true,
+    "crossChildConflict": "rejected",
+    "sourceAndRuntimePinsUnchangedAfterRun": true,
+    "sourcePins": 24,
+    "runtimePins": 2,
+    "fullScaleOperatorClosureSeparatelyMeasured": false
+  },
+  "runtime": {
+    "selectedBoundaryPairs": [
+      "era5:-0.25:-50.5|America/Belem",
+      "era5:0.25:-78.25|America/Guayaquil",
+      "era5:0.25:-78.5|America/Guayaquil",
+      "era5:27.25:86|Asia/Kathmandu",
+      "era5:27.25:87|Asia/Kathmandu",
+      "era5:37.75:29.75|Europe/Istanbul",
+      "era5:37.75:29|Europe/Istanbul",
+      "era5:45.5:16.75|Europe/Zagreb",
+      "era5:45.5:16|Europe/Zagreb",
+      "era5:54:-1|Europe/London",
+      "era5:54:-2.25|Europe/London",
+      "era5:9:99|Asia/Bangkok"
+    ],
+    "queries": 12,
+    "providerReads": 163,
+    "cache": {
+      "bytes": 478600,
+      "lineageBytes": 378650,
+      "shards": 4,
+      "children": 2
+    },
+    "totalCacheLimitBytes": 33554432,
+    "sharedLineageCacheLimitBytes": 2097152
+  },
+  "catalog": {
+    "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/catalog.json",
+    "manifestSha256": "e4633b21f13b52607b61cf7f806f36d89780119246cc4a3a5982b8579157d95b",
+    "pairCount": 56039,
+    "lineage": {
+      "format": "era5-lineage-radix-v1",
+      "rootPath": "catalog.json.sources/objects/root.json",
+      "rootSha256": "61d5527251a029a54b794d733d6022e6c2d4311c54de8b1df7c9c85400b14e8c",
+      "rootBytes": 4718,
+      "uniqueRevisionCount": 18033393,
+      "rawCount": 9016694,
+      "decodedCount": 9016696,
+      "manifestCount": 3,
+      "membershipRoot": {
+        "format": "era5-membership-radix-v1",
+        "rootPath": "catalog.json.members/objects/root.json",
+        "rootSha256": "417e58db4917c62301d6d6b560942a8fa89ed043d36b56d6f7a93b872f01f27b",
+        "rootBytes": 2332,
+        "count": 6,
+        "rawCount": 9016694,
+        "decodedCount": 9016696,
+        "manifestCount": 3
+      }
+    },
+    "metrics": {
+      "inputBytes": 14383499294,
+      "outputBytes": 2180529214,
+      "scratchBytes": 4300969756,
+      "elapsedMs": 1797783.7132
+    }
+  },
+  "children": [
+    {
+      "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/release-0.json",
+      "manifestSha256": "c82d0d8bccdeb09fddf0628e975d9c9199f1d648fb96a6e16e7e6a5de1581966",
+      "lineage": {
+        "format": "era5-lineage-radix-v1",
+        "rootPath": "release-0.json.sources/objects/root.json",
+        "rootSha256": "e49259723ab851f6efff8682db3c95c591f862b6a50b69d86a357f42d6bf1f7b",
+        "rootBytes": 4637,
+        "uniqueRevisionCount": 3218000,
+        "rawCount": 1609000,
+        "decodedCount": 1609000,
+        "manifestCount": 0,
+        "membershipRoot": {
+          "format": "era5-membership-radix-v1",
+          "rootPath": "release-0.json.members/objects/root.json",
+          "rootSha256": "b305a60196de9708f4be846310be17a4633e60232da87983a03f255ee6313a99",
+          "rootBytes": 8097,
+          "count": 2000,
+          "rawCount": 3218000,
+          "decodedCount": 3218000,
+          "manifestCount": 0
+        }
+      },
+      "metrics": {
+        "inputBytes": 1269127840,
+        "outputBytes": 414442499,
+        "scratchBytes": 381760460,
+        "elapsedMs": 98521.0417
+      }
+    },
+    {
+      "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/release-1.json",
+      "manifestSha256": "470ae1424779fc1c22909a64deb6b85a2ae474c8a942cd5407dc605d0f875d59",
+      "lineage": {
+        "format": "era5-lineage-radix-v1",
+        "rootPath": "release-1.json.sources/objects/root.json",
+        "rootSha256": "eccab72d582f94061aacfb7c9e40b35f90a3909c5b01739b297fada1efdff882",
+        "rootBytes": 4734,
+        "uniqueRevisionCount": 3218000,
+        "rawCount": 1609000,
+        "decodedCount": 1609000,
+        "manifestCount": 0,
+        "membershipRoot": {
+          "format": "era5-membership-radix-v1",
+          "rootPath": "release-1.json.members/objects/root.json",
+          "rootSha256": "8a4102d1ccdc46759a28cc955c9eeca42a881f682d686600384a59184337de7e",
+          "rootBytes": 8097,
+          "count": 2000,
+          "rawCount": 3218000,
+          "decodedCount": 3218000,
+          "manifestCount": 0
+        }
+      },
+      "metrics": {
+        "inputBytes": 1270421564,
+        "outputBytes": 415285825,
+        "scratchBytes": 382564110,
+        "elapsedMs": 98283.9085
+      }
+    },
+    {
+      "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/release-2.json",
+      "manifestSha256": "112cd9665b66da71e7f90df85e171ee9424abbbad5d0e2ec0cfef763a797fc09",
+      "lineage": {
+        "format": "era5-lineage-radix-v1",
+        "rootPath": "release-2.json.sources/objects/root.json",
+        "rootSha256": "f61dddf0e6d94bee9209b99e9704089763149fa7c4a1ab5e31bccfaac4cf8e79",
+        "rootBytes": 4749,
+        "uniqueRevisionCount": 3218000,
+        "rawCount": 1609000,
+        "decodedCount": 1609000,
+        "manifestCount": 0,
+        "membershipRoot": {
+          "format": "era5-membership-radix-v1",
+          "rootPath": "release-2.json.members/objects/root.json",
+          "rootSha256": "9c324ef3adc8dad88cda28da4f4cb2562352913ff9f4ab4ffed745dcc49900e1",
+          "rootBytes": 8097,
+          "count": 2000,
+          "rawCount": 3218000,
+          "decodedCount": 3218000,
+          "manifestCount": 0
+        }
+      },
+      "metrics": {
+        "inputBytes": 1275234328,
+        "outputBytes": 417778409,
+        "scratchBytes": 384978122,
+        "elapsedMs": 111704.4221
+      }
+    },
+    {
+      "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/release-3.json",
+      "manifestSha256": "45b8d797e0b8c949df09d43c143d3cfd774b141d62f35a113738737264a5be50",
+      "lineage": {
+        "format": "era5-lineage-radix-v1",
+        "rootPath": "release-3.json.sources/objects/root.json",
+        "rootSha256": "5dcc58d5ebac6970c25d3488c9eae2dee7e6f7f0e1b06321b97ce507fc1c2b9f",
+        "rootBytes": 4759,
+        "uniqueRevisionCount": 3218000,
+        "rawCount": 1609000,
+        "decodedCount": 1609000,
+        "manifestCount": 0,
+        "membershipRoot": {
+          "format": "era5-membership-radix-v1",
+          "rootPath": "release-3.json.members/objects/root.json",
+          "rootSha256": "27dfbd986109f0ed3421294294dc1f3f66d18cd4a44a088cacee9ec6ffb916e4",
+          "rootBytes": 8097,
+          "count": 2000,
+          "rawCount": 3218000,
+          "decodedCount": 3218000,
+          "manifestCount": 0
+        }
+      },
+      "metrics": {
+        "inputBytes": 1276853052,
+        "outputBytes": 418653176,
+        "scratchBytes": 385782280,
+        "elapsedMs": 96680.17970000004
+      }
+    },
+    {
+      "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/release-4.json",
+      "manifestSha256": "0557d426333ae31a3bcc53313530fa164e895f06555b5b85d7ab55c8765037e3",
+      "lineage": {
+        "format": "era5-lineage-radix-v1",
+        "rootPath": "release-4.json.sources/objects/root.json",
+        "rootSha256": "9c5bad02df04324036e5c19aa669679445104a6408cecc3f2d64853596306bb7",
+        "rootBytes": 4764,
+        "uniqueRevisionCount": 3218000,
+        "rawCount": 1609000,
+        "decodedCount": 1609000,
+        "manifestCount": 0,
+        "membershipRoot": {
+          "format": "era5-membership-radix-v1",
+          "rootPath": "release-4.json.members/objects/root.json",
+          "rootSha256": "b78f88da48df320aab53eee00311ef7623fc6af0a1abe608007d447c0d86e6ca",
+          "rootBytes": 8097,
+          "count": 2000,
+          "rawCount": 3218000,
+          "decodedCount": 3218000,
+          "manifestCount": 0
+        }
+      },
+      "metrics": {
+        "inputBytes": 1276772268,
+        "outputBytes": 418623314,
+        "scratchBytes": 385782140,
+        "elapsedMs": 92045.30610000005
+      }
+    },
+    {
+      "manifestPath": ".data/lineage-scale-proof-20261016-v1/artifacts/release-5.json",
+      "manifestSha256": "9270611847432e36d4cd17609d08dcbf4ac7a5debae6532273a23082e2bfd3ed",
+      "lineage": {
+        "format": "era5-lineage-radix-v1",
+        "rootPath": "release-5.json.sources/objects/root.json",
+        "rootSha256": "19bf5e3a52876db6d59f84b4a6700a26e5a09c037a99709225e76407aa1b476f",
+        "rootBytes": 4806,
+        "uniqueRevisionCount": 1943393,
+        "rawCount": 971694,
+        "decodedCount": 971696,
+        "manifestCount": 3,
+        "membershipRoot": {
+          "format": "era5-membership-radix-v1",
+          "rootPath": "release-5.json.members/objects/root.json",
+          "rootSha256": "1c8680a388f2bdf525e9c8ce72828044df5881458cf248f32ba4ba3187fb3385",
+          "rootBytes": 8081,
+          "count": 1208,
+          "rawCount": 1943388,
+          "decodedCount": 1943392,
+          "manifestCount": 6
+        }
+      },
+      "metrics": {
+        "inputBytes": 771045292,
+        "outputBytes": 264721919,
+        "scratchBytes": 232979327,
+        "elapsedMs": 66205.66300000006
+      }
+    }
+  ],
+  "successfulPublicationByteAccounting": {
+    "fixtureBytes": 3569734092,
+    "builtOutputBytes": 4530054861,
+    "builtScratchBytes": 6454817647,
+    "scope": "Successful publication accounting only; excludes retained failed-conflict scratch, evidence, logs and supervisor receipts. The separate sampled whole-output logical-byte observation includes these files when sampled."
+  },
+  "originalNamedInventorySha256": "82ab5ef0be1cba9e1b184df95d4db1468e64ba458d12b7d32069912f28206675",
+  "inputAndCodePins": [
+    {
+      "path": ".data/history-global-proposed-20261015-v1.json",
+      "sha256": "0b296d22142fea417a71299e17009536f82b14417f33eb4b38baa2ff307d2b12"
+    },
+    {
+      "path": ".data/history-source-proposed-20261015-v1/manifest.json",
+      "sha256": "82ab5ef0be1cba9e1b184df95d4db1468e64ba458d12b7d32069912f28206675"
+    },
+    {
+      "path": ".data/history-source-proposed-20261015-v1/pairs.jsonl",
+      "sha256": "7787139c32c0f4d00bd35f8c5df841eeadd21ec39bdcee4a668bf8137e108e64"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "4ad863ba3cbb5faa7f6d4e78c6c15ef7ccf9410d5197907cacfbadb771330bbc"
+    },
+    {
+      "path": "scripts/era5/build-catalog.ts",
+      "sha256": "027f23b445abf1950909752c5b2db8dade5dd41ef16ddf1971702f5c15b8ce6c"
+    },
+    {
+      "path": "scripts/era5/build-lineage-release.ts",
+      "sha256": "bb3825ece1cc3767ae6fa0a499cdf8d9be2637a7018569e46473c55b90d169d5"
+    },
+    {
+      "path": "scripts/era5/build-lineage.ts",
+      "sha256": "7c0b5602eedb0bf3d1317b18b3d9d1a5f4aa067d5e457d23cbf0ab316e6e6259"
+    },
+    {
+      "path": "scripts/era5/build-release.ts",
+      "sha256": "c32e079d2bc85a95bce9e1f4c2b2ffa49cbdbd1ce94e08897e02036db7e6d6bb"
+    },
+    {
+      "path": "scripts/era5/measure_lineage_scale.py",
+      "sha256": "ff13a18a0f46cccced5d641d7c4abe8fc6099049428d312d7773d80fa06f58e4"
+    },
+    {
+      "path": "scripts/era5/verify-lineage-scale.ts",
+      "sha256": "bf3a8061bdf7b3121f70300dcf3daee85630ecd44a5932e8ed279f60a3a486ce"
+    },
+    {
+      "path": "server/providers/climate/catalogEra5.ts",
+      "sha256": "1f1e88c9957f151bb6e272ed9065634f59023b8ebc2afe5eb930ba8ef9dddb00"
+    },
+    {
+      "path": "server/providers/climate/hierarchicalEra5.ts",
+      "sha256": "ffcf5c95d7ababfba653de18de75aabe736bd84d13b01306ea4ac0164f01b346"
+    },
+    {
+      "path": "server/providers/climate/hierarchicalProvider.ts",
+      "sha256": "168c0bbccf8a9deebc882f107f12015df96a8b146fc7ae1729b0298145ee8d3c"
+    },
+    {
+      "path": "server/providers/climate/lineageRadix.ts",
+      "sha256": "33c52c3c387e0eb810003c2f260692f10e392f334511841806bd683b02fc62cf"
+    },
+    {
+      "path": "server/providers/climate/releaseEra5.ts",
+      "sha256": "f619c83d26a88db5c8bb3e165809628dc5cb45002e38acfbe0fdb394c4381eb4"
+    },
+    {
+      "path": "server/providers/climate/tiledEra5.ts",
+      "sha256": "1c371cd3e44acb6dfa7fd7fd09f350c4a34badbae295630e339f20dc982b7d7b"
+    },
+    {
+      "path": "shared/nightsky/climate.ts",
+      "sha256": "a6b2e097106555d99a41761c2817575bf6ad8008f2adabd6ad982ebdee74255f"
+    },
+    {
+      "path": "shared/nightsky/common.ts",
+      "sha256": "0a8cd81bdda53f13502cb4913640b5759957d19c94e69d5b2ee255ffddb14856"
+    },
+    {
+      "path": "shared/nightsky/operator.ts",
+      "sha256": "341c570c2ca4e96f69c137fa9c1b29f04368ddb2160f1d59af5e1b824131c9c8"
+    },
+    {
+      "path": "shared/nightsky/operatorClosure.ts",
+      "sha256": "299cbd0b83391b395c0597d1fc36a42290800ba7d7e53fbce8e129554ecf97ea"
+    },
+    {
+      "path": "shared/nightsky/operatorLineageClosure.ts",
+      "sha256": "fabb5dafed7fb4dc762a5142aff4b7ad060be1b174e5154e4471f9182fdb5476"
+    },
+    {
+      "path": "tests/operations/release-closure-fixture.ts",
+      "sha256": "95eb471aefaab59ceb2c3bd720c3b3c955046321855b5ab0739a87d2860ba7d5"
+    },
+    {
+      "path": "tests/providers/climate/lineage-publication.test.ts",
+      "sha256": "af6d4a3b5120688b94153d15cb6076b840b495c7e2b631f0f2ac456b24eb148e"
+    },
+    {
+      "path": "tests/providers/climate/lineage-radix.test.ts",
+      "sha256": "7bbd2aa7fb732f5b694d86164e9341ede4978a9c03575f5690ff09c5f6ccebd3"
+    }
+  ],
+  "runtimePins": [
+    {
+      "name": "node.exe",
+      "sha256": "63c259c81e5d472b5f11c8d506070130cb04a1ecf84b80377a34ed6ec9048088"
+    },
+    {
+      "path": ".data/lineage-scale-build-20261016-v1/worker.mjs",
+      "sha256": "3beada8b1d1143d9ca6cc6d19e0357164210dffcce08389e779b9da939e7633a"
+    }
+  ],
+  "publishedSourceNormalization": [
+    {
+      "path": "package-lock.json",
+      "measuredSha256": "4ad863ba3cbb5faa7f6d4e78c6c15ef7ccf9410d5197907cacfbadb771330bbc",
+      "publishedGitLfSha256": "03f2983239755c9194028c57b5b7c2010d50d564e4e6fb7ed64aa4532b82f11f",
+      "equivalence": "Replacing CRLF with LF in measured bytes exactly equals the staged Git blob; no other byte changes."
+    },
+    {
+      "path": "server/providers/climate/releaseEra5.ts",
+      "measuredSha256": "f619c83d26a88db5c8bb3e165809628dc5cb45002e38acfbe0fdb394c4381eb4",
+      "publishedGitLfSha256": "3b0df34581f689fe8f9f44b18392cee04a4929820e523f095ff0fea3ddcec27b",
+      "equivalence": "Replacing CRLF with LF in measured bytes exactly equals the staged Git blob; no other byte changes."
+    },
+    {
+      "path": "shared/nightsky/climate.ts",
+      "measuredSha256": "a6b2e097106555d99a41761c2817575bf6ad8008f2adabd6ad982ebdee74255f",
+      "publishedGitLfSha256": "9eee8b83d09be0b2c155f8bfcb515f9618ffcbeca33c8827e57983868a7a8aee",
+      "equivalence": "Replacing CRLF with LF in measured bytes exactly equals the staged Git blob; no other byte changes."
+    },
+    {
+      "path": "tests/operations/release-closure-fixture.ts",
+      "measuredSha256": "95eb471aefaab59ceb2c3bd720c3b3c955046321855b5ab0739a87d2860ba7d5",
+      "publishedGitLfSha256": "aaa13bd4db2d89692c2046c67be6b73b7fdeb3640cc4216ac8faf56e982f05c9",
+      "equivalence": "Replacing CRLF with LF in measured bytes exactly equals the staged Git blob; no other byte changes."
+    }
+  ],
+  "rawReceiptPins": [
+    {
+      "path": ".data/lineage-scale-proof-20261016-v1/evidence.json",
+      "sha256": "532c6f6b6c77fc709f00537054074a95cb171d122594695308ca7843ed28e837"
+    },
+    {
+      "path": ".data/lineage-scale-proof-20261016-v1/supervisor-report.json",
+      "sha256": "9d3e4f693f931c091cb1abdb074f4816b620f2402194d0e916015f8919c44032"
+    },
+    {
+      "path": ".data/lineage-scale-build-20261016-v1/supervisor-config.json",
+      "sha256": "f28b292bf20b3df0e589b782c5479e0d899d039786c23581441a03d714bc9c08"
+    }
+  ],
+  "datasetRequests": 0,
+  "limitations": [
+    "All source hashes and climate values are synthetic. Prospective request-derived revision keys are distributed sequentially over actual sorted coverage pair routes; this is not the geographic attribution of acquisition rectangles to real cell observations.",
+    "The supervisor sampled logical file lengths in the whole output directory, not NTFS allocated cluster bytes. Its filesystem free-space reserve is separate. This clarification supersedes physical-disk wording in the raw worker receipt.",
+    "The peak RSS is a sampled observation of the main Node process, not a sum across the process tree. The Windows Job independently enforced the declared process-tree committed-memory cap, process count and wall-time deadline. Disk sampling ran at 60-second start intervals; publication writes also used immediate shared byte budgets.",
+    "The complete publisher/global-tree proof and selected runtime routes passed. Full operator closure was exercised in focused fixtures but was not separately measured at this 18-million-row scale.",
+    "This proof establishes bounded synthetic lineage engineering acceptance only. It does not establish real ERA5 data completeness, request feasibility, acquisition authorization, deployment, installed serving coverage or free-host feasibility.",
+    "No source downloads, external requests, credential access, deployment or runtime selection were performed. All scratch and failed-conflict output was retained. There was one supervised full proof and no automatic retry.",
+    "Raw receipts and bulky synthetic artifacts remain local ignored data. Published source normalization records four unchanged legacy files whose measured checkout bytes used CRLF while Git stores LF; measured pins and the executable bundle are preserved unchanged."
+  ]
+}

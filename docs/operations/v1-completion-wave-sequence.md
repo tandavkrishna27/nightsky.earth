@@ -1,5 +1,7 @@
 # Sequence after offline build preparation
 
+**Current engineering, 16 October:** [lineage implementation](lineage-implementation-admission-wave.md) replaces the previously design-only global/child lineage path and adds the source-admission validator. Full-scale synthetic acceptance passed in one bounded run; actual data/source acceptance remains separate. Source identity/rights/clip and actual provider format gates remain before any separate acquisition allowance.
+
 **Current next step, 16 October:** [reviewed preparation](admission-schedule-executor-wave.md) completes the compact global schedule and gated executor preparation. Next implement bounded global/child lineage references and resolve geography/CDS-host admission, then obtain a finite sample/body allowance. No acquisition or deployment is authorized by preparation.
 
 **Latest source metadata inspection:** [reviewed wave](source-metadata-admission-wave.md) now pins the proposed boundary commit/429 layers, confirms OSM HTTP lengths and freezes all retained named-place history mappings plus actual retained subtraction. Next: source-specific rights/IND conflict/edition clips and actual source schedule/global lineage capacity; a tiny response sample remains separately proposed and unapproved. The metadata allowance did not authorize datasets. See the consolidated packet's current table; historical preparation rows below keep their original dates/scopes.

@@ -25,7 +25,8 @@
     "scripts/plugin-operator-preflight.ts",
     "scripts/osm/boundary-metadata.ts",
     "scripts/osm/prepare-geographic-coverage.ts",
-    "scripts/validate-retained-source-adapters.ts"
+    "scripts/validate-retained-source-adapters.ts",
+    "scripts/osm/source-admission.ts"
   ],
   "exclude": [
     "node_modules",

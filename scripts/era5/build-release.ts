@@ -9,7 +9,8 @@ import {sharedReleaseMetadata,mergeReleaseRevisions,canonicalRelease,releaseSha,
 export interface ReleasePublicationOptions {inputs:ReadonlyArray<{inputPath:string;expectedSha256:string}>;outputDirectory:string;generatedAt:string;maxTotalInputBytes?:number;maxOutputBytes?:number;maxDurationMs?:number;onProgress?:(phase:'shard-complete'|'before-manifest',shard:number)=>void|Promise<void>}
 async function exists(path:string){try{await lstat(path);return true;}catch(e:any){if(e.code==='ENOENT')return false;throw e;}}
 async function save(path:string,value:unknown){const file=await open(path,'wx');try{await file.writeFile(canonicalRelease(value)+'\n');await file.sync();}finally{await file.close();}}
-export async function publishClimateRelease(options:ReleasePublicationOptions){
+export async function publishClimateRelease(options:ReleasePublicationOptions|import('./build-lineage-release').LineageReleaseOptions){
+ if('schemaVersion' in options){if(options.schemaVersion!==6)throw Error('Unknown release format');return (await import('./build-lineage-release')).publishLineageRelease(options);}
  if(!isAbsolute(options.outputDirectory)||options.inputs.length<1||options.inputs.length>1000)throw Error('Explicit output and 1..1000 bounded shard inputs required');
  const bounded=(value:number|undefined,maximum:number)=>{const n=value??maximum;if(!Number.isSafeInteger(n)||n<1||n>maximum)throw Error('Invalid release budget');return n;};
  const maxInput=bounded(options.maxTotalInputBytes,1024*1024*1024),maxOutput=bounded(options.maxOutputBytes,1024*1024*1024),duration=bounded(options.maxDurationMs,30*60*1000);
@@ -74,5 +75,5 @@ const configSchema=z.strictObject({inputs:z.array(z.strictObject({inputPath:z.st
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const args=process.argv.slice(2);
  const required=(flag:string)=>{const i=args.indexOf(flag);if(i<0||!args[i+1])throw Error('Required '+flag);return args[i+1]!;};
- (async()=>{const path=resolve(required('--config')),pin=required('--expected-config-sha256');const bytes=await readTrustedClimateFile(path,pin,1024*1024);const options=configSchema.parse(JSON.parse(bytes.toString('utf8')));console.log(JSON.stringify(await publishClimateRelease(options),null,2));})().catch(e=>{console.error(e instanceof Error?e.message:'Release publication failed');process.exitCode=1;});
+ (async()=>{const path=resolve(required('--config')),pin=required('--expected-config-sha256');const bytes=await readTrustedClimateFile(path,pin,1024*1024);const raw=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));const options=raw.schemaVersion===6?(await import('./build-lineage-release')).lineageReleaseOptionsSchema.parse(raw):configSchema.parse(raw);console.log(JSON.stringify(await publishClimateRelease(options),null,2));})().catch(e=>{console.error(e instanceof Error?e.message:'Release publication failed');process.exitCode=1;});
 }
