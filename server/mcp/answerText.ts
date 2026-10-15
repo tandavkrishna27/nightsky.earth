@@ -38,7 +38,7 @@ function twilightPhases(outer: Interval[], inner: Interval[], window: PlanResult
         { start: Math.max(b, piece.start), end: piece.end },
       ].filter(piece => piece.end > piece.start));
     }
-    return pieces.filter(piece => piece.end > piece.start).map(piece => `${formatLocalInstant(new Date(piece.start).toISOString(), window.timeZone, 'en')} to ${formatLocalInstant(new Date(piece.end).toISOString(), window.timeZone, 'en')}`);
+    return pieces.filter(piece => piece.end > piece.start).map(piece => `START ${formatLocalInstant(new Date(piece.start).toISOString(), window.timeZone, 'en')}; END ${formatLocalInstant(new Date(piece.end).toISOString(), window.timeZone, 'en')}`);
   });
 }
 
@@ -83,6 +83,7 @@ export function planAnswerText(plan: PlanResult): string {
   } else lines.push('Twilight phases unknown: required geometric threshold evidence unavailable.');
   const moon = astronomy?.moon;
   if (moon) lines.push(`Moon illumination ${moon.illuminationPercent.toFixed(1)}%; observing impact remains unknown. Geometric below-horizon timing does not establish minimal moonlight.`);
+  if (moon) lines.push(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees ${moon.maximumAltitudeAtUtc ? `at ${formatLocalInstant(moon.maximumAltitudeAtUtc, plan.requestedWindow.timeZone, 'en')}` : 'at time unknown'}; sampled maximum within this session, not a continuous optimum.`);
   lines.push('No compass-direction setup advice is supplied. Use an on-site sky chart; sampled bearings are not whole-session directions.');
   const names = new Map([...(plan.evidence?.target ? [plan.evidence.target] : []), ...(plan.suggestions ?? [])].map(target => [target.target.targetId, target.target.name]));
   for (const row of plan.candidateWindows) {

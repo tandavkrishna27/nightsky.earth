@@ -122,6 +122,7 @@ test('many forecast samples keep essential phases and Moon warning inside the bo
   assert.match(body,/Nautical twilight phase:.*05:17.*05:47/);
   assert.match(body,/Astronomical twilight phase:.*05:00.*05:17/);
   assert.match(body,/Moon illumination.*impact remains unknown/);
+  assert.match(body,/Moon maximum sampled altitude .*at Oct 16, 2026, 17:00 \(Australia\/Sydney\)/);
   assert.ok(Buffer.byteLength(body,'utf8')<4200);
   assert.match(text,/https:\/\/example.test\/forecast/);
  }finally{await server.close();}
@@ -153,5 +154,24 @@ test('forecast synopsis labels distinguish identical Unicode name prefixes witho
   assert.match(body,/Forecast 1:/);assert.match(body,/Forecast 2:/);
   assert.ok(body.includes('A'+'\u{1f30c}'.repeat(39)+'...'));
   assert.doesNotMatch(body,/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]|\uFFFD/);
+ }finally{await server.close();}
+});
+
+test('Sydney brief labels twilight starts and ends and pairs Moon maximum with its own local instant',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const {formatLocalInstant}=await import('../../shared/nightsky/format');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-endpoints-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990002',activity:'astrophotography',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Australia/Sydney'}}});
+  const plan=response.result.structuredContent,moon=plan.evidence.astronomy.moon;
+  const front=planAnswerText(plan).split('No compass-direction')[0];
+  assert.match(front,/Civil twilight phase: START Oct 16, 2026, 05:47 \(Australia\/Sydney\); END Oct 16, 2026, 06:17 \(Australia\/Sydney\)/);
+  assert.match(front,/Nautical twilight phase: START Oct 16, 2026, 05:17.*END Oct 16, 2026, 05:47/);
+  assert.match(front,/Astronomical twilight phase: START Oct 16, 2026, 05:00.*END Oct 16, 2026, 05:17/);
+  assert.ok(front.includes(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees at ${formatLocalInstant(moon.maximumAltitudeAtUtc,'Australia/Sydney','en')}`));
+  delete moon.maximumAltitudeAtUtc;
+  const unknown=planAnswerText(plan).split('No compass-direction')[0];
+  assert.match(unknown,/Moon maximum sampled altitude .*time unknown/);
+  assert.doesNotMatch(unknown,/undefined/);
  }finally{await server.close();}
 });
