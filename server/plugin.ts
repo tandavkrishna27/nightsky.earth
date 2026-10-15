@@ -12,6 +12,7 @@ import { loadRegionalOsmProvider } from "./places/regionalOsm";
 import { loadCatalogueFiles } from "./places/catalogueFiles";
 import { createGlobalCatalogue } from "./places/globalCatalogue";
 import { loadGeoNamesPlaceIndex } from "./places/geonames";
+import { climateArtifactConfiguration } from "./providers/climate/configuration";
 export interface PluginAppDependencies extends McpRouteDependencies {
     trustedProxyAddresses?: string;
     health?: HealthDependencies;
@@ -66,6 +67,7 @@ export function pluginToolMode(environment: { NIGHTSKY_MCP_TOOL_MODE?: string })
     return mode;
 }
 export async function startNightSkyPlugin() {
+    climateArtifactConfiguration({NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256});
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });

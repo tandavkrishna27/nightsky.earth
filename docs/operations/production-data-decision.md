@@ -49,6 +49,8 @@ Approval of a completed future record authorizes only its exact stated acquisiti
 
 ## Immediate sequence
 
+**Implementation follow-up:** the [larger offline engineering wave](offline-pipelines-wave.md) completes the bounded raw-source/bridge, aggregate-shard publication/serving and operator-preflight paths with reviewed tests. This supersedes the earlier absence of those modules; it does not admit real worldwide inputs or implement a full global boundary/observation producer. Use the owning guides for executable local contracts and the execution record for remaining gates. No acquisition budget follows from implementation.
+
 1. **Preparation complete:** three separate lane subagents produced the packets linked below; independent integration review checked their source/code facts, interfaces and known/missing fields. This closes preparation only.
 2. Implement the concrete offline producer/method/operator-configuration gaps identified by those packets, using retained/synthetic inputs and existing verification paths. Write an implementation packet before changing behavior; do not repeat geographic acquisition pilots or expand the request budget.
 3. Use those measurements to choose an executable global build and historical coverage route. If another machine/storage or a scope tradeoff is needed, present the concrete alternatives and implications to the owner. Do not infer approval from a proposal.

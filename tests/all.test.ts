@@ -94,3 +94,7 @@ import "./mcp/darkness-meaning.test.ts";
 import "./mcp/answer-text.test.ts";
 import './discovery/country-code-contract.test';
 import './planning/optional-event-evidence.test';
+import './mcp/climate-release-configuration.test';
+import './places/sourceCatalogue.test';
+import './providers/climate/release-publication.test';
+import './operations/operator-preflight.test';

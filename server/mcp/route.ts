@@ -1,4 +1,4 @@
-import { createEra5ClimateProvider } from "../providers/climate/era5";
+import { climateArtifactConfiguration, selectConfiguredClimateProvider } from "../providers/climate/configuration";
 import { loadGeoNamesPlaceIndex } from "../places/geonames";
 import type { Express, RequestHandler } from "express";
 import { hostHeaderValidation } from "@modelcontextprotocol/express";
@@ -64,15 +64,15 @@ export function mountMcpRoute(app: Express, dependencies: McpRouteDependencies =
   dependencies = { ...dependencies, osmCandidateIndexLoader };
   // Keep one reader and its bounded artifact cache across stateless MCP servers.
   if (!dependencies.climateProvider && !dependencies.plannerServices?.getClimatology) {
-    const artifactPath = process.env.NIGHTSKY_CLIMATE_ARTIFACT;
-    const expectedSha256 = process.env.NIGHTSKY_CLIMATE_SHA256;
+    const environment = {NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256};
+    climateArtifactConfiguration(environment);
     let providerPromise: Promise<NonNullable<NightSkyDependencies["climateProvider"]>> | undefined;
     const configured = dependencies;
     dependencies = { ...dependencies, climateProvider: { getClimatology: async (placeId, month) => {
       const provider = await (providerPromise ??= (async () => {
         const index = configured.placeIndex ?? await placeIndexLoader();
         if (!index) throw new Error("The local GeoNames place index is unavailable.");
-        return createEra5ClimateProvider({ index, artifactPath, expectedSha256 });
+        return selectConfiguredClimateProvider(index, environment);
       })().catch(error => { providerPromise = undefined; throw error; }));
       return provider.getClimatology(placeId, month);
     } } };

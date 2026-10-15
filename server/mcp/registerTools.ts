@@ -4,7 +4,7 @@ import { CatalogueRevisionError } from "../places/globalCatalogue";
 import { normalizeDiscoveryInput, searchDiscoveryInputSchema, searchDiscoveryResultSchema, candidateRefSchema, discoveryCoverageSchema, discoveryScopeSchema, originBasisSchema, resolveObservingRegionInputSchema, resolveObservingRegionResultSchema, getObservingLocationDetailsInputSchema, getObservingLocationDetailsResultSchema, type CatalogueReader, type RegionIndex, type CalculationPlace } from "../../shared/nightsky/discovery";
 import { resolveCalculationPlace, resolveNamedCalculationPlace, CalculationPlaceClarificationError } from "../places/calculationPlace";
 import { climateContextResultSchema, getClearSkyClimatologyInputSchema, describeClimateContext, type ClimateContextResultV2 } from "../../shared/nightsky/climate";
-import { createEra5ClimateProvider } from "../providers/climate/era5";
+import { selectConfiguredClimateProvider } from "../providers/climate/configuration";
 import { consentedHostLocation } from "./metadata";
 import type { McpServer } from "@modelcontextprotocol/server";
 import { resolvePlaceInputSchema, resolvePlaceResultSchema } from "../../shared/nightsky/places";
@@ -109,7 +109,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   let climateProvider: NightSkyDependencies["climateProvider"];
   const climateFor = (index: GeoNamesPlaceIndex): NonNullable<PlannerServices["getClimatology"]> => {
     if (dependencies.plannerServices?.getClimatology) return dependencies.plannerServices.getClimatology;
-    const provider = dependencies.climateProvider ?? (climateProvider ??= createEra5ClimateProvider({ index, artifactPath: process.env.NIGHTSKY_CLIMATE_ARTIFACT, expectedSha256: process.env.NIGHTSKY_CLIMATE_SHA256 }));
+    const provider = dependencies.climateProvider ?? (climateProvider ??= selectConfiguredClimateProvider(index, {NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256}));
     return (placeId, month, point) => point?.catalogueRevision ? Promise.resolve(candidateClimateGap(point,month)) : provider.getClimatology(placeId, month);
   };
   const plannerServicesFor = (index: GeoNamesPlaceIndex): PlannerServices => ({

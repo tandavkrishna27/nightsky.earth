@@ -20,7 +20,10 @@
     "plugin:package": "tsx scripts/build-plugin-package.ts",
     "test:review-cases": "tsx scripts/verify-review-cases.ts --offline",
     "test:plugin-runtime": "node scripts/verify-plugin-runtime.mjs",
-    "mcp:inspector-smoke": "tsx tests/mcp/inspector-smoke-server.ts"
+    "mcp:inspector-smoke": "tsx tests/mcp/inspector-smoke-server.ts",
+    "data:build-catalogue-source": "tsx scripts/osm/build-source-catalogue.ts",
+    "data:publish-history-release": "tsx scripts/era5/build-release.ts",
+    "plugin:preflight": "tsx scripts/plugin-operator-preflight.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

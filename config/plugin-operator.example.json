@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "status": "template",
+  "endpoints": { "production": null, "staging": null, "privacy": null, "terms": null, "support": null },
+  "topology": { "kind": "direct", "headerRewriteEvidence": null, "restrictedBackendEvidence": null },
+  "runtimeEnvironment": { "NODE_ENV": "production", "HOST": "127.0.0.1", "PORT": "5000", "NIGHTSKY_MCP_TOOL_MODE": "resolver-only" },
+  "releases": { "current": null, "rollback": null },
+  "artifacts": [],
+  "budget": null,
+  "ownerEvidence": { "identity": null, "policies": null, "retention": null, "host": null, "providerBudget": null }
+}
