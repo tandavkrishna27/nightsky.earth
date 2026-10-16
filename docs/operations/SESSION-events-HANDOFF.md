@@ -1,5 +1,32 @@
 # Events lane handoff — 17 October 2026
 
+## Current bounded Mercury/Venus addition
+
+Reviewed implementation commit: **`4dfd7c5135e71f8ece7fbead0f94851322dda154`**, following clean delivery `6b35666c7193093bb619c56a2273221f2e76a627`. The prior documentation delivery passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38958674854). The user then explicitly authorized conventional geocentric greatest elongation as a routine V1 implementation choice and requested reference/contract review plus implementation through the existing subagents. The [admission record](greatest-elongation-admission.md) contains reference locators, precision, attribution, preselected comparison limits and the exact remaining Venus-morning reference gap.
+
+`search_sky_events` now exposes a separate Mercury/Venus `greatest-elongation` stream using Astronomy Engine 2.1.19's native corrected geocentric three-dimensional Sun angle. The strict shared schema requires body/angle/morning-or-evening metadata and an instant, excludes duration/calendar windows and fixes local visibility to `not-evaluated`. Canonical annual anchors preserve identity at inclusive query endpoints and across year boundaries; advancement, invalid native outputs and ten-iteration exhaustion fail explicitly. Existing 1900–2100 engineering bounds, request duration, shared sorting and result limits remain. Default discovery includes the new stream; the catalog distinguishes its definition from heliocentric alignments and preserves mixed/out-of-horizon/unsupported/truncated results.
+
+MCP description and canonical/exposed sky-event guidance retain the difference between morning/evening geometry and a local observing opportunity. A real-catalog composed-plan test retains the event and source with unknown sky-event impact. No new tool is added. The user's later permission to update one MCP calendar-count assertion was available but unnecessary: `tests/mcp/initialize.test.ts` already expects eighteen approximate verbal calendar periods and was not changed.
+
+Three independently admitted NAOJ 2026 comparisons (Mercury evening/morning, Venus evening) pass the **60-minute / 2-arcminute limits chosen before computing**. Source times have whole-hour UT+9 display precision, angles arcminute precision and unspecified rounding; no subhour UTC accuracy or universal error bound is asserted. Venus morning has native maximum/contract checks but no admitted independent exact time/angle oracle. This gap is disclosed, not filled with an inferred Taipei timezone.
+
+Fresh verification for this implementation:
+
+| Check | Result |
+| --- | --- |
+| TDD | New core cases failed before implementation; parent composed-plan regression also failed on the old event enum (11 passed / one expected failure), then passed. |
+| Affected event, meteor-plan, optional-event-plan and MCP suites | **105 passed**, zero failed/skipped; parent rerun confirms the implementation-agent result. |
+| Workflow and optional-plan focused run | **20 passed**, zero failed/skipped. |
+| `npm test` | **973 cases: 967 passed, zero failed, six skipped**, 118.7 seconds. Five absent ignored installed-data smoke artifacts and one Windows symlink-fixture restriction explain skips; no acquisition was performed. |
+| `npm run check` | All three TypeScript projects passed. |
+| `npm run build:plugin`, `npm run plugin:package` | Passed; rehearsal output only. |
+| `node --import tsx scripts/verify-local-plugin-packages.ts` | Codex and Claude offline packages verified deterministic, with five exact canonical workflow copies each; no installation/publication. |
+| Documentation links / whitespace | Eleven local links resolved in affected admission/scope/workflow docs; `git diff --check` passed. |
+
+Two independent post-change reviews found **no actionable findings**: one reviewed native scientific definitions, all three NAOJ facts/transforms, attribution and precision; the other reviewed schema compatibility, annual anchors/endpoints, bounds/exhaustion, catalog handling, planner evidence and tests. Parent inspected the actual diff and reran the affected suites. A handoff-only commit follows to record this implementation SHA. Exact delivery tip and its CI outcome will be reported after push/watch; the prior documentation CI is not used as evidence for the new tip.
+
+Original acceptance/accounting remains **12 Done / 9 Partial / 6 Not started**. Meteor totals stay **38 maxima, twelve bounded radiant fits, eighteen verbal guidance rows, zero accepted complete UTC seasons**. General apparent planet-pair conjunctions and all previously recorded meteor/source/release gates remain open. Shared tracker, `tests/all.test.ts`, `tsconfig.tools.json`, workflow and other branches were untouched. No datasets, bulk downloads, API ephemeris requests, provider jobs, credentials access, deployment, installation, publication, merges or rebases occurred.
+
 ## Current investigation from integrated 750b12f
 
 Verified clean assigned worktree/branch at **`750b12f29b2ae10eb8f3e88eae31755874198156`** before this investigation. The [new scope/evidence reconciliation](events-v1-scope-reconciliation.md) is the current result; sections below retain prior-wave history. This wave changes documentation only. Original acceptance and **12 Done / 9 Partial / 6 Not started** accounting remain unchanged.
