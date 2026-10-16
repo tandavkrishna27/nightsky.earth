@@ -1,6 +1,64 @@
 # Weather lane handoff — 17 October 2026
 
-## Current wave: authenticated form review and global-history route audit
+## Current continuation: finite Icechunk public metadata inspection
+
+The authenticated review/source audit below is delivered at
+`69c0e6c568e39d051f3899faec8c15eb21657125`, with all six jobs successful in
+[exact-tip CI run 38959423443](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38959423443).
+The requested continuation began independently while that CI ran. It does not
+repeat the 27 form checks or alter their evidence.
+
+The [metadata dossier](icechunk-metadata-dossier-20261017.md) records concrete
+new findings from the registry-linked, logged-out public marketplace catalogue:
+`single/temporal/tcc` exists in that catalogue as Float32, shape
+`(758232,721,1440)`, chunks `(8736,12,12)`, PCodec level 8; attributes identify
+parameter 164, cloud fraction and the regular 0.25° grid. The public licence is
+CC-BY 4.0. Per-hour status descriptors define cloud-cover QC codes and
+`expver=1` final / `5` preliminary / `255` unspecified. Full values were not read;
+truncated previews do not establish valid/final status for the target horizon.
+`GRIB_totalNumber=0` and no member axis shown do not independently certify every
+hour's deterministic member identity.
+
+The [hash index](data-pilot-evidence/2026-10-17-icechunk-metadata-index.json)
+binds ten retained browser metadata captures/screenshot files. The catalogue's
+association with the anonymous S3 store is publisher-declared, not byte-bound to
+a snapshot. Its contradictory variable counts/daily-versus-quarterly prose are
+explicitly preserved. The old route audit's unknown catalogue inventory/layout
+is narrowed by these new observations; its pinned-source/admission unknowns
+remain. The old audit bytes and hash are unchanged.
+
+The finite inspection stops before binary repository metadata. The dossier
+prepares exact derived S3 repo/snapshot URLs and a conditional four-request plan:
+HEAD/GET `repo`, offline resolve one snapshot, HEAD/GET that snapshot, ≤1 MiB
+per object / ≤2 MiB aggregate bodies, no retries/redirects, bounded parsing and
+deadline. It is **not executed or an allowance**. Manifests are excluded because
+they can inline observation chunks; convenience client opens can preload data.
+Snapshot identity/retention, actual final/QC/member coverage, physical reads and
+bytes, scientific admission and measured aggregation remain separate gates.
+
+No direct S3 request, repository binary, data chunk, job, install, credential,
+subscription or terms acceptance occurred. Ordinary public-page metadata and
+assets were inspected; website backend operations were not instrumented. Shared
+tracker/build/test aggregator/workflow files and the 16-job cap remain unchanged.
+Acceptance remains **12 Done / 9 Partial / 6 Not started**.
+
+This continuation changes only documentation and metadata evidence. The previous
+195-test milestone remains the latest runtime check. All ten evidence sizes and
+hashes, full AX captures, UTC+05:30 observation dates and local dossier/handoff
+links passed an offline check; `git diff --check` passed. The first date-check
+attempt lacked system `tzdata`; the successful rerun used the explicit +05:30
+offset for these instants, without installing anything. Independent review
+reproduced hashes/dates, checked the screenshot and exact metadata, recomputed
+the advertised hourly extent, and checked primary specification/schema sources.
+No actionable findings remain. No repeated runtime suite is needed for this
+documentation-only continuation.
+
+Resolve the continuation delivery commit with
+`git log -1 --format=%H -- docs/operations/icechunk-metadata-dossier-20261017.md`.
+Its full pushed branch-tip SHA and exact-tip six-job CI result accompany the
+delivery chat; historical delivery identities below remain valid.
+
+## Delivered authenticated form review and global-history route audit
 
 Started clean on assigned branch `codex/weather-readiness` at integrated baseline
 `750b12f29b2ae10eb8f3e88eae31755874198156`. The parent alone controlled a new

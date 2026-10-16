@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "kind": "icechunk-public-catalogue-evidence-index",
+  "observedLocalDate": "2026-10-17",
+  "timezone": "Asia/Calcutta",
+  "listingUrl": "https://app.earthmover.io/marketplace/6a19bcfe9aa6e97720a2fad2",
+  "repositoryObjectsFetched": false,
+  "dataChunksRequested": false,
+  "executionEligible": false,
+  "files": [
+    {
+      "path": "2026-10-17-icechunk-expver-attributes.txt",
+      "bytes": 28927,
+      "sha256": "73fcbdba36e854d80d02bfaa5bae0abb82e329443f10ff60aa0ba35fba133272"
+    },
+    {
+      "path": "2026-10-17-icechunk-licence.json",
+      "bytes": 279,
+      "sha256": "05a3eb5ad6ef44aa05e485fe5160e222dda951654a77f14a2953931116176e43"
+    },
+    {
+      "path": "2026-10-17-icechunk-marketplace-access.txt",
+      "bytes": 46163,
+      "sha256": "83e0c6650b637eb88fe9b8178d214f31180b12d36b5c4107e56e3d39822964af"
+    },
+    {
+      "path": "2026-10-17-icechunk-marketplace-readme.txt",
+      "bytes": 19383,
+      "sha256": "f9e5dc50647703d10c60ca9ab5a7a8316017deade95875c0567f6882d7b8ff6b"
+    },
+    {
+      "path": "2026-10-17-icechunk-status-catalogue.txt",
+      "bytes": 27313,
+      "sha256": "8fac95fb4266d74dc70bdce3f58d709ead3ca07826909a1ee805daacde7bb22c"
+    },
+    {
+      "path": "2026-10-17-icechunk-status-metadata.png",
+      "bytes": 64557,
+      "sha256": "1d187d952e4c03eb209f6e18a31782246b13912971d8b7af1180204be3b8ce5a"
+    },
+    {
+      "path": "2026-10-17-icechunk-tcc-attributes.txt",
+      "bytes": 49267,
+      "sha256": "7375a4f3c8feddefc07b2c796b69a308ec4b45896d9e7d05d8b62ae012290a24"
+    },
+    {
+      "path": "2026-10-17-icechunk-tcc-encoding.txt",
+      "bytes": 45944,
+      "sha256": "13b981ef6d5b7d47b4a8ae72be175eeb5082734f6307a8ddd45ba6dd7202eead"
+    },
+    {
+      "path": "2026-10-17-icechunk-tcc-status-attributes.txt",
+      "bytes": 29100,
+      "sha256": "7771c391b2bea6451e0ddc46012eca68798967df20c557f3d0a8a4989bc47ea2"
+    },
+    {
+      "path": "2026-10-17-icechunk-temporal-catalogue.txt",
+      "bytes": 45290,
+      "sha256": "396fee039f8fa3a03ec26d83543ca2ef65d6a2984bb06d34c47af448c6fa1046"
+    }
+  ]
+}
