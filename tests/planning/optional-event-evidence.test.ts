@@ -4,6 +4,7 @@ import { GeoNamesPlaceIndex } from "../../server/places/geonames";
 import { getAstronomyWindow, getTargetVisibility } from "../../server/nightsky/astronomy";
 import { planObservingSession, type PlannerServices } from "../../server/nightsky/planner";
 import type { EventResult } from "../../shared/nightsky/events";
+import { searchSkyEvents } from "../../server/events/catalog";
 
 const index = new GeoNamesPlaceIndex([{ geonameId: 1, name: "London", asciiName: "London", alternateNames: "", latitude: 51.5, longitude: -.12, countryCode: "GB", countryName: "United Kingdom", featureClass: "P", featureCode: "PPLC", population: 8000000, timeZone: "Europe/London", modificationDate: "2026-10-01" }], "fixture");
 const placeId = "place:v1:geonames:1";
@@ -64,4 +65,16 @@ test("learning retains a positive event with source and coverage", async () => {
   assert.ok(result.sources.some(s => s.url === eventSource.url));
   assert.ok(result.gaps.some(g => /Event classes not covered/.test(g)));
   assert.ok(result.caveats.includes(eventCaveat));
+});
+
+test("learning retains a calculated elongation without inferring local visibility", async () => {
+  const elongationWindow = { startUtc: "2026-08-15T04:00:00Z", endUtc: "2026-08-15T08:00:00Z", timeZone: "Europe/London" };
+  const supplied = await searchSkyEvents({ placeId, window: elongationWindow, eventTypes: ["greatest-elongation"] }, index);
+  assert.equal(supplied.events.length, 1);
+  const result = await planObservingSession({ placeId, window: elongationWindow, activity: "learning" }, services(async () => supplied));
+  assert.deepEqual(result.evidence.events, supplied);
+  assert.equal(result.evidence.events?.events[0].localVisibility, "not-evaluated");
+  assert.deepEqual(result.evidence.events?.events[0].greatestElongation?.body, "Venus");
+  assert.ok(result.factors.some(f => f.name === "Sky events" && f.impact === "unknown"));
+  assert.ok(result.sources.some(s => s.url === supplied.events[0].source.url));
 });
