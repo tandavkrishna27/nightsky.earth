@@ -209,6 +209,14 @@ export function validateSourceAdmission(rawBundle: unknown, rawTrust: unknown, r
 // Upstream measured raw response pins in those documents are never normalized or changed.
 export const retainedSourceEvidencePin: EvidencePin = {path: 'docs/operations/geography-source-metadata-evidence.json', bytes: 2480339, sha256: 'e84cf663e02aa0fed3cd0bcb424d423f06a1bab6f4b119bf104d8c7371b23ffb'};
 export const retainedResolutionEvidencePin: EvidencePin = {path: 'docs/operations/geography-admission-resolution-evidence.json', bytes: 32663, sha256: 'dfa54188d7b101cefe6a5d9415f437a1a34110206d1dc9679fc69ca75c1af094'};
+// This revision adopts actual independent role reviews and a separate delegated admission
+// assessment. The assembler and candidate bundles cannot update this code-owned pin.
+const reviewedNaturalEarthAuthorityPin: EvidencePin = {path: 'docs/operations/natural-earth-admission/reviewed-authority.json', bytes: 6212, sha256: 'b4356db8419daa9c7b7ba01d9565610dc6c172456cd05d0243d4a40b17a428cf'};
+const reviewedNaturalEarthAuthoritySchema = z.strictObject({schemaVersion: z.literal(1),
+  kind: z.literal('reviewed-retained-natural-earth-authority'), scope: z.literal('exact-private-retained-boundary-preparation'),
+  sources: z.array(policySourceSchema).length(2), trust: sourceAdmissionTrustSchema,
+  assessments: z.array(admissionEvidencePinSchema).min(1).max(8),
+});
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 async function safeExisting(path: string): Promise<string> {
   if (path.split(/[\\/]/).includes('..')) throw new Error('Path traversal refused');
@@ -384,18 +392,27 @@ async function retainedInventory(root: string, budget: ReadBudget) {
 }
 
 /** Only code-reviewed replacement inventory/policy revisions may change the retained original grants. */
-async function retainedPolicy(root: string, budget: ReadBudget) {
+async function retainedAdmissionContext(root: string, budget: ReadBudget) {
   const inventory = await retainedInventory(root, budget);
-  return sourceAdmissionPolicySchema.parse({schemaVersion: 1, policyId: 'retained-geography-source-admission-v1',
-    inventoryRoots: [retainedSourceEvidencePin, retainedResolutionEvidencePin],
+  const authority = reviewedNaturalEarthAuthoritySchema.parse(json(await readBounded(join(root, reviewedNaturalEarthAuthorityPin.path), 4 * MiB, budget, reviewedNaturalEarthAuthorityPin)));
+  const trustDirectory = join(root, 'docs/operations/natural-earth-admission');
+  for (const [index, record] of authority.sources.entries()) if (record.key !== `NE-v5.1.1-ADM${index}` || record.kind !== 'boundary' || record.boundaryProvider !== 'natural-earth') throw new Error('Reviewed Natural Earth authority source mismatch');
+  for (const pin of authority.assessments) await readBounded(join(trustDirectory, pin.path), 4 * MiB, budget, pin);
+  const policy = sourceAdmissionPolicySchema.parse({schemaVersion: 1, policyId: 'retained-geography-source-admission-v2-reviewed-natural-earth',
+    inventoryRoots: [retainedSourceEvidencePin, retainedResolutionEvidencePin, reviewedNaturalEarthAuthorityPin],
     sources: [
       ...inventory.layers.map((layer: any) => ({key: layer.sourceKey, kind: layer.kind, edition: layer.edition, recordSha256: layer.recordSha256,
         originalLicenceId: layer.licenceProfile.id, requiredConditions: layer.requiredConditions,
         disposition: layer.gaps.includes('metadata-identity-conflict') || ['ambiguous', 'asset-specific'].includes(layer.licenceProfile.family) ? 'blocked' : 'reviewable'})),
       ...inventory.osmExtracts.map((source: any) => ({key: source.sourceKey, kind: source.kind, edition: source.edition, recordSha256: digest(source),
         originalLicenceId: 'ODbL-1.0', requiredConditions: source.requiredConditions, disposition: 'reviewable'})),
+      ...authority.sources,
     ],
   });
+  return {policy, trust: authority.trust, trustDirectory};
+}
+async function retainedPolicy(root: string, budget: ReadBudget) {
+  return (await retainedAdmissionContext(root, budget)).policy;
 }
 export async function buildRetainedSourceAdmissionPolicy(root = repoRoot) {
   return retainedPolicy(root, {bytes: 0, ceiling: 8 * MiB});
@@ -453,8 +470,8 @@ export async function validateSourceAdmissionMetadataFiles(bundlePath: string, o
 export async function validateProductionSourceAdmissionFiles(bundlePath: string, accounting?: AdmissionMetadataAccounting) {
   checkSharedAccounting(accounting);
   const budget: ReadBudget = {bytes: 0, ceiling: 16 * MiB, snapshot: new Map(), shared: accounting};
-  const policy = await retainedPolicy(repoRoot, budget);
-  return validateMetadata(bundlePath, {policy, trust: {schemaVersion: 1, trustedReviews: []}, trustDirectory: repoRoot}, budget, true);
+  const context = await retainedAdmissionContext(repoRoot, budget);
+  return validateMetadata(bundlePath, context, budget, true);
 }
 /** Compatibility inspection CLI: a supplied review allowlist is not a production trust authority. */
 export async function validateSourceAdmissionFiles(bundlePath: string, trustPath: string) {

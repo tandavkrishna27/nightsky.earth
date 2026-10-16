@@ -3,8 +3,10 @@
 The production gate binds an exact raw manifest, assembly plan, source subjects,
 normalized boundary lineage and local evidence snapshot before execution. It
 uses the code-controlled operator policy and an independently controlled review
-allowlist. **The actual allowlist is empty, so actual production remains
-unavailable.** Candidate files cannot supply policy, trusted reviews or a
+allowlist. The [actual allowlist](natural-earth-admission/reviewed-authority.md)
+covers only two exact reviewed private Natural Earth boundary subjects. The
+planet record, measured raw identity and native evidence remain absent, so the
+actual planet workflow remains unavailable. Candidate files cannot supply policy, trusted reviews or a
 self-approval token. This work acquires no data and authorizes no build or
 publication.
 

@@ -111,7 +111,7 @@ test('pinned normalization declarations must structurally bind original identity
  await assert.rejects(admission.validateSourceAdmissionMetadataFiles(join(f.root,'bundle.json'),{policy:f.policy,trust:f.trust,trustDirectory:f.root}),/Duplicate|unique/);
 });
 
-test('production helper derives immutable policy and empty trusted reviews instead of candidate context',async()=>{
+test('production helper derives immutable policy and fixed trusted reviews instead of candidate context',async()=>{
  const f=await fixture();const before=await admission.buildRetainedSourceAdmissionPolicy();
  const result=await admission.validateProductionSourceAdmissionFiles(join(f.root,'bundle.json'));
  assert.equal(result.disposition,'quarantined');assert.ok(result.gaps.includes('policy-source-not-found'));

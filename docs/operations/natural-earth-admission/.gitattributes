@@ -1,0 +1,2 @@
+# Preserve the measured upstream licence, including its original whitespace.
+evidence/licence.txt -text -whitespace
