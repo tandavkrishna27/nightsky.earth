@@ -1,5 +1,7 @@
 # N4 boundary preparation and existing weather result
 
+Follow-up: [partitioned geography and point decoder](n4-partitions-and-point-decoder.md) records subsequent offline implementation and retained-data validation. This document preserves the earlier delivery.
+
 16 October 2026. Continues the fixed G2/H2 work items. The owner authorized retained geography preparation and retrieval of the already completed weather job from the exact ECMWF asset host. No new CDS submission or deployment occurred.
 
 ## Geography changes and evidence

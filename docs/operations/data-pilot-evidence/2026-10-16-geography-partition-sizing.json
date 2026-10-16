@@ -1,0 +1,405 @@
+{
+  "scope": "Whole-feature original vertex sizing and exact provider inventory only; provisional source-derived identities plus explicit unresolved residuals, no geometry validation or admission",
+  "features": 4854,
+  "originalVertices": 1843790,
+  "partitions": [
+    {
+      "level": 0,
+      "features": 258,
+      "originalVertices": 548471,
+      "geometryJsonBytes": 12395240
+    },
+    {
+      "level": 1,
+      "features": 2895,
+      "originalVertices": 999681,
+      "geometryJsonBytes": 22448651
+    },
+    {
+      "level": 1,
+      "features": 1701,
+      "originalVertices": 295638,
+      "geometryJsonBytes": 6606357
+    }
+  ],
+  "descriptorBytes": 585594,
+  "provisionalMappedFeatures": 4784,
+  "unresolvedFeatures": 70,
+  "residuals": [
+    {
+      "level": 0,
+      "providerId": "ESB",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "SOL",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "KOS",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "USG",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "BRI",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "CYN",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "CNM",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "KAS",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "KAB",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "WSB",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "SPI",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "BRT",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "IOA",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "CSI",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "PGA",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "CLP",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "ATC",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "BJN",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "SER",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 0,
+      "providerId": "SCR",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "ESB-5132",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "SOL+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5889",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5890",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5909",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5908",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5904",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5905",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5915",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5914",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "USG+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5893",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5901",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5897",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5892",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5887",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5902",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5907",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5886",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "CYN+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KAS+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KAB+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "WSB-5133",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "ATA+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "IOA-1928",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KIR+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "CSI+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "IOA-2652",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "COL+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "PGA+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "VEN+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "AIA+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "CLP+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "MEX+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "RUS+99?",
+      "reason": "missing-name"
+    },
+    {
+      "level": 1,
+      "providerId": "ATC+00?",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5891",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5896",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5888",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5894",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5899",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5911",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5910",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5913",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5906",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5900",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5898",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5903",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5912",
+      "reason": "country-assignment"
+    },
+    {
+      "level": 1,
+      "providerId": "KOS-5895",
+      "reason": "country-assignment"
+    }
+  ],
+  "elapsedMilliseconds": 520,
+  "supervision": {
+    "elapsedSeconds": 0.67,
+    "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+    "limits": {
+      "commitBytes": 2147483648,
+      "diskBytes": 83886080,
+      "freeBytes": 1073741824,
+      "maxProcesses": 3,
+      "rssBytes": 2147483648,
+      "wallSeconds": 60
+    },
+    "peakLogicalBytes": 54614790,
+    "peakRssBytes": 433061888,
+    "platform": "win32",
+    "reason": null,
+    "stages": [
+      {
+        "elapsedSeconds": 0.664,
+        "exitCode": 0,
+        "stage": 0
+      }
+    ],
+    "status": "complete"
+  }
+}

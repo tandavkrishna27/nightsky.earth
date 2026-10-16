@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**N4 partitions and point decoder, 16 October:** [current delivery](n4-partitions-and-point-decoder.md) implements bounded whole-feature partitions through preparation/membership and a separate ZIP/scalar-point decoder. Retained sizing accounts for all 4,854 features with 70 blocking identity residuals; the actual weather sample decodes to 24 quarantined rows with unknown revision/member. Actual global topology and scientific admission remain partial. Original counts unchanged; no downloads or deployment.
+
 **N4 preparation and retrieval, 16 October:** [current delivery](n4-preparation-and-result-retrieval.md) adds reviewed compact geography identities, explicit normalization and bounded sweep validation. The existing weather result was retrieved (15,028 bytes, no new job) and inspected: ZIP-wrapped scalar-point NetCDF needs an adapted decoder and provenance review. Retained geography still needs partition/mapping acceptance. Original counts unchanged; no deployment.
 
 **N4 preflight and weather follow-up, 16 October:** [findings](n4-preflight-and-weather-r2.md): retained geography exceeds the current ingestion contract unchanged; fresh authorized ERA5 job succeeded remotely and is visible in CDS, but raw retrieval stopped. No new job or raw acceptance is implied. [Runtime data model](runtime-data-model.md) clarifies live APIs/calculations versus prepared production files. Original counts unchanged; no deployment.

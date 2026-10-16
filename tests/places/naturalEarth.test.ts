@@ -80,3 +80,31 @@ test('compact production descriptor derives provenance and refuses missing names
  const parsed=parseNaturalEarthDescriptor(f.descriptor);assert.equal(parsed.layers[0].mapping.country.sources[0].name,'Natural Earth');assert.equal(parsed.layers[0].mapping.country.regionId,'region:v1:country');
  for(const change of [{name:''},{countryCode:'-99'}]){const bad=structuredClone(f.descriptor);Object.assign(bad.layers[0].mapping.country,change);assert.throws(()=>parseNaturalEarthDescriptor(bad));}
 });
+
+
+test('whole-feature partitions feed compact preparation and all-shard membership with aggregate budgets',async()=>{
+ const f=await fixture();f.descriptor.partitions=[{level:0,providerIds:['country']},{level:1,providerIds:['state']}];await writeFile(f.input,JSON.stringify(f.descriptor));
+ const limits={maxVertices:15,maxTotalVertices:20};await ingestSyntheticNaturalEarth(f.input,f.out,limits);
+ const prep=JSON.parse(await readFile(join(f.out,'preparation.json'),'utf8'));assert.equal(prep.schemaVersion,2);assert.equal(prep.boundaries.length,2);assert.equal(prep.boundaries[0].mapping,undefined);
+ const country=JSON.parse(await readFile(join(f.out,'boundaries-0.geojson'),'utf8'));assert.equal(country.features[0].geometry.coordinates.length,2);assert.equal(country.features[0].geometry.coordinates[0].length,2);
+ const prepared=join(f.dir,'prepared');await prepareGeographicCoverage(join(f.out,'preparation.json'),prepared,limits);
+ const shardManifest=JSON.parse(await readFile(join(prepared,'boundary-shards.json'),'utf8'));
+ const row={placeId:'place:v1:osm:node:1',name:'Park',category:'park',latitude:1,longitude:1,accessEvidence:{status:'unknown'},sources:[source],caveats:[],catalogueRevision:'synthetic-only',sourceCompleteness:1,regionIds:[]};const body=JSON.stringify(row)+'\n';await writeFile(join(prepared,'candidates.jsonl'),body);
+ const descriptor={...shardManifest,catalogueRevision:'synthetic-only',candidates:{path:'candidates.jsonl',bytes:Buffer.byteLength(body),sha256:createHash('sha256').update(body).digest('hex')}};await writeFile(join(prepared,'membership.json'),JSON.stringify(descriptor));
+ const result=await buildBoundaryMetadata(join(prepared,'membership.json'),join(f.dir,'members'),limits);assert.equal(result.unknownCountryCandidates,0);const enriched=JSON.parse((await readFile(join(f.dir,'members','candidates.jsonl'),'utf8')).trim());assert.deepEqual(enriched.regionIds,['region:v1:country','region:v1:state']);
+ await assert.rejects(buildBoundaryMetadata(join(prepared,'membership.json'),join(f.dir,'too-small'),{...limits,maxTotalVertices:19}),/Aggregate vertex/);
+ await assert.rejects(prepareGeographicCoverage(join(f.out,'preparation.json'),join(f.dir,'prep-small'),{...limits,maxTotalVertices:19}),/Aggregate vertex/);
+});
+
+test('partition provider inventory refuses omissions, duplicates, unknown keys and split features',async()=>{
+ for(const partitions of [[{level:0,providerIds:['country']}],[{level:0,providerIds:['country','country']},{level:1,providerIds:['state']}],[{level:0,providerIds:['country']},{level:1,providerIds:['unknown']}]] ){
+ const f=await fixture();f.descriptor.partitions=partitions;await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out,{maxVertices:15,maxTotalVertices:20}),/partition provider/i);await assert.rejects(access(join(f.out,'complete.json')));}
+ const f=await fixture();f.descriptor.partitions=[{level:0,providerIds:['country']},{level:1,providerIds:['state']}];await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out,{maxVertices:14,maxTotalVertices:20}),/Vertex budget/);
+});
+
+test('explicit unresolved provider identities retain exact source residuals without completion',async()=>{
+ const f=await fixture();delete f.descriptor.layers[1].mapping.state;f.descriptor.layers[1].unresolved=[{providerId:'state',reason:'missing-name'}];f.descriptor.partitions=[{level:0,providerIds:['country']},{level:1,providerIds:['state']}];await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out),/Unresolved identity/);const report=JSON.parse(await readFile(join(f.out,'identity-residuals.json'),'utf8'));assert.equal(report.sourceFeatures,2);assert.deepEqual(report.residuals,[{level:1,providerId:'state',reason:'missing-name'}]);await assert.rejects(access(join(f.out,'complete.json')));
+});
+
+
+test('legacy duplicate normalization preserves its normalized vertex ceiling',async()=>{const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));raw.features[0].geometry.coordinates[0][0].splice(1,0,[0,0]);const body=Buffer.from(JSON.stringify(raw));await writeFile(path,body);Object.assign(layer.input,{bytes:body.length,sha256:createHash('sha256').update(body).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${body.length}\0`).update(body).digest('hex')});f.descriptor.geometryPolicy='remove-consecutive-identical';await writeFile(f.input,JSON.stringify(f.descriptor));const result=await ingestSyntheticNaturalEarth(f.input,f.out,{maxVertices:20});assert.equal(result.originalVertices,21);assert.equal(result.vertices,20);});
