@@ -18,7 +18,11 @@ The `date` value is a list. The retained example SHA-256 is `e22cc3d278891a22bc0
 
 The ceilings are 2 MiB raw, 128 MiB new output, one submission, 60 polls, 30 seconds between polls and 30 minutes total. They are rejection ceilings, not cost estimates or execution permission. Fixture timeouts are cooperative and do not provide hard containment against a blocking transport.
 
-## Still disabled
+## Later gated wrapper
+
+[S2 sample preparation](s2-weather-sample-proposal.md) adds a separate `timeseries_sample.py` owner-gated Windows wrapper with parent/worker containment checks. Its default is offline and it has not been used for an actual acquisition. The original `timeseries_executor.py` CLI remains plan-only. No scientific decoder/publication is supplied.
+
+## Original adapter delivery limits
 
 There is no real execution entry point, allowance consumer, time-series decoder, monthly publication or runtime selection. A future live path must separately bind exact owner allowance, output and identity, preserve host/TLS/auth separation and enforce existing hard process containment around blocked calls before credential access. Actual returned dimensions, units, missing values, revision semantics, costs/horizon, CDN and baseline remain unverified.
 

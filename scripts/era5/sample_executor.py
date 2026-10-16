@@ -7,6 +7,7 @@ import argparse
 from contextlib import contextmanager
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -83,7 +84,7 @@ def run_fixture(root, transport, *, clock=time.time, sleep=time.sleep, resume=Fa
     return _run(root, transport, clock=clock, sleep=sleep, resume=resume)
 
 
-def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, contract=None):
+def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, contract=None, deadline_cap=None):
     """Private state machine shared by fixtures and separately gated sample_live.
 
     submit(dataset, request, timeout) returns ONLY an opaque job ID;
@@ -95,6 +96,9 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, co
     # Contract changes identity only; resource and state protections stay fixed.
     contract_identity = identity() if contract is None else contract.identity()
     contract_plan = plan() if contract is None else contract.plan()
+    if deadline_cap is not None and (type(deadline_cap) not in (int,float) or
+        not math.isfinite(deadline_cap) or not 0<deadline_cap-clock()<=SECONDS):
+        raise ValueError('Invalid supervisor deadline cap')
     root=Path(root).absolute(); owned(root,'checkpoint.json')
     root.mkdir(exist_ok=True); budget(root)
     with writer_lock(root):
@@ -113,10 +117,14 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, co
             if resume: raise ValueError('No checkpoint to resume')
             if any(p.name != 'writer.lock' for p in root.iterdir()): raise ValueError('Fresh output required')
             now=clock()
+            deadline=min(now+SECONDS, deadline_cap) if deadline_cap is not None else now+SECONDS
+            if deadline<=now: raise ValueError('Supervisor deadline exceeded')
             state=dict(identity=contract_identity,submissions=1,phase='submission-uncertain',
-                       started=now,deadline=now+SECONDS,polls=0,nextPoll=now)
+                       started=now,deadline=deadline,polls=0,nextPoll=now)
             save(root,state)  # durable uncertainty BEFORE submit
-            job=transport.submit(contract_plan['dataset'],json.loads(json.dumps(contract_plan['request'])),timeout=min(30,SECONDS))
+            left=state['deadline']-clock()
+            if left<=0: raise ValueError('Supervisor deadline exceeded')
+            job=transport.submit(contract_plan['dataset'],json.loads(json.dumps(contract_plan['request'])),timeout=min(30,left))
             if not isinstance(job,str) or not re.fullmatch(r'[A-Za-z0-9-]{1,128}',job):
                 raise ValueError('Invalid remote identity')
             with owned(root,'job-identity.json').open('x',encoding='utf-8') as receipt:
@@ -125,6 +133,10 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, co
         receipt=json.loads(owned(root,'job-identity.json').read_text())
         if receipt != dict(identity=contract_identity,jobId=state['jobId']):
             raise ValueError('Immutable job identity mismatch')
+        if deadline_cap is not None and deadline_cap<state['deadline']:
+            if deadline_cap<=clock(): raise ValueError('Supervisor deadline exceeded')
+            state['deadline']=deadline_cap
+            save(root,state)
         def remaining():
             budget(root)
             left=state['deadline']-clock()

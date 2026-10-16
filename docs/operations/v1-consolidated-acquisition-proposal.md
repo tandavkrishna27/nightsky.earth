@@ -1,5 +1,7 @@
 # V1 consolidated acquisition proposal — 15 October 2026
 
+**Current S2 proposals:** [two-file geography packet](s2-geography-acquisition-proposal.md) and [event reconciliation](s2-events-coverage-matrix.md) replace the corresponding dated source assumptions below. These are proposals/evidence, not data-acquisition permission. Follow the [fixed tracker](v1-completion-tracker.md) for the current sequence.
+
 **Latest implementation, 16 October:** [lineage and admission record](lineage-implementation-admission-wave.md) adds bounded global/child lineage publishers, serving and operator audits; full synthetic proof passed for 18,033,393 pins and 56,039 pairs. The complete source-preparation inventory/validator leaves all 429 boundary layers and eight extracts quarantined. No acquisition authorized.
 
 **Previous decision, 16 October:** [admission/schedule/executor record](admission-schedule-executor-wave.md) supersedes earlier pending schedule preparation: full deduplication and retained subtraction are complete. Exact geography admission remains held; the actual 9,016,688-request proposal needs feasibility review; lineage migration is now implemented and synthetically verified. The sample executor is prepared for a later explicit allowance, with unknown CDN hosts stopped. No body acquisition is authorized. Older rows below retain their dated scope.

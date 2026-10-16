@@ -135,5 +135,7 @@ jobs:
         run: python scripts/era5/sample_live.py --plan
       - name: Verify time-series entry point stays offline and plan-only
         run: python scripts/era5/timeseries_executor.py --plan
+      - name: Verify gated time-series sample defaults to an offline plan
+        run: python scripts/era5/timeseries_sample.py --plan
       - name: Run ERA5 fixtures without account or source requests
         run: python -m unittest discover -s tests/era5 -v

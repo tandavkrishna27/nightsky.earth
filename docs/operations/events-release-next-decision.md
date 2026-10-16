@@ -1,5 +1,7 @@
 # Events release: next decision
 
+**Current reconciliation:** [S2 event coverage matrix](s2-events-coverage-matrix.md) supersedes this dated snapshot's 26-peak/no-2027 statements and old overlap counts. It preserves the unresolved science/rights gates.
+
 **Subsequent authorized evidence:** [16 October public source check](public-source-check-20261016.md) supersedes source-discovery unknowns below where explicitly stated; no runtime data or original completion gate was promoted.
 
 Local audit: 16 October 2026, baseline `c7e898c`. Scope remains the broad NightSky.earth experience: beginner/family stargazing, telescope and photography planning, meteor/eclipses/aurora, place discovery, comparisons and seasonal travel. This document changes no acceptance gate or implementation. Only retained local source/code/documents were inspected; no network, download, installation, model, test, deployment or commit was performed.
