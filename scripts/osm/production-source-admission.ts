@@ -4,11 +4,13 @@ import {lstat,open,realpath} from 'node:fs/promises';
 import {dirname,isAbsolute,join,parse,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import * as z from 'zod4';
-import {partitionedRawManifestSchema,partitionedAssemblyPlanSchema,validatePartitionedCapacity,parsePartitionedControl} from './partitioned-assembly-plan';
+import {partitionedRawManifestSchema,partitionedAssemblyPlanSchema,partitionedAssemblyPlanV3Schema,validatePartitionedCapacity,parsePartitionedControl} from './partitioned-assembly-plan';
 import {
  validateProductionSourceAdmissionFiles,validateSourceAdmissionMetadataFiles,
  boundaryNormalizationLineageSchema,
 } from './source-admission';
+
+import {validationRead,resourceCheckpoint,type ResourceSessionV3} from './partitioned-resources';
 
 const MiB=1024**2, MAX_METADATA=32*MiB, MAX_GEOMETRY=64*MiB;
 const sha=z.string().regex(/^[a-f0-9]{64}$/);
@@ -32,11 +34,11 @@ const legacyPlanSchema=z.object({schemaVersion:z.literal(1),boundaries:z.array(z
  footprints:pin,sourceDomains:z.array(metadataPin.extend({kind:z.literal('planet-domain-v1'),sourceId})).max(64).optional(),
 }).passthrough();
 const rawSchema=z.union([legacyRawSchema,partitionedRawManifestSchema]);
-const planSchema=z.union([legacyPlanSchema,partitionedAssemblyPlanSchema]);
+const planSchema=z.union([legacyPlanSchema,partitionedAssemblyPlanSchema,partitionedAssemblyPlanV3Schema]);
 export type ProductionAdmissionPin=z.infer<typeof pin>;
 export interface ProductionAdmissionOptions {
  manifestPath:string; admissionPath:string; admissionSha256:string; phase:string;
- expectedSnapshot?:string|{snapshotSha256:string}; expectedPlanPath?:string; expectedPlanSha256?:string;
+ expectedSnapshot?:string|{snapshotSha256:string}; expectedPlanPath?:string; expectedPlanSha256?:string; resourceSession?:ResourceSessionV3;
 }
 type TestContext=Parameters<typeof validateSourceAdmissionMetadataFiles>[1];
 const phases=new Set(['preflight','raw-before','raw-after','assembly-before','assembly-after','resume']);
@@ -53,6 +55,7 @@ export const productionAdmissionCodeFiles=Object.freeze([
  'shared/nightsky/common.ts','shared/nightsky/places.ts',
  'scripts/osm/partitioned-assembly-plan.ts',
  'scripts/osm/partitioned-candidates.ts',
+ 'scripts/osm/partitioned-resources.ts',
  'scripts/osm/geography-capacity-plan.ts',
  'scripts/osm/global_source.py',
  'scripts/osm/normalized_partitions.py',
@@ -67,15 +70,16 @@ function canonical(value:unknown):string {
  return JSON.stringify(value);
 }
 const hash=(body:Buffer|string)=>createHash('sha256').update(body).digest('hex');
-async function safePath(value:string){
+async function safePath(value:string,session?:ResourceSessionV3){
+ if(session)resourceCheckpoint(session);
  if(!isAbsolute(value)||value.length>4096||value.split(/[\\/]/).includes('..')||/^[\\/]{2}/.test(value))throw new Error('Unsafe admission path');
  const drive=/^[a-z]:[\\/]/i.test(value), components=(drive?value.slice(3):value.slice(1)).split(/[\\/]/);
  if(components.some(v=>!v||v==='.'||/[.\s]$/.test(v)||/[\x00-\x1f\x7f<>:"|?*]/.test(v)||/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(v)))throw new Error('Unsafe admission path component');
  let cursor=parse(value).root;
  for(const part of value.slice(cursor.length).split(/[\\/]/).filter(Boolean)){
-  cursor=join(cursor,part);if((await lstat(cursor)).isSymbolicLink())throw new Error('Admission symlink/reparse refused');
+  if(session)resourceCheckpoint(session);cursor=join(cursor,part);if((await lstat(cursor)).isSymbolicLink())throw new Error('Admission symlink/reparse refused');
  }
- return realpath(resolve(value));
+ const canonical=await realpath(resolve(value));if(session)resourceCheckpoint(session);return canonical;
 }
 function state(s:Awaited<ReturnType<typeof lstat>>){return [s.dev,s.ino,s.size,s.mtimeMs,s.ctimeMs].join(':');}
 const decode=(body:Buffer)=>JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(body));
@@ -89,10 +93,12 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
  if(!phases.has(options.phase))throw new Error('Unknown admission phase');
  sha.parse(options.admissionSha256);
  let geometryBytes=0,boundaryBytes=0;
- const sharedMetadata={bytes:0,ceiling:MAX_METADATA,paths:new Map<string,number>()};
+ const session=options.resourceSession;
+ const checkedPath=(value:string)=>safePath(value,session);
+ const sharedMetadata=session?Object.assign(session.metadata,{onRead:(bytes:number)=>validationRead(session,bytes,0,'control-and-admission'),checkpoint:()=>resourceCheckpoint(session)}):{bytes:0,ceiling:MAX_METADATA,paths:new Map<string,number>()};
  const seen=new Map<string,ProductionAdmissionPin>(),codePins:ProductionAdmissionPin[]=[],geometryPins:ProductionAdmissionPin[]=[];
  async function read(path:string,ceiling:number,expected?:Pick<ProductionAdmissionPin,'bytes'|'sha256'>,kind:'metadata'|'geometry'|'footprints'|'code'='metadata',recheck=false){
-  const absolute=await safePath(path),handle=await open(absolute,'r');
+  if(session)resourceCheckpoint(session);const absolute=await checkedPath(path),handle=await open(absolute,'r');
   try{
    const before=await handle.stat();
    if(!before.isFile()||before.size>ceiling||expected&&before.size!==expected.bytes)throw new Error('Admission input size/pin limit');
@@ -101,10 +107,11 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
     if(previous!==undefined&&previous!==before.size)throw new Error('Shared admission metadata size changed');
     if(previous===undefined){if(sharedMetadata.bytes+before.size>sharedMetadata.ceiling)throw new Error('Aggregate admission metadata byte limit');sharedMetadata.bytes+=before.size;sharedMetadata.paths.set(absolute,before.size);}
    }
+   if(session)validationRead(session,before.size,0,'control-and-admission');
    const body=Buffer.alloc(before.size),digest=createHash('sha256');let offset=0;
-   while(offset<body.length){const result=await handle.read(body,offset,Math.min(65536,body.length-offset),null);if(!result.bytesRead)throw new Error('Admission short/mutating input');digest.update(body.subarray(offset,offset+result.bytesRead));offset+=result.bytesRead;}
-   const extra=Buffer.alloc(1);if((await handle.read(extra,0,1,null)).bytesRead)throw new Error('Admission input grew');
-   const after=await handle.stat(),linked=await lstat(await safePath(absolute)),actual={path:absolute,bytes:body.length,sha256:digest.digest('hex')};
+   while(offset<body.length){if(session)resourceCheckpoint(session);const result=await handle.read(body,offset,Math.min(65536,body.length-offset),null);if(!result.bytesRead)throw new Error('Admission short/mutating input');digest.update(body.subarray(offset,offset+result.bytesRead));offset+=result.bytesRead;}
+   const extra=Buffer.alloc(1);if(!session&&(await handle.read(extra,0,1,null)).bytesRead)throw new Error('Admission input grew');
+   const after=await handle.stat(),linked=await lstat(await checkedPath(absolute)),actual={path:absolute,bytes:body.length,sha256:digest.digest('hex')};
    if(state(before)!==state(after)||state(after)!==state(linked)||expected&&actual.sha256!==expected.sha256)throw new Error('Admission input mutation/digest mismatch');
    const prior=seen.get(absolute);if(prior&&canonical(prior)!==canonical(actual))throw new Error('Admission snapshot input changed');
    if(!prior&&!recheck){
@@ -120,17 +127,19 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
  const admissionRead=await read(options.admissionPath,MiB);
  if(admissionRead.pin.sha256!==options.admissionSha256)throw new Error('Production admission envelope digest mismatch');
  const envelope=productionAdmissionEnvelopeSchema.parse(decode(admissionRead.body));
- if(await safePath(options.manifestPath)!==await safePath(envelope.manifest.path))throw new Error('Exact raw manifest path binding mismatch');
- if(options.expectedPlanPath&&await safePath(options.expectedPlanPath)!==await safePath(envelope.assemblyPlan.path))throw new Error('Exact assembly plan path binding mismatch');
+ if(await checkedPath(options.manifestPath)!==await checkedPath(envelope.manifest.path))throw new Error('Exact raw manifest path binding mismatch');
+ if(options.expectedPlanPath&&await checkedPath(options.expectedPlanPath)!==await checkedPath(envelope.assemblyPlan.path))throw new Error('Exact assembly plan path binding mismatch');
  if(options.expectedPlanSha256&&options.expectedPlanSha256!==envelope.assemblyPlan.sha256)throw new Error('Exact assembly plan digest binding mismatch');
  const manifestRead=await read(envelope.manifest.path,MiB,envelope.manifest),planRead=await read(envelope.assemblyPlan.path,MiB,envelope.assemblyPlan);
  const rawDecoded=decode(manifestRead.body),planDecoded=decode(planRead.body);
- const manifest=rawSchema.parse(rawDecoded.schemaVersion===2?parsePartitionedControl(manifestRead.body):rawDecoded),plan=planSchema.parse(planDecoded.schemaVersion===2?parsePartitionedControl(planRead.body):planDecoded);
+ const manifest=rawSchema.parse(rawDecoded.schemaVersion===2?parsePartitionedControl(manifestRead.body,session?{kind:'session',resources:session}:undefined):rawDecoded),plan=planSchema.parse([2,3].includes(planDecoded.schemaVersion)?parsePartitionedControl(planRead.body,session?{kind:'session',resources:session}:undefined):planDecoded);
  producerIntegers(manifest);
- if(manifest.schemaVersion!==plan.schemaVersion)throw new Error('Raw manifest/assembly layout version mismatch');
- if(plan.schemaVersion===2){
+ if(!((manifest.schemaVersion===1&&plan.schemaVersion===1)||(manifest.schemaVersion===2&&(plan.schemaVersion===2||plan.schemaVersion===3))))throw new Error('Raw manifest/assembly layout version mismatch');
+ if(plan.schemaVersion===3&&['assembly-before','assembly-after'].includes(options.phase)&&!session)throw new Error('Version-three assembly resource session required');
+ if(plan.schemaVersion===2||plan.schemaVersion===3){
   const capacity=await read(plan.capacityPlan.path,65536,plan.capacityPlan);
-  validatePartitionedCapacity(plan,parsePartitionedControl(capacity.body),manifest);
+  validatePartitionedCapacity(plan,parsePartitionedControl(capacity.body,session?{kind:'session',resources:session}:undefined),manifest);
+  if(plan.schemaVersion===3&&session&&(canonical(session.limits.validation)!==canonical(plan.validation)||session.limits.maxGeometryComparisons!==plan.membership.maxGeometryComparisons||session.limits.maxMilliseconds!==plan.membership.maxMilliseconds))throw new Error('Version-three admitted resource controls mismatch');
  }
  if(plan.boundaries.reduce((total,boundary)=>total+boundary.input.bytes,0)>MAX_GEOMETRY)throw new Error('Aggregate admission boundary byte limit');
  if(new Set(manifest.sources.map(s=>s.id)).size!==manifest.sources.length||new Set(envelope.rawSources.map(s=>s.sourceId)).size!==envelope.rawSources.length)throw new Error('Duplicate raw source admission binding');
@@ -156,16 +165,16 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
    const clip=subject.effectiveClip,descriptor=clip.descriptor;
    if(descriptor.nativeVintage!==source.vintage||descriptor.selectionPolicy!==manifest.policy)throw new Error('Admitted planet native vintage/selection mismatch');
    const descriptorPath=join(dirname(binding.bundle.path),clip.descriptorEvidence.path);
-   if(await safePath(source.sourceDomain.path)!==await safePath(descriptorPath)||source.sourceDomain.bytes!==clip.descriptorEvidence.bytes||source.sourceDomain.sha256!==clip.descriptorEvidence.sha256)throw new Error('Exact admitted planet descriptor mismatch');
+   if(await checkedPath(source.sourceDomain.path)!==await checkedPath(descriptorPath)||source.sourceDomain.bytes!==clip.descriptorEvidence.bytes||source.sourceDomain.sha256!==clip.descriptorEvidence.sha256)throw new Error('Exact admitted planet descriptor mismatch');
    const planned=(plan.sourceDomains??[]).filter(d=>d.sourceId===source.id);
-   if(planned.length!==1||planned[0].sha256!==source.sourceDomain.sha256||planned[0].bytes!==source.sourceDomain.bytes||await safePath(planned[0].path)!==await safePath(source.sourceDomain.path))throw new Error('Assembly planet descriptor does not match raw source');
+   if(planned.length!==1||planned[0].sha256!==source.sourceDomain.sha256||planned[0].bytes!==source.sourceDomain.bytes||await checkedPath(planned[0].path)!==await checkedPath(source.sourceDomain.path))throw new Error('Assembly planet descriptor does not match raw source');
   }else{
    if(subject.kind!=='osm-extract'||subject.effectiveClip.status!=='bound'||source.clipSha256!==subject.effectiveClip.payload.sha256)throw new Error('Admitted effective extract clip mismatch');
    const native=subject.rights.conditions.find(c=>c.id==='source-native-vintage');if(!native)throw new Error('Admitted native vintage evidence required');
    const observation=decode((await read(join(dirname(binding.bundle.path),native.evidence.path),4*MiB,native.evidence)).body);
    if(canonical(observation)!==canonical({schemaVersion:1,kind:'native-vintage-observation',raw:{bytes:source.bytes,sha256:source.sha256},nativeVintage:source.vintage}))throw new Error('Admitted extract native vintage mismatch');
   }
-  const path=await safePath(source.path),stat=await lstat(path);if(!stat.isFile()||stat.size!==source.bytes)throw new Error('Raw file size/identity mismatch');
+  const path=await checkedPath(source.path),stat=await lstat(path);if(!stat.isFile()||stat.size!==source.bytes)throw new Error('Raw file size/identity mismatch');
   rawFiles.push({path,bytes:source.bytes,sha256:source.sha256,fileState:state(stat)});
   sourceSubjects.push({sourceId:source.id,sourceKey:subject.key,subjectSha256:admitted.subjectSha256,policyId:admitted.policyId,trustedPolicySha256:admitted.trustedPolicySha256});
  }
@@ -179,12 +188,12 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
    if(subject.kind!=='boundary'||keys.has(subject.key))throw new Error('Duplicate/nonboundary admitted lineage source');keys.add(subject.key);
    const condition=subject.rights.conditions.find(c=>c.id==='normalized-boundary-lineage');if(!condition)throw new Error('Normalized lineage must be part of approved source subject');
    const conditionPath=join(dirname(binding.bundle.path),condition.evidence.path);
-   if(await safePath(conditionPath)!==await safePath(binding.lineage.path)||binding.lineage.bytes!==condition.evidence.bytes||binding.lineage.sha256!==condition.evidence.sha256)throw new Error('Boundary lineage is not exact approved condition evidence');
+   if(await checkedPath(conditionPath)!==await checkedPath(binding.lineage.path)||binding.lineage.bytes!==condition.evidence.bytes||binding.lineage.sha256!==condition.evidence.sha256)throw new Error('Boundary lineage is not exact approved condition evidence');
    const lineage=boundaryNormalizationLineageSchema.parse(decode((await read(binding.lineage.path,4*MiB,binding.lineage)).body));
    if(canonical(lineage.source)!==canonical({url:subject.payload.url,bytes:subject.payload.bytes,sha256:subject.payload.sha256})||lineage.transformRevision!==subject.intendedUse.transformRevision)throw new Error('Boundary lineage admitted original/transform mismatch');
-   let found=false;for(const output of lineage.outputs)if(await safePath(output.path)===await safePath(boundary.input.path)&&output.bytes===boundary.input.bytes&&output.sha256===boundary.input.sha256)found=true;
+   let found=false;for(const output of lineage.outputs){if(session)resourceCheckpoint(session);if(await checkedPath(output.path)===await checkedPath(boundary.input.path)&&output.bytes===boundary.input.bytes&&output.sha256===boundary.input.sha256)found=true;}
    if(!found)throw new Error('Normalized boundary absent from admitted lineage outputs');
-   boundarySubjects.push({boundaryIndex:index,sourceKey:subject.key,subjectSha256:admitted.subjectSha256,policyId:admitted.policyId,trustedPolicySha256:admitted.trustedPolicySha256,lineage:{...binding.lineage,path:await safePath(binding.lineage.path)}});
+   boundarySubjects.push({boundaryIndex:index,sourceKey:subject.key,subjectSha256:admitted.subjectSha256,policyId:admitted.policyId,trustedPolicySha256:admitted.trustedPolicySha256,lineage:{...binding.lineage,path:await checkedPath(binding.lineage.path)}});
   }
  }
  await read(plan.footprints.path,128*MiB,plan.footprints,'footprints');
@@ -192,7 +201,7 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
  // geometry, after validation. Raw bodies are hashed by the producer's existing
  // before/after checks; this gate binds their stat identity and admitted hash.
  for(const item of seen.values())await read(item.path,item.bytes,item,'metadata',true);
- for(const raw of rawFiles){const stat=await lstat(await safePath(raw.path));if(state(stat)!==raw.fileState)throw new Error('Raw file mutation during admission');}
+ for(const raw of rawFiles){const stat=await lstat(await checkedPath(raw.path));if(state(stat)!==raw.fileState)throw new Error('Raw file mutation during admission');}
  const metadataPins=[...seen.values()].filter(item=>!codePins.some(p=>p.path===item.path)&&!geometryPins.some(p=>p.path===item.path)).sort((a,b)=>a.path.localeCompare(b.path));
  const producerManifestSha256=hash(canonical(manifest));
  const producerIdentity={policy:manifest.policy,...(manifest.schemaVersion===2?{evidenceLayout:manifest.evidenceLayout}:{}),sources:manifest.sources.map(source=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as Record<string,unknown>).filter(([domainKey])=>domainKey!=='path')):value])))};

@@ -1,6 +1,8 @@
+import {createBootstrapResources,createResourceSessionV3} from '../../scripts/osm/partitioned-resources';
+import {partitionCanonical} from '../../scripts/osm/partitioned-candidates';
 import {test,after} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,access,rm,readdir} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,access,rm,readdir,open,stat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -218,4 +220,78 @@ test('partitioned assembly credit cannot exceed the actual pinned source invento
  await writeFile(f.manifestPath,JSON.stringify(manifest));await f.saveCapacity();
  await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job,undefined,f.manifestPath),/retained source credit/i);
  await assert.rejects(access(join(f.job,'assembly-complete.json')));
+});
+
+async function versionThreePlanFixture(input?:Awaited<ReturnType<typeof partitionedPlanFixture>>){
+ const f=input??await partitionedPlanFixture(),GiB=1024**3,MiB=1024**2;
+ f.plan.schemaVersion=3;f.capacity.schemaVersion=3;f.capacity.kind='partitioned-geography-capacity-v2';
+ f.capacity.limits.membership.maxGeometryComparisons=f.capacity.limits.membership.maxComparisons;
+ delete f.capacity.limits.membership.maxComparisons;
+ f.capacity.limits.membership.maxRows=1500001;f.capacity.limits.raw.candidates=1500001;
+ f.capacity.limits.membership.maxOutputBytes=2*GiB;f.capacity.allocations.membership=2*GiB;
+ f.capacity.limits.catalogue.maxInputRows=1500001;f.capacity.limits.catalogue.maxInputBytes=2*GiB+f.capacity.allocations.footprints;
+ f.capacity.limits.supervisor.diskBytes=8*GiB;f.capacity.limits.membership.maxMilliseconds=30000;f.capacity.limits.catalogue.timeoutMs=30000;f.capacity.limits.supervisor.wallSeconds=120;
+ f.plan.membership={...f.capacity.limits.membership};delete f.plan.membership.maxCandidateInputBytes;
+ f.plan.stream.maxBytes=f.capacity.limits.catalogue.maxInputBytes;f.plan.stream.maxRows=1500001;
+ const Q=MiB,R=4*(f.capacity.allocations.normalizedOutput+f.capacity.limits.membership.maxOutputBytes+f.capacity.allocations.footprints)+8*MiB+3*f.capacity.limits.membership.maxBoundaryBytes+Q;
+ f.plan.validation={maxReadBytes:R,maxRowsRead:R,maxLexicalTokens:R,maxOperations:R,controlAndAdmissionReadBytes:Q};
+ f.capacity.limits.validation=f.plan.validation;
+ await f.saveCapacity();return f;
+}
+test('strict version-three plan supports explicit global row/output controls without changing version two',async()=>{
+ const f=await versionThreePlanFixture(),plan=await loadAssemblyPlan(f.path,await f.save());
+ assert.equal(plan.schemaVersion,3);assert.equal(plan.membership.maxRows,1500001);assert.equal(plan.membership.maxOutputBytes,2*1024**3);
+});
+
+test('version-three assembly shares validation and geometry units and records writes separately',async()=>{
+ const f=await partitionedProducerFixture();await versionThreePlanFixture(f);
+ const raw=JSON.parse(await readFile(f.manifestPath,'utf8'));raw.limits=f.capacity.limits.raw;
+ await writeFile(f.manifestPath,JSON.stringify(raw));
+ const manifestSha256=digest(partitionCanonical(raw)),checkpointPath=join(f.producer,'checkpoint.json');
+ const checkpoint=JSON.parse(await readFile(checkpointPath,'utf8'));checkpoint.manifestSha256=manifestSha256;
+ const checkpointBody=partitionCanonical(checkpoint);await writeFile(checkpointPath,checkpointBody);
+ const completePath=join(f.producer,'complete.json'),complete=JSON.parse(await readFile(completePath,'utf8'));
+ complete.manifestSha256=manifestSha256;complete.checkpoint={bytes:Buffer.byteLength(checkpointBody),sha256:digest(checkpointBody)};
+ await writeFile(completePath,partitionCanonical(complete));
+ const evidence=await assembleMembership(f.path,await f.save(),f.producer,f.job,undefined,f.manifestPath);
+ assert.equal(evidence.schemaVersion,3);
+ const member=JSON.parse(await readFile(join(f.job,'membership','complete.json'),'utf8'));
+ assert.equal(member.schemaVersion,3);assert.equal(member.totalCandidates,2);
+ assert.ok(member.resources.validation.lexicalTokens>member.resources.geometry.comparisons);
+ assert.ok(member.resources.writes.membership.bytes>0);assert.ok(member.resources.validation.readBytes>member.resources.writes.membership.bytes);
+ assert.ok(member.resources.startedAt<=member.resources.deadline-30000);
+ assert.equal(member.limits.maxRows,1500001);assert.equal(member.limits.maxOutputBytes,2*1024**3);
+ const assemblyBody=await readFile(join(f.job,'assembly-complete.json')),inputBody=await readFile(join(f.job,'membership-input','input.json'));
+ const final=JSON.parse(assemblyBody.toString('utf8'));
+ assert.equal(final.verification.writes.assembly.bytes,assemblyBody.length+inputBody.length);
+ assert.ok(final.verification.validation.controlAndAdmissionReadBytes>0);
+});
+
+test('version-three bootstrap transfers its consumed Q and duplicate controls reject before staging',async()=>{
+ for(const mode of ['bootstrapQ','duplicatePlan','duplicateCapacity']){
+  const f=await versionThreePlanFixture();
+  if(mode==='bootstrapQ'){const previous=f.plan.validation.controlAndAdmissionReadBytes;f.plan.validation.controlAndAdmissionReadBytes=1;f.plan.validation.maxReadBytes-=previous-1;f.plan.validation.maxLexicalTokens=f.plan.validation.maxReadBytes;f.plan.validation.maxRowsRead=f.plan.validation.maxReadBytes;f.capacity.limits.validation=f.plan.validation;await f.saveCapacity();}
+  let planSha=await f.save();
+  if(mode==='duplicatePlan'){const body=(await readFile(f.path,'utf8')).replace('"schemaVersion":3','"schemaVersion":2,"schemaVersion":3');await writeFile(f.path,body);planSha=digest(body);}
+  if(mode==='duplicateCapacity'){const body=(await readFile(f.plan.capacityPlan.path,'utf8')).replace('"schemaVersion":3','"schemaVersion":2,"schemaVersion":3');await writeFile(f.plan.capacityPlan.path,body);f.plan.capacityPlan.bytes=Buffer.byteLength(body);f.plan.capacityPlan.sha256=digest(body);planSha=await f.save();}
+  if(mode==='bootstrapQ'){
+   const rawPath=join(f.root,'raw-manifest.json');await writeFile(rawPath,JSON.stringify({schemaVersion:2,policy:'named-complete-way-v1-polar85',authorization:'synthetic',sources:[{id:'s',path:join(f.root,'raw.xml'),format:'xml',url:'https://source.example.invalid/dated.xml',bytes:1,sha256:'a'.repeat(64),vintage:'2026-10-01T00:00:00Z',licenseUrl:'https://opendatacommons.org/licenses/odbl/1-0/',attribution:'© OpenStreetMap contributors',clipSha256:'b'.repeat(64)}],limits:f.capacity.limits.raw,evidenceLayout:f.plan.evidenceLayout}));
+   await assert.rejects(assembleMembership(f.path,planSha,f.producer,f.job,undefined,rawPath),/Control and admission read byte limit/);
+  }else await assert.rejects(loadAssemblyPlan(f.path,planSha),/Duplicate partition JSON field/);
+  await assert.rejects(access(join(f.job,'membership-input')));await assert.rejects(access(join(f.job,'assembly-complete.json')));
+ }
+});
+
+test('version-three pinned control and boundary reads never request beyond precharged bytes',async t=>{
+ const f=await versionThreePlanFixture(),sha=await f.save();
+ const probe=await open(f.path,'r'),prototype=Object.getPrototypeOf(probe),original=prototype.read;await probe.close();
+ const targets=new Set(await Promise.all([f.path,f.plan.capacityPlan.path,f.plan.boundaries[0].input.path].map(async path=>{const s=await stat(path);return `${s.dev}:${s.ino}`;})));
+ const positions=new WeakMap<object,number>();let checked=0;
+ t.mock.method(prototype,'read',async function(this:any,...args:any[]){
+  const s=await this.stat(),key=`${s.dev}:${s.ino}`;
+  if(targets.has(key)){const position=positions.get(this)??0;assert.ok(args[2]<=s.size-position,'a pinned read must fit its precharged remaining bytes');checked++;const result=await original.apply(this,args);positions.set(this,position+result.bytesRead);return result;}
+  return original.apply(this,args);
+ });
+ const resourceSession=createResourceSessionV3({validation:f.plan.validation,maxGeometryComparisons:f.plan.membership.maxGeometryComparisons,maxMilliseconds:f.plan.membership.maxMilliseconds},createBootstrapResources(Date.now()));
+ await loadAssemblyPlan(f.path,sha,{kind:'session',resources:resourceSession});assert.ok(checked>=3);
 });

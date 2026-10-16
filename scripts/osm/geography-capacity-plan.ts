@@ -1,5 +1,6 @@
 /** Advisory arithmetic only: does not admit source identity, enforce allocations, or predict a planet build. */
 import * as z from 'zod4';
+import {validationLimitsV3Schema} from './partitioned-resources';
 const MiB=1024**2, GiB=1024**3;
 export const proposedGeographyAllocations={raw:95380942829,index:20*GiB,journal:4*GiB,candidates:128*MiB,exclusions:128*MiB,lineage:128*MiB,boundaries:64*MiB,stagedCandidates:128*MiB,stagedBoundaries:64*MiB,footprints:128*MiB,membership:GiB,sort:8*GiB,catalogue:8*GiB,failureReports:GiB,rollback:4*GiB} as const;
 type Allocations={[K in keyof typeof proposedGeographyAllocations]:number};
@@ -32,10 +33,19 @@ export const capacityV2Schema=z.strictObject({schemaVersion:z.literal(2),kind:z.
   supervisor:z.strictObject({wallSeconds:positive.max(172800),rssBytes:positive,commitBytes:positive,diskBytes:positive,freeBytes:uint,maxProcesses:positive.max(4)}),
  })});
 export type GeographyCapacityV2=z.infer<typeof capacityV2Schema>;
+export const MEMBERSHIP_V3_BYTES=64*128*MiB+128*MiB+MiB;
+export const capacityV3Schema=capacityV2Schema.extend({schemaVersion:z.literal(3),kind:z.literal('partitioned-geography-capacity-v2'),
+ allocations:capacityV2Schema.shape.allocations.extend({membership:uint.max(MEMBERSHIP_V3_BYTES)}),
+ limits:capacityV2Schema.shape.limits.extend({membership:capacityV2Schema.shape.limits.shape.membership.omit({maxComparisons:true}).extend({maxGeometryComparisons:positive.max(200000000),maxRows:positive.max(10000000),maxOutputBytes:positive.max(MEMBERSHIP_V3_BYTES)}),validation:validationLimitsV3Schema})});
+export type GeographyCapacityV3=z.infer<typeof capacityV3Schema>;
 export function evaluateGeographyCapacityV2(input:unknown){
- const plan=capacityV2Schema.parse(input),a=plan.allocations,{raw,membership:m,catalogue:c,supervisor:s}=plan.limits;
+ return evaluateCapacity(capacityV2Schema.parse(input));
+}
+export function evaluateGeographyCapacityV3(input:unknown){return evaluateCapacity(capacityV3Schema.parse(input));}
+function evaluateCapacity<T extends GeographyCapacityV2|GeographyCapacityV3>(plan:T){
+ const a=plan.allocations,{raw,membership:m,catalogue:c,supervisor:s}=plan.limits;
  const sum=(values:number[])=>values.reduce((a,b)=>{const result=a+b;if(!Number.isSafeInteger(result)||result<0)throw new Error('Unsafe capacity arithmetic');return result;},0);
- const require=(condition:boolean,message:string)=>{if(!condition)throw new Error(`Capacity v2 ${message}`);};
+ const require=(condition:boolean,message:string)=>{if(!condition)throw new Error(`Capacity v${plan.schemaVersion} ${message}`);};
  const incrementalBytes=sum(Object.values(a)),countedLogicalCeiling=sum([incrementalBytes,plan.retainedBytes]);
  require(a.normalizedOutput===raw.outputBytes,'normalized aggregate mismatch');
  require(m.maxCandidateInputBytes<=raw.outputBytes,'candidate aggregate exceeds normalized aggregate');
@@ -47,6 +57,7 @@ export function evaluateGeographyCapacityV2(input:unknown){
  require(a.membership>=m.maxOutputBytes,'membership output allocation too small');
  require(a.sort>=c.maxScratchBytes&&a.catalogue>=c.maxOutputBytes,'publisher output/scratch allocation too small');
  require(m.maxRows<=raw.candidates&&c.maxInputRows>=m.maxRows&&c.maxInputBytes>=m.maxCandidateInputBytes,'row/input stage ceilings incompatible');
+ if(plan.schemaVersion===3){const v=plan.limits.validation,readBytes=sum([4*sum([a.normalizedOutput,m.maxOutputBytes,a.footprints]),8*MiB,3*m.maxBoundaryBytes,v.controlAndAdmissionReadBytes]);require(v.maxReadBytes===readBytes,'validation physical read reservation mismatch');require(c.maxInputBytes>=sum([m.maxOutputBytes,a.footprints]),'publisher input smaller than membership plus footprint ceiling');}
  require(m.maxTotalVertices>=m.maxVertices,'aggregate vertex ceiling smaller than shard ceiling');
  require(s.diskBytes>=countedLogicalCeiling,'supervisor disk ceiling smaller than retained coexistence');
  require(s.freeBytes>=plan.reserveBytes&&raw.freeBytes>=plan.reserveBytes,'supervisor/raw reserve smaller than declared reserve');

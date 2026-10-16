@@ -1,13 +1,15 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {mkdtemp,writeFile,readFile,realpath,mkdir,copyFile,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,readFile,realpath,mkdir,copyFile,rm,open} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {admissionSubjectDigest} from '../../scripts/osm/source-admission';
 import {verifyProductionAdmission,verifyProductionAdmissionWithContext,productionAdmissionEnvelopeSchema,productionAdmissionCodeFiles} from '../../scripts/osm/production-source-admission';
+
+import {createBootstrapResources,createResourceSessionV3} from '../../scripts/osm/partitioned-resources';
 
 const repo=fileURLToPath(new URL('../../',import.meta.url));
 async function membershipCodeClosure(){
@@ -194,4 +196,72 @@ test('version-two gate rejects missing, inconsistent or changed capacity without
    await f.repin();await assert.rejects(verifyProductionAdmissionWithContext(f.options(),f.context),undefined);
   }finally{await rm(f.root,{recursive:true,force:true});}
  }
+});
+
+async function versionThreeAdmissionFixture(){
+ const f=await versionTwoFixture(),MiB=1024**2,GiB=1024**3;
+ f.plan.schemaVersion=3;f.capacity.schemaVersion=3;f.capacity.kind='partitioned-geography-capacity-v2';
+ const member=f.capacity.limits.membership;member.maxGeometryComparisons=member.maxComparisons;delete member.maxComparisons;
+ member.maxRows=1500001;member.maxOutputBytes=2*GiB;member.maxMilliseconds=30000;
+ f.capacity.allocations.membership=member.maxOutputBytes;f.capacity.limits.raw.candidates=member.maxRows;
+ f.capacity.limits.catalogue.maxInputRows=member.maxRows;f.capacity.limits.catalogue.maxInputBytes=member.maxOutputBytes+f.capacity.allocations.footprints;f.capacity.limits.catalogue.timeoutMs=30000;
+ f.capacity.limits.supervisor.diskBytes=8*GiB;f.capacity.limits.supervisor.wallSeconds=120;
+ f.manifest.limits=f.capacity.limits.raw;f.plan.membership={...member};delete f.plan.membership.maxCandidateInputBytes;
+ f.plan.catalogue=f.capacity.limits.catalogue;f.plan.stream.maxBytes=f.capacity.limits.catalogue.maxInputBytes;f.plan.stream.maxRows=member.maxRows;
+ async function validationPin(Q:number){const R=4*(f.capacity.allocations.normalizedOutput+member.maxOutputBytes+f.capacity.allocations.footprints)+8*MiB+3*member.maxBoundaryBytes+Q;
+  f.plan.validation={maxReadBytes:R,maxRowsRead:R,maxLexicalTokens:R,maxOperations:R,controlAndAdmissionReadBytes:Q};f.capacity.limits.validation=f.plan.validation;await f.capacityPin();}
+ await validationPin(64*MiB);
+ const session=()=>createResourceSessionV3({validation:f.plan.validation,maxGeometryComparisons:member.maxGeometryComparisons,maxMilliseconds:member.maxMilliseconds},createBootstrapResources(Date.now()));
+ return {...f,validationPin,session};
+}
+test('version-three admission keeps exact matrix and one physical control allowance through both gates',async()=>{
+ const f=await versionThreeAdmissionFixture();try{
+  const resourceSession=f.session(),first=await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-before',resourceSession},f.context);
+  const initial=resourceSession.validation.controlAndAdmissionReadBytes;
+  assert.ok(initial>0);assert.equal(resourceSession.geometry.comparisons,0);assert.ok(resourceSession.validation.lexicalTokens>0);
+  await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-after',expectedSnapshot:first.snapshotSha256,resourceSession},f.context);
+  assert.equal(resourceSession.validation.controlAndAdmissionReadBytes,2*initial);
+  await f.validationPin(Math.ceil(initial*1.5));const bounded=f.session();
+  const before=await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-before',resourceSession:bounded},f.context);
+  await assert.rejects(verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-after',expectedSnapshot:before.snapshotSha256,resourceSession:bounded},f.context),/Control and admission read byte limit/);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+test('version-three admission rejects missing runtime resources and crossed raw/capacity versions',async()=>{
+ for(const mode of ['resources','raw3','raw1','capacity2']){
+  const f=await versionThreeAdmissionFixture();try{
+   if(mode==='raw3')f.manifest.schemaVersion=3;
+   if(mode==='raw1')f.manifest.schemaVersion=1;
+   if(mode==='capacity2'){f.capacity.schemaVersion=2;f.capacity.kind='partitioned-geography-capacity-v1';await f.capacityPin();}
+   await f.repin();
+
+   await assert.rejects(verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-before',...(mode==='resources'?{}:{resourceSession:f.session()})},f.context));
+  }finally{await rm(f.root,{recursive:true,force:true});}
+ }
+});
+
+test('version-three admission reads only precharged body bytes and fences path operations',async t=>{
+ const f=await versionThreeAdmissionFixture();try{
+  const probe=await open(f.envelope.assemblyPlan.path,'r');
+  const prototype=Object.getPrototypeOf(probe),original=prototype.read;await probe.close();
+  const positions=new WeakMap<object,number>();let requests=0;
+  t.mock.method(prototype,'read',async function(this:any,...args:any[]){
+   const s=await this.stat(),position=positions.get(this)??0;
+   assert.ok(args[2]<=s.size-position,'admission body requests must fit their precharged remaining bytes');
+   const result=await original.apply(this,args);positions.set(this,position+result.bytesRead);requests++;return result;
+  });
+  const resourceSession=f.session();await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-before',resourceSession},f.context);
+  assert.ok(requests>productionAdmissionCodeFiles.length);
+  assert.ok(resourceSession.validation.operations>requests);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+test('version-three final admission cannot restart consumed path and validation operations',async()=>{
+ const f=await versionThreeAdmissionFixture();try{
+  const measured=f.session();await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-before',resourceSession:measured},f.context);
+  const operations=measured.validation.operations;assert.ok(operations>100);
+  f.plan.validation.maxOperations=Math.ceil(operations*1.5);f.capacity.limits.validation=f.plan.validation;await f.capacityPin();
+  const bounded=f.session(),before=await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-before',resourceSession:bounded},f.context);
+  await assert.rejects(verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-after',expectedSnapshot:before.snapshotSha256,resourceSession:bounded},f.context),/Validation operation limit/);
+  assert.ok(bounded.validation.operations>0);assert.equal(bounded.geometry.comparisons,0);
+ }finally{await rm(f.root,{recursive:true,force:true});}
 });
