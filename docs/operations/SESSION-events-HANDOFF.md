@@ -1,5 +1,58 @@
 # Events lane handoff — 16 October 2026
 
+## Current wave from integrated ca7de5a
+
+Verified clean `codex/events-readiness` in the assigned worktree at **`ca7de5a70a60e7178c5ccf6f1f3e03ee5ffe9538`** before edits. This section is the current handoff; the previous wave below remains historical evidence. Original acceptance totals stay **12 Done / 9 Partial / 6 Not started**. No global source/science gate is closed, and no acquisition allowance or approval is created.
+
+Guidance grows from fourteen to **eighteen** retained codes. The new facts remain unfiltered annual verbal context, never dated events, UTC seasons, requested-window overlap or radiant-model support. The contract permits eighteen unique guidance rows and still accepts previous payloads. No forecast, coefficient, fit domain, year horizon or `data/events` artifact changed.
+
+| Added code | Retained period | Exact original source/locator and preserved qualification |
+| --- | --- | --- |
+| AND | early November | [Jenniskens and Moskovitz, 2021-12-01](https://www.emeteornews.net/2021/12/01/andromedid-activity-in-2021/), Introduction opening. Caveat explicitly preserves **low annual activity in most years**; later outbursts are separate and not predicted by this period. |
+| SDA | end of July | [Koen Miskotte, 2026-03-30](https://www.emeteornews.net/2026/03/30/the-southern-delta-aquariids-2000-2025/), Introduction opening paragraph; annual context in opening of Discussion of SDA activity between 2000 and 2025. Original multiyear analysis distinguishes SDA. Caveat retains year-to-year strength variation; no exact peak or rate imported. |
+| URS | December | [J. M. Madiedo, J. L. Ortiz, J. Aceituno and E. de Guindos, LPSC 2021 abstract 1275](https://www.hou.usra.edu/meetings/lpsc2021/pdf/1275.pdf), PDF page 1, Introduction opening annual-display sentence. Only the month is retained; its approximate numeric dates, peak, rates and separate 2020 outburst results are excluded. |
+| ZPE | first half of June | [Porubčan et al., 2007, CAOSP 37, 31–48](https://www.ta3.sk/caosp/Eedition/FullTexts/vol37no1/pp31-48.pdf), Section 5 opening, printed page 37 / PDF page 7; annual context in Section 1, printed page 32 / PDF page 2. General shower-level statement precedes a separate observed-years paragraph. Explicit daytime identity and nighttime-observing limitation retained; no conversion of radio findings to personal visual suitability. |
+
+All four original texts were read/reviewed on 2026-10-16. These are narrow attributed factual extractions with original identity, locator, review vintage and modification notice. No blanket license is asserted for the articles/papers, no media/numeric tables were acquired, and `licenseUrl` remains absent. The per-row extra qualification is included in the existing `caveat` field, not exposed as an unreviewed new schema field. Source display names fit the existing 120-character contract; full URS author identity is retained here.
+
+**Only SSG remains without admitted annual verbal guidance in the 19-code union.** The [CEMeNt 2025 original report](https://cementcz.eu/news/southern-spectroscopic-observatory-valasske-mezirici/), Southern mu Sagittariids section, describes June 2025 observations without an explicit annual recurrence statement. The exact unresolved question is: which original explanatory source establishes recurring annual calendar timing for **Southern mu-Sagittariids #69 / SSG**? A single year's observing period, a dataset table's annual label or a search snippet cannot supply it. Do not substitute Southern sigma-Sagittariids #168 / SSS.
+
+### New ETA/ORI method evidence
+
+Found the original [Barentsen/Molau MeteorFlux repository at revision `0d475d9e418e48d420582444524505997405f870`](https://github.com/barentsen/meteor-flux/tree/0d475d9e418e48d420582444524505997405f870), dated 2018-02-11. Its README names the authors and MetRec/PostgreSQL path; its [root MIT license](https://github.com/barentsen/meteor-flux/blob/0d475d9e418e48d420582444524505997405f870/LICENSE) names Geert Barentsen, copyright 2013–2016, and requires preserving notices. No code was copied, installed or executed. The repository's permissive software license does not supply A58's deployment history or relicense observation products.
+
+| Pinned source path | What is now established | What it does not establish |
+| --- | --- | --- |
+| [util.py lines 24–112](https://github.com/barentsen/meteor-flux/blob/0d475d9e418e48d420582444524505997405f870/meteorflux/util.py#L24-L112), [app.py date parsing](https://github.com/barentsen/meteor-flux/blob/0d475d9e418e48d420582444524505997405f870/meteorflux/app.py#L49-L50) | Date helper directly turns a UT datetime into Julian day and evaluates a Meeus/Steyaert series in degrees; web date inputs are parsed as UTC. No UTC-to-TT/TDB conversion is visible in this helper path. | The comment's approximate accuracy claim has no established year horizon or independent validation here. A helper's existence does not prove its use for A58 observed-profile longitude. |
+| [metrec.py lines 113–117](https://github.com/barentsen/meteor-flux/blob/0d475d9e418e48d420582444524505997405f870/meteorflux/metrec.py#L113-L117) | Observation longitude is imported directly from **MetRec FLX column 2**. | The originating MetRec version, frame realization, corrections and time handling of that field remain unresolved. It must not be replaced by the Python helper merely because both represent solar longitude. |
+| [functions.sql lines 259–283](https://github.com/barentsen/meteor-flux/blob/0d475d9e418e48d420582444524505997405f870/meteorflux/lib/functions.sql#L259-L283), 305–314 and 356–380; separate time path at 166–168 | Solar-longitude profiles group stored `sollong` values with collection-area weighting; another time-binned path invokes SQL `solarlon(interval.time)`. | Which deployment/query path and changes from this repository produced A58's profiles are unknown. Imported longitude and derived time-label provenance are separate questions. |
+| [graph.py labels at 155–158](https://github.com/barentsen/meteor-flux/blob/0d475d9e418e48d420582444524505997405f870/meteorflux/graph.py#L155-L158) | Output label says J2000.0. | A label alone still does not resolve origin or correction convention. |
+
+This is a specific method advance over the prior unavailable-code lead: **the next missing version is the MetRec FLX generator plus A58's actual MeteorFlux deployment/query**, not just any modern longitude helper. The original repository predates the [provider's 2023-11-20 longitude fix](https://meteorflux.org/changelog.html); its effect on historical values and any reprocessing remain unknown. A58's cited Barentsen/Steyaert occurrences do not identify this helper's cited 2004/1991 methods. CMOR's original longitude implementation and the four activity endpoints' criterion/uncertainty also remain unresolved. ETA/ORI date conversion stays unavailable. The prior conditional reference design below is retained, not reissued as a new plan or permission.
+
+### Outstanding numeric/year gates and delivery
+
+No new scientifically admitted numeric model or year-specific maximum follows from these textual findings. Retained totals remain **38 maxima (2025: 13; 2026: 13; 2027: 12), twelve bounded radiant fits, zero accepted complete UTC seasons**. Missing radiant codes stay **AND ARI DRA DSX SSG URS ZPE**; the previous original Brown2010/ZPE2022 numeric-source leads still need reuse acceptance, uncertainty/domain/convention and independent reference. Missing maxima stay 2025/2026 **HYD LEO LYR NTA ORI STA**; 2027 **AND HYD LYR NTA ORI SSG STA**; every code in other years. The URS2020 paper is not a forecast for any missing release year. No new exact report/version for those gaps was established, and no older dates or omissions were treated as recurrence/absence.
+
+Changes are within `server/events`, `shared/nightsky/events.ts`, existing event/planner/MCP tests and this lane handoff. No registration change in `tests/all.test.ts` is needed. Coordinator integration notes: eighteen verbal-guidance rows, **one** remaining guidance code (SSG), unchanged scientific coverage and global totals. Shared tracker, `tests/all.test.ts`, `tsconfig.tools.json` and workflow are untouched. No datasets/API ephemerides, provider jobs, credentials, deployment, publication or other-branch merges occurred; documentation and individual source-code pages were read without cloning/downloading a software bundle.
+
+Fresh current-wave verification:
+
+| Check | Result |
+| --- | --- |
+| TDD discovery/provenance/AND-plan regression | **32 cases: 26 passed, six expected failures** against baseline (four missing facts, list reconciliation, composed AND evidence); then green after implementation. |
+| Affected event/planner/MCP suites | **86 passed**, zero failures/skips. Intermediate implementation failures identified only URS source display name exceeding the existing 120-character limit; shortened the name without relaxing the contract, then reran successfully. |
+| `npm test` | **947 cases: 941 passed, zero failed, six skipped**, 230.2 seconds. Five installed-data smoke cases skipped for absent ignored artifacts; Windows symlink-fixture creation unavailable for the sixth. No acquisition to fill skips. |
+| `npm run check` | All three TypeScript projects passed. |
+| `npm run build:plugin` | Passed. |
+| `git diff --check` | Passed. |
+
+Independent post-change review read all four full primary texts and checked actual code/test changes, qualifiers, strict/backward-compatible schema, provenance, bounds and fallback behavior. Guidance parsed as eighteen rows / 20,360 bytes. A separate pass verified the new method section against pinned util/app/metrec/SQL/graph/license files. **No actionable science/code/documentation findings.** Reviewer scope concern was resolved against this wave's explicit authorization of `tests/nightsky/meteor-planning.test.ts` and `tests/mcp/initialize.test.ts`; no scope exception or new permission was fabricated.
+
+Final reviewed implementation commit: **`9be5bf81d95d7e1b15cff107dd7927288beca267`**. A handoff-only commit follows to record this evidence. Exact delivery HEAD and six-job CI outcome will be reported in the delivery message after push/watch; prior-wave or baseline CI is not used as evidence for this tip. No other implementation work remains in this bounded wave; unresolved scientific/source gates above remain open.
+
+## Previous wave retained record
+
 Branch `codex/events-readiness`, assigned worktree `.worktrees/events-readiness`, starting at reviewed baseline `b6bb5726b61c5faf05f9e9073306fd19f7828918`. This record supersedes the ten-guidance count in [acquisition readiness](events-acquisition-readiness.md) and [source closure](event-source-closure.md) for this branch only. Original acceptance and totals **12 Done / 9 Partial / 6 Not started** remain unchanged. No global science/source gate is closed.
 
 ## Concrete implementation
