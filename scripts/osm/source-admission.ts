@@ -57,13 +57,33 @@ export const sourceAdmissionSourceSchema = z.strictObject({
   }),
 });
 export const sourceAdmissionBundleSchema = z.strictObject({schemaVersion: z.literal(1), source: sourceAdmissionSourceSchema, reviews: z.array(reviewSchema).max(10)});
+const naturalEarthIdentitySchema = z.strictObject({originalSourceUrl: publicUrl, payload: payloadSchema,
+  licenceEvidence: admissionEvidencePinSchema, normalizationEvidence: admissionEvidencePinSchema});
+const policySourceSchema = z.strictObject({key: sourceAdmissionSourceSchema.shape.key, kind: sourceAdmissionSourceSchema.shape.kind,
+  edition: text, recordSha256: sha256, originalLicenceId: text, disposition: z.enum(['reviewable', 'blocked']),
+  requiredConditions: z.array(z.string().regex(/^[a-z][a-z0-9.-]{0,99}$/)).min(1).max(100),
+  // Omission preserves the retained GeoBoundaries inventory and its digest byte-for-byte.
+  boundaryProvider: z.enum(['geoboundaries', 'natural-earth']).optional(), naturalEarthIdentity: naturalEarthIdentitySchema.optional(),
+}).superRefine((record, context) => {
+  if (record.kind !== 'boundary' && (record.boundaryProvider || record.naturalEarthIdentity)) context.addIssue({code: 'custom', message: 'Boundary provider classification only applies to boundaries'});
+  if (record.boundaryProvider === 'natural-earth') {
+    if (!record.naturalEarthIdentity || record.originalLicenceId !== 'public-domain') context.addIssue({code: 'custom', message: 'Natural Earth requires trusted exact identity pins and public-domain original terms'});
+    if (record.requiredConditions.some(id => id.startsWith('geoboundaries-'))) context.addIssue({code: 'custom', message: 'Natural Earth cannot inherit misleading GeoBoundaries conditions'});
+  } else if (record.naturalEarthIdentity) context.addIssue({code: 'custom', message: 'Natural Earth identity requires the trusted Natural Earth classification'});
+});
 /** This context is supplied by the operator, independently of candidates and receipt declarations. */
 export const sourceAdmissionPolicySchema = z.strictObject({
   schemaVersion: z.literal(1), policyId: text, inventoryRoots: z.array(admissionEvidencePinSchema).min(1).max(4),
-  sources: z.array(z.strictObject({key: sourceAdmissionSourceSchema.shape.key, kind: sourceAdmissionSourceSchema.shape.kind,
-    edition: text, recordSha256: sha256, originalLicenceId: text, disposition: z.enum(['reviewable', 'blocked']),
-    requiredConditions: z.array(z.string().regex(/^[a-z][a-z0-9.-]{0,99}$/)).min(1).max(100),
-  })).min(1).max(1000),
+  sources: z.array(policySourceSchema).min(1).max(1000),
+});
+/** The document hash is part of the reviewed source subject via its condition evidence pin. */
+export const boundaryNormalizationLineageSchema = z.strictObject({schemaVersion: z.literal(1), kind: z.literal('boundary-normalization-lineage'),
+  source: payloadSchema.omit({identityEvidence: true}), transformRevision: text,
+  outputs: z.array(z.strictObject({path: z.string().min(1).max(2048).refine(value => isAbsolute(value) && !value.split(/[\\/]/).includes('..') && !/[\x00-\x1f\x7f]/.test(value)),
+    bytes: z.number().int().min(1).max(128 * MiB), sha256})).min(1).max(1000),
+}).superRefine((lineage, context) => {
+  const paths = lineage.outputs.map(output => process.platform === 'win32' ? resolve(output.path).toLowerCase() : resolve(output.path));
+  if (new Set(paths).size !== paths.length) context.addIssue({code: 'custom', message: 'Duplicate normalized output paths; unique pins required'});
 });
 
 /** Sorting object keys makes approval scope independent of JSON formatting, but preserves array order. */
@@ -149,8 +169,18 @@ export function validateSourceAdmission(rawBundle: unknown, rawTrust: unknown, r
   // Mandatory original terms come from trusted inventory, never the candidate's chosen label.
   const profile = policyRecord ? profiles[policyRecord.originalLicenceId] : undefined;
   const conditionIds = source.rights.conditions.map(condition => condition.id);
+  const naturalEarth = source.kind === 'boundary' && policyRecord?.boundaryProvider === 'natural-earth';
+  if (naturalEarth) {
+    const identity = policyRecord.naturalEarthIdentity!;
+    for (const [name, declared, trusted] of [
+      ['original-source', source.originalSource.url, identity.originalSourceUrl],
+      ['payload', source.payload, identity.payload], ['licence-evidence', source.rights.licenceEvidence, identity.licenceEvidence],
+      ['normalization-evidence', source.rights.conditions.find(condition => condition.id === 'normalized-boundary-lineage')?.evidence, identity.normalizationEvidence],
+    ] as const) if (canonical(declared) !== canonical(trusted)) gaps.push('natural-earth-identity-mismatch:' + name);
+  }
   for (const condition of ['exact-original-source-identity', 'licensor-authority', 'original-source-to-payload-chain', 'mixed-output-compatibility-review',
-    ...(source.kind === 'boundary' ? ['geoboundaries-cc-by-4.0-attribution', 'geoboundaries-modification-and-edition-notice'] : ['osm-contributor-attribution'])]) {
+    ...(source.kind === 'boundary' ? naturalEarth ? ['natural-earth-exact-edition-and-source', 'natural-earth-normalization-and-limitations', 'normalized-boundary-lineage'] :
+      ['geoboundaries-cc-by-4.0-attribution', 'geoboundaries-modification-and-edition-notice'] : ['osm-contributor-attribution'])]) {
     if (!conditionIds.includes(condition)) gaps.push('missing-condition:' + condition);
   }
   if (!profile || !Object.hasOwn(profiles, source.rights.licenceId) || profile.family === 'ambiguous' || profile.family === 'asset-specific') gaps.push('unsupported-licence-profile');
@@ -186,18 +216,46 @@ async function safeExisting(path: string): Promise<string> {
   for (const part of absolute.slice(cursor.length).split(/[\\/]/).filter(Boolean)) { cursor = join(cursor, part); if ((await lstat(cursor)).isSymbolicLink()) throw new Error('Symlink path refused'); }
   return absolute;
 }
-interface ReadBudget {bytes: number; ceiling: number}
+export interface AdmissionMetadataSnapshot {path: string; bytes: number; sha256: string}
+/** Resource accounting only; it cannot select policy, reviews or source authority. */
+export interface AdmissionMetadataAccounting {bytes: number; ceiling: number; paths: Map<string, number>}
+function checkSharedAccounting(shared?: AdmissionMetadataAccounting) {
+  if (!shared) return;
+  if (!Number.isSafeInteger(shared.bytes) || shared.bytes < 0 || !Number.isSafeInteger(shared.ceiling) ||
+      shared.ceiling < 1 || shared.ceiling > 32 * MiB || shared.bytes > shared.ceiling || !(shared.paths instanceof Map)) throw new Error('Shared metadata accounting invalid');
+  let total = 0;
+  for (const [path, bytes] of shared.paths) {
+    if (typeof path !== 'string' || !isAbsolute(path) || !Number.isSafeInteger(bytes) || bytes < 0) throw new Error('Shared metadata accounting entry invalid');
+    total += bytes; if (!Number.isSafeInteger(total) || total > shared.ceiling) throw new Error('Shared metadata accounting limit');
+  }
+  if (total !== shared.bytes) throw new Error('Shared metadata accounting total mismatch');
+}
+interface ReadBudget {bytes: number; ceiling: number; snapshot?: Map<string, AdmissionMetadataSnapshot>; shared?: AdmissionMetadataAccounting}
 async function readBounded(path: string, maxBytes: number, budget: ReadBudget, pin?: Pick<EvidencePin, 'bytes' | 'sha256'>): Promise<Buffer> {
   const absolute = await safeExisting(path), handle = await open(absolute, 'r');
   try {
     const before = await handle.stat();
     if (!before.isFile() || before.size > maxBytes || budget.bytes + before.size > budget.ceiling || pin && before.size !== pin.bytes) throw new Error('Input byte/pin budget');
+    if (budget.shared) {
+      const shared = budget.shared, previous = shared.paths.get(absolute);
+      if (previous !== undefined && previous !== before.size) throw new Error('Shared metadata path size changed');
+      if (previous === undefined) {
+        if (shared.bytes + before.size > shared.ceiling) throw new Error('Shared metadata byte limit');
+        shared.bytes += before.size; shared.paths.set(absolute, before.size);
+      }
+    }
     budget.bytes += before.size;
     const bytes = Buffer.alloc(before.size); let offset = 0;
     while (offset < bytes.length) { const result = await handle.read(bytes, offset, bytes.length - offset, null); if (!result.bytesRead) throw new Error('Input mutation'); offset += result.bytesRead; }
     const after = await handle.stat(); await safeExisting(absolute);
     if (before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ino !== after.ino) throw new Error('Input mutation');
-    if (pin && createHash('sha256').update(bytes).digest('hex') !== pin.sha256) throw new Error('Input checksum mismatch');
+    const sha256 = createHash('sha256').update(bytes).digest('hex');
+    if (pin && sha256 !== pin.sha256) throw new Error('Input checksum mismatch');
+    if (budget.snapshot) {
+      const observed = {path: absolute, bytes: bytes.length, sha256}, previous = budget.snapshot.get(absolute);
+      if (previous && canonical(previous) !== canonical(observed)) throw new Error('Metadata changed between reads');
+      budget.snapshot.set(absolute, observed);
+    }
     return bytes;
   } finally { await handle.close(); }
 }
@@ -343,13 +401,14 @@ export async function buildRetainedSourceAdmissionPolicy(root = repoRoot) {
   return retainedPolicy(root, {bytes: 0, ceiling: 8 * MiB});
 }
 
-/** Verify the bytes of every metadata/review pin before evaluating CLI input. No payload body is read. */
-export async function validateSourceAdmissionFiles(bundlePath: string, trustPath: string) {
-  const budget = {bytes: 0, ceiling: 16 * MiB};
-  // Candidate/trust files cannot select the baseline: its root and canonical pins are fixed here.
-  const policy = await retainedPolicy(repoRoot, budget);
+export interface OperatorAdmissionContext {
+  /** Operator-owned in-memory context only. Never deserialize these values from an execution candidate. */
+  policy: unknown; trust: unknown; trustDirectory: string; policyDirectory?: string;
+}
+async function validateMetadata(bundlePath: string, operator: OperatorAdmissionContext, budget: ReadBudget, rootsAlreadyVerified = false) {
+  const policy = sourceAdmissionPolicySchema.parse(operator.policy), trust = sourceAdmissionTrustSchema.parse(operator.trust);
+  if (!rootsAlreadyVerified) for (const pin of policy.inventoryRoots) await readBounded(join(operator.policyDirectory ?? operator.trustDirectory, pin.path), 4 * MiB, budget, pin);
   const bundle = sourceAdmissionBundleSchema.parse(json(await readBounded(bundlePath, 2 * MiB, budget)));
-  const trust = sourceAdmissionTrustSchema.parse(json(await readBounded(trustPath, 2 * MiB, budget)));
   const source = bundle.source;
   const manifest = sourceAdmissionManifestSchema.parse(json(await readBounded(join(dirname(resolve(bundlePath)), source.manifest.path), 4 * MiB, budget, source.manifest)));
   const selected = manifest.records.filter(record => record.sourceKey === source.key);
@@ -365,7 +424,7 @@ export async function validateSourceAdmissionFiles(bundlePath: string, trustPath
     if (canonical(retained) !== canonical(descriptor)) throw new Error('Planet descriptor content mismatch');
   }
   const visited = new Set<string>();
-  for (const [base, list] of [[dirname(resolve(bundlePath)), pins], [dirname(resolve(trustPath)), trust.trustedReviews.map(review => review.evidence)]] as const) {
+  for (const [base, list] of [[dirname(resolve(bundlePath)), pins], [operator.trustDirectory, trust.trustedReviews.map(review => review.evidence)]] as const) {
     for (const pin of list) {
       const path = join(base, pin.path), key = canonical({absolutePath: path, pin}); if (visited.has(key)) continue; visited.add(key);
       const bytes = await readBounded(path, 4 * MiB, budget, pin);
@@ -376,7 +435,33 @@ export async function validateSourceAdmissionFiles(bundlePath: string, trustPath
       }
     }
   }
-  return {...validateSourceAdmission(bundle, trust, policy), verifiedMetadataBytes: budget.bytes};
+  const lineagePin = source.rights.conditions.find(condition => condition.id === 'normalized-boundary-lineage')?.evidence;
+  if (lineagePin) {
+    if (source.kind !== 'boundary') throw new Error('Boundary normalization lineage is boundary-only');
+    const lineage = boundaryNormalizationLineageSchema.parse(json(await readBounded(join(dirname(resolve(bundlePath)), lineagePin.path), 4 * MiB, budget, lineagePin)));
+    if (canonical(lineage.source) !== canonical({url: source.payload.url, bytes: source.payload.bytes, sha256: source.payload.sha256}) ||
+        lineage.transformRevision !== source.intendedUse.transformRevision) throw new Error('Boundary normalization lineage source/revision mismatch');
+  }
+  return {...validateSourceAdmission(bundle, trust, policy), source, bundle, verifiedMetadataBytes: budget.bytes, evidenceSnapshot: [...budget.snapshot?.values() ?? []]};
+}
+/** Bounded metadata inspection for an internally supplied operator context; no raw/normalized bodies are read. */
+export async function validateSourceAdmissionMetadataFiles(bundlePath: string, operator: OperatorAdmissionContext, accounting?: AdmissionMetadataAccounting) {
+  checkSharedAccounting(accounting);
+  return validateMetadata(bundlePath, operator, {bytes: 0, ceiling: 16 * MiB, snapshot: new Map(), shared: accounting});
+}
+/** The production context is fixed here: candidates cannot select policy or supply trusted approvals. */
+export async function validateProductionSourceAdmissionFiles(bundlePath: string, accounting?: AdmissionMetadataAccounting) {
+  checkSharedAccounting(accounting);
+  const budget: ReadBudget = {bytes: 0, ceiling: 16 * MiB, snapshot: new Map(), shared: accounting};
+  const policy = await retainedPolicy(repoRoot, budget);
+  return validateMetadata(bundlePath, {policy, trust: {schemaVersion: 1, trustedReviews: []}, trustDirectory: repoRoot}, budget, true);
+}
+/** Compatibility inspection CLI: a supplied review allowlist is not a production trust authority. */
+export async function validateSourceAdmissionFiles(bundlePath: string, trustPath: string) {
+  const budget: ReadBudget = {bytes: 0, ceiling: 16 * MiB, snapshot: new Map()};
+  const policy = await retainedPolicy(repoRoot, budget);
+  const trust = sourceAdmissionTrustSchema.parse(json(await readBounded(trustPath, 2 * MiB, budget)));
+  return validateMetadata(bundlePath, {policy, trust, trustDirectory: dirname(resolve(trustPath))}, budget, true);
 }
 
 export function sourceAdmissionOutputPath(output: string) {

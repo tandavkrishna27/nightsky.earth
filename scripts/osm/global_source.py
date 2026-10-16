@@ -1,5 +1,6 @@
 """Offline, source-local OSM selection. SQLite is disposable build scratch only."""
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import math
@@ -258,18 +259,56 @@ class ResourceGuard:
         self.last_scan=self.deadline(); self.calls=0
 
 
-def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_mode='all-nodes'):
+@contextmanager
+def admitted_raw_leases(sources):
+    """Windows production holds deny-write/delete handles through all raw passes.
+
+    Other platforms retain repeated hash/stat checks; this pipeline's production
+    process containment remains Windows-only. No additional raw copy is made.
+    """
+    handles=[]
+    if os.name=='nt':
+        import ctypes
+        from ctypes import wintypes
+        kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+        kernel.CreateFileW.argtypes=[wintypes.LPCWSTR,wintypes.DWORD,wintypes.DWORD,ctypes.c_void_p,wintypes.DWORD,wintypes.DWORD,wintypes.HANDLE]
+        kernel.CreateFileW.restype=wintypes.HANDLE
+        kernel.CloseHandle.argtypes=[wintypes.HANDLE]
+    try:
+        if os.name=='nt':
+            for source in sources:
+                handle=kernel.CreateFileW(str(safe_path(source['path'])),0x80000000,1,None,3,0x80,None)
+                if handle==ctypes.c_void_p(-1).value: raise ValueError('admitted raw write/delete lease refused')
+                handles.append(handle)
+        yield
+    finally:
+        if os.name=='nt':
+            for handle in handles: kernel.CloseHandle(handle)
+
+
+def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_mode='all-nodes', admission_check=None, admission_snapshot=None):
+    """Library primitive; production entry points must supply their checked admission.
+
+    Admission is supplied by trusted calling code, never selected by the manifest.
+    Legacy synthetic fixture calls intentionally exercise this primitive directly.
+    """
+    if (admission_check is None) != (admission_snapshot is None): raise ValueError('admission callback and snapshot required together')
+    if admission_check is not None: admission_check('raw-before')
     if geography_mode not in ('all-nodes','selected-references'): raise ValueError('geography mode')
     m=validate_manifest(manifest); revision=manifest_revision(m); limits=m['limits']; output=safe_path(output)
     if any(safe_path(s['path']).is_relative_to(output) for s in m['sources']): raise ValueError('source inside output')
     if output.exists() and not resume: raise FileExistsError(output)
     output.mkdir(parents=True,exist_ok=resume); start=time.monotonic()
     guard=ResourceGuard(output,limits,start); check=guard.check
+    source_witnesses={}
     def verify_sources():
         check(force=True)
         for s in m['sources']:
             if 'sourceDomain' in s: verify_planet_domain(s,m['policy'])
             p=safe_path(s['path']); before=p.stat()
+            witness=(before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,before.st_ctime_ns)
+            if admission_check is not None and p in source_witnesses and source_witnesses[p]!=witness: raise ValueError('admitted source changed between passes')
+            source_witnesses[p]=witness
             if before.st_size!=s['bytes'] or digest(p,check)!=s['sha256']: raise ValueError('source hash/size mismatch')
             after=p.stat()
             if (before.st_ino,before.st_mtime_ns,before.st_size)!=(after.st_ino,after.st_mtime_ns,after.st_size): raise ValueError('source mutation')
@@ -281,17 +320,21 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
     if resume:
         state=descriptor(checkpoint)
         if state.get('geographyMode','all-nodes')!=geography_mode: raise ValueError('checkpoint geography mode mismatch')
+        if state.get('admissionSnapshotSha256')!=admission_snapshot: raise ValueError('checkpoint admission identity mismatch')
         if state['manifestSha256']!=manifest_hash or state['databaseSha256']!=digest(dbpath,check): raise ValueError('checkpoint digest/manifest mismatch')
         completed=state['completedSources']
         if type(completed) is not int or not 0<=completed<=len(m['sources']): raise ValueError('checkpoint source count')
         if (output/'complete.json').exists():
             done=descriptor(output/'complete.json')
             if done.get('geographyMode','all-nodes')!=geography_mode: raise ValueError('published geography mode mismatch')
+            if done.get('admissionSnapshotSha256')!=admission_snapshot: raise ValueError('published admission identity mismatch')
             if done.get('catalogueRevision')!=revision or done.get('manifestSha256')!=manifest_hash or done.get('policy')!=POLICY or set(done.get('files',{}))!={'candidates.jsonl','exclusions.jsonl','lineage.jsonl'}: raise ValueError('published identity mismatch')
             if done.get('sourceDomains',[])!=source_domains: raise ValueError('published planet domain mismatch')
             for name, pin in done['files'].items():
                 if name not in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl') or digest(output/name,check)!=pin['sha256'] or (output/name).stat().st_size!=pin['bytes']: raise ValueError('published digest mismatch')
-            check(force=True); return output
+            check(force=True)
+            if admission_check is not None: admission_check('resume')
+            return output
         for name in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl'):
             if (output/name).exists(): raise ValueError('partial output present; preserve evidence and use fresh output')
     elif dbpath.exists(): raise ValueError('unexpected scratch')
@@ -307,7 +350,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
         db.executescript('CREATE TABLE IF NOT EXISTS nodes(id INTEGER PRIMARY KEY, lat REAL, lon REAL); CREATE TABLE IF NOT EXISTS candidates(id TEXT PRIMARY KEY, body TEXT, vintage TEXT); CREATE TABLE IF NOT EXISTS lineage(id TEXT, source TEXT, PRIMARY KEY(id,source)); CREATE TABLE IF NOT EXISTS exclusions(source TEXT,id TEXT,reason TEXT); CREATE INDEX IF NOT EXISTS exclusion_order ON exclusions(source,id,reason);')
         def save(count):
             check(force=True)
-            db.commit(); payload={'manifestSha256':manifest_hash,'databaseSha256':digest(dbpath,check),'completedSources':count,'catalogueRevision':revision,'geographyMode':geography_mode}
+            db.commit(); payload={'manifestSha256':manifest_hash,'databaseSha256':digest(dbpath,check),'completedSources':count,'catalogueRevision':revision,'geographyMode':geography_mode,**({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {})}
             temp=output/'checkpoint.tmp'
             encoded=canonical(payload).encode();check(len(encoded))
             with safe_path(temp).open('xb') as f: f.write(encoded)
@@ -395,7 +438,8 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
         write('exclusions.jsonl',(dict(source=s,id=i,reason=r) for s,i,r in db.execute('SELECT * FROM exclusions ORDER BY source,id,reason')))
         write('lineage.jsonl',(dict(placeId=i,source=s,sha256=sources[s]['sha256'],vintage=sources[s]['vintage'],policy=m['policy']) for i,s in db.execute('SELECT * FROM lineage ORDER BY id,source')))
         verify_sources(); check()
-        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode,**({'sourceDomains':source_domains} if source_domains else {}))).encode()
+        if admission_check is not None: admission_check('raw-after')
+        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode,**({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {}),**({'sourceDomains':source_domains} if source_domains else {}))).encode()
         check(len(payload))
         with safe_path(output/'complete.json').open('xb') as f: f.write(payload)
         check(force=True)
@@ -404,8 +448,31 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
         db.close()
 
 
-if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__); parser.add_argument('manifest'); parser.add_argument('output'); parser.add_argument('--resume',action='store_true'); parser.add_argument('--geography-mode',choices=('all-nodes','selected-references'),default='all-nodes'); args=parser.parse_args()
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('manifest'); parser.add_argument('output')
+    parser.add_argument('--resume',action='store_true')
+    parser.add_argument('--geography-mode',choices=('all-nodes','selected-references'),default='all-nodes')
+    parser.add_argument('--admission',nargs=2,required=True,metavar=('FILE','SHA256'))
+    parser.add_argument('--admission-snapshot')
+    args=parser.parse_args(argv)
+    from production_admission import verify_production_admission, production_admission_retained_paths
     path=safe_path(args.manifest)
-    if path.stat().st_size>1024*1024: raise ValueError('manifest byte limit')
-    build(json.loads(path.read_text(encoding='utf8')),args.output,resume=args.resume,geography_mode=args.geography_mode)
+    checked=verify_production_admission(path,*args.admission,'raw-before',args.admission_snapshot)
+    snapshot=checked['snapshotSha256']
+    def admission_check(phase):
+        return verify_production_admission(path,*args.admission,phase,snapshot)
+    with path.open('rb') as handle:
+        body=handle.read(1024*1024+1)
+    if len(body)>1024*1024 or hashlib.sha256(body).hexdigest()!=checked['manifest']['sha256']:
+        raise ValueError('admitted manifest mutation')
+    manifest=validate_manifest(json.loads(body))
+    lease_paths=[*production_admission_retained_paths(checked),*[safe_path(s['path']) for s in manifest['sources']]]
+    with admitted_raw_leases([{'path':p} for p in dict.fromkeys(lease_paths)]):
+        build(manifest,args.output,resume=args.resume,geography_mode=args.geography_mode,
+              admission_check=admission_check,admission_snapshot=snapshot)
+    return 0
+
+
+if __name__=='__main__':
+    main()

@@ -11,6 +11,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'/'osm'))
 from global_source_supervisor import supervise
 from global_source_supervisor import pipeline
 import test_global_source_pipeline as fixtures
+from fixture_execution import fixture_runtime
 
 
 class Supervisor(unittest.TestCase):
@@ -30,6 +31,7 @@ class Supervisor(unittest.TestCase):
             self.assertFalse((fixture.root/'job').exists())
         finally: fixture.doCleanups()
     @unittest.skipUnless(os.name=='nt','Windows Job evidence only')
+    @fixture_runtime
     def test_raw_to_pages(self):
         fixture=fixtures.Pipeline(); fixture.setUp()
         try:

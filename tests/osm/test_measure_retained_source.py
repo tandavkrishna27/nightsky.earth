@@ -5,6 +5,7 @@ import sys
 import tempfile
 import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts/osm'))
+from fixture_execution import fixture_runtime
 spec=importlib.util.spec_from_file_location('measurement',Path(__file__).resolve().parents[2]/'scripts/osm/measure-retained-source.py')
 m=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
@@ -34,6 +35,7 @@ class Measurement(unittest.TestCase):
 
 class MeasuredPipeline(unittest.TestCase):
     @unittest.skipUnless(sys.platform=='win32','requires existing Windows Job supervisor')
+    @fixture_runtime
     def test_actual_configured_producer_bridge_and_metrics(self):
         import hashlib
         with tempfile.TemporaryDirectory() as tmp:
