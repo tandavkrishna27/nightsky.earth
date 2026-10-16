@@ -12,7 +12,7 @@ const integer=(max:number)=>z.number().int().safe().min(1).max(max);
 const pin=z.strictObject({path:z.string().refine(isAbsolute),bytes:z.number().int().safe().min(0).max(128*1024**2),sha256:z.string().regex(/^[a-f0-9]{64}$/)});
 const filePin=pin.omit({path:true});
 const membership=z.strictObject({maxBoundaryBytes:integer(64*1024**2).optional(),maxVertices:integer(1000000).optional(),maxTotalVertices:integer(2000000).optional(),maxMilliseconds:integer(1800000).optional(),maxComparisons:integer(200000000).optional(),maxRows:integer(1000000).optional(),maxOutputBytes:integer(1024**3).optional()});
-const planSchema=z.strictObject({schemaVersion:z.literal(1),boundaries:z.array(z.strictObject({input:pin,regionIds:z.array(z.string().min(1).max(200)).max(10000),unresolvedBoundaryIds:z.array(z.string().min(1).max(400)).max(10000).optional()})).min(1).max(100),footprints:pin,membership,stream:streamLimitsSchema,catalogue:catalogueOptionsSchema,retained:z.array(z.string().refine(isAbsolute)).max(100)});
+const planSchema=z.strictObject({schemaVersion:z.literal(1),geographyMode:z.enum(['all-nodes','selected-references']).optional(),boundaries:z.array(z.strictObject({input:pin,regionIds:z.array(z.string().min(1).max(200)).max(10000),unresolvedBoundaryIds:z.array(z.string().min(1).max(400)).max(10000).optional()})).min(1).max(100),footprints:pin,membership,stream:streamLimitsSchema,catalogue:catalogueOptionsSchema,retained:z.array(z.string().refine(isAbsolute)).max(100)});
 async function small(path:string,max:number){const h=await open(await safe(path),'r');try{const a=await h.stat();if(!a.isFile()||a.size>max)throw new Error('Descriptor byte limit');const body=await h.readFile();const b=await h.stat();if(body.length!==a.size||a.size!==b.size||a.mtimeMs!==b.mtimeMs)throw new Error('Descriptor mutation');return body;}finally{await h.close();}}
 export async function loadAssemblyPlan(path:string,sha256:string){
  const body=await small(path,1024*1024);if(!/^[a-f0-9]{64}$/.test(sha256)||createHash('sha256').update(body).digest('hex')!==sha256)throw new Error('Assembly digest mismatch');
@@ -36,6 +36,7 @@ export async function assembleMembership(planPath:string,sha256:string,producer:
  const original=await small(join(producer,'complete.json'),1024*1024),done=JSON.parse(original.toString('utf8'));
  if(done.schemaVersion!==1||!done.files?.['candidates.jsonl'])throw new Error('Producer completion required');
  if(Object.keys(done.files).sort().join(',')!=='candidates.jsonl,exclusions.jsonl,lineage.jsonl')throw new Error('Complete raw producer evidence required');
+ if((done.geographyMode??'all-nodes')!==(plan.geographyMode??'all-nodes'))throw new Error('Producer geography mode mismatch');
  const producerPins=[];
  for(const [name,value] of Object.entries(done.files)){if(!['candidates.jsonl','lineage.jsonl','exclusions.jsonl'].includes(name))throw new Error('Unknown producer evidence');const item=pin.parse({...filePin.parse(value),path:join(await safe(producer),name)});await copyPinned(item);producerPins.push(item);}
  const candidate=pin.parse({...filePin.parse(done.files['candidates.jsonl']),path:join(await safe(producer),'candidates.jsonl')});

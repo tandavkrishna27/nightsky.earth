@@ -38,6 +38,19 @@ class Assembly(unittest.TestCase):
             self.assertTrue((fixture.root/'job'/'normalized'/'lineage.jsonl').exists())
         finally: fixture.doCleanups()
 
+    @unittest.skipUnless(os.name=='nt','Windows Job integration')
+    def test_selected_references_plan_runs_and_records_mode(self):
+        from supervised_membership_assembly import assembly_pipeline
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
+            plan,path,save=self.setup_plan(fixture);plan['geographyMode']='selected-references'
+            result=assembly_pipeline(manifest,fixture.root/'job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=20000000,freeBytes=0,maxProcesses=2))
+            self.assertEqual(result['status'],'complete',str(result))
+            evidence=json.loads((fixture.root/'job'/'assembly-complete.json').read_text())
+            self.assertEqual(evidence['producerDescriptor']['geographyMode'],'selected-references')
+        finally: fixture.doCleanups()
+
     def test_bad_pin_and_retained_overlap_reject_before_job(self):
         from supervised_membership_assembly import assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()

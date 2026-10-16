@@ -33,11 +33,27 @@ export const ADDITIONAL_CALENDAR_SOURCES = [
  },
 ];
 
+
+const SOURCE_CLOSURE_GUIDANCE = [
+ { code: "QUA", name: "Quadrantids", sourceWording: "early-January", sourceLocator: "About the Meteor Shower, opening annual-recurrence sentence", sourceName: "NASA Science, Quadrantids Meteor Shower", url: "https://science.nasa.gov/solar-system/meteors-meteorites/quadrantids/", vintage: "NASA-Quadrantids-narrative-reviewed-2026-10-16", daytime: false },
+ { code: "DSX", name: "Daytime Sextantids", sourceWording: "late September and early October", sourceLocator: "Section 1, introduction, annual Daytime Sextantid description", sourceName: "Kipreos, Campbell-Brown, Brown and Vida (2022), Characterizing the Daytime Sextantids, arXiv 2208.03521v1", url: "https://arxiv.org/html/2208.03521v1", vintage: "Kipreos-et-al-2208.03521v1", daytime: true },
+ { code: "ARI", name: "Daytime Arietids", sourceWording: "on or near June 8th", sourceLocator: "Narrative paragraph beginning Meteors and meteor showers can occur in the daytime", sourceName: "NOAA/NWS Sioux Falls, Meteors and Meteor Showers", url: "https://www.weather.gov/fsd/meteor", vintage: "NWS-FSD-meteor-narrative-reviewed-2026-10-16", daytime: true },
+ { code: "CAP", name: "Alpha Capricornids", sourceWording: "late July", sourceLocator: "Event narrative, Every year sentence preceding This year peak statement", sourceName: "Lowell Observatory, Two Meteor Showers: One Fabulous Night, Night Sky Network listing (2020-07-28)", url: "https://nightsky.jpl.nasa.gov/events/12408/", vintage: "Lowell-NSN-12408-2020-07-28", daytime: false },
+].map(({sourceName, url, vintage, daytime, ...row}) => ({
+ ...row, evidenceKind: "approximate-calendar-guidance", precision: "verbal-period",
+ recurrenceBasis: "typical-annual", requestedWindowOverlap: "not-evaluated",
+ caveat: "Approximate annual context only; no exact season, year-specific peak, local visibility or requested-window overlap is inferred. Radiant validity is separate." + (daytime ? " This is a daytime shower; annual timing is not a recommendation for nighttime visual observing." : ""),
+ source: {name: sourceName, url, vintage, dataClass: "context", modified: true,
+  product: "Individual annual calendar fact from original explanatory narrative",
+  attribution: `Source reference: ${sourceName}. Annual calendar fact extracted and structured by NightSky.earth; no blanket article license or endorsement asserted.`,
+ },
+}));
+
 /** A58's introductory calendar wording, independently of its longitude intervals.
  * No numerical boundaries are assigned to "early" or "late". */
 export function meteorCalendarGuidance(): MeteorCalendarGuidance {
  return meteorCalendarGuidanceSchema.parse({
-  availability: { status: "partial", reason: "Approximate annual calendar wording is admitted for ETA, ORI, GEM, LYR, PER and LEO only; other showers remain unavailable pending source and reuse review. Missing guidance does not mean no meteor activity." },
+  availability: { status: "partial", reason: "Approximate annual calendar wording is admitted for ETA, ORI, GEM, LYR, PER, LEO, QUA, DSX, ARI and CAP only; other showers remain unavailable pending source and reuse review. Missing guidance does not mean no meteor activity." },
   entries: [...[["ETA", "Eta Aquariids", "early May"], ["ORI", "Orionids", "late October"]].map(([code, name, sourceWording]) => ({
    code, name, sourceWording, evidenceKind: "approximate-calendar-guidance",
    precision: "verbal-period", recurrenceBasis: "typical-annual", requestedWindowOverlap: "not-evaluated",
@@ -63,6 +79,6 @@ export function meteorCalendarGuidance(): MeteorCalendarGuidance {
    recurrenceBasis: "typical-annual", requestedWindowOverlap: "not-evaluated",
    caveat: "Approximate annual calendar context only, not activity throughout the named period, a complete season, a year-specific peak or local visibility. Verbal qualifiers are retained; no UTC boundaries or requested-window overlap are inferred. Radiant validity is separate.",
    source: ADDITIONAL_CALENDAR_SOURCES[index],
-  }))],
+  })), ...SOURCE_CLOSURE_GUIDANCE],
  });
 }

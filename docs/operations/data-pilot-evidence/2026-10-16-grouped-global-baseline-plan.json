@@ -1,0 +1,3841 @@
+{
+  "elapsedSeconds": 93.22343959999999,
+  "maxDurationSeconds": 300,
+  "peakRssBytes": 336838656,
+  "status": "unapproved-nonexecuting",
+  "input": {
+    "path": ".data/history-global-proposed-20261015-v1.json",
+    "sha256": "0b296d22142fea417a71299e17009536f82b14417f33eb4b38baa2ff307d2b12",
+    "bytes": 7098093
+  },
+  "sourceSha256": "2e0a06c2ff234e3dc7f34b521e53c4f8ab80848146e3332ee7d365c80a753914",
+  "counts": {
+    "acquisitionCells": 99914,
+    "destinations": 236042,
+    "distinctProspectiveRawPins": 9016688,
+    "fillerCells": 45092,
+    "minimumProspectiveDecodedPins": 9016688,
+    "missingRequiredCellHours": 14422993920,
+    "proposedScalarCellHours": 26286148944,
+    "prospectiveRawAndDecodedUnionLowerBound": 18033376,
+    "requests": 9016688,
+    "requiredSourceCellHours": 14423010336,
+    "retainedAllAcquisitionCellHours": 25488,
+    "retainedDecodedPins": 8,
+    "retainedMetadataPins": 2,
+    "retainedRawPins": 6,
+    "retainedRequiredCellHours": 16416,
+    "tiles": 24908,
+    "uniqueCellZonePairs": 56039,
+    "uniqueRequiredCells": 54822
+  },
+  "results": [
+    {
+      "maxYearsPerRequest": 30,
+      "requests": 373619,
+      "scalarCellHours": 26286148944,
+      "decodedMonthlyPartitions": 9016688,
+      "maxSourceHoursPerRequest": 22320,
+      "maxScalarHoursPerRequest": 133920,
+      "orderedRequestIdentitySha256": "e8f0e7cf03bfaf960acc4b0a48979046ec64d5cff521f979e89a44c1612e9883",
+      "prefix": [
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "821c3417c3f3ca98f09d8af919483686fc05daf2014e874b372ccd7c84202290",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "12"
+            ],
+            "day": [
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1990"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 48,
+          "scalarCellHours": 192,
+          "partitions": [
+            {
+              "year": "1990",
+              "month": "12",
+              "expectedHours": 48
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "cdacd43ad7dd387b6c25cc645116949c34ee6167caae7d2f22bd33c9d30aea6a",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "01"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "01",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "01",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "0fa778ae377fd697a186bc3407262221477316bccae83cdd83ed4dba71c00009",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "02"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1993",
+              "1994",
+              "1995",
+              "1997",
+              "1998",
+              "1999",
+              "2001",
+              "2002",
+              "2003",
+              "2005",
+              "2006",
+              "2007",
+              "2009",
+              "2010",
+              "2011",
+              "2013",
+              "2014",
+              "2015",
+              "2017",
+              "2018",
+              "2019"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 14784,
+          "scalarCellHours": 59136,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "1993",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "1994",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "1995",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "1997",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "1998",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "1999",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2001",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2002",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2003",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2005",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2006",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2007",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2009",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2010",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2011",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2013",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2014",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2015",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2017",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2018",
+              "month": "02",
+              "expectedHours": 672
+            },
+            {
+              "year": "2019",
+              "month": "02",
+              "expectedHours": 672
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "207114a2b9d8942096f2a50b0b4bbb413ad058cbb23b6936d5fb92058b1948f8",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "03"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "03",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "03",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "2112a3a0908606b59388f6beae94925c9d6c0abd8c06aafd169278aef1426e44",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "04"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 21600,
+          "scalarCellHours": 86400,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1992",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1993",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1994",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1995",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1996",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1997",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1998",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "1999",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2000",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2001",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2002",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2003",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2004",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2005",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2006",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2007",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2008",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2009",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2010",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2011",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2012",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2013",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2014",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2015",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2016",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2017",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2018",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2019",
+              "month": "04",
+              "expectedHours": 720
+            },
+            {
+              "year": "2020",
+              "month": "04",
+              "expectedHours": 720
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "9c183efbf5d5ceb5bb0593415fcb1f25d1a3a5ef9c5a15ff88c95b2d6404983b",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "05"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "05",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "05",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "7dabc203f406ad0f41adddc84ead9e486052dc6fc14d4d8761c46a53cc539cb3",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "06"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 21600,
+          "scalarCellHours": 86400,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1992",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1993",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1994",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1995",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1996",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1997",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1998",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "1999",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2000",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2001",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2002",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2003",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2004",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2005",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2006",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2007",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2008",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2009",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2010",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2011",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2012",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2013",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2014",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2015",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2016",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2017",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2018",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2019",
+              "month": "06",
+              "expectedHours": 720
+            },
+            {
+              "year": "2020",
+              "month": "06",
+              "expectedHours": 720
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "b495761c816e0514138e96ac3892d6c50a75b0407f870298ba933804cfb9056c",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "07"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "07",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "07",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "7666a4ec6885aa87c0a1b579f3855605d70be2c02224955e2701c7d2d1a73e41",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "08"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "08",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "08",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "f46326b7ac681085e02b508c6f7cd1133d1f35e098989b50cbe71dc918965797",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "09"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 21600,
+          "scalarCellHours": 86400,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1992",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1993",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1994",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1995",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1996",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1997",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1998",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "1999",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2000",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2001",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2002",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2003",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2004",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2005",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2006",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2007",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2008",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2009",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2010",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2011",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2012",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2013",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2014",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2015",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2016",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2017",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2018",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2019",
+              "month": "09",
+              "expectedHours": 720
+            },
+            {
+              "year": "2020",
+              "month": "09",
+              "expectedHours": 720
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "e472a3ec7ebea08bf3876e34fb0e34ee99f0f0bcfd463f3a998b118d3087cd81",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "10"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "10",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "10",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "2ce5d14ca29a083ca4ae0caa48898ec2e5d39b9e73156dd15e6bc2deccd26267",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "11"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 21600,
+          "scalarCellHours": 86400,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1992",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1993",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1994",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1995",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1996",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1997",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1998",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "1999",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2000",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2001",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2002",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2003",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2004",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2005",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2006",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2007",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2008",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2009",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2010",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2011",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2012",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2013",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2014",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2015",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2016",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2017",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2018",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2019",
+              "month": "11",
+              "expectedHours": 720
+            },
+            {
+              "year": "2020",
+              "month": "11",
+              "expectedHours": 720
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "40a49061a390f1cb0fbce37344878fcb13e445ef7982a3f6c0cbe699ef86e88f",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "12"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29",
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1991",
+              "1992",
+              "1993",
+              "1994",
+              "1995",
+              "1996",
+              "1997",
+              "1998",
+              "1999",
+              "2000",
+              "2001",
+              "2002",
+              "2003",
+              "2004",
+              "2005",
+              "2006",
+              "2007",
+              "2008",
+              "2009",
+              "2010",
+              "2011",
+              "2012",
+              "2013",
+              "2014",
+              "2015",
+              "2016",
+              "2017",
+              "2018",
+              "2019",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 22320,
+          "scalarCellHours": 89280,
+          "partitions": [
+            {
+              "year": "1991",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1992",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1993",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1994",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1995",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1996",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1997",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1998",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "1999",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2000",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2001",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2002",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2003",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2004",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2005",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2006",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2007",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2008",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2009",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2010",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2011",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2012",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2013",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2014",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2015",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2016",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2017",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2018",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2019",
+              "month": "12",
+              "expectedHours": 744
+            },
+            {
+              "year": "2020",
+              "month": "12",
+              "expectedHours": 744
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "d101a5a2b9e94398bda6c9f7248892750e92e54161a06bbb8ce5e8114a605c98",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "02"
+            ],
+            "day": [
+              "01",
+              "02",
+              "03",
+              "04",
+              "05",
+              "06",
+              "07",
+              "08",
+              "09",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "17",
+              "18",
+              "19",
+              "20",
+              "21",
+              "22",
+              "23",
+              "24",
+              "25",
+              "26",
+              "27",
+              "28",
+              "29"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "1992",
+              "1996",
+              "2000",
+              "2004",
+              "2008",
+              "2012",
+              "2016",
+              "2020"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 5568,
+          "scalarCellHours": 22272,
+          "partitions": [
+            {
+              "year": "1992",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "1996",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "2000",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "2004",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "2008",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "2012",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "2016",
+              "month": "02",
+              "expectedHours": 696
+            },
+            {
+              "year": "2020",
+              "month": "02",
+              "expectedHours": 696
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "2f5717e6a41ee14eeda429d8d6110b6dd797f1897350ecaf47c4ebb370851eca",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "01"
+            ],
+            "day": [
+              "01",
+              "02"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73.5,
+              -40,
+              -73.25
+            ],
+            "year": [
+              "2021"
+            ]
+          },
+          "tileId": "100:213",
+          "expectedCells": [
+            "era5:-40:-73.5",
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5",
+            "era5:-39.75:-73.25"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-73.25",
+            "era5:-40:-73.5"
+          ],
+          "fillerCells": [
+            "era5:-40:-73.25",
+            "era5:-39.75:-73.5"
+          ],
+          "expectedHours": 48,
+          "scalarCellHours": 192,
+          "partitions": [
+            {
+              "year": "2021",
+              "month": "01",
+              "expectedHours": 48
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        },
+        {
+          "status": "unapproved-nonexecuting",
+          "sha256": "701c58fcedd5d58c1951afdbc71d7b8bf0697dfef9042e667390dcecb05bf65f",
+          "dataset": "reanalysis-era5-single-levels",
+          "revision": "0001",
+          "member": 0,
+          "request": {
+            "data_format": "netcdf",
+            "download_format": "unarchived",
+            "product_type": [
+              "reanalysis"
+            ],
+            "variable": [
+              "total_cloud_cover"
+            ],
+            "month": [
+              "12"
+            ],
+            "day": [
+              "30",
+              "31"
+            ],
+            "time": [
+              "00:00",
+              "01:00",
+              "02:00",
+              "03:00",
+              "04:00",
+              "05:00",
+              "06:00",
+              "07:00",
+              "08:00",
+              "09:00",
+              "10:00",
+              "11:00",
+              "12:00",
+              "13:00",
+              "14:00",
+              "15:00",
+              "16:00",
+              "17:00",
+              "18:00",
+              "19:00",
+              "20:00",
+              "21:00",
+              "22:00",
+              "23:00"
+            ],
+            "area": [
+              -39.75,
+              -73,
+              -40,
+              -72.75
+            ],
+            "year": [
+              "1990"
+            ]
+          },
+          "tileId": "100:214",
+          "expectedCells": [
+            "era5:-40:-73",
+            "era5:-40:-72.75",
+            "era5:-39.75:-73",
+            "era5:-39.75:-72.75"
+          ],
+          "requiredCells": [
+            "era5:-39.75:-72.75",
+            "era5:-40:-73"
+          ],
+          "fillerCells": [
+            "era5:-40:-72.75",
+            "era5:-39.75:-73"
+          ],
+          "expectedHours": 48,
+          "scalarCellHours": 192,
+          "partitions": [
+            {
+              "year": "1990",
+              "month": "12",
+              "expectedHours": 48
+            }
+          ],
+          "providerAcceptance": "unproved-for-this-group"
+        }
+      ]
+    }
+  ],
+  "networkRequests": 0,
+  "datasetBodyReads": 0
+}

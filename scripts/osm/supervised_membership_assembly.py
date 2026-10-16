@@ -19,7 +19,9 @@ def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, no
     with plan_path.open('rb') as handle: body=handle.read(1024*1024+1)
     if len(body)>1024*1024 or hashlib.sha256(body).hexdigest()!=plan_sha256: raise ValueError('assembly size/digest mismatch')
     plan=json.loads(body)
-    if not isinstance(plan,dict) or set(plan)!=set(('schemaVersion','boundaries','footprints','membership','stream','catalogue','retained')) or type(plan['schemaVersion']) is not int or plan['schemaVersion']!=1: raise ValueError('assembly schema')
+    if not isinstance(plan,dict) or set(plan)-{'geographyMode'}!=set(('schemaVersion','boundaries','footprints','membership','stream','catalogue','retained')) or type(plan['schemaVersion']) is not int or plan['schemaVersion']!=1: raise ValueError('assembly schema')
+    geography_mode=plan.get('geographyMode','all-nodes')
+    if geography_mode not in ('all-nodes','selected-references'): raise ValueError('geography mode')
     if not isinstance(plan['boundaries'],list) or not 1<=len(plan['boundaries'])<=100: raise ValueError('boundary inventory')
     retained=[manifest_path,plan_path,*[safe_path(s['path']) for s in manifest['sources']],*[safe_path(p) for p in accounting_paths]]
     for pin in [*[s['input'] for s in plan['boundaries']],plan['footprints']]:
@@ -41,7 +43,7 @@ def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, no
     worker=[node,'--max-old-space-size=1280','--import',(scripts.parents[1]/'node_modules'/'tsx'/'dist'/'loader.mjs').as_uri(),str(scripts/'membership-assembly.ts')]
     # Validate the complete TypeScript plan under the same containment before raw parsing.
     commands=[[*worker,'--prepare',str(plan_path),plan_sha256,str(manifest_path),str(len(manifest_body)),hashlib.sha256(manifest_body).hexdigest(),str(root/'raw-manifest.json')],
-              [python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(root/'raw-manifest.json'),str(root/'normalized')],
+              [python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(root/'raw-manifest.json'),str(root/'normalized'),'--geography-mode',geography_mode],
               [*worker,str(plan_path),plan_sha256,str(root/'normalized'),str(root)]]
     return supervise(commands,root,limits,retained=retained)
 

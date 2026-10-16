@@ -88,7 +88,7 @@ def category(tags):
 
 
 def entities(source, limit, check):
-    """Two-pass XML/PBF records, never pyosmium's in-memory location index."""
+    """Streaming XML/PBF records, never pyosmium's in-memory location index."""
     if source['format']=='pbf':
         try: import osmium
         except ImportError as exc: raise ValueError('PBF requires existing optional pyosmium') from exc
@@ -220,7 +220,8 @@ class ResourceGuard:
         self.last_scan=self.deadline(); self.calls=0
 
 
-def build(manifest, output, *, resume=False, hook=lambda stage: None):
+def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_mode='all-nodes'):
+    if geography_mode not in ('all-nodes','selected-references'): raise ValueError('geography mode')
     m=validate_manifest(manifest); revision=manifest_revision(m); limits=m['limits']; output=safe_path(output)
     if any(safe_path(s['path']).is_relative_to(output) for s in m['sources']): raise ValueError('source inside output')
     if output.exists() and not resume: raise FileExistsError(output)
@@ -239,11 +240,13 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
     completed=0
     if resume:
         state=descriptor(checkpoint)
+        if state.get('geographyMode','all-nodes')!=geography_mode: raise ValueError('checkpoint geography mode mismatch')
         if state['manifestSha256']!=manifest_hash or state['databaseSha256']!=digest(dbpath,check): raise ValueError('checkpoint digest/manifest mismatch')
         completed=state['completedSources']
         if type(completed) is not int or not 0<=completed<=len(m['sources']): raise ValueError('checkpoint source count')
         if (output/'complete.json').exists():
             done=descriptor(output/'complete.json')
+            if done.get('geographyMode','all-nodes')!=geography_mode: raise ValueError('published geography mode mismatch')
             if done.get('catalogueRevision')!=revision or done.get('manifestSha256')!=manifest_hash or done.get('policy')!=POLICY or set(done.get('files',{}))!={'candidates.jsonl','exclusions.jsonl','lineage.jsonl'}: raise ValueError('published identity mismatch')
             for name, pin in done['files'].items():
                 if name not in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl') or digest(output/name,check)!=pin['sha256'] or (output/name).stat().st_size!=pin['bytes']: raise ValueError('published digest mismatch')
@@ -263,7 +266,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
         db.executescript('CREATE TABLE IF NOT EXISTS nodes(id INTEGER PRIMARY KEY, lat REAL, lon REAL); CREATE TABLE IF NOT EXISTS candidates(id TEXT PRIMARY KEY, body TEXT, vintage TEXT); CREATE TABLE IF NOT EXISTS lineage(id TEXT, source TEXT, PRIMARY KEY(id,source)); CREATE TABLE IF NOT EXISTS exclusions(source TEXT,id TEXT,reason TEXT); CREATE INDEX IF NOT EXISTS exclusion_order ON exclusions(source,id,reason);')
         def save(count):
             check(force=True)
-            db.commit(); payload={'manifestSha256':manifest_hash,'databaseSha256':digest(dbpath,check),'completedSources':count,'catalogueRevision':revision}
+            db.commit(); payload={'manifestSha256':manifest_hash,'databaseSha256':digest(dbpath,check),'completedSources':count,'catalogueRevision':revision,'geographyMode':geography_mode}
             temp=output/'checkpoint.tmp'
             encoded=canonical(payload).encode();check(len(encoded))
             with safe_path(temp).open('xb') as f: f.write(encoded)
@@ -274,10 +277,29 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
         for index,s in enumerate(m['sources']):
             if index<completed: continue
             db.execute('BEGIN'); db.execute('DELETE FROM nodes'); node_count=0; candidate_count=db.execute('SELECT count(*) FROM candidates').fetchone()[0]
+            if geography_mode=='selected-references':
+                # The disk-backed placeholder set shares the main database cap.
+                # No global Python reference set or location index is retained.
+                for kind, oid, tags, point, refs in entities(s,limits,check):
+                    if kind=='way' and category(tags) and clean(tags.get('name') or tags.get('name:en') or tags.get('official_name')):
+                        for ref in refs:
+                            check()
+                            db.execute('INSERT OR IGNORE INTO nodes(id) VALUES(?)',(ref,))
+                check(force=True)
+            last_node=None
             for kind, oid, tags, point, refs in entities(s,limits,check):
                 if kind!='node' or not valid(point): continue
                 node_count+=1
                 if node_count>limits['nodes']: raise ValueError('node limit')
+                if geography_mode=='selected-references':
+                    # Sorted valid-node IDs permit exact duplicate validation for
+                    # ALL valid nodes using only the immediately previous record.
+                    if last_node is not None:
+                        if oid<last_node[0]: raise ValueError('node order: selected-references requires nondecreasing valid-node IDs')
+                        if oid==last_node[0] and tuple(point)!=last_node[1]: raise ValueError('node identity conflict')
+                    last_node=(oid,tuple(point))
+                    db.execute('UPDATE nodes SET lat=?,lon=? WHERE id=?',(*point,oid))
+                    continue
                 previous=db.execute('SELECT lat,lon FROM nodes WHERE id=?',(oid,)).fetchone()
                 if previous is not None and tuple(point)!=previous: raise ValueError('node identity conflict')
                 db.execute('INSERT OR IGNORE INTO nodes VALUES(?,?,?)',(oid,*point))
@@ -288,7 +310,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
                 reason='relation' if kind=='relation' else 'unnamed' if not name else None
                 if kind=='way' and not reason:
                     points=[db.execute('SELECT lat,lon FROM nodes WHERE id=?',(ref,)).fetchone() for ref in refs]
-                    if not points or any(p is None for p in points): reason='incomplete'
+                    if not points or any(p is None or p[0] is None for p in points): reason='incomplete'
                     elif max(p[1] for p in points)-min(p[1] for p in points)>180: reason='dateline'
                     elif any(abs(p[0])>=85 for p in points): reason='polar'
                     else:
@@ -332,7 +354,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
         write('exclusions.jsonl',(dict(source=s,id=i,reason=r) for s,i,r in db.execute('SELECT * FROM exclusions ORDER BY source,id,reason')))
         write('lineage.jsonl',(dict(placeId=i,source=s,sha256=sources[s]['sha256'],vintage=sources[s]['vintage'],policy=m['policy']) for i,s in db.execute('SELECT * FROM lineage ORDER BY id,source')))
         verify_sources(); check()
-        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'])).encode()
+        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode)).encode()
         check(len(payload))
         with safe_path(output/'complete.json').open('xb') as f: f.write(payload)
         check(force=True)
@@ -342,7 +364,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__); parser.add_argument('manifest'); parser.add_argument('output'); parser.add_argument('--resume',action='store_true'); args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__); parser.add_argument('manifest'); parser.add_argument('output'); parser.add_argument('--resume',action='store_true'); parser.add_argument('--geography-mode',choices=('all-nodes','selected-references'),default='all-nodes'); args=parser.parse_args()
     path=safe_path(args.manifest)
     if path.stat().st_size>1024*1024: raise ValueError('manifest byte limit')
-    build(json.loads(path.read_text(encoding='utf8')),args.output,resume=args.resume)
+    build(json.loads(path.read_text(encoding='utf8')),args.output,resume=args.resume,geography_mode=args.geography_mode)

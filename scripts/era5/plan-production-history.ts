@@ -14,6 +14,58 @@ export const productionHistoryInventorySchema=z.strictObject({schemaVersion:z.li
 export const SOURCE_START='1990-12-30T00:00:00Z',SOURCE_END='2021-01-03T00:00:00Z';
 const start=Date.parse(SOURCE_START),end=Date.parse(SOURCE_END),hour=3600000;
 export const SOURCE_HOURS=(end-start)/hour;
+/** Offline regrouping of a separately hash-verified global compact plan. No submission path.
+ * One tile is held at a time. Group only identical month/day/hour shapes; never
+ * combine leap/non-leap February or a retained-hour override with a full month.
+ */
+export function* groupLegacyCalendarRequests(plan:any,limits:{maxYearsPerRequest:number;maxSourceHoursPerRequest:number}):Generator<any>{
+ if(!Number.isSafeInteger(limits.maxYearsPerRequest)||!Number.isSafeInteger(limits.maxSourceHoursPerRequest))throw Error('Explicit finite grouped budget required');
+ const yearsCap=bound(limits.maxYearsPerRequest,30),hoursCap=bound(limits.maxSourceHoursPerRequest,22320);
+ if(plan.dataset!=='reanalysis-era5-single-levels'||plan.revision!=='0001'||plan.member!==0||canonicalRelease(plan.requestDefaults)!==canonicalRelease({product_type:['reanalysis'],variable:['total_cloud_cover'],data_format:'netcdf',download_format:'unarchived'}))throw Error('Unadmitted grouped request defaults');
+ const ownedCells=new Set<string>();
+ for(const tile of plan.tiles){
+  const [north,west,south,east]=tile.area;
+  if(![north,west,south,east].every(v=>Number.isFinite(v)&&Number.isInteger(v*4))||north>90||south< -90||west< -180||east>=180||north<=south||east<=west||tile.expectedCells.length<4||tile.expectedCells.length>10)throw Error('Nondegenerate bounded rectangle required');
+  const expected:string[]=[];for(let lat=south;lat<=north;lat+=.25)for(let lon=west;lon<=east;lon+=.25){if(expected.length===10)throw Error('Rectangle exceeds cell cap');expected.push(`era5:${lat}:${lon}`);}
+  if(JSON.stringify([...expected].sort())!==JSON.stringify([...tile.expectedCells].sort()))throw Error('Rectangle cell inventory differs');
+  for(const id of expected){if(ownedCells.has(id))throw Error('Repeated acquisition cell');ownedCells.add(id);}
+  if(new Set([...tile.requiredCells,...tile.fillerCells]).size!==expected.length||[...tile.requiredCells,...tile.fillerCells].length!==expected.length||[...tile.requiredCells,...tile.fillerCells].some(id=>!expected.includes(id)))throw Error('Required/filler ownership differs');
+  const groups=new Map<string,{request:any;years:string[];partitionHours:number}>();
+  const overrides=new Map<number,any>();for(const override of tile.overrides){if(!Number.isInteger(override.template)||override.template<0||override.template>=plan.calendarTemplates.length||overrides.has(override.template))throw Error('Invalid or duplicate calendar override');overrides.set(override.template,override);}
+  const monthShapes=new Map<string,{days:string[];time:string[]}[]>();
+  for(let i=0;i<plan.calendarTemplates.length;i++){
+   const template=plan.calendarTemplates[i],override=overrides.get(i);
+   const shapes=override?override.shapes:[{days:template.day,time:template.time}];
+   for(const shape of shapes){
+    if(template.year.length!==1||template.month.length!==1)throw Error('One source calendar month required');
+    const year=template.year[0],month=template.month[0],days=shape.days,times=shape.time;
+    if(!/^\d{4}$/.test(year)||! /^(0[1-9]|1[0-2])$/.test(month)||!days.length||!times.length||new Set(days).size!==days.length||new Set(times).size!==times.length)throw Error('Invalid grouped calendar shape');
+    const lastDay=new Date(Date.UTC(+year,+month,0)).getUTCDate();
+    if(days.some((d:string)=>!/^\d{2}$/.test(d)||+d<1||+d>lastDay)||times.some((t:string)=>! /^(0\d|1\d|2[0-3]):00$/.test(t)))throw Error('Invalid grouped Cartesian date');
+    if(days.some((d:string)=>!template.day.includes(d))||times.some((t:string)=>!template.time.includes(t)))throw Error('Override exceeds source template');
+    const first=Date.UTC(+year,+month-1,Math.min(...days.map(Number)),Math.min(...times.map((t:string)=>+t.slice(0,2))));
+    const last=Date.UTC(+year,+month-1,Math.max(...days.map(Number)),Math.max(...times.map((t:string)=>+t.slice(0,2))));
+    if(first<start||last>=end)throw Error('Grouped hour outside production clock');
+    const monthKey=year+'-'+month,prior=monthShapes.get(monthKey)??[];
+    if(prior.some(s=>s.days.some(d=>days.includes(d))&&s.time.some(t=>times.includes(t))))throw Error('Overlapping grouped calendar shapes');
+    prior.push({days,time:times});monthShapes.set(monthKey,prior);
+    const partitionHours=days.length*times.length;if(partitionHours>744||partitionHours>hoursCap)throw Error('Grouped partition exceeds hour bound');
+    const request={...plan.requestDefaults,month:[month],day:[...days].sort(),time:[...times].sort(),area:tile.area};
+    const key=canonicalRelease(request),group=groups.get(key)??{request,years:[],partitionHours};
+    if(group.years.includes(year))throw Error('Duplicate grouped year/shape');group.years.push(year);groups.set(key,group);
+   }
+  }
+  for(const group of groups.values()){
+   group.years.sort();const width=Math.min(yearsCap,Math.floor(hoursCap/group.partitionHours));
+   for(let offset=0;offset<group.years.length;offset+=width){
+    const years=group.years.slice(offset,offset+width),request={...group.request,year:years};
+    const identity={dataset:plan.dataset,revision:plan.revision,member:plan.member,request};
+    const expectedHours=years.length*group.partitionHours;
+    yield {status:'unapproved-nonexecuting',sha256:releaseSha(canonicalRelease(identity)),...identity,tileId:tile.tileId,expectedCells:tile.expectedCells,requiredCells:tile.requiredCells,fillerCells:tile.fillerCells,expectedHours,scalarCellHours:expectedHours*tile.expectedCells.length,partitions:years.map(year=>({year,month:request.month[0],expectedHours:group.partitionHours})),providerAcceptance:'unproved-for-this-group'};
+   }
+  }
+ }
+}
 export interface ProductionHistoryPlannerOptions {inventoryPath:string;expectedInventorySha256:string;outputPath:string;prefixJobs:number;maxInputBytes?:number;maxVerifiedCellHours?:number;maxDurationMs?:number}
 function bound(value:number|undefined,fallback:number){const n=value??fallback;if(!Number.isSafeInteger(n)||n<1||n>fallback)throw Error('Invalid planner budget');return n;}
 /** All input/output identities are explicit; creation is exclusive and never overwrites. */

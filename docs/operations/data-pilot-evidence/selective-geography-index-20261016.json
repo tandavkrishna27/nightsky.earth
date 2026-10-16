@@ -1,0 +1,105 @@
+{
+  "scope": "Retained Monaco and Faroe only; synthetic clipping control unadmitted; no global coverage or planet-capacity claim",
+  "byteEquality": {
+    "candidates.jsonl": true,
+    "exclusions.jsonl": true,
+    "lineage.jsonl": true
+  },
+  "rowCounts": {
+    "candidates.jsonl": 84,
+    "exclusions.jsonl": 295,
+    "lineage.jsonl": 84
+  },
+  "results": {
+    "all-nodes": {
+      "status": "complete",
+      "reason": null,
+      "stages": [
+        {
+          "stage": 0,
+          "exitCode": 0,
+          "elapsedSeconds": 47.174
+        }
+      ],
+      "elapsedSeconds": 47.196,
+      "peakRssBytes": 4808704,
+      "peakLogicalBytes": 42375097,
+      "limits": {
+        "wallSeconds": 120,
+        "rssBytes": 536870912,
+        "commitBytes": 805306368,
+        "diskBytes": 268435456,
+        "freeBytes": 137438953472,
+        "maxProcesses": 2
+      },
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "platform": "win32",
+      "finalGeographyRows": 1198456,
+      "databaseBytes": 33828864,
+      "files": {
+        "candidates.jsonl": "c296e06a4ce2e287291630086e513652090f134a6dd68f3cbe4d09c4ab72019a",
+        "exclusions.jsonl": "76181ae5ed7c4f4cf8e6d052ef9d2aea5099fe01a284fd61284c614bcf7ae8da",
+        "lineage.jsonl": "822991f41b308d58639f5eb26a753f332f26295a47aeb0f251de9de1f94a99cd"
+      },
+      "finalCoordinates": 1198456
+    },
+    "selected-references": {
+      "status": "complete",
+      "reason": null,
+      "stages": [
+        {
+          "stage": 0,
+          "exitCode": 0,
+          "elapsedSeconds": 64.562
+        }
+      ],
+      "elapsedSeconds": 64.599,
+      "peakRssBytes": 4804608,
+      "peakLogicalBytes": 42632811,
+      "limits": {
+        "wallSeconds": 120,
+        "rssBytes": 536870912,
+        "commitBytes": 805306368,
+        "diskBytes": 268435456,
+        "freeBytes": 137438953472,
+        "maxProcesses": 2
+      },
+      "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+      "platform": "win32",
+      "finalGeographyRows": 1446,
+      "databaseBytes": 147456,
+      "files": {
+        "candidates.jsonl": "c296e06a4ce2e287291630086e513652090f134a6dd68f3cbe4d09c4ab72019a",
+        "exclusions.jsonl": "76181ae5ed7c4f4cf8e6d052ef9d2aea5099fe01a284fd61284c614bcf7ae8da",
+        "lineage.jsonl": "822991f41b308d58639f5eb26a753f332f26295a47aeb0f251de9de1f94a99cd"
+      },
+      "finalCoordinates": 1446
+    }
+  },
+  "rssLimitation": "Supervisor sampled the Windows venv launcher, not parser child RSS; only the hard tree commit ceiling applies to both processes.",
+  "priorAttempt": "v1 stopped before parsing: maxProcesses=1 blocked venv launcher child; preserved and counted by v2",
+  "sources": [
+    {
+      "attribution": "\u00a9 OpenStreetMap contributors",
+      "bytes": 692392,
+      "clipSha256": "99bb34fa5a7caf06f3c6e9d16eb162ac5264c03532998dff93babbf4911fc4c5",
+      "format": "pbf",
+      "id": "monaco",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05",
+      "url": "https://download.geofabrik.de/europe/monaco-261013.osm.pbf",
+      "vintage": "2026-10-13T20:21:31Z"
+    },
+    {
+      "attribution": "\u00a9 OpenStreetMap contributors",
+      "bytes": 7735542,
+      "clipSha256": "99bb34fa5a7caf06f3c6e9d16eb162ac5264c03532998dff93babbf4911fc4c5",
+      "format": "pbf",
+      "id": "faroe-islands",
+      "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+      "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859",
+      "url": "https://download.geofabrik.de/europe/faroe-islands-261013.osm.pbf",
+      "vintage": "2026-10-13T20:21:31Z"
+    }
+  ]
+}

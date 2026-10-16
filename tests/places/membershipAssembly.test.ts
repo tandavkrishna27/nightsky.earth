@@ -48,3 +48,12 @@ test('producer evidence cannot override paths or omit raw lineage',async()=>{
   await writeFile(join(f.producer,'complete.json'),JSON.stringify(done));await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job));await assert.rejects(access(join(f.job,'assembly-complete.json')));
  }
 });
+
+test('selected geography mode is pinned and must match producer evidence',async()=>{
+ const f=await fixture();Object.assign(f.plan,{geographyMode:'selected-references'});
+ assert.equal((await loadAssemblyPlan(f.path,await f.save())).geographyMode,'selected-references');
+ await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job),/geography mode/);
+ await assert.rejects(access(join(f.job,'membership-input')));
+ Object.assign(f.plan,{geographyMode:'automatic-fallback'});
+ await assert.rejects(loadAssemblyPlan(f.path,await f.save()));
+});

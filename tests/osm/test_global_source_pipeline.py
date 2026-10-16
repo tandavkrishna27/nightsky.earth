@@ -296,6 +296,75 @@ class Pipeline(unittest.TestCase):
             self.run_build(m,'page-cap')
         self.assertLessEqual((self.root/'page-cap'/'scratch.sqlite').stat().st_size,4096)
 
+    def test_selective_index_fits_small_scratch_and_preserves_named_node(self):
+        body=''.join(f'<node id="{i}" lat="10.1234567" lon="20.1234567"/>' for i in range(1,5001))
+        body+='<node id="5001" lat="11" lon="21"><tag k="name" v="Solo"/><tag k="leisure" v="park"/></node>'
+        body+='<way id="9"><nd ref="1"/><nd ref="2"/><tag k="name" v="Way"/><tag k="leisure" v="park"/></way>'
+        m=self.manifest([body]);m['limits']['scratchBytes']=65536
+        out=self.run_build(m,'selective',geography_mode='selected-references')
+        rows=[json.loads(r) for r in (out/'candidates.jsonl').read_text().splitlines()]
+        self.assertEqual([r['name'] for r in rows],['Solo','Way'])
+        with global_source.sqlite3.connect(out/'scratch.sqlite') as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM nodes').fetchone()[0],2)
+        db.close()
+        self.assertLessEqual((out/'scratch.sqlite').stat().st_size,65536)
+        with self.assertRaisesRegex((ValueError,global_source.sqlite3.DatabaseError),'scratch|full'):
+            self.run_build(m,'all-small')
+
+    def test_selective_output_equivalence_and_resume_mode_binding(self):
+        tags='<tag k="name" v="Way"/><tag k="leisure" v="park"/>'
+        body=self.node()+'<node id="1" lat="10" lon="20"/><node id="2" lat="12" lon="22"/><node id="3" lat="nan" lon="0"/><node id="4" lat="0" lon="179"/><node id="5" lat="0" lon="-179"/><node id="6" lat="89" lon="0"/>'
+        for oid,refs in [(1,[1,2,1]),(2,[3]),(3,[999]),(4,[4,5]),(5,[6]),(6,[])]:
+            body+=f'<way id="{oid}">'+''.join(f'<nd ref="{r}"/>' for r in refs)+tags+'</way>'
+        body+='<relation id="1">'+tags+'</relation><way id="7"><nd ref="123"/><tag k="leisure" v="park"/></way>'
+        m=self.manifest([body,body]);old=self.run_build(m,'all');new=self.run_build(m,'select',geography_mode='selected-references')
+        for name in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl'):
+            self.assertEqual((old/name).read_bytes(),(new/name).read_bytes())
+        self.assertEqual(self.run_build(m,'select',resume=True,geography_mode='selected-references'),new)
+        with self.assertRaisesRegex(ValueError,'geography mode'):
+            self.run_build(m,'select',resume=True)
+
+    def test_selective_rejects_unselected_duplicate_conflict_and_unsorted_nodes(self):
+        for label,body,reason in [
+            ('conflict','<node id="1" lat="0" lon="0"/><node id="1" lat="1" lon="0"/>','node identity conflict'),
+            ('unsorted','<node id="2" lat="0" lon="0"/><node id="1" lat="0" lon="0"/>','node order')]:
+            with self.subTest(label=label):
+                with self.assertRaisesRegex(ValueError,reason):
+                    self.run_build(self.manifest([body]),label,geography_mode='selected-references')
+                self.assertFalse((self.root/label/'complete.json').exists())
+
+    def test_selective_completed_resume_rejects_changed_mode(self):
+        m=self.manifest([self.node()]);out=self.run_build(m,'mode-complete',geography_mode='selected-references')
+        done=json.loads((out/'complete.json').read_text());done.pop('geographyMode')
+        (out/'complete.json').write_text(json.dumps(done))
+        with self.assertRaisesRegex(ValueError,'geography mode'):
+            self.run_build(m,'mode-complete',resume=True,geography_mode='selected-references')
+
+    def test_legacy_checkpoint_without_mode_still_resumes(self):
+        m=self.manifest([self.node()]);out=self.run_build(m,'legacy-mode')
+        for name in ('checkpoint.json','complete.json'):
+            payload=json.loads((out/name).read_text());payload.pop('geographyMode')
+            (out/name).write_text(json.dumps(payload))
+        self.assertEqual(self.run_build(m,'legacy-mode',resume=True),out)
+        with self.assertRaisesRegex(ValueError,'geography mode'):
+            self.run_build(m,'legacy-mode',resume=True,geography_mode='selected-references')
+
+    def test_selective_reference_prepass_obeys_disk_and_reference_caps(self):
+        tags='<tag k="name" v="Way"/><tag k="leisure" v="park"/>'
+        body=''.join(f'<way id="{w}">'+''.join(f'<nd ref="{w*1000+r}"/>' for r in range(1000))+tags+'</way>' for w in range(10))
+        m=self.manifest([body]);m['limits']['scratchBytes']=65536
+        with self.assertRaisesRegex((ValueError,global_source.sqlite3.DatabaseError),'scratch|full'):
+            self.run_build(m,'refdisk',geography_mode='selected-references')
+        self.assertFalse((self.root/'refdisk'/'complete.json').exists())
+        m['limits']['referencesPerWay']=999
+        with self.assertRaisesRegex(ValueError,'reference limit'):
+            self.run_build(m,'refcount',geography_mode='selected-references')
+
+    def test_selective_counts_unselected_nodes_against_limit(self):
+        m=self.manifest(['<node id="1" lat="0" lon="0"/><node id="2" lat="0" lon="0"/>']);m['limits']['nodes']=1
+        with self.assertRaisesRegex(ValueError,'node limit'):
+            self.run_build(m,'nodecap',geography_mode='selected-references')
+
     @unittest.skipUnless(importlib.util.find_spec('osmium'),'optional existing pyosmium unavailable')
     def test_optional_pbf_same_contract(self):
         import osmium

@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**Global preparation, 16 October:** [Delivery](global-preparation-delivery.md) implements selective geography indexing, grouped global-history preparation and ten sourced annual calendar contexts. Retained geography outputs match byte for byte with a smaller temporary index; planet fit and actual global coverage remain open. No new downloads or deployment; original 12/9/6 unchanged.
+
 **Source resolution, 16 October:** [Delivery](source-resolution-delivery.md) establishes exact planet metadata and available preparation headroom, retrieves and strictly validates the approved 25,261-byte existing weather result without another CDS job, and expands annual calendar context to six showers. Production coverage and original 12/9/6 totals remain unchanged; no deployment.
 
 **Data readiness, 16 October:** [Delivery](data-readiness-delivery.md) proposes a dated planet source, records one approved weather request with remote success but no downloaded raw, and adds sourced Geminids December context. No retry, production admission or deployment; original 12/9/6 unchanged.

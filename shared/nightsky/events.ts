@@ -34,14 +34,14 @@ export type MeteorTypicalSeason = z.infer<typeof meteorTypicalSeasonSchema>;
 export const meteorCalendarGuidanceSchema = z.strictObject({
   availability: z.strictObject({ status: z.literal("partial"), reason: z.string().trim().min(1).max(500) }),
   entries: z.array(z.strictObject({
-    code: z.enum(["ETA", "ORI", "GEM", "LYR", "PER", "LEO"]), name: z.string().trim().min(1).max(100),
+    code: z.enum(["ETA", "ORI", "GEM", "LYR", "PER", "LEO", "QUA", "DSX", "ARI", "CAP"]), name: z.string().trim().min(1).max(100),
     evidenceKind: z.literal("approximate-calendar-guidance"),
     sourceWording: z.string().trim().min(1).max(100),
     precision: z.literal("verbal-period"), recurrenceBasis: z.literal("typical-annual"),
     requestedWindowOverlap: z.literal("not-evaluated"),
     sourceLocator: z.string().trim().min(1).max(200),
     caveat: z.string().trim().min(1).max(500), source: sourceRecordSchema,
-  })).max(6).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate calendar guidance code."),
+  })).max(10).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate calendar guidance code."),
 });
 export type MeteorCalendarGuidance = z.infer<typeof meteorCalendarGuidanceSchema>;
 export const skyEventsResultSchema = resultSchema({
