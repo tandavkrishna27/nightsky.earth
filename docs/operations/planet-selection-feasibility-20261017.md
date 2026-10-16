@@ -1,5 +1,7 @@
 # Planet selection feasibility — 17 October 2026
 
+This is the historical screen at the code reference below. The later [bounded spatial-index change](boundary-spatial-index-20261017.md) removes the mandatory all-feature membership floor; it does not establish global fit or remove the stream, node, containment-work and partition/merge gaps. The retained arithmetic JSON remains unchanged evidence of this screen.
+
 The present single-stream, full-boundary route is **not established as feasible for global production**. Its effective ceilings are much smaller than the advertised one-million candidate rows: at most **169,895 minimally serialized candidate rows** under 128 MiB, and at most **41,186 candidates** under 200 million membership checks with the current 4,854 features, even before geometry/setup costs. Public counts indicate substantial pressure on these limits. They cannot establish the exact accepted count of the absent dated planet. A 95,380,942,829-byte receipt would establish source identity, not resolve these architecture limits; do not recommend it as the next step toward completion on the strength of available disk alone.
 
 ## Finite evidence and scope

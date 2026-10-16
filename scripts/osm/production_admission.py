@@ -19,7 +19,14 @@ SCRIPT = REPO/'scripts/osm/production-source-admission.ts'
 LOADER = REPO/'scripts/osm/production-type-loader.mjs'
 CODE_FILES = ('scripts/osm/production-source-admission.ts',
               'scripts/osm/source-admission.ts', 'scripts/osm/natural-earth-policy.ts',
-              'scripts/osm/production_admission.py')
+              'scripts/osm/production_admission.py',
+              # Repository-owned membership closure; same order as the fixed TS gate.
+              'scripts/osm/membership-assembly.ts', 'scripts/osm/boundary-metadata.ts',
+              'scripts/osm/partitioned-boundaries.ts', 'scripts/osm/geographic-geometry.ts',
+              'scripts/osm/build-source-catalogue.ts', 'scripts/osm/source-build-config.ts',
+              'scripts/osm/build-streamed-catalogue.ts', 'scripts/osm/normalized-input-bytes.ts',
+              'server/places/catalogueFormat.ts', 'shared/nightsky/discovery.ts',
+              'shared/nightsky/common.ts', 'shared/nightsky/places.ts')
 PHASES = {'preflight', 'raw-before', 'raw-after', 'assembly-before', 'assembly-after', 'resume'}
 MAX_OUTPUT = 1024**2
 
