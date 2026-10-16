@@ -53,6 +53,11 @@ the advertised hourly extent, and checked primary specification/schema sources.
 No actionable findings remain. No repeated runtime suite is needed for this
 documentation-only continuation.
 
+The browser README's trailing spaces triggered the initial staged whitespace
+check. Its capture is now wrapped losslessly in JSON, retaining original byte
+length/hash and exact restorable content; the ten-file index hashes the wrapper.
+The corrected staged check and byte-equivalence check pass.
+
 Resolve the continuation delivery commit with
 `git log -1 --format=%H -- docs/operations/icechunk-metadata-dossier-20261017.md`.
 Its full pushed branch-tip SHA and exact-tip six-job CI result accompany the

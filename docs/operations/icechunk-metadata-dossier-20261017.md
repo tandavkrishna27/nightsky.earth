@@ -85,6 +85,10 @@ transcription. These are publisher UI observations, not repository-signed proofs
 The screenshot shows cloud-cover QC definitions and logged-out public access.
 No account identifier or credential appears in them.
 
+The README capture is losslessly wrapped in JSON because the browser's text
+contains trailing spaces. Its `content` restores the original UTF-8 bytes, whose
+length/hash are retained inside the wrapper; the index hashes the wrapper file.
+
 ## Exact next metadata request, prepared and not executed
 
 The next missing fact is an immutable snapshot. The
@@ -168,3 +172,5 @@ An independent reviewer checked captures, screenshot, transcriptions, exact
 hourly extent and primary specification/schema claims; no actionable findings
 remain. The prior runtime milestone passed 195 ERA5 tests; this continuation
 changes only documentation/evidence and does not repeat that suite.
+The initial staged whitespace check identified those README spaces; packaging
+was corrected and the original capture bytes were independently reverified.
