@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head profile="http://a9.com/-/spec/opensearch/1.1/">
+    <title>Database | Sources | OpenStreetMap Taginfo</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="content-language" content="en" />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" type="text/css" href="/css/taginfo.css" />
+    <link rel="search" type="application/opensearchdescription+xml" href="/search/opensearch.xml" title="Taginfo" />
+    <script id="context" type="application/json">
+{"instance":"","lang":"en"}    </script>
+    <script type="text/javascript" src="/js/taginfo.js"></script>
+    <script type="text/javascript" src="/js/en/texts.js"></script></head>
+<body>
+    <div id="tooltip"></div>
+    <div id="menu-button-wrapper">
+        <div id="menu-button"></div>
+    </div>
+    <header>
+        <div class="header-logo key-tooltip">
+            <a href="/"><img width="49" height="49" src="/img/logo/world.png" alt="taginfo"/></a>
+            <a href="/"><img width="129" height="49" src="/img/logo/taginfo.png" alt="taginfo"/></a>
+        </div>
+        <div class="no-print">
+            <form class="header-language-switcher" id="set_language" action="/switch_locale">
+                <input type="hidden" id="url" name="url" value="/sources/db"/>
+                <select id="locale" name="locale">
+                    <option value="ca">Català</option>
+                    <option value="de">Deutsch</option>
+                    <option value="en" selected="selected">English</option>
+                    <option value="es">Español</option>
+                    <option value="eo">Esperanto</option>
+                    <option value="fr">Français</option>
+                    <option value="gl">Galego</option>
+                    <option value="it">Italiano</option>
+                    <option value="hu">Magyar</option>
+                    <option value="nl">Nederlands</option>
+                    <option value="pl">Polski</option>
+                    <option value="pt">Português</option>
+                    <option value="pt-BR">(unknown)</option>
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="zh-hans">简体中文</option>
+                    <option value="zh-hant">繁體中文</option>
+                    <option value="cs">Čeština</option>
+                    <option value="ru">Русский</option>
+                    <option value="uk">Українська</option>
+                    <option value="ar">العربية</option>
+                    <option value="fa">فارسی</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh-CN">(unknown)</option>
+                    <option value="zh-TW">(unknown)</option>
+                    <option value="ko">한국어</option>
+                </select>
+            </form>
+        </div>
+        <div>
+            <div class="header-date" title="Last update of taginfo database" data-tooltip-position="OnLeft">Data from: 2026-10-16 00:59 UTC</div>
+            <form id="search_form" class="key-tooltip" action="/search">
+                <input type="text" id="search" name="q" value="" autocomplete="off" autocapitalize="off" placeholder="[KEY][=VALUE]"/>
+                <div id="suggestions"></div>
+            </form>
+        </div>
+    </header>
+    <nav>
+    <ul id="menu" class="no-print">
+        <li class="key-tooltip" id="menu-keys"><a href="/keys">Keys</a></li>
+        <li class="key-tooltip" id="menu-tags"><a href="/tags">Tags</a></li>
+        <li class="key-tooltip" id="menu-relations"><a href="/relations">Relations</a></li>
+        <li class="key-tooltip" id="menu-projects"><a href="/projects">Projects</a></li>
+        <li class="key-tooltip" id="menu-reports"><a href="/reports">Reports</a></li>
+        <li class="key-tooltip" id="menu-sources"><a class="selected" href="/sources">Sources</a></li>
+        <li id="menu-about"><a href="/about">About</a></li>
+    </ul>
+    </nav>
+    <main>
+        <div class="section_title">
+            <a class="section" href="/sources">Sources</a>
+        </div>
+<h1 class="section">Database</h1>
+
+<p>Statistics about keys, tags, and relation types are generated from the <a class="extlink" href="https://planet.openstreetmap.org/">OSM database</a> (or an extract) as well as the maps that show the geographic distribution of nodes and ways.</p>
+
+<div class="fboxes">
+    <div class="fbox">
+        <h2>Data</h2>
+        <div>
+            <table class="desc">
+                <tr><th>Data until*:</th><td>2026-10-16 00:59:40 UTC</td></tr>
+                <tr><th>Last update run:</th><td>2026-10-16 03:46:38 to 2026-10-16 06:47:15 UTC (181 mins )</td></tr>
+                <tr><th>Database size:</th><td>40561&thinsp;MB</td></tr>
+                <tr><th>Download:</th><td><a rel="nofollow" href="/download/taginfo-db.db.bz2">taginfo-db.db.bz2</a> (2510&thinsp;MB)</td></tr>
+            </table>
+            <p class="note">* All edits until this time will be in the data, later edits might be.</p>
+        </div>
+    </div>
+<div class="fbox">
+    <h2>Statistics: Objects</h2>
+    <div>
+        <table>
+            <tr><td>Number of objects in the database:</td><td class="number">12&#x202f;182&#x202f;035&#x202f;808</td></tr>
+            <tr><td>Number of tags in the database:</td><td class="number">3&#x202f;996&#x202f;112&#x202f;244</td></tr>
+        </table>
+    </div>
+</div>
+<div class="fbox">
+    <h2>Statistics: Tags</h2>
+    <div>
+        <table>
+            <tr><td>Number of distinct keys:</td><td class="number">115&#x202f;161</td></tr>
+            <tr><td>Number of distinct tags:</td><td class="number">197&#x202f;939&#x202f;645</td></tr>
+        </table>
+    </div>
+</div>
+<div class="fbox">
+    <h2>Statistics: Nodes</h2>
+    <div>
+        <table>
+            <tr><td>Number of nodes in the database:</td><td class="number">10&#x202f;941&#x202f;937&#x202f;381</td></tr>
+            <tr><td>Number of nodes with at least one tag:</td><td class="number">297&#x202f;655&#x202f;726</td></tr>
+            <tr><td>Percentage of nodes with at least one tag:</td><td class="number">2.72%</td></tr>
+            <tr><td>Number of tags on nodes:</td><td class="number">1&#x202f;030&#x202f;263&#x202f;632</td></tr>
+            <tr><td>Average number of tags per tagged node:</td><td class="number">3.46</td></tr>
+        </table>
+    </div>
+</div>
+<div class="fbox">
+    <h2>Statistics: Ways</h2>
+    <div>
+        <table>
+            <tr><td>Number of ways in the database:</td><td class="number">1&#x202f;225&#x202f;169&#x202f;403</td></tr>
+            <tr><td>Number of closed ways:</td><td class="number">865&#x202f;161&#x202f;855</td></tr>
+            <tr><td>Number of tags on ways:</td><td class="number">2&#x202f;905&#x202f;073&#x202f;017</td></tr>
+            <tr><td>Average number of tags per way:</td><td class="number">2.37</td></tr>
+        </table>
+    </div>
+</div>
+<div class="fbox">
+    <h2>Statistics: Relations</h2>
+    <div>
+        <table>
+            <tr><td>Number of relations in the database:</td><td class="number">14&#x202f;929&#x202f;024</td></tr>
+            <tr><td>Number of tags on relations:</td><td class="number">60&#x202f;775&#x202f;595</td></tr>
+            <tr><td>Average number of tags per relation:</td><td class="number">4.07</td></tr>
+        </table>
+    </div>
+</div>
+</div>
+    </main>
+    <footer class="no-print">
+        <div class="footer-start"><span id="osmlink"><a class="extlink" href="https://www.openstreetmap.org/"><b>OpenStreetMap</b></a> &middot;</span>
+            <a href="https://www.openstreetmap.org/copyright">Data © OSM contributors (ODbL)</a></div>
+        <div class="footer-end">
+            <a href="/download">Download</a> &middot;
+            <a href="/taginfo/apidoc">API</a> &middot;
+            <a id="help-link" target="_blank" href="/help">Help</a> &middot;
+            <a class="extlink" href="https://wiki.openstreetmap.org/wiki/Taginfo">Wiki</a>
+        </div>
+        <div class="footer-middle">
+            <span class="key">?</span> Show available shortcut keys        </div>
+    </footer>
+    <div id="javascriptmsg">This website only works with Javascript! Please enable Javascript in your browser.</div>
+    <script>document.getElementById('javascriptmsg').remove();</script>
+</body>
+</html>

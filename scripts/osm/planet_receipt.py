@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import shutil
 import ssl
+import stat
 import subprocess
 import sys
 import time
@@ -63,9 +64,15 @@ def _source_evidence():
 
 
 def _retained_paths(paths):
-    result = [safe_path(p) for p in paths]
+    result = []
+    for path in paths:
+        if len(result)>=64:
+            raise ValueError('retained accounting exceeds 64 roots')
+        result.append(safe_path(path))
     evidence = safe_path(_source_evidence()['path'])
     if not any(evidence == p or evidence.is_relative_to(p) for p in result):
+        if len(result)>=64:
+            raise ValueError('retained source evidence exceeds 64 roots')
         result.append(evidence)
     return result
 
@@ -82,9 +89,16 @@ def _write_new(path, value):
 
 
 def _inventory(paths, deadline_check=lambda: None):
-    deadline_check()
-    paths = [safe_path(p) for p in paths]
-    if len(paths) > 64 or len(set(paths)) != len(paths):
+    # Roots are the caller boundary; scandir names below them come from the
+    # filesystem. Do not repeat safe_path's complete ancestor resolution for
+    # every file in a retained tree. No verdict is cached between inventories.
+    canonical_paths=[]
+    for path in paths:
+        deadline_check()
+        if len(canonical_paths)>=64:raise ValueError('bounded unique retained paths required')
+        canonical_paths.append(safe_path(path));deadline_check()
+    paths=canonical_paths
+    if len(set(paths)) != len(paths):
         raise ValueError('bounded unique retained paths required')
     for index, path in enumerate(paths):
         deadline_check()
@@ -93,24 +107,65 @@ def _inventory(paths, deadline_check=lambda: None):
         if any(path.is_relative_to(other) or other.is_relative_to(path)
                for other in paths[:index]):
             raise ValueError('overlapping retained accounting')
-    total = count = 0
-    for path in paths:
-        deadline_check()
-        if path.is_file():
-            total += path.stat().st_size
-            continue
-        if not path.is_dir():
+    def regular(info):
+        if stat.S_ISLNK(info.st_mode) or getattr(info,'st_file_attributes',0)&0x400:
+            raise ValueError('retained symlink/reparse point refused')
+        if not(stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode)):
             raise ValueError('regular file/directory required')
-        for parent, dirs, files in os.walk(path, followlinks=False):
-            deadline_check()
-            for name in dirs+files:
-                deadline_check()
-                item = safe_path(Path(parent)/name)
-                count += 1
-                if count > 1000000:
-                    raise ValueError('retained inventory entry limit')
-                if item.is_file():
-                    total += item.stat().st_size
+    def identity(info):return info.st_dev,info.st_ino
+    def directory_state(info):return identity(info),info.st_size,info.st_mtime_ns
+    def ancestry(path):
+        result=[]
+        for part in reversed((path,*path.parents)):
+            deadline_check();info=part.lstat();regular(info)
+            result.append((part,identity(info)))
+        return result
+    total=count=0
+    for path in paths:
+        before=ancestry(path)
+        info=path.lstat();regular(info)
+        if stat.S_ISREG(info.st_mode):
+            total+=info.st_size
+            if before!=ancestry(path) or directory_state(info)!=directory_state(path.lstat()):
+                raise ValueError('retained file/root mutation')
+            continue
+        frames=[]
+        def enter(directory,expected):
+            # Validate directory ancestry at descent boundaries, not once per
+            # sibling file. DirEntry can have zero inode/device on Windows;
+            # actual directory identities always use lstat on both sides.
+            for parent,witness in before+[(frame[0],identity(frame[1])) for frame in frames]:
+                deadline_check();observed=parent.lstat();regular(observed)
+                if identity(observed)!=witness:raise ValueError('retained directory ancestry mutation')
+            observed=directory.lstat();regular(observed)
+            if identity(observed)!=expected or not stat.S_ISDIR(observed.st_mode):
+                raise ValueError('retained directory identity mutation')
+            context=os.scandir(directory)
+            iterator=iter(context.__enter__())
+            frames.append((directory,observed,context,iterator))
+        try:
+            enter(path,identity(info))
+            # DFS iterator frames hold one directory per depth; no list of a
+            # broad directory's files or pending sibling subtrees is built.
+            while frames:
+                deadline_check();directory,initial,context,iterator=frames[-1]
+                try:entry=next(iterator)
+                except StopIteration:
+                    frames.pop();context.__exit__(None,None,None)
+                    after=directory.lstat();regular(after)
+                    if directory_state(initial)!=directory_state(after):
+                        raise ValueError('retained directory changed during enumeration')
+                    continue
+                count+=1
+                if count>1000000:raise ValueError('retained inventory entry limit')
+                deadline_check();entry_info=entry.stat(follow_symlinks=False);regular(entry_info)
+                if stat.S_ISREG(entry_info.st_mode):total+=entry_info.st_size
+                else:
+                    child=Path(entry.path);child_info=child.lstat();regular(child_info)
+                    enter(child,identity(child_info))
+            if before!=ancestry(path):raise ValueError('retained root/ancestor mutation')
+        finally:
+            for _,_,context,_ in reversed(frames):context.__exit__(None,None,None)
     deadline_check()
     return paths, total
 
@@ -144,7 +199,11 @@ def validate_allowance(value):
             raise ValueError('receipt limit exceeds ceiling: '+key)
     if limits['rssBytes'] > limits['commitBytes']:
         raise ValueError('RSS exceeds tree commit allowance')
-    if not isinstance(value['retainedPaths'], list) or any(
+    if not isinstance(value['retainedPaths'], list):
+        raise ValueError('absolute retained path inventory required')
+    if len(value['retainedPaths'])>64:
+        raise ValueError('retained path inventory exceeds 64 roots')
+    if any(
         not isinstance(path, str) or not Path(path).is_absolute()
         for path in value['retainedPaths']):
         raise ValueError('absolute retained path inventory required')
@@ -460,17 +519,29 @@ def _supervise_worker(command, root, limits, retained, handoff=None):
     process = job = None
     reason = None
     peak = peak_rss = 0
+    header_accepted = False
+    next_header_sample = began
     def deadline_check():
-        elapsed = time.monotonic()-began
+        nonlocal header_accepted, next_header_sample
+        now = time.monotonic()
+        elapsed = now-began
         if elapsed >= limits['wallSeconds']:
             raise TimeoutError('supervisor total receipt deadline')
-        if not _header_accepted(root, header_deadline) and elapsed >= limits['connectSeconds']:
+        # Every metadata entry checks the clock. Marker I/O is sampled at the
+        # watchdog cadence, and forced at the shared header deadline. Before
+        # launch no worker can publish a marker. A cached acceptance never
+        # replaces the mandatory direct marker/transport checks at completion.
+        if process is not None and not header_accepted and (now >= next_header_sample or now >= header_deadline):
+            header_accepted = _header_accepted(root, header_deadline)
+            next_header_sample = now+.02
+        if not header_accepted and now >= header_deadline:
             raise TimeoutError('supervisor connection/header deadline')
     disk_ceiling = SOURCE['bytes']+EVIDENCE_BYTES
-    def check():
+    def check(current=None):
         nonlocal peak, peak_rss
         deadline_check()
-        current = _inventory([root, *retained], deadline_check)[1]
+        if current is None:
+            current = _inventory([root, *retained], deadline_check)[1]
         peak = max(peak, current)
         if current > disk_ceiling:
             raise ValueError('supervisor whole-receipt disk limit')
@@ -482,9 +553,17 @@ def _supervise_worker(command, root, limits, retained, handoff=None):
                 raise ValueError('supervisor RSS limit')
         deadline_check()
     try:
-        initial_retained = _inventory(retained, deadline_check)[1]
+        # Scan retained trees once before launch. Keep their baseline separate
+        # from the tiny new intent root, so root growth can never enlarge the
+        # retained-only + body + evidence allowance.
+        retained, initial_retained = _inventory(retained, deadline_check)
+        if len(retained)+1>64:
+            raise ValueError('combined receipt accounting exceeds 64 roots')
+        if any(root.is_relative_to(path) or path.is_relative_to(root) for path in retained):
+            raise ValueError('overlapping attempt/retained accounting')
+        initial_root = _inventory([root], deadline_check)[1]
         disk_ceiling = initial_retained+SOURCE['bytes']+EVIDENCE_BYTES
-        check()
+        check(initial_retained+initial_root)
         job = WindowsJob(limits['commitBytes'], limits['maxProcesses'])
         # Suppress unbounded logs; all bounded evidence is written explicitly.
         environment = {k:v for k,v in os.environ.items() if k.upper() in ('SYSTEMROOT','WINDIR')}

@@ -1,0 +1,227 @@
+{
+  "actualBodyBytes": 9044,
+  "aggregateBodyLimitBytes": 1048576,
+  "datasetBodyRequests": 0,
+  "elapsedSeconds": 5.233,
+  "headerLimitBytesPerResponse": 65536,
+  "kind": "official-taginfo-count-metadata-ledger",
+  "osmPlanetBodyRead": false,
+  "perResponseBodyLimitBytes": 131072,
+  "redirects": false,
+  "requestLimit": 11,
+  "requests": [
+    {
+      "body": {
+        "bytes": 274,
+        "path": "site.json",
+        "sha256": "62126cb0215d70950f9433bd0401f904e9dee969ce6c62ffe8228fed63da50bb"
+      },
+      "dataUntil": null,
+      "endedUtc": "2026-10-16T20:25:31.749524+00:00",
+      "headers": {
+        "Content-Length": "274",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:31 GMT"
+      },
+      "httpStatus": 200,
+      "name": "site",
+      "startedUtc": "2026-10-16T20:25:31.257503+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/site/info"
+    },
+    {
+      "body": {
+        "bytes": 361,
+        "path": "park.json",
+        "sha256": "a727128be9f33240cb7e3e788cf4d972216b23ffae36e32c432f65984967700d"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:32.259203+00:00",
+      "headers": {
+        "Content-Length": "361",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:31 GMT"
+      },
+      "httpStatus": 200,
+      "name": "park",
+      "startedUtc": "2026-10-16T20:25:31.749561+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=leisure&value=park"
+    },
+    {
+      "body": {
+        "bytes": 363,
+        "path": "nature-reserve.json",
+        "sha256": "534a86c7ea74e28ea5df4ebc18b7c39cb7c80871249f514240c8c1a92ae153ee"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:32.700355+00:00",
+      "headers": {
+        "Content-Length": "363",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:32 GMT"
+      },
+      "httpStatus": 200,
+      "name": "nature-reserve",
+      "startedUtc": "2026-10-16T20:25:32.259225+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=leisure&value=nature_reserve"
+    },
+    {
+      "body": {
+        "bytes": 353,
+        "path": "viewpoint.json",
+        "sha256": "a9dcc00475c28ce856847fc70bd6693553f19735fb5ee297cd3655e309beff45"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:33.181927+00:00",
+      "headers": {
+        "Content-Length": "353",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:32 GMT"
+      },
+      "httpStatus": 200,
+      "name": "viewpoint",
+      "startedUtc": "2026-10-16T20:25:32.700379+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=tourism&value=viewpoint"
+    },
+    {
+      "body": {
+        "bytes": 358,
+        "path": "camp-site.json",
+        "sha256": "f68acc16a9a5823aee3015169f954c64ba249d1559b21adf5cfaa9ebc6f8219a"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:33.650660+00:00",
+      "headers": {
+        "Content-Length": "358",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:32 GMT"
+      },
+      "httpStatus": 200,
+      "name": "camp-site",
+      "startedUtc": "2026-10-16T20:25:33.181950+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=tourism&value=camp_site"
+    },
+    {
+      "body": {
+        "bytes": 352,
+        "path": "caravan-site.json",
+        "sha256": "aa0509271af8a7115a2c75dc481f342c91661f9876c49df8fc492ce8ec55af22"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:34.178464+00:00",
+      "headers": {
+        "Content-Length": "352",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:33 GMT"
+      },
+      "httpStatus": 200,
+      "name": "caravan-site",
+      "startedUtc": "2026-10-16T20:25:33.650680+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=tourism&value=caravan_site"
+    },
+    {
+      "body": {
+        "bytes": 353,
+        "path": "national-park.json",
+        "sha256": "d6ff2f1b706abdfc76005561d79cf5f84401b4d063c7820041180cf43599124f"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:34.630480+00:00",
+      "headers": {
+        "Content-Length": "353",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:33 GMT"
+      },
+      "httpStatus": 200,
+      "name": "national-park",
+      "startedUtc": "2026-10-16T20:25:34.178485+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=boundary&value=national_park"
+    },
+    {
+      "body": {
+        "bytes": 355,
+        "path": "beach.json",
+        "sha256": "04ef9d53b10c228213c8fde45dc8e113bbf5ba01357fa8a02cdec4c9386d350c"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:35.083350+00:00",
+      "headers": {
+        "Content-Length": "355",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:34 GMT"
+      },
+      "httpStatus": 200,
+      "name": "beach",
+      "startedUtc": "2026-10-16T20:25:34.630502+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/stats?key=natural&value=beach"
+    },
+    {
+      "body": {
+        "bytes": 393,
+        "path": "protect-class.json",
+        "sha256": "7ddf555b38b9a6aee061ef7167da3048a6b5bff682efbf3f200d091a604ce3c7"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:35.541543+00:00",
+      "headers": {
+        "Content-Length": "393",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:34 GMT"
+      },
+      "httpStatus": 200,
+      "name": "protect-class",
+      "startedUtc": "2026-10-16T20:25:35.083372+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/key/stats?key=protect_class"
+    },
+    {
+      "body": {
+        "bytes": 2912,
+        "path": "park-names-nodes.json",
+        "sha256": "fd58b1b3f2bca402e18faeb4f80b10c3f42f98812d6f95ed5190ba8c17b11780"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:36.011358+00:00",
+      "headers": {
+        "Content-Length": "2912",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:35 GMT"
+      },
+      "httpStatus": 200,
+      "name": "park-names-nodes",
+      "startedUtc": "2026-10-16T20:25:35.541569+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/combinations?key=leisure&value=park&query=name&filter=nodes&page=1&rp=25&sortname=together_count&sortorder=desc"
+    },
+    {
+      "body": {
+        "bytes": 2970,
+        "path": "park-names-ways.json",
+        "sha256": "21374c37039cf098098ae756669359e0c26418e0c777fbd06abad61121be6e06"
+      },
+      "dataUntil": "2026-10-16T00:59:40Z",
+      "endedUtc": "2026-10-16T20:25:36.490393+00:00",
+      "headers": {
+        "Content-Length": "2970",
+        "Content-Type": "application/json;charset=UTF-8",
+        "Date": "Fri, 16 Oct 2026 20:25:35 GMT"
+      },
+      "httpStatus": 200,
+      "name": "park-names-ways",
+      "startedUtc": "2026-10-16T20:25:36.011390+00:00",
+      "status": "retained-public-metadata",
+      "url": "https://taginfo.openstreetmap.org/api/4/tag/combinations?key=leisure&value=park&query=name&filter=ways&page=1&rp=25&sortname=together_count&sortorder=desc"
+    }
+  ],
+  "retries": 0,
+  "schemaVersion": 1,
+  "scope": "Public aggregate tag/count metadata only; live database snapshot is not exact dated PBF or accepted unique candidate count",
+  "sharedDeadlineSeconds": 45
+}

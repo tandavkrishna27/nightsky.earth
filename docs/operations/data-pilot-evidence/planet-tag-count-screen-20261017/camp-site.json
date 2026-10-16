@@ -1,0 +1,1 @@
+{"url":"https://taginfo.openstreetmap.org/api/4/tag/stats?key=tourism&value=camp_site","data_until":"2026-10-16T00:59:40Z","total":4,"data":[{"type":"all","count":163514,"count_fraction":0.0},{"type":"nodes","count":105404,"count_fraction":0.0004},{"type":"ways","count":54975,"count_fraction":0.0},{"type":"relations","count":3135,"count_fraction":0.0002}]}

@@ -1,0 +1,1 @@
+{"url":"https://taginfo.openstreetmap.org/api/4/tag/stats?key=leisure&value=nature_reserve","data_until":"2026-10-16T00:59:40Z","total":4,"data":[{"type":"all","count":150614,"count_fraction":0.0},{"type":"nodes","count":4940,"count_fraction":0.0},{"type":"ways","count":102539,"count_fraction":0.0001},{"type":"relations","count":43135,"count_fraction":0.0029}]}
