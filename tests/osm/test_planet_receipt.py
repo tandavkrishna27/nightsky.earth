@@ -219,8 +219,12 @@ class PlanetReceiptTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             with patch.object(receipt, '_require_handoff', return_value=dict(deadline=200, headerDeadline=99)):
                 with patch.object(receipt.time, 'monotonic', return_value=100):
-                    with patch.object(receipt.http.client, 'HTTPSConnection', return_value=FakeConnection()):
-                        report = receipt._worker(folder, self.allowance(folder), '0'*64)
+                    # Isolate this deadline fixture from the runner's actual
+                    # free disk; production still requires the full reserve.
+                    with patch.object(receipt.shutil, 'disk_usage') as disk:
+                        disk.return_value.free = receipt.RESERVE_BYTES
+                        with patch.object(receipt.http.client, 'HTTPSConnection', return_value=FakeConnection()):
+                            report = receipt._worker(folder, self.allowance(folder), '0'*64)
             self.assertEqual(report['status'], 'bounded-stop')
             self.assertIn('connection/header deadline', report['reason'])
             self.assertEqual(reply.read_sizes, [])
@@ -320,21 +324,48 @@ class PlanetReceiptTests(unittest.TestCase):
     @unittest.skipUnless(os.name == 'nt', 'Windows Job enforcement')
     def test_real_handoff_verifies_job_and_isolated_environment_without_network(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            # Windows hosted TEMP can contain 8.3 aliases (e.g. RUNNER~1).
+            # Match receive(): bind the authenticated handoff to canonical root.
+            root = receipt.safe_path(folder)
             limits = {**receipt.LIMITS, 'freeBytes': 1}
-            code = ("import sys,json,os;sys.path.insert(0,sys.argv[1]);import planet_receipt as p;"
-                    "p._require_handoff(sys.argv[2],'0'*64,json.loads(sys.argv[3]));"
-                    "assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode;"
-                    "assert 'PLANET_TEST_INHERITED_ENV' not in os.environ;"
-                    "p._write_new(p.Path(sys.argv[2])/'handoff-verified.json',{'verified':True});"
-                    "raise SystemExit(9)")
+            code = '''import sys,json,os
+from pathlib import Path
+stage = 'import-receiver'
+try:
+    sys.path.insert(0,sys.argv[1])
+    import planet_receipt as p
+    stage = 'require-handoff'
+    p._require_handoff(sys.argv[2],'0'*64,json.loads(sys.argv[3]))
+    stage = 'isolated-flags'
+    assert sys.flags.isolated and sys.flags.no_site and sys.dont_write_bytecode
+    stage = 'environment'
+    assert 'PLANET_TEST_INHERITED_ENV' not in os.environ
+    stage = 'verified-marker'
+    p._write_new(Path(sys.argv[2])/'handoff-verified.json',{'verified':True})
+except Exception as error:
+    # Explicit bounded evidence replaces suppressed child stderr. Only this
+    # synthetic child's public error/stage is captured, never environment data.
+    evidence = dict(stage=stage,errorType=type(error).__name__,error=str(error)[:800],
+                    python=sys.version[:200])
+    payload = json.dumps(evidence).encode()
+    assert len(payload) <= 4096
+    with (Path(sys.argv[2])/'handoff-child-failure.json').open('xb') as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
+    raise SystemExit(8)
+raise SystemExit(9)
+'''
             command = [sys.executable, '-I', '-S', '-B', '-c', code,
                        str(Path(receipt.__file__).parent), str(root), json.dumps(limits)]
             with patch.dict(os.environ, {'PLANET_TEST_INHERITED_ENV': 'synthetic-value'}):
                 report = receipt._supervise_worker(command, root, limits, [],
                     dict(root=str(root), allowanceSha256='0'*64))
-            self.assertTrue((root/'handoff-verified.json').exists())
-            self.assertEqual(report['exitCode'], 9)
+            failure = root/'handoff-child-failure.json'
+            detail = failure.read_text()[:4096] if failure.exists() else 'no child failure record'
+            diagnostics = f'supervisor={report}; child={detail}'
+            self.assertTrue((root/'handoff-verified.json').exists(), diagnostics)
+            self.assertEqual(report['exitCode'], 9, diagnostics)
 
     def test_actual_direct_handoff_without_pipe_refuses(self):
         code = ("import sys;sys.path.insert(0,sys.argv[1]);import planet_receipt as p;"
