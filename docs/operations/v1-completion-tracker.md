@@ -10,7 +10,7 @@ Historical reviewed baseline: `b6bb5726b61c5faf05f9e9073306fd19f7828918`, packag
 
 Global, free product; shared MCP and five workflows; no database. Claude testing remains owner-deferred. This document authorizes no downloads, provider/model calls, deployment or publication.
 
-Latest pushed engineering commit: `dc63c9ff2a6a449d91e330ca946ef0018ee8c33f`; [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38959039725). This includes the reviewed capacity-harness correction after `750b12f` integrated weather form evidence, production source-policy binding and eighteen annual meteor guidance periods. It does not close actual global source or release acceptance.
+Latest verified pushed integration: `5c41882d08989182d97b16d5ec0aa7daf0c789a3`; [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38961716926). This includes the capacity-harness correction, actual private boundary admission, authenticated weather form evidence, greatest elongation and metadata-preservation evidence. Subsequent lane changes remain separately reviewed and tested before integration. This does not close actual global source or release acceptance.
 
 ## Active goal through S3
 
@@ -124,6 +124,8 @@ All nine Partial and six Not started headings are represented. None is deleted, 
 5. Report stage/row IDs, rows advanced/closed, blockers and the next concrete action. Never substitute a freshly regrouped wave count.
 
 ## Current resource decision
+
+Active follow-through: the weather lane is implementing and independently reviewing a bounded local Icechunk metadata reader; no source-object request is authorized. Geography is correcting two Windows fixture path-alias failures from run `38961977160` before integration, then checking a bounded spatial broad phase and the unresolved 128 MiB candidate-stream capacity. Events is preparing a proposed 2026–2027 visual-shower coverage matrix for an explicit owner decision; it does not replace the existing scope. The Venus morning reference follow-up is integrated locally with 12 affected tests passing. Keep large combined verification at integration milestones; these preparations do not substitute for actual S3 measurements.
 
 The fresh geography observation shows room for the proposed raw receipt, but not the earlier full-build allocation plus unchanged reserve. No download is authorized. Read-only retention review identified `.data/lineage-scale-proof-20261016-v1/artifacts` as generated synthetic outputs (14,554,607,140 logical bytes in the recorded inventory). Root preserved 27 compact manifests/root records totaling 3,585,739 bytes outside that child; [preservation receipt](data-pilot-evidence/lineage-scale-cleanup-preservation-20261017.json). Original measurement receipts, frozen worker/configuration and inputs remain retained. Owner deletion decision is pending; zero reclaimed bytes assumed. Removing bulk artifacts would remove original descendant closure and require replay for another full inspection.
 
