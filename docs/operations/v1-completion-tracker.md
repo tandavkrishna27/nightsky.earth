@@ -28,7 +28,7 @@ Row IDs stay fixed after completion. Root owns integration/docs. Heavy builds sh
 | ID | Lane / original tickets | Status and deliverable | Exit evidence / dependency |
 | --- | --- | --- | --- |
 | S2-G1 | Geography / 0, 8 | Complete as software preparation: producer/bridge, geometry preparation and pinned local ingestion. | [Producer evidence](local-engineering-acquisition-wave.md), [adapter evidence](offline-timeseries-boundaries-wave.md). No actual global coverage inferred. |
-| S2-G2 | Geography / 0, 8 | Approved tranche attempted: first GET timed out, zero retained body bytes; second not attempted. [N4 results](n4-acquisition-results.md). Renewed allowance needed before another attempt. | Exact bodies/hashes, reviewed provider IDs, topology/membership tests and measured preparation resources. |
+| S2-G2 | Geography / 0, 8 | Renewed tranche succeeded: both pinned bodies acquired and verified, 54,014,085 bytes; preliminary inventory complete. [N4 results](n4-acquisition-results.md). | Reviewed provider IDs/mappings, topology/membership tests and actual preparation resource fit. Reuse these bodies; no repeat download needed. |
 | S2-G3 | Geography / 0, 8 | Pending source acceptance: actual global candidate catalogue and extraction completeness. | Accepted extracts/footprints, coverage/residual manifest, reproducible catalogue and attribution/public offer where required. Boundaries alone prove neither extraction completeness nor access. |
 | S2-H1 | History / 0, 9 | Complete as preparation: request syntax, bounded lineage and offline adapter. | [Time-series contract](era5-timeseries-adapter.md). Live execution/scientific acceptance not enabled. |
 | S2-H2 | History / 0, 9 | Approved one-job attempt stopped `submission-uncertain`; no job ID/raw recorded. [N4 results](n4-acquisition-results.md). Diagnostics corrected offline; no resubmission. | Reconcile remote uncertainty; renewed finite authority before another attempt; actual format/point/time/units/missingness and decoder acceptance. |
@@ -78,7 +78,7 @@ If actual source feasibility fails, record the failure and a concrete alternativ
 - [x] N1: Prepare the geography acquisition packet: exact two pinned bodies totaling 54,014,085 bytes, scratch/time bounds and stop conditions; reuse retained licence/listing metadata. [Reviewed proposal](s2-geography-acquisition-proposal.md); no download.
 - [x] N2: Prepare the weather sample execution contract and gated wrapper: fixed request, one job, byte/time/storage/poll bounds, hard containment, credentials isolation and quarantine. [Reviewed packet](s2-weather-sample-proposal.md); default remains offline, execution requires separate allowance.
 - [x] N3: In parallel reconcile E2 using retained evidence; list genuine source questions without automatically fetching data. [Reviewed matrix](s2-events-coverage-matrix.md); science/source gates remain open.
-- [ ] N4 (partial): Packets approved and bounded attempts executed; weather uncertain, first geography GET timed out. [Results and corrections](n4-acquisition-results.md). No actual dataset accepted; renewed finite allowance required for further remote actions. E2 source/science questions remain separate.
+- [ ] N4 (partial): Renewed geography attempt acquired both pinned bodies; request-history check completed read-only. Weather sample remains pending a fresh explicit one-job allowance. [Results](n4-acquisition-results.md). Geography mapping/topology and E2 source/science questions remain separate acceptance work.
 - [ ] N5: Use measured findings to complete G3/H3/R1, then S3 and S4. Corrections stay under the same stage IDs.
 
 No dataset request is authorized by this tracking plan. Download-batch count and total ETA remain unknown until actual formats and throughput are measured.
@@ -114,6 +114,7 @@ All nine Partial and six Not started headings are represented. None is deleted, 
 | 16 Oct / tracker reconciliation | Reporting only | Original four-stage owner contract restored. No code, acquisition or ticket acceptance changed. |
 | 16 Oct / S2 N1–N3 preparation | S2-G2/H2/E2 subtasks | [Integrated record](s2-acquisition-preparation-wave.md): reviewed source proposals, event reconciliation and offline-tested sample wrapper. N1/N2/N3 complete; N4 authorization/acquisition and actual G2/H2/E2 acceptance remain open. Original ticket totals unchanged. |
 | 16 Oct / N4 bounded attempts | S2-G2/H2 findings; N4 partial | [Actual outcomes](n4-acquisition-results.md): weather submission uncertain, first geography GET timed out, second not attempted. No dataset accepted; offline defects corrected and evidence preserved. |
+| 16 Oct / N4 renewed geography | S2-G2 acquisition subtask complete | [Verified retry](data-pilot-evidence/2026-10-16-n4-geography-r2.json): both bodies acquired in 9.098 seconds; CDS history read-only with no visible current-day entry. No new weather job or deployment. Mapping/topology/scientific gates remain open. |
 
 ## Tracker review — 16 October 2026
 

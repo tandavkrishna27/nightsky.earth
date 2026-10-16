@@ -1,5 +1,20 @@
 # N4 bounded acquisition results — 16 October 2026
 
+## Renewed geography allowance: successful retry
+
+The owner renewed the two-file geography allowance and read-only CDS request-history check. The corrected runner used fresh `.cache/s2-geography-acquisition-20261016-r2/`, preserving all earlier failed/uncertain artifacts. Both exact GETs succeeded; total bodies **54,014,085 bytes**. Expected lengths and immutable Git blob identities matched; measured SHA-256s and sanitized results are in the [retry evidence](data-pilot-evidence/2026-10-16-n4-geography-r2.json).
+
+| Body | Bytes | Preliminary feature count |
+| --- | ---: | ---: |
+| Countries | 13,287,234 | 258 |
+| States/provinces | 40,726,851 | 4,596 |
+
+The supervised run completed in **9.098 seconds**, peak combined RSS **400,732,160 bytes**, sampled combined private commit **380,203,008 bytes**, peak local run disk **54,031,990 bytes**. This is acquisition/JSON inventory cost, not production serving capacity. Inspection counted 1,843,790 coordinate positions across both bodies; compare actual input requirements with the existing vertex/descriptor limits before preparation, without automatically raising limits. Provider mappings, topology and membership acceptance remain open; no data was promoted to runtime.
+
+The read-only CDS All Requests page showed **34 total entries**, newest visible submission **15 October 2026**, with no entry for today's time-series attempt visible. This observation is not proof that a remote job cannot exist and does not reset the consumed local allowance. No weather request, download or job submission was made during the retry. N4 remains partial because the weather sample and subsequent data acceptance are unfinished.
+
+The sections below preserve the first attempt and its corrective history; the renewed successful geography result above supersedes the earlier lack of acquired geography bodies.
+
 **Outcome: acquisition attempted, acceptance not completed.** The owner approved the two fixed geography downloads and one fixed ERA5 job within the reviewed limits, with no deployment. The owner then separately authorized loading the saved private CDS configuration into the child environment. No credential value is recorded in this document, evidence, command arguments or Git.
 
 ## Actual results
@@ -30,8 +45,8 @@ Root offline verification: **110 ERA5 tests passed**; **18 geography acquisition
 
 ## Next decision under the same N4
 
-N4 remains partial; S2-G2/H2 and original **12 Done / 9 Partial / 6 Not started** totals are unchanged. No new stage or wave is introduced.
+N4 remains partial. S2-G2 acquisition has advanced; its mapping/topology acceptance and S2-H2 scientific acceptance remain open. Original **12 Done / 9 Partial / 6 Not started** totals are unchanged. No new stage or wave is introduced.
 
-Before another remote attempt, obtain a renewed finite allowance. Geography needs a reviewed fresh run root and at most the same two immutable GETs with unchanged size/resource limits and corrected timeout. Do not delete/reuse the failed root. Weather needs safe reconciliation of possible provider-side existence where feasible, or an explicit owner decision accepting that unresolved possibility before authorizing another single submission. Any fresh weather attempt uses a new allowance/output tuple and the reviewed diagnostics, not a reset consumed receipt. No account lookup is implicitly authorized here.
+The geography renewal and read-only request-history observation are now completed as recorded above. Reuse the acquired geography files for the next mapping/topology decision; no further geography download is needed for these exact inputs. Weather still needs explicit authorization before another single submission, considering the limited request-history evidence. Any fresh weather attempt uses a new allowance/output tuple and the reviewed diagnostics, not a reset consumed receipt. Do not delete/reuse either failed run root.
 
 Actual body inspection, mappings/scientific format, real release construction and S3/S4 acceptance remain pending. These results justify neither a bulk download nor a claim that global history is feasible.

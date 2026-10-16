@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "observedUtc": "2026-10-16T08:30:55.753295+00:00",
+  "status": "stopped-for-mapping-review",
+  "rootRelative": ".cache/s2-geography-acquisition-20261016-r2",
+  "manifest": [
+    {
+      "identity": {
+        "bytes": 13287234,
+        "git": "5ebc66e25fc1af01edaebe9375c546655e04cf1e",
+        "sha256": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255"
+      },
+      "manifest": {
+        "bytes": 13287234,
+        "git": "5ebc66e25fc1af01edaebe9375c546655e04cf1e",
+        "name": "ne_10m_admin_0_countries.geojson",
+        "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/9380cca83db5f9aef52d5e762765100745f84b27/geojson/ne_10m_admin_0_countries.geojson"
+      }
+    },
+    {
+      "identity": {
+        "bytes": 40726851,
+        "git": "4a8438f98ac7dfec7dc1739b1eaf91398ad33f22",
+        "sha256": "22d0e3ad85eb3e27f17cabf8ba2d50e554fbc27a87796ff891d958185da62fb5"
+      },
+      "manifest": {
+        "bytes": 40726851,
+        "git": "4a8438f98ac7dfec7dc1739b1eaf91398ad33f22",
+        "name": "ne_10m_admin_1_states_provinces.geojson",
+        "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/9380cca83db5f9aef52d5e762765100745f84b27/geojson/ne_10m_admin_1_states_provinces.geojson"
+      }
+    }
+  ],
+  "metrics": {
+    "elapsedSeconds": 9.098436899999797,
+    "peakDisk": 54031990,
+    "peakSampledTreePrivateCommit": 380203008,
+    "peakTreeRss": 400732160,
+    "exitCode": 0
+  },
+  "inspection": [
+    {
+      "file": "ne_10m_admin_0_countries.geojson.json",
+      "features": 258,
+      "positions": 548471,
+      "geometryTypes": {
+        "MultiPolygon": 151,
+        "Polygon": 107
+      },
+      "propertyCount": 168
+    },
+    {
+      "file": "ne_10m_admin_1_states_provinces.geojson.json",
+      "features": 4596,
+      "positions": 1295319,
+      "geometryTypes": {
+        "MultiPolygon": 651,
+        "Polygon": 3945
+      },
+      "propertyCount": 121
+    }
+  ],
+  "cdsReadOnlyObservation": {
+    "date": "2026-10-16",
+    "allTabTotal": 34,
+    "newestVisibleSubmissionDate": "2026-10-15",
+    "todayTimeSeriesEntryVisible": false,
+    "jobAbsenceProven": false,
+    "newWeatherSubmission": false
+  },
+  "mappingAccepted": false,
+  "topologyAccepted": false,
+  "runtimePromotion": false
+}

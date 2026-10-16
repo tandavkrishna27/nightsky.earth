@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**N4 renewed geography, 16 October:** [results](n4-acquisition-results.md) record successful acquisition/hash verification of both pinned Natural Earth bodies, 54,014,085 bytes, in 9.098 seconds. Preliminary inventory completed; mappings/topology/membership not accepted. CDS Requests was inspected read-only; no current-day entry visible, not proof of remote absence. Weather still requires a fresh explicit job allowance; no submission or deployment. Original **12 Done / 9 Partial / 6 Not started** unchanged.
+
 **N4 actual attempts, 16 October:** [results](n4-acquisition-results.md): approved weather attempt stopped submission-uncertain with no recorded job ID/raw; first geography GET timed out with zero retained bytes, second not attempted. No retries, data acceptance or deployment. Offline diagnostic/accounting/timeout corrections are reviewed and tested; N4 remains partial and further remote actions need renewed authority. Original **12 Done / 9 Partial / 6 Not started** unchanged.
 
 **S2 N1–N3 preparation, 16 October:** [integrated record](s2-acquisition-preparation-wave.md) delivers reviewed geography/weather proposals, retained event reconciliation and a gated Windows sample wrapper verified offline. No actual data acquired, source/scientific acceptance or original ticket closure; **12 Done / 9 Partial / 6 Not started** unchanged.

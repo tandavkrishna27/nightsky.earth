@@ -22,7 +22,7 @@ from global_source_supervisor import WindowsJob, rss_bytes
 MIB = 1024 ** 2
 GIB = 1024 ** 3
 REPO = Path(__file__).resolve().parents[2]
-ROOT = REPO / '.cache/s2-geography-acquisition-20261016'
+ROOT = REPO / '.cache/s2-geography-acquisition-20261016-r2'
 PACKET = 'N4-natural-earth-v5.1.1-20261016-fixed-two-GET'
 COMMIT = '9380cca83db5f9aef52d5e762765100745f84b27'
 FILES = [dict(name='ne_10m_admin_0_countries.geojson', bytes=13287234, git='5ebc66e25fc1af01edaebe9375c546655e04cf1e'),
