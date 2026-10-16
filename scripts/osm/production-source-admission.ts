@@ -4,6 +4,7 @@ import {lstat,open,realpath} from 'node:fs/promises';
 import {dirname,isAbsolute,join,parse,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import * as z from 'zod4';
+import {partitionedRawManifestSchema,partitionedAssemblyPlanSchema,validatePartitionedCapacity,parsePartitionedControl} from './partitioned-assembly-plan';
 import {
  validateProductionSourceAdmissionFiles,validateSourceAdmissionMetadataFiles,
  boundaryNormalizationLineageSchema,
@@ -23,13 +24,15 @@ export const productionAdmissionEnvelopeSchema=z.strictObject({
  boundaries:z.array(z.strictObject({boundaryIndex:z.number().int().min(0).max(99),
   bindings:z.array(z.strictObject({bundle:metadataPin,lineage:metadataPin})).min(1).max(64)})).min(1).max(100),
 });
-const rawSchema=z.object({schemaVersion:z.literal(1),policy:z.literal('named-complete-way-v1-polar85'),
+const legacyRawSchema=z.object({schemaVersion:z.literal(1),policy:z.literal('named-complete-way-v1-polar85'),
  sources:z.array(z.object({id:sourceId,path:absolute,url:z.string(),bytes:z.number().int().safe().positive(),sha256:sha,
   vintage:z.string(),clipSha256:sha.optional(),sourceDomain:metadataPin.extend({kind:z.literal('planet-domain-v1')}).optional()}).passthrough()).min(1).max(64),
 }).passthrough();
-const planSchema=z.object({schemaVersion:z.literal(1),boundaries:z.array(z.object({input:pin}).passthrough()).min(1).max(100),
+const legacyPlanSchema=z.object({schemaVersion:z.literal(1),boundaries:z.array(z.object({input:pin}).passthrough()).min(1).max(100),
  footprints:pin,sourceDomains:z.array(metadataPin.extend({kind:z.literal('planet-domain-v1'),sourceId})).max(64).optional(),
 }).passthrough();
+const rawSchema=z.union([legacyRawSchema,partitionedRawManifestSchema]);
+const planSchema=z.union([legacyPlanSchema,partitionedAssemblyPlanSchema]);
 export type ProductionAdmissionPin=z.infer<typeof pin>;
 export interface ProductionAdmissionOptions {
  manifestPath:string; admissionPath:string; admissionSha256:string; phase:string;
@@ -48,6 +51,14 @@ export const productionAdmissionCodeFiles=Object.freeze([
  'scripts/osm/build-streamed-catalogue.ts','scripts/osm/normalized-input-bytes.ts',
  'server/places/catalogueFormat.ts','shared/nightsky/discovery.ts',
  'shared/nightsky/common.ts','shared/nightsky/places.ts',
+ 'scripts/osm/partitioned-assembly-plan.ts',
+ 'scripts/osm/partitioned-candidates.ts',
+ 'scripts/osm/geography-capacity-plan.ts',
+ 'scripts/osm/global_source.py',
+ 'scripts/osm/normalized_partitions.py',
+ 'scripts/osm/spot_paths.py',
+ 'scripts/osm/supervised_membership_assembly.py',
+ 'scripts/osm/global_source_supervisor.py',
  'scripts/osm/production-type-loader.mjs',
 ]);
 function canonical(value:unknown):string {
@@ -113,8 +124,14 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
  if(options.expectedPlanPath&&await safePath(options.expectedPlanPath)!==await safePath(envelope.assemblyPlan.path))throw new Error('Exact assembly plan path binding mismatch');
  if(options.expectedPlanSha256&&options.expectedPlanSha256!==envelope.assemblyPlan.sha256)throw new Error('Exact assembly plan digest binding mismatch');
  const manifestRead=await read(envelope.manifest.path,MiB,envelope.manifest),planRead=await read(envelope.assemblyPlan.path,MiB,envelope.assemblyPlan);
- const manifest=rawSchema.parse(decode(manifestRead.body)),plan=planSchema.parse(decode(planRead.body));
+ const rawDecoded=decode(manifestRead.body),planDecoded=decode(planRead.body);
+ const manifest=rawSchema.parse(rawDecoded.schemaVersion===2?parsePartitionedControl(manifestRead.body):rawDecoded),plan=planSchema.parse(planDecoded.schemaVersion===2?parsePartitionedControl(planRead.body):planDecoded);
  producerIntegers(manifest);
+ if(manifest.schemaVersion!==plan.schemaVersion)throw new Error('Raw manifest/assembly layout version mismatch');
+ if(plan.schemaVersion===2){
+  const capacity=await read(plan.capacityPlan.path,65536,plan.capacityPlan);
+  validatePartitionedCapacity(plan,parsePartitionedControl(capacity.body),manifest);
+ }
  if(plan.boundaries.reduce((total,boundary)=>total+boundary.input.bytes,0)>MAX_GEOMETRY)throw new Error('Aggregate admission boundary byte limit');
  if(new Set(manifest.sources.map(s=>s.id)).size!==manifest.sources.length||new Set(envelope.rawSources.map(s=>s.sourceId)).size!==envelope.rawSources.length)throw new Error('Duplicate raw source admission binding');
  if(envelope.rawSources.length!==manifest.sources.length||envelope.boundaries.length!==plan.boundaries.length||new Set(envelope.boundaries.map(s=>s.boundaryIndex)).size!==envelope.boundaries.length)throw new Error('Complete exact source/boundary admission inventory required');
@@ -178,7 +195,7 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
  for(const raw of rawFiles){const stat=await lstat(await safePath(raw.path));if(state(stat)!==raw.fileState)throw new Error('Raw file mutation during admission');}
  const metadataPins=[...seen.values()].filter(item=>!codePins.some(p=>p.path===item.path)&&!geometryPins.some(p=>p.path===item.path)).sort((a,b)=>a.path.localeCompare(b.path));
  const producerManifestSha256=hash(canonical(manifest));
- const producerIdentity={policy:manifest.policy,sources:manifest.sources.map(source=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as Record<string,unknown>).filter(([domainKey])=>domainKey!=='path')):value])))};
+ const producerIdentity={policy:manifest.policy,...(manifest.schemaVersion===2?{evidenceLayout:manifest.evidenceLayout}:{}),sources:manifest.sources.map(source=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as Record<string,unknown>).filter(([domainKey])=>domainKey!=='path')):value])))};
  const producerCatalogueRevision='osm-'+hash(canonical(producerIdentity));
  const identity={schemaVersion:1 as const,kind:'production-admission-snapshot-v1' as const,
   manifest:manifestRead.pin,assemblyPlan:planRead.pin,admission:admissionRead.pin,

@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {buildBoundaryMetadata,boundedContains,indexedBoundaryContains} from '../../scripts/osm/boundary-metadata';
+import * as boundaryMetadata from '../../scripts/osm/boundary-metadata';
 import {contains} from '../../scripts/osm/geographic-geometry';
 const source={name:'Synthetic',url:'https://example.org',attribution:'Synthetic',dataClass:'catalog'};
 const fixtureRoots:string[]=[];
@@ -114,4 +115,109 @@ test('full feature-count membership avoids visiting every distant feature for ea
  const enriched=await values(join(f.output,'candidates.jsonl'));
  assert.equal(enriched.length,256);
  assert.ok(enriched.every(item=>item.countryCode==='IND'&&item.regionIds.join(',')==='region:v1:cell-0'));
+});
+
+async function partitionedFixture(rows=[row(1,1,1),row(2,8,8)]){
+ const f=await shardFixture();
+ const manifest={schemaVersion:3,catalogueRevision:'fixture',boundaries:f.manifest.boundaries};
+ await writeFile(f.input,JSON.stringify(manifest));
+ const family=(values:any[],name:string,key:(value:any)=>string[])=>{
+  const body=values.map(value=>JSON.stringify(value)+'\n').join(''),sha256=createHash('sha256').update(body).digest('hex');
+  return {bytes:Buffer.byteLength(body),rows:values.length,sha256,parts:values.length?[{ordinal:0,path:`parts/${name}-00000.jsonl`,bytes:Buffer.byteLength(body),sha256,firstRow:0,rows:values.length,firstKey:key(values[0]),lastKey:key(values.at(-1))}]:[]};
+ };
+ const n=rows.length,empty={bytes:0,sha256:createHash('sha256').update('').digest('hex')};
+ const identity={rawStreams:{candidates:family(rows,'candidates',r=>[r.placeId]),lineage:family(rows.map(r=>({placeId:r.placeId,source:'fixture'})),'lineage',r=>[r.placeId,r.source]),exclusions:family([],'exclusions',r=>[r.source,r.id,r.reason])},counts:{accepted:n,lineage:n,exclusions:0,selectedOccurrences:n,acceptedOccurrences:n,duplicateAcceptedOccurrences:0,sources:[{id:'fixture',selected:n,accepted:n,excluded:0,lineage:n}]},boundaryPins:manifest.boundaries.map(s=>({...s.input,path:join(f.dir,s.input.path)})),footprintPin:{...empty,path:join(f.dir,'footprints.jsonl')}};
+ async function* values(){for(const value of rows)yield value;}
+ const budget={bytes:0,rows:0,work:0,maxBytes:1024**2,maxRows:100000,maxWork:200000000,deadline:Date.now()+60000};
+ return {...f,manifest,rows,source:{rows:values(),producerDescriptorSha256:'a'.repeat(64),planSha256:'b'.repeat(64),expectedCandidates:n,inputIdentity:identity,budget}};
+}
+test('partitioned membership classifies one complete stream and binds its producer and controls',async()=>{
+ const f=await partitionedFixture();
+ const done=await (boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source);
+ assert.equal(done.kind,'partitioned-membership-v1');assert.equal(done.schemaVersion,2);
+ assert.equal(done.totalCandidates,2);assert.equal(done.unknownCountryCandidates,1);
+ assert.equal(done.producerDescriptorSha256,'a'.repeat(64));assert.equal(done.planSha256,'b'.repeat(64));
+ const rows=(await Promise.all(done.streams.candidates.parts.map((p:any)=>values(join(f.output,p.path))))).flat();
+ assert.deepEqual(rows.map((r:any)=>r.regionIds),[['region:v1:country','region:v1:state'],[]]);
+ assert.equal(done.resources.rows,2);assert.ok(done.resources.work>0);
+ assert.equal(done.resources.work,f.source.budget.work);
+ assert.equal(done.files['regions.jsonl'].bytes,Buffer.byteLength(await readFile(join(f.output,'regions.jsonl'))));
+ assert.equal(await readFile(join(f.output,'footprints.jsonl'),'utf8'),'');
+ assert.ok(done.resources.outputBytes<=1024**3);assert.equal(done.inputIdentity.counts.accepted,2);
+ assert.equal(done.resources.outputBytes,done.streams.candidates.bytes+done.files['regions.jsonl'].bytes+done.files['footprints.jsonl'].bytes+Buffer.byteLength(await readFile(join(f.output,'complete.json'))));
+});
+test('partitioned input reads and classification share work and deadline without reset',async()=>{
+ for(const mode of ['work','deadline','abort']){
+  const f=await partitionedFixture();let reachedSecond=false;
+  f.source.rows=(async function*(){yield f.rows[0];reachedSecond=true;if(mode==='work')f.source.budget.work=f.source.budget.maxWork;if(mode==='deadline')f.source.budget.deadline=Date.now()-1;if(mode==='abort')throw new Error('partition-input-aborted');yield f.rows[1];})();
+  await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source),/Comparison|Deadline|aborted|deadline|work/i);
+  assert.equal(reachedSecond,true);await assert.rejects(access(join(f.output,'complete.json')));
+ }
+});
+test('already consumed shared work cannot be reset by geometry setup',async()=>{
+ const f=await partitionedFixture();f.source.budget.work=f.source.budget.maxWork-1;
+ await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source),/Comparison|work/i);
+ await assert.rejects(access(f.output));
+});
+test('partitioned output and completion share one finite allowance',async()=>{
+ const f=await partitionedFixture();
+ await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source,{maxOutputBytes:1}),/byte|output/i);
+ await assert.rejects(access(join(f.output,'complete.json')));
+ const empty=await partitionedFixture([]);
+ await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(empty.input,empty.output,empty.source,{maxOutputBytes:1}),/byte|output/i);
+ await assert.rejects(access(join(empty.output,'complete.json')));
+});
+test('a second enriched row cannot receive a fresh output allowance',async()=>{
+ const f=await partitionedFixture(),first={...f.rows[0],countryCode:'IND',regionIds:['region:v1:country','region:v1:state']};
+ const cap=Buffer.byteLength(JSON.stringify(first)+'\n')+1;let reachedSecond=false;
+ f.source.rows=(async function*(){yield f.rows[0];reachedSecond=true;yield f.rows[1];})();
+ await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source,{maxRows:2,maxOutputBytes:cap}),/byte|output/i);
+ assert.equal(reachedSecond,true);assert.equal(Buffer.byteLength(await readFile(join(f.output,'parts','candidates-00000.jsonl'))),cap-1);
+ await assert.rejects(access(join(f.output,'complete.json')));
+});
+test('partitioned classified output reaches the unchanged catalogue consumer',async()=>{
+ const f=await partitionedFixture();await writeFile(f.source.inputIdentity.footprintPin.path,'');
+ const done=await (boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source);
+ const {buildSourceCatalogue}=await import('../../scripts/osm/build-source-catalogue');
+ const {loadCatalogueFiles}=await import('../../server/places/catalogueFiles');
+ const membershipBody=Buffer.from(JSON.stringify(done)+'\n'),expectedMembershipPin={path:join(f.output,'complete.json'),bytes:membershipBody.length,sha256:createHash('sha256').update(membershipBody).digest('hex')};
+ const result=await buildSourceCatalogue({producerDir:f.output,regions:join(f.output,'regions.jsonl'),footprints:f.source.inputIdentity.footprintPin.path,expectedCandidates:2,partitionBudget:f.source.budget,expectedMembershipPin},join(f.dir,'edition'));
+ assert.equal(done.totalCandidates,2);assert.equal(result.stats.inputRows,2);
+ const files=await loadCatalogueFiles(result.path,{expectedSha256:result.sha256}),ids=[];
+ for await(const page of files.walk('spatial'))if(page.kind==='candidates')ids.push(...page.rows.map(value=>value.placeId));
+ assert.deepEqual(ids,['place:v1:osm:node:1','place:v1:osm:node:2']);assert.equal(files.root.trees.membership.rows,2);
+});
+test('partitioned descriptor is refused without the internal complete-stream source',async()=>{
+ const f=await partitionedFixture();await assert.rejects(buildBoundaryMetadata(f.input,f.output));await assert.rejects(access(join(f.output,'complete.json')));
+});
+test('partitioned membership never resets row limits for the next input segment',async()=>{
+ const f=await partitionedFixture();let reachedSecond=false;
+ f.source.rows=(async function*(){yield f.rows[0];reachedSecond=true;yield f.rows[1];})();
+ await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source,{maxRows:1}),/row|candidate/i);
+ assert.equal(reachedSecond,true);await assert.rejects(access(join(f.output,'complete.json')));
+});
+test('partitioned membership requires source EOF, exact counts and immutable boundary inputs',async()=>{
+ for(const mode of ['count','iterator','mutation','duplicate']){
+  const f=await partitionedFixture();
+  if(mode==='count')f.source.expectedCandidates++;
+  if(mode==='iterator')f.source.rows=(async function*(){yield f.rows[0];throw new Error('source-eof-refused');})();
+  if(mode==='mutation')f.source.rows=(async function*(){yield f.rows[0];await writeFile(join(f.dir,'shard-2.json'),'{}');yield f.rows[1];})();
+  if(mode==='duplicate')f.source.rows=(async function*(){yield f.rows[0];yield f.rows[0];})();
+  await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source));await assert.rejects(access(join(f.output,'complete.json')));
+ }
+});
+test('generated boundary descriptors reserve distinct bytes before exceeding seeded admission metadata',async()=>{
+ const f=await partitionedFixture([]),size=Buffer.byteLength(await readFile(f.input));
+ (f.source.budget as any).metadata={bytes:32*1024**2-size+1,ceiling:32*1024**2,paths:new Map([[join(f.dir,'already-admitted.json'),32*1024**2-size+1]])};
+ await assert.rejects((boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source),/metadata.*budget|metadata.*byte/i);await assert.rejects(access(f.output));
+});
+test('the same canonical descriptor is not charged again during boundary revalidation',async()=>{
+ const f=await partitionedFixture([]),size=Buffer.byteLength(await readFile(f.input)),path=await realpath(f.input);
+ const metadata={bytes:32*1024**2,ceiling:32*1024**2,paths:new Map([[path,size]])};(f.source.budget as any).metadata=metadata;
+ await (boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.dir+'/./input.json',f.output,f.source);assert.equal(metadata.bytes,32*1024**2);
+});
+test('a shorter shared deadline does not invent elapsed membership time',async()=>{
+ const f=await partitionedFixture([]);f.source.budget.deadline=Date.now()+10000;const before=Date.now();
+ const done=await (boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source);
+ assert.ok(done.resources.elapsedMilliseconds<=Date.now()-before+1000,`reported ${done.resources.elapsedMilliseconds}ms for an actual short session`);
 });

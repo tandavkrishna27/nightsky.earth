@@ -1,4 +1,4 @@
-import {open,mkdir,writeFile,lstat} from 'node:fs/promises';
+import {open,mkdir,writeFile,lstat,rename,realpath} from 'node:fs/promises';
 import {join,resolve,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -6,10 +6,12 @@ import {parseArgs} from 'node:util';
 import {verifyProductionAdmission} from './production-source-admission';
 import * as z from 'zod4';
 import {safe,buildSourceCatalogue} from './build-source-catalogue';
-import {buildBoundaryMetadata} from './boundary-metadata';
+import {buildBoundaryMetadata,buildPartitionedBoundaryMetadata} from './boundary-metadata';
 import {verifyPlanetDomainFile} from './source-admission';
 import {boundaryShards} from './partitioned-boundaries';
 import {streamLimitsSchema,catalogueOptionsSchema,verifyMetadata} from './source-build-config';
+import {partitionedAssemblyPlanSchema,partitionedRawManifestSchema,loadPartitionedCapacity,parsePartitionedControl,type PartitionedAssemblyPlan} from './partitioned-assembly-plan';
+import {verifyNormalizedPartitions,iteratePartitionedCandidates,partitionCanonical,type SharedPartitionBudget} from './partitioned-candidates';
 
 const integer=(max:number)=>z.number().int().safe().min(1).max(max);
 const pin=z.strictObject({path:z.string().refine(isAbsolute),bytes:z.number().int().safe().min(0).max(128*1024**2),sha256:z.string().regex(/^[a-f0-9]{64}$/)});
@@ -31,7 +33,9 @@ async function small(path:string,max:number){
 }
 export async function loadAssemblyPlan(path:string,sha256:string){
  const body=await small(path,1024*1024);if(!/^[a-f0-9]{64}$/.test(sha256)||createHash('sha256').update(body).digest('hex')!==sha256)throw new Error('Assembly digest mismatch');
- const plan=planSchema.parse(JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(body)));
+ const decoded=JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(body));
+ const plan=decoded.schemaVersion===2?partitionedAssemblyPlanSchema.parse(parsePartitionedControl(body)):planSchema.parse(decoded);
+ if(plan.schemaVersion===2)await loadPartitionedCapacity(plan);
  if(new Set((plan.sourceDomains??[]).map(d=>d.sourceId)).size!==(plan.sourceDomains??[]).length)throw new Error('Duplicate planet domain source');
  for(const domain of plan.sourceDomains??[])await verifyPlanetDomainFile(domain.path,{bytes:domain.bytes,sha256:domain.sha256});
  const staged=plan.boundaries.map((s,i)=>({...s,input:{...s.input,path:`boundary-${i}.json`}}));boundaryShards.parse(staged);
@@ -55,9 +59,10 @@ export async function prepareAssemblyInputs(planPath:string,sha256:string,input:
  await copyPinned(pin.parse(input),output);
 }
 /** Library primitive; executable production entry points always provide a fixed-authority gate. */
-export async function assembleMembership(planPath:string,sha256:string,producer:string,root:string,admission?:ProductionGate){
+export async function assembleMembership(planPath:string,sha256:string,producer:string,root:string,admission?:ProductionGate,partitionedManifestPath?:string){
  const admitted=admission?await verifyProductionAdmission({...admission,phase:'assembly-before',expectedPlanPath:planPath,expectedPlanSha256:sha256}):undefined;
  const plan=await loadAssemblyPlan(planPath,sha256);await safe(root);
+ if(plan.schemaVersion===2)return assemblePartitioned(plan,planPath,sha256,producer,root,admission?.manifestPath??partitionedManifestPath,admission,admitted);
  const original=await small(join(producer,'complete.json'),1024*1024),done=JSON.parse(original.toString('utf8'));
  if(done.schemaVersion!==1||!done.files?.['candidates.jsonl'])throw new Error('Producer completion required');
  if((done.admissionSnapshotSha256??undefined)!==admitted?.snapshotSha256)throw new Error('Producer admission identity mismatch');
@@ -83,6 +88,59 @@ export async function assembleMembership(planPath:string,sha256:string,producer:
  if(admission)await verifyProductionAdmission({...admission,phase:'assembly-after',expectedSnapshot:admitted!.snapshotSha256,expectedPlanPath:planPath,expectedPlanSha256:sha256});
  const evidence={schemaVersion:1,...(admitted?{admissionSnapshotSha256:admitted.snapshotSha256}:{}),planSha256:sha256,producerDirectory:producer,producerDescriptor:done,producerDescriptorSha256:createHash('sha256').update(original).digest('hex'),catalogue,membership:enriched,sourceCoverage:plan.footprints.bytes===0?'unknown; no extraction footprints admitted':'only supplied pinned footprints; administrative membership does not establish source coverage'};
  await writeFile(join(root,'assembly-complete.json'),JSON.stringify(evidence)+'\n',{flag:'wx'});return evidence;
+}
+async function assemblePartitioned(plan:PartitionedAssemblyPlan,planPath:string,planSha256:string,producer:string,root:string,manifestPath:string|undefined,admission:ProductionGate|undefined,admitted:Awaited<ReturnType<typeof verifyProductionAdmission>>|undefined){
+ if(!manifestPath)throw new Error('Exact version-2 raw manifest required');
+ const rawBody=await small(manifestPath,1024*1024),raw=partitionedRawManifestSchema.parse(parsePartitionedControl(rawBody));
+ await loadPartitionedCapacity(plan,raw);
+ const rawManifestSha256=createHash('sha256').update(partitionCanonical(raw)).digest('hex');
+ const revisionIdentity={policy:raw.policy,evidenceLayout:raw.evidenceLayout,sources:raw.sources.map(source=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as Record<string,unknown>).filter(([key])=>key!=='path')):value])))};
+ const catalogueRevision='osm-'+createHash('sha256').update(partitionCanonical(revisionIdentity)).digest('hex');
+ if(admitted&&(admitted.producerManifestSha256!==rawManifestSha256||admitted.producerCatalogueRevision!==catalogueRevision))throw new Error('Partitioned admitted producer identity mismatch');
+ const domains=raw.sources.flatMap(source=>source.sourceDomain?[{sourceId:source.id,...source.sourceDomain}]:[]);
+ if(partitionCanonical(domains)!==partitionCanonical(plan.sourceDomains??[]))throw new Error('Partitioned source-domain inventory mismatch');
+ const completePath=join(await safe(producer),'complete.json'),completeBody=await small(completePath,1024*1024);
+ const completionPin={path:completePath,bytes:completeBody.length,sha256:createHash('sha256').update(completeBody).digest('hex')};
+ const maxReadBytes=4*(plan.maxNormalizedOutputBytes+plan.membership.maxOutputBytes+plan.footprints.bytes)+8*1024**2;
+ if(!Number.isSafeInteger(maxReadBytes))throw new Error('Unsafe aggregate verification allocation');
+ const budget:SharedPartitionBudget={bytes:0,rows:0,work:0,maxBytes:maxReadBytes,maxRows:maxReadBytes,maxWork:plan.membership.maxComparisons,deadline:Date.now()+plan.membership.maxMilliseconds,metadata:{bytes:0,ceiling:32*1024**2,paths:new Map()}};
+ // Continue the admission allocation; partition descriptors do not receive a
+ // second 32MiB metadata allowance. Geometry/code/JSONL bodies are excluded.
+ const metadataPins=admitted?.metadataPins??[
+  {path:manifestPath,bytes:rawBody.length},
+  {path:planPath,bytes:(await lstat(await safe(planPath))).size},plan.capacityPlan,
+  ...domains,
+ ];
+ for(const pin of metadataPins){const path=await realpath(await safe(pin.path)),old=budget.metadata!.paths.get(path);if(old!==undefined&&old!==pin.bytes)throw new Error('Shared metadata size mutation');if(old===undefined){const bytes=budget.metadata!.bytes+pin.bytes;if(!Number.isSafeInteger(bytes)||bytes>budget.metadata!.ceiling)throw new Error('Shared metadata byte budget');budget.metadata!.bytes=bytes;budget.metadata!.paths.set(path,pin.bytes);}}
+ const expected={manifestSha256:rawManifestSha256,catalogueRevision,policy:raw.policy,geographyMode:plan.geographyMode??'all-nodes' as const,sourceDomains:domains,admissionSnapshotSha256:admitted?.snapshotSha256,sources:raw.sources.map(({id,url,sha256,vintage,attribution,licenseUrl})=>({id,url,sha256,vintage,attribution,licenseUrl})),maxNormalizedOutputBytes:plan.maxNormalizedOutputBytes,maxCandidateInputBytes:plan.maxCandidateInputBytes,evidenceLayout:plan.evidenceLayout};
+ const verified=await verifyNormalizedPartitions(producer,completionPin,expected,budget);
+ const stage=join(root,'membership-input');await mkdir(stage);
+ const shards=[];
+ for(const [i,spec] of plan.boundaries.entries()){const name=`boundary-${i}.json`;await copyPinned(spec.input,join(stage,name));shards.push({...spec,input:{...spec.input,path:name}});}
+ const descriptor=join(stage,'input.json');await writeFile(descriptor,JSON.stringify({schemaVersion:3,catalogueRevision,boundaries:shards}),{flag:'wx'});
+ const enriched=await buildPartitionedBoundaryMetadata(descriptor,join(root,'membership'),{
+  rows:iteratePartitionedCandidates(verified,budget),budget,producerDescriptorSha256:completionPin.sha256,planSha256,admissionSnapshotSha256:admitted?.snapshotSha256,expectedCandidates:verified.completion.counts.accepted,
+  inputIdentity:{rawStreams:verified.completion.streams,counts:verified.completion.counts,boundaryPins:plan.boundaries.map(s=>s.input),footprintPin:plan.footprints},
+ },plan.membership);
+ await verifyNormalizedPartitions(producer,completionPin,expected,budget);
+ const config={schemaVersion:1 as const,catalogueRevision,stream:plan.stream,catalogue:plan.catalogue,files:{regions:enriched.files['regions.jsonl'],footprints:{bytes:plan.footprints.bytes,sha256:plan.footprints.sha256}}};
+ const membershipBody=JSON.stringify(enriched)+'\n';
+ const expectedMembershipPin={path:join(root,'membership','complete.json'),bytes:Buffer.byteLength(membershipBody),sha256:createHash('sha256').update(membershipBody).digest('hex')};
+ let reverifyMembership:(()=>Promise<void>)|undefined;
+ const catalogue=await buildSourceCatalogue({producerDir:join(root,'membership'),regions:join(root,'membership','regions.jsonl'),footprints:plan.footprints.path,config,partitionBudget:budget,expectedMembershipPin,capturePartitionedVerifier:verify=>{reverifyMembership=verify;},expectedCandidates:verified.completion.counts.accepted},join(root,'catalogue'));
+ await loadAssemblyPlan(planPath,planSha256);
+ if(!(await small(manifestPath,1024*1024)).equals(rawBody))throw new Error('Raw manifest changed during partitioned assembly');
+ if(Date.now()>=budget.deadline||++budget.work>budget.maxWork)throw new Error('Shared partition assembly budget exhausted');
+ if(admission)await verifyProductionAdmission({...admission,phase:'assembly-after',expectedSnapshot:admitted!.snapshotSha256});
+ await verifyNormalizedPartitions(producer,completionPin,expected,budget);
+ if(!reverifyMembership)throw new Error('Partitioned membership final verifier required');await reverifyMembership();
+ if(Date.now()>=budget.deadline||++budget.work>budget.maxWork)throw new Error('Shared partition assembly budget exhausted');
+ if(!(await small(expectedMembershipPin.path,1024*1024)).equals(Buffer.from(membershipBody)))throw new Error('Fresh membership completion changed before assembly commit');
+ const evidence={schemaVersion:2,kind:'partitioned-geography-assembly-v1',...(admitted?{admissionSnapshotSha256:admitted.snapshotSha256}:{}),planSha256,producerDirectory:producer,producerDescriptor:verified.completion,producerDescriptorSha256:completionPin.sha256,catalogue,membership:enriched,sourceCoverage:plan.footprints.bytes===0?'unknown; no extraction footprints admitted':'only supplied pinned footprints; administrative membership does not establish source coverage',verification:{bytes:budget.bytes,rows:budget.rows,work:budget.work,deadline:budget.deadline}};
+ const encoded=JSON.stringify(evidence)+'\n';if(Buffer.byteLength(encoded)>1024*1024)throw new Error('Assembly evidence byte limit');
+ const pending=join(root,'assembly-complete.pending');await writeFile(pending,encoded,{flag:'wx'});
+ if(Date.now()>=budget.deadline||++budget.work>budget.maxWork)throw new Error('Shared partition assembly budget exhausted before commit');
+ await rename(pending,join(root,'assembly-complete.json'));return evidence;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const {values,positionals:args}=parseArgs({options:{admission:{type:'string'},'admission-sha256':{type:'string'},'admission-snapshot':{type:'string'},manifest:{type:'string'},prepare:{type:'boolean'},validate:{type:'boolean'}},allowPositionals:true});
