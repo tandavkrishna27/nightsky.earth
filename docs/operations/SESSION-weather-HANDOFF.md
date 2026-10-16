@@ -1,6 +1,57 @@
 # Weather lane handoff — 17 October 2026
 
-## Current continuation: finite Icechunk public metadata inspection
+## Current continuation: bounded Icechunk metadata preparation
+
+Local executor/parser preparation was also assessed after the catalogue review.
+The [dossier's preparation result](icechunk-metadata-dossier-20261017.md#local-executorparser-preparation-result)
+and [local inventory](data-pilot-evidence/2026-10-17-icechunk-parser-readiness.json)
+identify the missing maintained parser in existing environments. Python 3.14
+Zstd support alone is insufficient. The new
+[specific dependency plan](icechunk-parser-dependency-plan-20261017.md) recommends
+official Icechunk 2.3.0 plus a seven-wheel closure of 18,438,932 bytes, with exact
+versions/URLs/hashes/licences and a local-only API design. The coordinator then
+approved exactly that isolated development setup: verified wheel archives plus
+installed target use 70,453,339 bytes below 128 MiB. The
+[setup receipt](data-pilot-evidence/2026-10-17-icechunk-development-setup.json)
+pins all seven actual wheels and 293 installed files; the shared/lane test
+environment and existing NumPy/typing packages remain unchanged.
+The smaller FlatBuffers/flatc route lacks the required verification path.
+The four-request design is **not execution-ready**, and no owner source-access
+approval is requested. A raw repo receipt is transport evidence only, not usable
+snapshot progress. The official local-file parser and bounded transport are now
+implemented for offline fixtures. The reader can inspect the fixed descriptors
+in known-format metadata-only fixtures, but its APIs omit unknown stored feature
+IDs and opaque extensions; the reviewed native open path does not reject them.
+The coordinator refined the metadata-only contract to report the pinned reader's
+interpretation with `unsupportedFeatureExclusionProved=false` and
+`scientificAdmission=false`, without asserting complete compatibility or absent
+extensions. Default/candidate packets remain nonexecuting; source access still
+requires separate explicit approval and a fresh byte-pinned packet/allowance.
+See the dependency plan's actual-capability section for the exact limitation.
+No source request is authorized or executed; source cap/authority is unchanged.
+
+Fresh focused verification discovered 25 tests on each runtime: Python 3.14.3
+passed 19 and delegated six native methods to its passing contained-child
+harness, where all six actually ran; Python 3.12.14 passed 17 and skipped eight
+unavailable optional/Zstd cases. The [verification receipt](data-pilot-evidence/2026-10-17-icechunk-offline-verification.json)
+pins all four new files and records the exact scope, counts, default CLI results
+and unchanged 293-file dependency admission. Independent review found malformed
+Zstd error normalization and an exited-worker peak-RSS admission gap; both have
+regressions and are fixed. Final independent review is clear under the refined
+metadata-only contract; complete scientific or format compatibility is unproved.
+
+Attempted-access evidence combines the actual six-key store boundary, guarded
+public cloud factories, native snapshot-download tracing with a missing-metadata
+positive control, and pinned source review. It does not claim a kernel I/O
+sandbox. Actual Job limits and supervisor-pipe helpers were exercised; full live
+execution, allocation-limit stress and production deadline-kill tests were not.
+No additional dependency or Rust helper was added. The final pushed identity and
+exact-tip CI result are supplied by the delivery chat; this file cannot pin its
+own commit hash.
+
+The catalogue evidence and lossless README packaging correction are delivered at
+`1a120dd09d7754cb56dd60d03f627bccec4a7a01`; all six jobs passed in
+[exact-tip CI run 38960516980](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38960516980).
 
 The authenticated review/source audit below is delivered at
 `69c0e6c568e39d051f3899faec8c15eb21657125`, with all six jobs successful in
@@ -36,14 +87,17 @@ they can inline observation chunks; convenience client opens can preload data.
 Snapshot identity/retention, actual final/QC/member coverage, physical reads and
 bytes, scientific admission and measured aggregation remain separate gates.
 
-No direct S3 request, repository binary, data chunk, job, install, credential,
-subscription or terms acceptance occurred. Ordinary public-page metadata and
-assets were inspected; website backend operations were not instrumented. Shared
+During the public catalogue inspection, no direct S3 request, repository binary,
+data chunk, job, install, credential, subscription or terms acceptance occurred.
+The later seven development wheels are the separately approved setup above.
+Ordinary public-page metadata/assets were inspected; website backend operations
+were not instrumented. Shared
 tracker/build/test aggregator/workflow files and the 16-job cap remain unchanged.
 Acceptance remains **12 Done / 9 Partial / 6 Not started**.
 
-This continuation changes only documentation and metadata evidence. The previous
-195-test milestone remains the latest runtime check. All ten evidence sizes and
+The catalogue-only delivery changed documentation and metadata evidence; its
+previous runtime milestone was 195 ERA5 tests. The newer focused implementation
+verification is recorded below. All ten catalogue evidence sizes and
 hashes, full AX captures, UTC+05:30 observation dates and local dossier/handoff
 links passed an offline check; `git diff --check` passed. The first date-check
 attempt lacked system `tzdata`; the successful rerun used the explicit +05:30
@@ -51,7 +105,8 @@ offset for these instants, without installing anything. Independent review
 reproduced hashes/dates, checked the screenshot and exact metadata, recomputed
 the advertised hourly extent, and checked primary specification/schema sources.
 No actionable findings remain. No repeated runtime suite is needed for this
-documentation-only continuation.
+documentation-only catalogue delivery. Runtime preparation is tracked separately
+above and receives its own focused fixtures and independent review.
 
 The browser README's trailing spaces triggered the initial staged whitespace
 check. Its capture is now wrapped losslessly in JSON, retaining original byte
