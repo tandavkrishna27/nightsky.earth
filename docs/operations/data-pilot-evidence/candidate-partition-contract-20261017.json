@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded-partition-contract-evidence-v1",
+  "date": "2026-10-17",
+  "executionTip": "e470872747c0b85297be9dead273aa13c259f645",
+  "approvedDesignSha256": "a0d3fb2a72310ddf3090b69a26580c9cfe4a885807443ee5eb33d5f2e5ffbad3",
+  "test": "tests/places/partitionedLargeContract.test.ts",
+  "testSha256": "28bc7bac74cf2ce7f7848edb1e1fafd0499812fd9f8cbf421cb7ef531a2fc878",
+  "runtime": {
+    "platform": "win32",
+    "node": "v24.14.0",
+    "python": "3.14.3"
+  },
+  "runs": 1,
+  "exitCode": 0,
+  "focusedTypeScript": {
+    "tests": 99,
+    "passed": 99,
+    "failed": 0
+  },
+  "existingNodeAggregate": {
+    "tests": 1007,
+    "passed": 1001,
+    "skipped": 6,
+    "failed": 0,
+    "newPartitionReaderRegistered": false,
+    "newLargeTestRegistered": false
+  },
+  "fullOsmPython": {
+    "tests": 239,
+    "passed": 234,
+    "skipped": 5,
+    "failed": 0
+  },
+  "typechecks": "all three npm run check projects and explicit strict new/root test checks passed",
+  "reviews": {
+    "producer": "independent spec and quality approved after fixes",
+    "contractAndCapacity": "independent spec and quality approved",
+    "membershipAndBridge": "independent spec and quality approved after fixes",
+    "assemblyAndAdmission": "independent spec and quality approved after fixes",
+    "coordinatorScopedReview": "downgrade and final enriched verifier cleared read-only"
+  },
+  "observation": {
+    "kind": "large-partition-contract-result",
+    "syntheticOnly": true,
+    "productionAdmitted": false,
+    "rawSelectionJob": false,
+    "supervisorRun": false,
+    "networkRequests": 0,
+    "retainedRoot": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\.cache\\partition-implementation\\large-contract-7wiejG",
+    "retained": true,
+    "elapsedMilliseconds": 28472,
+    "candidates": 16000,
+    "rawCandidateBytes": 150064000,
+    "rawLineageBytes": 13248000,
+    "rawExclusionBytes": 232,
+    "rawPartCount": 4,
+    "rawAggregateOutputBytes": 163315131,
+    "rawAggregateBudget": 268435456,
+    "membershipCandidateBytes": 150260000,
+    "membershipPartCount": 2,
+    "membershipResources": {
+      "rows": 16000,
+      "work": 7527212,
+      "outputBytes": 150264625,
+      "elapsedMilliseconds": 2905
+    },
+    "verification": {
+      "bytes": 1241081302,
+      "rows": 320013,
+      "work": 28053328,
+      "deadline": 1792187696728
+    },
+    "publisher": {
+      "inputRows": 16000,
+      "metadataRows": 1,
+      "inputBytes": 155288355,
+      "scratchBytes": 629197554,
+      "outputBytes": 160260384,
+      "maxBufferedRows": 8192,
+      "maxOpenSortReaders": 2,
+      "mergeLevels": 1,
+      "pages": 413
+    },
+    "consumer": {
+      "schemaVersion": 2,
+      "spatialRows": 16000,
+      "idRows": 16000,
+      "known": 4000,
+      "unknown": 12000,
+      "regionRows": 1,
+      "footprintRows": 0
+    },
+    "catalogueSha256": "65c5f6c3a2d9ead284daa936d05ab22a6fba0616502c016d1e3c8fe75ed985c7",
+    "oneConsumerRoot": true,
+    "monolithicCandidateFile": false,
+    "stagedCandidateCopy": false,
+    "globalScaleOrProductionCompletion": false
+  },
+  "metadataPins": [
+    {
+      "path": "raw-manifest.json",
+      "bytes": 10171,
+      "sha256": "b0ab2c089487fbab56d80adac1146347b4759d3bb5b357609b14302954bbb029"
+    },
+    {
+      "path": "assembly-plan.json",
+      "bytes": 1675,
+      "sha256": "c543362a407c818b2f1b866c4f7a2238f095c13b936ad8642f9d713d7df683c1"
+    },
+    {
+      "path": "synthetic-capacity.json",
+      "bytes": 1222,
+      "sha256": "6221afd855ca0a9c49cc1b8f29aa777acd5f0d8a8ad4c92b7c09b8889f195162"
+    },
+    {
+      "path": "producer/complete.json",
+      "bytes": 2356,
+      "sha256": "b4315c79e79d4d2a526b27bacdc7209642da4e97e52b34f4c77163c9d36c802b"
+    },
+    {
+      "path": "producer/checkpoint.json",
+      "bytes": 543,
+      "sha256": "9073f12b1bf3535c34b9e29f3b69cfcabf7416aa6ad861b7d5a800677ddc5fc5"
+    },
+    {
+      "path": "assembly/membership/complete.json",
+      "bytes": 4325,
+      "sha256": "fc97a591268c2a2cb8d2a176732fd849f2d5c1761a043dc9cd5254e1e02c9549"
+    },
+    {
+      "path": "assembly/assembly-complete.json",
+      "bytes": 10136,
+      "sha256": "fd9e5393433e27144278f281389141fd657fd712e6dc0f64ad5eda3430373501"
+    }
+  ],
+  "limits": [
+    "Synthetic library contract; source stubs were not normalized or selected.",
+    "No actual free-space observation, production admission, source receiver, provider Job or supervisor run.",
+    "No world accepted-object count or global scale/throughput/capacity conclusion.",
+    "Membership elapsed time measures classification session; total elapsed includes fixture generation, assembly and consumer checks.",
+    "No RSS/commit peak measurement; concurrent offline suites may affect elapsed time.",
+    "All synthetic body artifacts retained; no cleanup performed."
+  ]
+}
