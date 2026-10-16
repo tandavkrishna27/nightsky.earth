@@ -6,11 +6,13 @@ from contextlib import redirect_stdout, redirect_stderr
 import json
 import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'scripts/osm'))
 import planet_receipt as receipt
@@ -267,6 +269,212 @@ class PlanetReceiptTests(unittest.TestCase):
             with self.assertRaisesRegex(TimeoutError, 'inventory deadline'):
                 receipt._inventory([root], deadline)
             self.assertEqual(len(calls), 6)
+
+    def test_inventory_avoids_rechecking_every_file_ancestor(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)/'one'/'two'/'three';root.mkdir(parents=True)
+            for index in range(200):(root/f'file-{index}').write_bytes(b'x')
+            original=Path.lstat;calls=[]
+            def counted(path,*args,**kwargs):
+                calls.append(path);return original(path,*args,**kwargs)
+            with patch.object(Path,'lstat',counted):
+                paths,size=receipt._inventory([root])
+            self.assertEqual(size,200)
+            self.assertEqual(paths,[root.resolve()])
+            self.assertLessEqual(len(calls),664,'ancestor work must scale with directories, not every file')
+
+    def test_inventory_rejects_replaced_directory_after_enumeration(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)/'data';root.mkdir();(root/'original').write_bytes(b'x')
+            original=os.scandir;moved=Path(folder)/'original-directory'
+            class Entries:
+                def __init__(self,path):self.inner=original(path);self.path=Path(path)
+                def __enter__(self):return self.inner.__enter__()
+                def __exit__(self,*args):
+                    result=self.inner.__exit__(*args)
+                    if self.path==root and not moved.exists():
+                        root.rename(moved);root.mkdir()
+                    return result
+            with patch.object(receipt.os,'scandir',side_effect=Entries):
+                with self.assertRaisesRegex(ValueError,'mutation|changed'):
+                    receipt._inventory([root])
+
+    def test_inventory_rejects_nonregular_child_metadata(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'special').write_bytes(b'x');original=os.scandir
+            class Entry:
+                def __init__(self,entry):self.entry=entry
+                def __getattr__(self,key):return getattr(self.entry,key)
+                def stat(self,*,follow_symlinks=True):
+                    value=self.entry.stat(follow_symlinks=follow_symlinks)
+                    fields={key:getattr(value,key) for key in dir(value) if key.startswith('st_')}
+                    fields['st_mode']=(value.st_mode&0o7777)|stat.S_IFIFO
+                    return SimpleNamespace(**fields)
+            class Entries:
+                def __init__(self,path):self.inner=original(path)
+                def __enter__(self):return (Entry(item) for item in self.inner.__enter__())
+                def __exit__(self,*args):return self.inner.__exit__(*args)
+            with patch.object(receipt.os,'scandir',side_effect=Entries):
+                with self.assertRaisesRegex(ValueError,'regular'):
+                    receipt._inventory([root])
+
+    def test_inventory_rejects_child_reparse_metadata(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'linked').write_bytes(b'x');original=os.scandir
+            class Entry:
+                def __init__(self,entry):self.entry=entry
+                def __getattr__(self,key):return getattr(self.entry,key)
+                def stat(self,*,follow_symlinks=True):
+                    value=self.entry.stat(follow_symlinks=follow_symlinks)
+                    fields={key:getattr(value,key) for key in dir(value) if key.startswith('st_')}
+                    fields['st_file_attributes']=0x400
+                    return SimpleNamespace(**fields)
+            class Entries:
+                def __init__(self,path):self.inner=original(path)
+                def __enter__(self):return (Entry(item) for item in self.inner.__enter__())
+                def __exit__(self,*args):return self.inner.__exit__(*args)
+            with patch.object(receipt.os,'scandir',side_effect=Entries):
+                with self.assertRaisesRegex(ValueError,'reparse'):
+                    receipt._inventory([root])
+
+    def test_inventory_refuses_65th_root_before_resolving_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            roots=[]
+            for index in range(65):
+                root=Path(folder)/str(index);root.mkdir();roots.append(root)
+            original=receipt.safe_path;resolved=[]
+            def resolve(path):resolved.append(path);return original(path)
+            with patch.object(receipt,'safe_path',side_effect=resolve):
+                with self.assertRaisesRegex(ValueError,'bounded unique'):
+                    receipt._inventory(iter(roots))
+            self.assertEqual(len(resolved),64)
+
+    def test_retained_path_preparation_refuses_65th_input_before_resolution(self):
+        resolved=[]
+        def resolve(path):resolved.append(path);return Path(path)
+        with patch.object(receipt,'safe_path',side_effect=resolve):
+            with patch.object(receipt,'_source_evidence',side_effect=AssertionError('must bound inputs first')):
+                with self.assertRaisesRegex(ValueError,'64'):
+                    receipt._retained_paths(Path.cwd()/str(index) for index in range(65))
+        self.assertEqual(len(resolved),64)
+
+    def test_retained_path_evidence_append_cannot_exceed_64_roots(self):
+        roots=[Path.cwd()/str(index) for index in range(64)]
+        with patch.object(receipt,'safe_path',side_effect=Path):
+            with patch.object(receipt,'_source_evidence',return_value=dict(path=str(Path.cwd()/'evidence.json'))):
+                with self.assertRaisesRegex(ValueError,'64'):
+                    receipt._retained_paths(roots)
+        allowance=self.allowance(str(Path.cwd()))
+        allowance['retainedPaths']=[str(Path.cwd()/str(index)) for index in range(65)]
+        with self.assertRaisesRegex(ValueError,'64'):
+            receipt.validate_allowance(allowance)
+
+    def test_inventory_rejects_duplicate_and_ancestor_roots(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);child=root/'child';child.mkdir()
+            with self.assertRaisesRegex(ValueError,'unique'):
+                receipt._inventory([root,root])
+            with self.assertRaisesRegex(ValueError,'overlapping'):
+                receipt._inventory([child,root])
+
+    @unittest.skipUnless(os.name=='nt','Windows root spelling aliases')
+    def test_inventory_canonicalizes_short_root_alias_before_duplicate_check(self):
+        import ctypes
+        from ctypes import wintypes
+        kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+        kernel.GetShortPathNameW.argtypes=[wintypes.LPCWSTR,wintypes.LPWSTR,wintypes.DWORD]
+        kernel.GetShortPathNameW.restype=wintypes.DWORD
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)/'retained root with a long name';root.mkdir();buffer=ctypes.create_unicode_buffer(32768)
+            size=kernel.GetShortPathNameW(str(root),buffer,len(buffer))
+            self.assertTrue(0<size<len(buffer))
+            alias=Path(buffer.value)
+            if '~' not in str(alias):self.skipTest('volume does not supply 8.3 aliases')
+            with self.assertRaisesRegex(ValueError,'unique'):
+                receipt._inventory([root,alias])
+
+    def test_supervisor_marker_io_does_not_repeat_for_each_inventory_entry(self):
+        original=receipt._header_accepted;marker_reads=[]
+        def marker(*args):marker_reads.append(True);return original(*args)
+        def synthetic_inventory(paths,deadline_check=lambda:None):
+            for _ in range(200):deadline_check()
+            raise TimeoutError('synthetic accounting stop')
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(receipt.time,'monotonic',return_value=1):
+                with patch.object(receipt,'_header_accepted',side_effect=marker):
+                    with patch.object(receipt,'_inventory',side_effect=synthetic_inventory):
+                        report=receipt._supervise_worker(['must-not-start'],folder,{**receipt.LIMITS,'freeBytes':1},[])
+            self.assertEqual(report['status'],'bounded-stop')
+            self.assertIn('synthetic accounting stop',report['reason'])
+            self.assertLessEqual(len(marker_reads),2,'metadata entries must use pure clock checks')
+
+    def test_supervisor_refuses_65_combined_roots_before_launch(self):
+        import global_source_supervisor as supervisor
+        with tempfile.TemporaryDirectory() as folder:
+            parent=Path(folder);root=parent/'attempt';root.mkdir();retained=[]
+            for index in range(64):
+                path=parent/str(index);path.mkdir();retained.append(path)
+            with patch.object(supervisor,'WindowsJob',side_effect=AssertionError('must reject before Job')) as job:
+                with patch.object(receipt.subprocess,'Popen',side_effect=AssertionError('must not launch')) as popen:
+                    report=receipt._supervise_worker(['must-not-start'],root,{**receipt.LIMITS,'freeBytes':1},retained)
+            self.assertIn('64',report['reason'])
+            job.assert_not_called();popen.assert_not_called()
+
+    @unittest.skipUnless(os.name=='nt','Windows suspended worker handoff')
+    def test_supervisor_accounts_root_and_retained_once_before_launch(self):
+        original_inventory=receipt._inventory;original_popen=receipt.subprocess.Popen
+        launched=[False];before_launch=[]
+        def inventory(paths,deadline_check=lambda:None):
+            if not launched[0]:before_launch.append(list(paths))
+            return original_inventory(paths,deadline_check)
+        def popen(*args,**kwargs):
+            launched[0]=True;return original_popen(*args,**kwargs)
+        with tempfile.TemporaryDirectory() as folder:
+            parent=Path(folder);root=parent/'job';root.mkdir();(root/'attempt-intent.json').write_bytes(b'intent');retained=parent/'retained';retained.mkdir();(retained/'old').write_bytes(b'old')
+            with patch.object(receipt,'_inventory',side_effect=inventory),patch.object(receipt.subprocess,'Popen',side_effect=popen):
+                report=receipt._supervise_worker([WORKER_PYTHON,'-I','-S','-B','-c','raise SystemExit(9)'],root,{**receipt.LIMITS,'freeBytes':1},[retained])
+            self.assertEqual(report['exitCode'],9)
+            retained_scans=[set(map(Path,paths)) for paths in before_launch if retained in map(Path,paths)]
+            self.assertEqual(retained_scans,[{retained}],'retained trees must be traversed only once before launch')
+            self.assertIn([root],before_launch,'attempt evidence must be measured separately before launch')
+            self.assertEqual(report['maximumAccountedBytes'],3+receipt.SOURCE['bytes']+receipt.EVIDENCE_BYTES,
+                             'initial attempt evidence must not enlarge the evidence allowance')
+
+    @unittest.skipUnless(os.name=='nt','Windows suspended worker enforcement')
+    def test_supervisor_forces_marker_sample_at_header_deadline(self):
+        clock=[1.0];launched=[False];original_popen=receipt.subprocess.Popen
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            def popen(*args,**kwargs):
+                result=original_popen(*args,**kwargs);launched[0]=True;return result
+            def inventory(paths,deadline_check=lambda:None):
+                if launched[0]:
+                    clock[0]=30.999;deadline_check()  # False sample next due at31.019.
+                    receipt._write_new(root/'response-accepted.json',dict(
+                        source=receipt.SOURCE,status=200,headerDeadline=31,
+                        acceptedMonotonic=30.9995,observedUtc=receipt.utc()))
+                    clock[0]=31;deadline_check()  # Must sample despite20ms cache.
+                    raise TimeoutError('synthetic accepted-header probe complete')
+                deadline_check();return list(map(Path,paths)),0
+            with patch.object(receipt.time,'monotonic',side_effect=lambda:clock[0]),patch.object(receipt,'_inventory',side_effect=inventory),patch.object(receipt.subprocess,'Popen',side_effect=popen):
+                report=receipt._supervise_worker([WORKER_PYTHON,'-I','-S','-B','-c','import time;time.sleep(30)'],root,{**receipt.LIMITS,'freeBytes':1},[])
+            self.assertIn('synthetic accepted-header probe complete',report['reason'])
+            self.assertIsNotNone(report['exitCode'])
+
+    @unittest.skipUnless(os.name=='nt','Windows suspended worker enforcement')
+    def test_supervisor_revalidates_cached_marker_at_completion(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);marker=root/'response-accepted.json';original=receipt._header_accepted;accepted=[]
+            receipt._write_new(marker,dict(source=receipt.SOURCE,status=200,
+                headerDeadline=31,acceptedMonotonic=1,observedUtc=receipt.utc()))
+            def validate(*args):
+                result=original(*args)
+                if result and not accepted:accepted.append(True);marker.unlink()
+                return result
+            with patch.object(receipt.time,'monotonic',return_value=1),patch.object(receipt,'_header_accepted',side_effect=validate):
+                report=receipt._supervise_worker([WORKER_PYTHON,'-I','-S','-B','-c','pass'],root,{**receipt.LIMITS,'freeBytes':1},[])
+            self.assertEqual(accepted,[True])
+            self.assertIn('without complete response acceptance',report['reason'])
 
     def test_supervisor_inventory_crossing_total_deadline_is_bounded_stop(self):
         clock = [0]

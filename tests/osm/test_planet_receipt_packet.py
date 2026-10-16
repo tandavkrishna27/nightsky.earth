@@ -1,0 +1,212 @@
+import importlib.util
+import json
+import os
+from pathlib import Path
+import stat
+import sys
+import tempfile
+from types import SimpleNamespace
+import unittest
+from unittest.mock import patch
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts/osm'))
+path=Path(__file__).resolve().parents[2]/'scripts/osm/prepare-planet-receipt-packet.py'
+spec=importlib.util.spec_from_file_location('prepare_planet_receipt_packet',path)
+packet=importlib.util.module_from_spec(spec);spec.loader.exec_module(packet)
+import planet_receipt as receiver
+
+
+class PlanetReceiptPacketTests(unittest.TestCase):
+    def fixture(self,folder):
+        root=Path(folder);data=root/'data';data.mkdir();cache=root/'cache';cache.mkdir()
+        (data/'original.osm.pbf').write_bytes(b'raw')
+        (data/'boundary.geojson').write_bytes(b'boundary')
+        runtime=data/'venv';runtime.mkdir();(runtime/'runtime.bin').write_bytes(b'runtime')
+        scratch=data/'scratch.sqlite';scratch.write_bytes(b'scratch')
+        failed=data/'failed';failed.mkdir();(failed/'body.partial').write_bytes(b'partial')
+        (data/'rollback').mkdir();(data/'rollback'/'edition.json').write_bytes(b'old')
+        machine=dict(observedUtc='2026-10-16T23:00:00Z',platform='synthetic',
+            disk=dict(path=str(root),totalBytes=1024**4,freeBytes=receiver.RESERVE_BYTES+receiver.SOURCE['bytes']+receiver.EVIDENCE_BYTES+1024**3),
+            memory=dict(totalPhysicalBytes=64*1024**3,availablePhysicalBytes=32*1024**3,totalPageFileBytes=96*1024**3,availablePageFileBytes=48*1024**3))
+        return root,data,cache,machine
+
+    def test_inventory_exact_nonoverlapping_lengths_and_categories_without_content_reads(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            with patch.object(Path,'open',side_effect=AssertionError('no content read')):
+                inventory=packet.inventory_roots([data])
+            self.assertEqual(inventory['logicalBytes'],35)
+            self.assertEqual(inventory['files'],6)
+            record=inventory['records'][0]
+            self.assertEqual(record['categories']['runtime-allocation']['logicalBytes'],7)
+            self.assertEqual(record['categories']['scratch-or-journal']['logicalBytes'],7)
+            self.assertEqual(record['categories']['partial-failure-or-diagnostic']['logicalBytes'],7)
+            self.assertEqual(sum(item['logicalBytes'] for item in record['categories'].values()),35)
+            self.assertFalse(inventory['reservation']);self.assertFalse(inventory['atomicFilesystemSnapshot'])
+
+    def test_draft_has_all_exact_bounds_but_no_runnable_approval(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            inventory=packet.inventory_roots([data])
+            observation,draft=packet.build_documents(inventory,machine,dict(path='synthetic retained metadata',sha256Lf='0'*64),
+                cache/'planet-261012-receipt',root/'inventory.json',root/'draft.json')
+            self.assertEqual(draft['proposedAllowance']['source'],receiver.SOURCE)
+            self.assertEqual(draft['proposedAllowance']['limits'],receiver.LIMITS)
+            self.assertEqual(draft['proposedAllowance']['source']['bytes'],95380942829)
+            self.assertIsNone(draft['authorization']);self.assertIsNone(draft['proposedAllowance']['operatorApprovalReference'])
+            self.assertFalse(draft['executionAllowed'])
+            with self.assertRaises(ValueError):receiver.validate_allowance(draft)
+            with self.assertRaisesRegex(ValueError,'operator approval reference required'):
+                receiver.validate_allowance(draft['proposedAllowance'])
+            self.assertFalse((cache/'planet-261012-receipt').exists())
+            self.assertIsNone(draft['sourceObservation']['rawSha256']);self.assertIsNone(draft['sourceObservation']['nativeVintage'])
+
+    def test_self_byte_lengths_converge_without_self_hash_pins_and_capacity_no_double_allocation(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            inventory=packet.inventory_roots([data])
+            observation,draft=packet.build_documents(inventory,machine,dict(path='fixture',sha256Lf='0'*64),
+                cache/'receipt',root/'inventory.json',root/'draft.json')
+            lengths=[len(packet.canonical(observation).encode()),len(packet.canonical(draft).encode())]
+            self.assertEqual([item['bytes'] for item in observation['preparationArtifacts']],lengths)
+            self.assertTrue(all(set(item)=={'path','bytes'} for item in observation['preparationArtifacts']))
+            self.assertEqual(draft['capacity']['supervisorMaximumAccountedBytes'],35+sum(lengths)+receiver.SOURCE['bytes']+receiver.EVIDENCE_BYTES)
+            self.assertEqual(draft['capacity']['headroomAfterPreparationRawEvidenceAndReserveBytes'],1024**3-sum(lengths))
+
+    def test_entry_deadline_depth_overlap_and_receiver_root_count_bounds(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            with self.assertRaisesRegex(ValueError,'entry limit'):packet.inventory_roots([data],max_entries=1)
+            with self.assertRaisesRegex(TimeoutError,'deadline'):
+                packet.inventory_roots([data],max_seconds=1,clock=iter([0,2]).__next__)
+            nested=data/'a'/'b';nested.mkdir(parents=True)
+            with self.assertRaisesRegex(ValueError,'depth'):packet.inventory_roots([data],max_depth=1)
+            with self.assertRaisesRegex(ValueError,'overlapping'):packet.inventory_roots([data,data/'a'])
+            with self.assertRaisesRegex(ValueError,'64'):packet.inventory_roots([data]*65)
+
+    def test_output_overwrite_attempt_overlap_and_existing_attempt_are_visible(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            inventory=packet.inventory_roots([data])
+            with self.assertRaisesRegex(ValueError,'overlaps'):
+                packet.build_documents(inventory,machine,{},data/'receipt',root/'inventory.json',root/'draft.json')
+            existing=cache/'receipt';existing.mkdir()
+            observation,draft=packet.build_documents(inventory,machine,{},existing,root/'inventory.json',root/'draft.json')
+            self.assertTrue(any('already exists' in gate for gate in draft['gates']))
+            (root/'draft.json').write_text('{}')
+            with self.assertRaises(FileExistsError):
+                packet.build_documents(inventory,machine,{},existing,root/'inventory.json',root/'draft.json')
+
+    def test_symlink_is_never_followed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);data=root/'data';data.mkdir();outside=root/'outside';outside.mkdir()
+            link=data/'linked'
+            try:link.symlink_to(outside,target_is_directory=True)
+            except OSError as error:self.skipTest(str(error))
+            with self.assertRaisesRegex(ValueError,'symlink|reparse'):packet.inventory_roots([data])
+
+    def test_reparse_metadata_is_refused_without_following_or_opening_content(self):
+        class Entry:
+            def stat(self,follow_symlinks=True):
+                if follow_symlinks:raise AssertionError('must not follow reparse metadata')
+                return SimpleNamespace(st_mode=stat.S_IFREG,st_file_attributes=0x400)
+        class Entries:
+            def __enter__(self):return iter([Entry()])
+            def __exit__(self,*args):return False
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(packet.os,'scandir',return_value=Entries()):
+                with self.assertRaisesRegex(ValueError,'reparse'):
+                    packet.inventory_roots([folder])
+
+    def test_preparation_code_never_constructs_network_connection(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            with patch.object(receiver.http.client,'HTTPSConnection',side_effect=AssertionError('network')):
+                observation,draft=packet.build_documents(packet.inventory_roots([data]),machine,{},
+                    cache/'receipt',root/'inventory.json',root/'draft.json')
+            self.assertEqual(observation['networkRequests'],0)
+            self.assertFalse(observation['rawBodyAcquired'])
+
+    def test_prepare_bounds_cache_discovery_before_consuming_all_entries(self):
+        consumed=[]
+        class Entries:
+            def __enter__(self):
+                def entries():
+                    for index in range(100):
+                        consumed.append(index)
+                        yield SimpleNamespace(path=str(cache/f'child-{index}'))
+                return entries()
+            def __exit__(self,*args):return False
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);cache=root/'.cache';cache.mkdir()
+            with patch.object(packet,'REPO',root),patch.object(packet.os,'scandir',return_value=Entries()):
+                with patch.object(packet,'inventory_roots',side_effect=AssertionError('discovery must stop first')):
+                    with self.assertRaisesRegex(ValueError,'64-root ceiling'):
+                        packet.prepare()
+            self.assertEqual(len(consumed),packet.CACHE_CHILD_LIMIT+1)
+
+    def test_r2_preparation_retains_all_v1_evidence_once_with_distinct_outputs(self):
+        captured=[]
+        def inventory(roots,**kwargs):captured.extend(roots);raise RuntimeError('synthetic roots captured')
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'.cache').mkdir()
+            with patch.object(packet,'REPO',root),patch.object(packet,'_cache_children',return_value=[]),patch.object(receiver,'_source_evidence',return_value=dict(path=str(root/'source.json'))),patch.object(packet,'inventory_roots',side_effect=inventory):
+                with self.assertRaisesRegex(RuntimeError,'synthetic roots captured'):
+                    packet.prepare()
+        history=tuple(packet.HISTORICAL_PREPARATION)
+        self.assertEqual(len(history),3)
+        self.assertTrue(all(captured.count(path)==1 for path in history))
+        self.assertTrue(all('-r2.json' in str(path) for path in (packet.INVENTORY,packet.DRAFT,packet.COMPATIBILITY)))
+        self.assertFalse(set(history)&{packet.INVENTORY,packet.DRAFT,packet.COMPATIBILITY})
+        self.assertEqual(packet.CACHE_CHILD_LIMIT+len(captured)+2+1,64)
+
+    def test_preparation_reserves_attempt_root_slot_in_combined_64_root_limit(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            records=[dict(path=str(root/f'retained-{index}')) for index in range(62)]
+            with self.assertRaisesRegex(ValueError,'attempt.*64'):
+                packet.build_documents(dict(records=records,logicalBytes=0),machine,{},
+                    cache/'receipt',root/'inventory.json',root/'draft.json')
+
+    def test_prepare_shared_deadline_starts_before_path_resolution_or_source_read(self):
+        with patch.object(packet,'safe_path',side_effect=AssertionError('deadline must stop before resolution')):
+            with patch.object(receiver,'_source_evidence',side_effect=AssertionError('no evidence read')):
+                with self.assertRaisesRegex(TimeoutError,'deadline'):
+                    packet.prepare(clock=iter([0,31]).__next__)
+
+    def test_root_canonicalization_is_bounded_before_full_input_consumption(self):
+        consumed=[]
+        def roots():
+            for index in range(100):
+                consumed.append(index);yield Path(f'/synthetic/{index}')
+        with patch.object(packet,'safe_path',side_effect=lambda value:value) as resolve:
+            with self.assertRaisesRegex(ValueError,'64'):
+                packet.inventory_roots(roots())
+        self.assertEqual(len(consumed),65)
+        self.assertEqual(resolve.call_count,64)
+
+    def test_receiver_compatibility_probe_is_metadata_only_and_reports_bounded_failure(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);(root/'data').write_bytes(b'tiny')
+            with patch.object(receiver.http.client,'HTTPSConnection',side_effect=AssertionError('network')):
+                report=packet.probe_receiver_inventory([str(root)],4)
+            self.assertEqual(report['status'],'compatible-observation')
+            self.assertEqual(report['actualRetainedLogicalBytes'],4)
+            self.assertFalse(report['retainedAllocationChangedSinceObservation'])
+            def stalled(paths,deadline_check):deadline_check()
+            with patch.object(receiver,'_inventory',side_effect=stalled):
+                failed=packet.probe_receiver_inventory([str(root)],4,clock=iter([0,0,30,30]).__next__)
+            self.assertEqual(failed['status'],'bounded-stop')
+            self.assertIsNone(failed['actualRetainedLogicalBytes'])
+            self.assertIsNone(failed['retainedAllocationChangedSinceObservation'])
+            self.assertEqual(failed['networkRequests'],0);self.assertFalse(failed['allowanceUsed'])
+
+    def test_probe_rejects_unbounded_or_nontext_roots_before_receiver_resolution(self):
+        with patch.object(receiver,'_inventory',side_effect=AssertionError('no receiver traversal')):
+            for paths in ([str(Path.cwd())]*65,[],[Path.cwd()],['relative'],['']):
+                with self.subTest(paths=paths[:1]):
+                    with self.assertRaisesRegex(ValueError,'1 to 64 absolute text paths'):
+                        packet.probe_receiver_inventory(paths,0)
+
+
+if __name__=='__main__':unittest.main()
