@@ -44,3 +44,6 @@ The separate `era5-point-quarantine-v1` header explicitly records unknown member
 Independent reviews found and resolved two issues: the new raw-position ceiling must not change legacy post-normalization acceptance, and the point decoder must reject nested NetCDF groups. Regression tests cover both. Output-parent link checks were also added. Forty focused geography tests and 132 ERA5 tests passed; TypeScript checks passed. The full Node suite passed 861 tests, with one existing skip and no failures. Exact-commit CI is checked after push; local results alone do not establish CI success.
 
 The fixed tracker remains at S2/N4 in progress; original counts remain **12 Done / 9 Partial / 6 Not started**. Next acceptance is explicit handling of the 70 geographic residuals, actual full geography validation, weather provenance admission, then the existing G3/H3/E2 source-coverage gates. S3/S4 still depend on actual assembled release files.
+
+
+Follow-up: [unknown-region fallback and whole-dataset diagnostic](n4-unknown-region-and-global-validation.md) supersedes the identity blocker status above; nine geometry rejections remain.

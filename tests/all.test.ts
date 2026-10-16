@@ -111,3 +111,4 @@ import './places/sourceAdmission.test';
 import './places/naturalEarth.test';
 
 import './places/geographicSweep.test';
+import './mcp/unknown-region-assembled.test';

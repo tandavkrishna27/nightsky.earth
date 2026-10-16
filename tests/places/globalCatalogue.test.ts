@@ -14,9 +14,9 @@ const region = (n: string) => ({ regionId: `region:v1:${n}`, name: n, countryCod
 const row = (id: number, latitude: number, longitude = 0, regionIds: string[] = []) => ({ placeId: `place:v1:osm:node:${id}`, name: 'Park', category: 'park' as const, latitude, longitude, accessEvidence: { status: 'unknown' as const }, sources: [source], caveats: [], catalogueRevision: 'test-v1', sourceCompleteness: id, regionIds, countryCode: 'IND' });
 const cities = new GeoNamesPlaceIndex([[1, 'Origin', 'Origin', '', 0, 0, 'IN', 'India', 0, 'Asia/Kolkata'], [2, 'Date', 'Date', '', 0, 179.9, 'IN', 'India', 0, 'Asia/Kolkata'], [3, 'Pole', 'Pole', '', 89.9, 0, 'IN', 'India', 0, 'Asia/Kolkata']], 'test');
 const fp = { geometryBasis: 'full-cell' as const, footprintId: 'world', bounds: { south: -90, north: 90, west: -180, east: 180 }, sources: [source], vintage: '2026', regionIds: ['region:v1:A', 'region:v1:B'] };
-async function fixture(candidates: CatalogueCandidate[] = [row(1, .1, 0, ['region:v1:A']), row(2, .2, 0, ['region:v1:A', 'region:v1:B']), row(3, .3, 0, ['region:v1:B'])], footprints: CoverageFootprint[] = [fp], options = {}, buildOptions = { maxRows: 1, fanout: 2 }) {
+async function fixture(candidates: CatalogueCandidate[] = [row(1, .1, 0, ['region:v1:A']), row(2, .2, 0, ['region:v1:A', 'region:v1:B']), row(3, .3, 0, ['region:v1:B'])], footprints: CoverageFootprint[] = [fp], options = {}, buildOptions = { maxRows: 1, fanout: 2 }, regionRecords = [region('A'), region('B')] as import('../../shared/nightsky/discovery').RegionRef[]) {
     const dir = await mkdtemp(join(tmpdir(), 'cat-query-'));
-    const built = await buildGlobalCatalogue({ catalogueRevision: 'test-v1', candidates, regions: [region('A'), region('B')], footprints }, dir, buildOptions);
+    const built = await buildGlobalCatalogue({ catalogueRevision: 'test-v1', candidates, regions: regionRecords, footprints }, dir, buildOptions);
     const files = await loadCatalogueFiles(built.path, { expectedSha256: built.sha256 });
     const { createGlobalCatalogue } = await import('../../server/places/globalCatalogue');
     return createGlobalCatalogue(files, { cities, ...options });
@@ -27,7 +27,7 @@ test('scopeResultsMatchBruteForce', async () => { const cat = await fixture(); f
             const scope = discoveryScopeSchema.parse({ origins: [{ placeId: 'place:v1:geonames:1', radiusKm: 50, minimumDistanceKm: 15 }], originMode, includeRegionIds: ['region:v1:A', 'region:v1:B'], excludeRegionIds: excluded, regionMode });
             const result = await cat.search(scope, { limit: 10 });
             searchDiscoveryResultSchema.parse(result);
-            const expected = [row(2, .2, 0, ['region:v1:A', 'region:v1:B']), row(3, .3, 0, ['region:v1:B'])].filter(r => (regionMode === 'any' || r.regionIds.length === 2) && !r.regionIds.some(id => excluded.includes(id))).map(r => r.placeId);
+            const expected = [row(2, .2, 0, ['region:v1:A', 'region:v1:B']), row(3, .3, 0, ['region:v1:B'])].filter(r => (regionMode === 'any' || r.regionIds.length === 2) && excluded.length === 0).map(r => r.placeId);
             assert.deepEqual(result.candidates.map(r => r.placeId), expected);
             assert.equal(result.discoveryCoverage.searchCompleteness, 'complete');
         } });
@@ -60,7 +60,7 @@ test('combined five-origin scopes equal independent spherical reference', async 
                 const origins = points.map((_, i) => ({ placeId: `place:v1:geonames:${[1, 2, 3, 1, 2][i]}`, radiusKm: 50, minimumDistanceKm: i % 2 ? 10 : 0 }));
                 const scope = discoveryScopeSchema.parse({ origins, originMode, regionMode, includeRegionIds: ['region:v1:A', 'region:v1:B'], excludeRegionIds });
                 const result = await cat.search(scope, { limit: 10, categories: [category] });
-                const expected = candidates.map(row => ({ row, distances: points.map(p => distance(p, row)) })).filter(({ row, distances }) => row.category === category && !row.regionIds.some(id => excludeRegionIds.includes(id)) && (regionMode === 'any' || row.regionIds.length === 2) && (originMode === 'any' ? distances.some((d, i) => d >= origins[i].minimumDistanceKm && d <= 50) : distances.every((d, i) => d >= origins[i].minimumDistanceKm && d <= 50))).sort((a, b) => (originMode === 'any' ? Math.min(...a.distances) - Math.min(...b.distances) : Math.max(...a.distances) - Math.max(...b.distances)) || b.row.sourceCompleteness - a.row.sourceCompleteness);
+                const expected = candidates.map(row => ({ row, distances: points.map(p => distance(p, row)) })).filter(({ row, distances }) => row.category === category && excludeRegionIds.length === 0 && (regionMode === 'any' || row.regionIds.length === 2) && (originMode === 'any' ? distances.some((d, i) => d >= origins[i].minimumDistanceKm && d <= 50) : distances.every((d, i) => d >= origins[i].minimumDistanceKm && d <= 50))).sort((a, b) => (originMode === 'any' ? Math.min(...a.distances) - Math.min(...b.distances) : Math.max(...a.distances) - Math.max(...b.distances)) || b.row.sourceCompleteness - a.row.sourceCompleteness);
                 assert.deepEqual(result.candidates.map(r => r.placeId), expected.map(r => r.row.placeId));
                 for (const c of result.candidates) {
                     const r = expected.find(e => e.row.placeId === c.placeId)!;
@@ -148,7 +148,7 @@ test('region tags never admit a disjoint cell into a combined origin scope', asy
     const cat = await fixture([row(1, .1, 0, ['region:v1:A']), row(2, .2, 0, ['region:v1:A', 'region:v1:B'])], [local, remote]);
     for (const regionMode of ['any', 'all'] as const) {
         const result = await cat.search(discoveryScopeSchema.parse({ origins: [{ placeId: 'place:v1:geonames:1' }], includeRegionIds: ['region:v1:A'], excludeRegionIds: ['region:v1:B'], regionMode }), { limit: 5 });
-        assert.deepEqual(result.candidates.map(c => c.placeId), ['place:v1:osm:node:1']);
+        assert.deepEqual(result.candidates.map(c => c.placeId), []);
         assert.equal(result.discoveryCoverage.footprintStatus, 'partial');
         assert.ok(result.sources.every(s => s.product !== 'remote'));
     }
@@ -184,4 +184,29 @@ test('coverage partition honors a one-leaf total without extending its deadline'
     assert.equal(spent!.leaves, 1);
     assert.equal(spent!.directoryBytes, 0);
     assert.equal(spent!.deadline, deadline);
+});
+
+
+test('unknown country and state membership cannot satisfy exclusions or all inclusions', async () => {
+    const unknownCountry = { ...row(1, .01), countryCode: undefined };
+    const unknownState = row(2, .02, 0, ['region:v1:A']);
+    const otherCountry = { ...row(3, .03), countryCode: 'USA' };
+    const knownMatch = row(4, .04, 0, ['region:v1:B']);
+    const cat = await fixture([unknownCountry, unknownState, otherCountry, knownMatch], undefined, {}, undefined, [region('A'), { ...region('B'), adminLevel: 1 }]);
+    const origins = [{ placeId: 'place:v1:geonames:1' }];
+    for (const regionMode of ['any', 'all'] as const) {
+        const excluded = await cat.search(discoveryScopeSchema.parse({ origins, excludeRegionIds: ['region:v1:B'], regionMode }), { limit: 10 });
+        assert.deepEqual(excluded.candidates.map(c => c.placeId), [otherCountry.placeId]);
+        assert.equal(excluded.discoveryCoverage.searchCompleteness, 'complete');
+        assert.match(excluded.caveats.join(' '), /membership may be unknown/);
+        assert.match(excluded.caveats.join(' '), /processed catalogue rows, not complete regional membership/);
+        const included = await cat.search(discoveryScopeSchema.parse({ origins, includeRegionIds: ['region:v1:A', 'region:v1:B'], regionMode }), { limit: 10 });
+        assert.deepEqual(included.candidates.map(c => c.placeId), regionMode === 'any' ? [unknownState.placeId, knownMatch.placeId] : []);
+    }
+    const radiusOnly = await cat.search(discoveryScopeSchema.parse({ origins }), { limit: 10 });
+    assert.equal(radiusOnly.candidates.length, 4);
+    assert.ok(!radiusOnly.caveats.some(c => c.includes('Administrative region membership')));
+    const regionOnly = await cat.search(discoveryScopeSchema.parse({ includeRegionIds: ['region:v1:A'] }), { limit: 10 });
+    assert.equal(regionOnly.discoveryCoverage.searchCompleteness, 'complete');
+    assert.match(regionOnly.caveats.join(' '), /not complete regional membership/);
 });

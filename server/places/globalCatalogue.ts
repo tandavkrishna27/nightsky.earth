@@ -171,8 +171,19 @@ export function createGlobalCatalogue(files: CatalogueFiles, options: GlobalCata
                 originPoints.push(point);
                 rectangles.push(catalogueRadiusBounds(point.latitude, point.longitude, o.radiusKm));
             }
-            for (const id of Array.from(new Set([...scope.includeRegionIds, ...scope.excludeRegionIds])))
-                addSources((await knownRegion(id, b)).sources);
+            const requestedRegions = new Map<string, RegionRef>();
+            for (const id of Array.from(new Set([...scope.includeRegionIds, ...scope.excludeRegionIds]))) {
+                const region = await knownRegion(id, b);
+                requestedRegions.set(id, region);
+                addSources(region.sources);
+            }
+            // Missing tags are not proof of being outside a boundary. A known
+            // different country can establish nonmembership without state data.
+            function membership(row: CatalogueCandidate, id: string): boolean | undefined {
+                if (row.regionIds.includes(id)) return true;
+                if (row.countryCode && row.countryCode !== requestedRegions.get(id)!.countryCode) return false;
+                return undefined;
+            }
             let anyFootprint = files.root.trees.footprints.rows > 0, overlapFootprint = false;
             const remaining = rectangles.map(rs => rs.map(r => ({ ...r })));
             let wholeWorld = false;
@@ -302,9 +313,9 @@ export function createGlobalCatalogue(files: CatalogueFiles, options: GlobalCata
                         }
                         if (categories && !categories.includes(row.category))
                             continue;
-                        if (scope.excludeRegionIds.some(id => row.regionIds.includes(id)))
+                        if (scope.excludeRegionIds.some(id => membership(row, id) !== false))
                             continue;
-                        if (scope.includeRegionIds.length && !(scope.regionMode === 'all' ? scope.includeRegionIds.every(id => row.regionIds.includes(id)) : scope.includeRegionIds.some(id => row.regionIds.includes(id))))
+                        if (scope.includeRegionIds.length && !(scope.regionMode === 'all' ? scope.includeRegionIds.every(id => membership(row, id) === true) : scope.includeRegionIds.some(id => membership(row, id) === true)))
                             continue;
                         const distances = originPoints.map(p => catalogueDistanceKm(p, row));
                         const inside = distances.map((d, i) => d >= scope.origins[i].minimumDistanceKm && d <= scope.origins[i].radiusKm);
@@ -330,7 +341,7 @@ export function createGlobalCatalogue(files: CatalogueFiles, options: GlobalCata
             const unavailable = !stop && footprintStatus === 'not-covered';
             const completeness = stop ? 'budget-limited' : unavailable ? 'unavailable' : 'complete';
             const reason = stop ? `Catalogue search stopped: ${stop}. Ranking is incomplete.` : unavailable ? (anyFootprint ? 'Requested geography is outside admitted footprints.' : 'No admitted catalogue footprints are installed.') : 'Search completed within admitted source footprints; mapped-feature completeness is unknown.';
-            const result = searchDiscoveryResultSchema.parse({ availability: { status: stop || footprintStatus === 'partial' ? 'partial' : unavailable ? 'not-covered' : 'available', reason }, sources, caveats: ['Source geometry identifies candidate points; darkness and night access are not verified.', 'Coverage describes admitted source footprints, not completeness of real-world observing sites.'], candidates: ranked.map(r => r.candidate), sortBasis, coverage: reason, discoveryCoverage: { footprintStatus, searchCompleteness: completeness, mappedFeatureCompleteness: 'unknown', catalogueRevision: revision, ...(stop ? { stopReason: stop } : {}) }, queryScope: scope, originBasis, ...(stop ? { truncationReason: stop } : {}) });
+            const result = searchDiscoveryResultSchema.parse({ availability: { status: stop || footprintStatus === 'partial' ? 'partial' : unavailable ? 'not-covered' : 'available', reason }, sources, caveats: ['Source geometry identifies candidate points; darkness and night access are not verified.', 'Coverage describes admitted source footprints, not completeness of real-world observing sites.', ...(requestedRegions.size ? ['Administrative region membership may be unknown; candidates without enough membership evidence to satisfy region filters are omitted. Search completeness describes processed catalogue rows, not complete regional membership.'] : [])], candidates: ranked.map(r => r.candidate), sortBasis, coverage: reason, discoveryCoverage: { footprintStatus, searchCompleteness: completeness, mappedFeatureCompleteness: 'unknown', catalogueRevision: revision, ...(stop ? { stopReason: stop } : {}) }, queryScope: scope, originBasis, ...(stop ? { truncationReason: stop } : {}) });
             assertStructuredResultSize(result);
             return result;
         }

@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**N4 unknown-region fallback, 16 October:** [delivery and dataset diagnostic](n4-unknown-region-and-global-validation.md) preserves unresolved identities, conservatively filters regional results and checks all 4,854 retained features automatically. 4,845 pass current geometry rules; nine remain rejected. Source admission remains pending; original 12/9/6 counts unchanged. No downloads or deployment.
+
 **N4 partitions and point decoder, 16 October:** [current delivery](n4-partitions-and-point-decoder.md) implements bounded whole-feature partitions through preparation/membership and a separate ZIP/scalar-point decoder. Retained sizing accounts for all 4,854 features with 70 blocking identity residuals; the actual weather sample decodes to 24 quarantined rows with unknown revision/member. Actual global topology and scientific admission remain partial. Original counts unchanged; no downloads or deployment.
 
 **N4 preparation and retrieval, 16 October:** [current delivery](n4-preparation-and-result-retrieval.md) adds reviewed compact geography identities, explicit normalization and bounded sweep validation. The existing weather result was retrieved (15,028 bytes, no new job) and inspected: ZIP-wrapped scalar-point NetCDF needs an adapted decoder and provenance review. Retained geography still needs partition/mapping acceptance. Original counts unchanged; no deployment.

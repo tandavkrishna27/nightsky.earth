@@ -108,3 +108,51 @@ test('explicit unresolved provider identities retain exact source residuals with
 
 
 test('legacy duplicate normalization preserves its normalized vertex ceiling',async()=>{const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));raw.features[0].geometry.coordinates[0][0].splice(1,0,[0,0]);const body=Buffer.from(JSON.stringify(raw));await writeFile(path,body);Object.assign(layer.input,{bytes:body.length,sha256:createHash('sha256').update(body).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${body.length}\0`).update(body).digest('hex')});f.descriptor.geometryPolicy='remove-consecutive-identical';await writeFile(f.input,JSON.stringify(f.descriptor));const result=await ingestSyntheticNaturalEarth(f.input,f.out,{maxVertices:20});assert.equal(result.originalVertices,21);assert.equal(result.vertices,20);});
+
+test('opt-in unknown identities preserve exact geometry and conservatively suppress membership across all shards',async()=>{
+ for(const level of [0,1]){
+  const f=await fixture(),layer=f.descriptor.layers[level],raw=JSON.parse(await readFile(join(f.dir,layer.input.path),'utf8'));
+  const unknownGeometry={type:'MultiPolygon',coordinates:[[ring(1,1,2,2),ring(1.3,1.3,1.7,1.7)],[ring(30,0,31,1)]]};
+  raw.features.push({type:'Feature',properties:{fixture_id:'unknown'},geometry:unknownGeometry});
+  const bytes=Buffer.from(JSON.stringify(raw));await writeFile(join(f.dir,layer.input.path),bytes);Object.assign(layer.input,{bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex')});
+  layer.unresolved=[{providerId:'unknown',reason:'country-assignment'}];f.descriptor.unresolvedIdentityPolicy='preserve-unknown';
+  f.descriptor.partitions=[{level:0,providerIds:['country']},{level:1,providerIds:['state']},{level,providerIds:['unknown']}];await writeFile(f.input,JSON.stringify(f.descriptor));
+  const complete=await ingestSyntheticNaturalEarth(f.input,f.out);assert.equal(complete.sourceFeatures,3);assert.equal(complete.unresolvedFeatures,1);assert.equal(complete.vertices,35);
+  const shard=JSON.parse(await readFile(join(f.out,'boundaries-2.geojson'),'utf8'));assert.deepEqual(shard.features[0].geometry,unknownGeometry);assert.equal(shard.features[0].properties.name,undefined);assert.equal(shard.features[0].properties.countryCode,undefined);assert.equal(shard.features[0].properties.sourceLayer,level);
+  const prepared=join(f.dir,'prepared');await prepareGeographicCoverage(join(f.out,'preparation.json'),prepared);assert.equal(await readFile(join(prepared,'footprints.jsonl'),'utf8'),'');assert.deepEqual(JSON.parse(await readFile(join(prepared,'boundaries-2.geojson'),'utf8')),shard);
+  const manifest=JSON.parse(await readFile(join(prepared,'boundary-shards.json'),'utf8'));
+  const points=[[1.1,1.1],[1,1.1],[1.5,1.5],[0.5,0.5],[30.5,0.5],[40,40]];
+  const rows=points.map(([longitude,latitude],i)=>({placeId:`place:v1:osm:node:${i+1}`,name:`Point ${i}`,category:'park',latitude,longitude,accessEvidence:{status:'unknown'},sources:[source],caveats:[],catalogueRevision:'synthetic-only',sourceCompleteness:1,regionIds:[]}));
+  const body=rows.map(r=>JSON.stringify(r)+'\n').join('');await writeFile(join(prepared,'candidates.jsonl'),body);await writeFile(join(prepared,'membership.json'),JSON.stringify({...manifest,catalogueRevision:'synthetic-only',candidates:{path:'candidates.jsonl',bytes:Buffer.byteLength(body),sha256:createHash('sha256').update(body).digest('hex')}}));
+  const members=join(f.dir,'members');await buildBoundaryMetadata(join(prepared,'membership.json'),members);
+  const enriched=(await readFile(join(members,'candidates.jsonl'),'utf8')).trim().split('\n').map(x=>JSON.parse(x));
+  const known=['region:v1:country','region:v1:state'];assert.deepEqual(enriched.map(r=>r.regionIds),[level?['region:v1:country']:[],level?['region:v1:country']:[],known,known,[],[]]);assert.equal(enriched.length,rows.length);
+  assert.deepEqual((await readFile(join(members,'regions.jsonl'),'utf8')).trim().split('\n').map(x=>JSON.parse(x).regionId),known);assert.equal(await readFile(join(members,'footprints.jsonl'),'utf8'),'');
+  const bad=structuredClone(manifest);bad.boundaries[2].regionIds=bad.boundaries[2].unresolvedBoundaryIds;delete bad.boundaries[2].unresolvedBoundaryIds;await writeFile(join(prepared,'bad.json'),JSON.stringify({...bad,extractions:[],intendedCells:[]}));await assert.rejects(prepareGeographicCoverage(join(prepared,'bad.json'),join(f.dir,'bad')));
+ }
+});
+
+test('unknown preservation requires explicit partitions and exact unresolved inventory',async()=>{
+ for(const mode of ['no-partitions','missing','duplicate','conflict']){
+  const f=await fixture();f.descriptor.unresolvedIdentityPolicy='preserve-unknown';f.descriptor.layers[1].unresolved=[{providerId:'state',reason:'missing-name'}];if(mode!=='conflict')delete f.descriptor.layers[1].mapping.state;
+  if(mode!=='no-partitions')f.descriptor.partitions=[{level:0,providerIds:['country']},{level:1,providerIds:mode==='missing'?['bogus']:['state']}];
+  if(mode==='duplicate')f.descriptor.layers[1].unresolved.push({providerId:'state',reason:'region-identity'});await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out));await assert.rejects(access(join(f.out,'complete.json')));
+ }
+});
+
+test('unresolved shard identity rejects contradictory levels and provider identity and meters inventory setup',async()=>{
+ const {shardGeometry}=await import('../../scripts/osm/partitioned-boundaries');
+ const properties={kind:'unresolved-boundary',boundaryId:'unresolved:ne:0:country',providerId:'country',adminLevel:0,sourceLayer:0,boundaryRevision:'synthetic-only',sources:[source],reason:'country-assignment'};
+ const raw=(props:unknown)=>({type:'FeatureCollection',features:[{type:'Feature',properties:props,geometry:{type:'Polygon',coordinates:[ring(0,0,2,2)]}}]});
+ for(const mutation of [{adminLevel:1},{sourceLayer:1},{providerId:'other'},{boundaryId:'unresolved:ne:1:country'}])assert.throws(()=>shardGeometry(raw({...properties,...mutation}),[],new Set(),100,()=>{},[properties.boundaryId]),/Conflicting unresolved/);
+ assert.equal(shardGeometry(raw(properties),[],new Set(),100,()=>{},[properties.boundaryId]).parsed.length,1);
+ let ticks=0;assert.throws(()=>shardGeometry(raw(properties),Array.from({length:1000},(_,i)=>`region:v1:${i}`),new Set(),100,()=>{if(++ticks>5)throw new Error('Inventory budget');},[properties.boundaryId]),/Inventory budget/);assert.equal(ticks,6);
+});
+
+test('multipart bbox pruning preserves overlap, containment, touching and near-touch rejection',async()=>{
+ const {validateMultipart}=await import('../../scripts/osm/geographic-geometry');
+ const polygon=(a:number,b:number,c:number,d:number)=>[ring(a,b,c,d)] as [number,number][][];
+ for(const part of [polygon(1,1,3,3),polygon(0.5,0.5,1.5,1.5),polygon(2,0,3,2),polygon(2+5e-11,0,3,2)])assert.throws(()=>validateMultipart([polygon(0,0,2,2),part],()=>{}),/multipart/);
+ let work=0;const sparse=Array.from({length:100},(_,i)=>polygon(i*3,0,i*3+1,1));validateMultipart(sparse,()=>{if(++work>6000)throw new Error('Sparse multipart work');});assert.ok(work<6000);
+ let ticks=0;assert.throws(()=>validateMultipart(sparse,()=>{if(++ticks>10)throw new Error('Box budget');}),/Box budget/);
+});
