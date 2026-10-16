@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**Production source research, 16 October:** [decisions and sequence](production-source-research-decision.md) compare global geography routes, narrow the historical provenance question using current provider documentation, and propose approximate meteor guidance separately from precise events. Documentation only; no new runtime coverage or acquisition. Original 12/9/6 unchanged.
+
 **G3/H2/E2 retained integration, 16 October:** [delivery](g3-h2-e2-retained-delivery.md) joins 84 actual candidates against all 4,854 prepared boundaries and builds the catalogue in 10.064 seconds, preserves ERA5 quarantine after provenance review, and binds meteor peak loading to reviewed source identities. Local 890 tests pass, one existing skip; types and eight review cases pass. Global production inputs, historical scientific admission and event source gaps remain open. Original 12/9/6 counts unchanged; no downloads or deployment.
 
 **N4 nine geometry cases resolved, 16 October:** [completed retained pipeline](n4-nine-geometry-resolution.md) passes all 4,854 boundaries, 17 targeted probes and 23-row membership; 70 identities remain explicitly unknown. G2 boundary preparation is complete within this scope. Local 887 tests pass, one existing skip; all types and eight review cases pass. Original 12/9/6 counts remain unchanged because broader ticket acceptance gates remain open. No downloads or deployment.
