@@ -116,7 +116,8 @@ export default function SkyEventDetail() {
               </a>
             ))}
             <p className="source-credit">
-              Sky Event Almanacs Courtesy of Fred Espenak, www.AstroPixels.com.
+              {event.sources.some((s) => s.id === "almanac") &&
+                "Sky Event Almanacs Courtesy of Fred Espenak, www.AstroPixels.com."}
               {event.category === "eclipses" &&
                 " Eclipse Predictions by Fred Espenak, NASA’s GSFC."}
             </p>

@@ -9,7 +9,7 @@ test("reviewed catalogue and all twelve research months validate", () => {
     validateCoverage(coverageMonths, new Date("2026-10-16")),
     [],
   );
-  assert.equal(new Set(skyEvents.map((e) => e.category)).size, 4);
+  assert.equal(new Set(skyEvents.map((e) => e.category)).size, 6);
   for (const e of skyEvents) assert.ok(e.lastReviewedAt <= "2026-10-16");
 });
 test("coverage omissions and duplicates are explicit", () => {

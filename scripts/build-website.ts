@@ -1,4 +1,5 @@
-import {skyEvents,coverageMonths} from "../shared/skyEventCatalog";
+import { auditMajorEventCoverage } from "../shared/skyEventCoverage";
+import { skyEvents, coverageMonths } from "../shared/skyEventCatalog";
 import { build as viteBuild, resolveConfig, loadEnv } from "vite";
 import { build as esbuild } from "esbuild";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
@@ -16,13 +17,16 @@ const fileEnv = loadEnv(viteConfig.mode, viteConfig.envDir, "VITE_");
 const listing = resolveBuildListing(fileEnv, process.env);
 process.env.VITE_NIGHTSKY_LISTING_PUBLISHED = String(listing.published);
 process.env.VITE_NIGHTSKY_LISTING_URL = listing.url || "";
+const missingMajor = auditMajorEventCoverage(skyEvents);
+if (missingMajor.length)
+  throw Error("Missing major-event coverage: " + missingMajor.join(", "));
 const output = buildWebsiteOutputs({
   release,
   facts: releaseFacts,
   listing,
   routes: siteRoutes,
   events: skyEvents,
-      coverageMonths,
+  coverageMonths,
   legacyMeteorIds,
 });
 process.env.VITE_WEBSITE_RELEASE = String(release);

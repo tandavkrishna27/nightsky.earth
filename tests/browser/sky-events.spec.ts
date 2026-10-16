@@ -111,8 +111,10 @@ test("preferences persist, reset removes only zone override, mobile default is l
     .getByRole("link", { name: "NightSky.earth home" })
     .click();
   await expect(
-    page.locator('.upcoming-grid [data-event-id="full-moon-2026-10-26"]'),
-  ).toContainText("09:42");
+    page.locator(
+      '.upcoming-grid [data-event-id="first-quarter-moon-2026-10-18"]',
+    ),
+  ).toContainText("21:43");
   await page.goto("/sky-events?month=2026-10");
   await page.evaluate(() => localStorage.setItem("unrelated", "keep"));
   await page.getByRole("button", { name: "Use browser time zone" }).click();

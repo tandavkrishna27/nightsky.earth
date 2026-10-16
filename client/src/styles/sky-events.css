@@ -444,3 +444,41 @@
     font-size: 22px;
   }
 }
+
+.calendar-coverage {
+  border: 1px solid var(--line);
+  padding: 22px 25px;
+  background: #111823;
+  margin: 0 0 25px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.calendar-coverage summary {
+  color: var(--paper);
+  font-size: 14px;
+  cursor: pointer;
+}
+.calendar-coverage p,
+.calendar-coverage ul {
+  margin-top: 16px;
+}
+.calendar-coverage ul {
+  padding-left: 20px;
+  list-style: disc;
+}
+.calendar-coverage li {
+  margin: 8px 0;
+}
+.calendar-coverage a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.calendar-event.category-pairings {
+  border-color: #a991bb;
+  background: #a991bb12;
+}
+.calendar-event.category-seasons {
+  border-color: #8bbaad;
+  background: #8bbaad12;
+}

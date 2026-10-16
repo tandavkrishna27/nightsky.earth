@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link, useLocation, useSearch } from "wouter";
+import { majorCoveragePolicy } from "@shared/skyEventCoverage";
 import SEO from "@/components/SEO";
 import PluginAction from "@/components/PluginAction";
 import { skyEvents, coverageMonths } from "@shared/skyEventCatalog";
@@ -100,10 +101,55 @@ export default function SkyEvents() {
           <p className="eyebrow">Make room for a little wonder</p>
           <h2>Your calendar of the sky.</h2>
           <p>
-            Reviewed selection: October 2026–September 2027. This is a curated
-            calendar, not a list of every astronomical event.
+            Reviewed window: October 2026–September 2027. Explore the major
+            events covered below, with source timing and visibility kept clear.
           </p>
         </div>
+        <details className="calendar-coverage">
+          <summary>Major-event coverage</summary>
+          <p>
+            {skyEvents.filter((e) => e.reviewStatus === "reviewed").length}{" "}
+            reviewed entries through 30 September 2027.
+          </p>
+          <ul>
+            {majorCoveragePolicy.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
+          <p>
+            Meteor peak references appear in the calendar; longer activity
+            periods are explained in each guide. Aurora forecasts, newly
+            discovered comets and location-specific satellite passes need
+            current, separate evidence.
+          </p>
+          <p>
+            Timing research:{" "}
+            <a
+              href="https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Fred Espenak’s almanacs
+            </a>{" "}
+            ·{" "}
+            <a
+              href="https://www.amsmeteors.org/calendar/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              American Meteor Society
+            </a>{" "}
+            ·{" "}
+            <a
+              href="https://eclipse.gsfc.nasa.gov/OH/OH2027.html"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              NASA eclipse overview
+            </a>
+            .
+          </p>
+        </details>
         <CalendarControls
           state={state}
           onChange={update}

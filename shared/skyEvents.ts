@@ -4,6 +4,8 @@ export const categoryLabels = {
   eclipses: "Eclipses",
   moon: "Moon",
   planets: "Planets",
+  pairings: "Pairings & occultations",
+  seasons: "Earth & seasons",
 } as const;
 export type EventCategory = keyof typeof categoryLabels;
 export function validDay(s: string) {
@@ -45,7 +47,14 @@ export type EventTiming = z.infer<typeof timingSchema>;
 const schema = z.object({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   title: z.string().min(1),
-  category: z.enum(["meteor-showers", "eclipses", "moon", "planets"]),
+  category: z.enum([
+    "meteor-showers",
+    "eclipses",
+    "moon",
+    "planets",
+    "pairings",
+    "seasons",
+  ]),
   synopsis: z.string().min(1),
   timing: timingSchema,
   activity: timingSchema.optional(),

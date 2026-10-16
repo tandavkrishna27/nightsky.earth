@@ -1,3 +1,4 @@
+import { auditMajorEventCoverage } from "../shared/skyEventCoverage";
 import { skyEvents, coverageMonths } from "../shared/skyEventCatalog";
 import { validateSkyEvents, validateCoverage } from "../shared/skyEvents";
 const records = validateSkyEvents(skyEvents);
@@ -14,3 +15,7 @@ console.log(
     coverageMonths.at(-1)?.month,
 );
 if (gaps.length) throw Error("Unreviewed months: " + gaps.join(", "));
+
+const missingMajor = auditMajorEventCoverage(records);
+if (missingMajor.length)
+  throw Error("Missing major-event coverage: " + missingMajor.join(", "));
