@@ -1,6 +1,88 @@
 # Weather lane handoff — 17 October 2026
 
-## Current wave: all 27 public form/code comparisons
+## Current wave: authenticated form review and global-history route audit
+
+Started clean on assigned branch `codex/weather-readiness` at integrated baseline
+`750b12f29b2ae10eb8f3e88eae31755874198156`. The parent alone controlled a new
+in-app browser (`iab`) tab using the existing signed-in session; the coordinator's
+tab was untouched. Two subagents handled the public-source audit and independent
+review. No new chat was created.
+
+**All 27 exact generated dataset/request objects match the retained proposal.
+All 27 show existing CC-BY acceptance and enabled Submit controls, with no
+observed request-too-large error. No job was submitted.** This resolves the
+earlier logged-out form blocker for these exact selections. The form exposes no
+absolute numeric cost or ceiling for the enabled selections; percentage bar
+widths are not cost units. Provider acceptance and execution remain unproved.
+
+The [authenticated findings](weather-authenticated-form-review-20261017.md)
+retain the full selection table, reproduction command and remaining decisions.
+The unchanged proposal is 59,765 bytes, SHA-256
+`5482a483a50dd6870ac1b6e1bb061bfdfdc303596b7bee273fdab93e8ff846dd`.
+
+| Current evidence | Bytes | SHA-256 |
+| --- | ---: | --- |
+| [Observations](data-pilot-evidence/2026-10-17-cds-authenticated-observations.json) | 31,722 | `09d3951aaa9cf4f83e83e96d368c5ddc0a222491911e64d23295200980c35c79` |
+| [Computed report](data-pilot-evidence/2026-10-17-cds-authenticated-comparison.json) | 15,387 | `bbb34a6a10b26855f47e0ae99da11732c47716438bc87d2e678953ade667385a` |
+| [Sanitized screenshot](data-pilot-evidence/2026-10-17-cds-authenticated-enabled.jpg) | 46,320 | `a9c310100eec0a6edc5bdf3361e93ab4c033d2fe70a6bfbdca7ddf594b96b2ca` |
+| [Global-history route audit](global-history-route-audit-20261017.md) | 22,516 | `ca7e77ae908ef31f74b6930a9ab42264ab256b6e23d20845f20047f277463c00` |
+
+All 27 observations were saved individually and immediately with offset instant
+timestamps before assembly. The offline verifier reproduces 27 compared,
+27 enabled, zero disabled/login-required/missing, `allRequestsCompared=true`,
+`allSubmitControlsEnabled=true`, **`executionEligible=false`**. The new fixture
+guards that distinction and the unchanged 16-submission cap. No authority flag
+or allowance was added. These are sanitized agent observations, not receipts.
+The final parent-owned IAB tab (`1`) is retained for handoff at selection 27.
+
+The route audit preserves all 236,042 destinations, 54,822 required cells and
+56,039 cell/zone pairs. Retained subtraction leaves 14,422,993,824 required
+cell-hours; Float32 representation alone is 57,691,975,296 bytes before transport,
+blocks, masks or lineage. The 373,619-parent count predates the latest overlay
+and does not establish feasible global acquisition.
+
+The first concrete alternative is a **metadata-only descriptor dossier** for
+the exact anonymous `earthmover-icechunk-era5/icechunkV2` temporal store, with
+NCAR as fallback comparator. The new store's exact `tcc` inventory, immutable
+snapshot/underlying object pins, final `0001`/member-zero semantics, physical
+read geometry and transfer bounds remain unknown. Older Earthmover examples and
+QC-tool variable mappings do not prove that inventory. No source is admitted by
+this audit. Efficient acquisition also leaves solar/timezone aggregation CPU,
+scratch, lineage and serving fit to measure separately. Source citations, exact
+arithmetic, revision/licence differences and future gates are in the audit.
+
+**Remaining decisions:** owner disposition of proposed +11 submissions and the
+unchanged eight-hour/512 MiB envelope; fresh executable contract, packet/code/
+runtime pins and explicit allowance before execution. The 16-job executor cannot
+execute the 27-parent proposal as-is. Queue/completion, output conversion, routing,
+actual bytes and scientific completeness remain unproved. The alternative source
+requires its own metadata/scientific admission and later bounded-data decision.
+
+No terms acceptance, credential/token access, provider job, dataset download,
+external message, deployment or publication occurred. No scope or source-contract
+reduction occurred. Shared tracker, `tests/all.test.ts`, `tsconfig.tools.json`
+and CI workflow were not edited. Acceptance remains **12 Done / 9 Partial /
+6 Not started**. Historical evidence below remains unchanged.
+
+Milestone verification in the lane-owned Python 3.14 environment:
+
+```text
+.data/weather-py314/Scripts/python.exe -m unittest discover -s tests/era5 -p test_form_readiness.py
+19 tests, OK, exit 0 (2.231 seconds)
+.data/weather-py314/Scripts/python.exe -m unittest discover -s tests/era5 -p 'test_*.py'
+195 tests, OK, exit 0 (22.509 seconds)
+git diff --check
+exit 0
+```
+
+The independent reviewer reproduced all raw-record/proposal comparisons, hashes,
+report equality and timestamp precision; inspected the sanitized screenshot;
+reran all 19 focused tests; and checked primary source claims and arithmetic in
+the route audit. No actionable findings remain in those artifacts. Existing
+NumPy fixture deprecation warnings remain; no shared environment was changed.
+Final delivery identity follows after the handoff review.
+
+## Historical public form/code comparison — 17 October 2026
 
 Started clean on assigned branch `codex/weather-readiness` at integrated baseline
 `ca7de5a70a60e7178c5ccf6f1f3e03ee5ffe9538`. The parent alone owned the CDS browser;

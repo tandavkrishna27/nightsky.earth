@@ -187,6 +187,26 @@ class FormReadinessTests(unittest.TestCase):
         self.assertFalse(report['allSubmitControlsEnabled'])
         self.assertFalse(report['executionEligible'])
 
+    def test_authenticated_browser_record_passes_all_form_checks_without_authority(self):
+        evidence, digest = form.read_json(PROPOSAL.parent / '2026-10-17-cds-authenticated-observations.json')
+        report = form.validate(PROPOSAL, PIN, evidence, observed_date='2026-10-17')
+        report['observationsSha256'] = digest
+        retained, _ = form.read_json(PROPOSAL.parent / '2026-10-17-cds-authenticated-comparison.json')
+        self.assertEqual(report, retained)
+        self.assertEqual(report['comparedRows'], 27)
+        self.assertEqual(report['enabledRows'], 27)
+        self.assertEqual(report['disabledRows'], 0)
+        self.assertEqual(report['loginRequiredRows'], 0)
+        self.assertEqual(report['missingRows'], [])
+        self.assertTrue(report['allRequestsCompared'])
+        self.assertTrue(report['allSubmitControlsEnabled'])
+        self.assertFalse(report['executionEligible'])
+        self.assertEqual({r['observationPrecision'] for r in report['rows']}, {'instant'})
+        self.assertTrue(all('CC-BY licence: Accepted' in r['validationMessages'] for r in report['rows']))
+        self.assertNotIn('currentProviderFormReviewed', report)
+        import global_acquisition as g
+        self.assertEqual(g.LIMITS['submissions'], 16)
+
     def test_file_inputs_reject_duplicate_json_keys_nonfinite_and_oversize(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / 'observations.json'
