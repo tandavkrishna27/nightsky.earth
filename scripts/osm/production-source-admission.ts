@@ -184,7 +184,7 @@ async function verify(options:ProductionAdmissionOptions,context?:TestContext){
   scope:'Exact local production input binding only; no acquisition, publication or searched-coverage authorization'};
 }
 
-/** Fixed operator policy and independently pinned EMPTY review allowlist. */
+/** Fixed operator policy and independently pinned exact-subject review allowlist. */
 export async function verifyProductionAdmission(options:ProductionAdmissionOptions){return verify(options);}
 /** Explicit library-only synthetic seam; unavailable from the production CLI. */
 export async function verifyProductionAdmissionWithContext(options:ProductionAdmissionOptions,context:TestContext){return verify(options,context);}

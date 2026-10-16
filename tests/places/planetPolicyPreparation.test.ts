@@ -35,12 +35,12 @@ test('preparation rejects supplied hashes, approval claims or candidate-selected
  }
 });
 
-test('Natural Earth retained preparation does not silently become generic production admission',async()=>{
+test('reviewed private Natural Earth records do not silently become planet workflow admission',async()=>{
  const report=await buildPlanetPolicyPreparation();
  assert.equal(report.naturalEarth.productionAdmitted,false);
  assert.equal(report.naturalEarth.layers.length,2);
- assert.ok(report.naturalEarth.layers.every(l=>l.policyStatus==='missing-from-retained-policy'));
- assert.ok(report.blockers.includes('natural-earth-trusted-provider-record-required'));
+ assert.ok(report.naturalEarth.layers.every(l=>l.policyStatus==='present-requires-exact-subject-review'));
+ assert.ok(!report.blockers.includes('natural-earth-trusted-provider-record-required'));
  assert.ok(report.blockers.includes('real-source-production-admission-evidence-required'));
  assert.equal(report.naturalEarth.providerConditionSupport,'implemented-operator-controlled-policy');
  assert.ok(report.naturalEarth.forbiddenSubstituteConditions.includes('geoboundaries-cc-by-4.0-attribution'));

@@ -1,0 +1,28 @@
+# Independent Natural Earth evidence review — 17 October 2026
+
+The independent AI reviewer `codex-independent-evidence-review:/root/independent_review` approves **source-provenance**, **payload-validation** and **rights-review** for the two exact private-use subjects below. These conclusions follow direct inspection of actual retained files, their measured hashes and geometry, rather than approval based on tests or candidate assertions. The reviewer is separate from packet assembly. Root retains the separate admission-approval decision.
+
+| Source | Exact reviewed subject SHA-256 |
+| --- | --- |
+| ADM0 | `6afdd8189eb50e1d8e508393d051cb5fef5fffa13030518a95965fb854f06e79` |
+| ADM1 | `06d404498660df3a966f5f7fcf0d3a058b5f1ee2b41030cacc32072b367a0673` |
+
+The complete machine-readable conclusions and six strict role receipts are in [independent-review.json](independent-review.json). Its current byte identity is **7341 bytes**, SHA-256 `0d51144625b4a037b162b80e5314e8195370f084cea69346d09368fb4be66b31`. Independent measured facts and every inspected package artifact pin are in [observations.json](observations.json), **13456 bytes**, SHA-256 `52d1e0aae2103c3189ecb97ef6689b91857d922b9a6d3ce5cb7bcba914b78757`. Original generated bundles remain unsigned with `reviews: []`; no admission-approval receipt is issued by this reviewer.
+
+## Provenance and payload
+
+Both originals were freshly hashed against the exact immutable commit URLs, repository-listed Git blob identities, measured acquisition evidence and subject records: ADM0 **13,287,234 bytes**, SHA-256 `239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255`; ADM1 **40,726,851 bytes**, SHA-256 `22d0e3ad85eb3e27f17cabf8ba2d50e554fbc27a87796ff891d958185da62fb5`. Retained official Natural Earth pages link to the repository; the saved tag response binds v5.1.1 to commit `9380cca83db5f9aef52d5e762765100745f84b27`. The exact licence matches both retained original copies and Git blob `9dfbc3d55a4ab1dd758c253b2ee339888f632889`.
+
+The three actual prepared bodies total **45,254,883 bytes** with feature counts **258 / 2,895 / 1,701**. Their freshly measured pins match both retained ingestion/preparation completions, the frozen lineage documents and the complete audit. All **4,854** provider features appear exactly once in the recorded partitions; **4,784** mappings and **70** unresolved identities remain. The latter are 20 ADM0 and 50 ADM1, comprising 63 country-assignment and seven missing-name cases. Each resolved ADM0 country code equals its actual `ISO_A3_EH`; each resolved ADM1 country code follows its original `adm0_a3` join to that explicit ADM0 mapping. Names are present in original name/ADMIN attributes. These are verified provider-to-output mappings, not a real-world sovereignty or boundary-accuracy determination.
+
+Every polygon's nondegenerate directed-edge multiset is preserved, and an independent replay of all **49** recorded transformations equals the prepared geometry exactly. All **12,809** polygon components remain; 52 consecutive zero-length edges were removed and two tangent loops became holes while the existing holes remain, changing 130 holes to 132. Positions change from **1,843,790** to **1,843,740**. This review used linear feature/position/edge checks with per-body reads capped at 48 MiB, prepared aggregate below 64 MiB and measured peak working set **637,288,448 bytes**, below 2 GiB. It performed no new all-pairs topology calculation or data build. The retained successful v6 geometry/probe evidence was inspected; generalized de facto cartography, ADM1 beta, coastal/disputed/overseas uncertainty and strict-interior unknown outcomes remain limitations.
+
+## Rights evidence and exact private scope
+
+The **4,636-byte** pinned licence has SHA-256 `2631b5b39b6d1acc56de75235109b5af2dbb4b0ac5a127b6f06185977247fd4b`. Its affirmative public-domain declaration and broad reuse/modification permission, also present in retained official terms, support the declared private offline boundary-adaptation purpose. This review read the historical Washington Post, EC JRC IES and XNR releases and the accuracy disclaimers. No ADM0/ADM1-specific contrary restriction was found in that retained material. This is an AI review of the actual provider declaration and express reuse evidence, not a legal opinion, a universal jurisdiction conclusion or a warranty of all underlying third-party rights.
+
+The exact subjects retain source/edition/modification notices and expressly exclude public OSM mixed-database release. `notices.destination` is the immutable upstream source citation; the modified notice text is retained locally in the source bundles/context and is not represented as published at that upstream URL. Provider credit is optional under the retained grant. The review approves no public notice-placement location, mixed-database licence compatibility or derivative offer. GeoBoundaries conditions are absent and are not substituted for Natural Earth evidence.
+
+## Remaining authority
+
+These six receipts cover only the frozen private offline source subjects and the three named review roles. Root must independently assess admission-approval and any operator-policy/trust adoption. No receipt, build, planet/OSM admission, searched coverage, observing access, public release, serving installation or deployment is authorized here. The 128 MiB assembly caps and existing stage/host limits remain unchanged. Any changed source subject, intended use, rights or lineage/evidence pin requires a fresh review; a matching test result or copied review declaration cannot extend this scope.
