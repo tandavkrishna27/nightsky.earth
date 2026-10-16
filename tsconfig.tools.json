@@ -26,7 +26,8 @@
     "scripts/osm/boundary-metadata.ts",
     "scripts/osm/prepare-geographic-coverage.ts",
     "scripts/validate-retained-source-adapters.ts",
-    "scripts/osm/source-admission.ts"
+    "scripts/osm/source-admission.ts",
+    "scripts/osm/natural-earth-ingest.ts"
   ],
   "exclude": [
     "node_modules",

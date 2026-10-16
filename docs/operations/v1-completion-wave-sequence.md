@@ -1,3 +1,5 @@
+> Latest adapter preparation: [offline time-series and boundaries](offline-timeseries-boundaries-wave.md). Request syntax is verified; actual returned format, production bodies/mappings and resource fit remain unverified. No new acquisition is authorized.
+
 # Sequence after offline build preparation
 
 **Latest source delivery, 16 October:** [three-lane record](source-admission-three-lane-wave-20261016.md) integrates twelve actual 2027 maxima; current global boundary-body proposal has exact immutable paths, while time-series date/location serialization still needs official evidence. No large geometry/weather downloads or deployment.

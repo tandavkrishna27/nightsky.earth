@@ -133,5 +133,7 @@ jobs:
         run: python -m pip install -r scripts/era5/requirements.txt -r scripts/era5/download-requirements.txt
       - name: Verify deferred sample entry point remains offline by default
         run: python scripts/era5/sample_live.py --plan
+      - name: Verify time-series entry point stays offline and plan-only
+        run: python scripts/era5/timeseries_executor.py --plan
       - name: Run ERA5 fixtures without account or source requests
         run: python -m unittest discover -s tests/era5 -v

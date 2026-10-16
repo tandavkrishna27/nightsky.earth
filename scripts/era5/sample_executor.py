@@ -83,7 +83,7 @@ def run_fixture(root, transport, *, clock=time.time, sleep=time.sleep, resume=Fa
     return _run(root, transport, clock=clock, sleep=sleep, resume=resume)
 
 
-def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False):
+def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, contract=None):
     """Private state machine shared by fixtures and separately gated sample_live.
 
     submit(dataset, request, timeout) returns ONLY an opaque job ID;
@@ -92,13 +92,16 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False):
     redirects=False) returns a response with status, headers, blocks(), close().
     The separately gated adapter supplies the reviewed CDS wire implementation.
     """
+    # Contract changes identity only; resource and state protections stay fixed.
+    contract_identity = identity() if contract is None else contract.identity()
+    contract_plan = plan() if contract is None else contract.plan()
     root=Path(root).absolute(); owned(root,'checkpoint.json')
     root.mkdir(exist_ok=True); budget(root)
     with writer_lock(root):
         checkpoint=owned(root,'checkpoint.json')
         if checkpoint.exists():
             state=json.loads(checkpoint.read_text())
-            if state.get('identity') != identity() or state.get('submissions') != 1:
+            if state.get('identity') != contract_identity or state.get('submissions') != 1:
                 raise ValueError('Checkpoint identity mismatch')
             if (type(state.get('started')) not in (int,float) or type(state.get('deadline')) not in (int,float) or not 0 < state['deadline']-state['started'] <= SECONDS or type(state.get('polls')) is not int or not 0 <= state['polls'] <= MAX_POLLS or type(state.get('nextPoll')) not in (int,float)):
                 raise ValueError('Invalid checkpoint limits')
@@ -110,17 +113,17 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False):
             if resume: raise ValueError('No checkpoint to resume')
             if any(p.name != 'writer.lock' for p in root.iterdir()): raise ValueError('Fresh output required')
             now=clock()
-            state=dict(identity=identity(),submissions=1,phase='submission-uncertain',
+            state=dict(identity=contract_identity,submissions=1,phase='submission-uncertain',
                        started=now,deadline=now+SECONDS,polls=0,nextPoll=now)
             save(root,state)  # durable uncertainty BEFORE submit
-            job=transport.submit(DATASET,json.loads(json.dumps(REQUEST)),timeout=min(30,SECONDS))
+            job=transport.submit(contract_plan['dataset'],json.loads(json.dumps(contract_plan['request'])),timeout=min(30,SECONDS))
             if not isinstance(job,str) or not re.fullmatch(r'[A-Za-z0-9-]{1,128}',job):
                 raise ValueError('Invalid remote identity')
             with owned(root,'job-identity.json').open('x',encoding='utf-8') as receipt:
-                json.dump(dict(identity=identity(),jobId=job),receipt); receipt.flush(); os.fsync(receipt.fileno())
+                json.dump(dict(identity=contract_identity,jobId=job),receipt); receipt.flush(); os.fsync(receipt.fileno())
             state.update(jobId=job,phase='queued'); save(root,state)
         receipt=json.loads(owned(root,'job-identity.json').read_text())
-        if receipt != dict(identity=identity(),jobId=state['jobId']):
+        if receipt != dict(identity=contract_identity,jobId=state['jobId']):
             raise ValueError('Immutable job identity mismatch')
         def remaining():
             budget(root)

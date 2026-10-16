@@ -1,0 +1,36 @@
+{
+  "observedAtUtc": "2026-10-16T05:52:06.155588+00:00",
+  "sourceUrl": "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels-timeseries?tab=download",
+  "method": "User-authorized browser form selection and rendered Show API request code; no submission",
+  "exampleSha256": "e22cc3d278891a22bc02f8ca607f80c00ed6bbffaa9ec5517cbb1bf0df81faae",
+  "dataset": "reanalysis-era5-single-levels-timeseries",
+  "request": {
+    "variable": [
+      "total_cloud_cover"
+    ],
+    "location": {
+      "longitude": 48.75,
+      "latitude": 32
+    },
+    "date": [
+      "1990-12-30/1990-12-30"
+    ],
+    "data_format": "netcdf"
+  },
+  "validatedUiSelection": {
+    "startDate": "1990-12-30",
+    "endDate": "1990-12-30",
+    "latitude": 32,
+    "longitude": 48.75,
+    "variable": "total_cloud_cover",
+    "format": "netcdf"
+  },
+  "jobSubmitted": false,
+  "weatherDataDownloaded": false,
+  "codeExecuted": false,
+  "limitations": [
+    "Generated form request example is verified, not provider execution/response acceptance.",
+    "Returned dimensions/units/missing values/revision/cost/horizon/CDN and real baseline remain unverified.",
+    "Python example is retained as unexecuted evidence; it would submit a job if run."
+  ]
+}

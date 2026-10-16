@@ -1,5 +1,7 @@
 # CDS time-series contract: 16 October 2026
 
+**Subsequent browser verification:** the owner-authorized CDS form generated `location:{longitude:48.75,latitude:32}` and `date:["1990-12-30/1990-12-30"]` for total cloud cover/NetCDF. The [sanitized evidence](data-pilot-evidence/2026-10-16-timeseries-request-contract.json) records the exact example and its hash; no job was submitted. The earlier wire-format uncertainty below is historical. [Offline adapter preparation](era5-timeseries-adapter.md) uses this generated contract, while actual response/revision/limits/CDN acceptance remains separate.
+
 **Decision: the distinct CDS time-series route remains promising, but its point/date wire contract and response admission are incomplete. No adapter or source job is ready.** This lane inspected retained public responses and installed official client source offline; it made no network request, credential read, submission, installation or code change. The owning wave's ledger is `.cache/source-admission-wave-20261016-v2/ledger.json`; its final request accounting belongs to the consolidated wave report.
 
 ## What is established
