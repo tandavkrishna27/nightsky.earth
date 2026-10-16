@@ -1,5 +1,7 @@
 # Fixed ERA5 time-series adapter preparation
 
+**Current status (16 October):** This document records the original offline preparation. Later [execution/point-decoder evidence](n4-partitions-and-point-decoder.md) and the [retained provenance decision](h2-retained-provenance-decision.md) supersede its preparation-only status. The retained sample remains quarantined; no final revision/member admission or production history is established.
+
 `python scripts/era5/timeseries_executor.py --plan` is offline. It prints the fixed one-point/one-day plan and SHA-256 `95edd1dddef2cd942e66089f3d6f85760d5ffd8876f7f4e32a6646be794a5322`. No credential lookup, HTTP client construction or job submission occurs. `--execute` is unsupported.
 
 The public [browser request evidence](data-pilot-evidence/2026-10-16-timeseries-request-contract.json) records the rendered, unexecuted form example on 2026-10-16. Dataset is `reanalysis-era5-single-levels-timeseries`; request is:

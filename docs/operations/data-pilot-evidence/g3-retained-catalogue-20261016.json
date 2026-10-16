@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "scope": "Actual retained candidate integration only; no global coverage or verified access",
+  "candidates": 84,
+  "sourceRows": {
+    "faroe-islands": 73,
+    "monaco": 11
+  },
+  "sourceChecks": [
+    {
+      "id": "monaco",
+      "url": "https://download.geofabrik.de/europe/monaco-261013.osm.pbf",
+      "nativeVintage": "2026-10-13T20:21:31Z",
+      "bytes": 692392,
+      "sha256": "32c409ec20a3449be6450e7e615a9d575dd7808e7326a8d087d3f4128b394a05"
+    },
+    {
+      "id": "faroe-islands",
+      "url": "https://download.geofabrik.de/europe/faroe-islands-261013.osm.pbf",
+      "nativeVintage": "2026-10-13T20:21:31Z",
+      "bytes": 7735542,
+      "sha256": "0b512e51364c5bc499b12691f8a91e34aa3e59efa368c4095aa096353bb2a859"
+    }
+  ],
+  "producerFilesVerified": {
+    "candidates.jsonl": {
+      "bytes": 66957,
+      "sha256": "c296e06a4ce2e287291630086e513652090f134a6dd68f3cbe4d09c4ab72019a"
+    },
+    "exclusions.jsonl": {
+      "bytes": 23674,
+      "sha256": "76181ae5ed7c4f4cf8e6d052ef9d2aea5099fe01a284fd61284c614bcf7ae8da"
+    },
+    "lineage.jsonl": {
+      "bytes": 18146,
+      "sha256": "822991f41b308d58639f5eb26a753f332f26295a47aeb0f251de9de1f94a99cd"
+    }
+  },
+  "boundaryPinsVerified": [
+    {
+      "path": "boundaries-0.geojson",
+      "bytes": 12596289,
+      "sha256": "c05e09728d6fa92c56f44c54ccda87b8bdbd14d1733d9307d2d9e51b69259d99"
+    },
+    {
+      "path": "boundaries-1.geojson",
+      "bytes": 24718304,
+      "sha256": "63599bc852fa013b398ff222de5d23f8dea2e578d2d17ae2a6b36d4f6bc9b642"
+    },
+    {
+      "path": "boundaries-2.geojson",
+      "bytes": 7940290,
+      "sha256": "16a8e80eef9b135cf8b4536d93c2d924546cace5d7a33912077ed86fa23dd1ce"
+    }
+  ],
+  "candidateFactsPreserved": true,
+  "allAccessUnknown": true,
+  "coverage": "unknown; synthetic clipping control is not an extraction footprint",
+  "footprintBytes": 0,
+  "countryCounts": {
+    "total": 84,
+    "unknown": 28,
+    "byCountry": {
+      "unknown": 28,
+      "FRO": 46,
+      "MCO": 9,
+      "FRA": 1
+    }
+  },
+  "job": {
+    "elapsedSeconds": 10.064,
+    "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+    "limits": {
+      "commitBytes": 2147483648,
+      "diskBytes": 402653184,
+      "freeBytes": 1073741824,
+      "maxProcesses": 3,
+      "rssBytes": 2147483648,
+      "wallSeconds": 300
+    },
+    "peakLogicalBytes": 95031703,
+    "peakRssBytes": 967589888,
+    "platform": "win32",
+    "reason": null,
+    "stages": [
+      {
+        "elapsedSeconds": 10.03,
+        "exitCode": 0,
+        "stage": 0
+      }
+    ],
+    "status": "complete"
+  },
+  "outputFiles": {
+    "catalogue/catalogue-79b546e599de169714f9134ac55ada0070925de1cb72c8736f854b3e47e8297f.json": {
+      "bytes": 1764,
+      "sha256": "79b546e599de169714f9134ac55ada0070925de1cb72c8736f854b3e47e8297f"
+    },
+    "catalogue/pages/0ee925140e8958ae1889ca5c3eb7be21e1f63e7371e1d106482b33af11484333.json": {
+      "bytes": 28016,
+      "sha256": "0ee925140e8958ae1889ca5c3eb7be21e1f63e7371e1d106482b33af11484333"
+    },
+    "catalogue/pages/1d0ed5119b05142ca54ea7b586d13f7d14207f632e842bcc2ed357d1a63b1f67.json": {
+      "bytes": 1590,
+      "sha256": "1d0ed5119b05142ca54ea7b586d13f7d14207f632e842bcc2ed357d1a63b1f67"
+    },
+    "catalogue/pages/27c45c353cd4bd06ca862cedaa483a47d9d4219a78f86c357cb7b7a7aa063cb4.json": {
+      "bytes": 579238,
+      "sha256": "27c45c353cd4bd06ca862cedaa483a47d9d4219a78f86c357cb7b7a7aa063cb4"
+    },
+    "catalogue/pages/5a2580bec1c8d2518ae8991f76de926b398bab6cb5ef0d26eacb2fa3ae24312d.json": {
+      "bytes": 739643,
+      "sha256": "5a2580bec1c8d2518ae8991f76de926b398bab6cb5ef0d26eacb2fa3ae24312d"
+    },
+    "catalogue/pages/729d957488fd32547b7874073fac34f133ec6249dfc52f10b228c54b74a6738c.json": {
+      "bytes": 41651,
+      "sha256": "729d957488fd32547b7874073fac34f133ec6249dfc52f10b228c54b74a6738c"
+    },
+    "catalogue/pages/9b6b28660724597cf5e0051bc995bc19613d691a06a0bac15e4c0a2b1a3029aa.json": {
+      "bytes": 7056,
+      "sha256": "9b6b28660724597cf5e0051bc995bc19613d691a06a0bac15e4c0a2b1a3029aa"
+    },
+    "catalogue/pages/a9af5912fdab670eee58839660d59ec70a1f72f2c754ac45be90f601e8fb2734.json": {
+      "bytes": 739333,
+      "sha256": "a9af5912fdab670eee58839660d59ec70a1f72f2c754ac45be90f601e8fb2734"
+    },
+    "catalogue/pages/cc8e4f8049328df6ab76128ecf3cf84225110cd797c8c2c12b03f9b2200ad5ee.json": {
+      "bytes": 737862,
+      "sha256": "cc8e4f8049328df6ab76128ecf3cf84225110cd797c8c2c12b03f9b2200ad5ee"
+    },
+    "catalogue/pages/cf7c5e1b5248e621cbe7825856b4a0e100212bf9096309843f7fe970fc4fac85.json": {
+      "bytes": 741212,
+      "sha256": "cf7c5e1b5248e621cbe7825856b4a0e100212bf9096309843f7fe970fc4fac85"
+    },
+    "catalogue/pages/e49698dda89d1b4bd9b66f75f7f80951ba682f0f95daab8d2a17971ac9921a78.json": {
+      "bytes": 71391,
+      "sha256": "e49698dda89d1b4bd9b66f75f7f80951ba682f0f95daab8d2a17971ac9921a78"
+    },
+    "catalogue/pages/e4be049816c08dee5aa8668cf42f81f9dda3daa383c19032edc3b87149431957.json": {
+      "bytes": 143,
+      "sha256": "e4be049816c08dee5aa8668cf42f81f9dda3daa383c19032edc3b87149431957"
+    },
+    "job-complete.json": {
+      "bytes": 22,
+      "sha256": "d12df96e8d922d035ca400abb39171428d8596f829f9bad5d707ef1c145e372c"
+    },
+    "job-report.json": {
+      "bytes": 472,
+      "sha256": "a1b0640ac0095ecd474f83204d1e471a5681e4f5179c258af7b9ef3628c736a3"
+    },
+    "membership/candidates.jsonl": {
+      "bytes": 71251,
+      "sha256": "0e284c51999b012110954922561730ed5bd50ff99792e0444daeaca7fa59753b"
+    },
+    "membership/complete.json": {
+      "bytes": 161611,
+      "sha256": "7b6d99454bfbbfd4ed9d37ee524cb96046c89110dc2bbbcf878fddc031631311"
+    },
+    "membership/footprints.jsonl": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "membership/regions.jsonl": {
+      "bytes": 3536603,
+      "sha256": "e06b947dd61f2da1fe81ed1b67799f860c3920c9a1d2c54a4fbcd2ab2c230d1f"
+    },
+    "stage-0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stage-0.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tsx-TK/17921-0534c92b2c02b0ad840a29b88fdc0e953085a886": {
+      "bytes": 12018,
+      "sha256": "3abdc93a4d123930b1091e18e00f8c9c453fe6f61419c0cde43639738ef31059"
+    },
+    "tsx-TK/17921-0e94436df200ad0daa284b2ff03e324bf54ffe7f": {
+      "bytes": 11447,
+      "sha256": "b65dbe298248d8131d69e2db98f67f34b7c41b2ad82079c9a955619f0026c700"
+    },
+    "tsx-TK/17921-2c0345572ab041ca3fbba451dddbfc0c1f576b85": {
+      "bytes": 15718,
+      "sha256": "4d2d0415a66ba95d42cdd60791e8df1fd5575ccecf88819828d16f299e5838eb"
+    },
+    "tsx-TK/17921-313392dcc1aa7462ed028c80f7952204026c3305": {
+      "bytes": 11800,
+      "sha256": "609c03479be53b367cc0f25f339597327c7ee7fd898181829fbc8272cad15deb"
+    },
+    "tsx-TK/17921-51a264bdd46ab9ba65286582535049488c7e5ab2": {
+      "bytes": 6827,
+      "sha256": "cd5abb10e8429e7a8c8b2c110942fcc025e9826290536c032a963940c08bdd60"
+    },
+    "tsx-TK/17921-529081b270e2700ec3833fc3587d4e39fb7a99d8": {
+      "bytes": 20836,
+      "sha256": "bfa76e475aea0e277ed58cc2274dc72d015dfaaa556ae7e137d05c4ebe797dcd"
+    },
+    "tsx-TK/17921-6bae952e25e6f5c668c8ed5fed2882ddc9f7314e": {
+      "bytes": 8061,
+      "sha256": "9fdc6a914eb658a2ec2a8b1662056501ea28f8ee26d74b12e051248fd9096f9a"
+    },
+    "tsx-TK/17921-8bcabb384d544cc65267c05fe53f210e3efbbe32": {
+      "bytes": 3573,
+      "sha256": "bd9468a9105fea1b7e2b078f934cf683984a54ff4e692d962b1b242571479d7a"
+    },
+    "tsx-TK/17921-bc39455fc284d5b67b3c8402f82b728de7c0b9d1": {
+      "bytes": 29003,
+      "sha256": "846d92f118bb185c8601ddef6a60c0f666e73b07632aa3620150ad7818255229"
+    },
+    "tsx-TK/17921-c3370e32d9962f40559b4628935cc4717f5e2f5d": {
+      "bytes": 1770,
+      "sha256": "800e6cec09110c8485e71f4b2fd2f4c07d25b9defac7e89b5b63abc8477e70b6"
+    },
+    "tsx-TK/17921-e04865769d604c76a63303426f43f065f05d6429": {
+      "bytes": 4935,
+      "sha256": "18fca90b3bae45cae485a4900b6e206ac0b24a297706d31a1ed86a20639444a7"
+    },
+    "tsx-TK/17921-e7eae1e636c6e3f0f0d86dd39e6c9a93f87fefa2": {
+      "bytes": 2394,
+      "sha256": "5758a9fa476d83407495c92cdeda531457537b34a9f8a779505547513ede3c95"
+    }
+  }
+}

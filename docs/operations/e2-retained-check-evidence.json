@@ -1,0 +1,9 @@
+{
+  "baseline": "3be90df",
+  "date": "2026-10-16",
+  "networkRequests": 0,
+  "sourceAdmissionChanges": 0,
+  "tddRed": { "command": "node --import tsx --test tests/events/meteorPeaks.test.ts", "passed": 7, "failed": 1, "reason": "validateReviewedMeteorPeakCatalog is not a function" },
+  "focusedGreen": { "command": "node --import tsx --test tests/events/meteorPeaks.test.ts tests/events/catalog.test.ts tests/events/localHorizon.test.ts tests/events/meteorTypicalSeasons.test.ts tests/events/meteorRadiants.test.ts", "passed": 49, "failed": 0, "skipped": 0 },
+  "acceptance": "S2-E2 remains open; no scientific coverage gate promoted"
+}

@@ -99,3 +99,20 @@ test("reviewed meteor admission rejects same-count code substitutions and wrong-
     assert.throws(() => validateReviewedMeteorPeakCoverage(year, rows.slice(1)), /coverage/);
   }
 });
+
+test("reviewed admission binds each peak artifact to its exact retained report identity", async () => {
+  const { validateReviewedMeteorPeakCatalog } = await import("../../server/events/meteorPeaks");
+  for (const year of [2025, 2026, 2027]) {
+    const catalog = JSON.parse(readFileSync(`data/events/meteor-peaks-nasa-${year}.json`, "utf8"));
+    assert.doesNotThrow(() => validateReviewedMeteorPeakCatalog(year, catalog));
+    for (const [field, value] of Object.entries({
+      sourceUrl: "https://ntrs.nasa.gov/unreviewed.pdf",
+      rightsEvidenceUrl: "https://ntrs.nasa.gov/citations/unreviewed",
+      vintage: `NASA-MEO-${year}-unreviewed-revision`, table: "Table 4",
+      rightsStatement: "Public domain inferred", reviewedAt: "invalid",
+    })) {
+      assert.throws(() => validateReviewedMeteorPeakCatalog(year, { ...catalog, [field]: value }), undefined, field);
+    }
+    assert.throws(() => validateReviewedMeteorPeakCatalog(2028, catalog), /admission/);
+  }
+});

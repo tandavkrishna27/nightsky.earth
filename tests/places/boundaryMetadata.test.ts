@@ -4,11 +4,26 @@ import {mkdtemp,writeFile,readFile,access,realpath,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
-import {buildBoundaryMetadata} from '../../scripts/osm/boundary-metadata';
+import {buildBoundaryMetadata,boundedContains} from '../../scripts/osm/boundary-metadata';
+import {contains} from '../../scripts/osm/geographic-geometry';
 const source={name:'Synthetic',url:'https://example.org',attribution:'Synthetic',dataClass:'catalog'};
 const fixtureRoots:string[]=[];
 after(async()=>{for(const root of fixtureRoots)await rm(root,{recursive:true,force:true});});
 const ring=(a:number,b:number,c:number,d:number)=>[[a,b],[c,b],[c,d],[a,d],[a,b]];
+test('boundary bounds prune distant queries while preserving holes, parts and border tolerance',()=>{
+ const boundary:any={region:{},polygons:[[ring(0,0,10,10),ring(2,2,4,4)],[ring(20,0,21,1)]]};
+ let ticks=0;const query=boundedContains(boundary,()=>{ticks++;});
+ for(const p of [[-1,0],[-5e-11,1],[-2e-10,1],[0,0],[1,1],[3,3],[2,3],[15,0],[20.5,.5],[21+5e-11,.5]])assert.equal(query(p as [number,number]),contains(p as [number,number],boundary,()=>{}));
+ ticks=0;assert.equal(query([100,50]),0);assert.equal(ticks,1);
+});
+test('bounded classifier matches exact classification across dateline parts and unresolved identities',()=>{
+ const shapes=[[[ring(-180,-5,-170,5)],[ring(170,-5,180,5)]],[[ring(-4,-4,4,4),ring(-2,-2,2,2)]]];
+ for(const polygons of shapes)for(const region of [{regionId:'region:v1:known'},{kind:'unresolved-boundary',boundaryId:'unresolved:ne:0:X'}]){
+  const boundary:any={region,polygons},query=boundedContains(boundary,()=>{});
+  for(let x=-180;x<=180;x+=2.5)for(let y=-6;y<=6;y+=.5)assert.equal(query([x,y]),contains([x,y],boundary,()=>{}));
+  for(const x of [-180,-170,-4,-2,2,4,170,180])for(const delta of [-2e-10,-5e-11,0,5e-11,2e-10])assert.equal(query([x+delta,0]),contains([x+delta,0],boundary,()=>{}));
+ }
+});
 const feature=(id:string,level:number,coordinates:any,countryCode='IND')=>({type:'Feature',properties:{regionId:`region:v1:${id}`,name:id,countryCode,adminLevel:level,boundaryRevision:'fixture',sources:[source]},geometry:{type:'Polygon',coordinates}});
 const row=(id:number,x:number,y:number)=>({placeId:`place:v1:osm:node:${id}`,name:'Park',category:'park',latitude:y,longitude:x,accessEvidence:{status:'unknown'},sources:[source],caveats:[],catalogueRevision:'fixture',sourceCompleteness:1,regionIds:[]});
 async function fixture(features:any[],rows:any[]){const dir=await realpath(await mkdtemp(join(await realpath(tmpdir()),'boundary-')));fixtureRoots.push(dir);const pins:any={};for(const [name,data] of Object.entries({'boundaries.geojson':JSON.stringify({type:'FeatureCollection',features}),'candidates.jsonl':rows.map(r=>JSON.stringify(r)+'\n').join('')})){await writeFile(join(dir,name),data);pins[name]={path:name,bytes:Buffer.byteLength(data),sha256:createHash('sha256').update(data).digest('hex')};}const manifest={schemaVersion:1,catalogueRevision:'fixture',boundaries:pins['boundaries.geojson'],candidates:pins['candidates.jsonl']};await writeFile(join(dir,'input.json'),JSON.stringify(manifest));return {dir,manifest,input:join(dir,'input.json'),output:join(dir,'out')};}

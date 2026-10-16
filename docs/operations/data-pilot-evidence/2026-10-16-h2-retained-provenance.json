@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "purpose": "offline-retained-provenance-decision",
+  "networkRequests": 0,
+  "decision": "retain-quarantine-no-historical-admission",
+  "historicalAdmission": false,
+  "member": null,
+  "experimentVersions": null,
+  "pins": [
+    {
+      "path": ".data/era5/timeseries-sample-19901230-r2-retrieval/sample.raw",
+      "bytes": 15028,
+      "sha256": "b1ba3a848d14aea362a9af6cbbe32c79a0f8681213bde5eeb747729c47c99c56"
+    },
+    {
+      "path": ".cache/public-source-check-20261016/01.body",
+      "bytes": 4680,
+      "sha256": "c04cd8a81d00cff8ebd84378bfe6afd0065ada36df5131ddc68b084f8a3bad93"
+    },
+    {
+      "path": "docs/operations/data-pilot-evidence/2026-10-15-history-source-catalogue-1.json",
+      "bytes": 11879,
+      "sha256": "eec0fa062a31fb36ce0c0dbb131660fde79e4e81e4c98a01d73ce128f89f38c0"
+    },
+    {
+      "path": ".cache/cds-browser-request-20261016/request-example.py",
+      "bytes": 313,
+      "sha256": "e22cc3d278891a22bc02f8ca607f80c00ed6bbffaa9ec5517cbb1bf0df81faae"
+    }
+  ],
+  "observed": {
+    "globalAttributeNames": [
+      "Conventions",
+      "GRIB_centre",
+      "GRIB_centreDescription",
+      "GRIB_edition",
+      "GRIB_subCentre",
+      "history",
+      "institution"
+    ],
+    "variableNames": [
+      "tcc",
+      "latitude",
+      "longitude",
+      "valid_time"
+    ],
+    "memberSha256": "08ab00f75baf4e8f0dad1b398f9457ae190fda8b9899bbbbfea25d74a52f3e81",
+    "tccAttributeNames": [
+      "_FillValue",
+      "GRIB_NV",
+      "GRIB_Nx",
+      "GRIB_Ny",
+      "GRIB_cfName",
+      "GRIB_cfVarName",
+      "GRIB_dataType",
+      "GRIB_gridDefinitionDescription",
+      "GRIB_gridType",
+      "GRIB_iDirectionIncrementInDegrees",
+      "GRIB_iScansNegatively",
+      "GRIB_jDirectionIncrementInDegrees",
+      "GRIB_jPointsAreConsecutive",
+      "GRIB_jScansPositively",
+      "GRIB_latitudeOfFirstGridPointInDegrees",
+      "GRIB_latitudeOfLastGridPointInDegrees",
+      "GRIB_longitudeOfFirstGridPointInDegrees",
+      "GRIB_longitudeOfLastGridPointInDegrees",
+      "GRIB_missingValue",
+      "GRIB_name",
+      "GRIB_numberOfPoints",
+      "GRIB_paramId",
+      "GRIB_shortName",
+      "GRIB_stepType",
+      "GRIB_stepUnits",
+      "GRIB_totalNumber",
+      "GRIB_typeOfLevel",
+      "GRIB_units",
+      "long_name",
+      "standard_name",
+      "units",
+      "coordinates"
+    ],
+    "tccProvenanceAttributes": {
+      "GRIB_dataType": "an",
+      "GRIB_totalNumber": "0",
+      "GRIB_paramId": "164",
+      "coordinates": "number time step surface latitude longitude valid_time"
+    },
+    "conversionHistorySummary": {
+      "timestamp": "2024-09-02T04:48",
+      "converter": "cfgrib-0.9.10.4/ecCodes-2.26.0",
+      "sourceBasename": "pre-reanalysis_era5_single_levels-sfc:1-sst-20150131-000000.grib",
+      "sampleVariable": "tcc",
+      "sampleDay": "1990-12-30",
+      "sampleRevisionBinding": false
+    },
+    "numberVariablePresent": false,
+    "expverVariablePresent": false,
+    "expverAttributePresent": false
+  },
+  "remainingSourceQuestion": "Bind this timeseries product/store generation to deterministic high-resolution ERA5 analysis and final expver 0001 for every returned hour; specify whether inherited GRIB attributes survive homogenization as authoritative per-observation metadata."
+}
