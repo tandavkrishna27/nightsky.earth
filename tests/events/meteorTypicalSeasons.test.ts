@@ -63,7 +63,7 @@ test("approximate calendar survives discovery without inventing annual dates or 
  assert.ok(guidance, "Approximate calendar guidance is missing");
  assert.equal(guidance.availability.status, "partial");
  assert.match(guidance.availability.reason, /other showers.*unavailable/i);
- assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"],["LYR","April"],["PER","August"],["LEO","around Nov. 17 or 18"],["QUA","early-January"],["DSX","late September and early October"],["ARI","on or near June 8th"],["CAP","late July"]]);
+ assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"],["LYR","April"],["PER","August"],["LEO","around Nov. 17 or 18"],["QUA","early-January"],["DSX","late September and early October"],["ARI","on or near June 8th"],["CAP","late July"],["DRA","October"],["NTA","middle and late November"],["STA","October and early November"],["HYD","December"]]);
  for (const row of guidance.entries) {
   assert.equal(row.precision,"verbal-period");
   assert.equal(row.recurrenceBasis,"typical-annual");
@@ -131,6 +131,10 @@ for (const [code, wording, url] of [
  ["DSX", "late September and early October", "https://arxiv.org/html/2208.03521v1"],
  ["ARI", "on or near June 8th", "https://www.weather.gov/fsd/meteor"],
  ["CAP", "late July", "https://nightsky.jpl.nasa.gov/events/12408/"],
+ ["DRA", "October", "https://science.nasa.gov/image-article/apod-2011-october-19-draconid-meteors-over-spain/"],
+ ["NTA", "middle and late November", "https://arxiv.org/html/2202.05141v1"],
+ ["STA", "October and early November", "https://arxiv.org/html/2202.05141v1"],
+ ["HYD", "December", "https://science.nasa.gov/image-article/apod-2023-september-9-comet-nishimura-grows/"],
 ]) test(`${code} source closure retains annual precision and excludes local visibility inference`, async () => {
  const result = await query();
  const row = result.meteorCalendarGuidance?.entries.find(entry => String(entry.code) === code);
