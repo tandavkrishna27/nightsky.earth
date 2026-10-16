@@ -109,3 +109,5 @@ import './providers/climate/lineage-radix.test';
 import './providers/climate/lineage-publication.test';
 import './places/sourceAdmission.test';
 import './places/naturalEarth.test';
+
+import './places/geographicSweep.test';

@@ -63,3 +63,20 @@ test('mutation while pending completion is written leaves no published marker',a
 test('production provenance replaces caller supplied edition and source claims',async()=>{const {naturalEarthRegion}=await import('../../scripts/osm/natural-earth-policy');const result=naturalEarthRegion(region('country',0) as any);assert.equal(result.regionId,'region:v1:country');assert.equal(result.sources[0].name,'Natural Earth');assert.equal(result.sources[0].vintage,'5.1.1');assert.equal(result.boundaryRevision,'natural-earth-v5.1.1-9380cca83db5f9aef52d5e762765100745f84b27');});
 
 test('provider CRS annotations are never silently discarded',async()=>{for(const feature of [false,true]){const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));(feature?raw.features[0]:raw).crs={type:'name',properties:{name:'EPSG:3857'}};const b=Buffer.from(JSON.stringify(raw));await writeFile(path,b);Object.assign(layer.input,{bytes:b.length,sha256:createHash('sha256').update(b).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${b.length}\0`).update(b).digest('hex')});await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out),/CRS/i);await assert.rejects(access(join(f.out,'complete.json')));}});
+
+test('explicit CRS84 and consecutive duplicate policy retain pins and audit exact transformations',async()=>{
+ const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));
+ raw.crs={type:'name',properties:{name:'urn:ogc:def:crs:OGC:1.3:CRS84'}};
+ raw.features[0].geometry.coordinates[0][0].splice(1,0,[0,0]);
+ const b=Buffer.from(JSON.stringify(raw));await writeFile(path,b);Object.assign(layer.input,{bytes:b.length,sha256:createHash('sha256').update(b).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${b.length}\0`).update(b).digest('hex')});
+ f.descriptor.crsPolicy='verified-crs84';f.descriptor.geometryPolicy='remove-consecutive-identical';await writeFile(f.input,JSON.stringify(f.descriptor));
+ await ingestSyntheticNaturalEarth(f.input,f.out);assert.deepEqual(await readFile(path),b);
+ const audit=JSON.parse(await readFile(join(f.out,'audit.json'),'utf8'));assert.equal(audit.transformations.length,1);assert.deepEqual(audit.transformations[0],{level:0,providerId:'country',polygon:0,ring:0,removedPositionIndices:[1]});assert.equal(audit.crs[0].declaration.properties.name,raw.crs.properties.name);
+});
+
+test('compact production descriptor derives provenance and refuses missing names and fake ISO sentinels',async()=>{
+ const {parseNaturalEarthDescriptor}=await import('../../scripts/osm/natural-earth-ingest');const f=await fixture();f.descriptor.schemaVersion=2;f.descriptor.profile='natural-earth-v5.1.1';
+ for(const layer of f.descriptor.layers)for(const id of Object.keys(layer.mapping)){delete layer.mapping[id].sources;delete layer.mapping[id].boundaryRevision;}
+ const parsed=parseNaturalEarthDescriptor(f.descriptor);assert.equal(parsed.layers[0].mapping.country.sources[0].name,'Natural Earth');assert.equal(parsed.layers[0].mapping.country.regionId,'region:v1:country');
+ for(const change of [{name:''},{countryCode:'-99'}]){const bad=structuredClone(f.descriptor);Object.assign(bad.layers[0].mapping.country,change);assert.throws(()=>parseNaturalEarthDescriptor(bad));}
+});

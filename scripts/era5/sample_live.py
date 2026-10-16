@@ -107,12 +107,12 @@ class Adapter:
         if type(size) is not int or not 0 < size <= core.RAW_LIMIT:
             raise ValueError('Result size rejected')
         self.asset_size = size
-        return core.asset_url(urljoin(result_url, value['href']), ASSET_HOSTS)
+        return core.asset_url(urljoin(result_url, value['href']), self.asset_hosts)
 
     def open_asset(self, url, timeout, authenticated=False, redirects=False):
         if authenticated or redirects:
             raise ValueError('Asset policy rejected')
-        core.asset_url(url, ASSET_HOSTS)
+        core.asset_url(url, self.asset_hosts)
         try:
             response = self.download.get(url, timeout=(min(5, timeout), timeout),
                                          stream=True, allow_redirects=False)

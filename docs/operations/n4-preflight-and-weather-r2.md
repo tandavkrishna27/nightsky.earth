@@ -1,5 +1,7 @@
 # N4 retained geography preflight and weather sample retry
 
+Follow-up: [preparation and existing-result retrieval](n4-preparation-and-result-retrieval.md) records the subsequently authorized asset download and actual format inspection. This document preserves the earlier checkpoint.
+
 16 October 2026. Owner authorized offline geography checks and one fresh bounded ERA5 sample, reusing the previously authorized private configuration setup. No deployment or runtime data selection occurred. Earlier failed/uncertain attempts are preserved.
 
 ## Geography: bounded offline inventory
