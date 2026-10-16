@@ -1,0 +1,1608 @@
+ObservedAt: 2026-10-16T20:06:23.378Z
+Browser tab: 2, Title: "ERA5 | Arraylake Marketplace", URL: "https://app.earthmover.io/marketplace/6a19bcfe9aa6e97720a2fad2?tab=dataset&path=single%2Ftemporal&use_data=1&access_method=direct".
+0 AXWebArea ERA5 | Arraylake Marketplace, URL: app.earthmover.io/marketplace/6a19bcfe9aa6e97720a2fad2?tab=dataset&path=single%2Ftemporal&use_data=1&access_method=direct
+	1 container
+		57 text ERA5
+		2 container mantine-d4zsjbbi9
+			3 container
+				4 link Description: Home, Value: app.earthmover.io/
+				5 link Description: Marketplace, Value: app.earthmover.io/marketplace
+				6 text /
+				7 link Description: ERA5, Value: app.earthmover.io/marketplace/6a19bcfe9aa6e97720a2fad2
+				8 link Description: Log In, Value: app.earthmover.io/auth/login
+			9 container
+				17 link Description: Earthmover Datasets Earthmover Datasets, Value: app.earthmover.io/marketplace/providers/earthmover-public
+				18 image
+				19 text ICECHUNK
+				20 heading ERA5, Value: 1
+					21 text ERA5
+				22 text ECMWF ERA5 hourly single and pressure levels starting 1940-01-01, updated every three months.
+				23 button Data Access
+				24 container listing-tabs
+					25 tab group
+						26 tab (selectable, settable, boolean) README, Value: 0, ID: listing-tabs-tab-readme
+						27 tab (selected, settable, boolean) Dataset, Value: 1, ID: listing-tabs-tab-dataset
+						28 tab (selectable, settable, boolean) License, Value: 0, ID: listing-tabs-tab-license
+					29 container Description: Dataset, ID: listing-tabs-panel-dataset
+						58 button root
+						59 text /
+						60 button single
+						61 text /
+						62 button temporal
+						63 button status
+							64 image
+							65 text status
+						66 container mantine-xvbyxivxi
+							67 button (expanded) Description, ID: mantine-xvbyxivxi-control-description, Secondary Actions: Collapse
+								68 image
+								69 text Description
+								70 image
+							71 container Description, ID: mantine-xvbyxivxi-panel-description
+								72 text ERA5 is the fifth generation ECMWF atmospheric reanalysis of the global climate covering the period from January 1940 to the present. ERA5 provides hourly estimates of a large number of atmospheric, land and oceanic climate variables at 0.25° resolution. Data are served here as an Analysis-Ready Cloud-Optimized (ARCO) Zarr store, updated daily. Recent timesteps carry expver=0005 (ERA5T, near-realtime, ~5 days behind real time) and are overwritten with expver=0001 (final ERA5) approximately two months after the reference month.
+						73 container mantine-evdefhgxq
+							74 button (expanded) Dataset CF-1.7 GEOZARR:PROJ Logical Size: 123 TB, ID: mantine-evdefhgxq-control-dataset, Secondary Actions: Collapse
+								75 image
+								76 text Dataset
+								77 container
+									78 link Description: CF-1.7, Value: cfconventions.org/Data/cf-conventions/cf-conventions-1.10/cf-conventions.html
+									79 link Description: GEOZARR:PROJ, Value: github.com/zarr-conventions/proj/blob/v0.1/README.md
+								80 container
+									81 text Logical Size:  123 TB
+								82 image
+							83 container Dataset CF-1.7 GEOZARR:PROJ Logical Size: 123 TB, ID: mantine-evdefhgxq-panel-dataset
+								84 container
+									85 text DIMENSIONS ( 3 )
+								86 text latitude
+								87 container
+									88 text :  721
+								89 text longitude
+								90 container
+									91 text :  1440
+								92 text valid_time
+								93 container
+									94 text :  758232
+								95 container
+									96 text COORDINATES  ( 7 )
+								97 table
+									98 row
+										99 cell
+											100 container
+												101 text Name
+												102 button Sorted by Name ascending
+													103 image
+										104 cell
+											105 text Dimensions
+										106 cell
+											107 text Dtype
+										108 cell
+											109 text Shape
+										110 cell
+											111 text Chunks
+										112 cell
+											113 text Size
+										114 cell
+											115 text Attrs
+										116 cell
+											117 text Encoding
+										118 cell
+											119 text Preview
+									120 container
+										121 row
+											122 cell
+												123 text latitude
+											124 cell
+												125 text latitude
+											126 cell
+												127 text float64
+											128 cell
+												129 text 721
+											130 cell
+												131 text 721
+											132 cell
+												133 text 5.77 kB
+											134 cell
+												135 button View attributes
+													136 image
+											137 cell
+												138 button View Zarr encoding
+													139 image
+											140 cell
+												141 text 90 89.8 89.5 ... -89.5 -89.8 -90
+										142 row
+											143 cell
+												144 text longitude
+											145 cell
+												146 text longitude
+											147 cell
+												148 text float64
+											149 cell
+												150 text 1440
+											151 cell
+												152 text 1440
+											153 cell
+												154 text 11.5 kB
+											155 cell
+												156 button View attributes
+													157 image
+											158 cell
+												159 button View Zarr encoding
+													160 image
+											161 cell
+												162 text 0 0.3 0.5 ... 359.3 359.5 359.8
+										163 row
+											164 cell
+												165 text lsm
+											166 cell
+												167 text latitude longitude
+											168 cell
+												169 text float32
+											170 cell
+												171 text 721
+												172 text ,
+												173 text 1440
+											174 cell
+												175 text 721
+												176 text ,
+												177 text 1440
+											178 cell
+												179 text 4.15 MB
+											180 cell
+												181 button View attributes
+													182 image
+											183 cell
+												184 button View Zarr encoding
+													185 image
+											186 cell
+												187 text --
+										188 row
+											189 cell
+												190 text sdor
+											191 cell
+												192 text latitude longitude
+											193 cell
+												194 text float32
+											195 cell
+												196 text 721
+												197 text ,
+												198 text 1440
+											199 cell
+												200 text 721
+												201 text ,
+												202 text 1440
+											203 cell
+												204 text 4.15 MB
+											205 cell
+												206 button View attributes
+													207 image
+											208 cell
+												209 button View Zarr encoding
+													210 image
+											211 cell
+												212 text --
+										213 row
+											214 cell
+												215 text slor
+											216 cell
+												217 text latitude longitude
+											218 cell
+												219 text float32
+											220 cell
+												221 text 721
+												222 text ,
+												223 text 1440
+											224 cell
+												225 text 721
+												226 text ,
+												227 text 1440
+											228 cell
+												229 text 4.15 MB
+											230 cell
+												231 button View attributes
+													232 image
+											233 cell
+												234 button View Zarr encoding
+													235 image
+											236 cell
+												237 text --
+										238 row
+											239 cell
+												240 text valid_time
+											241 cell
+												242 text valid_time
+											243 cell
+												244 text int64
+											245 cell
+												246 text 758232
+											247 cell
+												248 text 878400
+											249 cell
+												250 text 6.07 MB
+											251 cell
+												252 button View attributes
+													253 image
+											254 cell
+												255 button View Zarr encoding
+													256 image
+											257 cell
+												258 text 1940-01-01 1940-01-01T01:00:00 1940-01-01T02:00:00 ... 2026-06-30T21:00:00 2026-06-30T22:00:00 2026-06-30T23:00:00
+										259 row
+											260 cell
+												261 text z_sfc
+											262 cell
+												263 text latitude longitude
+											264 cell
+												265 text float32
+											266 cell
+												267 text 721
+												268 text ,
+												269 text 1440
+											270 cell
+												271 text 721
+												272 text ,
+												273 text 1440
+											274 cell
+												275 text 4.15 MB
+											276 cell
+												277 button View attributes
+													278 image
+											279 cell
+												280 button View Zarr encoding
+													281 image
+											282 cell
+												283 text --
+								284 container
+									285 text DATA VARIABLES  ( 39 )
+								286 table
+									287 row
+										288 cell
+											289 container
+												290 text Name
+												291 button Sorted by Name ascending
+													292 image
+										293 cell
+											294 text Dimensions
+										295 cell
+											296 text Dtype
+										297 cell
+											298 text Shape
+										299 cell
+											300 text Chunks
+										301 cell
+											302 text Size
+										303 cell
+											304 text Attrs
+										305 cell
+											306 text Encoding
+									307 container
+										308 row
+											309 cell
+												310 text blh
+											311 cell
+												312 text valid_time latitude longitude
+											313 cell
+												314 text float32
+											315 cell
+												316 text 758232
+												317 text ,
+												318 text 721
+												319 text ,
+												320 text 1440
+											321 cell
+												322 text 8736
+												323 text ,
+												324 text 12
+												325 text ,
+												326 text 12
+											327 cell
+												328 text 3.15 TB
+											329 cell
+												330 button View attributes
+													331 image
+											332 cell
+												333 button View Zarr encoding
+													334 image
+										335 row
+											336 cell
+												337 text cape
+											338 cell
+												339 text valid_time latitude longitude
+											340 cell
+												341 text float32
+											342 cell
+												343 text 758232
+												344 text ,
+												345 text 721
+												346 text ,
+												347 text 1440
+											348 cell
+												349 text 8736
+												350 text ,
+												351 text 12
+												352 text ,
+												353 text 12
+											354 cell
+												355 text 3.15 TB
+											356 cell
+												357 button View attributes
+													358 image
+											359 cell
+												360 button View Zarr encoding
+													361 image
+										362 row
+											363 cell
+												364 text cp
+											365 cell
+												366 text valid_time latitude longitude
+											367 cell
+												368 text float32
+											369 cell
+												370 text 758232
+												371 text ,
+												372 text 721
+												373 text ,
+												374 text 1440
+											375 cell
+												376 text 8736
+												377 text ,
+												378 text 12
+												379 text ,
+												380 text 12
+											381 cell
+												382 text 3.15 TB
+											383 cell
+												384 button View attributes
+													385 image
+											386 cell
+												387 button View Zarr encoding
+													388 image
+										389 row
+											390 cell
+												391 text d2m
+											392 cell
+												393 text valid_time latitude longitude
+											394 cell
+												395 text float32
+											396 cell
+												397 text 758232
+												398 text ,
+												399 text 721
+												400 text ,
+												401 text 1440
+											402 cell
+												403 text 8736
+												404 text ,
+												405 text 12
+												406 text ,
+												407 text 12
+											408 cell
+												409 text 3.15 TB
+											410 cell
+												411 button View attributes
+													412 image
+											413 cell
+												414 button View Zarr encoding
+													415 image
+										416 row
+											417 cell
+												418 text fdir
+											419 cell
+												420 text valid_time latitude longitude
+											421 cell
+												422 text float32
+											423 cell
+												424 text 758232
+												425 text ,
+												426 text 721
+												427 text ,
+												428 text 1440
+											429 cell
+												430 text 8736
+												431 text ,
+												432 text 12
+												433 text ,
+												434 text 12
+											435 cell
+												436 text 3.15 TB
+											437 cell
+												438 button View attributes
+													439 image
+											440 cell
+												441 button View Zarr encoding
+													442 image
+										443 row
+											444 cell
+												445 text fg10
+											446 cell
+												447 text valid_time latitude longitude
+											448 cell
+												449 text float32
+											450 cell
+												451 text 758232
+												452 text ,
+												453 text 721
+												454 text ,
+												455 text 1440
+											456 cell
+												457 text 8736
+												458 text ,
+												459 text 12
+												460 text ,
+												461 text 12
+											462 cell
+												463 text 3.15 TB
+											464 cell
+												465 button View attributes
+													466 image
+											467 cell
+												468 button View Zarr encoding
+													469 image
+										470 row
+											471 cell
+												472 text fsr
+											473 cell
+												474 text valid_time latitude longitude
+											475 cell
+												476 text float32
+											477 cell
+												478 text 758232
+												479 text ,
+												480 text 721
+												481 text ,
+												482 text 1440
+											483 cell
+												484 text 8736
+												485 text ,
+												486 text 12
+												487 text ,
+												488 text 12
+											489 cell
+												490 text 3.15 TB
+											491 cell
+												492 button View attributes
+													493 image
+											494 cell
+												495 button View Zarr encoding
+													496 image
+										497 row
+											498 cell
+												499 text hcc
+											500 cell
+												501 text valid_time latitude longitude
+											502 cell
+												503 text float32
+											504 cell
+												505 text 758232
+												506 text ,
+												507 text 721
+												508 text ,
+												509 text 1440
+											510 cell
+												511 text 8736
+												512 text ,
+												513 text 12
+												514 text ,
+												515 text 12
+											516 cell
+												517 text 3.15 TB
+											518 cell
+												519 button View attributes
+													520 image
+											521 cell
+												522 button View Zarr encoding
+													523 image
+										524 row
+											525 cell
+												526 text ie
+											527 cell
+												528 text valid_time latitude longitude
+											529 cell
+												530 text float32
+											531 cell
+												532 text 758232
+												533 text ,
+												534 text 721
+												535 text ,
+												536 text 1440
+											537 cell
+												538 text 8736
+												539 text ,
+												540 text 12
+												541 text ,
+												542 text 12
+											543 cell
+												544 text 3.15 TB
+											545 cell
+												546 button View attributes
+													547 image
+											548 cell
+												549 button View Zarr encoding
+													550 image
+										551 row
+											552 cell
+												553 text lcc
+											554 cell
+												555 text valid_time latitude longitude
+											556 cell
+												557 text float32
+											558 cell
+												559 text 758232
+												560 text ,
+												561 text 721
+												562 text ,
+												563 text 1440
+											564 cell
+												565 text 8736
+												566 text ,
+												567 text 12
+												568 text ,
+												569 text 12
+											570 cell
+												571 text 3.15 TB
+											572 cell
+												573 button View attributes
+													574 image
+											575 cell
+												576 button View Zarr encoding
+													577 image
+										578 row
+											579 cell
+												580 text lsp
+											581 cell
+												582 text valid_time latitude longitude
+											583 cell
+												584 text float32
+											585 cell
+												586 text 758232
+												587 text ,
+												588 text 721
+												589 text ,
+												590 text 1440
+											591 cell
+												592 text 8736
+												593 text ,
+												594 text 12
+												595 text ,
+												596 text 12
+											597 cell
+												598 text 3.15 TB
+											599 cell
+												600 button View attributes
+													601 image
+											602 cell
+												603 button View Zarr encoding
+													604 image
+										605 row
+											606 cell
+												607 text mcc
+											608 cell
+												609 text valid_time latitude longitude
+											610 cell
+												611 text float32
+											612 cell
+												613 text 758232
+												614 text ,
+												615 text 721
+												616 text ,
+												617 text 1440
+											618 cell
+												619 text 8736
+												620 text ,
+												621 text 12
+												622 text ,
+												623 text 12
+											624 cell
+												625 text 3.15 TB
+											626 cell
+												627 button View attributes
+													628 image
+											629 cell
+												630 button View Zarr encoding
+													631 image
+										632 row
+											633 cell
+												634 text msl
+											635 cell
+												636 text valid_time latitude longitude
+											637 cell
+												638 text float32
+											639 cell
+												640 text 758232
+												641 text ,
+												642 text 721
+												643 text ,
+												644 text 1440
+											645 cell
+												646 text 8736
+												647 text ,
+												648 text 12
+												649 text ,
+												650 text 12
+											651 cell
+												652 text 3.15 TB
+											653 cell
+												654 button View attributes
+													655 image
+											656 cell
+												657 button View Zarr encoding
+													658 image
+										659 row
+											660 cell
+												661 text sd
+											662 cell
+												663 text valid_time latitude longitude
+											664 cell
+												665 text float32
+											666 cell
+												667 text 758232
+												668 text ,
+												669 text 721
+												670 text ,
+												671 text 1440
+											672 cell
+												673 text 8736
+												674 text ,
+												675 text 12
+												676 text ,
+												677 text 12
+											678 cell
+												679 text 3.15 TB
+											680 cell
+												681 button View attributes
+													682 image
+											683 cell
+												684 button View Zarr encoding
+													685 image
+										686 row
+											687 cell
+												688 text sf
+											689 cell
+												690 text valid_time latitude longitude
+											691 cell
+												692 text float32
+											693 cell
+												694 text 758232
+												695 text ,
+												696 text 721
+												697 text ,
+												698 text 1440
+											699 cell
+												700 text 8736
+												701 text ,
+												702 text 12
+												703 text ,
+												704 text 12
+											705 cell
+												706 text 3.15 TB
+											707 cell
+												708 button View attributes
+													709 image
+											710 cell
+												711 button View Zarr encoding
+													712 image
+										713 row
+											714 cell
+												715 text skt
+											716 cell
+												717 text valid_time latitude longitude
+											718 cell
+												719 text float32
+											720 cell
+												721 text 758232
+												722 text ,
+												723 text 721
+												724 text ,
+												725 text 1440
+											726 cell
+												727 text 8736
+												728 text ,
+												729 text 12
+												730 text ,
+												731 text 12
+											732 cell
+												733 text 3.15 TB
+											734 cell
+												735 button View attributes
+													736 image
+											737 cell
+												738 button View Zarr encoding
+													739 image
+										740 row
+											741 cell
+												742 text slhf
+											743 cell
+												744 text valid_time latitude longitude
+											745 cell
+												746 text float32
+											747 cell
+												748 text 758232
+												749 text ,
+												750 text 721
+												751 text ,
+												752 text 1440
+											753 cell
+												754 text 8736
+												755 text ,
+												756 text 12
+												757 text ,
+												758 text 12
+											759 cell
+												760 text 3.15 TB
+											761 cell
+												762 button View attributes
+													763 image
+											764 cell
+												765 button View Zarr encoding
+													766 image
+										767 row
+											768 cell
+												769 text sp
+											770 cell
+												771 text valid_time latitude longitude
+											772 cell
+												773 text float32
+											774 cell
+												775 text 758232
+												776 text ,
+												777 text 721
+												778 text ,
+												779 text 1440
+											780 cell
+												781 text 8736
+												782 text ,
+												783 text 12
+												784 text ,
+												785 text 12
+											786 cell
+												787 text 3.15 TB
+											788 cell
+												789 button View attributes
+													790 image
+											791 cell
+												792 button View Zarr encoding
+													793 image
+										794 row
+											795 cell
+												796 text ssr
+											797 cell
+												798 text valid_time latitude longitude
+											799 cell
+												800 text float32
+											801 cell
+												802 text 758232
+												803 text ,
+												804 text 721
+												805 text ,
+												806 text 1440
+											807 cell
+												808 text 8736
+												809 text ,
+												810 text 12
+												811 text ,
+												812 text 12
+											813 cell
+												814 text 3.15 TB
+											815 cell
+												816 button View attributes
+													817 image
+											818 cell
+												819 button View Zarr encoding
+													820 image
+										821 row
+											822 cell
+												823 text ssrd
+											824 cell
+												825 text valid_time latitude longitude
+											826 cell
+												827 text float32
+											828 cell
+												829 text 758232
+												830 text ,
+												831 text 721
+												832 text ,
+												833 text 1440
+											834 cell
+												835 text 8736
+												836 text ,
+												837 text 12
+												838 text ,
+												839 text 12
+											840 cell
+												841 text 3.15 TB
+											842 cell
+												843 button View attributes
+													844 image
+											845 cell
+												846 button View Zarr encoding
+													847 image
+										848 row
+											849 cell
+												850 text sst
+											851 cell
+												852 text valid_time latitude longitude
+											853 cell
+												854 text float32
+											855 cell
+												856 text 758232
+												857 text ,
+												858 text 721
+												859 text ,
+												860 text 1440
+											861 cell
+												862 text 8736
+												863 text ,
+												864 text 12
+												865 text ,
+												866 text 12
+											867 cell
+												868 text 3.15 TB
+											869 cell
+												870 button View attributes
+													871 image
+											872 cell
+												873 button View Zarr encoding
+													874 image
+										875 row
+											876 cell
+												877 text stl1
+											878 cell
+												879 text valid_time latitude longitude
+											880 cell
+												881 text float32
+											882 cell
+												883 text 758232
+												884 text ,
+												885 text 721
+												886 text ,
+												887 text 1440
+											888 cell
+												889 text 8736
+												890 text ,
+												891 text 12
+												892 text ,
+												893 text 12
+											894 cell
+												895 text 3.15 TB
+											896 cell
+												897 button View attributes
+													898 image
+											899 cell
+												900 button View Zarr encoding
+													901 image
+										902 row
+											903 cell
+												904 text stl2
+											905 cell
+												906 text valid_time latitude longitude
+											907 cell
+												908 text float32
+											909 cell
+												910 text 758232
+												911 text ,
+												912 text 721
+												913 text ,
+												914 text 1440
+											915 cell
+												916 text 8736
+												917 text ,
+												918 text 12
+												919 text ,
+												920 text 12
+											921 cell
+												922 text 3.15 TB
+											923 cell
+												924 button View attributes
+													925 image
+											926 cell
+												927 button View Zarr encoding
+													928 image
+										929 row
+											930 cell
+												931 text stl3
+											932 cell
+												933 text valid_time latitude longitude
+											934 cell
+												935 text float32
+											936 cell
+												937 text 758232
+												938 text ,
+												939 text 721
+												940 text ,
+												941 text 1440
+											942 cell
+												943 text 8736
+												944 text ,
+												945 text 12
+												946 text ,
+												947 text 12
+											948 cell
+												949 text 3.15 TB
+											950 cell
+												951 button View attributes
+													952 image
+											953 cell
+												954 button View Zarr encoding
+													955 image
+										956 row
+											957 cell
+												958 text stl4
+											959 cell
+												960 text valid_time latitude longitude
+											961 cell
+												962 text float32
+											963 cell
+												964 text 758232
+												965 text ,
+												966 text 721
+												967 text ,
+												968 text 1440
+											969 cell
+												970 text 8736
+												971 text ,
+												972 text 12
+												973 text ,
+												974 text 12
+											975 cell
+												976 text 3.15 TB
+											977 cell
+												978 button View attributes
+													979 image
+											980 cell
+												981 button View Zarr encoding
+													982 image
+										983 row
+											984 cell
+												985 text swvl1
+											986 cell
+												987 text valid_time latitude longitude
+											988 cell
+												989 text float32
+											990 cell
+												991 text 758232
+												992 text ,
+												993 text 721
+												994 text ,
+												995 text 1440
+											996 cell
+												997 text 8736
+												998 text ,
+												999 text 12
+												1000 text ,
+												1001 text 12
+											1002 cell
+												1003 text 3.15 TB
+											1004 cell
+												1005 button View attributes
+													1006 image
+											1007 cell
+												1008 button View Zarr encoding
+													1009 image
+										1010 row
+											1011 cell
+												1012 text swvl2
+											1013 cell
+												1014 text valid_time latitude longitude
+											1015 cell
+												1016 text float32
+											1017 cell
+												1018 text 758232
+												1019 text ,
+												1020 text 721
+												1021 text ,
+												1022 text 1440
+											1023 cell
+												1024 text 8736
+												1025 text ,
+												1026 text 12
+												1027 text ,
+												1028 text 12
+											1029 cell
+												1030 text 3.15 TB
+											1031 cell
+												1032 button View attributes
+													1033 image
+											1034 cell
+												1035 button View Zarr encoding
+													1036 image
+										1037 row
+											1038 cell
+												1039 text t2m
+											1040 cell
+												1041 text valid_time latitude longitude
+											1042 cell
+												1043 text float32
+											1044 cell
+												1045 text 758232
+												1046 text ,
+												1047 text 721
+												1048 text ,
+												1049 text 1440
+											1050 cell
+												1051 text 8736
+												1052 text ,
+												1053 text 12
+												1054 text ,
+												1055 text 12
+											1056 cell
+												1057 text 3.15 TB
+											1058 cell
+												1059 button View attributes
+													1060 image
+											1061 cell
+												1062 button View Zarr encoding
+													1063 image
+										1064 row
+											1065 cell
+												1066 text tcc
+											1067 cell
+												1068 text valid_time latitude longitude
+											1069 cell
+												1070 text float32
+											1071 cell
+												1072 text 758232
+												1073 text ,
+												1074 text 721
+												1075 text ,
+												1076 text 1440
+											1077 cell
+												1078 text 8736
+												1079 text ,
+												1080 text 12
+												1081 text ,
+												1082 text 12
+											1083 cell
+												1084 text 3.15 TB
+											1085 cell
+												1086 button View attributes
+													1087 image
+											1088 cell
+												1089 button View Zarr encoding
+													1090 image
+										1091 row
+											1092 cell
+												1093 text tcw
+											1094 cell
+												1095 text valid_time latitude longitude
+											1096 cell
+												1097 text float32
+											1098 cell
+												1099 text 758232
+												1100 text ,
+												1101 text 721
+												1102 text ,
+												1103 text 1440
+											1104 cell
+												1105 text 8736
+												1106 text ,
+												1107 text 12
+												1108 text ,
+												1109 text 12
+											1110 cell
+												1111 text 3.15 TB
+											1112 cell
+												1113 button View attributes
+													1114 image
+											1115 cell
+												1116 button View Zarr encoding
+													1117 image
+										1118 row
+											1119 cell
+												1120 text tcwv
+											1121 cell
+												1122 text valid_time latitude longitude
+											1123 cell
+												1124 text float32
+											1125 cell
+												1126 text 758232
+												1127 text ,
+												1128 text 721
+												1129 text ,
+												1130 text 1440
+											1131 cell
+												1132 text 8736
+												1133 text ,
+												1134 text 12
+												1135 text ,
+												1136 text 12
+											1137 cell
+												1138 text 3.15 TB
+											1139 cell
+												1140 button View attributes
+													1141 image
+											1142 cell
+												1143 button View Zarr encoding
+													1144 image
+										1145 row
+											1146 cell
+												1147 text tisr
+											1148 cell
+												1149 text valid_time latitude longitude
+											1150 cell
+												1151 text float32
+											1152 cell
+												1153 text 758232
+												1154 text ,
+												1155 text 721
+												1156 text ,
+												1157 text 1440
+											1158 cell
+												1159 text 8736
+												1160 text ,
+												1161 text 12
+												1162 text ,
+												1163 text 12
+											1164 cell
+												1165 text 3.15 TB
+											1166 cell
+												1167 button View attributes
+													1168 image
+											1169 cell
+												1170 button View Zarr encoding
+													1171 image
+										1172 row
+											1173 cell
+												1174 text tp
+											1175 cell
+												1176 text valid_time latitude longitude
+											1177 cell
+												1178 text float32
+											1179 cell
+												1180 text 758232
+												1181 text ,
+												1182 text 721
+												1183 text ,
+												1184 text 1440
+											1185 cell
+												1186 text 8736
+												1187 text ,
+												1188 text 12
+												1189 text ,
+												1190 text 12
+											1191 cell
+												1192 text 3.15 TB
+											1193 cell
+												1194 button View attributes
+													1195 image
+											1196 cell
+												1197 button View Zarr encoding
+													1198 image
+										1199 row
+											1200 cell
+												1201 text tsr
+											1202 cell
+												1203 text valid_time latitude longitude
+											1204 cell
+												1205 text float32
+											1206 cell
+												1207 text 758232
+												1208 text ,
+												1209 text 721
+												1210 text ,
+												1211 text 1440
+											1212 cell
+												1213 text 8736
+												1214 text ,
+												1215 text 12
+												1216 text ,
+												1217 text 12
+											1218 cell
+												1219 text 3.15 TB
+											1220 cell
+												1221 button View attributes
+													1222 image
+											1223 cell
+												1224 button View Zarr encoding
+													1225 image
+										1226 row
+											1227 cell
+												1228 text u10
+											1229 cell
+												1230 text valid_time latitude longitude
+											1231 cell
+												1232 text float32
+											1233 cell
+												1234 text 758232
+												1235 text ,
+												1236 text 721
+												1237 text ,
+												1238 text 1440
+											1239 cell
+												1240 text 8736
+												1241 text ,
+												1242 text 12
+												1243 text ,
+												1244 text 12
+											1245 cell
+												1246 text 3.15 TB
+											1247 cell
+												1248 button View attributes
+													1249 image
+											1250 cell
+												1251 button View Zarr encoding
+													1252 image
+										1253 row
+											1254 cell
+												1255 text u100
+											1256 cell
+												1257 text valid_time latitude longitude
+											1258 cell
+												1259 text float32
+											1260 cell
+												1261 text 758232
+												1262 text ,
+												1263 text 721
+												1264 text ,
+												1265 text 1440
+											1266 cell
+												1267 text 8736
+												1268 text ,
+												1269 text 12
+												1270 text ,
+												1271 text 12
+											1272 cell
+												1273 text 3.15 TB
+											1274 cell
+												1275 button View attributes
+													1276 image
+											1277 cell
+												1278 button View Zarr encoding
+													1279 image
+										1280 row
+											1281 cell
+												1282 text v10
+											1283 cell
+												1284 text valid_time latitude longitude
+											1285 cell
+												1286 text float32
+											1287 cell
+												1288 text 758232
+												1289 text ,
+												1290 text 721
+												1291 text ,
+												1292 text 1440
+											1293 cell
+												1294 text 8736
+												1295 text ,
+												1296 text 12
+												1297 text ,
+												1298 text 12
+											1299 cell
+												1300 text 3.15 TB
+											1301 cell
+												1302 button View attributes
+													1303 image
+											1304 cell
+												1305 button View Zarr encoding
+													1306 image
+										1307 row
+											1308 cell
+												1309 text v100
+											1310 cell
+												1311 text valid_time latitude longitude
+											1312 cell
+												1313 text float32
+											1314 cell
+												1315 text 758232
+												1316 text ,
+												1317 text 721
+												1318 text ,
+												1319 text 1440
+											1320 cell
+												1321 text 8736
+												1322 text ,
+												1323 text 12
+												1324 text ,
+												1325 text 12
+											1326 cell
+												1327 text 3.15 TB
+											1328 cell
+												1329 button View attributes
+													1330 image
+											1331 cell
+												1332 button View Zarr encoding
+													1333 image
+										1334 row
+											1335 cell
+												1336 text zust
+											1337 cell
+												1338 text valid_time latitude longitude
+											1339 cell
+												1340 text float32
+											1341 cell
+												1342 text 758232
+												1343 text ,
+												1344 text 721
+												1345 text ,
+												1346 text 1440
+											1347 cell
+												1348 text 8736
+												1349 text ,
+												1350 text 12
+												1351 text ,
+												1352 text 12
+											1353 cell
+												1354 text 3.15 TB
+											1355 cell
+												1356 button View attributes
+													1357 image
+											1358 cell
+												1359 button View Zarr encoding
+													1360 image
+								1361 container
+									1362 text ATTRIBUTES ( 46 )
+								1363 table
+									1364 row
+										1365 cell
+											1366 text Key
+										1367 cell
+											1368 text Value
+									1369 container
+										1370 row
+											1371 cell
+												1372 text Conventions
+											1373 cell
+												1374 text CF-1.7
+										1375 row
+											1376 cell
+												1377 text title
+											1378 cell
+												1379 text ERA5 Hourly Global Reanalysis - chunked for temporal analysis
+										1380 row
+											1381 cell
+												1382 text summary
+											1383 cell
+												1384 text ERA5 is the fifth generation ECMWF atmospheric reanalysis of the global climate covering the period from January 1940 to the present. ERA5 provides hourly estimates of a large number of atmospheric, land and oceanic climate variables at 0.25° resolution. Data are served here as an Analysis-Ready Cloud-Optimized (ARCO) Zarr store, updated daily. Recent timesteps carry expver=0005 (ERA5T, near-realtime, ~5 days behind real time) and are overwritten with expver=0001 (final ERA5) approximately two months after the reference month.
+										1385 row
+											1386 cell
+												1387 text keywords
+											1388 cell
+												1389 text ERA5, reanalysis, atmosphere, climate, ECMWF, Copernicus, single
+										1390 row
+											1391 cell
+												1392 text keywords_vocabulary
+											1393 cell
+												1394 text GCMD Science Keywords
+										1395 row
+											1396 cell
+												1397 text id
+											1398 cell
+												1399 text era5
+										1400 row
+											1401 cell
+												1402 text naming_authority
+											1403 cell
+												1404 text earthmover.io
+										1405 row
+											1406 cell
+												1407 text source
+											1408 cell
+												1409 text ECMWF ERA5 reanalysis downloaded via Copernicus Climate Data Store (CDS) dataset reanalysis-era5-single-levels
+										1410 row
+											1411 cell
+												1412 text processing_level
+											1413 cell
+												1414 text L4
+										1415 row
+											1416 cell
+												1417 text institution
+											1418 cell
+												1419 text European Centre for Medium-Range Weather Forecasts
+										1420 row
+											1421 cell
+												1422 text project
+											1423 cell
+												1424 text ERA5 Reanalysis / Earthmover Marketplace
+										1425 row
+											1426 cell
+												1427 text license
+											1428 cell
+												1429 link Description: https://creativecommons.org/licenses/by/4.0/, Value: creativecommons.org/licenses/by/4.0/
+										1430 row
+											1431 cell
+												1432 text acknowledgement
+											1433 cell
+												1434 text Generated using Copernicus Climate Change Service information (ERA5). Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.
+										1435 row
+											1436 cell
+												1437 text standard_name_vocabulary
+											1438 cell
+												1439 text CF Standard Name Table v85
+										1440 row
+											1441 cell
+												1442 text creator_name
+											1443 cell
+												1444 text ECMWF
+										1445 row
+											1446 cell
+												1447 text creator_url
+											1448 cell
+												1449 link Description: https://www.ecmwf.int, Value: ecmwf.int/
+										1450 row
+											1451 cell
+												1452 text creator_type
+											1453 cell
+												1454 text institution
+										1455 row
+											1456 cell
+												1457 text creator_institution
+											1458 cell
+												1459 text European Centre for Medium-Range Weather Forecasts
+										1460 row
+											1461 cell
+												1462 text publisher_name
+											1463 cell
+												1464 text Earthmover
+										1465 row
+											1466 cell
+												1467 text publisher_url
+											1468 cell
+												1469 link Description: https://earthmover.io, Value: earthmover.io/
+										1470 row
+											1471 cell
+												1472 text publisher_type
+											1473 cell
+												1474 text institution
+										1475 row
+											1476 cell
+												1477 text publisher_institution
+											1478 cell
+												1479 text Earthmover
+										1480 row
+											1481 cell
+												1482 text geospatial_lat_min
+											1483 cell
+												1484 text -90
+										1485 row
+											1486 cell
+												1487 text geospatial_lat_max
+											1488 cell
+												1489 text 90
+										1490 row
+											1491 cell
+												1492 text geospatial_lat_units
+											1493 cell
+												1494 text degrees_north
+										1495 row
+											1496 cell
+												1497 text geospatial_lat_resolution
+											1498 cell
+												1499 text 0.25 degree
+										1500 row
+											1501 cell
+												1502 text geospatial_lon_min
+											1503 cell
+												1504 text 0
+										1505 row
+											1506 cell
+												1507 text geospatial_lon_max
+											1508 cell
+												1509 text 359.75
+										1510 row
+											1511 cell
+												1512 text geospatial_lon_units
+											1513 cell
+												1514 text degrees_east
+										1515 row
+											1516 cell
+												1517 text geospatial_lon_resolution
+											1518 cell
+												1519 text 0.25 degree
+										1520 row
+											1521 cell
+												1522 text geospatial_bounds
+											1523 cell
+												1524 text POLYGON((0 -90, 359.75 -90, 359.75 90, 0 90, 0 -90))
+										1525 row
+											1526 cell
+												1527 text geospatial_bounds_crs
+											1528 cell
+												1529 text EPSG:4326
+										1530 row
+											1531 cell
+												1532 text time_coverage_start
+											1533 cell
+												1534 text 1940-01-01T00:00:00Z
+										1535 row
+											1536 cell
+												1537 text time_coverage_end
+											1538 cell
+												1539 text 2026-06-30T23:00Z
+										1540 row
+											1541 cell
+												1542 text time_coverage_resolution
+											1543 cell
+												1544 text PT1H
+										1545 row
+											1546 cell
+												1547 text references
+											1548 cell
+												1549 text Hersbach et al. (2020) https://doi.org/10.1002/qj.3803; https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation; https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+										1550 row
+											1551 cell
+												1552 text cdm_data_type
+											1553 cell
+												1554 text Grid
+										1555 row
+											1556 cell
+												1557 text date_created
+											1558 cell
+												1559 text 2026-05-15
+										1560 row
+											1561 cell
+												1562 text date_modified
+											1563 cell
+												1564 text 2026-10-12
+										1565 row
+											1566 cell
+												1567 text metadata_link
+											1568 cell
+												1569 link Description: https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels, Value: cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels
+										1570 row
+											1571 cell
+												1572 text proj:code
+											1573 cell
+												1574 text EPSG:4326
+										1575 row
+											1576 cell
+												1577 text proj:epsg
+											1578 cell
+												1579 text 4326
+										1580 row
+											1581 cell
+												1582 text GRIB_centre
+											1583 cell
+												1584 text ecmf
+										1585 row
+											1586 cell
+												1587 text GRIB_centreDescription
+											1588 cell
+												1589 text European Centre for Medium-Range Weather Forecasts
+										1590 row
+											1591 cell
+												1592 text GRIB_subCentre
+											1593 cell
+												1594 text 0
+										1595 row
+											1596 cell
+												1597 text history
+											1598 cell
+												1599 text 2026-08-31T08:23 GRIB to CDM+CF via cfgrib-0.9.15.1/ecCodes-2.48.0 with {"source": "tmpe6082dlv/data.grib", "filter_by_keys": {"stream": ["oper"], "stepType": ["instant"]}, "encode_cf": ["parameter", "time", "geography", "vertical"]}
+					39 container ERA5
+					40 heading Details, Value: 4
+						41 text Details
+					42 text Cloud
+					43 image
+					44 text Amazon S3
+					45 text Region
+					46 text us-east-1
+					47 heading About this provider, Value: 4
+						48 text About this provider
+					49 link Description: Earthmover Datasets Earthmover Datasets, Value: app.earthmover.io/marketplace/providers/earthmover-public
+					50 text Datasets managed and curated directly by Earthmover.
+					51 link Description: Contact, Value: mailto:sales@earthmover.io
+					52 link earthmover.io/
+					53 link Description: Github, Value: github.com/earth-mover
+					54 link Description: Linkedin, Value: linkedin.com/company/earthmover
+					55 link Description: @earthmover.io, Value: bsky.app/profile/earthmover.io
+					56 link Description: Slack, Value: join.slack.com/t/earthmover-community/shared_invite/zt-2cwje92ir-xU3CfdG8BI~4CJOJy~sceQ
+				10 text ©  2026 Earthmover PBC Powered by
+				11 link Description: Earthmover.io, Value: earthmover.io/
+				12 content list
+					13 link Description: Docs, Value: docs.earthmover.io/
+					14 link Description: About, Value: earthmover.io/about
+					15 link Description: Terms, Value: docs.earthmover.io/terms-of-service
+					16 link Description: GitHub, Value: github.com/earth-mover
+		1600 container mantine-76m9in1lg
+			1601 container
+				1602 button
+					1603 image
+				1604 container mantine-76m9in1lg-body
+					1605 heading Direct access, Value: 3
+						1606 text Direct access
+					1607 text Log in to authenticate the Arraylake client.
+					1608 link Description: Log in to your Arraylake account, Value: app.earthmover.io/auth/login?returnTo=%2Fmarketplace%2F6a19bcfe9aa6e97720a2fad2%3Ftab%3Daccess%26path%3Dsingle%252Ftemporal%26use_data%3D1%26access_method%3Ddirect
+					1609 button Subscribe
+						1610 image
+						1611 text Subscribe
+					1612 text Adds the repo to your org for free, no storage needed, and unlocks all Arraylake features.
+
+The focused UI element is 0 AXWebArea ERA5 | Arraylake Marketplace, URL: app.earthmover.io/marketplace/6a19bcfe9aa6e97720a2fad2?tab=dataset&path=single%2Ftemporal&use_data=1&access_method=direct
