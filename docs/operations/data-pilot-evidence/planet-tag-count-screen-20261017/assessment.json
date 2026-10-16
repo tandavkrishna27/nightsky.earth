@@ -1,0 +1,147 @@
+{
+  "kind": "metadata-only-planet-selection-feasibility",
+  "codeReference": "203e4d49fffc676163b6bafa51bc23b4674db447",
+  "selectionPolicy": "named-complete-way-v1-polar85",
+  "metadataDataUntil": "2026-10-16T00:59:40Z",
+  "targetEdition": "planet-261012.osm.pbf",
+  "targetBodyMeasured": false,
+  "counts": [
+    {
+      "predicate": "leisure=park",
+      "all": 1304431,
+      "nodes": 46628,
+      "ways": 1216565,
+      "relations": 41238
+    },
+    {
+      "predicate": "leisure=nature_reserve",
+      "all": 150614,
+      "nodes": 4940,
+      "ways": 102539,
+      "relations": 43135
+    },
+    {
+      "predicate": "tourism=viewpoint",
+      "all": 264967,
+      "nodes": 257624,
+      "ways": 7158,
+      "relations": 185
+    },
+    {
+      "predicate": "tourism=camp_site",
+      "all": 163514,
+      "nodes": 105404,
+      "ways": 54975,
+      "relations": 3135
+    },
+    {
+      "predicate": "tourism=caravan_site",
+      "all": 36467,
+      "nodes": 11460,
+      "ways": 24393,
+      "relations": 614
+    },
+    {
+      "predicate": "boundary=national_park",
+      "all": 5940,
+      "nodes": 10,
+      "ways": 3237,
+      "relations": 2693
+    },
+    {
+      "predicate": "natural=beach",
+      "all": 250182,
+      "nodes": 13299,
+      "ways": 205542,
+      "relations": 31341
+    },
+    {
+      "predicate": "protect_class=*",
+      "all": 105026,
+      "nodes": 7848,
+      "ways": 54753,
+      "relations": 42425
+    }
+  ],
+  "rawPredicateOccurrences": 2281141,
+  "uniqueRawSelectedObjectLowerBound": 1304431,
+  "uniqueRawSelectedObjectUpperBound": 2281141,
+  "acceptedUniqueCandidates": null,
+  "parkNameKeyPresence": {
+    "nodes": {
+      "name": 38030,
+      "name:en": 918,
+      "official_name": 22
+    },
+    "ways": {
+      "name": 555086,
+      "name:en": 23821,
+      "official_name": 1646
+    }
+  },
+  "conditionalParkExclusionLowerBound": {
+    "unnamedWays": 636012,
+    "unnamedNodes": 7658,
+    "relations": 41238,
+    "rows": 684908,
+    "bytes": 41349566
+  },
+  "hypotheticalSerializationOnly": {
+    "actualSourceHashOrVintage": false,
+    "candidate": {
+      "placeId": "place:v1:osm:way:0",
+      "name": "A",
+      "category": "park",
+      "latitude": 0.0,
+      "longitude": 0.0,
+      "sourceCompleteness": 1,
+      "regionIds": [],
+      "accessEvidence": {
+        "status": "unknown"
+      },
+      "caveats": [
+        "Named nodes and complete ways only; access, darkness and mapped completeness unknown."
+      ],
+      "catalogueRevision": "osm-0000000000000000000000000000000000000000000000000000000000000000",
+      "sources": [
+        {
+          "name": "OpenStreetMap contributors",
+          "url": "https://osm-planet-eu-central-1.s3.dualstack.eu-central-1.amazonaws.com/planet/pbf/2026/planet-261012.osm.pbf",
+          "attribution": "© OpenStreetMap contributors",
+          "dataClass": "catalog",
+          "vintage": "2026-10-12T00:00:00Z",
+          "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+          "modified": true,
+          "product": "OSM x 0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    },
+    "candidateJsonlMinimumBytes": 790,
+    "candidate128MiBRowUpperBound": 169895,
+    "lineage": {
+      "placeId": "place:v1:osm:way:0",
+      "source": "x",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "vintage": "2026-10-12T00:00:00Z",
+      "policy": "named-complete-way-v1-polar85"
+    },
+    "lineageJsonlMinimumBytes": 196,
+    "lineage128MiBRowUpperBound": 684784
+  },
+  "membershipWorkLowerBound": {
+    "features": 4854,
+    "checksPerCandidateAtLeast": 4856,
+    "workLimit": 200000000,
+    "candidatesAtMostIgnoringOtherWork": 41186
+  },
+  "databaseMetadata": {
+    "totalNodes": 10941937381,
+    "taggedNodes": 297655726,
+    "ways": 1225169403,
+    "relations": 14929024,
+    "plannedValidNodeStop": 10000000000,
+    "targetNativeValidNodeCount": null
+  },
+  "executionAllowed": false,
+  "conclusion": "Current one-stream full-boundary route has material global feasibility blockers; metadata does not establish accepted dated-planet counts or authorize acquisition."
+}

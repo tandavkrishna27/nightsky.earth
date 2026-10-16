@@ -1,0 +1,1 @@
+{"url":"https://taginfo.openstreetmap.org/api/4/tag/stats?key=natural&value=beach","data_until":"2026-10-16T00:59:40Z","total":4,"data":[{"type":"all","count":250182,"count_fraction":0.0},{"type":"nodes","count":13299,"count_fraction":0.0},{"type":"ways","count":205542,"count_fraction":0.0002},{"type":"relations","count":31341,"count_fraction":0.0021}]}

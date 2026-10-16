@@ -1,0 +1,17 @@
+{
+  "kind": "official-taginfo-database-page-metadata-ledger",
+  "url": "https://taginfo.openstreetmap.org/sources/db",
+  "observedUtc": "2026-10-16T20:30:04.558209+00:00",
+  "requestLimit": 1,
+  "actualRequests": 1,
+  "headerLimitBytes": 65536,
+  "bodyLimitBytes": 131072,
+  "wallSecondsLimit": 30,
+  "httpStatus": 200,
+  "bytes": 8445,
+  "sha256": "e504f9f684035eeddaedb26a2569f079a1909a3aeb33e8f7dd584848b8f82aa6",
+  "datasetBodyRequests": 0,
+  "redirects": false,
+  "retries": false,
+  "elapsedSeconds": 0.484
+}

@@ -1,0 +1,1 @@
+{"url":"https://taginfo.openstreetmap.org/api/4/tag/stats?key=leisure&value=park","data_until":"2026-10-16T00:59:40Z","total":4,"data":[{"type":"all","count":1304431,"count_fraction":0.0001},{"type":"nodes","count":46628,"count_fraction":0.0002},{"type":"ways","count":1216565,"count_fraction":0.001},{"type":"relations","count":41238,"count_fraction":0.0028}]}

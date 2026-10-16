@@ -1,0 +1,1 @@
+{"url":"https://taginfo.openstreetmap.org/api/4/tag/stats?key=tourism&value=viewpoint","data_until":"2026-10-16T00:59:40Z","total":4,"data":[{"type":"all","count":264967,"count_fraction":0.0},{"type":"nodes","count":257624,"count_fraction":0.0009},{"type":"ways","count":7158,"count_fraction":0.0},{"type":"relations","count":185,"count_fraction":0.0}]}
