@@ -221,3 +221,57 @@ test('a shorter shared deadline does not invent elapsed membership time',async()
  const done=await (boundaryMetadata as any).buildPartitionedBoundaryMetadata(f.input,f.output,f.source);
  assert.ok(done.resources.elapsedMilliseconds<=Date.now()-before+1000,`reported ${done.resources.elapsedMilliseconds}ms for an actual short session`);
 });
+test('v2 membership cannot inherit larger row or output caps from a future envelope',async()=>{
+ for(const limits of [{maxRows:1000001},{maxOutputBytes:1024**3+1}]){
+  const f=await partitionedFixture([]);
+  await assert.rejects(boundaryMetadata.buildPartitionedBoundaryMetadata(f.input,f.output,f.source,limits),/Unsupported|budget/i);await assert.rejects(access(f.output));
+ }
+});
+test('unknown membership resource versions cannot silently fall back to the v2 session',async()=>{
+ const f=await partitionedFixture([]);
+ await assert.rejects(boundaryMetadata.buildPartitionedBoundaryMetadata(f.input,f.output,{...f.source,membershipVersion:99} as any),/version|envelope/i);await assert.rejects(access(f.output));
+});
+async function v3BoundaryFixture(rows=[row(1,1,1),row(2,8,8)],patch:any={}){
+ const f=await partitionedFixture(rows),r=await import('../../scripts/osm/partitioned-resources');
+ const limits={validation:{maxLexicalTokens:1024**2,maxOperations:1024**2,maxReadBytes:32*1024**2,maxRowsRead:100000,controlAndAdmissionReadBytes:1024**2},maxGeometryComparisons:200000000,maxMilliseconds:60000,...patch};
+ const resourceSession=r.createResourceSessionV3(limits,r.createBootstrapResources(Date.now()));
+ const source={...f.source,membershipVersion:3 as const,resourceSession,budget:{...f.source.budget,resourceSession,accounting:'read' as const,maxWork:resourceSession.limits.validation.maxOperations,deadline:resourceSession.deadline,metadata:resourceSession.metadata}};
+ return {...f,source,resourceSession,limits:{maxRows:1000001,maxOutputBytes:1024**3+1,maxGeometryComparisons:limits.maxGeometryComparisons,maxMilliseconds:60000}};
+}
+test('v3 classification keeps physical reads, lexical validation, geometry and emitted writes separate',async()=>{
+ const f=await v3BoundaryFixture(),descriptorBytes=Buffer.byteLength(await readFile(f.input)),geometryBytes=f.manifest.boundaries.reduce((n,s)=>n+s.input.bytes,0);
+ const done=await boundaryMetadata.buildPartitionedBoundaryMetadata(f.input,f.output,f.source as any,f.limits as any) as any;
+ assert.equal(done.schemaVersion,3);assert.equal(done.totalCandidates,2);assert.equal(done.limits.maxRows,1000001);assert.equal(done.limits.maxOutputBytes,1024**3+1);
+ assert.equal(done.resources.validation.readBytes,2*descriptorBytes+2*geometryBytes);
+ assert.ok(done.resources.validation.lexicalTokens>0);assert.ok(done.resources.geometry.comparisons>0);
+ assert.equal(done.resources.writes.membership.bytes,done.resources.outputBytes);assert.equal(done.resources.validation.controlAndAdmissionReadBytes,0);
+ assert.equal(done.resources.startedAt,f.resourceSession.startedAt);assert.equal(done.resources.deadline,f.resourceSession.deadline);
+});
+test('v3 expected counts above one million still require actual complete source EOF',async()=>{
+ const f=await v3BoundaryFixture([]);f.source.expectedCandidates=1000001;f.source.inputIdentity.counts.accepted=1000001;let reached=false;
+ f.source.rows=(async function*(){reached=true;})();
+ await assert.rejects(boundaryMetadata.buildPartitionedBoundaryMetadata(f.input,f.output,f.source as any,f.limits as any),/Incomplete.*count|EOF/i);
+ assert.equal(reached,true);await assert.rejects(access(join(f.output,'complete.json')));
+});
+
+test('v3 classification independently stops lexical, validation, physical-read and geometry exhaustion',async()=>{
+ for(const mode of ['lexical','operations','read','geometry']){
+  const validation={maxLexicalTokens:1024**2,maxOperations:1024**2,maxReadBytes:32*1024**2,maxRowsRead:100000,controlAndAdmissionReadBytes:1024**2};
+  if(mode==='lexical')validation.maxLexicalTokens=1;if(mode==='operations')validation.maxOperations=1;
+  if(mode==='read'){validation.maxReadBytes=1;validation.maxLexicalTokens=1;validation.controlAndAdmissionReadBytes=1;}
+  const f=await v3BoundaryFixture([],{validation,...(mode==='geometry'?{maxGeometryComparisons:1}:{})});
+  await assert.rejects(boundaryMetadata.buildPartitionedBoundaryMetadata(f.input,f.output,f.source as any,f.limits as any),mode==='lexical'?/lexical/i:mode==='operations'?/operation/i:mode==='read'?/read byte/i:/geometry/i);
+  await assert.rejects(access(join(f.output,'complete.json')));
+  if(mode==='read')assert.equal(f.resourceSession.validation.readBytes,0,'The quota must stop allocation/read before body IO');
+ }
+});
+test('v3 membership requires the same read view and retains its original deadline',async()=>{
+ for(const mode of ['view','deadline','version']){
+  const f=await v3BoundaryFixture([]);const original=f.resourceSession.deadline;
+  if(mode==='view')f.source.budget.metadata={bytes:0,ceiling:32*1024**2,paths:new Map()};
+  if(mode==='deadline')f.source.budget.deadline++;
+  if(mode==='version')f.source.membershipVersion=2 as any;
+  await assert.rejects(boundaryMetadata.buildPartitionedBoundaryMetadata(f.input,f.output,f.source as any,f.limits as any),/session|version/i);
+  assert.equal(f.resourceSession.deadline,original);await assert.rejects(access(f.output));
+ }
+});

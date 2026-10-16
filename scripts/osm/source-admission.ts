@@ -226,7 +226,11 @@ async function safeExisting(path: string): Promise<string> {
 }
 export interface AdmissionMetadataSnapshot {path: string; bytes: number; sha256: string}
 /** Resource accounting only; it cannot select policy, reviews or source authority. */
-export interface AdmissionMetadataAccounting {bytes: number; ceiling: number; paths: Map<string, number>}
+export interface AdmissionMetadataAccounting {
+  bytes: number; ceiling: number; paths: Map<string, number>;
+  onRead?: (bytes: number) => void;
+  checkpoint?: () => void;
+}
 function checkSharedAccounting(shared?: AdmissionMetadataAccounting) {
   if (!shared) return;
   if (!Number.isSafeInteger(shared.bytes) || shared.bytes < 0 || !Number.isSafeInteger(shared.ceiling) ||
@@ -240,6 +244,7 @@ function checkSharedAccounting(shared?: AdmissionMetadataAccounting) {
 }
 interface ReadBudget {bytes: number; ceiling: number; snapshot?: Map<string, AdmissionMetadataSnapshot>; shared?: AdmissionMetadataAccounting}
 async function readBounded(path: string, maxBytes: number, budget: ReadBudget, pin?: Pick<EvidencePin, 'bytes' | 'sha256'>): Promise<Buffer> {
+  budget.shared?.checkpoint?.();
   const absolute = await safeExisting(path), handle = await open(absolute, 'r');
   try {
     const before = await handle.stat();
@@ -252,9 +257,10 @@ async function readBounded(path: string, maxBytes: number, budget: ReadBudget, p
         shared.bytes += before.size; shared.paths.set(absolute, before.size);
       }
     }
+    budget.shared?.onRead?.(before.size);
     budget.bytes += before.size;
     const bytes = Buffer.alloc(before.size); let offset = 0;
-    while (offset < bytes.length) { const result = await handle.read(bytes, offset, bytes.length - offset, null); if (!result.bytesRead) throw new Error('Input mutation'); offset += result.bytesRead; }
+    while (offset < bytes.length) { budget.shared?.checkpoint?.(); const result = await handle.read(bytes, offset, Math.min(65536, bytes.length - offset), null); if (!result.bytesRead) throw new Error('Input mutation'); offset += result.bytesRead; }
     const after = await handle.stat(); await safeExisting(absolute);
     if (before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ino !== after.ino) throw new Error('Input mutation');
     const sha256 = createHash('sha256').update(bytes).digest('hex');
@@ -264,6 +270,7 @@ async function readBounded(path: string, maxBytes: number, budget: ReadBudget, p
       if (previous && canonical(previous) !== canonical(observed)) throw new Error('Metadata changed between reads');
       budget.snapshot.set(absolute, observed);
     }
+    budget.shared?.checkpoint?.();
     return bytes;
   } finally { await handle.close(); }
 }
@@ -307,8 +314,9 @@ async function readPlanetDomainFile(path: string, pin: Pick<EvidencePin, 'bytes'
   return descriptor;
 }
 /** Assembly calls this on initial and final plan load, checking all three pinned artifacts. */
-export async function verifyPlanetDomainFile(path: string, pin: Pick<EvidencePin, 'bytes' | 'sha256'>) {
-  return readPlanetDomainFile(path, admissionEvidencePinSchema.omit({path: true}).parse(pin), {bytes: 0, ceiling: 12 * MiB});
+export async function verifyPlanetDomainFile(path: string, pin: Pick<EvidencePin, 'bytes' | 'sha256'>, accounting?: AdmissionMetadataAccounting) {
+  checkSharedAccounting(accounting);
+  return readPlanetDomainFile(path, admissionEvidencePinSchema.omit({path: true}).parse(pin), {bytes: 0, ceiling: 12 * MiB, shared: accounting});
 }
 
 /** Immutable retained evidence has already been sanitized; do not replace it with current upstream metadata. */

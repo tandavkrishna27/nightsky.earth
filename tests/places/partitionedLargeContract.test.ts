@@ -9,12 +9,14 @@ import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {assembleMembership} from '../../scripts/osm/membership-assembly';
-import {capacityV2Schema} from '../../scripts/osm/geography-capacity-plan';
-import {partitionedAssemblyPlanSchema,partitionedRawManifestSchema,validatePartitionedCapacity} from '../../scripts/osm/partitioned-assembly-plan';
+import {capacityV2Schema,capacityV3Schema} from '../../scripts/osm/geography-capacity-plan';
+import {partitionedAssemblyPlanSchema,partitionedAssemblyPlanV3Schema,partitionedRawManifestSchema,validatePartitionedCapacity} from '../../scripts/osm/partitioned-assembly-plan';
 import {PART_BYTES,partitionCanonical,rawCompletionV2Schema,writePartitionedFamily,type SharedPartitionBudget,type StreamFamily} from '../../scripts/osm/partitioned-candidates';
 import {loadCatalogueFiles,type CatalogueCandidate} from '../../server/places/catalogueFiles';
 
 const enabled=process.env.NIGHTSKY_LARGE_PARTITION_TEST==='1';
+const resourceVersion=process.env.NIGHTSKY_LARGE_PARTITION_RESOURCE_VERSION==='3'?3:2;
+const candidateCeiling=resourceVersion===3?2281141:1000000;
 const MiB=1024**2,GiB=1024**3,COUNT=16000;
 const layout={kind:'partitioned-jsonl-v1' as const,maxPartBytes:PART_BYTES,maxParts:64 as const};
 const policy='named-complete-way-v1-polar85' as const;
@@ -28,7 +30,7 @@ function charge(budget:SharedPartitionBudget,bytes:number,rows=0){
   budget.bytes+=bytes;budget.rows+=rows;budget.work++;
 }
 
-test('opt-in >128MiB candidate family reaches one unchanged catalogue consumer root',{
+test(`opt-in >128MiB v${resourceVersion} candidate family reaches one unchanged catalogue consumer root`,{
   skip:!enabled,
   timeout:70*60*1000,
 },async t=>{
@@ -38,7 +40,7 @@ test('opt-in >128MiB candidate family reaches one unchanged catalogue consumer r
   await mkdir(parent,{recursive:true});
   const root=await realpath(await mkdtemp(join(parent,'large-contract-')));
   const producer=join(root,'producer'),job=join(root,'assembly');
-  t.diagnostic(JSON.stringify({kind:'large-partition-contract-start',syntheticOnly:true,root,retained:true}));
+  t.diagnostic(JSON.stringify({kind:'large-partition-contract-start',syntheticOnly:true,resourceVersion,root,retained:true}));
   await mkdir(producer);await mkdir(job);
   const aggregate=256*MiB,deadlineMs=1800000;
   const generation:SharedPartitionBudget={bytes:0,rows:0,work:0,maxBytes:aggregate,maxRows:1000000,maxWork:200000000,deadline:Date.now()+300000};
@@ -53,7 +55,7 @@ test('opt-in >128MiB candidate family reaches one unchanged catalogue consumer r
       const path=join(root,`synthetic-source-${index}.osm`);await writeFile(path,body,{flag:'wx'});
       sources.push({id:`s${index}`,path,format:'xml' as const,url,bytes:body.length,sha256:hash(body),vintage:'2026-10-01T00:00:00Z',licenseUrl:'https://opendatacommons.org/licenses/odbl/1-0/' as const,attribution:'© OpenStreetMap contributors' as const,clipSha256:'a'.repeat(64)});
     }
-    const rawLimits={sourceBytes:MiB,scratchBytes:MiB,outputBytes:aggregate,rowBytes:65536,nodes:1000000,candidates:1000000,referencesPerWay:100000,seconds:300,freeBytes:0};
+    const rawLimits={sourceBytes:MiB,scratchBytes:MiB,outputBytes:aggregate,rowBytes:65536,nodes:1000000,candidates:candidateCeiling,referencesPerWay:100000,seconds:300,freeBytes:0};
     const raw=partitionedRawManifestSchema.parse({schemaVersion:2,policy,authorization:'SYNTHETIC LIBRARY CONTRACT FIXTURE ONLY; NO PRODUCTION AUTHORITY',sources,limits:rawLimits,evidenceLayout:layout});
     const manifestPath=join(root,'raw-manifest.json');await writeFile(manifestPath,partitionCanonical(raw),{flag:'wx'});
     const catalogueRevision='osm-'+hash(partitionCanonical({policy,evidenceLayout:layout,sources:sources.map(({path:_path,...source})=>source)}));
@@ -68,24 +70,33 @@ test('opt-in >128MiB candidate family reaches one unchanged catalogue consumer r
     ]});
     const boundaryPath=join(root,'boundaries.json'),footprintsPath=join(root,'footprints.jsonl');
     await writeFile(boundaryPath,boundaryBody,{flag:'wx'});await writeFile(footprintsPath,'',{flag:'wx'});
-    const membership={maxCandidateInputBytes:aggregate,maxBoundaryBytes:64*MiB,maxVertices:1000000,maxTotalVertices:2000000,maxComparisons:200000000,maxRows:1000000,maxOutputBytes:aggregate,maxMilliseconds:deadlineMs};
+    const membership={maxCandidateInputBytes:aggregate,maxBoundaryBytes:64*MiB,maxVertices:1000000,maxTotalVertices:2000000,maxComparisons:200000000,maxRows:candidateCeiling,maxOutputBytes:aggregate,maxMilliseconds:deadlineMs};
     // Two initial candidate sort runs keep cumulative sort writes below1GiB.
     // All publisher controls remain finite and within existing implementation caps.
-    const publisherControls={chunkRows:8192,mergeFanIn:8,maxRows:128,fanout:128,maxInputRows:1000000,maxMetadataRows:10000,maxInputBytes:2*GiB,maxOutputBytes:GiB,maxScratchBytes:GiB,timeoutMs:deadlineMs};
-    const capacity=capacityV2Schema.parse({schemaVersion:2,kind:'partitioned-geography-capacity-v1',freeBytes:16*GiB,reserveBytes:0,retainedBytes:0,rawSourceAlreadyRetainedBytes:0,
+    const publisherControls={chunkRows:8192,mergeFanIn:8,maxRows:128,fanout:128,maxInputRows:candidateCeiling,maxMetadataRows:10000,maxInputBytes:2*GiB,maxOutputBytes:GiB,maxScratchBytes:GiB,timeoutMs:deadlineMs};
+    const capacityInput:any={schemaVersion:2,kind:'partitioned-geography-capacity-v1',freeBytes:16*GiB,reserveBytes:0,retainedBytes:0,rawSourceAlreadyRetainedBytes:0,
       allocations:{raw:MiB,index:MiB,journal:MiB,normalizedOutput:aggregate,boundaries:64*MiB,stagedCandidates:0,stagedBoundaries:64*MiB,footprints:MiB,membership:aggregate,sort:GiB,catalogue:GiB,failureReports:MiB,rollback:0},
       limits:{raw:rawLimits,membership,catalogue:publisherControls,supervisor:{wallSeconds:3900,rssBytes:2*GiB,commitBytes:4*GiB,diskBytes:4*GiB,freeBytes:0,maxProcesses:2}},
-    });
+    };
+    if(resourceVersion===3){
+      capacityInput.schemaVersion=3;capacityInput.kind='partitioned-geography-capacity-v2';
+      capacityInput.limits.membership={...membership,maxGeometryComparisons:membership.maxComparisons};delete capacityInput.limits.membership.maxComparisons;
+      const Q=16*MiB,R=4*(aggregate+aggregate+capacityInput.allocations.footprints)+8*MiB+3*membership.maxBoundaryBytes+Q;
+      capacityInput.limits.validation={maxReadBytes:R,maxRowsRead:R,maxLexicalTokens:R,maxOperations:R,controlAndAdmissionReadBytes:Q};
+    }
+    const capacity=resourceVersion===3?capacityV3Schema.parse(capacityInput):capacityV2Schema.parse(capacityInput);
     const capacityBody=partitionCanonical(capacity),capacityPath=join(root,'synthetic-capacity.json');
     await writeFile(capacityPath,capacityBody,{flag:'wx'});
-    const {maxCandidateInputBytes:_candidateCeiling,...memberControls}=membership;
-    const plan=partitionedAssemblyPlanSchema.parse({schemaVersion:2,geographyMode:'all-nodes',
+    const {maxCandidateInputBytes:_candidateCeiling,...memberControls}=capacity.limits.membership;
+    const planInput:any={schemaVersion:resourceVersion,geographyMode:'all-nodes',
       boundaries:[{input:{path:boundaryPath,bytes:Buffer.byteLength(boundaryBody),sha256:hash(boundaryBody)},regionIds:[countryId],unresolvedBoundaryIds:[unresolvedId]}],
       footprints:{path:footprintsPath,bytes:0,sha256:hash('')},membership:memberControls,
-      stream:{maxRowBytes:65536,maxBytes:aggregate,maxRows:1000000},catalogue:publisherControls,retained:[],evidenceLayout:layout,
+      stream:{maxRowBytes:65536,maxBytes:resourceVersion===3?aggregate+capacity.allocations.footprints:aggregate,maxRows:candidateCeiling},catalogue:publisherControls,retained:[],evidenceLayout:layout,
       maxNormalizedOutputBytes:aggregate,maxCandidateInputBytes:aggregate,
       capacityPlan:{path:capacityPath,bytes:Buffer.byteLength(capacityBody),sha256:hash(capacityBody)},
-    });
+    };
+    if(resourceVersion===3)planInput.validation=(capacity as any).limits.validation;
+    const plan=resourceVersion===3?partitionedAssemblyPlanV3Schema.parse(planInput):partitionedAssemblyPlanSchema.parse(planInput);
     // Fail bad arithmetic/control coupling before creating the large family.
     validatePartitionedCapacity(plan,capacity,raw);
     const planBody=partitionCanonical(plan),planPath=join(root,'assembly-plan.json');await writeFile(planPath,planBody,{flag:'wx'});
@@ -135,14 +146,14 @@ test('opt-in >128MiB candidate family reaches one unchanged catalogue consumer r
     assert.equal(done.counts.selectedOccurrences,done.counts.acceptedOccurrences+done.counts.exclusions);
     assert.equal(done.counts.duplicateAcceptedOccurrences,done.counts.acceptedOccurrences-done.counts.lineage);
     const evidence=await assembleMembership(planPath,hash(planBody),producer,job,undefined,manifestPath);
-    assert.equal(evidence.schemaVersion,2);
+    assert.equal(evidence.schemaVersion,resourceVersion);
     if(!('verification' in evidence))throw new Error('Partitioned assembly verification evidence required');
     const member=JSON.parse(await readFile(join(job,'membership','complete.json'),'utf8'));
     assert.equal(member.totalCandidates,COUNT);assert.equal(member.unknownCountryCandidates,COUNT*3/4);
     assert.ok(member.streams.candidates.bytes>PART_BYTES);
     assert.ok(member.streams.candidates.parts.length>=2);
     assert.ok(member.streams.candidates.parts.every((part:{bytes:number})=>part.bytes<=PART_BYTES));
-    assert.ok(member.resources.rows<=1000000&&member.resources.work<=200000000&&member.resources.outputBytes<=aggregate);
+    if(resourceVersion===3){assert.equal(member.schemaVersion,3);assert.ok(member.resources.geometry.comparisons<=200000000);assert.ok(member.resources.validation.lexicalTokens<=(capacity as any).limits.validation.maxLexicalTokens);assert.ok(member.resources.validation.operations<=(capacity as any).limits.validation.maxOperations);assert.equal(member.resources.writes.membership.bytes,member.resources.outputBytes);assert.ok(member.resources.rows<=candidateCeiling&&member.resources.outputBytes<=aggregate);}else assert.ok(member.resources.rows<=1000000&&member.resources.work<=200000000&&member.resources.outputBytes<=aggregate);
     assert.deepEqual(member.inputIdentity.counts,counts);
     assert.deepEqual(member.inputIdentity.rawStreams.exclusions,exclusionFamily);
     const catalogue=evidence.catalogue;
@@ -186,13 +197,13 @@ test('opt-in >128MiB candidate family reaches one unchanged catalogue consumer r
     }
     assert.deepEqual((await readdir(join(job,'membership-input'))).sort(),['boundary-0.json','input.json']);
     assert.ok((await readFile(join(job,'assembly-complete.json'))).length>0);
-    t.diagnostic(JSON.stringify({kind:'large-partition-contract-result',syntheticOnly:true,productionAdmitted:false,rawSelectionJob:false,supervisorRun:false,networkRequests:0,
+    t.diagnostic(JSON.stringify({kind:'large-partition-contract-result',syntheticOnly:true,resourceVersion,productionAdmitted:false,rawSelectionJob:false,supervisorRun:false,networkRequests:0,
       retainedRoot:root,retained:true,elapsedMilliseconds:Date.now()-began,candidates:COUNT,rawCandidateBytes:candidateFamily.bytes,rawLineageBytes:lineageFamily.bytes,rawExclusionBytes:exclusionFamily.bytes,
       rawPartCount:rawParts.length,rawAggregateOutputBytes:generation.bytes,rawAggregateBudget:aggregate,membershipCandidateBytes:member.streams.candidates.bytes,membershipPartCount:member.streams.candidates.parts.length,
       membershipResources:member.resources,verification:evidence.verification,publisher:catalogue.stats,consumer:{schemaVersion:files.root.schemaVersion,spatialRows,idRows,known,unknown,regionRows,footprintRows},
       catalogueSha256:catalogue.sha256,oneConsumerRoot:true,monolithicCandidateFile:false,stagedCandidateCopy:false,globalScaleOrProductionCompletion:false}));
   }catch(error){
-    t.diagnostic(JSON.stringify({kind:'large-partition-contract-failure',syntheticOnly:true,retainedRoot:root,retained:true,elapsedMilliseconds:Date.now()-began,generationBytes:generation.bytes,generationRows:generation.rows,generationWork:generation.work,
+    t.diagnostic(JSON.stringify({kind:'large-partition-contract-failure',syntheticOnly:true,resourceVersion,retainedRoot:root,retained:true,elapsedMilliseconds:Date.now()-began,generationBytes:generation.bytes,generationRows:generation.rows,generationWork:generation.work,
       error:error instanceof Error?error.message.slice(0,1000):String(error).slice(0,1000),acceptedAssembly:false}));
     throw error;
   }

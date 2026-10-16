@@ -4,7 +4,7 @@ import {readFile, writeFile, mkdtemp, mkdir, access} from 'node:fs/promises';
 import {join, resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {buildRetainedSourceAdmissionInventory, buildRetainedSourceAdmissionPolicy, admissionSubjectDigest, validateSourceAdmission, validateSourceAdmissionFiles, sourceAdmissionBundleSchema, retainedSourceEvidencePin, sourceAdmissionOutputPath} from '../../scripts/osm/source-admission';
+import {buildRetainedSourceAdmissionInventory, buildRetainedSourceAdmissionPolicy, admissionSubjectDigest, validateSourceAdmission, validateSourceAdmissionFiles, verifyPlanetDomainFile, sourceAdmissionBundleSchema, retainedSourceEvidencePin, sourceAdmissionOutputPath} from '../../scripts/osm/source-admission';
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 const pin=(name:string)=>({path:`synthetic/${name}.json`,bytes:64,sha256:hash(name)});
 async function scratchDirectory(prefix:string,parent=resolve('.cache')) {await mkdir(parent,{recursive:true});return mkdtemp(join(parent,prefix));}
@@ -112,4 +112,36 @@ test('retained public artifact identity and regenerated inventory survive LF and
  const lf=await buildRetainedSourceAdmissionInventory(dir);assert.equal(lf.retainedManifest.bytes,2480339);assert.equal(lf.retainedManifest.sha256,'e84cf663e02aa0fed3cd0bcb424d423f06a1bab6f4b119bf104d8c7371b23ffb');
  for(const name of ['geography-source-metadata-evidence.json','geography-admission-resolution-evidence.json']){const path=join(dir,'docs','operations',name);await writeFile(path,(await readFile(path,'utf8')).replaceAll('\n','\r\n'));}
  assert.deepEqual(await buildRetainedSourceAdmissionInventory(dir),lf);
+});
+
+async function domainReadFixture(){
+ const dir=await scratchDirectory('source-admission-metered-'),raw={bytes:1234,sha256:hash('synthetic body identity')},nativeVintage='2026-10-17T00:00:00Z';
+ const observation=JSON.stringify({schemaVersion:1,kind:'native-vintage-observation',raw,nativeVintage}),provider='p'.repeat(140000);
+ const observationPin={path:'vintage.json',bytes:Buffer.byteLength(observation),sha256:hash(observation)},providerPin={path:'provider.txt',bytes:Buffer.byteLength(provider),sha256:hash(provider)};
+ const descriptor={schemaVersion:1,kind:'planet-domain-v1',sourceUrl:'https://example.org/immutable/fictional.osm',edition:'fictional-1',provider:'Synthetic metadata only',providerWholeWorldEvidence:providerPin,providerObject:{version:'synthetic-version',etag:'synthetic-etag',md5:'a'.repeat(32)},raw,nativeVintage,nativeVintageEvidence:observationPin,domain:{west:-180,south:-90,east:180,north:90},selectionPolicy:'named-complete-way-v1-polar85',coverageClaim:'source-domain-only'};
+ const body=JSON.stringify(descriptor),path=join(dir,'domain.json'),pin={bytes:Buffer.byteLength(body),sha256:hash(body)};
+ await writeFile(path,body);await writeFile(join(dir,observationPin.path),observation);await writeFile(join(dir,providerPin.path),provider);
+ return {dir,path,pin,lengths:[pin.bytes,observationPin.bytes,providerPin.bytes]};
+}
+test('trusted metadata hooks charge every physical linked read while distinct bytes deduplicate',async()=>{
+ const f=await domainReadFixture(),reads:number[]=[];let checkpoints=0;
+ const accounting={bytes:0,ceiling:32*1024**2,paths:new Map<string,number>(),onRead(bytes:number){reads.push(bytes);},checkpoint(){checkpoints++;}};
+ await verifyPlanetDomainFile(f.path,f.pin,accounting);await verifyPlanetDomainFile(f.path,f.pin,accounting);
+ assert.deepEqual(reads,[...f.lengths,...f.lengths]);assert.equal(accounting.bytes,f.lengths.reduce((a,b)=>a+b,0));assert.equal(accounting.paths.size,3);
+ // Three bounded reads for the140kB linked provider file, plus before-open and
+ // final checks for every artifact on both passes. Short I/O may add checks.
+ assert.ok(checkpoints>=22);
+});
+test('trusted read hook exhaustion rejects before metadata allocation or body reads',async()=>{
+ const f=await domainReadFixture(),original=Buffer.alloc;let matchingAllocations=0,reads=0;
+ Buffer.alloc=((size:number,...args:any[])=>{if(size===f.pin.bytes)matchingAllocations++;return original(size,...args);}) as typeof Buffer.alloc;
+ try{
+  await assert.rejects(verifyPlanetDomainFile(f.path,f.pin,{bytes:0,ceiling:32*1024**2,paths:new Map(),onRead(bytes){assert.equal(bytes,f.pin.bytes);reads++;throw new Error('physical-read-exhausted');}}),/physical-read-exhausted/);
+  assert.equal(reads,1);assert.equal(matchingAllocations,0);
+ }finally{Buffer.alloc=original;}
+});
+test('trusted metadata checkpoint can stop before opening an absent descriptor',async()=>{
+ const f=await domainReadFixture();let checkpoints=0;
+ await assert.rejects(verifyPlanetDomainFile(join(f.dir,'absent.json'),f.pin,{bytes:0,ceiling:32*1024**2,paths:new Map(),checkpoint(){checkpoints++;throw new Error('shared-deadline');}}),/shared-deadline/);
+ assert.equal(checkpoints,1);
 });

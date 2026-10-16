@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {buildSourceCatalogue,jsonlRows} from '../../scripts/osm/build-source-catalogue';
+import * as sourceCatalogue from '../../scripts/osm/build-source-catalogue';
 import {loadCatalogueFiles} from '../../server/places/catalogueFiles';
 const dir=()=>mkdtemp(join(tmpdir(),'source-catalogue-'));
 const source={name:'OSM',url:'https://openstreetmap.org',attribution:'OSM contributors',dataClass:'catalog' as const};
@@ -176,5 +177,61 @@ test('the captured partition verifier rejects parts or common metadata changed a
   assert.ok(verify,'The admitted wrapper needs the complete retained-input verifier');
   await writeFile(mode==='part'?join(f.d,f.done.streams.candidates.parts[0].path):f.input.regions,'changed\n');
   await assert.rejects(verify());
+ }
+});
+test('v3 completion supports explicit larger C and M with split units while v2 stays capped',async()=>{
+ const f=await partitionedSourceFixture(),count=1000001,start=Date.now();
+ const done={...f.done,schemaVersion:3,limits:{maxRows:count,maxOutputBytes:2*1024**3,maxGeometryComparisons:200000000},totalCandidates:count,unknownCountryCandidates:count,
+  streams:{candidates:{...f.done.streams.candidates,rows:count}},inputIdentity:{...f.done.inputIdentity,counts:{...f.done.inputIdentity.counts,accepted:count}},
+  resources:{rows:count,outputBytes:1024**3+1,startedAt:start,deadline:start+60000,elapsedMilliseconds:1,validation:{readBytes:1000000000,rowsRead:count,lexicalTokens:719000000,operations:1000,controlAndAdmissionReadBytes:100},geometry:{comparisons:100},writes:{'boundary-staging':{bytes:0,rows:0},membership:{bytes:1024**3+1,rows:count},assembly:{bytes:0,rows:0},'publisher-output':{bytes:0,rows:0},'publisher-scratch':{bytes:0,rows:0}}}};
+ // This checks the representation envelope only; iterators still have to prove every actual row at EOF.
+ assert.equal((sourceCatalogue as any).partitionedMembershipCompletionV3Schema.safeParse(done).success,true);
+ assert.equal(sourceCatalogue.partitionedMembershipCompletionSchema.safeParse({...done,schemaVersion:2}).success,false);
+ assert.equal((sourceCatalogue as any).partitionedMembershipCompletionV3Schema.safeParse({...done,resources:{...done.resources,work:1}}).success,false);
+ assert.equal((sourceCatalogue as any).partitionedMembershipCompletionV3Schema.safeParse({...done,resources:{...done.resources,geometry:{comparisons:200000001}}}).success,false);
+});
+
+async function v3SourceFixture(){
+ const f=await partitionedSourceFixture(),r=await import('../../scripts/osm/partitioned-resources');
+ const session=r.createResourceSessionV3({validation:{maxLexicalTokens:1000000,maxOperations:1000000,maxReadBytes:16*1024**2,maxRowsRead:100000,controlAndAdmissionReadBytes:1024**2},maxGeometryComparisons:200000000,maxMilliseconds:60000},r.createBootstrapResources(Date.now()));
+ const snapshot=r.resourceSnapshotV3(session);
+ Object.assign(f.done,{schemaVersion:3,limits:{maxRows:1000001,maxOutputBytes:2*1024**3,maxGeometryComparisons:200000000},resources:{rows:2,outputBytes:0,...snapshot}});
+ // The fixture represents the freshly returned classifier metadata, not a disk-derived trust pin.
+ f.done.resources.writes.membership.rows=2;
+ for(let i=0;i<16;i++){await f.save();if(f.done.resources.writes.membership.bytes===f.done.resources.outputBytes)break;f.done.resources.writes.membership.bytes=f.done.resources.outputBytes;}
+ await f.save();r.recordWrite(session,'membership',f.done.resources.outputBytes,2);
+ return {...f,session,input:{...f.input,maxRows:1000001,maxBytes:2*1024**3,expectedMembershipVersion:3 as const,resourceSession:session,partitionBudget:{...f.input.partitionBudget,maxWork:session.limits.validation.maxOperations,deadline:session.deadline,resourceSession:session,accounting:'read' as const,metadata:session.metadata}}};
+}
+test('v3 bridge preserves the original session through publication and captured verification',async()=>{
+ const f=await v3SourceFixture();let verify:(()=>Promise<void>)|undefined;
+ const result=await buildSourceCatalogue({...f.input,capturePartitionedVerifier(v){verify=v;}},join(f.d,'edition'),{maxInputRows:1000001,maxInputBytes:2*1024**3});
+ assert.equal(result.stats.inputRows,2);assert.ok(verify);const before=f.session.validation.readBytes;await verify();assert.ok(f.session.validation.readBytes>before);
+ assert.equal(f.input.partitionBudget.deadline,f.session.deadline);assert.equal(f.session.geometry.comparisons,0);
+ assert.equal(f.session.writes['publisher-output'].bytes,result.stats.outputBytes);assert.equal(f.session.writes['publisher-scratch'].bytes,result.stats.scratchBytes);
+ assert.ok(f.session.validation.lexicalTokens>0);
+});
+test('v3 bridge rejects downgraded versions, replaced sessions and undersized publisher allocations before output',async()=>{
+ const {existsSync}=await import('node:fs');
+ for(const mode of ['version','session','missing-pin','stream','publisher-bytes','publisher-rows']){
+  const f=await v3SourceFixture(),output=join(f.d,'edition');let input:any=f.input;const options:any={maxInputRows:1000001,maxInputBytes:2*1024**3};
+  if(mode==='version')input={...input,expectedMembershipVersion:2};
+  if(mode==='session')input={...input,resourceSession:undefined};
+  if(mode==='missing-pin'){input={...input,expectedMembershipPin:undefined};await writeFile(join(f.d,'complete.json'),JSON.stringify({schemaVersion:1}));}
+  if(mode==='stream')input={...input,maxBytes:10000};
+  if(mode==='publisher-bytes')options.maxInputBytes=10000;
+  if(mode==='publisher-rows')options.maxInputRows=2;
+  await assert.rejects(buildSourceCatalogue(input,output,options));assert.equal(existsSync(output),false);
+ }
+});
+
+test('scoped JSONL reads reserve control admission quota before IO and charge actual bytes once',async()=>{
+ const r=await import('../../scripts/osm/partitioned-resources'),d=await dir(),path=join(d,'control.jsonl'),body='{"ok":true}\n';await writeFile(path,body);
+ for(const exhausted of [true,false]){
+  const q=Buffer.byteLength(body)+(exhausted?-1:1);
+  const session=r.createResourceSessionV3({validation:{maxLexicalTokens:10000,maxOperations:10000,maxReadBytes:65536,maxRowsRead:1000,controlAndAdmissionReadBytes:q},maxGeometryComparisons:100,maxMilliseconds:60000},r.createBootstrapResources(Date.now()));
+  const budget={bytes:0,rows:0,work:0,maxBytes:65536,maxRows:1000,maxWork:10000,deadline:session.deadline,resourceSession:session,accounting:'read' as const,metadata:session.metadata,readScope:'control-and-admission' as const};
+  const read=async()=>{const rows=[];for await(const row of jsonlRows(path,{partitionBudget:budget}))rows.push(row);return rows;};
+  if(exhausted){await assert.rejects(read(),/control and admission read byte limit/i);assert.equal(session.validation.readBytes,0);assert.equal(session.validation.controlAndAdmissionReadBytes,0);assert.equal(budget.bytes,0);}
+  else{assert.deepEqual(await read(),[{ok:true}]);assert.equal(session.validation.readBytes,Buffer.byteLength(body));assert.equal(session.validation.controlAndAdmissionReadBytes,Buffer.byteLength(body));assert.equal(budget.bytes,Buffer.byteLength(body));}
  }
 });
