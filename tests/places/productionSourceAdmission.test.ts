@@ -170,7 +170,11 @@ async function versionTwoFixture(){
 test('version-two admission binds the exact explicit aggregate capacity, layout and code snapshot',async()=>{
  const f=await versionTwoFixture();try{
   const first=await verifyProductionAdmissionWithContext(f.options(),f.context);
-  assert.ok(first.metadataPins.some(p=>p.path===f.plan.capacityPlan.path));
+  const canonicalCapacityPath=await realpath(f.plan.capacityPlan.path);
+  const capacityEvidence=first.metadataPins.find(p=>p.path===canonicalCapacityPath);
+  assert.ok(capacityEvidence);
+  assert.equal(capacityEvidence.bytes,f.plan.capacityPlan.bytes);
+  assert.equal(capacityEvidence.sha256,f.plan.capacityPlan.sha256);
   const identity={policy:f.manifest.policy,evidenceLayout:f.manifest.evidenceLayout,sources:f.manifest.sources.map((source:any)=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as any).filter(([key])=>key!=='path')):value])))};
   assert.equal(first.producerCatalogueRevision,'osm-'+h(canonical(identity)));
   await verifyProductionAdmissionWithContext({...f.options(),expectedSnapshot:first.snapshotSha256},f.context);

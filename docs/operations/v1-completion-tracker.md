@@ -160,3 +160,7 @@ Reviewed against the original remaining-ticket matrix, four-stage contract and l
 ## Partition integration verification — 17 October 2026
 
 Integrated reviewed geography commits `e470872` and `a6c8f9e`, registered both new TypeScript suites (large test remains explicitly opt-in), and verified the retained large-test source hash and all seven metadata pins. Combined root suite: **1,056 tests, 1,054 passed, two skipped, zero failures**; all three TypeScript configurations passed. The opt-in large fixture passed once in the geography lane; no duplicate large execution was performed. Exact integrated-commit CI follows the coordinator push. Original ticket and stage acceptance counts are unchanged.
+
+### Windows integration follow-up
+
+Integrated CI on `cd1707f` ([run 38969497290](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38969497290)) passed five jobs and failed Windows Node at the new capacity-pin fixture: it compared the canonical admission path with an uncanonicalized temporary path. The test-only correction resolves the expected path and also checks exact bytes/SHA; all 13 affected admission tests pass locally, and independent review confirmed no production change or weakened assertion. The corrected commit requires its own CI result.
