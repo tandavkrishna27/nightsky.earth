@@ -4,7 +4,7 @@
 
 **Goal:** Advance existing S2-G2, S2-H2 and S2-E2 through concrete proposals and offline executor preparation, without acquiring data.
 
-**Spec:** [Fixed completion tracker](../../operations/v1-completion-tracker.md), N1â€“N3. Permanent stages and original ticket acceptance are unchanged.
+**Spec:** [Fixed completion tracker](../../operations/v1-completion-tracker.md), N1–N3. Permanent stages and original ticket acceptance are unchanged.
 
 **Architecture:** Reuse the fixed time-series transport/state machine and existing Windows process containment. Geography and events produce retained-evidence proposals; root owns tracker, CI registration and integration.
 
