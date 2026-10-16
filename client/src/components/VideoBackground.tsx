@@ -1,62 +1,46 @@
-import { useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-
-interface VideoBackgroundProps {
+import { useEffect, useRef, useState } from "react";
+export default function VideoBackground({
+  videoUrl,
+  fallbackImage,
+  overlay = true,
+}: {
   videoUrl: string;
   fallbackImage?: string;
   overlay?: boolean;
   overlayOpacity?: number;
   className?: string;
-}
-
-export default function VideoBackground({ 
-  videoUrl, 
-  fallbackImage,
-  overlay = true,
-  overlayOpacity = 0.5,
-  className = ""
-}: VideoBackgroundProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
+}) {
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = 0.75; // Slow motion for more cinematic feel
-      
-      // Programmatically play the video to ensure it starts
-      videoRef.current.play().catch((error) => {
-        console.log('Video autoplay prevented:', error);
-      });
-    }
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
   }, []);
-
+  useEffect(() => {
+    if (!reduced && !failed) ref.current?.play().catch(() => setFailed(true));
+  }, [reduced, failed]);
   return (
-    <div className={`absolute inset-0 overflow-hidden ${className}`}>
-      <video
-        ref={videoRef}
-        autoPlay={true}
-        loop={true}
-        muted={true}
-        playsInline={true}
-        className="absolute inset-0 w-full h-full object-cover"
-        poster={fallbackImage}
-      >
-        <source src={videoUrl} type="video/mp4" />
-        {fallbackImage && (
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${fallbackImage})` }}
-          />
-        )}
-      </video>
-      
-      {overlay && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: overlayOpacity }}
-          transition={{ duration: 1 }}
-          className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"
-        />
+    <div className="sky-media" aria-hidden="true">
+      {fallbackImage && <img src={fallbackImage} alt="" fetchPriority="high" />}
+      {!reduced && !failed && (
+        <video
+          ref={ref}
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster={fallbackImage}
+          onError={() => setFailed(true)}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
       )}
+      {overlay && <div className="sky-shade" />}
     </div>
   );
 }

@@ -12,11 +12,8 @@
     NODE_VERSION = "20"
 
 # Redirect rules for Single Page Application
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+[functions]
+  directory = "netlify/functions"
 
 # Headers for security and caching
 [[headers]]
