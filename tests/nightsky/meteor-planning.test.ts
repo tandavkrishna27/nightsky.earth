@@ -79,6 +79,21 @@ test("a reviewed 2026 peak remains exact in the plan while full activity-season 
   assert.equal(result.factors.find(row => row.name === "Meteor shower and sky events")!.impact, "unknown");
 });
 
+test("qualified Andromedid annual guidance reaches a plan without inventing an event or radiant", async () => {
+  const annualWindow = { startUtc: "2028-01-02T20:00:00Z", endUtc: "2028-01-03T04:00:00Z", timeZone: "Europe/London" };
+  const result = await planObservingSession({ placeId, window: annualWindow, activity: "meteor-shower", target: "AND" }, {
+    ...services(), searchEvents: (p, w) => searchSkyEvents({ placeId: p, window: w, eventTypes: ["meteor-shower"] }, index),
+  });
+  const guidance = result.evidence!.events!.meteorCalendarGuidance!.entries.find(row => row.code === "AND");
+  assert.ok(guidance, "Andromedid annual guidance missing from composed evidence");
+  assert.match(guidance.caveat, /most years/i);
+  assert.equal(guidance.requestedWindowOverlap, "not-evaluated");
+  assert.deepEqual(result.evidence!.events!.events, []);
+  assert.ok(result.evidence!.meteorRadiantSamples!.every(sample => sample.status !== "available" && !("altitudeDeg" in sample)));
+  assert.ok(result.sources.some(row => row.url === "https://www.emeteornews.net/2021/12/01/andromedid-activity-in-2021/"));
+  assert.equal(result.availability.status, "partial");
+});
+
 test("an independently referenced below-horizon eclipse is an unfavorable event factor", async () => {
   const eclipseWindow = { startUtc: "2026-03-03T08:00:00Z", endUtc: "2026-03-03T16:00:00Z", timeZone: "Europe/London" };
   const result = await planObservingSession({ placeId, window: eclipseWindow, activity: "eclipse" }, {
