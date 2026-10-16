@@ -135,8 +135,15 @@ deadline, 1 MiB stdout and 64 KiB stderr limits. Failures return no admitted
 snapshot and create no production output. These are local input-validation
 bounds, not a source receipt or producer runtime allowance.
 Cross-phase code pins include the gate, source validator, Natural Earth policy,
-Python bridge and fixed `production-type-loader.mjs`, so a changed loader or bridge cannot silently
-reuse an earlier snapshot.
+Python bridge, fixed `production-type-loader.mjs` and the repository-owned
+membership executable import closure: assembly, boundary classifier/shards,
+geometry, source bridge/configuration, publisher, byte normalizer and shared
+catalogue schemas. Both languages select the same 17 fixed files in the same
+order. A changed classifier, dependency, loader or bridge cannot silently reuse
+an earlier snapshot; old envelopes must be regenerated. Existing one-MiB
+per-code-file reads, shared metadata allocation and retained-path/lease limits
+remain unchanged. The [spatial-index report](boundary-spatial-index-20261017.md)
+records the mutation and closure checks.
 The gate loader uses Node 24's built-in type stripping without an esbuild child,
 preserving the existing two-process Job ceiling for the Python worker and Node
 gate. It adds no process or memory allowance.

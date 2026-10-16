@@ -1,0 +1,62 @@
+{
+  "kind": "bounded-retained-boundary-index-equivalence",
+  "schemaVersion": 1,
+  "bodyAcquisition": false,
+  "sourceJobs": 0,
+  "geometryAdmission": false,
+  "topologyRevalidation": false,
+  "description": "Hash-checked existing normalized bodies; direct parsed geometry, exact existing boundedContains oracle; finite point sample only, not coverage or throughput.",
+  "inputs": [
+    {
+      "bytes": 12596289,
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\nine-global-staged-validation-20261016-v6\\prepared\\boundaries-0.geojson",
+      "sha256": "c05e09728d6fa92c56f44c54ccda87b8bdbd14d1733d9307d2d9e51b69259d99"
+    },
+    {
+      "bytes": 24718304,
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\nine-global-staged-validation-20261016-v6\\prepared\\boundaries-1.geojson",
+      "sha256": "63599bc852fa013b398ff222de5d23f8dea2e578d2d17ae2a6b36d4f6bc9b642"
+    },
+    {
+      "bytes": 7940290,
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\nine-global-staged-validation-20261016-v6\\prepared\\boundaries-2.geojson",
+      "sha256": "16a8e80eef9b135cf8b4536d93c2d924546cace5d7a33912077ed86fa23dd1ce"
+    }
+  ],
+  "features": 4854,
+  "unresolved": 70,
+  "points": 500,
+  "mismatches": 0,
+  "classificationDigest": "6cb2fd9960fc3fd5030888bb39af7c6d0bb685b0d7f2c2ad628dee4634bee366",
+  "work": {
+    "indexedBuild": 2082870,
+    "indexedQuery": 21014425,
+    "linearBuild": 1848594,
+    "linearQuery": 23364176,
+    "sharedWork": 48316118
+  },
+  "limits": {
+    "boundaryBytes": 67108864,
+    "points": 512,
+    "sharedWork": 200000000,
+    "wallSeconds": 60,
+    "rssBytes": 2147483648,
+    "nodeHeapMiB": 1280,
+    "rssObservation": "sampled every 4096 diagnostic checks; not a hard process-tree limit"
+  },
+  "elapsedSeconds": 2.0682595999999998,
+  "observedRssBytes": 452956160,
+  "codePins": [
+    {
+      "path": "scripts/osm/boundary-metadata.ts",
+      "bytes": 11597,
+      "sha256": "51e0b18758ba3a8a42febc155a1b56a59ad4a21d1bb6e61728e918bb6ef0a55a"
+    },
+    {
+      "path": "scripts/osm/geographic-geometry.ts",
+      "bytes": 10981,
+      "sha256": "c3dbd31c574f34d027c8d0681e2fb43825e7797be4eb1b059115121e7a441975"
+    }
+  ],
+  "recordedUtc": "2026-10-16T20:39:18.995094+00:00"
+}

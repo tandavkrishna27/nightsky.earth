@@ -4,7 +4,7 @@ import {mkdtemp,writeFile,readFile,access,realpath,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
-import {buildBoundaryMetadata,boundedContains} from '../../scripts/osm/boundary-metadata';
+import {buildBoundaryMetadata,boundedContains,indexedBoundaryContains} from '../../scripts/osm/boundary-metadata';
 import {contains} from '../../scripts/osm/geographic-geometry';
 const source={name:'Synthetic',url:'https://example.org',attribution:'Synthetic',dataClass:'catalog'};
 const fixtureRoots:string[]=[];
@@ -23,6 +23,60 @@ test('bounded classifier matches exact classification across dateline parts and 
   for(let x=-180;x<=180;x+=2.5)for(let y=-6;y<=6;y+=.5)assert.equal(query([x,y]),contains([x,y],boundary,()=>{}));
   for(const x of [-180,-170,-4,-2,2,4,170,180])for(const delta of [-2e-10,-5e-11,0,5e-11,2e-10])assert.equal(query([x+delta,0]),contains([x+delta,0],boundary,()=>{}));
  }
+});
+const indexedResults=(hits:ReturnType<ReturnType<typeof indexedBoundaryContains>>)=>hits.map(({index,status})=>[index,status]);
+test('spatial index preserves linear feature order, holes, contacts, polar and dateline uncertainty',()=>{
+ const geometry:any[]=[
+  {region:{regionId:'country',adminLevel:0},polygons:[[ring(-10,-10,10,10),ring(-2,-2,2,2)]]},
+  {region:{regionId:'state',adminLevel:1},polygons:[[ring(0,0,4,4)]]},
+  {region:{kind:'unresolved-boundary',boundaryId:'unresolved:ne:0:X',adminLevel:0},polygons:[[ring(3,3,6,6)]]},
+  {region:{regionId:'dateline'},polygons:[[ring(170,-5,180,5)],[ring(-180,-5,-170,5)]]},
+  {region:{regionId:'polar'},polygons:[[ring(-5,85,5,90)],[ring(-5,-90,5,-85)]]},
+  {region:{regionId:'tangent-hole'},polygons:[[ring(20,0,30,10),[[20,5],[23,3],[23,7],[20,5]]]]},
+  ...Array.from({length:20},(_,i)=>({region:{regionId:`far-${i}`},polygons:[[ring(40+i*2,40,41+i*2,41)]]})),
+ ];
+ const linear=geometry.map(b=>boundedContains(b,()=>{}));
+ const indexed=indexedBoundaryContains(geometry,()=>{});
+ const points:[number,number][]=[];
+ for(let x=-180;x<=180;x+=7.5)for(let y=-90;y<=90;y+=7.5)points.push([x,y]);
+ for(const [x,y] of [[-180,0],[180,0],[-170,0],[170,0],[-10,0],[10,0],[-2,0],[2,0],[3,4],[20,5],[23,5],[0,85],[0,90],[0,-90],[0,-85]]){
+  for(const delta of [-2e-10,-5e-11,0,5e-11,2e-10])points.push([x+delta,y],[x,y+delta]);
+ }
+ for(const point of points){
+  const expected=linear.map((query,index)=>[index,query(point)]).filter(([,status])=>status!==0);
+  const hits=indexed(point);assert.deepEqual(indexedResults(hits),expected,`query ${point}`);
+  assert.ok(hits.every(hit=>hit.b===geometry[hit.index]));
+ }
+});
+test('spatial query work prunes 4854 disjoint features with construction charged separately',()=>{
+ const geometry:any[]=Array.from({length:4854},(_,index)=>{
+  const x=-170+(index%100)*3.3,y=-80+Math.floor(index/100)*3.2;
+  return {region:{regionId:String(index)},polygons:[[ring(x,y,x+.2,y+.2)]]};
+ });
+ let ticks=0;const indexed=indexedBoundaryContains(geometry,()=>{ticks++;}),buildTicks=ticks;
+ assert.ok(buildTicks>geometry.length*5,'construction includes every vertex and tree work');
+ assert.ok(buildTicks<500000,'construction stays within a finite deterministic test budget');
+ const linear=geometry.map(b=>boundedContains(b,()=>{}));ticks=0;
+ for(let i=0;i<64;i++){
+  const index=i*73,x=-170+(index%100)*3.3+.1,y=-80+Math.floor(index/100)*3.2+.1;
+  assert.deepEqual(indexedResults(indexed([x,y])),linear.map((query,j)=>[j,query([x,y])]).filter(([,status])=>status!==0));
+ }
+ assert.ok(ticks<64*256,`query work ${ticks} must avoid the old ${64*4854} feature visits`);
+});
+test('empty, singleton and identical-centre trees preserve hits and propagate work failures',()=>{
+ const boundary:any={region:{regionId:'same'},polygons:[[ring(-1,-1,1,1)]]};
+ assert.deepEqual(indexedBoundaryContains([],()=>{})([0,0]),[]);
+ assert.deepEqual(indexedResults(indexedBoundaryContains([boundary],()=>{})([0,0])),[[0,1]]);
+ const geometry=Array.from({length:40},()=>boundary),expected=geometry.map((_,i)=>[i,1]);
+ let ticks=0;const indexed=indexedBoundaryContains(geometry,()=>{ticks++;});
+ assert.deepEqual(indexedResults(indexed([0,0])),expected);
+ assert.throws(()=>indexed([NaN,0]),/Finite/);assert.throws(()=>indexed([0,Infinity]),/Finite/);
+ assert.throws(()=>indexedBoundaryContains(geometry,()=>{throw new Error('build-stop');}),/build-stop/);
+ let remaining=Infinity;const budgeted=indexedBoundaryContains(geometry,()=>{if(--remaining<0)throw new Error('query-stop');});
+ remaining=0;assert.throws(()=>budgeted([0,0]),/query-stop/);
+ remaining=8;assert.throws(()=>budgeted([0,0]),/query-stop/);
+ remaining=Infinity;assert.deepEqual(indexedResults(budgeted([0,0])),expected);
+ assert.ok(ticks>0);
 });
 const feature=(id:string,level:number,coordinates:any,countryCode='IND')=>({type:'Feature',properties:{regionId:`region:v1:${id}`,name:id,countryCode,adminLevel:level,boundaryRevision:'fixture',sources:[source]},geometry:{type:'Polygon',coordinates}});
 const row=(id:number,x:number,y:number)=>({placeId:`place:v1:osm:node:${id}`,name:'Park',category:'park',latitude:y,longitude:x,accessEvidence:{status:'unknown'},sources:[source],caveats:[],catalogueRevision:'fixture',sourceCompleteness:1,regionIds:[]});
@@ -48,4 +102,16 @@ test('shard inventories, aggregate bytes/work/vertices, output and input mutatio
 
 test('offline membership accepts explicit 200M comparison ceiling and rejects larger budgets',async()=>{
  const f=await fixture([feature('country',0,[ring(0,0,10,10)])],[row(1,1,1)]);await assert.rejects(buildBoundaryMetadata(f.input,f.output,{maxComparisons:200000001}),/Unsupported budget/);await assert.rejects(access(join(f.output,'complete.json')));await buildBoundaryMetadata(f.input,f.output,{maxComparisons:200000000});
+});
+
+test('full feature-count membership avoids visiting every distant feature for each candidate',async()=>{
+ const features=Array.from({length:4854},(_,i)=>{
+  const x=-170+(i%100)*3.3,y=-80+Math.floor(i/100)*3.2;
+  return feature(`cell-${i}`,0,[ring(x,y,x+.2,y+.2)]);
+ });
+ const f=await fixture(features,Array.from({length:256},(_,i)=>row(i,-169.9,-79.9)));
+ await buildBoundaryMetadata(f.input,f.output,{maxComparisons:1000000});
+ const enriched=await values(join(f.output,'candidates.jsonl'));
+ assert.equal(enriched.length,256);
+ assert.ok(enriched.every(item=>item.countryCode==='IND'&&item.regionIds.join(',')==='region:v1:cell-0'));
 });
