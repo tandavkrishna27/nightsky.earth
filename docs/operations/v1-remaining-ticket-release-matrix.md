@@ -1,5 +1,7 @@
 # V1 remaining-ticket and release matrix
 
+Current stage progress and ticket mapping: [fixed completion tracker](v1-completion-tracker.md). This matrix preserves original acceptance; dated implementation observations below are historical snapshots.
+
 Audit date: 15 October 2026. Read-only audit of baseline `c64d9fd`, branch `codex/plugin-v1`; this document adds no implementation, acquisition, installation, model run or release evidence.
 
 ## Accounting and authority

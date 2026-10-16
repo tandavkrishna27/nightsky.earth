@@ -1,5 +1,7 @@
 # NightSky V1 implementation status
 
+**Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
+
 **Offline time-series and boundary adapters, 16 October:** [wave record](offline-timeseries-boundaries-wave.md) adds the browser-verified CDS request as a plan-only offline adapter and pinned Natural Earth local ingestion. Live execution/scientific acceptance and actual production geometry remain separate gates. Original **12 Done / 9 Partial / 6 Not started** unchanged.
 
 **Three-lane source-admission wave, 16 October:** [current delivery](source-admission-three-lane-wave-20261016.md) admits twelve 2027 NASA maxima with exact-year validation and updated five workflows, package 1.0.13. Historical query serialization remains unverified; two immutable Natural Earth GeoJSON inputs are proposed, not acquired. Original **12 Done / 9 Partial / 6 Not started** remains unchanged.

@@ -1,5 +1,7 @@
 # V1 production completion goal — 16 October 2026
 
+Current progress against these four permanent stages: [completion tracker](v1-completion-tracker.md). Baseline facts below remain preserved; later reviewed deliveries are recorded there.
+
 This is the active completion contract, using the existing tickets rather than creating a new completion count. The product remains global and free, with no database and a shared MCP backend plus five workflow skills. Deployment and new data downloads are not authorized. Claude testing is deferred by the owner; earlier results remain evidence with their original version and scope.
 
 ## Frozen local engineering baseline

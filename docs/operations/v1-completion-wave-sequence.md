@@ -2,6 +2,8 @@
 
 # Sequence after offline build preparation
 
+**Historical sequence:** current status and next work are maintained in the [fixed completion tracker](v1-completion-tracker.md). Do not restart or renumber the remaining stages from this dated record.
+
 **Latest source delivery, 16 October:** [three-lane record](source-admission-three-lane-wave-20261016.md) integrates twelve actual 2027 maxima; current global boundary-body proposal has exact immutable paths, while time-series date/location serialization still needs official evidence. No large geometry/weather downloads or deployment.
 
 **Current source decision, 16 October:** [completed authorized metadata check](public-source-check-20261016.md) identifies the 2027 NASA report, a uniform public-domain boundary alternative and incomplete time-series request metadata. Next resolve the source/query choices and obtain a finite actual-body allowance; do not repeat completed lineage/producer work.
