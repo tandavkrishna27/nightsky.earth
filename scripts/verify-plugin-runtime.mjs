@@ -3,13 +3,22 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { createServer } from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
+import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { gzipSync } from "node:zlib";
+
+// The city is fictional; meteor facts still load from the real reviewed catalog.
+// Explicit fixture selection makes this check independent of ignored local data.
+const directory = await mkdtemp(join(tmpdir(), "nightsky-plugin-runtime-"));
+const cityIndex = join(directory, "cities.gz");
 
 async function verifyMode(mode) {
 const probe=createServer().listen(0,"127.0.0.1");
 await once(probe,"listening");
 const port=probe.address().port;
 await new Promise(done=>probe.close(done));
-const environment={...process.env,NIGHTSKY_MCP_TOOL_MODE:mode,NODE_ENV:"production",HOST:"127.0.0.1",PORT:String(port),NIGHTSKY_MCP_ALLOWED_HOSTS:"127.0.0.1"};
+const environment={...process.env,NIGHTSKY_GEONAMES_INDEX:cityIndex,NIGHTSKY_MCP_TOOL_MODE:mode,NODE_ENV:"production",HOST:"127.0.0.1",PORT:String(port),NIGHTSKY_MCP_ALLOWED_HOSTS:"127.0.0.1"};
 const child=spawn(process.execPath,["dist/plugin.js"],{env:environment,stdio:["ignore","ignore","ignore"]});
 let spawnFailed=false;child.on("error",()=>{spawnFailed=true;});
 const base=`http://127.0.0.1:${port}`;
@@ -33,8 +42,8 @@ try{
   if (mode === "full") {
   for(const name of ["resolve_place","get_clear_sky_climatology","plan_observing_session","compare_observing_options","recommend_specialist_tools"])assert.ok(listed.tools.some(tool=>tool.name===name));
   const suggested=await rpc(3,"tools/call",{name:"recommend_specialist_tools",arguments:{activity:"general-stargazing"}});assert.equal(suggested.isError,undefined);assert.ok(suggested.structuredContent.recommendations.length);
-  const meteor=await rpc(4,"tools/call",{name:"search_sky_events",arguments:{placeId:"place:v1:geonames:1259229",window:{startUtc:"2027-11-20T00:00:00Z",endUtc:"2027-11-21T00:00:00Z",timeZone:"Asia/Kolkata"},eventTypes:["meteor-shower"]}});
-  assert.equal(meteor.isError,undefined);assert.equal(meteor.structuredContent.availability.status,"partial");
+  const meteor=await rpc(4,"tools/call",{name:"search_sky_events",arguments:{placeId:"place:v1:geonames:9999991",window:{startUtc:"2027-11-20T00:00:00Z",endUtc:"2027-11-21T00:00:00Z",timeZone:"Asia/Kolkata"},eventTypes:["meteor-shower"]}});
+  assert.equal(meteor.isError,undefined,JSON.stringify(meteor));assert.equal(meteor.structuredContent.availability.status,"partial");
   const leonids=meteor.structuredContent.events.find(event=>event.name==="Leonids");
   assert.equal(leonids?.peakUtc,"2027-11-20T04:38:00Z");assert.equal(leonids?.localVisibility,"not-evaluated");
   assert.equal(leonids?.source.url,"https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf");
@@ -48,5 +57,10 @@ try{
 }
 
 }
-await verifyMode("full");
-await verifyMode("resolver-only");
+try {
+  await writeFile(cityIndex, gzipSync(JSON.stringify({schemaVersion:2,vintage:"fictional-plugin-runtime-city",generatedAt:"2026-10-16T00:00:00Z",cities:[[9999991,"Fictional India Town","Fictional India Town","",18.52,73.85,"IN","India",1,"Asia/Kolkata"]]})));
+  await verifyMode("full");
+  await verifyMode("resolver-only");
+} finally {
+  await rm(directory,{recursive:true,force:true});
+}
