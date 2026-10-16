@@ -22,7 +22,7 @@ class Assembly(unittest.TestCase):
 
     @unittest.skipUnless(os.name=='nt','Windows Job integration')
     def test_raw_membership_catalogue_preserves_lineage_and_unknown_coverage(self):
-        from supervised_membership_assembly import assembly_pipeline
+        from fixture_execution import fixture_assembly_pipeline as assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()
         try:
             m=fixture.manifest([fixture.node(),fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
@@ -40,7 +40,7 @@ class Assembly(unittest.TestCase):
 
     @unittest.skipUnless(os.name=='nt','Windows Job integration')
     def test_selected_references_plan_runs_and_records_mode(self):
-        from supervised_membership_assembly import assembly_pipeline
+        from fixture_execution import fixture_assembly_pipeline as assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()
         try:
             m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
@@ -52,7 +52,7 @@ class Assembly(unittest.TestCase):
         finally: fixture.doCleanups()
 
     def test_bad_pin_and_retained_overlap_reject_before_job(self):
-        from supervised_membership_assembly import assembly_pipeline
+        from fixture_execution import fixture_assembly_pipeline as assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()
         try:
             m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
@@ -68,7 +68,7 @@ class Assembly(unittest.TestCase):
 
     @unittest.skipUnless(os.name=='nt','Windows Job integration')
     def test_membership_failure_retains_raw_evidence_without_completion(self):
-        from supervised_membership_assembly import assembly_pipeline
+        from fixture_execution import fixture_assembly_pipeline as assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()
         try:
             m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
@@ -102,7 +102,7 @@ class Assembly(unittest.TestCase):
 
     @unittest.skipUnless(os.name=='nt','Windows Job integration')
     def test_bad_content_pin_stops_inside_supervision_before_raw(self):
-        from supervised_membership_assembly import assembly_pipeline
+        from fixture_execution import fixture_assembly_pipeline as assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()
         try:
             m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
@@ -132,7 +132,7 @@ class Assembly(unittest.TestCase):
 
     @unittest.skipUnless(os.name=='nt','Windows Job integration')
     def test_planet_domain_runs_under_supervised_assembly_and_is_accounted(self):
-        from supervised_membership_assembly import assembly_pipeline
+        from fixture_execution import fixture_assembly_pipeline as assembly_pipeline
         fixture=fixtures.Pipeline();fixture.setUp()
         try:
             m,d,domain,bind=fixtures.planet_fixture(fixture)

@@ -20,6 +20,12 @@ Completion carries `sourceDomains` entries with `sourceId` plus the domain pin. 
 
 This closes the local producer/assembly contract gap. Independent operator-controlled source policy and trusted reviews remain a separate preparation gate, as for existing extracts. The production CLI still cannot admit the real planet before an approved inventory revision and actual retained raw/native evidence exist. No download, provider job or runtime promotion is authorized by these functions.
 
+## Production invocation binding — 17 October 2026
+
+[The production gate](production-source-admission.md) now runs before producer/assembly execution and again before completion and resume. An exact independently pinned envelope binds the actual raw manifest and assembly plan, every source bundle, normalized boundary lineage and consumed geometry/footprint pins. The gate derives the immutable operator policy and a fixed empty trusted-review allowlist; candidate policy/trust files and copied snapshots cannot grant admission. Source subjects and policy digests, full invocation hashes, producer manifest/revision/policy and fixed executable context participate in the snapshot. Windows production retains read leases across stages, refusing writes/deletes without another raw allocation. The raw CLI also holds its retained input leases.
+
+Provider-aware Natural Earth conditions come from explicit trusted records rather than candidate labels; legacy geoBoundaries conditions stay unchanged. Real planet and selected Natural Earth records/reviews are still unavailable. This implements the enforcement path and does not fabricate or grant its missing actual-source inputs. The direct producer-to-catalogue bridge fails before a job because it has no admitted boundary assembly contract; production uses supervised membership assembly. Test-owned tiny reserved-domain launchers exercise library primitives and expose no production CLI bypass.
+
 ## Assembly fit
 
 `membership-assembly.ts` parses all three completion pins (candidates, exclusions, lineage) under an individual **128 MiB** maximum before creating membership staging. Footprints have the same maximum. Producer aggregate output limits cannot override these individual caps. Oversized evidence must result in retained failure evidence and a revised capacity decision, not an automatic ceiling increase. Boundary membership and publisher limits remain additional constraints; no partition merger is present.

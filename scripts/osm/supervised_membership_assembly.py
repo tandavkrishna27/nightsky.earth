@@ -4,12 +4,13 @@ import json
 from pathlib import Path
 import re
 import sys
-from global_source import validate_manifest, planet_retained_paths
+from global_source import validate_manifest, planet_retained_paths, admitted_raw_leases
+from production_admission import verify_production_admission
 from global_source_supervisor import supervise
 from spot_paths import safe_path
 
 
-def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, node='node', python=None, accounting_paths=()):
+def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, node='node', python=None, accounting_paths=(), admission_path=None, admission_sha256=None):
     manifest_path=safe_path(manifest_path); root=safe_path(root); plan_path=safe_path(plan_path)
     if manifest_path.stat().st_size>1024*1024: raise ValueError('manifest byte limit')
     with manifest_path.open('rb') as handle: manifest_body=handle.read(1024*1024+1)
@@ -41,13 +42,32 @@ def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, no
     # Reject overlap before platform/limit checks and before creating any evidence.
     for i,path in enumerate(retained):
         if path==root or path.is_relative_to(root) or root.is_relative_to(path) or any(path==q or path.is_relative_to(q) or q.is_relative_to(path) for q in retained[:i]): raise ValueError('overlapping retained accounting')
+    admitted=verify_production_admission(manifest_path,admission_path,admission_sha256,'preflight',
+        expected_plan_path=plan_path,expected_plan_sha256=plan_sha256)
+    # Shared evidence is counted once; explicit retained overlaps stay rejected.
+    for pin in [admitted.get('admission',{}),*admitted.get('metadataPins',[]),*admitted.get('codePins',[])]:
+        if not pin.get('path'): continue
+        path=safe_path(pin['path'])
+        if path not in retained: retained.append(path)
+    commands=production_commands(manifest_path,root,plan_path,plan_sha256,manifest_body,geography_mode,node,python,
+        admission_path,admission_sha256,admitted['snapshotSha256'])
+    # Freeze retained files across stage transitions. On Windows these handles
+    # deny writes/deletes, including through hardlink aliases, without a raw copy.
+    with admitted_raw_leases([{'path':p} for p in retained if p.is_file()]):
+        verify_production_admission(manifest_path,admission_path,admission_sha256,'preflight',admitted['snapshotSha256'],
+            expected_plan_path=plan_path,expected_plan_sha256=plan_sha256)
+        return supervise(commands,root,limits,retained=retained)
+
+
+def production_commands(manifest_path,root,plan_path,plan_sha256,manifest_body,geography_mode,node,python,admission_path,admission_sha256,snapshot):
     scripts=Path(__file__).resolve().parent
     worker=[node,'--max-old-space-size=1280','--import',(scripts.parents[1]/'node_modules'/'tsx'/'dist'/'loader.mjs').as_uri(),str(scripts/'membership-assembly.ts')]
-    # Validate the complete TypeScript plan under the same containment before raw parsing.
-    commands=[[*worker,'--prepare',str(plan_path),plan_sha256,str(manifest_path),str(len(manifest_body)),hashlib.sha256(manifest_body).hexdigest(),str(root/'raw-manifest.json')],
-              [python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(root/'raw-manifest.json'),str(root/'normalized'),'--geography-mode',geography_mode],
-              [*worker,str(plan_path),plan_sha256,str(root/'normalized'),str(root)]]
-    return supervise(commands,root,limits,retained=retained)
+    gate=['--admission',str(admission_path),'--admission-sha256',admission_sha256,'--admission-snapshot',snapshot]
+    # The staged manifest is audit evidence. The raw invocation reads the exact
+    # independently admitted original pin, under the same retained-file leases.
+    return [[*worker,'--prepare',str(plan_path),plan_sha256,str(manifest_path),str(len(manifest_body)),hashlib.sha256(manifest_body).hexdigest(),str(root/'raw-manifest.json'),*gate],
+            [python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(manifest_path),str(root/'normalized'),'--geography-mode',geography_mode,'--admission',str(admission_path),admission_sha256,'--admission-snapshot',snapshot],
+            [*worker,str(plan_path),plan_sha256,str(root/'normalized'),str(root),'--manifest',str(manifest_path),*gate]]
 
 
 def load_limits(path):
@@ -60,6 +80,7 @@ if __name__=='__main__':
     import argparse
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ('manifest','root','plan','sha256','limits'): parser.add_argument(name)
+    parser.add_argument('--admission',nargs=2,required=True,metavar=('FILE','SHA256'))
     args=parser.parse_args();path=safe_path(args.limits)
-    result=assembly_pipeline(args.manifest,args.root,args.plan,args.sha256,load_limits(path),accounting_paths=[path])
+    result=assembly_pipeline(args.manifest,args.root,args.plan,args.sha256,load_limits(path),accounting_paths=[path],admission_path=args.admission[0],admission_sha256=args.admission[1])
     sys.exit(0 if result['status']=='complete' else 1)

@@ -1,7 +1,9 @@
-import {open,mkdir,writeFile} from 'node:fs/promises';
+import {open,mkdir,writeFile,lstat} from 'node:fs/promises';
 import {join,resolve,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {parseArgs} from 'node:util';
+import {verifyProductionAdmission} from './production-source-admission';
 import * as z from 'zod4';
 import {safe,buildSourceCatalogue} from './build-source-catalogue';
 import {buildBoundaryMetadata} from './boundary-metadata';
@@ -15,7 +17,18 @@ const domainPin=pin.extend({sourceId:z.string().regex(/^[A-Za-z0-9_-]{1,80}$/),k
 const filePin=pin.omit({path:true});
 const membership=z.strictObject({maxBoundaryBytes:integer(64*1024**2).optional(),maxVertices:integer(1000000).optional(),maxTotalVertices:integer(2000000).optional(),maxMilliseconds:integer(1800000).optional(),maxComparisons:integer(200000000).optional(),maxRows:integer(1000000).optional(),maxOutputBytes:integer(1024**3).optional()});
 const planSchema=z.strictObject({schemaVersion:z.literal(1),geographyMode:z.enum(['all-nodes','selected-references']).optional(),sourceDomains:z.array(domainPin).min(1).max(64).optional(),boundaries:z.array(z.strictObject({input:pin,regionIds:z.array(z.string().min(1).max(200)).max(10000),unresolvedBoundaryIds:z.array(z.string().min(1).max(400)).max(10000).optional()})).min(1).max(100),footprints:pin,membership,stream:streamLimitsSchema,catalogue:catalogueOptionsSchema,retained:z.array(z.string().refine(isAbsolute)).max(100)});
-async function small(path:string,max:number){const h=await open(await safe(path),'r');try{const a=await h.stat();if(!a.isFile()||a.size>max)throw new Error('Descriptor byte limit');const body=await h.readFile();const b=await h.stat();if(body.length!==a.size||a.size!==b.size||a.mtimeMs!==b.mtimeMs)throw new Error('Descriptor mutation');return body;}finally{await h.close();}}
+async function small(path:string,max:number){
+ const absolute=await safe(path),h=await open(absolute,'r');
+ try{
+  const before=await h.stat();if(!before.isFile()||before.size>max)throw new Error('Descriptor byte limit');
+  const bytes=Buffer.alloc(before.size+1);let count=0;
+  while(count<bytes.length){const {bytesRead}=await h.read(bytes,count,bytes.length-count,null);if(!bytesRead)break;count+=bytesRead;}
+  const after=await h.stat(),linked=await lstat(await safe(absolute));
+  const state=(value:typeof before)=>[value.dev,value.ino,value.size,value.mtimeMs,value.ctimeMs].join(':');
+  if(count!==before.size||count>max||state(before)!==state(after)||state(after)!==state(linked))throw new Error('Descriptor mutation/byte limit');
+  return bytes.subarray(0,count);
+ }finally{await h.close();}
+}
 export async function loadAssemblyPlan(path:string,sha256:string){
  const body=await small(path,1024*1024);if(!/^[a-f0-9]{64}$/.test(sha256)||createHash('sha256').update(body).digest('hex')!==sha256)throw new Error('Assembly digest mismatch');
  const plan=planSchema.parse(JSON.parse(new TextDecoder('utf8',{fatal:true}).decode(body)));
@@ -35,10 +48,20 @@ async function copyPinned(input:z.infer<typeof pin>,output?:string){
   const after=await h.stat();await safe(input.path);if(total!==input.bytes||before.size!==after.size||before.mtimeMs!==after.mtimeMs||hash.digest('hex')!==input.sha256)throw new Error('Input mutation/digest mismatch');
  }finally{await h.close();await out?.close();}
 }
-export async function assembleMembership(planPath:string,sha256:string,producer:string,root:string){
+type ProductionGate={manifestPath:string;admissionPath:string;admissionSha256:string;expectedSnapshot?:string};
+export async function prepareAssemblyInputs(planPath:string,sha256:string,input:z.infer<typeof pin>,output:string){
+ await loadAssemblyPlan(planPath,sha256);
+ if(input.bytes>1024*1024)throw new Error('Manifest byte limit');
+ await copyPinned(pin.parse(input),output);
+}
+/** Library primitive; executable production entry points always provide a fixed-authority gate. */
+export async function assembleMembership(planPath:string,sha256:string,producer:string,root:string,admission?:ProductionGate){
+ const admitted=admission?await verifyProductionAdmission({...admission,phase:'assembly-before',expectedPlanPath:planPath,expectedPlanSha256:sha256}):undefined;
  const plan=await loadAssemblyPlan(planPath,sha256);await safe(root);
  const original=await small(join(producer,'complete.json'),1024*1024),done=JSON.parse(original.toString('utf8'));
  if(done.schemaVersion!==1||!done.files?.['candidates.jsonl'])throw new Error('Producer completion required');
+ if((done.admissionSnapshotSha256??undefined)!==admitted?.snapshotSha256)throw new Error('Producer admission identity mismatch');
+ if(admitted&&(done.manifestSha256!==admitted.producerManifestSha256||done.policy!==admitted.policy||done.catalogueRevision!==admitted.producerCatalogueRevision))throw new Error('Producer admitted manifest/policy/revision mismatch');
  if(Object.keys(done.files).sort().join(',')!=='candidates.jsonl,exclusions.jsonl,lineage.jsonl')throw new Error('Complete raw producer evidence required');
  if((done.geographyMode??'all-nodes')!==(plan.geographyMode??'all-nodes'))throw new Error('Producer geography mode mismatch');
  const domains=z.array(domainPin).max(64).parse(done.sourceDomains??[]);
@@ -57,12 +80,23 @@ export async function assembleMembership(planPath:string,sha256:string,producer:
  if(!(await small(join(producer,'complete.json'),1024*1024)).equals(original))throw new Error('Producer descriptor mutation');
  for(const item of producerPins)await copyPinned(item);
  await loadAssemblyPlan(planPath,sha256);
- const evidence={schemaVersion:1,planSha256:sha256,producerDirectory:producer,producerDescriptor:done,producerDescriptorSha256:createHash('sha256').update(original).digest('hex'),catalogue,membership:enriched,sourceCoverage:plan.footprints.bytes===0?'unknown; no extraction footprints admitted':'only supplied pinned footprints; administrative membership does not establish source coverage'};
+ if(admission)await verifyProductionAdmission({...admission,phase:'assembly-after',expectedSnapshot:admitted!.snapshotSha256,expectedPlanPath:planPath,expectedPlanSha256:sha256});
+ const evidence={schemaVersion:1,...(admitted?{admissionSnapshotSha256:admitted.snapshotSha256}:{}),planSha256:sha256,producerDirectory:producer,producerDescriptor:done,producerDescriptorSha256:createHash('sha256').update(original).digest('hex'),catalogue,membership:enriched,sourceCoverage:plan.footprints.bytes===0?'unknown; no extraction footprints admitted':'only supplied pinned footprints; administrative membership does not establish source coverage'};
  await writeFile(join(root,'assembly-complete.json'),JSON.stringify(evidence)+'\n',{flag:'wx'});return evidence;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- const args=process.argv.slice(2);if(args.length===3&&args[0]==='--validate')await loadAssemblyPlan(args[1],args[2]);
- else if(args.length===7&&args[0]==='--prepare'){await loadAssemblyPlan(args[1],args[2]);const input=pin.parse({path:args[3],bytes:Number(args[4]),sha256:args[5]});if(input.bytes>1024*1024)throw new Error('Manifest byte limit');await copyPinned(input,args[6]);}
- else if(args.length===4)await assembleMembership(args[0],args[1],args[2],args[3]);
- else throw new Error('Usage: membership-assembly.ts PLAN SHA256 PRODUCER JOB_ROOT');
+ const {values,positionals:args}=parseArgs({options:{admission:{type:'string'},'admission-sha256':{type:'string'},'admission-snapshot':{type:'string'},manifest:{type:'string'},prepare:{type:'boolean'},validate:{type:'boolean'}},allowPositionals:true});
+ if(values.validate&&args.length===2&&!values.prepare){await loadAssemblyPlan(args[0],args[1]);}
+ else{
+  if(!values.admission||!values['admission-sha256'])throw new Error('Production admission file and exact digest required');
+  const manifestPath=values.prepare?args[2]:values.manifest;
+  if(!manifestPath)throw new Error('Exact admitted manifest required');
+  const admission={manifestPath,admissionPath:values.admission,admissionSha256:values['admission-sha256'],expectedSnapshot:values['admission-snapshot']};
+  if(values.prepare&&args.length===6){
+   const admitted=await verifyProductionAdmission({...admission,phase:'preflight',expectedPlanPath:args[0],expectedPlanSha256:args[1]});
+   await prepareAssemblyInputs(args[0],args[1],pin.parse({path:args[2],bytes:Number(args[3]),sha256:args[4]}),args[5]);
+   await verifyProductionAdmission({...admission,phase:'preflight',expectedSnapshot:admitted.snapshotSha256,expectedPlanPath:args[0],expectedPlanSha256:args[1]});
+  }else if(!values.prepare&&args.length===4)await assembleMembership(args[0],args[1],args[2],args[3],admission);
+  else throw new Error('Usage: membership-assembly.ts [--prepare] PLAN SHA256 ... --admission FILE --admission-sha256 SHA256 [--admission-snapshot SHA256] [--manifest FILE]');
+ }
 }

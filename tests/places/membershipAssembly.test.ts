@@ -81,3 +81,18 @@ test('each producer stream exceeding assembly pin capacity fails before staging'
   await writeFile(join(f.producer,'complete.json'),JSON.stringify(done));await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job));await assert.rejects(access(join(f.job,'membership-input')));
  }
 });
+
+
+test('an unbound assembly primitive cannot consume an admitted producer completion',async()=>{
+ const f=await fixture(),path=join(f.producer,'complete.json');
+ const done=JSON.parse(await readFile(path,'utf8'));done.admissionSnapshotSha256='a'.repeat(64);await writeFile(path,JSON.stringify(done));
+ await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job),/admission identity/);
+ await assert.rejects(access(join(f.job,'membership-input')));
+});
+
+test('production assembly CLI refuses missing admission before processing a candidate plan',async()=>{
+ const {spawnSync}=await import('node:child_process');const f=await fixture();
+ const result=spawnSync(process.execPath,['--import','tsx','scripts/osm/membership-assembly.ts',f.path,await f.save(),f.producer,f.job],{encoding:'utf8',timeout:10000});
+ assert.notEqual(result.status,0);assert.match(result.stderr,/Production admission/);
+ await assert.rejects(access(join(f.job,'membership-input')));
+});

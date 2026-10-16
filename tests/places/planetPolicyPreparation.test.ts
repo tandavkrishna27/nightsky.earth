@@ -40,10 +40,13 @@ test('Natural Earth retained preparation does not silently become generic produc
  assert.equal(report.naturalEarth.productionAdmitted,false);
  assert.equal(report.naturalEarth.layers.length,2);
  assert.ok(report.naturalEarth.layers.every(l=>l.policyStatus==='missing-from-retained-policy'));
- assert.ok(report.blockers.includes('natural-earth-provider-specific-conditions-required'));
- assert.ok(report.blockers.includes('natural-earth-production-binding-required'));
- assert.ok(report.naturalEarth.incompatibleRequiredConditions.includes('geoboundaries-cc-by-4.0-attribution'));
- assert.ok(report.naturalEarth.incompatibleRequiredConditions.includes('geoboundaries-modification-and-edition-notice'));
+ assert.ok(report.blockers.includes('natural-earth-trusted-provider-record-required'));
+ assert.ok(report.blockers.includes('real-source-production-admission-evidence-required'));
+ assert.equal(report.naturalEarth.providerConditionSupport,'implemented-operator-controlled-policy');
+ assert.ok(report.naturalEarth.forbiddenSubstituteConditions.includes('geoboundaries-cc-by-4.0-attribution'));
+ assert.ok(report.naturalEarth.forbiddenSubstituteConditions.includes('geoboundaries-modification-and-edition-notice'));
+ assert.equal(report.productionGateSupport,'implemented-fixed-policy-and-pinned-trust');
+ assert.ok(report.postReceiptGates.some(g=>g.id==='actual-production-admission-envelope'&&g.requiresReceipt));
  assert.equal(report.serving.rawPlanetOnTinyServer,false);
  assert.equal(report.assemblyPinMaxBytes,134217728);
 });

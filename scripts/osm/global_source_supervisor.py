@@ -251,6 +251,11 @@ def verify_metadata_pin(path, pin, stream):
         final=os.fstat(handle.fileno())
     if (initial.st_size,initial.st_mtime_ns)!=(final.st_size,final.st_mtime_ns) or digest.hexdigest()!=pin['sha256']: raise ValueError('metadata mutation/digest mismatch')
 
+def require_admitted_assembly_route():
+    """The direct bridge has no admitted boundary lineage/assembly contract."""
+    raise ValueError('Production source policy requires supervised_membership_assembly.py with exact --admission; direct bridge is a library fixture primitive')
+
+
 def pipeline(manifest_path, root, regions, footprints, limits, *, node='node', python=None, build_config=None, build_config_sha256=None):
     """Complete local raw → normalized → paged stages under one deadline/accounting."""
     from global_source import validate_manifest, planet_retained_paths
@@ -267,6 +272,7 @@ def pipeline(manifest_path, root, regions, footprints, limits, *, node='node', p
         verify_metadata_pin(footprints,config['files']['footprints'],config['stream'])
         retained_config=[safe_path(build_config)]
         bridge_controls=['--config',str(retained_config[0]),build_config_sha256]
+    require_admitted_assembly_route()
     scripts=Path(__file__).resolve().parent
     commands=[[python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(manifest_path),str(root/'normalized')],
               [node,'--import',(scripts.parents[1]/'node_modules'/'tsx'/'dist'/'loader.mjs').as_uri(),str(scripts/'build-source-catalogue.ts'),str(root/'normalized'),str(regions),str(footprints),str(root/'catalogue'),*bridge_controls]]
