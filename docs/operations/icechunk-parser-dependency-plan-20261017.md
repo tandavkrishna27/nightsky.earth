@@ -226,3 +226,12 @@ The [offline verification receipt](data-pilot-evidence/2026-10-17-icechunk-offli
 pins the implemented scripts/tests, focused Python 3.14/3.12 results, actual
 contained native cases, attempted-access instrumentation and explicit limits.
 It is evidence of local preparation, not a source execution allowance.
+
+The [exact owner proposal](icechunk-metadata-owner-proposal-20261017.md) closes the
+remaining packet/template preparation: actual byte hashes, current runtime and
+dependency pins, a verified absent output, exact activation/preflight/execution
+commands and host/resource/stop contract. Local preflight rejected its unapproved
+template and accepted the exact approved shape only in an ephemeral test fixture
+with transport construction trapped. No approved allowance or claim was retained.
+Only explicit owner approval of the unexpired proposal remains before source
+execution; no source request is authorized by this preparation.

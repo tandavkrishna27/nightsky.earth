@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "kind": "icechunk-metadata-owner-review-candidate",
+  "preparedAt": "2026-10-16T20:53:31.196494+00:00",
+  "approvalState": "not-approved",
+  "sourceExecutionAuthorized": false,
+  "localPreparationReady": true,
+  "interpretation": "bounded-observational-metadata-as-interpreted-by-icechunk-2.3.0",
+  "unsupportedFeatureExclusionProved": false,
+  "scientificAdmission": false,
+  "packet": {
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\docs\\operations\\data-pilot-evidence\\2026-10-17-icechunk-candidate-packet.json",
+    "bytes": 3070,
+    "sha256": "c6b263ff07d8a740d7119e469bc72fb37f917e584744bfd8b7ea0245b57eeb71",
+    "expiresAt": 1792270404.1030827,
+    "expiresAtUtc": "2026-10-17T20:53:24.103083+00:00"
+  },
+  "unapprovedTemplate": {
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\docs\\operations\\data-pilot-evidence\\2026-10-17-icechunk-allowance-template.json",
+    "bytes": 354,
+    "sha256": "1cff7177bef844669f24510988aa24a9abc8bfca14f1dbec36b44a2f77f183a4"
+  },
+  "activationAfterExplicitOwnerApprovalOnly": {
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\icechunk-source-metadata-20261017-approved-allowance.json",
+    "bytes": 353,
+    "sha256": "2d07deef8e239988912c26a99b272d73934ef312b4cd8ddca054d3318d54d14d",
+    "canonicalJson": "{\"allowExecution\":true,\"decision\":\"approved-metadata-only\",\"expiresAt\":1792270404.1030827,\"outputRoot\":\"C:\\\\Users\\\\TK\\\\OneDrive\\\\Desktop\\\\Claude Data\\\\nightsky.earth-main\\\\.worktrees\\\\weather-readiness\\\\.data\\\\icechunk-source-metadata-20261017-review1\",\"packetSha256\":\"c6b263ff07d8a740d7119e469bc72fb37f917e584744bfd8b7ea0245b57eeb71\",\"schemaVersion\":1}",
+    "instruction": "Only after explicit owner approval of this exact packet/resource/host contract, materialize these exact canonical bytes. This nested preview is not an executor allowance file."
+  },
+  "outputRoot": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\icechunk-source-metadata-20261017-review1",
+  "outputMustNotExist": true,
+  "workingDirectory": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness",
+  "preflightCommand": [
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\weather-py314\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\scripts\\era5\\icechunk_metadata.py",
+    "--preflight",
+    "--packet",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\docs\\operations\\data-pilot-evidence\\2026-10-17-icechunk-candidate-packet.json",
+    "--expected-packet-sha256",
+    "c6b263ff07d8a740d7119e469bc72fb37f917e584744bfd8b7ea0245b57eeb71",
+    "--allowance",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\icechunk-source-metadata-20261017-approved-allowance.json",
+    "--expected-allowance-sha256",
+    "2d07deef8e239988912c26a99b272d73934ef312b4cd8ddca054d3318d54d14d",
+    "--output",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\icechunk-source-metadata-20261017-review1"
+  ],
+  "executeCommand": [
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\weather-py314\\Scripts\\python.exe",
+    "-B",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\scripts\\era5\\icechunk_metadata.py",
+    "--execute",
+    "--packet",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\docs\\operations\\data-pilot-evidence\\2026-10-17-icechunk-candidate-packet.json",
+    "--expected-packet-sha256",
+    "c6b263ff07d8a740d7119e469bc72fb37f917e584744bfd8b7ea0245b57eeb71",
+    "--allowance",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\icechunk-source-metadata-20261017-approved-allowance.json",
+    "--expected-allowance-sha256",
+    "2d07deef8e239988912c26a99b272d73934ef312b4cd8ddca054d3318d54d14d",
+    "--output",
+    "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\weather-readiness\\.data\\icechunk-source-metadata-20261017-review1"
+  ],
+  "allowedHost": "earthmover-icechunk-era5.s3.us-east-1.amazonaws.com",
+  "allowedRepoUrl": "https://earthmover-icechunk-era5.s3.us-east-1.amazonaws.com/icechunkV2/repo",
+  "allowedSnapshotUrlTemplate": "https://earthmover-icechunk-era5.s3.us-east-1.amazonaws.com/icechunkV2/snapshots/{ID}",
+  "requestOrder": [
+    "HEAD repo",
+    "GET repo with exact If-Match",
+    "local main resolution once",
+    "HEAD exact canonical snapshot",
+    "GET exact snapshot with exact If-Match",
+    "local fixed descriptor inspection"
+  ],
+  "limits": {
+    "requests": 4,
+    "objectBytes": 1048576,
+    "aggregateBodyBytes": 2097152,
+    "headerBytes": 32768,
+    "httpSeconds": 30,
+    "parseSeconds": 15,
+    "wallSeconds": 120,
+    "rssBytes": 268435456,
+    "jobCommitBytes": 536870912,
+    "activeProcesses": 2,
+    "expandedBytes": 16777216,
+    "redirects": 0,
+    "retries": 0
+  },
+  "descriptors": [
+    "single/temporal/tcc/zarr.json",
+    "single/temporal/valid_time/zarr.json",
+    "single/temporal/latitude/zarr.json",
+    "single/temporal/longitude/zarr.json",
+    "single/temporal/status/expver/zarr.json",
+    "single/temporal/status/tcc/zarr.json"
+  ],
+  "exclusions": [
+    "listings",
+    "history/ref fallback",
+    "manifests",
+    "chunks",
+    "virtual targets",
+    "observation reads",
+    "credentials/accounts",
+    "provider jobs",
+    "retries",
+    "redirects"
+  ],
+  "stops": [
+    "expired/changed packet, allowance, code, runtime or dependency pins",
+    "existing output or consumed allowance",
+    "missing actual Windows Job/parent pipe",
+    "unexpected status/headers/encoding, missing or changed ETag/length",
+    "byte/request/decompression/JSON bounds or deadline/memory limit",
+    "unsupported header/version, malformed native buffer, invalid or mismatching snapshot ID",
+    "missing/invalid fixed descriptor"
+  ],
+  "onStop": "Retain durable intent/raw/derivative/receipt evidence; no retry, alternate output, broader request or automatic allowance reuse. Review uncertainty before any further authority.",
+  "localChecks": {
+    "unapprovedTemplateRejected": true,
+    "exactApprovedShapeOfflinePreflightPassed": true,
+    "transportConstructed": false,
+    "sourceRequests": 0,
+    "allowanceClaimWritten": false,
+    "retainedApprovedAllowanceCreated": false,
+    "outputCreated": false
+  },
+  "remainingGate": "Explicit owner approval of this exact unexpired byte-pinned proposal; no source request has been authorized or performed"
+}
