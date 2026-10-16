@@ -1,6 +1,6 @@
 # Single-job historical source benchmark execution packet
 
-16 October 2026. **Prepared for a later explicit owner decision; not executed or authorized by this document.** This packet reuses `scripts/era5/sample_live.py` and its existing state machine. It is a format/acceptance diagnostic, not a baseline download or a worldwide throughput estimate. No credentials, provider calls, downloads, deployment or scientific promotion occurred in preparing it.
+16 October 2026. **Historical packet: subsequently approved and attempted once.** See the [actual outcome](data-readiness-delivery.md): remote success, local stop before download, no validated raw and no retry. The output and allowance below are consumed and must not be reused to start another job. This document itself authorizes no further operation. The original preparation text and execution pins below describe the attempted revision. It is a format/acceptance diagnostic, not a baseline download or a worldwide throughput estimate.
 
 ## Exact request and identity
 
@@ -32,7 +32,7 @@ All paths below are absolute Windows paths under:
 | Output files | `checkpoint.json`, transient `checkpoint.pending`, `job-identity.json`, `writer.lock`, `sample.raw`, `validation.json`, `benchmark-metrics.json` within the fresh output root |
 | Library scratch | `TEMP`, `TMP`, `TMPDIR`, `SQLITE_TMPDIR` all equal that output root |
 
-The output directory and allowance have not been created by this work. The owner-created JSON must exactly equal the following object; this is a specimen, not an authorization file:
+The output directory and allowance were created only for the subsequent approved attempt and are now retained. At preparation time the required owner-approved JSON was the following object; this specimen cannot authorize a new attempt:
 
 ```json
 {"planSha256":"50294863dc89d2773347c252c34c97c3858c6a6442c6489f357d01bea04001c6","allowExecution":true,"maxSubmissions":1,"maxRawBytes":2097152,"outputRoot":"C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\history-benchmark-20261016-legacy01"}
@@ -46,7 +46,7 @@ After separate explicit approval and creation of that exact allowance, the exist
 
 The owner supplies `CDSAPI_KEY` explicitly at that later time. This preparation neither reads nor stores it. Default/`--plan` invocation is offline. The allowance is consumed exclusively before submission; uncertainty burns the claim. Do not automatically resume, remove locks, delete partial output or recreate an allowance. A known-job resume is a separately reviewed reconciliation of the original identity/deadline, never a replacement submission. Root/ancestor aliases, junctions, output symlinks and hardlinked files are rejected. The allowance pins the request plan and output root, not source file contents: verify the following source pins before approving this command.
 
-Source pins below use LF file bytes matching committed Git blobs; verify the executable checkout uses those exact bytes before execution.
+Historical execution pins below use LF file bytes matching the attempted baseline's committed Git blobs. Subsequent [offline diagnostics changes](sample-failure-diagnostics.md) change `sample_live.py`; these historical pins must not be presented as pins for that later revision. Any future executable packet must freeze its own reviewed source revision and allowance.
 
 | File | SHA-256 |
 | --- | --- |

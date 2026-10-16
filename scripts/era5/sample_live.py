@@ -23,6 +23,31 @@ HEADER_LIMIT = 65536
 HEADER_COUNT = 64
 
 
+FAILURE_PHASES = frozenset({'worker-setup', 'executor', 'submit', 'poll',
+    'result-metadata', 'result-shape', 'result-size', 'result-origin',
+    'asset-open', 'asset-headers', 'asset-stream', 'decode'})
+FAILURE_ERRORS = frozenset({'operation-failed', 'transport', 'headers',
+    'http-status', 'metadata-cap', 'json', 'shape', 'size-rejected', 'policy-rejected'})
+
+
+def write_failure_receipt(root, phase, error):
+    """One small fixed-category receipt; no exception, URL or credential input.
+
+    Failure telemetry never creates an output root, overwrites prior evidence,
+    widens the storage cap, changes the checkpoint or initiates recovery.
+    """
+    if phase not in FAILURE_PHASES or error not in FAILURE_ERRORS:
+        return
+    payload = json.dumps(dict(schemaVersion=1, phase=phase, error=error),
+                         sort_keys=True).encode()
+    try:
+        if len(payload) <= 256 and core.budget(root) + len(payload) <= core.TREE_LIMIT:
+            with core.owned(root, 'failure-diagnostic.json').open('xb') as stream:
+                stream.write(payload); stream.flush(); os.fsync(stream.fileno())
+    except (OSError, ValueError):
+        pass  # Missing telemetry is never evidence of success.
+
+
 def bounded_headers(response):
     """Post-parse admission bound; parser allocations remain Job-contained."""
     if len(response.headers) > HEADER_COUNT or sum(
@@ -38,6 +63,7 @@ class Adapter:
     asset_hosts = ASSET_HOSTS
 
     def __init__(self, token, session_factory, diagnostic=None):
+        self.phase, self.failure = 'worker-setup', 'operation-failed'
         self.diagnostic = diagnostic
         self.api = session_factory()
         self.download = session_factory()
@@ -67,11 +93,13 @@ class Adapter:
             emit('request')
             response = self.api.request(method, BASE + path, timeout=(min(5, timeout), timeout),
                                         allow_redirects=False, stream=True, **kwargs)
+            failure = 'headers'
             bounded_headers(response)
             emit('response')
             if response.status_code not in (200, 201, 202):
                 failure = 'http-status'
                 raise ValueError('CDS response rejected')
+            failure = 'transport'
             body = bytearray()
             for block in response.iter_content(65536):
                 if time.monotonic() >= deadline or len(body) + len(block) > 1024 * 1024:
@@ -87,6 +115,7 @@ class Adapter:
             emit('metadata')
             return value
         except Exception:
+            self.failure = failure
             emit('failed')
             # Never propagate requests exception text (may contain token/URL).
             raise ValueError('CDS operation failed; reconcile checkpoint') from None
@@ -95,6 +124,7 @@ class Adapter:
                 response.close()
 
     def submit(self, dataset, request, timeout):
+        self.phase, self.failure = 'submit', 'operation-failed'
         reply = self._json('POST', '/processes/' + dataset + '/execution', timeout,
                            json={'inputs': request})
         monitors = [link['href'] for link in reply.get('links', []) if link.get('rel') == 'monitor']
@@ -107,31 +137,48 @@ class Adapter:
         job = monitor[len(prefix):]
         if not re.fullmatch(r'[A-Za-z0-9-]{1,128}', job):
             raise ValueError('Unexpected monitor identity; reconcile submission')
+        self.phase, self.failure = 'executor', 'operation-failed'
         return job
 
     def status(self, job, timeout):
+        self.phase, self.failure = 'poll', 'operation-failed'
         status = self._json('GET', '/jobs/' + job, timeout).get('status')
+        self.phase, self.failure = 'executor', 'operation-failed'
         return {'accepted': 'queued', 'rejected': 'failed', 'dismissed': 'failed',
                 'deleted': 'failed'}.get(status, status)
 
     def asset(self, job, timeout):
+        self.phase, self.failure = 'result-metadata', 'operation-failed'
         result_url = BASE + '/jobs/' + job + '/results'
-        value = self._json('GET', '/jobs/' + job + '/results', timeout)['asset']['value']
+        result = self._json('GET', '/jobs/' + job + '/results', timeout)
+        self.phase, self.failure = 'result-shape', 'shape'
+        value = result['asset']['value']
         size = value['file:size']
+        self.phase, self.failure = 'result-size', 'size-rejected'
         if type(size) is not int or not 0 < size <= core.RAW_LIMIT:
             raise ValueError('Result size rejected')
         self.asset_size = size
-        return core.asset_url(urljoin(result_url, value['href']), self.asset_hosts)
+        self.phase, self.failure = 'result-shape', 'shape'
+        href = value['href']
+        if not isinstance(href, str):
+            raise ValueError('Result link rejected')
+        self.phase, self.failure = 'result-origin', 'policy-rejected'
+        url = core.asset_url(urljoin(result_url, href), self.asset_hosts)
+        self.phase, self.failure = 'executor', 'operation-failed'
+        return url
 
     def open_asset(self, url, timeout, authenticated=False, redirects=False):
+        self.phase, self.failure = 'asset-open', 'policy-rejected'
         if authenticated or redirects:
             raise ValueError('Asset policy rejected')
         core.asset_url(url, self.asset_hosts)
+        self.failure = 'transport'
         try:
             response = self.download.get(url, timeout=(min(5, timeout), timeout),
                                          stream=True, allow_redirects=False)
         except Exception:
             raise ValueError('Asset transport failed') from None
+        self.phase, self.failure = 'asset-headers', 'headers'
         try:
             bounded_headers(response)
         except Exception:
@@ -140,11 +187,15 @@ class Adapter:
         expected = self.asset_size
         deadline = time.monotonic() + timeout
 
+        adapter = self
+        self.phase, self.failure = 'executor', 'operation-failed'
+
         class Body:
             status = response.status_code
             headers = response.headers
 
             def blocks(self):
+                adapter.phase, adapter.failure = 'asset-stream', 'operation-failed'
                 total = 0
                 try:
                     for block in response.iter_content(65536):
@@ -154,6 +205,7 @@ class Adapter:
                         yield block
                     if total != expected:
                         raise ValueError('Asset size mismatch')
+                    adapter.phase, adapter.failure = 'executor', 'operation-failed'
                 except Exception:
                     raise ValueError('Asset stream failed; raw remains unaccepted') from None
 
@@ -347,22 +399,33 @@ def supervise(args):
 
 
 def execute(args):
-    consume_allowance(args.owner_allowance, args.output, args.resume)
-    # Explicit environment credential only; no account/config discovery or SDK.
-    token = os.environ.get('CDSAPI_KEY')
-    if not token or '\n' in token or '\r' in token:
-        raise ValueError('Explicit CDSAPI_KEY required')
-    import requests
-    def session():
-        value = requests.Session()
-        value.mount('https://', requests.adapters.HTTPAdapter(max_retries=0))
-        return value
-    adapter = Adapter(token, session)
+    adapter = None
+    phase = 'worker-setup'
     try:
+        consume_allowance(args.owner_allowance, args.output, args.resume)
+        # Explicit environment credential only; no account/config discovery or SDK.
+        token = os.environ.get('CDSAPI_KEY')
+        if not token or '\n' in token or '\r' in token:
+            raise ValueError('Explicit CDSAPI_KEY required')
+        import requests
+        def session():
+            value = requests.Session()
+            value.mount('https://', requests.adapters.HTTPAdapter(max_retries=0))
+            return value
+        adapter = Adapter(token, session)
+        adapter.phase = phase = 'executor'
         state = core._run(args.output, adapter, resume=args.resume)
+        phase = 'decode'
         decode(args.output, state)
+    except Exception:
+        if adapter is not None and phase == 'executor':
+            write_failure_receipt(args.output, adapter.phase, adapter.failure)
+        else:
+            write_failure_receipt(args.output, phase, 'operation-failed')
+        raise
     finally:
-        adapter.close()
+        if adapter is not None:
+            adapter.close()
 
 
 if __name__ == '__main__':

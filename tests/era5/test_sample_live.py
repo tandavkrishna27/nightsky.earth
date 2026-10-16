@@ -294,4 +294,84 @@ class MeasurementReceipt(unittest.TestCase):
             self.assertEqual(metrics['status'], 'completed')
             self.assertNotIn('CDSAPI_KEY', receipt.read_text())
 
+
+class FailureDiagnostics(unittest.TestCase):
+    def test_result_failure_is_sanitized_and_does_not_overwrite_evidence(self):
+        import argparse
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sessions = [Session(), Session()]
+            sessions[0].responses = [Response(json.dumps({'asset': {'value': {
+                'href': 'https://private.invalid/?secret-token', 'file:size': 1}}}).encode())]
+            adapter = live.Adapter('secret-token', lambda: sessions.pop(0))
+            def run(output, transport, **kwargs):
+                return transport.asset('abc', 1)
+            args = argparse.Namespace(output=str(root), owner_allowance='unused', resume=False)
+            with patch.object(live, 'consume_allowance'), patch.dict(live.os.environ, CDSAPI_KEY='secret-token'), patch.object(live, 'Adapter', return_value=adapter), patch.object(core, '_run', side_effect=run):
+                with self.assertRaises(ValueError): live.execute(args)
+            receipt = root / 'failure-diagnostic.json'
+            self.assertTrue(receipt.exists(), 'missing safe worker failure receipt')
+            body = receipt.read_text()
+            self.assertEqual(json.loads(body), dict(schemaVersion=1, phase='result-origin', error='policy-rejected'))
+            self.assertNotIn('secret', body); self.assertNotIn('https:', body)
+            original = receipt.read_bytes()
+            live.write_failure_receipt(root, 'decode', 'operation-failed')
+            self.assertEqual(receipt.read_bytes(), original)
+
+    def test_failure_receipt_respects_budget_and_rejects_arbitrary_categories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(core, 'TREE_LIMIT', 1):
+                live.write_failure_receipt(directory, 'decode', 'operation-failed')
+            self.assertFalse((Path(directory) / 'failure-diagnostic.json').exists())
+            live.write_failure_receipt(directory, 'https://secret', 'private-error')
+            self.assertFalse((Path(directory) / 'failure-diagnostic.json').exists())
+
+
+class FailureCategories(unittest.TestCase):
+    def test_result_metadata_shape_size_and_transport_are_distinct(self):
+        cases = [
+            (Response(b'not-json'), 'result-metadata', 'json'),
+            (Response(b'{}'), 'result-shape', 'shape'),
+            (Response(json.dumps({'asset': {'value': {'file:size': 0}}}).encode()), 'result-size', 'size-rejected'),
+            (RuntimeError('secret https://private.invalid'), 'result-metadata', 'transport'),
+        ]
+        for response, phase, reason in cases:
+            with self.subTest(reason=reason):
+                adapter = LivePreparation().adapter()
+                adapter.api.responses = [response]
+                with self.assertRaises(Exception): adapter.asset('fixture', 1)
+                self.assertEqual((adapter.phase, adapter.failure), (phase, reason))
+                self.assertEqual(adapter.download.calls, [])
+
+    def test_metadata_body_transport_failure_is_not_a_header_rejection(self):
+        class BrokenBody(Response):
+            def iter_content(self, size):
+                raise RuntimeError('secret-token https://private.invalid/read')
+        adapter = LivePreparation().adapter()
+        response = BrokenBody(b'')
+        adapter.api.responses = [response]
+        with self.assertRaises(ValueError): adapter.asset('fixture', 1)
+        self.assertEqual((adapter.phase, adapter.failure), ('result-metadata', 'transport'))
+        self.assertTrue(response.closed)
+
+    def test_stream_failure_retains_only_operation_category(self):
+        adapter = LivePreparation().adapter(); adapter.asset_size = 1
+        adapter.download.responses = [Response(b'xx')]
+        body = adapter.open_asset('https://cds.climate.copernicus.eu/raw', 1)
+        try:
+            with self.assertRaises(ValueError): list(body.blocks())
+            self.assertEqual((adapter.phase, adapter.failure), ('asset-stream', 'operation-failed'))
+        finally: body.close()
+
+    def test_decode_failure_is_not_mislabeled_as_previous_transport(self):
+        import argparse
+        with tempfile.TemporaryDirectory() as directory:
+            adapter = LivePreparation().adapter()
+            args = argparse.Namespace(output=directory, owner_allowance='unused', resume=False)
+            with patch.object(live, 'consume_allowance'), patch.dict(live.os.environ, CDSAPI_KEY='synthetic'), patch.object(live, 'Adapter', return_value=adapter), patch.object(core, '_run', return_value={}), patch.object(live, 'decode', side_effect=RuntimeError('private https://secret')):
+                with self.assertRaises(RuntimeError): live.execute(args)
+            self.assertEqual(json.loads((Path(directory) / 'failure-diagnostic.json').read_text()),
+                dict(schemaVersion=1, phase='decode', error='operation-failed'))
+
+
 if __name__ == '__main__': unittest.main()

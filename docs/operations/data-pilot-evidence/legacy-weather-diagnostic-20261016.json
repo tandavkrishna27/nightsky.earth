@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-16",
+  "planSha256": "50294863dc89d2773347c252c34c97c3858c6a6442c6489f357d01bea04001c6",
+  "requestSha256": "e96fac8783c4e3fe4a9b479038c95a9498b18690812380d785e22ee2af316d18",
+  "submissions": 1,
+  "polls": 8,
+  "lastPersistedPhase": "successful",
+  "supervisorStatus": "stopped",
+  "submitToReadySeconds": 211.36,
+  "elapsedSeconds": 211.906,
+  "peakMainRssBytes": 35590144,
+  "peakOutputAndScratchBytes": 675,
+  "samplingIntervalSeconds": 0.02,
+  "retainedRawBytes": 0,
+  "validation": "not-reached",
+  "failureCause": "unknown-no-specific-receipt",
+  "failureInterval": "after-remote-success-before-asset-download",
+  "retried": false,
+  "productionAdmission": false
+}

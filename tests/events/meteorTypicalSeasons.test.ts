@@ -63,13 +63,15 @@ test("approximate calendar survives discovery without inventing annual dates or 
  assert.ok(guidance, "Approximate calendar guidance is missing");
  assert.equal(guidance.availability.status, "partial");
  assert.match(guidance.availability.reason, /other showers.*unavailable/i);
- assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"]]);
+ assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"]]);
  for (const row of guidance.entries) {
   assert.equal(row.precision,"verbal-period");
   assert.equal(row.recurrenceBasis,"typical-annual");
   assert.equal(row.requestedWindowOverlap,"not-evaluated");
-  assert.equal(row.sourceLocator,"Section 1, introduction, page 1");
-  assert.equal(row.source.licenseUrl,"https://creativecommons.org/licenses/by/4.0/");
+  if (row.code !== "GEM") {
+   assert.equal(row.sourceLocator,"Section 1, introduction, page 1");
+   assert.equal(row.source.licenseUrl,"https://creativecommons.org/licenses/by/4.0/");
+  }
   assert.equal(row.peakUtc,undefined);
   for(const patch of [{peakUtc:"2028-05-05T00:00:00Z"},{precision:"day"},{requestedWindowOverlap:"overlaps"},{source:undefined}]) {
    assert.equal(skyEventsResultSchema.safeParse({...result, meteorCalendarGuidance:{...guidance,entries:[{...row,...patch}]}}).success,false);
@@ -79,4 +81,18 @@ test("approximate calendar survives discovery without inventing annual dates or 
  assert.equal(skyEventsResultSchema.safeParse({...result,meteorCalendarGuidance:undefined}).success,true);
  assert.equal(skyEventsResultSchema.safeParse({...result,meteorCalendarGuidance:{...guidance,entries:[guidance.entries[0],guidance.entries[0]]}}).success,false);
  assert.equal((await query(["moon-phase"]) as any).meteorCalendarGuidance,undefined);
+});
+
+test("Geminid annual month fact keeps original source and never becomes a forecast", async () => {
+ const result = await query();
+ const row = result.meteorCalendarGuidance?.entries.find(entry => String(entry.code) === "GEM");
+ assert.ok(row, "Geminid annual month guidance missing");
+ assert.equal(row.sourceWording, "December");
+ assert.equal(row.precision, "verbal-period");
+ assert.equal(row.requestedWindowOverlap, "not-evaluated");
+ assert.equal(row.source.url, "https://www.jpl.nasa.gov/videos/whats-up-december-2023/");
+ assert.equal(row.source.licenseUrl, undefined);
+ assert.match(row.source.attribution, /calendar fact.*NightSky/i);
+ assert.ok(result.sources.some(source => source.url === row.source.url));
+ assert.deepEqual(result.events, []);
 });
