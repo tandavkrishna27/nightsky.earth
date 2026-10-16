@@ -1,4 +1,88 @@
-# Weather lane handoff — 16 October 2026
+# Weather lane handoff — 17 October 2026
+
+## Current wave: all 27 public form/code comparisons
+
+Started clean on assigned branch `codex/weather-readiness` at integrated baseline
+`ca7de5a70a60e7178c5ccf6f1f3e03ee5ffe9538`. The parent alone owned the CDS browser;
+one subagent implemented the offline evidence verifier and another independently
+reviewed its code and final artifacts. No new chat was created.
+
+**All 27 exact generated dataset/request objects matched the retained proposal.
+All 27 remained login-required; account-side constraints and actionable Submit
+controls could not be established.** The request-size widget exposed no numeric
+cost or limit in this logged-out Chrome session. This does not create provider
+acceptance, licence acceptance, a `currentProviderFormReviewed` claim or allowance.
+The executor still caps submissions at 16; proposed +11 remains an owner decision.
+
+The [current findings and reproduction](weather-form-comparison-20261017.md)
+include a request-by-request selection table and the precise remaining gates.
+The [observations](data-pilot-evidence/2026-10-17-cds-form-observations.json) bind
+the unchanged 27-parent proposal SHA-256
+`5482a483a50dd6870ac1b6e1bb061bfdfdc303596b7bee273fdab93e8ff846dd`, every ordered
+request identity and all source pins. Observations: 32,964 bytes, SHA-256
+`8b1ffdbb21fc8c6ffc06ef044791f9c05443e64c51ab35b5f094281b9a87f13d`.
+The [computed report](data-pilot-evidence/2026-10-17-cds-form-comparison.json) is
+16,570 bytes, SHA-256
+`faf18164d0af07df7df989701a1bdf3c50d0e8a07ae35ccc4441525b24aa4f3e`:
+27 compared, no missing rows, zero enabled submission controls,
+`allRequestsCompared=true`, `allSubmitControlsEnabled=false`,
+`executionEligible=false`.
+
+Twelve records retain exact timestamps; fifteen retain honest day precision.
+The review crossed midnight: the earliest two selections were rechecked on
+17 October, and offset timestamps are checked in Asia/Calcutta. Browser inventory,
+page-update and transient API-code-panel failures were recovered before counting
+affected selections. The full-key equality checks, not checkbox appearance or
+representative-month inference, establish each transcribed match. These are
+sanitized agent observations, not provider-signed receipts.
+
+The [saved screenshot](data-pilot-evidence/2026-10-17-cds-logged-out.jpg) shows
+licence/login gates and the nonnumeric request-size widget. The final public
+form is retained as a Chrome handoff tab (`1924823419`, last selection row 27).
+The first stalled agent-created tab was closed. No login, terms acceptance,
+token/credential access, request submission, provider job or dataset download
+occurred. No deployment/publication, source mutation or scope reduction occurred.
+
+`scripts/era5/form_readiness.py` is offline and read only. It checks the trusted
+operator-supplied proposal byte hash (fixed to the retained SHA above in this
+invocation), full request equality and source/order/date/control consistency.
+It rejects duplicate JSON keys, nonfinite values, oversized files, missing or
+duplicate reviewed rows, changed selections and authority claims. Missing rows
+may be reported honestly as incomplete. A reviewer-reproduced timezone defect
+received failing boundary tests, a fix, and independent successful rechecks.
+No actionable review findings remain.
+
+Verification in this lane's own retained Python 3.14 environment:
+
+```text
+.data/weather-py314/Scripts/python.exe -m unittest discover -s tests/era5 -p test_form_readiness.py
+18 tests, OK, exit 0
+.data/weather-py314/Scripts/python.exe -m unittest discover -s tests/era5 -p 'test_*.py'
+194 tests, OK, exit 0 (35.641 seconds)
+git diff --check
+exit 0
+```
+
+The independent reviewer reran the 18 focused tests, compared all 27 raw objects
+with the pinned proposal, recomputed the report, checked byte/hash/precision
+counts and inspected the screenshot. Existing NumPy fixture warnings remain.
+An initial verifier-agent test run in the unprovisioned default interpreter
+failed for missing dependencies; the owned-environment full rerun above resolves
+that environment issue. No shared environment was modified.
+
+**Exact outstanding gates:** signed-in session and truthful existing licence
+state; current account-side cost/constraint validation for all 27 requests; owner
+decision on proposed +11 submissions and unchanged resource-cap implications;
+fresh executable contract, packet/runtime pins and explicit allowance. Provider
+queue/conversion/routing/bytes and scientific completeness are unproved.
+
+Integration: ERA5 CI already discovers `test_*.py`; no change is needed to
+`tests/all.test.ts`, `tsconfig.tools.json` or the workflow. Shared tracker and
+acceptance totals remain **12 Done / 9 Partial / 6 Not started**. This bounded
+handoff ends this wave; account/form validation and execution gates are not
+silently closed. Exact pushed commit and CI delivery record follows after commit.
+
+## Historical regrouping handoff — 16 October 2026
 
 Branch: `codex/weather-readiness`. Assigned baseline:
 `b6bb5726b61c5faf05f9e9073306fd19f7828918`.
