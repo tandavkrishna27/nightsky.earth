@@ -123,3 +123,6 @@ import './era5/replan-history-ownership.test';
 
 import './places/planetPolicyPreparation.test';
 import './places/planetReceiptContract.test';
+
+import './places/providerSourceAdmission.test';
+import './places/productionSourceAdmission.test';
