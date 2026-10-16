@@ -54,3 +54,7 @@ No large source download, regional pilot, dependency install, build, runtime edi
 
 
 
+
+## Later capacity update
+
+The reference-selective producer is now implemented; the earlier all-node-only description and unimplemented alternative above record the earlier decision state. See [the checked geography capacity plan](geography-capacity-plan.md) for refreshed machine evidence, explicit proposed allocations, the additional 128 MiB lineage/exclusion pin ceilings, and unresolved planet-domain admission. Small-input selective savings do not establish planet fit.

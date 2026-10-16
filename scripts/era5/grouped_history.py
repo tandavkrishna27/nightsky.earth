@@ -81,12 +81,13 @@ def reconcile(root,chunk_id,plan,expected_digest):
     if plan!=build_plan(plan['startYear'],plan['endYear']) or pilot.plan_digest(plan)!=expected_digest:raise ValueError('Reviewed grouped digest differs.')
     return download.reconcile_local(root,chunk_id,approved_plan=plan,verifier=verify_entry)
 
-def checkpoint_locked(root,chunk_id,source,*,approved_plan,deadline_started=None):
+def checkpoint_locked(root,chunk_id,source,*,approved_plan,deadline_started=None,external_gate=None):
     root=Path(root).resolve();source=Path(source).resolve()
     started=deadline_started if deadline_started is not None else time.monotonic()
     lock=pilot.owned(root,'.writer.lock')
     if not lock.is_file() or lock.read_text()!=str(os.getpid()):raise ValueError('Grouped import needs owned writer lock.')
     def gate():
+        if external_gate is not None: external_gate()
         if time.monotonic()-started>=pilot.BATCH_SECONDS or pilot.peak_rss_bytes()>approved_plan['limits']['peakRssBytes']:raise ValueError('Grouped time/memory gate exceeded.')
     gate()
     plan,ledger=pilot.load_state(root,approved_plan)

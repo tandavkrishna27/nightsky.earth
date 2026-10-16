@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-16T15:50:41.5752415Z",
+  "freeBytes": 290857336832,
+  "reserveBytes": 137438953472,
+  "planetBytes": 95380942829,
+  "remainingAfterRawBytes": 58037440531,
+  "physicalTotalKiB": 64545140,
+  "physicalFreeKiB": 30514436,
+  "virtualTotalKiB": 96002420,
+  "virtualFreeKiB": 46128472,
+  "scope": "Read-only local metadata; no retained inventory enumeration or planet forecast"
+}

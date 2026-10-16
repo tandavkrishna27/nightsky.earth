@@ -11,7 +11,7 @@ spec = importlib.util.spec_from_file_location("read_chunks", MODULE)
 reader = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(reader)
 
-def fixture(path, values=(0.1, 0.5), times=(0, 1), units="1", calendar="standard"):
+def fixture(path, values=(0.1, 0.5), times=(0, 1), units="1", calendar="standard", member=0):
     with netCDF4.Dataset(path, "w") as ds:
         ds.createDimension("valid_time", 2)
         ds.createDimension("latitude", 1)
@@ -26,11 +26,19 @@ def fixture(path, values=(0.1, 0.5), times=(0, 1), units="1", calendar="standard
         cloud.units = units
         cloud.standard_name = "cloud_area_fraction"
         cloud[:] = np.asarray(values).reshape(2, 1, 1)
-        ds.createVariable("number", "i4").assignValue(0)
+        ds.createVariable("number", "f8",fill_value=-999).assignValue(member)
         ds.createVariable("expver", str, ("valid_time",))[:] = np.array(["0001", "0001"], dtype=object)
         ds.institution = "ECMWF"
 
 class ReaderTests(unittest.TestCase):
+    def test_member_must_be_unmasked_finite_exact_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'source.nc'
+            for member in [.5,-.5,float('nan'),float('inf'),-999]:
+                with self.subTest(member=member):
+                    fixture(path,member=member)
+                    with self.assertRaises(ValueError): list(reader.read_chunk(path))
+
     def test_stream_preserves_values_units_and_source_hash(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "source.nc"

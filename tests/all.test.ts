@@ -114,3 +114,6 @@ import './places/geographicSweep.test';
 import './mcp/unknown-region-assembled.test';
 
 import './places/membershipAssembly.test';
+
+import './era5/reconcile-retained-history.test';
+import './places/geographyCapacityPlan.test';

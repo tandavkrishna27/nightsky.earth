@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-prepared-unapproved",
+  "packet": {
+    "path": ".data/global-acquisition-preparation-20261016-v1/packet.json",
+    "sha256": "24a60d6f7316dfeacbb62844c87dbec6393e913de0cb87ee3f97ef140eef6c89",
+    "bytes": 38218
+  },
+  "jobs": 16,
+  "monthlyChildren": 363,
+  "scalarCellHours": 1052544,
+  "requestSha256": [
+    "821c3417c3f3ca98f09d8af919483686fc05daf2014e874b372ccd7c84202290",
+    "cdacd43ad7dd387b6c25cc645116949c34ee6167caae7d2f22bd33c9d30aea6a",
+    "0fa778ae377fd697a186bc3407262221477316bccae83cdd83ed4dba71c00009",
+    "207114a2b9d8942096f2a50b0b4bbb413ad058cbb23b6936d5fb92058b1948f8",
+    "2112a3a0908606b59388f6beae94925c9d6c0abd8c06aafd169278aef1426e44",
+    "9c183efbf5d5ceb5bb0593415fcb1f25d1a3a5ef9c5a15ff88c95b2d6404983b",
+    "7dabc203f406ad0f41adddc84ead9e486052dc6fc14d4d8761c46a53cc539cb3",
+    "b495761c816e0514138e96ac3892d6c50a75b0407f870298ba933804cfb9056c",
+    "7666a4ec6885aa87c0a1b579f3855605d70be2c02224955e2701c7d2d1a73e41",
+    "f46326b7ac681085e02b508c6f7cd1133d1f35e098989b50cbe71dc918965797",
+    "e472a3ec7ebea08bf3876e34fb0e34ee99f0f0bcfd463f3a998b118d3087cd81",
+    "2ce5d14ca29a083ca4ae0caa48898ec2e5d39b9e73156dd15e6bc2deccd26267",
+    "40a49061a390f1cb0fbce37344878fcb13e445ef7982a3f6c0cbe699ef86e88f",
+    "d101a5a2b9e94398bda6c9f7248892750e92e54161a06bbb8ce5e8114a605c98",
+    "2f5717e6a41ee14eeda429d8d6110b6dd797f1897350ecaf47c4ebb370851eca",
+    "701c58fcedd5d58c1951afdbc71d7b8bf0697dfef9042e667390dcecb05bf65f"
+  ],
+  "sourcePins": {
+    "assetOrigin": "6038f89252b2144afa4dae0910ebe8b45275140addeac268d6ab201b6e872747",
+    "frozenPlan": "0b296d22142fea417a71299e17009536f82b14417f33eb4b38baa2ff307d2b12",
+    "reconciliation": "a5cc2399ca627fbf23a3a776182f93235c37dab2bd639c954d7ed5d1a200a2ba"
+  },
+  "runtimePins": {
+    "code": {
+      "global_acquisition.py": "0f19b1733df00ccc6502d5cf7e258a5af618d0f2c68f0da2e98b9900bf7ca853",
+      "global_source_supervisor.py": "d155053189792a960243aff6cbc9c832c08910ccf782b669efc0914eb91c9823",
+      "grouped_history.py": "913aec6f6dd13e4987e71f5b14f1969ead9c797cffb9b57b1d98c3557019cabc",
+      "pilot.py": "472e7b6c00f35f15a97ec5767608ab67a16df58657e4720fe85d82d76a17cc20",
+      "read_chunks.py": "ee27b9e1640a5a7c858c10011e51482a2be695d3b9b7ed4825ee2ee2ae61f43b",
+      "sample_live.py": "8f8c84d51d9159bee811b50fa5352f1f9d325ea5d589e7f271aad152c82b061a"
+    },
+    "executableSha256": "b847bb9f4e48c19f585c8bf7d8b355f3f8c6d2125717ece9c9d7e16fb9f09de8",
+    "netCDF4": "1.7.3",
+    "numpy": "2.5.4",
+    "python": "3.12.14",
+    "requests": "2.34.2"
+  },
+  "assetHosts": [
+    "cds.climate.copernicus.eu",
+    "object-store.os-api.cci2.ecmwf.int"
+  ],
+  "limits": {
+    "batchSeconds": 28800,
+    "commitBytes": 536870912,
+    "freeBytes": 103079215104,
+    "jobSeconds": 1800,
+    "metadataBytes": 33554432,
+    "outputBytes": 4294967296,
+    "pollSeconds": 30,
+    "polls": 20,
+    "processes": 2,
+    "rawBytes": 536870912,
+    "rssBytes": 268435456,
+    "submissions": 16
+  },
+  "blockedTilesExcluded": [
+    "243:457",
+    "243:458",
+    "244:457",
+    "244:458"
+  ],
+  "verification": {
+    "frozenOwnershipAndReconciledMasks": "passed",
+    "installedRuntimePins": "passed",
+    "executorTests": 12,
+    "decoderTests": 6,
+    "groupedTests": 7,
+    "providerCalls": 0,
+    "credentialsRead": false,
+    "ownerAllowanceCreated": false,
+    "liveExecution": false
+  },
+  "remainingGates": [
+    "current exact provider-form acceptance evidence",
+    "explicit owner allowance",
+    "actual Windows-contained live execution"
+  ],
+  "enforcementNotes": {
+    "commitAndProcesses": "Windows Job hard limits",
+    "diskReserveAndRss": "sampled plus cooperative admission; not OS disk or RSS quotas"
+  }
+}

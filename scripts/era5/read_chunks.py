@@ -63,8 +63,12 @@ def _read_chunk(path, decoded_limit, max_hours):
         calendar = getattr(t, "calendar", "standard")
         if calendar not in {"standard", "gregorian", "proleptic_gregorian"}:
             raise ValueError("Unsupported source calendar.")
-        if ds.variables["number"].size != 1 or int(ds.variables["number"][:]) != 0:
+        if ds.variables["number"].size != 1:
             raise ValueError("Only deterministic ERA5 member 0 is supported.")
+        member = np.ma.asarray(ds.variables["number"][:])
+        if (np.ma.getmaskarray(member).any() or member.dtype.kind not in "iuf" or
+                not np.isfinite(member).all() or not (member == 0).all()):
+            raise ValueError("Only unmasked finite exact ERA5 member 0 is supported.")
         expver = ds.variables["expver"]
         if expver.dimensions not in {(), (time_name,)} or expver.size > max_hours:
             raise ValueError("Unsupported source revision dimensions.")

@@ -140,5 +140,7 @@ jobs:
         run: python scripts/era5/timeseries_executor.py --plan
       - name: Verify gated time-series sample defaults to an offline plan
         run: python scripts/era5/timeseries_sample.py --plan
+      - name: Verify global acquisition defaults to an offline plan
+        run: python scripts/era5/global_acquisition.py --plan
       - name: Run ERA5 fixtures without account or source requests
         run: python -m unittest discover -s tests/era5 -v
