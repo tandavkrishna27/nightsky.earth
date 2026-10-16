@@ -22,7 +22,23 @@ A linear JSON scanner preserves duplicate-key/depth/UTF8 protections and lexical
 
 Disjoint resource/capacity, membership/bridge, Python, and controller scopes received independent spec and quality review. All actionable findings were corrected with focused regressions: malformed-regex scan, in-flight context removal, reservation/write overbooking, oversized pinned read requests, Q-scoped footprint reads and unchecked provenance/path operations. No scope has a remaining reported blocker.
 
-Stable focused TypeScript: 153/153 passed across eight affected test files, including the new 10-test `partitionedResources.test.ts` run directly. All three `npm run check` projects and explicit strict large/root test checks passed. Shared aggregator/config/workflow edits remain coordinator-owned. Full OSM Python passed: **244 run, 239 passed, five skips, zero failures**, using the worktree-owned Python 3.14 environment. The one justified v3 large resource-contract result is recorded below after execution. The earlier [v2 large evidence](data-pilot-evidence/candidate-partition-contract-20261017.json) remains unchanged and tied to its own tip; it is not substituted as proof of the changed resource machinery.
+Stable focused TypeScript: 153/153 passed across eight affected test files, including the new 10-test `partitionedResources.test.ts` run directly. All three `npm run check` projects and explicit strict large/root test checks passed. Shared aggregator/config/workflow edits remain coordinator-owned. Full OSM Python passed: **244 run, 239 passed, five skips, zero failures**, using the worktree-owned Python 3.14 environment. The changed lexer/read/write machinery justified one v3 large rerun, not a repeat of the full-scale claim. At implementation tip `5d532067c987a64b50788d698dbbd21f81c1d98a`, it ran once and passed in27.9seconds. [Exact diagnostic, declared limits and seven metadata pins](data-pilot-evidence/candidate-global-resource-contract-20261017.json) are retained.
+
+| V3 observation | Result |
+|---|---:|
+| Actual / declared candidate row ceiling |16,000 /2,281,141|
+| Raw / enriched candidate bytes |150,064,000 /150,260,000; two parts each|
+| Full raw aggregate / declared allowance |163,315,131 /268,435,456 bytes|
+| Validation input bytes / rows |1,241,137,426 /320,013|
+| Lexical tokens / validation operations |27,287,889 /2,406,479|
+| Geometry comparisons |156,073|
+| Physical control/admission input bytes |50,650|
+| Membership / boundary-staging writes |150,265,135 /918 bytes|
+| Assembly control/marker writes |11,396 bytes|
+| Publisher scratch / output writes |629,197,554 /160,260,384 bytes|
+| Final known / unknown country rows |4,000 /12,000|
+
+The original start/deadline was preserved through final verification. The unchanged schema2 root SHA, all three raw-family hashes, enriched candidate-family hash and frozen counters exactly match the earlier v2 fixture. There is one consumer root, no candidate staging/combined file, one common region and no footprints. All16,000 spatial/ID records preserve facts/provenance/caveats/access/unknown semantics. The C ceiling exercises versioned declarations, not a claim that256MiB M fits2.28m rows. Two simple boundary features cannot establish full-boundary geometry work or planet throughput. All successful/failed test artifacts remain retained. The earlier [v2 large evidence](data-pilot-evidence/candidate-partition-contract-20261017.json) remains unchanged and tied to its own tip; it is not substituted as proof of the changed resource machinery.
 
 ## Remaining actual S2/S3 gates
 
