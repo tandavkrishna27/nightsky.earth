@@ -80,7 +80,14 @@ Integration: ERA5 CI already discovers `test_*.py`; no change is needed to
 `tests/all.test.ts`, `tsconfig.tools.json` or the workflow. Shared tracker and
 acceptance totals remain **12 Done / 9 Partial / 6 Not started**. This bounded
 handoff ends this wave; account/form validation and execution gates are not
-silently closed. Exact pushed commit and CI delivery record follows after commit.
+silently closed.
+
+Current-wave reviewed implementation commit (pushed):
+`3f40986a9657717e3f506ae2c58e08593a3ad9b4`.
+The final lane commit adds only this delivery identity. Resolve that commit with
+`git rev-parse codex/weather-readiness`; its full pushed SHA and exact-tip six-job
+CI result are supplied in the delivery chat. The code, observations, computed
+report and screenshot are unchanged after the reviewed implementation commit.
 
 ## Historical regrouping handoff — 16 October 2026
 
