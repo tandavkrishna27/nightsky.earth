@@ -80,6 +80,7 @@ class NativeChildTests(unittest.TestCase):
         sys.path.insert(0, str(ROOT / 'scripts/osm'))
         from global_source_supervisor import WindowsJob, rss_bytes
         with tempfile.TemporaryDirectory() as temp:
+            temp = str(Path(temp).resolve())
             env = {'SYSTEMROOT': os.environ['SYSTEMROOT'], 'TEMP': temp, 'TMP': temp,
                    'USERPROFILE': temp, 'APPDATA': temp, 'LOCALAPPDATA': temp, 'HOME': temp,
                    'OPENBLAS_NUM_THREADS': '1', 'OMP_NUM_THREADS': '1', 'MKL_NUM_THREADS': '1',
@@ -124,7 +125,7 @@ class OfficialFixtures(unittest.TestCase):
         self.zarr = zarr
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.repo = icechunk.Repository.create(icechunk.local_filesystem_storage(str(self.root / 'fixture')),
                                              spec_version=2, authorize_virtual_chunk_access={})
         session = self.repo.writable_session('main')

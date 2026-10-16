@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "icechunk-offline-preparation-verification",
-  "observedAt": "2026-10-16T20:42:02.615767+00:00",
+  "observedAt": "2026-10-16T20:50:29.025756+00:00",
   "scope": "Coordinator-refined bounded observational metadata interpretation by Icechunk 2.3.0",
   "sourceRequests": 0,
   "sourceAccessAuthorized": false,
@@ -16,8 +16,8 @@
   "code": [
     {
       "path": "scripts/era5/icechunk_metadata.py",
-      "bytes": 26913,
-      "sha256": "3d21605324a3d774565b82cab09701d122c6b4ed46dd96a164f1abd9dbf2b5cf"
+      "bytes": 26914,
+      "sha256": "acff7b1b48441ac0fccb6909929cbecd0b6b38b26021361f13bb40477f069d62"
     },
     {
       "path": "scripts/era5/icechunk_offline.py",
@@ -26,13 +26,13 @@
     },
     {
       "path": "tests/era5/test_icechunk_metadata.py",
-      "bytes": 13236,
-      "sha256": "3ae37adfc95f436eddc36d89d9efeefb1ac33b82e69f5b13784a6ac110785f70"
+      "bytes": 16125,
+      "sha256": "4ce31af128c8d2b3c46c65b17abd7c53f18e5a4099ea7cc9d083e6157a93ff54"
     },
     {
       "path": "tests/era5/test_icechunk_offline.py",
-      "bytes": 15564,
-      "sha256": "4c4c73da7aa87033583583997537a775d3664b988db6c1888539f34a679a4df6"
+      "bytes": 15619,
+      "sha256": "56dd6809592b4ef011e74c31480df7422d2d7c68a9e96c59ffe16328d8c80296"
     }
   ],
   "dependencyReceipt": "2026-10-17-icechunk-development-setup.json",
@@ -42,20 +42,20 @@
   "focusedRuns": [
     {
       "runtime": "3.14.3",
-      "discovered": 25,
-      "passed": 19,
+      "discovered": 27,
+      "passed": 21,
       "skipped": 6,
-      "seconds": 1.352,
+      "seconds": 1.439,
       "exitCode": 0,
       "containedNativeFixturesPassed": 6,
       "skipReason": "Six native methods are delegated to the passing contained-child harness"
     },
     {
       "runtime": "3.12.14",
-      "discovered": 25,
-      "passed": 17,
+      "discovered": 27,
+      "passed": 19,
       "skipped": 8,
-      "seconds": 0.423,
+      "seconds": 0.507,
       "exitCode": 0,
       "skipReason": "No stdlib Zstd or approved 3.14 native target; six native methods are delegated only to that optional child"
     }
@@ -133,11 +133,14 @@
     "limitation": "Qualified boundary/source-call evidence, not exhaustive native storage or kernel filesystem/network tracing"
   },
   "containmentEvidence": "Actual 512 MiB/two-process Windows Job and sanitized native child; independent actual Job/parent-owned pipe helper check; shared/phase deadline and RSS monitor seams, including final exited-worker peak RSS regression",
-  "independentReview": "Clear under the refined metadata-only interpretation contract; no actionable findings remain",
+  "independentReview": "Clear including Windows alias fixture correction and 24-hour expiry boundary; no actionable findings remain",
   "reviewFixes": [
     "Normalize malformed stdlib Zstd exceptions",
-    "Sample retained-handle peak RSS after worker exit before success"
+    "Sample retained-handle peak RSS after worker exit before success",
+    "Canonicalize owned test temp roots after Windows CI alias rejection; retain strict production path guard"
   ],
+  "reviewWindowSeconds": 86400,
+  "freshnessEvidence": "24-hour candidate accepted at expiry minus one second; expiry, future issue time and more than 24 hours rejected; current pins still checked at preflight and worker launch",
   "notTested": [
     "Live TLS/DNS/certificate/source exchange",
     "Constructed unknown union/feature/opaque-extension native fixtures",
