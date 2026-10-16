@@ -21,11 +21,14 @@ async function fixture(counts=[6000,4001]){
 }
 const budgets={maxInputBytes:64*1024**2,maxMemoryBytes:16*1024**2,maxScratchBytes:64*1024**2,maxOutputBytes:64*1024**2,maxDurationMs:60000};
 test('schema6 admits 10001 source pins without embedding a child union and schema5 serves pinned membership',async()=>{
+ // This is an integrity/serving fixture, not a 60-second performance assertion.
+ // Windows hosted-runner filesystem variance exceeded the smaller fixture budget.
+ const largeFixtureBudgets={...budgets,maxDurationMs:180000};
  const {root,inputs}=await fixture();
- const published=await publishClimateRelease({schemaVersion:6,outputPath:join(root,'release.json'),inputs,budgets} as any);
+ const published=await publishClimateRelease({schemaVersion:6,outputPath:join(root,'release.json'),inputs,budgets:largeFixtureBudgets} as any);
  const data=JSON.parse(await readFile(published.manifestPath,'utf8'));
  assert.equal(data.schemaVersion,6);assert.equal(data.sourceLineage.uniqueRevisionCount,10001);assert.equal(data.metadata.sourceRevisions,undefined);assert.equal(data.shards[0].sourceRevisions,undefined);
- const catalog=await publishClimateCatalog({schemaVersion:5,outputPath:join(root,'catalog.json'),inputs:[{path:'release.json',sha256:published.manifestSha256}],budgets} as any);
+ const catalog=await publishClimateCatalog({schemaVersion:5,outputPath:join(root,'catalog.json'),inputs:[{path:'release.json',sha256:published.manifestSha256}],budgets:largeFixtureBudgets} as any);
  const {createReleaseEra5ClimateProvider}=await import('../../../server/providers/climate/releaseEra5');
  const index={vintageLabel:'fictional-index',getById(id:number){return {latitude:10.25,longitude:id===1?77:77.25,timeZone:'Asia/Kolkata'};}} as any;
  const provider=createReleaseEra5ClimateProvider({index,artifactPath:catalog.manifestPath,expectedSha256:catalog.manifestSha256});

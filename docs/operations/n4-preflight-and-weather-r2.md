@@ -23,10 +23,16 @@ The new allowance/output tuple is `.data/era5/timeseries-sample-19901230-r2*`; i
 
 Read-only CDS browser verification showed 35 total requests and a successful time-series request with the matching private local job identity, exact 1990-12-30 date, latitude 32, longitude 48.75, total cloud cover and NetCDF. The UI reports a 15.03 KB result and 1 minute 43 seconds provider duration. No Download button was pressed and no additional job was submitted. Job IDs and account identity are retained privately, not copied into this public record.
 
-This is stronger request/protocol evidence than the original uncertain attempt. It is still not a locally inspected scientific sample: point/time axis, variables/units, missing values, encoding/revision and asset origin remain unvalidated. Preserve the successful checkpoint and job receipt. Investigate the existing result-retrieval contract before any new download; a new job is not needed merely to investigate this completed job. No cause such as an unapproved CDN or response-shape mismatch is asserted without evidence.
+One additional bounded, contained GET of this same job's results metadata, within the original deadline, confirmed a 15,028-byte asset at HTTPS host `object-store.os-api.cci2.ecmwf.int`. That hostname is outside the current immutable asset allowlist, so it is a confirmed retrieval blocker. No request was sent to that host, and no signed URL or token was recorded. This inspection made no submission and did not reset the allowance.
+
+This is stronger request/protocol evidence than the original uncertain attempt. It is still not a locally inspected scientific sample: point/time axis, variables/units, missing values and encoding/revision remain unvalidated. Preserve the successful checkpoint and job receipt. Review the exact returned asset host before downloading; a new job is not needed to retrieve this completed job's result.
 
 ## Architecture and tracker disposition
 
 See [runtime data model](runtime-data-model.md): forecasts use APIs, astronomy is calculated, and gazetteer/catalogue/boundary/history features may use prepared read-only files. These downloads are a mixture of technical samples and potential production inputs, not universally disposable test fixtures.
 
 N4, S2-G2 and S2-H2 remain partial. No original ticket acceptance or 12 Done / 9 Partial / 6 Not started accounting changes. Further source/asset actions must preserve the approved host/count/byte/deadline boundaries; no automatic new job, host expansion, geometry repair, limit increase or data promotion follows this report.
+
+## CI timing correction
+
+The documentation delivery's Windows Node job twice hit the existing 60-second publication budget in the 10,001-pin synthetic lineage integrity fixture. The same case passed locally in 47.696 seconds. Only that large fixture now requests a 180-second ceiling per publication; its assertions, other fixture budgets and all production defaults/limits are unchanged. The corrected focused replay passed in 102.146 seconds total, illustrating timing variance rather than a performance improvement. The original failed runs remain visible in CI history.
