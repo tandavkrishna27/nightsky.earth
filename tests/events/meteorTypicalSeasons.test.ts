@@ -63,12 +63,12 @@ test("approximate calendar survives discovery without inventing annual dates or 
  assert.ok(guidance, "Approximate calendar guidance is missing");
  assert.equal(guidance.availability.status, "partial");
  assert.match(guidance.availability.reason, /other showers.*unavailable/i);
- assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"]]);
+ assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"],["LYR","April"],["PER","August"],["LEO","around Nov. 17 or 18"]]);
  for (const row of guidance.entries) {
   assert.equal(row.precision,"verbal-period");
   assert.equal(row.recurrenceBasis,"typical-annual");
   assert.equal(row.requestedWindowOverlap,"not-evaluated");
-  if (row.code !== "GEM") {
+  if (["ETA", "ORI"].includes(row.code)) {
    assert.equal(row.sourceLocator,"Section 1, introduction, page 1");
    assert.equal(row.source.licenseUrl,"https://creativecommons.org/licenses/by/4.0/");
   }
@@ -96,3 +96,32 @@ test("Geminid annual month fact keeps original source and never becomes a foreca
  assert.ok(result.sources.some(source => source.url === row.source.url));
  assert.deepEqual(result.events, []);
 });
+
+for (const [code, wording, url] of [
+ ["LYR", "April", "https://www.jpl.nasa.gov/videos/whats-up-april-2023/"],
+ ["PER", "August", "https://science.nasa.gov/resource/whats-up-august-2021/"],
+ ["LEO", "around Nov. 17 or 18", "https://www.jpl.nasa.gov/news/nasa-leonids-activities-sleepheads-may-miss-spectacular-celestial-display/"],
+]) test(`${code} original annual wording remains reference evidence outside its calendar period`, async () => {
+ const result = await query(); // January 2028, outside every admitted phrase and forecast year.
+ const row = result.meteorCalendarGuidance?.entries.find(entry => String(entry.code) === code);
+ assert.ok(row, `${code} annual guidance missing`);
+ assert.equal(row.sourceWording, wording);
+ assert.equal(row.source.url, url);
+ assert.equal(row.source.licenseUrl, undefined);
+ assert.match(row.source.attribution, /calendar fact.*NightSky/i);
+ assert.ok(result.sources.some(source => source.url === url));
+ assert.equal(row.requestedWindowOverlap, "not-evaluated");
+ assert.deepEqual(result.events, []);
+ const nonMeteor = await query(["moon-phase"]);
+ assert.ok(!nonMeteor.sources.some(source => source.url === url));
+});
+
+test("calendar caveat identifies every supplied shower without claiming missing guidance for it", async () => {
+  const result = await query();
+  const caveat = result.caveats.find(text => text.startsWith("Approximate meteor calendar guidance"));
+  assert.ok(caveat);
+  for (const code of ["ETA", "ORI", "GEM", "LYR", "PER", "LEO"]) {
+   assert.ok(caveat.includes(code), `Caveat omits supported ${code} guidance`);
+  }
+  assert.doesNotMatch(caveat, /Other showers have no admitted/);
+ });

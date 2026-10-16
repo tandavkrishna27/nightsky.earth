@@ -1,0 +1,48 @@
+{
+  "observedUtc": "2026-10-16T14:09:40.1471470Z",
+  "constraints": {
+    "timeoutSecondsPerRequest": 30,
+    "maxHeaderKiBPerResponse": 31,
+    "aggregateCapBytes": 65536,
+    "checksumBodyCapBytes": 1024,
+    "requests": 2,
+    "redirects": false,
+    "retries": 0
+  },
+  "responses": [
+    {
+      "method": "HEAD",
+      "url": "https://osm-planet-eu-central-1.s3.dualstack.eu-central-1.amazonaws.com/planet/pbf/2026/planet-261012.osm.pbf",
+      "startedUtc": "2026-10-16T14:09:40.1521748Z",
+      "status": 200,
+      "headers": "x-amz-id-2: DSyFBqje0P3/fC7PQZK7NFNfLZCMtGG95tT4cAK3xazciblpIDxtbQzf1T4+mLiwAo/LfH3KcE/w1hHkh+0kP8XkuSk3CzVN\r\nx-amz-request-id: 08RXSCEE2WGKZ29M\r\nServer: AmazonS3\r\nDate: Fri, 16 Oct 2026 14:09:41 GMT\r\nx-amz-replication-status: COMPLETED\r\nETag: \"37619b1886c62145e6a0a6b31109b300-5686\"\r\nx-amz-storage-class: INTELLIGENT_TIERING\r\nx-amz-server-side-encryption: AES256\r\nx-amz-version-id: brLMq6.oGIcbk.3ciQgjtqIduCfYJMT1\r\nAccept-Ranges: bytes\r\nLast-Modified: Thu, 15 Oct 2026 19:22:44 GMT\r\nContent-Length: 95380942829\r\nContent-Type: binary/octet-stream\r\n",
+      "finishedUtc": "2026-10-16T14:09:40.9748077Z"
+    },
+    {
+      "method": "GET",
+      "url": "https://osm-planet-eu-central-1.s3.dualstack.eu-central-1.amazonaws.com/planet/pbf/2026/planet-261012.osm.pbf.md5",
+      "startedUtc": "2026-10-16T14:09:40.9792215Z",
+      "status": 200,
+      "headers": "x-amz-id-2: /XQOez+bZd+0bTzuCovHjFIJUsMtxg92zLsP0uG+JhIOAdoPcNXWz7sak+2GUcEE6KPEXbnRWJpout1sd5e7ETydWQSeVgka\r\nx-amz-request-id: 08RT36SBEDFKJAFK\r\nServer: AmazonS3\r\nDate: Fri, 16 Oct 2026 14:09:41 GMT\r\nx-amz-replication-status: COMPLETED\r\nETag: \"f84756700a319096c467dd3ec5a30df5\"\r\nx-amz-storage-class: INTELLIGENT_TIERING\r\nx-amz-server-side-encryption: AES256\r\nx-amz-version-id: PeORRfxCxo5y564C7x1nJphpAt1bz03h\r\nAccept-Ranges: bytes\r\nLast-Modified: Thu, 15 Oct 2026 19:22:41 GMT\r\nContent-Type: binary/octet-stream\r\nContent-Length: 56\r\n",
+      "bodyBytes": 56,
+      "body": "c51bb08eb9fc486d010aaa1a3424cabc  planet-261012.osm.pbf\n",
+      "bodyCapReached": false,
+      "finishedUtc": "2026-10-16T14:09:41.2572195Z"
+    }
+  ],
+  "aggregateParsedHeadersAndBodyBytes": 1140,
+  "machine": {
+    "observedUtc": "2026-10-16T14:09:41.2593045Z",
+    "volume": {
+      "DriveLetter": "C",
+      "Size": 999109423104,
+      "SizeRemaining": 295450152960
+    },
+    "memoryKiB": {
+      "TotalVisibleMemorySize": 64545140,
+      "FreePhysicalMemory": 27543444,
+      "TotalVirtualMemorySize": 96002420,
+      "FreeVirtualMemory": 44207492
+    }
+  }
+}

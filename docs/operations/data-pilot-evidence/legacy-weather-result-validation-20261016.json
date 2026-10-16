@@ -1,0 +1,27 @@
+{
+  "assetGets": 1,
+  "assetHost": "object-store.os-api.cci2.ecmwf.int",
+  "decodeMetrics": {
+    "elapsedSeconds": 0.203,
+    "peakRssBytes": 42029056,
+    "samplingIntervalSeconds": 0.02
+  },
+  "metadataBytes": 329,
+  "metadataGets": 1,
+  "metadataSha256": "cd3246f9e59bcd462b67018710852f2d5fc23021d6583b98801f9ca6d7e7aa2d",
+  "phase": "validated-sample-only",
+  "rawBytes": 25261,
+  "rawSha256": "4d54f0e655b04c22c077d94fe790bbec5cc5e1f49df32f6ac9189a8013e2d5bd",
+  "validation": {
+    "accepted": true,
+    "cells": 4,
+    "expver": "0001",
+    "hours": 24,
+    "member": 0,
+    "scalarCellHours": 96,
+    "sourceSha256": "4d54f0e655b04c22c077d94fe790bbec5cc5e1f49df32f6ac9189a8013e2d5bd"
+  },
+  "scope": "validated-legacy-sample-only",
+  "newSubmissions": 0,
+  "productionAdmission": false
+}

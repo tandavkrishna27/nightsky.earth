@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**Source resolution, 16 October:** [Delivery](source-resolution-delivery.md) establishes exact planet metadata and available preparation headroom, retrieves and strictly validates the approved 25,261-byte existing weather result without another CDS job, and expands annual calendar context to six showers. Production coverage and original 12/9/6 totals remain unchanged; no deployment.
+
 **Data readiness, 16 October:** [Delivery](data-readiness-delivery.md) proposes a dated planet source, records one approved weather request with remote success but no downloaded raw, and adds sourced Geminids December context. No retry, production admission or deployment; original 12/9/6 unchanged.
 
 **Supervised assembly and guidance, 16 October:** [delivery](assembly-guidance-delivery.md) connects the existing geography stages under containment, prepares a measured single-job weather packet with offline protections, and adds two source-backed approximate annual meteor descriptions to MCP/planner output. Actual global sources/history/science gates remain open; original 12/9/6 unchanged. No downloads or deployment.
