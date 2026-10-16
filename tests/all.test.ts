@@ -130,3 +130,7 @@ import './places/productionSourceAdmission.test';
 import "./places/retainedNaturalEarthAdmission.test";
 
 import "./places/reviewedNaturalEarthAuthority.test";
+
+import './places/partitionedCandidates.test';
+
+import './places/partitionedLargeContract.test';
