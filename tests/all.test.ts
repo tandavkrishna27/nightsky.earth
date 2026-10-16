@@ -126,3 +126,7 @@ import './places/planetReceiptContract.test';
 
 import './places/providerSourceAdmission.test';
 import './places/productionSourceAdmission.test';
+
+import "./places/retainedNaturalEarthAdmission.test";
+
+import "./places/reviewedNaturalEarthAuthority.test";
