@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded-global-resource-contract-evidence-v1",
+  "date": "2026-10-17",
+  "executionTip": "5d532067c987a64b50788d698dbbd21f81c1d98a",
+  "test": "tests/places/partitionedLargeContract.test.ts",
+  "testSha256": "4f3740393f879f0f596739c441127d19292c4325b5dc6550728e05f6ee06e8ad",
+  "runsAtResourceVersion3": 1,
+  "exitCode": 0,
+  "runtime": {
+    "platform": "win32",
+    "node": "v24.14.0",
+    "python": "3.14.3"
+  },
+  "focusedTypeScript": {
+    "tests": 153,
+    "passed": 153,
+    "failed": 0,
+    "newResourceTests": 10,
+    "newResourceTestsRegisteredInLaneAggregate": false
+  },
+  "fullOsmPython": {
+    "tests": 244,
+    "passed": 239,
+    "skipped": 5,
+    "failed": 0
+  },
+  "typechecks": "all three npm run check projects and explicit strict large/root test checks passed",
+  "review": "all four implementation scopes independently spec and quality approved after focused fixes; coordinator scoped integration review clear",
+  "declaredLimits": {
+    "catalogue": {
+      "chunkRows": 8192,
+      "fanout": 128,
+      "maxInputBytes": 2147483648,
+      "maxInputRows": 2281141,
+      "maxMetadataRows": 10000,
+      "maxOutputBytes": 1073741824,
+      "maxRows": 128,
+      "maxScratchBytes": 1073741824,
+      "mergeFanIn": 8,
+      "timeoutMs": 1800000
+    },
+    "membership": {
+      "maxBoundaryBytes": 67108864,
+      "maxCandidateInputBytes": 268435456,
+      "maxGeometryComparisons": 200000000,
+      "maxMilliseconds": 1800000,
+      "maxOutputBytes": 268435456,
+      "maxRows": 2281141,
+      "maxTotalVertices": 2000000,
+      "maxVertices": 1000000
+    },
+    "raw": {
+      "candidates": 2281141,
+      "freeBytes": 0,
+      "nodes": 1000000,
+      "outputBytes": 268435456,
+      "referencesPerWay": 100000,
+      "rowBytes": 65536,
+      "scratchBytes": 1048576,
+      "seconds": 300,
+      "sourceBytes": 1048576
+    },
+    "supervisor": {
+      "commitBytes": 4294967296,
+      "diskBytes": 4294967296,
+      "freeBytes": 0,
+      "maxProcesses": 2,
+      "rssBytes": 2147483648,
+      "wallSeconds": 3900
+    },
+    "validation": {
+      "controlAndAdmissionReadBytes": 16777216,
+      "maxLexicalTokens": 2378170368,
+      "maxOperations": 2378170368,
+      "maxReadBytes": 2378170368,
+      "maxRowsRead": 2378170368
+    }
+  },
+  "observation": {
+    "kind": "large-partition-contract-result",
+    "syntheticOnly": true,
+    "resourceVersion": 3,
+    "productionAdmitted": false,
+    "rawSelectionJob": false,
+    "supervisorRun": false,
+    "networkRequests": 0,
+    "retainedRoot": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\.cache\\partition-implementation\\large-contract-ArcX2i",
+    "retained": true,
+    "elapsedMilliseconds": 27858,
+    "candidates": 16000,
+    "rawCandidateBytes": 150064000,
+    "rawLineageBytes": 13248000,
+    "rawExclusionBytes": 232,
+    "rawPartCount": 4,
+    "rawAggregateOutputBytes": 163315131,
+    "rawAggregateBudget": 268435456,
+    "membershipCandidateBytes": 150260000,
+    "membershipPartCount": 2,
+    "membershipResources": {
+      "validation": {
+        "readBytes": 313421663,
+        "rowsRead": 96003,
+        "lexicalTokens": 7139159,
+        "operations": 713782,
+        "controlAndAdmissionReadBytes": 31487
+      },
+      "geometry": {
+        "comparisons": 156073
+      },
+      "writes": {
+        "boundary-staging": {
+          "bytes": 918,
+          "rows": 0
+        },
+        "membership": {
+          "bytes": 150265135,
+          "rows": 16001
+        },
+        "assembly": {
+          "bytes": 340,
+          "rows": 0
+        },
+        "publisher-output": {
+          "bytes": 0,
+          "rows": 0
+        },
+        "publisher-scratch": {
+          "bytes": 0,
+          "rows": 0
+        }
+      },
+      "rows": 16000,
+      "outputBytes": 150265135,
+      "startedAt": 1792187932201,
+      "deadline": 1792189732201,
+      "elapsedMilliseconds": 4963
+    },
+    "verification": {
+      "startedAt": 1792187932201,
+      "deadline": 1792189732201,
+      "elapsedMilliseconds": 25597,
+      "validation": {
+        "readBytes": 1241137426,
+        "rowsRead": 320013,
+        "lexicalTokens": 27287889,
+        "operations": 2406479,
+        "controlAndAdmissionReadBytes": 50650
+      },
+      "geometry": {
+        "comparisons": 156073
+      },
+      "writes": {
+        "boundary-staging": {
+          "bytes": 918,
+          "rows": 0
+        },
+        "membership": {
+          "bytes": 150265135,
+          "rows": 16001
+        },
+        "assembly": {
+          "bytes": 11396,
+          "rows": 0
+        },
+        "publisher-output": {
+          "bytes": 160260384,
+          "rows": 0
+        },
+        "publisher-scratch": {
+          "bytes": 629197554,
+          "rows": 0
+        }
+      }
+    },
+    "publisher": {
+      "inputRows": 16000,
+      "metadataRows": 1,
+      "inputBytes": 155288355,
+      "scratchBytes": 629197554,
+      "outputBytes": 160260384,
+      "maxBufferedRows": 8192,
+      "maxOpenSortReaders": 2,
+      "mergeLevels": 1,
+      "pages": 413
+    },
+    "consumer": {
+      "schemaVersion": 2,
+      "spatialRows": 16000,
+      "idRows": 16000,
+      "known": 4000,
+      "unknown": 12000,
+      "regionRows": 1,
+      "footprintRows": 0
+    },
+    "catalogueSha256": "65c5f6c3a2d9ead284daa936d05ab22a6fba0616502c016d1e3c8fe75ed985c7",
+    "oneConsumerRoot": true,
+    "monolithicCandidateFile": false,
+    "stagedCandidateCopy": false,
+    "globalScaleOrProductionCompletion": false
+  },
+  "comparisonWithPriorV2Fixture": {
+    "previousEvidence": "candidate-partition-contract-20261017.json",
+    "previousExecutionTip": "e470872747c0b85297be9dead273aa13c259f645",
+    "consumerRootSha256Equal": true,
+    "rawFamilyHashesEqual": true,
+    "enrichedFamilyHashEqual": true,
+    "countsEqual": true
+  },
+  "metadataPins": [
+    {
+      "path": "raw-manifest.json",
+      "bytes": 10171,
+      "sha256": "ba3061d5dbd8488cc79897ce5d172291b79006782a212ae1ab3b60bec72e2657"
+    },
+    {
+      "path": "assembly-plan.json",
+      "bytes": 1846,
+      "sha256": "ddd7209c42dba3b14f86c14eeddf6da1c71b3b7767c2c59853e2521318756d54"
+    },
+    {
+      "path": "synthetic-capacity.json",
+      "bytes": 1393,
+      "sha256": "5e2ceb12a8d6a3dea46f6075ab46c60919c6ff166e211a6bb4258d916e40964f"
+    },
+    {
+      "path": "producer/complete.json",
+      "bytes": 2356,
+      "sha256": "da0b7a5630ff6fed4b4161cac66df7314b28a130bb859244e433b1167b70e17f"
+    },
+    {
+      "path": "producer/checkpoint.json",
+      "bytes": 543,
+      "sha256": "9a016ffa4d80137f20cc0949c5935fc32c8a5fa39bd4d3ab0ef1c6d72b333467"
+    },
+    {
+      "path": "assembly/membership/complete.json",
+      "bytes": 4835,
+      "sha256": "048c08b9140ff770ceb3e7a0cb6ced99beb03c4337ec3172e30c34ca089d2a3a"
+    },
+    {
+      "path": "assembly/assembly-complete.json",
+      "bytes": 11056,
+      "sha256": "d6f7482e6ed50551044cd0b7a470d16005ad0aadf6a1924d7f73789e02c08003"
+    }
+  ],
+  "limits": [
+    "Synthetic metadata and library contract only; no raw source normalization or actual production/supervisor job occurred.",
+    "C2281141 is an explicit control envelope; actual A16000. M256MiB is not a proposed output budget for2281141 real candidates.",
+    "Input read counters cover source/admission validation and repeated inputs; publisher internal scratch reads are separately bounded by unchanged publisher mechanics/deadline and are not this counter.",
+    "Geometry156073 describes only two simple fixture features, not the4854 retained full-boundary workload.",
+    "No global count, wall/commit/storage fit, native source ordering, searched coverage or actual S2/S3 completion is implied.",
+    "No peak RSS/tree commit measurement; no production free-space observation.",
+    "All generated synthetic artifacts retained; no cleanup."
+  ]
+}
