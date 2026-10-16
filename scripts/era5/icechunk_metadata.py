@@ -105,8 +105,8 @@ def _validate_authority(packet_path, packet_sha, allowance_path, allowance_sha, 
     issued = packet.get('issuedAt'); expires = packet.get('expiresAt')
     if (type(issued) not in (int, float) or type(expires) not in (int, float)
             or not math.isfinite(issued) or not math.isfinite(expires)
-            or not issued <= now < expires or not 0 < expires - issued <= 3600):
-        raise ValueError('Fresh packet with at most one-hour validity required')
+            or not issued <= now < expires or not 0 < expires - issued <= 86400):
+        raise ValueError('Fresh packet with at most 24-hour validity required')
     pins = current_pins()
     if packet != build_packet(pins, issued_at=issued, expires_at=expires):
         raise ValueError('Packet code/runtime/dependency pins or contract differ')
@@ -478,7 +478,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.prepare_packet:
         now = time.time()
-        print(canonical(build_packet(current_pins(), issued_at=now, expires_at=now + 3600)).decode())
+        print(canonical(build_packet(current_pins(), issued_at=now, expires_at=now + 86400)).decode())
         return
     if not (args.preflight or args.execute or args.worker):
         print(canonical(dict(status='offline-no-execution', executionEligible=False,

@@ -50,6 +50,39 @@ class Transport:
         return self.replies.pop(0)
 
 
+class FixturePathTests(unittest.TestCase):
+    def test_owned_temp_alias_is_canonicalized_before_real_metadata_fixture(self):
+        # CI may spell TEMP through a Windows short name or directory junction.
+        # Create an owned alias to reproduce the same path-versus-resolve split.
+        with tempfile.TemporaryDirectory(prefix='icechunk owned alias ') as directory:
+            base = Path(directory).resolve()
+            target = base / 'target'; target.mkdir()
+            alias = base / 'alias'
+            if os.name == 'nt':
+                result = subprocess.run(['cmd', '/c', 'mklink', '/J', str(alias), str(target)],
+                                        capture_output=True)
+                if result.returncode: self.skipTest('owned junction creation unavailable')
+            else:
+                alias.symlink_to(target, target_is_directory=True)
+            try:
+                self.assertNotEqual(alias, alias.resolve())
+                with self.assertRaises(ValueError): m.offline.safe_path(alias)
+                class TemporaryAlias:
+                    name = str(alias)
+                    def cleanup(self): pass
+                fixture = MetadataTests('test_four_request_sequence_matches_etag_and_retains_intents_and_raw_bytes')
+                with patch.object(tempfile, 'TemporaryDirectory', return_value=TemporaryAlias()):
+                    fixture.setUp()
+                try:
+                    self.assertEqual(fixture.root, target)
+                    fixture.test_four_request_sequence_matches_etag_and_retains_intents_and_raw_bytes()
+                finally:
+                    fixture.doCleanups()
+            finally:
+                if os.name == 'nt': alias.rmdir()
+                else: alias.unlink()
+
+
 class MetadataTests(unittest.TestCase):
     def test_default_cli_is_nonexecuting_without_optional_imports(self):
         self.assertIsNotNone(m, 'guarded metadata executor implementation missing')
@@ -65,16 +98,16 @@ class MetadataTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.clock = Clock()
 
-    def approval(self):
-        packet = m.build_packet({'fixture': 'a' * 64}, issued_at=1000, expires_at=1100)
+    def approval(self, *, issued_at=1000, expires_at=1100):
+        packet = m.build_packet({'fixture': 'a' * 64}, issued_at=issued_at, expires_at=expires_at)
         raw = m.canonical(packet)
         (self.root / 'packet.json').write_bytes(raw)
         allowance = {'schemaVersion': 1, 'decision': 'approved-metadata-only', 'allowExecution': True,
                      'packetSha256': hashlib.sha256(raw).hexdigest(), 'outputRoot': str(self.root / 'out'),
-                     'expiresAt': 1100}
+                     'expiresAt': expires_at}
         body = m.canonical(allowance)
         (self.root / 'allowance.json').write_bytes(body)
         return [self.root / 'packet.json', hashlib.sha256(raw).hexdigest(), self.root / 'allowance.json',
@@ -105,6 +138,22 @@ class MetadataTests(unittest.TestCase):
             args[2].write_bytes(m.canonical(changed)); args[3] = hashlib.sha256(args[2].read_bytes()).hexdigest()
             with self.assertRaises(ValueError): m._validate_authority(*args, now=1000)
         with self.assertRaises(ValueError): m.main(['--execute'])
+
+    def test_24_hour_review_window_accepts_before_expiry_but_rejects_stale_or_longer(self):
+        args = self.approval(issued_at=1000, expires_at=87400)
+        with patch.object(m, 'current_pins', return_value={'fixture': 'a' * 64}), \
+                patch.object(m, 'DirectTLS', side_effect=AssertionError('network constructor')):
+            m.preflight(*args, now=87399)
+            with self.assertRaises(ValueError): m.preflight(*args, now=87400)
+            with self.assertRaises(ValueError): m.preflight(*args, now=999)
+            args = self.approval(issued_at=1000, expires_at=87401)
+            with self.assertRaises(ValueError): m.preflight(*args, now=1000)
+            output = io.StringIO()
+            with patch.object(m.time, 'time', return_value=1000), contextlib.redirect_stdout(output):
+                m.main(['--prepare-packet'])
+            candidate = json.loads(output.getvalue())
+            self.assertEqual((candidate['issuedAt'], candidate['expiresAt']), (1000, 87400))
+            self.assertFalse(candidate['executionEligible'])
 
     @unittest.skipIf(m is None, 'implementation absent in initial red run')
     def test_authority_cannot_claim_feature_certainty_or_bypass_missing_allowance(self):
