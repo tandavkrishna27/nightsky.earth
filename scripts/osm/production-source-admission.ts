@@ -41,6 +41,13 @@ const repo=fileURLToPath(new URL('../../',import.meta.url));
 export const productionAdmissionCodeFiles=Object.freeze([
  'scripts/osm/production-source-admission.ts','scripts/osm/source-admission.ts',
  'scripts/osm/natural-earth-policy.ts','scripts/osm/production_admission.py',
+ // Repository-owned membership executable closure; keep the Python bridge in the same order.
+ 'scripts/osm/membership-assembly.ts','scripts/osm/boundary-metadata.ts',
+ 'scripts/osm/partitioned-boundaries.ts','scripts/osm/geographic-geometry.ts',
+ 'scripts/osm/build-source-catalogue.ts','scripts/osm/source-build-config.ts',
+ 'scripts/osm/build-streamed-catalogue.ts','scripts/osm/normalized-input-bytes.ts',
+ 'server/places/catalogueFormat.ts','shared/nightsky/discovery.ts',
+ 'shared/nightsky/common.ts','shared/nightsky/places.ts',
  'scripts/osm/production-type-loader.mjs',
 ]);
 function canonical(value:unknown):string {

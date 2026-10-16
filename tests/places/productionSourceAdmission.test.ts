@@ -1,12 +1,26 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,readFile,realpath,mkdir,copyFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve,dirname} from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {admissionSubjectDigest} from '../../scripts/osm/source-admission';
-import {verifyProductionAdmission,verifyProductionAdmissionWithContext,productionAdmissionEnvelopeSchema} from '../../scripts/osm/production-source-admission';
+import {verifyProductionAdmission,verifyProductionAdmissionWithContext,productionAdmissionEnvelopeSchema,productionAdmissionCodeFiles} from '../../scripts/osm/production-source-admission';
+
+const repo=fileURLToPath(new URL('../../',import.meta.url));
+async function membershipCodeClosure(){
+ const visited=new Set<string>();
+ async function visit(path:string):Promise<void>{
+  if(visited.has(path))return;visited.add(path);
+  const body=await readFile(path,'utf8');
+  for(const match of body.matchAll(/(?:from\s*|import\s*\()(['"])(\.[^'"]+)\1/g)){
+   const dependency=resolve(dirname(path),match[2]);await visit(dependency.endsWith('.ts')?dependency:dependency+'.ts');
+  }
+ }
+ await visit(join(repo,'scripts/osm/membership-assembly.ts'));return visited;
+}
 
 const h=(body:string)=>createHash('sha256').update(body).digest('hex');
 const canonical=(value:any):string=>Array.isArray(value)?'['+value.map(canonical).join(',')+']':value!==null&&typeof value==='object'?'{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+canonical(value[key])).join(',')+'}':JSON.stringify(value);
@@ -59,8 +73,36 @@ test('exact approved synthetic subjects bind manifest, plan, raw identity, norma
   const identity={policy:f.manifest.policy,sources:f.manifest.sources.map((source:any)=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as any).filter(([key])=>key!=='path')):value])))};
   assert.equal(first.producerCatalogueRevision,'osm-'+h(canonical(identity)));
   const after=await verifyProductionAdmissionWithContext({...f.options(),phase:'assembly-after',expectedSnapshot:first.snapshotSha256},f.context);
-  assert.equal(first.snapshotSha256,after.snapshotSha256);assert.ok(first.metadataPins.some(p=>p.path.endsWith('lineage.json')));assert.equal(first.geometryPins.length,2);assert.equal(first.codePins.length,5);
+  assert.equal(first.snapshotSha256,after.snapshotSha256);assert.ok(first.metadataPins.some(p=>p.path.endsWith('lineage.json')));assert.equal(first.geometryPins.length,2);assert.equal(first.codePins.length,productionAdmissionCodeFiles.length);
  }finally{await rm(f.root,{recursive:true,force:true});}
+});
+test('membership executable import closure is pinned with exact current bytes',async()=>{
+ const f=await fixture();try{
+  const result=await verifyProductionAdmissionWithContext(f.options(),f.context);
+  for(const path of await membershipCodeClosure()){
+   const absolute=await realpath(path),pin=result.codePins.find(pin=>pin.path===absolute);
+   assert.ok(pin,`Unpinned membership executable dependency: ${path}`);
+   const body=await readFile(path);assert.equal(pin.bytes,body.length);assert.equal(pin.sha256,createHash('sha256').update(body).digest('hex'));
+  }
+  const python=await readFile(join(repo,'scripts/osm/production_admission.py'),'utf8');
+  const fixed=python.match(/CODE_FILES = \(([\s\S]*?)\)\r?\n/);assert.ok(fixed);
+  const paths=[...fixed[1].matchAll(/'([^']+)'/g)].map(match=>match[1]);
+  assert.deepEqual([...paths,'scripts/osm/production-type-loader.mjs'],productionAdmissionCodeFiles);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+test('actual membership code changes invalidate the TypeScript resume snapshot in an isolated checkout',async()=>{
+ const f=await fixture(),checkout=await mkdtemp(join(repo,'.admission-code-test-'));
+ try{
+  for(const path of productionAdmissionCodeFiles){const destination=join(checkout,path);await mkdir(dirname(destination),{recursive:true});await copyFile(join(repo,path),destination);}
+  const isolated=await import(pathToFileURL(join(checkout,'scripts/osm/production-source-admission.ts')).href);
+  const first=await isolated.verifyProductionAdmissionWithContext(f.options(),f.context);
+  for(const path of ['scripts/osm/boundary-metadata.ts','scripts/osm/geographic-geometry.ts','scripts/osm/partitioned-boundaries.ts','scripts/osm/membership-assembly.ts']){
+   const target=join(checkout,path),original=await readFile(target);
+   await writeFile(target,Buffer.concat([original,Buffer.from('\n// Isolated executable mutation.\n')]));
+   await assert.rejects(isolated.verifyProductionAdmissionWithContext({...f.options(),expectedSnapshot:first.snapshotSha256},f.context),/snapshot\/resume identity changed/);
+   await writeFile(target,original);
+  }
+ }finally{await rm(f.root,{recursive:true,force:true});await rm(checkout,{recursive:true,force:true});}
 });
 test('fixed production authority rejects fictional self-issued policy and trusted reviews',async()=>{
  const f=await fixture();try{await assert.rejects(verifyProductionAdmission(f.options()),/quarantined/);}finally{await rm(f.root,{recursive:true,force:true});}

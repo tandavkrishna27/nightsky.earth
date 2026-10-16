@@ -38,7 +38,7 @@ class ProductionAdmissionBridgeTests(unittest.TestCase):
             self.assertEqual(request['phase'],'raw-before')
             self.assertNotIn('policy',request);self.assertNotIn('trust',request)
             self.assertEqual(request['expectedSnapshot'],'a'*64)
-            self.assertEqual(len(admission.production_admission_retained_paths(checked)),7)
+            self.assertEqual(len(admission.production_admission_retained_paths(checked)),len(admission.CODE_FILES)+3)
 
     def test_unknown_phase_missing_pin_and_candidate_context_are_not_execution_paths(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -87,6 +87,35 @@ class ProductionAdmissionBridgeTests(unittest.TestCase):
                 with patch.object(admission,'_run_gate',side_effect=gate):
                     with self.assertRaisesRegex(ValueError,'executable context changed'):
                         admission.verify_production_admission(manifest,envelope,'b'*64,'raw-before')
+
+    def test_membership_dependency_mutations_during_gate_refuse_snapshot(self):
+        dependencies=('scripts/osm/membership-assembly.ts','scripts/osm/boundary-metadata.ts',
+                      'scripts/osm/partitioned-boundaries.ts','scripts/osm/geographic-geometry.ts',
+                      'scripts/osm/build-source-catalogue.ts','scripts/osm/source-build-config.ts',
+                      'scripts/osm/build-streamed-catalogue.ts','scripts/osm/normalized-input-bytes.ts',
+                      'server/places/catalogueFormat.ts','shared/nightsky/discovery.ts',
+                      'shared/nightsky/common.ts','shared/nightsky/places.ts')
+        with tempfile.TemporaryDirectory() as folder:
+            manifest=Path(folder)/'manifest.json';manifest.write_text('{}')
+            envelope=Path(folder)/'admission.json';envelope.write_text('{}')
+            for dependency in dependencies:
+                with self.subTest(dependency=dependency):
+                    result=self.result(manifest,envelope,phase='assembly-before')
+                    original=admission._pin
+                    changed=False
+                    def pin(path,*args,**kwargs):
+                        value=original(path,*args,**kwargs)
+                        if changed and Path(path)==admission.REPO/dependency:
+                            value['sha256']='e'*64
+                        return value
+                    def gate(*args):
+                        nonlocal changed
+                        changed=True
+                        return 0,json.dumps(result).encode(),b''
+                    with patch.object(admission,'_pin',side_effect=pin):
+                        with patch.object(admission,'_run_gate',side_effect=gate):
+                            with self.assertRaisesRegex(ValueError,'executable context changed'):
+                                admission.verify_production_admission(manifest,envelope,'b'*64,'assembly-before')
 
     def test_bounded_synthetic_subprocess_output_is_stopped(self):
         executable=getattr(sys,'_base_executable',sys.executable)
