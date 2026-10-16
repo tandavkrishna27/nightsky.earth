@@ -16,9 +16,13 @@ installed target use 70,453,339 bytes below 128 MiB. The
 pins all seven actual wheels and 293 installed files; the shared/lane test
 environment and existing NumPy/typing packages remain unchanged.
 The smaller FlatBuffers/flatc route lacks the required verification path.
-The four-request design is **not execution-ready**, and no owner source-access
-approval is requested. A raw repo receipt is transport evidence only, not usable
-snapshot progress. The official local-file parser and bounded transport are now
+The four-request operation is **locally prepared, pending explicit owner approval**.
+The [exact owner proposal](icechunk-metadata-owner-proposal-20261017.md) now supplies
+the byte-pinned packet, explicitly unapproved template, fresh output path and
+exact host/resource/stop/command contract. Its packet has a 24-hour review window;
+the proposal records the exact expiry, and changed or expired bytes need renewed
+review. A raw repo receipt is transport evidence only, not usable snapshot
+progress. The official local-file parser and bounded transport are now
 implemented for offline fixtures. The reader can inspect the fixed descriptors
 in known-format metadata-only fixtures, but its APIs omit unknown stored feature
 IDs and opaque extensions; the reviewed native open path does not reject them.
@@ -30,15 +34,34 @@ requires separate explicit approval and a fresh byte-pinned packet/allowance.
 See the dependency plan's actual-capability section for the exact limitation.
 No source request is authorized or executed; source cap/authority is unchanged.
 
-Fresh focused verification discovered 25 tests on each runtime: Python 3.14.3
-passed 19 and delegated six native methods to its passing contained-child
-harness, where all six actually ran; Python 3.12.14 passed 17 and skipped eight
+Fresh focused verification discovered 27 tests on each runtime: Python 3.14.3
+passed 21 and delegated six native methods to its passing contained-child
+harness, where all six actually ran; Python 3.12.14 passed 19 and skipped eight
 unavailable optional/Zstd cases. The [verification receipt](data-pilot-evidence/2026-10-17-icechunk-offline-verification.json)
 pins all four new files and records the exact scope, counts, default CLI results
 and unchanged 293-file dependency admission. Independent review found malformed
 Zstd error normalization and an exited-worker peak-RSS admission gap; both have
 regressions and are fixed. Final independent review is clear under the refined
 metadata-only contract; complete scientific or format compatibility is unproved.
+
+The first pushed run's Windows ERA5 job rejected aliased temporary fixture paths
+before any fake transport call. A real owned junction reproduced the path split;
+test roots now resolve before use while the production alias/reparse guard is
+unchanged. A regression verifies guard rejection and then the real fake-byte
+state machine through the canonical owned path. The 24-hour approval-window
+boundary is also tested; current code/runtime/dependency pins are still required
+at preflight and worker launch, with one-use claims. All source/resource limits
+remain unchanged.
+
+The correction is delivered at `6507a5eb32bad98cd27bd8e13687da3934d27442`.
+Both Linux and Windows ERA5 jobs passed in
+[run 38965254980](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38965254980)
+before the candidate was refreshed once for its 24-hour review window. The exact
+expiry is **18 October 2026, 02:23:24 IST**. The unapproved template is rejected;
+an ephemeral approved-shape preflight fixture passes with transport construction
+trapped. No approved allowance, claim, output or request was created. The final
+delivery includes only this reviewed packet/template/proposal and documentation
+after the correction; its exact-tip six-job result is supplied by the chat.
 
 Attempted-access evidence combines the actual six-key store boundary, guarded
 public cloud factories, native snapshot-download tracing with a missing-metadata

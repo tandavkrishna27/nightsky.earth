@@ -161,8 +161,11 @@ loads coordinate data. `chunks=None` does not remove those reads. Separately,
 [Icechunk expiration and garbage collection](https://icechunk.io/en/stable/understanding/expiration/)
 can delete old snapshots/data; an ID alone is no retention guarantee.
 
-This finite public inspection stops at the binary-metadata boundary. The exact
-small source request remains a design until a tested parser/executor is ready.
+The public inspection stopped at the binary-metadata boundary. Local preparation
+is now complete under the refined metadata-only contract; the
+[exact owner proposal](icechunk-metadata-owner-proposal-20261017.md) supplies its
+fresh byte-pinned packet, explicitly unapproved template and exact commands.
+Execution still requires separate owner approval of those unexpired bytes.
 Snapshot retention, full `expver=1`/QC-valid clocks, deterministic member assurance,
 physical transfer accounting, exact retained subtraction, decode equivalence and
 measured solar/timezone aggregation remain separate gates. No source admission,
@@ -257,9 +260,9 @@ without changing original-byte transfer accounting.
 
 The [verification receipt](data-pilot-evidence/2026-10-17-icechunk-offline-verification.json)
 records fresh parent runs of only the two focused test modules. Python 3.14.3:
-25 discovered, 19 passed, six outer skips delegated to the passing contained
-native harness, where all six actually executed. Python 3.12.14: 25 discovered,
-17 passed, eight honest optional/Zstd skips. Both default CLIs are offline;
+27 discovered, 21 passed, six outer skips delegated to the passing contained
+native harness, where all six actually executed. Python 3.12.14: 27 discovered,
+19 passed, eight honest optional/Zstd skips. Both default CLIs are offline;
 installed dependencies still match all 293 file pins. No broad local suite was
 repeated; unchanged full CI discovery is reserved for the pushed milestone.
 
@@ -279,3 +282,17 @@ identity helpers were checked. No full live exchange, overcommit/process-limit
 stress, production 120-second kill, or constructed unknown native union/feature/
 reserved-extension case is claimed tested. These limits remain explicit in the
 receipt and do not establish scientific admission or authorize source access.
+
+The initial Windows CI run exposed aliased temporary test paths; canonicalizing
+owned fixture roots fixed those pre-transport failures without weakening the
+production path guard. A real junction regression exercises that distinction.
+The owner-review window is now 24 hours with expiry/future-issue/over-window
+negative fixtures; this changes approval timing only, not the 120-second
+operation deadline or other request/resource bounds. The exact refreshed
+packet/template remains non-authorizing until explicit owner approval.
+
+The Windows and Linux ERA5 jobs passed on correction commit
+`6507a5eb32bad98cd27bd8e13687da3934d27442` in
+[run 38965254980](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38965254980).
+Only then was the exact owner packet/template refreshed once; its proposal
+records the 24-hour expiry and current pins. No approved allowance was retained.
