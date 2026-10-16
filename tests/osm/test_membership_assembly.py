@@ -76,7 +76,20 @@ class Assembly(unittest.TestCase):
             old=fixture.root/'old-failure';old.mkdir();(old/'evidence').write_bytes(b'keep')
             plan['retained']=[str(old)]
             result=assembly_pipeline(manifest,fixture.root/'job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=20000000,freeBytes=0,maxProcesses=2))
-            self.assertEqual(result['status'],'bounded-stop');self.assertEqual(len(result['stages']),3)
+            # Preserve the actual failing stage/reason before TemporaryDirectory cleanup.
+            # A raw-worker or containment failure is not the membership failure under test.
+            stderr={}
+            for log in (fixture.root/'job').glob('stage-*.stderr'):
+                with log.open('rb') as stream:
+                    stderr[log.name]=stream.read(8192).decode('utf8',errors='replace')
+            evidence={name: ((fixture.root/'job'/name).stat().st_size if (fixture.root/'job'/name).is_file() else None)
+                      for name in ('raw-manifest.json','normalized/complete.json','normalized/candidates.jsonl',
+                                   'normalized/lineage.jsonl','normalized/exclusions.jsonl','assembly-complete.json','job-complete.json')}
+            diagnostics=json.dumps(dict(report=result,stderr=stderr,evidenceBytes=evidence,rawLimits=m['limits']),sort_keys=True)
+            self.assertEqual(result['status'],'bounded-stop',diagnostics)
+            self.assertEqual(len(result['stages']),3,diagnostics)
+            self.assertEqual([stage['exitCode'] for stage in result['stages'][:2]],[0,0],diagnostics)
+            self.assertIn('Comparison budget',stderr.get('stage-2.stderr',''),diagnostics)
             self.assertTrue((fixture.root/'job'/'normalized'/'complete.json').exists())
             self.assertFalse((fixture.root/'job'/'job-complete.json').exists());self.assertFalse((fixture.root/'job'/'assembly-complete.json').exists())
             self.assertEqual((old/'evidence').read_bytes(),b'keep')

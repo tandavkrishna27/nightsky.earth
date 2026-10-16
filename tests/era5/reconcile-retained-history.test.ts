@@ -20,11 +20,13 @@ test('outside ownership stays outside and identical replay is idempotent',()=>{
 test('ledger binds raw parent and decoded child together',async()=>{const {assertLedgerBinding}=await import('../../scripts/era5/reconcile-retained-history');assert.throws(()=>assertLedgerBinding({entries:[{rawSha256:'a',decodedSha256:'c'}]},{rawSha256:'a',sha256:'b'}),/lineage/);assert.doesNotThrow(()=>assertLedgerBinding({entries:[{rawSha256:'a',partitions:[{rawSha256:'a',decodedSha256:'b'}]}]},{rawSha256:'a',sha256:'b'}));});
 import {mkdtemp,writeFile,readFile,symlink,rm,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join,resolve,relative,isAbsolute} from 'node:path';
+import {join,relative,isAbsolute} from 'node:path';
 import {releaseSha} from '../../server/providers/climate/releaseEra5';
 import {reconcileRetainedHistory} from '../../scripts/era5/reconcile-retained-history';
 test('root output succeeds exclusively while aliased roots and outside output fail',async()=>{
- const temp=await realpath(await mkdtemp(join(tmpdir(),'retained-reconcile-'))),root=join(temp,'root');
+ // Pin the canonical parent once: Windows TEMP can be a junction to another volume.
+ const fixtureParent=await realpath(tmpdir());
+ const temp=await realpath(await mkdtemp(join(fixtureParent,'retained-reconcile-'))),root=join(temp,'root');
  const {mkdir}=await import('node:fs/promises');await mkdir(root);
  try {
   const body=JSON.stringify(plan());await writeFile(join(root,'plan.json'),body);
@@ -36,5 +38,5 @@ test('root output succeeds exclusively while aliased roots and outside output fa
   await assert.rejects(reconcileRetainedHistory(root,'manifest.json',sha,join(root,'..','escape.json')),/Release/);
   const alias=join(temp,'alias');await symlink(root,alias,process.platform==='win32'?'junction':'dir');
   await assert.rejects(reconcileRetainedHistory(alias,'manifest.json',sha,join(alias,'result2.json')),/Release/);
- } finally {const rel=relative(resolve(tmpdir()),temp);assert.ok(rel&&!rel.startsWith('..')&&!isAbsolute(rel));await rm(temp,{recursive:true,force:true});}
+ } finally {const rel=relative(fixtureParent,temp);assert.ok(rel&&!rel.startsWith('..')&&!isAbsolute(rel));await rm(temp,{recursive:true,force:true});}
 });
