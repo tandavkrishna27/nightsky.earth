@@ -24,7 +24,8 @@ ASSET_HOSTS = frozenset({'cds.climate.copernicus.eu'})
 class Adapter:
     asset_hosts = ASSET_HOSTS
 
-    def __init__(self, token, session_factory):
+    def __init__(self, token, session_factory, diagnostic=None):
+        self.diagnostic = diagnostic
         self.api = session_factory()
         self.download = session_factory()
         for session in (self.api, self.download):
@@ -40,22 +41,39 @@ class Adapter:
 
     def _json(self, method, path, timeout, **kwargs):
         response = None
+        count = 0
+        failure = 'transport'
+        def emit(stage):
+            if self.diagnostic is not None:
+                try:
+                    self.diagnostic(stage, status=None if response is None else response.status_code,
+                                    metadata_bytes=count, failure=failure if stage == 'failed' else 'none')
+                except Exception: pass
         deadline = time.monotonic() + timeout
         try:
+            emit('request')
             response = self.api.request(method, BASE + path, timeout=(min(5, timeout), timeout),
                                         allow_redirects=False, stream=True, **kwargs)
+            emit('response')
             if response.status_code not in (200, 201, 202):
+                failure = 'http-status'
                 raise ValueError('CDS response rejected')
             body = bytearray()
             for block in response.iter_content(65536):
                 if time.monotonic() >= deadline or len(body) + len(block) > 1024 * 1024:
+                    failure = 'metadata-cap'
                     raise ValueError('CDS metadata cap exceeded')
                 body.extend(block)
+                count = len(body)
+            failure = 'json'
             value = json.loads(body)
             if not isinstance(value, dict):
+                failure = 'shape'
                 raise ValueError('CDS metadata rejected')
+            emit('metadata')
             return value
         except Exception:
+            emit('failed')
             # Never propagate requests exception text (may contain token/URL).
             raise ValueError('CDS operation failed; reconcile checkpoint') from None
         finally:

@@ -21,6 +21,7 @@ import sample_executor as core
 import sample_live
 import timeseries_executor as contract
 from timeseries_transport import Adapter
+from timeseries_diagnostics import DiagnosticSink, supervisor_budget, write_receipt
 
 MEMORY_BYTES = 512 * 1024**2
 
@@ -136,8 +137,13 @@ def require_containment():
 
 def make_adapter(token):
     import requests
+    class NoRedirectSession(requests.Session):
+        def resolve_redirects(self, *args, **kwargs):
+            # Session.send otherwise prepares _next and consumes redirect bodies
+            # even when allow_redirects=False, bypassing our streamed body cap.
+            return iter(())
     def session():
-        value = requests.Session()
+        value = NoRedirectSession()
         value.mount('https://', requests.adapters.HTTPAdapter(max_retries=0))
         return value
     return Adapter(token, session)
@@ -208,6 +214,7 @@ def execute(allowance, output, resume=False):
     if not token or '\n' in token or '\r' in token:
         raise ValueError('Explicit CDSAPI_KEY required')
     adapter = make_adapter(token)
+    adapter.diagnostic = DiagnosticSink(root)
     try:
         return core._run(root, adapter, resume=resume, contract=contract, deadline_cap=deadline_cap)
     finally:
@@ -216,7 +223,23 @@ def execute(allowance, output, resume=False):
 
 
 def supervise(allowance, output, resume=False):
+    result = dict(stage='preflight', outcome='stopped', childReturnCode=None)
+    started = time.perf_counter()
+    try:
+        value = _supervise(allowance, output, resume, result)
+        result['outcome'] = 'completed'
+        return value
+    finally:
+        result['elapsedMilliseconds'] = max(0, int((time.perf_counter() - started) * 1000))
+        try:
+            write_receipt(str(Path(allowance).absolute()) + '.supervisor-result.json', result, exclusive=True)
+        except Exception:
+            pass  # Preserve original failure; never overwrite a prior attempt receipt.
+
+
+def _supervise(allowance, output, resume, result):
     preflight(allowance, output, resume)
+    result['stage'] = 'containment'
     Job = job_class()
     wall_started = time.time()
     seconds = core.SECONDS
@@ -227,6 +250,7 @@ def supervise(allowance, output, resume=False):
     job = Job(MEMORY_BYTES, 1)
     child = None
     try:
+        result['stage'] = 'launch'
         argv = [sys._base_executable, '-I', str(Path(__file__).resolve()), '--worker',
                 '--owner-allowance', str(Path(allowance).absolute()),
                 '--output', sample_live.canonical_output(output)]
@@ -239,16 +263,22 @@ def supervise(allowance, output, resume=False):
             deadlineMonotonic=deadline, deadlineWall=wall_deadline,
             sitePackages=sysconfig.get_path('purelib'))).encode())
         child.stdin.close()
+        result['stage'] = 'supervision'
         while child.poll() is None:
             if time.monotonic() >= deadline:
+                result['stage'] = 'deadline'
                 raise ValueError('Whole execution deadline exceeded; reconcile checkpoint')
-            if Path(output).exists(): core.budget(output)
+            if Path(output).exists(): supervisor_budget(output)
             time.sleep(.02)
         if time.monotonic() >= deadline:
+            result['stage'] = 'deadline'
             raise ValueError('Whole execution deadline exceeded; reconcile checkpoint')
+        result['childReturnCode'] = child.returncode
         if child.returncode:
+            result['stage'] = 'child-exit'
             raise ValueError('Execution stopped; preserve output and reconcile checkpoint')
-        core.budget(output)
+        supervisor_budget(output)
+        result['stage'] = 'complete'
     finally:
         try:
             job.stop()
@@ -257,6 +287,7 @@ def supervise(allowance, output, resume=False):
                 child.wait(timeout=3)
             job.drain(timeout=3)
         finally:
+            if child is not None: result['childReturnCode'] = child.returncode
             job.close()
 
 

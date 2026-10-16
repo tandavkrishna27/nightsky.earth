@@ -115,6 +115,9 @@ jobs:
       - name: Validate the offline pinned spot plan CLI
         run: python scripts/osm/spot_runner.py plan
 
+      - name: Verify fixed geography acquisition defaults to an offline plan
+        run: python scripts/osm/natural_earth_acquire.py
+
   era5-decoder:
     name: ERA5 offline decoder, downloader and pilot tests / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
