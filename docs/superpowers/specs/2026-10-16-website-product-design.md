@@ -1,7 +1,7 @@
 # NightSky.earth website: product story and design specification
 
 Date: 16 October 2026 (Asia/Calcutta)
-Status: Design and content draft for owner review. Not approved for implementation or publication.
+Status: Design and content approved by the owner in chat on 16 October 2026. Detailed implementation planning and review authorized; implementation and publication remain pending.
 Branch: codex/website-plugin-design
 Base: main at a59260a
 
@@ -23,7 +23,7 @@ Confirmed owner decisions:
 - Include supporting sources, privacy, and terms pages.
 - Expeditions are a later product direction and must not be advertised as current services.
 
-Recommended defaults awaiting this document's review: retain News as a secondary page; no separate How it works page or header item; preserve the restrained Playfair Display/Inter typography and existing colors rather than introduce a new design system.
+Approved defaults: retain News as a secondary page; no separate How it works page or header item; preserve the restrained Playfair Display/Inter typography and existing colors rather than introduce a new design system.
 
 Success: a visitor can identify the product and its ChatGPT destination from the first screen; find a useful resource; understand the distinction between explanation, evidence, and predictions; and never encounter a false installation, booking, form-success, or community-membership promise.
 
