@@ -49,14 +49,16 @@ class GlobalTests(unittest.TestCase):
     def test_disk_sampler_accepts_disappearing_stage_but_not_permission_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);stage=root/'state.pending';stage.write_bytes(b'abc')
-            original=Path.stat;calls=[0]
+            original=Path.stat;original_is_file=Path.is_file;removed=[False]
             def race(path,*args,**kwargs):
-                if path==stage and kwargs.get('follow_symlinks',True):
-                    calls[0]+=1
-                    if calls[0]==3:
-                        stage.unlink();raise FileNotFoundError('ordinary atomic replacement')
-                return original(path,*args,**kwargs)
-            with patch.object(Path,'stat',race): self.assertEqual(g.tree_bytes(root),0)
+                # Path.is_file uses cached/native metadata on newer Python;
+                # counting internal stat calls does not reliably trigger a race.
+                if path==stage and not removed[0]:
+                    removed[0]=True;stage.unlink()
+                    raise FileNotFoundError('ordinary atomic replacement')
+                return original_is_file(path,*args,**kwargs)
+            with patch.object(Path,'is_file',race): self.assertEqual(g.tree_bytes(root),0)
+            self.assertTrue(removed[0])
             stage.write_bytes(b'abc')
             def denied(path,*args,**kwargs):
                 if path==stage: raise PermissionError('must not suppress')
