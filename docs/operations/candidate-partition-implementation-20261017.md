@@ -24,7 +24,28 @@ Implementation used disjoint producer, contract/capacity, membership/bridge and 
 
 Stable-code focused verification: 99/99 TypeScript tests passed across the six affected contract/capacity/membership/bridge/assembly/admission files. Full OSM Python: 239 run, 234 passed, five existing privilege/optional-dependency skips, zero failures in the worktree-owned Python 3.14 environment. All three `npm run check` projects and explicit strict typechecks of new/root TypeScript tests passed. Diff checks passed. Independent spec and quality reviews have no remaining actionable findings.
 
-New `tests/places/partitionedCandidates.test.ts` is run directly (14 tests); `tests/places/partitionedLargeContract.test.ts` is opt-in and remains unrun at this implementation commit. Neither is registered in the shared aggregator here; the coordinator owns that edit. The existing aggregate run and the one large contract result will be recorded separately, followed by the exact final six-job CI observation.
+New `tests/places/partitionedCandidates.test.ts` is run directly (14 tests); `tests/places/partitionedLargeContract.test.ts` is opt-in and remains unrun at this implementation commit. Neither is registered in the shared aggregator here; the coordinator owns that edit. The existing aggregate passed: **1,007 run, 1,001 passed, six skips, zero failures**. Its imports did not yet include the 14 new reader tests or the opt-in test. The coordinator subsequently registered both files and owns combined integration verification.
+
+## Single large contract observation
+
+At implementation tip `e470872747c0b85297be9dead273aa13c259f645`, the opt-in test ran **once**, passed in 28.5 seconds and retained its complete synthetic attempt. [Machine-readable evidence](data-pilot-evidence/candidate-partition-contract-20261017.json) records controls, metadata pins and the exact test SHA.
+
+| Observed item | Result |
+|---|---:|
+| Accepted synthetic candidates | 16,000 |
+| Raw candidate family | 150,064,000 bytes, two bounded parts |
+| Raw lineage / exclusions | 13,248,000 / 232 bytes |
+| All raw output plus descriptors | 163,315,131 bytes of explicit 268,435,456-byte allowance |
+| Enriched candidate family | 150,260,000 bytes, two bounded parts |
+| Membership output / session work | 150,264,625 bytes / 7,527,212 checks |
+| Shared final verification reads / work | 1,241,081,302 bytes / 28,053,328 checks |
+| Publisher input / scratch / output | 155,288,355 / 629,197,554 / 160,260,384 bytes |
+| Final spatial / ID rows | 16,000 / 16,000 |
+| Known / unknown country | 4,000 / 12,000 |
+
+All candidate facts, four source attributions, original caveats, unknown access and evidence counters survived. The fixture contains strict interior, outside, border and unresolved competitor cases. There is one schema-2 catalogue root, one common region, no footprints, no combined candidate file and no staged candidate copy. Raw selection and the production supervisor did not run. Long reserved source URLs make this a serialization/ownership contract test, not representative global density or throughput evidence. No RSS/commit peak was measured; elapsed time is observational.
+
+Final exact-tip CI is reported with the pushed evidence tip; a previous commit's green result is not substituted.
 
 ## Remaining execution gates
 
