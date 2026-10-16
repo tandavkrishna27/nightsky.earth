@@ -107,3 +107,27 @@ test("lunar eclipse peak and penumbral duration match NASA 2026 catalog within b
   assert.ok(Math.abs(Date.parse(lunar.peakUtc)-Date.parse("2026-03-03T11:33:37Z")) <= 120000);
   assert.ok(Math.abs((Date.parse(lunar.endUtc)-Date.parse(lunar.startUtc))/60000 - 338.6) <= 2);
 });
+
+test("default discovery includes greatest elongations and the final sorted result limit remains shared", async () => {
+  const requested = { placeId: place(1).placeId, window: window("2026-02-19T00:00:00Z", "2026-02-21T00:00:00Z", "Asia/Kolkata"), limit: 25 };
+  const discovery = await searchSkyEvents(requested, index);
+  assert.ok(discovery.events.some(row => row.eventType === "greatest-elongation" && row.greatestElongation?.body === "Mercury"));
+  assert.ok(!discovery.unsupportedEventTypes.includes("greatest-elongation"));
+  const annual = { ...requested, window: window("2026-01-01T00:00:00Z", "2026-12-31T23:59:59Z", "Asia/Kolkata"), eventTypes: ["greatest-elongation", "moon-phase"] };
+  const limited = await searchSkyEvents({ ...annual, limit: 2 }, index);
+  const wider = await searchSkyEvents({ ...annual, limit: 25 }, index);
+  assert.deepEqual(limited.events, wider.events.slice(0, 2));
+  assert.equal(wider.events.length, 25);
+  assert.equal(limited.availability.status, "partial");
+  assert.match(limited.availability.reason, /truncated/);
+  assert.match(limited.caveats.join(" "), /limited to the first 2/);
+  assert.ok(wider.events.every((row, i) => i === 0 || row.peakUtc! >= wider.events[i-1]!.peakUtc!));
+  const mixed = await searchSkyEvents({ ...requested, eventTypes: ["greatest-elongation", "comet"] }, index);
+  assert.equal(mixed.availability.status, "partial");
+  assert.deepEqual(mixed.unsupportedEventTypes, ["comet"]);
+  assert.ok(mixed.events.some(row => row.eventType === "greatest-elongation"));
+  const withAlignments = await searchSkyEvents({ ...requested, eventTypes: ["greatest-elongation", "planetary-conjunction"] }, index);
+  assert.equal(withAlignments.availability.status, "partial");
+  assert.match(withAlignments.caveats.join(" "), /heliocentric/);
+  assert.match(withAlignments.caveats.join(" "), /3D/);
+});

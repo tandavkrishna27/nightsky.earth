@@ -4,6 +4,7 @@ import type { CalculationPlace } from "../../shared/nightsky/discovery";
 
 import { boundedAltitudeVisibility } from "./intervalVisibility";
 import { findPlanetAlignments, planetWindowCovered } from "./planetAlignments";
+import { findPlanetElongations } from "./planetElongations";
 import { createRequire } from "node:module";
 import type * as AstronomyTypes from "astronomy-engine";
 import { findReviewedMeteorPeaks, REVIEWED_METEOR_PEAK_SOURCES } from "./meteorPeaks";
@@ -20,8 +21,8 @@ const CALC_SOURCE: SourceRecord = {
   dataClass: "calculation", product: "Astronomy Engine", vintage: `astronomy-engine-${LIBRARY_VERSION}`,
   licenseUrl: "https://github.com/cosinekitty/astronomy/blob/master/LICENSE", modified: true,
 };
-const SUPPORTED_TYPES = ["meteor-shower", "eclipse", "equinox-solstice", "moon-phase", "opposition", "planetary-conjunction"] as const;
-const ALL_EVENT_TYPES = ["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "equinox-solstice", "moon-phase", "comet", "other"] as const;
+const SUPPORTED_TYPES = ["meteor-shower", "eclipse", "equinox-solstice", "moon-phase", "opposition", "planetary-conjunction", "greatest-elongation"] as const;
+const ALL_EVENT_TYPES = ["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"] as const;
 const UNSUPPORTED_REASONS: Record<string, string> = {
   occultation: "No maintained occultation catalog is included in V1.",
   comet: "Transient comet data needs a maintained, rights-reviewed catalog or live feed; none is enabled in V1.",
@@ -47,9 +48,11 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
   if (requestedTypes.includes("equinox-solstice")) events.push(...findSeasons(start, end, placeId));
   if (requestedTypes.includes("eclipse")) events.push(...findEclipses(start, end, observer, input.window.timeZone, placeId));
   if (requestedTypes.includes("meteor-shower")) events.push(...findMeteorShowers(start, end, input.window.timeZone, placeId));
-  const wantsPlanets = requestedTypes.includes("opposition") || requestedTypes.includes("planetary-conjunction");
-  const planetsOutOfRange = wantsPlanets && !planetWindowCovered(start, end);
-  if (wantsPlanets) events.push(...findPlanetAlignments(start, end, requestedTypes.includes("opposition"), requestedTypes.includes("planetary-conjunction"), CALC_SOURCE));
+  const wantsAlignments = requestedTypes.includes("opposition") || requestedTypes.includes("planetary-conjunction");
+  const wantsElongation = requestedTypes.includes("greatest-elongation");
+  const planetsOutOfRange = (wantsAlignments || wantsElongation) && !planetWindowCovered(start, end);
+  if (wantsAlignments) events.push(...findPlanetAlignments(start, end, requestedTypes.includes("opposition"), requestedTypes.includes("planetary-conjunction"), CALC_SOURCE));
+  if (wantsElongation) events.push(...findPlanetElongations(start, end, CALC_SOURCE));
 
   events.sort((a, b) => eventSortTime(a) - eventSortTime(b) || a.eventId.localeCompare(b.eventId));
   const limited = events.slice(0, input.limit);
@@ -64,16 +67,17 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
     caveats.push(`Approximate meteor calendar guidance preserves published verbal periods for ${calendarGuidance!.entries.map(row => row.code).join(", ")}. It is unfiltered annual context, not dated activity, an exact peak, or a local viewing recommendation. Missing guidance does not imply no activity.`);
     caveats.push("Meteor typical-season metadata is unfiltered source reference evidence for two showers. Requested-window overlap is not evaluated; J2000 solar longitude convention is unresolved, so no UTC dates are inferred. Typical intervals do not guarantee activity, peaks, rates or visibility and do not extend radiant fit domains.");
   }
-  if (wantsPlanets) caveats.push("Planet alignments use relative heliocentric ecliptic longitude, ignoring latitude, within the bounded engineering range 1900–2100. Local visibility is not evaluated; alignment time does not establish horizon position, darkness or detectability.");
+  if (wantsAlignments) caveats.push("Planet alignments use relative heliocentric ecliptic longitude, ignoring latitude, within the bounded engineering range 1900–2100. Local visibility is not evaluated; alignment time does not establish horizon position, darkness or detectability.");
+  if (wantsElongation) caveats.push("Greatest elongation covers Mercury and Venus only: maximum geocentric 3D Sun separation with light-time correction and aberration, within the engineering range 1900–2100. Morning/evening describes Sun-relative geometry, not a local visibility, horizon, darkness or detectability assessment. This is not planet-pair conjunction coverage.");
   if (requestedTypes.includes("planetary-conjunction")) caveats.push("Conjunction coverage is partial: only explicitly labeled inferior/superior solar alignments are calculated. Apparent planet-pair conjunctions and minimum sky-plane separation are unsupported. Solar alignment is not a viewing recommendation; never look at the Sun through unfiltered optics.");
-  if (planetsOutOfRange) caveats.push("The requested planet window is outside 1900–2100; no planet alignment calculation was returned.");
+  if (planetsOutOfRange) caveats.push("The requested planet window is outside 1900–2100; no requested planet alignment or greatest-elongation calculation was returned.");
   if (unsupportedEventTypes.length) caveats.push(`V1 does not include maintained event data or calculations for: ${unsupportedEventTypes.map((type) => `${type} (${UNSUPPORTED_REASONS[type]})`).join(" ")}`);
   if (truncated) caveats.push(`The result was limited to the first ${input.limit} events. Narrow the requested time window for a complete list.`);
-  const onlyOutOfRangePlanets = planetsOutOfRange && requestedTypes.every(type => type === "opposition" || type === "planetary-conjunction");
+  const onlyOutOfRangePlanets = planetsOutOfRange && requestedTypes.every(type => type === "opposition" || type === "planetary-conjunction" || type === "greatest-elongation");
   const status = onlyOutOfRangePlanets ? "out-of-horizon" : requestedTypes.every((type) => unsupportedEventTypes.includes(type)) ? "unsupported" : (unsupportedEventTypes.length || truncated || planetsOutOfRange || requestedTypes.includes("meteor-shower") || requestedTypes.includes("planetary-conjunction") ? "partial" : "available");
   const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [...REVIEWED_METEOR_PEAK_SOURCES, METEOR_TYPICAL_SEASON_SOURCE, ...calendarGuidance!.entries.filter(row => !["ETA", "ORI"].includes(row.code)).map(row => row.source)] : [])];
   return skyEventsResultSchema.parse({
-    availability: { status, reason: onlyOutOfRangePlanets ? "Planet alignment windows are supported only within 1900–2100." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : status === "unsupported" ? "Only unsupported event classes were requested." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : planetsOutOfRange ? "Other supported events are shown; planet calculations are outside the supported date horizon." : requestedTypes.includes("meteor-shower") ? `Dated meteor coverage is limited to 2025–2027 forecast maxima; two typical longitude intervals and ${calendarGuidance!.entries.length} approximate verbal calendar periods are reference metadata only. Complete activity seasons and other years' maxima remain unavailable.` : requestedTypes.includes("planetary-conjunction") ? "Only heliocentric-longitude solar alignments are calculated; apparent planet-pair conjunctions remain unsupported." : "Supported events were calculated or loaded from the versioned catalog." },
+    availability: { status, reason: onlyOutOfRangePlanets ? "Planet alignment and greatest-elongation windows are supported only within 1900–2100." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : status === "unsupported" ? "Only unsupported event classes were requested." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : planetsOutOfRange ? "Other supported events are shown; planet calculations are outside the supported date horizon." : requestedTypes.includes("meteor-shower") ? `Dated meteor coverage is limited to 2025–2027 forecast maxima; two typical longitude intervals and ${calendarGuidance!.entries.length} approximate verbal calendar periods are reference metadata only. Complete activity seasons and other years' maxima remain unavailable.` : requestedTypes.includes("planetary-conjunction") ? "Only heliocentric-longitude solar alignments are calculated; apparent planet-pair conjunctions remain unsupported." : wantsElongation ? "Mercury/Venus greatest geocentric elongations were calculated; local visibility is not evaluated." : "Supported events were calculated or loaded from the versioned catalog." },
     sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
     ...(requestedTypes.includes("meteor-shower") ? { meteorTypicalSeasons: meteorTypicalSeasons(), meteorCalendarGuidance: calendarGuidance } : {}),
   });

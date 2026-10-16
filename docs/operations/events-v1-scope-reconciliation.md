@@ -2,6 +2,8 @@
 
 Reviewed from integrated baseline `750b12f29b2ae10eb8f3e88eae31755874198156`. This is a traceability assessment, **not a new scope decision**. It changes no acceptance, launch selection, source admission or status. The original **12 Done / 9 Partial / 6 Not started** accounting remains intact.
 
+Subsequent bounded implementation: the [greatest-elongation admission](greatest-elongation-admission.md) records the later authorized Mercury/Venus addition and its independent references. The assessment below describes the earlier baseline; apparent planet-pair conjunctions and the broader acceptance gates remain open.
+
 ## What the original scope actually requires
 
 The [product event table](../product-scope-v1-v3.md#v1-sky-event-coverage) and [Task 6](../superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md#task-6-implement-predictable-events-and-supported-target-catalogs) must be read together. The product table describes the intended experience; the execution plan specifies source gates and explicit unsupported dispositions. [Gate 0A](../superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md#task-0-complete-independent-source-scale-and-hosting-gates) permits partial/unsupported behavior while a source is unavailable, but that handling does not independently close an unfinished required journey.

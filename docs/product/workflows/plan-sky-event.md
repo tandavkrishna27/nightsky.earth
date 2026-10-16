@@ -55,9 +55,11 @@ Pass requested supported `locale` and `units` to planning/comparison tools. Summ
 
 Preserve the returned reason when an enabled candidate, history, aurora or site-context lookup fails or is outside coverage. Describe unavailable data as unavailable; do not describe an enabled service as disabled or interpret missing evidence as clear weather, safe access or no sky activity. Continue with the remaining supported evidence and show the gap.
 
-## Calculated planet alignment coverage
+## Calculated planet event coverage
 
 `search_sky_events` now includes outer-planet oppositions and explicitly labeled inferior/superior solar alignments from relative heliocentric ecliptic longitude, ignoring ecliptic latitude, in the bounded engineering range 1900–2100. These are global alignment times. Every planet alignment has local visibility not-evaluated; use `get_target_visibility`, darkness and available forecast for the selected named destination before suggesting a night. Solar alignment is not an observing recommendation; never suggest unfiltered solar viewing. Do not relabel a solar alignment as an apparent planet-pair conjunction, minimum angular separation or closest-distance instant. The latter remain unsupported; conjunction coverage is partial. Preserve truncation, out-of-horizon and missing-source states. Independent 2026 comparisons are coarse event-identity checks between different definitions, not an all-years accuracy guarantee.
+
+`greatest-elongation` separately covers Mercury and Venus using the maximum geocentric three-dimensional angular distance from the Sun, with light-time and aberration corrections, within the same engineering range. Preserve the returned body, angle and morning/evening geometry. Evening means east of the Sun and morning means west; neither establishes a local observing window, horizon clearance, darkness or visual detectability. Local visibility stays not-evaluated. For a named-place session, check the selected planet with `get_target_visibility`, darkness and available weather before suggesting a time. Never suggest unfiltered solar viewing. Three coarse 2026 reference comparisons cover Mercury morning/evening and Venus evening; they are finite regressions, not an all-years accuracy guarantee or a verified Venus-morning time/angle reference.
 
 ## Interpret evidence and answer a beginner
 
