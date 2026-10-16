@@ -21,19 +21,29 @@ const publicUrl = z.string().max(2048).refine(value => {
 export const admissionEvidencePinSchema = z.strictObject({path: safeRelative, bytes: z.number().int().min(1).max(4 * MiB), sha256});
 type EvidencePin = z.infer<typeof admissionEvidencePinSchema>;
 const payloadSchema = z.strictObject({url: publicUrl, bytes: z.number().int().min(1).max(160 * 1024 ** 3), sha256, identityEvidence: admissionEvidencePinSchema});
-const roles = ['source-provenance', 'payload-validation', 'rights-review', 'effective-clip', 'admission-approval'] as const;
+const roles = ['source-provenance', 'payload-validation', 'rights-review', 'effective-clip', 'planet-domain', 'admission-approval'] as const;
 const roleSchema = z.enum(roles);
 const reviewIdentitySchema = z.strictObject({role: roleSchema, subjectSha256: sha256, reviewer: text, evidence: admissionEvidencePinSchema});
 const reviewSchema = reviewIdentitySchema.extend({reviewedAt: z.iso.datetime(), decision: z.literal('approve')});
 const receiptDocumentSchema = z.strictObject({schemaVersion: z.literal(1), role: roleSchema, subjectSha256: sha256, reviewer: text, reviewedAt: z.iso.datetime(), decision: z.literal('approve')});
 export const sourceAdmissionTrustSchema = z.strictObject({schemaVersion: z.literal(1), trustedReviews: z.array(reviewIdentitySchema).max(1000)});
-export const sourceAdmissionManifestSchema = z.strictObject({schemaVersion: z.literal(1), kind: z.literal('source-admission-manifest'), records: z.array(z.strictObject({sourceKey: text, kind: z.enum(['boundary', 'osm-extract']), edition: text, recordSha256: sha256, payload: payloadSchema.omit({identityEvidence: true})})).min(1).max(1000)});
+export const sourceAdmissionManifestSchema = z.strictObject({schemaVersion: z.literal(1), kind: z.literal('source-admission-manifest'), records: z.array(z.strictObject({sourceKey: text, kind: z.enum(['boundary', 'osm-extract', 'osm-planet']), edition: text, recordSha256: sha256, payload: payloadSchema.omit({identityEvidence: true})})).min(1).max(1000)});
+/** Source extent only: never a provider clipping polygon or completed search. */
+export const planetDomainSchema = z.strictObject({
+  schemaVersion: z.literal(1), kind: z.literal('planet-domain-v1'), sourceUrl: publicUrl, edition: text, provider: text,
+  providerWholeWorldEvidence: admissionEvidencePinSchema,
+  providerObject: z.strictObject({version: text, etag: text, md5: z.string().regex(/^[a-f0-9]{32}$/)}),
+  raw: payloadSchema.pick({bytes: true, sha256: true}), nativeVintage: z.iso.datetime().regex(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/), nativeVintageEvidence: admissionEvidencePinSchema,
+  domain: z.strictObject({west: z.literal(-180), south: z.literal(-90), east: z.literal(180), north: z.literal(90)}),
+  selectionPolicy: z.literal('named-complete-way-v1-polar85'), coverageClaim: z.literal('source-domain-only'),
+});
 const clipSchema = z.discriminatedUnion('status', [
+  z.strictObject({status: z.literal('planet-domain'), descriptor: planetDomainSchema, descriptorEvidence: admissionEvidencePinSchema}),
   z.strictObject({status: z.literal('not-applicable'), reason: text}),
   z.strictObject({status: z.literal('bound'), payload: payloadSchema, associationEvidence: admissionEvidencePinSchema, boundPayloadSha256: sha256, procedure: text}),
 ]);
 export const sourceAdmissionSourceSchema = z.strictObject({
-  key: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/), kind: z.enum(['boundary', 'osm-extract']),
+  key: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/), kind: z.enum(['boundary', 'osm-extract', 'osm-planet']),
   edition: text, manifest: admissionEvidencePinSchema, recordSha256: sha256,
   originalSource: z.strictObject({identity: text, url: publicUrl, provenanceEvidence: admissionEvidencePinSchema}),
   payload: payloadSchema, effectiveClip: clipSchema,
@@ -128,6 +138,13 @@ export function validateSourceAdmission(rawBundle: unknown, rawTrust: unknown, r
     requiredRoles.push('effective-clip');
     if (source.effectiveClip.status !== 'bound') gaps.push('effective-clip-required');
     else if (source.effectiveClip.boundPayloadSha256 !== source.payload.sha256) gaps.push('effective-clip-payload-mismatch');
+  } else if (source.kind === 'osm-planet') {
+    requiredRoles.push('planet-domain');
+    if (source.effectiveClip.status !== 'planet-domain') gaps.push('planet-domain-required');
+    else {
+      const d = source.effectiveClip.descriptor;
+      if (d.sourceUrl !== source.payload.url || d.edition !== source.edition || d.raw.sha256 !== source.payload.sha256 || d.raw.bytes !== source.payload.bytes) gaps.push('planet-domain-source-mismatch');
+    }
   } else if (source.effectiveClip.status !== 'not-applicable') gaps.push('boundary-clip-not-applicable');
   // Mandatory original terms come from trusted inventory, never the candidate's chosen label.
   const profile = policyRecord ? profiles[policyRecord.originalLicenceId] : undefined;
@@ -141,7 +158,7 @@ export function validateSourceAdmission(rawBundle: unknown, rawTrust: unknown, r
     if (new Set(conditionIds).size !== conditionIds.length) gaps.push('duplicate-condition');
     for (const condition of profile.conditions) if (!conditionIds.includes(condition)) gaps.push('missing-condition:' + condition);
     if (profile.id === 'ODbL-1.0' && source.intendedUse.distribution === 'public' && !source.rights.offer) gaps.push('machine-readable-offer-required');
-    if (source.kind === 'osm-extract' && profile.id !== 'ODbL-1.0') gaps.push('osm-original-odbl-review-required');
+    if (source.kind !== 'boundary' && profile.id !== 'ODbL-1.0') gaps.push('osm-original-odbl-review-required');
   }
   if (new Set(bundle.reviews.map(review => review.role)).size !== bundle.reviews.length) gaps.push('duplicate-review-role');
   if (new Set(trust.trustedReviews.map(review => canonical(review))).size !== trust.trustedReviews.length) gaps.push('duplicate-trusted-review');
@@ -170,7 +187,7 @@ async function safeExisting(path: string): Promise<string> {
   return absolute;
 }
 interface ReadBudget {bytes: number; ceiling: number}
-async function readBounded(path: string, maxBytes: number, budget: ReadBudget, pin?: EvidencePin): Promise<Buffer> {
+async function readBounded(path: string, maxBytes: number, budget: ReadBudget, pin?: Pick<EvidencePin, 'bytes' | 'sha256'>): Promise<Buffer> {
   const absolute = await safeExisting(path), handle = await open(absolute, 'r');
   try {
     const before = await handle.stat();
@@ -190,6 +207,42 @@ async function retainedPublicJson(root: string, pin: EvidencePin, budget: ReadBu
   const canonicalBytes = Buffer.from(new TextDecoder('utf8', {fatal: true}).decode(raw).replaceAll('\r\n', '\n'), 'utf8');
   if (canonicalBytes.length !== pin.bytes || createHash('sha256').update(canonicalBytes).digest('hex') !== pin.sha256) throw new Error('Canonical LF public artifact pin mismatch');
   return json(canonicalBytes);
+}
+
+/** Read retained raw bytes before describing them. The native observation still requires a trusted payload review. */
+export async function createPlanetDomainDescriptor(rawPath: string, input: unknown, descriptorPath: string) {
+  const descriptor = planetDomainSchema.parse(input), absolute = await safeExisting(rawPath), handle = await open(absolute, 'r');
+  try {
+    const before = await handle.stat();
+    if (!before.isFile() || before.size !== descriptor.raw.bytes) throw new Error('Planet raw identity size mismatch');
+    const hash = createHash('sha256'), buffer = Buffer.alloc(65536); let count = 0;
+    while (true) {
+      const {bytesRead} = await handle.read(buffer, 0, buffer.length, null); if (!bytesRead) break;
+      count += bytesRead; if (count > descriptor.raw.bytes) throw new Error('Planet raw identity grew'); hash.update(buffer.subarray(0, bytesRead));
+    }
+    const after = await handle.stat(); await safeExisting(absolute);
+    if (count !== descriptor.raw.bytes || hash.digest('hex') !== descriptor.raw.sha256 || before.mtimeMs !== after.mtimeMs || before.size !== after.size || before.ino !== after.ino) throw new Error('Planet raw identity mismatch');
+  } finally { await handle.close(); }
+  await verifyPlanetDomainEvidence(descriptor, dirname(resolve(descriptorPath)), {bytes: 0, ceiling: 8 * MiB});
+  const bytes = Buffer.from(canonical(descriptor), 'utf8');
+  return {descriptor, bytes, sha256: createHash('sha256').update(bytes).digest('hex')};
+}
+
+/** Linked evidence is always relative to the retained descriptor's parent directory. */
+async function verifyPlanetDomainEvidence(descriptor: z.infer<typeof planetDomainSchema>, descriptorDirectory: string, budget: ReadBudget) {
+  const observation = json(await readBounded(join(descriptorDirectory, descriptor.nativeVintageEvidence.path), 4 * MiB, budget, descriptor.nativeVintageEvidence));
+  const expected = {schemaVersion: 1, kind: 'native-vintage-observation', raw: descriptor.raw, nativeVintage: descriptor.nativeVintage};
+  if (canonical(observation) !== canonical(expected)) throw new Error('Planet native vintage observation mismatch');
+  await readBounded(join(descriptorDirectory, descriptor.providerWholeWorldEvidence.path), 4 * MiB, budget, descriptor.providerWholeWorldEvidence);
+}
+async function readPlanetDomainFile(path: string, pin: Pick<EvidencePin, 'bytes' | 'sha256'>, budget: ReadBudget) {
+  const descriptor = planetDomainSchema.parse(json(await readBounded(path, 4 * MiB, budget, pin)));
+  await verifyPlanetDomainEvidence(descriptor, dirname(resolve(path)), budget);
+  return descriptor;
+}
+/** Assembly calls this on initial and final plan load, checking all three pinned artifacts. */
+export async function verifyPlanetDomainFile(path: string, pin: Pick<EvidencePin, 'bytes' | 'sha256'>) {
+  return readPlanetDomainFile(path, admissionEvidencePinSchema.omit({path: true}).parse(pin), {bytes: 0, ceiling: 12 * MiB});
 }
 
 /** Immutable retained evidence has already been sanitized; do not replace it with current upstream metadata. */
@@ -306,6 +359,11 @@ export async function validateSourceAdmissionFiles(bundlePath: string, trustPath
   const pins: EvidencePin[] = [source.originalSource.provenanceEvidence, source.payload.identityEvidence, source.rights.licenceEvidence,
     ...source.rights.conditions.map(condition => condition.evidence), ...bundle.reviews.map(review => review.evidence)];
   if (source.effectiveClip.status === 'bound') pins.push(source.effectiveClip.payload.identityEvidence, source.effectiveClip.associationEvidence);
+  if (source.effectiveClip.status === 'planet-domain') {
+    const {descriptor, descriptorEvidence} = source.effectiveClip;
+    const retained = await readPlanetDomainFile(join(dirname(resolve(bundlePath)), descriptorEvidence.path), descriptorEvidence, budget);
+    if (canonical(retained) !== canonical(descriptor)) throw new Error('Planet descriptor content mismatch');
+  }
   const visited = new Set<string>();
   for (const [base, list] of [[dirname(resolve(bundlePath)), pins], [dirname(resolve(trustPath)), trust.trustedReviews.map(review => review.evidence)]] as const) {
     for (const pin of list) {

@@ -162,6 +162,63 @@ class GlobalTests(unittest.TestCase):
             path=Path(tmp)/'allowance.json';path.write_text('{}')
             with self.assertRaises(ValueError): g.read_allowance(path,hashlib.sha256(path.read_bytes()).hexdigest(),packet(),Path(tmp)/'o')
 
+    def test_overlay_admits_exact_replacements_and_retained_owner_remainder(self):
+        evidence=Path(__file__).resolve().parents[2]/'docs/operations/data-pilot-evidence'
+        fixture=json.loads((evidence/'2026-10-16-history-ownership-replan-fixture.json').read_text())
+        overlay=json.loads((evidence/'2026-10-16-history-ownership-replan.json').read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            sources={'frozenPlan':fixture['plan'],'reconciliation':fixture['reconciliation'],'ownershipOverlay':overlay}
+            p=packet();paths={k:str(Path(tmp)/(k+'.json')) for k in sources}
+            def write():
+                for k in sources:
+                    if k=='reconciliation': sources[k]['frozenPlanSha256']=p['sourcePins']['frozenPlan']
+                    if k=='ownershipOverlay':
+                        sources[k]['frozenPlanSha256']=p['sourcePins']['frozenPlan']
+                        sources[k]['reconciliationSha256']=p['sourcePins']['reconciliation']
+                    Path(paths[k]).write_text(g.canonical(sources[k]))
+                    p['sourcePins'][k]=hashlib.sha256(Path(paths[k]).read_bytes()).hexdigest()
+            p['jobs']=copy.deepcopy(overlay['replacements']);write()
+            g.verify_sources(p,paths)
+            # An exact old owner may resume only outside the replaced day.
+            tile=fixture['plan']['tiles'][1];row=copy.deepcopy(p['jobs'][0])
+            row.update({k:tile[k] for k in ['tileId','expectedCells','requiredCells','fillerCells']})
+            row['request']['area']=tile['area'];row['request']['day']=['31'];row['scalarCellHours']=len(row['expectedCells'])*24
+            row['sha256']=g.identity({k:row[k] for k in ['dataset','revision','member','request']})
+            p['jobs']=[row];g.verify_sources(p,paths)
+            row['request']['day']=['30'];row['sha256']=g.identity({k:row[k] for k in ['dataset','revision','member','request']})
+            with self.assertRaises(ValueError): g.verify_sources(p,paths)
+            p['jobs']=copy.deepcopy(overlay['replacements'])
+            original=copy.deepcopy(sources)
+            def shrink_filler_rectangle(s):
+                changed=s['ownershipOverlay']['replacements'][-1]
+                changed['request']['area'][3]=49.5;changed['area'][3]=49.5
+                removed=[c for c in changed['expectedCells'] if c.endswith(':49.75')]
+                changed['expectedCells']=[c for c in changed['expectedCells'] if c not in removed]
+                changed['fillerCells']=[c for c in changed['fillerCells'] if c not in removed]
+                changed['scalarCellHours']=96
+                changed['sha256']=g.identity({k:changed[k] for k in ['dataset','revision','member','request']})
+                s['ownershipOverlay']['removedFillerCells']=sorted(s['ownershipOverlay']['removedFillerCells']+removed)
+                p['jobs']=copy.deepcopy(s['ownershipOverlay']['replacements'])
+            sources=copy.deepcopy(original);shrink_filler_rectangle(sources);write()
+            with self.assertRaises(ValueError): g.verify_sources(p,paths)
+            p['jobs']=copy.deepcopy(overlay['replacements'])
+            mutations=[
+                lambda s:s['ownershipOverlay']['ownerOverrides'][0]['overrides'].clear(),
+                lambda s:s['ownershipOverlay']['replacements'].pop(),
+                lambda s:s['ownershipOverlay']['replacements'].append(copy.deepcopy(s['ownershipOverlay']['replacements'][0])),
+                lambda s:s['ownershipOverlay']['removedFillerCells'].clear(),
+                lambda s:s['reconciliation']['cells'][0]['hoursUtc'].pop(),
+                lambda s:s['ownershipOverlay']['resolvedBlockedTileIds'].append('100:213'),
+                lambda s:s['ownershipOverlay']['replacements'][0]['requiredCells'].clear(),
+            ]
+            for mutate in mutations:
+                sources=copy.deepcopy(original);mutate(sources);write()
+                with self.assertRaises(ValueError): g.verify_sources(p,paths)
+            sources=copy.deepcopy(original);write()
+            p['jobs'][0]['request']['day']=['31']
+            p['jobs'][0]['sha256']=g.identity({k:p['jobs'][0][k] for k in ['dataset','revision','member','request']})
+            with self.assertRaises(ValueError): g.verify_sources(p,paths)
+
     def test_source_pins_bind_frozen_ownership_and_reconciled_missing_masks(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=packet();row=p['jobs'][0]

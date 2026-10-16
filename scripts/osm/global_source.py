@@ -37,6 +37,43 @@ def descriptor(path):
     return json.loads(path.read_text(encoding='utf8'))
 
 
+def verify_planet_domain(source, policy):
+    pin=source['sourceDomain']
+    if set(pin)!={'kind','path','bytes','sha256'} or pin['kind']!='planet-domain-v1' or not isinstance(pin['path'],str) or not Path(pin['path']).is_absolute(): raise ValueError('planet descriptor pin')
+    def pinned(path,p):
+        if type(p['bytes']) is not int or not 1<=p['bytes']<=4*1024*1024 or not isinstance(p['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',p['sha256']): raise ValueError('planet evidence pin')
+        path=safe_path(path)
+        with path.open('rb') as f:
+            before=os.fstat(f.fileno())
+            if not stat.S_ISREG(before.st_mode) or before.st_size!=p['bytes']: raise ValueError('planet evidence size')
+            data=f.read(p['bytes']+1);after=os.fstat(f.fileno())
+        safe_path(path)
+        if len(data)!=p['bytes'] or hashlib.sha256(data).hexdigest()!=p['sha256'] or (before.st_size,before.st_mtime_ns,before.st_ino)!=(after.st_size,after.st_mtime_ns,after.st_ino): raise ValueError('planet evidence digest/mutation')
+        return data
+    d=json.loads(pinned(pin['path'],pin))
+    keys={'schemaVersion','kind','sourceUrl','edition','provider','providerWholeWorldEvidence','providerObject','raw','nativeVintage','nativeVintageEvidence','domain','selectionPolicy','coverageClaim'}
+    if set(d)!=keys or d['schemaVersion']!=1 or d['kind']!='planet-domain-v1' or d['coverageClaim']!='source-domain-only' or d['domain']!={'west':-180,'south':-90,'east':180,'north':90}: raise ValueError('planet domain semantics')
+    if d['sourceUrl']!=source['url'] or d['raw']!={'bytes':source['bytes'],'sha256':source['sha256']} or d['nativeVintage']!=source['vintage'] or d['selectionPolicy']!=policy: raise ValueError('planet source binding')
+    if any(not isinstance(d[k],str) or not d[k].strip() or len(d[k])>4096 for k in ('edition','provider')): raise ValueError('planet provider/edition')
+    obj=d['providerObject']
+    if not isinstance(obj,dict) or set(obj)!={'version','etag','md5'} or any(not isinstance(obj[k],str) or not obj[k].strip() or len(obj[k])>4096 for k in obj) or not re.fullmatch('[a-f0-9]{32}',obj['md5']): raise ValueError('planet provider object')
+    for key in ('providerWholeWorldEvidence','nativeVintageEvidence'):
+        p=d[key]
+        if not isinstance(p,dict) or set(p)!={'path','bytes','sha256'} or not isinstance(p['path'],str) or not p['path'] or len(p['path'])>240 or '\\' in p['path'] or ':' in p['path'] or any(part in ('','.','..') for part in p['path'].split('/')): raise ValueError('planet evidence path')
+        data=pinned(Path(pin['path']).parent/p['path'],p)
+        if key=='nativeVintageEvidence' and json.loads(data)!={'schemaVersion':1,'kind':'native-vintage-observation','raw':d['raw'],'nativeVintage':d['nativeVintage']}: raise ValueError('planet native vintage observation')
+    return d
+
+
+def planet_retained_paths(manifest):
+    paths=[]
+    for source in manifest['sources']:
+        if 'sourceDomain' not in source: continue
+        d=verify_planet_domain(source,manifest['policy']);path=safe_path(source['sourceDomain']['path'])
+        paths.extend([path,*[safe_path(path.parent/d[k]['path']) for k in ('providerWholeWorldEvidence','nativeVintageEvidence')]])
+    return list(dict.fromkeys(paths))
+
+
 def validate_manifest(m):
     if set(m) != {'schemaVersion', 'policy', 'authorization', 'sources', 'limits'} or m['schemaVersion'] != 1 or m['policy'] != POLICY:
         raise ValueError('manifest schema/policy')
@@ -47,7 +84,7 @@ def validate_manifest(m):
     if not isinstance(m['sources'], list) or not 1 <= len(m['sources']) <= 64: raise ValueError('source count')
     ids=set(); paths=set(); total=0
     for s in m['sources']:
-        if set(s) != {'id','path','format','url','bytes','sha256','vintage','licenseUrl','attribution','clipSha256'}: raise ValueError('source fields')
+        if set(s) != {'id','path','format','url','bytes','sha256','vintage','licenseUrl','attribution', 'sourceDomain' if 'sourceDomain' in s else 'clipSha256'}: raise ValueError('source fields')
         if not re.fullmatch(r'[A-Za-z0-9_-]{1,80}',s['id']) or s['id'] in ids: raise ValueError('source identity')
         ids.add(s['id'])
         if not isinstance(s['path'],str) or not Path(s['path']).is_absolute(): raise ValueError('absolute source path required')
@@ -55,10 +92,11 @@ def validate_manifest(m):
         if path in paths or not path.is_file(): raise ValueError('source path')
         paths.add(path)
         if s['format'] not in ('xml','pbf'): raise ValueError('source format')
-        for key in ('sha256','clipSha256'):
+        for key in (('sha256',) if 'sourceDomain' in s else ('sha256','clipSha256')):
             if not isinstance(s[key],str) or not re.fullmatch('[a-f0-9]{64}',s[key]): raise ValueError('source hash pin')
         if type(s['bytes']) is not int or s['bytes'] < 1: raise ValueError('source bytes')
         total+=s['bytes']
+        if 'sourceDomain' in s: verify_planet_domain(s,m['policy'])
         if not re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ',s['vintage']): raise ValueError('native vintage required')
         if not s['url'].startswith('https://') or 'latest' in s['url'].lower(): raise ValueError('exact source URL required')
         if s['licenseUrl'] != 'https://opendatacommons.org/licenses/odbl/1-0/' or s['attribution'] != '© OpenStreetMap contributors': raise ValueError('OSM rights required')
@@ -69,7 +107,7 @@ def validate_manifest(m):
 def manifest_revision(m):
     validate_manifest(m)
     # Machine path and operational ceilings do not change geographic identity.
-    identity={'policy':m['policy'],'sources':[{k:v for k,v in s.items() if k!='path'} for s in m['sources']]}
+    identity={'policy':m['policy'],'sources':[{k:({dk:dv for dk,dv in v.items() if dk!='path'} if k=='sourceDomain' else v) for k,v in s.items() if k!='path'} for s in m['sources']]}
     return 'osm-'+hashlib.sha256(canonical(identity).encode()).hexdigest()
 
 
@@ -230,12 +268,14 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
     def verify_sources():
         check(force=True)
         for s in m['sources']:
+            if 'sourceDomain' in s: verify_planet_domain(s,m['policy'])
             p=safe_path(s['path']); before=p.stat()
             if before.st_size!=s['bytes'] or digest(p,check)!=s['sha256']: raise ValueError('source hash/size mismatch')
             after=p.stat()
             if (before.st_ino,before.st_mtime_ns,before.st_size)!=(after.st_ino,after.st_mtime_ns,after.st_size): raise ValueError('source mutation')
         check(force=True)
     verify_sources()
+    source_domains=[dict(sourceId=s['id'],**s['sourceDomain']) for s in m['sources'] if 'sourceDomain' in s]
     manifest_hash=hashlib.sha256(canonical(m).encode()).hexdigest(); dbpath=safe_path(output/'scratch.sqlite'); checkpoint=safe_path(output/'checkpoint.json')
     completed=0
     if resume:
@@ -248,6 +288,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
             done=descriptor(output/'complete.json')
             if done.get('geographyMode','all-nodes')!=geography_mode: raise ValueError('published geography mode mismatch')
             if done.get('catalogueRevision')!=revision or done.get('manifestSha256')!=manifest_hash or done.get('policy')!=POLICY or set(done.get('files',{}))!={'candidates.jsonl','exclusions.jsonl','lineage.jsonl'}: raise ValueError('published identity mismatch')
+            if done.get('sourceDomains',[])!=source_domains: raise ValueError('published planet domain mismatch')
             for name, pin in done['files'].items():
                 if name not in ('candidates.jsonl','exclusions.jsonl','lineage.jsonl') or digest(output/name,check)!=pin['sha256'] or (output/name).stat().st_size!=pin['bytes']: raise ValueError('published digest mismatch')
             check(force=True); return output
@@ -354,7 +395,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
         write('exclusions.jsonl',(dict(source=s,id=i,reason=r) for s,i,r in db.execute('SELECT * FROM exclusions ORDER BY source,id,reason')))
         write('lineage.jsonl',(dict(placeId=i,source=s,sha256=sources[s]['sha256'],vintage=sources[s]['vintage'],policy=m['policy']) for i,s in db.execute('SELECT * FROM lineage ORDER BY id,source')))
         verify_sources(); check()
-        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode)).encode()
+        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode,**({'sourceDomains':source_domains} if source_domains else {}))).encode()
         check(len(payload))
         with safe_path(output/'complete.json').open('xb') as f: f.write(payload)
         check(force=True)

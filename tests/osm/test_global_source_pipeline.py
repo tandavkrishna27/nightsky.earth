@@ -13,6 +13,19 @@ from global_source import build, manifest_revision
 import global_source
 
 
+def planet_fixture(fixture):
+    m=fixture.manifest([fixture.node()]);s=m['sources'][0]
+    evidence=fixture.root/'whole-world.txt';evidence.write_bytes(b'synthetic provider evidence')
+    pin=dict(path=evidence.name,bytes=evidence.stat().st_size,sha256=hashlib.sha256(evidence.read_bytes()).hexdigest())
+    native=fixture.root/'native.json';native.write_text(json.dumps(dict(schemaVersion=1,kind='native-vintage-observation',raw=dict(bytes=s['bytes'],sha256=s['sha256']),nativeVintage=s['vintage'])))
+    d=dict(schemaVersion=1,kind='planet-domain-v1',sourceUrl=s['url'],edition='fixture',provider='Synthetic',providerWholeWorldEvidence=pin,providerObject=dict(version='v1',etag='etag',md5='a'*32),raw=dict(bytes=s['bytes'],sha256=s['sha256']),nativeVintage=s['vintage'],nativeVintageEvidence=dict(path=native.name,bytes=native.stat().st_size,sha256=hashlib.sha256(native.read_bytes()).hexdigest()),domain=dict(west=-180,south=-90,east=180,north=90),selectionPolicy=m['policy'],coverageClaim='source-domain-only')
+    path=fixture.root/'domain.json'
+    def bind():
+        path.write_text(json.dumps(d));s.pop('clipSha256',None);s['sourceDomain']=dict(kind='planet-domain-v1',path=str(path),bytes=path.stat().st_size,sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+    bind()
+    return m,d,path,bind
+
+
 class Pipeline(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -374,5 +387,20 @@ class Pipeline(unittest.TestCase):
             writer.add_node(osmium.osm.mutable.Node(id=1,location=(20,10),tags={'name':'Park','leisure':'park'}))
         s=m['sources'][0];s.update(path=str(pbf),format='pbf',bytes=pbf.stat().st_size,sha256=hashlib.sha256(pbf.read_bytes()).hexdigest())
         out=self.run_build(m,'pbf');self.assertEqual(json.loads((out/'candidates.jsonl').read_text())['name'],'Park')
+    def test_planet_domain_is_verified_and_carried_without_coverage(self):
+        m,d,path,bind=planet_fixture(self);s=m['sources'][0]
+        bind();out=self.run_build(m,'planet');done=json.loads((out/'complete.json').read_text());self.assertEqual(done['sourceDomains'],[dict(sourceId=s['id'],**s['sourceDomain'])]);self.assertIn('not coverage',done['coverage']);self.assertEqual(self.run_build(m,'planet',resume=True),out)
+        for field,value in [('sourceUrl','https://example.org/wrong'),('nativeVintage','2026-10-02T00:00:00Z'),('domain',dict(west=-179,south=-90,east=180,north=90)),('coverageClaim','searched-world')]:
+            original=d[field];d[field]=value;bind()
+            with self.assertRaisesRegex(ValueError,'planet'):self.run_build(m,'bad-'+field)
+            d[field]=original
+        bind();revision=manifest_revision(m);d['edition']='fixture-2';bind();self.assertNotEqual(manifest_revision(m),revision)
+        with self.assertRaisesRegex(ValueError,'manifest'):self.run_build(m,'planet',resume=True)
+        d['edition']='fixture';d['nativeVintage']='2026-10-02T00:00:00Z';s['vintage']=d['nativeVintage']
+        native=self.root/'native.json';native.write_text(json.dumps(dict(schemaVersion=1,kind='native-vintage-observation',raw=d['raw'],nativeVintage=d['nativeVintage'])))
+        d['nativeVintageEvidence'].update(bytes=native.stat().st_size,sha256=hashlib.sha256(native.read_bytes()).hexdigest());bind()
+        with self.assertRaisesRegex(ValueError,'header vintage'):self.run_build(m,'actual-header')
+        bind();path.write_text('{}')
+        with self.assertRaisesRegex(ValueError,'planet'):self.run_build(m,'tampered-domain')
 
 if __name__=='__main__': unittest.main()

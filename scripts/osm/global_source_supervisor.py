@@ -253,7 +253,7 @@ def verify_metadata_pin(path, pin, stream):
 
 def pipeline(manifest_path, root, regions, footprints, limits, *, node='node', python=None, build_config=None, build_config_sha256=None):
     """Complete local raw → normalized → paged stages under one deadline/accounting."""
-    from global_source import validate_manifest
+    from global_source import validate_manifest, planet_retained_paths
     manifest_path=safe_path(manifest_path); root=safe_path(root); regions=safe_path(regions); footprints=safe_path(footprints)
     if manifest_path.stat().st_size>1024*1024: raise ValueError('manifest byte limit')
     m=validate_manifest(json.loads(manifest_path.read_text(encoding='utf8')))
@@ -270,7 +270,7 @@ def pipeline(manifest_path, root, regions, footprints, limits, *, node='node', p
     scripts=Path(__file__).resolve().parent
     commands=[[python or getattr(sys,'_base_executable',sys.executable),str(scripts/'global_source.py'),str(manifest_path),str(root/'normalized')],
               [node,'--import',(scripts.parents[1]/'node_modules'/'tsx'/'dist'/'loader.mjs').as_uri(),str(scripts/'build-source-catalogue.ts'),str(root/'normalized'),str(regions),str(footprints),str(root/'catalogue'),*bridge_controls]]
-    return supervise(commands,root,limits,retained=[manifest_path,regions,footprints,*retained_config,*[safe_path(s['path']) for s in m['sources']]])
+    return supervise(commands,root,limits,retained=[*planet_retained_paths(m),manifest_path,regions,footprints,*retained_config,*[safe_path(s['path']) for s in m['sources']]])
 
 
 if __name__=='__main__':

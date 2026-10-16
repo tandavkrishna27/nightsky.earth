@@ -117,3 +117,6 @@ import './places/membershipAssembly.test';
 
 import './era5/reconcile-retained-history.test';
 import './places/geographyCapacityPlan.test';
+
+import './places/planetSourceAdmission.test';
+import './era5/replan-history-ownership.test';

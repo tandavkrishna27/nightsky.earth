@@ -290,6 +290,71 @@ def pinned_json(path,sha,limit=8*MiB):
     return json.loads(data)
 
 
+def verify_ownership_overlay(overlay,plan,reconciliation,pins):
+    """Independently prove the bounded day overlay against its actual pinned inputs."""
+    affected=[f'{r}:{c}' for r in (243,244) for c in range(456,460)]
+    blocked=['243:457','243:458','244:457','244:458']
+    hours=[f'1990-12-30T{h:02}:00:00Z' for h in range(24)]
+    central={f'era5:{y:g}:{x:g}' for y in (32,32.25) for x in (48.75,49)}
+    if overlay.get('schemaVersion')!=1 or overlay.get('frozenPlanSha256')!=pins['frozenPlan'] or overlay.get('reconciliationSha256')!=pins['reconciliation']:
+        raise ValueError('Overlay input pins differ')
+    if overlay.get('affectedTileIds')!=affected or overlay.get('resolvedBlockedTileIds')!=blocked or overlay.get('hoursUtc')!=hours or sorted(x['tileId'] for x in reconciliation['blockedTiles'])!=blocked:
+        raise ValueError('Overlay scope differs')
+    tiles={};owners={};required=set()
+    for tile in plan['tiles']:
+        if tile['tileId'] in tiles: raise ValueError('Duplicate frozen owner')
+        tiles[tile['tileId']]=tile
+        cells=tile['expectedCells'];req=tile['requiredCells'];fill=tile['fillerCells']
+        if len(set(cells))!=len(cells) or len(req)+len(fill)!=len(cells) or set(req)&set(fill) or set(req)|set(fill)!=set(cells): raise ValueError('Frozen classifications differ')
+        for cell in cells:
+            if cell in owners: raise ValueError('Duplicate frozen cell')
+            owners[cell]=tile['tileId']
+        if tile['tileId'] in affected: required.update(req)
+    original={c for c,t in owners.items() if t in affected}
+    geometry={f'era5:{y:g}:{48+i*.25:g}' for y in (31.75,32,32.25,32.5) for i in range(8)}
+    if original!=geometry or not set(affected)<=set(tiles): raise ValueError('Affected geometry differs')
+    known={}
+    for cell in reconciliation['cells']:
+        if cell['cellId'] in known or len(set(cell['hoursUtc']))!=len(cell['hoursUtc']): raise ValueError('Duplicate retained mask')
+        known[cell['cellId']]=set(cell['hoursUtc'])
+        if cell['cellId'] in original and (cell['tileId']!=owners[cell['cellId']] or cell['ownership']!=('required' if cell['cellId'] in required else 'filler')): raise ValueError('Retained ownership differs')
+    if any(known.get(c,set())!=(set(hours) if c in central else set()) for c in original): raise ValueError('Affected retained mask changed')
+    # Recompute exact unaffected clocks plus subtraction, rather than trusting counts/status.
+    expected=[]
+    for tile_id in affected:
+        if tiles[tile_id]['overrides'] or any(x['tileId']==tile_id for x in reconciliation['updatedOverrides']): raise ValueError('Affected source overrides changed')
+        overrides=[];removed=0
+        for index,t in enumerate(plan['calendarTemplates']):
+            groups={};changed=False
+            if len(t['year'])!=1 or len(t['month'])!=1: raise ValueError('Calendar template differs')
+            for day in t['day']:
+                remaining=[]
+                for hour in t['time']:
+                    if f"{t['year'][0]}-{t['month'][0]}-{day}T{hour}:00Z" in hours: removed+=1;changed=True
+                    else: remaining.append(hour)
+                if remaining: groups.setdefault(tuple(remaining),[]).append(day)
+            if changed: overrides.append(dict(template=index,shapes=[dict(days=d,time=list(h)) for h,d in groups.items()]))
+        if removed!=24: raise ValueError('Overlay clock not present exactly once')
+        expected.append(dict(tileId=tile_id,overrides=overrides))
+    if overlay.get('ownerOverrides')!=expected: raise ValueError('Overlay owner subtraction differs')
+    replacements={};used=set();used_required=set()
+    if len(overlay['replacements'])!=4: raise ValueError('Four finite replacements required')
+    for row in overlay['replacements']:
+        validate_job(row)
+        request=row['request'];cells=set(row['expectedCells'])
+        if row['tileId'] in tiles or row['tileId'] in replacements or row.get('area')!=request['area']: raise ValueError('Replacement identity differs')
+        if request['year']!=['1990'] or request['month']!=['12'] or request['day']!=['30'] or request['time']!=[h[11:16] for h in hours]: raise ValueError('Replacement clock differs')
+        if cells-used!=cells or not cells<=original or cells&central: raise ValueError('Replacement overlaps retained/outside ownership')
+        if set(row['requiredCells'])!=cells&required: raise ValueError('Replacement classification differs')
+        used.update(cells);used_required.update(row['requiredCells']);replacements[row['tileId']]=row
+    if used_required!=required-central: raise ValueError('Required coverage differs')
+    removed=original-central-used
+    approved_removed={f'era5:{y:g}:{x:g}' for y in (31.75,32.5) for x in (48.75,49)}
+    if removed!=approved_removed: raise ValueError('Overlay exceeds exact four-cell filler removal')
+    if removed&required or overlay.get('removedFillerCells')!=sorted(removed) or overlay.get('addedFillerCells')!=[]: raise ValueError('Filler accounting differs')
+    return replacements,{x['tileId']:x['overrides'] for x in expected},set(blocked)
+
+
 def verify_sources(packet,paths):
     if set(paths)!=set(packet['sourcePins']): raise ValueError('Every source pin needs one path')
     sources={k:pinned_json(paths[k],v) for k,v in packet['sourcePins'].items()}
@@ -303,7 +368,16 @@ def verify_sources(packet,paths):
     overrides={x['tileId']:x['overrides'] for x in reconciliation['updatedOverrides']}
     tiles={t['tileId']:t for t in plan['tiles']}
     templates={(t['year'][0],t['month'][0]):(i,t) for i,t in enumerate(plan['calendarTemplates'])}
+    replacements={}
+    if 'ownershipOverlay' in sources:
+        replacements,overlay_overrides,resolved=verify_ownership_overlay(sources['ownershipOverlay'],plan,reconciliation,packet['sourcePins'])
+        overrides.update(overlay_overrides);blocked-=resolved
     for row in packet['jobs']:
+        validate_job(row)
+        if row['tileId'] in replacements:
+            if row!=replacements[row['tileId']]: raise ValueError('Exact pinned replacement required')
+            continue
+        if row['tileId'] not in tiles: raise ValueError('Unknown frozen owner')
         if row['tileId'] in blocked: raise ValueError('Unequal retained masks require explicit ownership replan')
         tile=tiles[row['tileId']]
         if row['request']['area']!=tile['area'] or any(row[k]!=tile[k] for k in ['expectedCells','requiredCells','fillerCells']): raise ValueError('Frozen cell ownership differs')

@@ -129,4 +129,22 @@ class Assembly(unittest.TestCase):
             self.assertEqual(load_limits(path),{})
         finally: fixture.doCleanups()
 
+
+    @unittest.skipUnless(os.name=='nt','Windows Job integration')
+    def test_planet_domain_runs_under_supervised_assembly_and_is_accounted(self):
+        from supervised_membership_assembly import assembly_pipeline
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            m,d,domain,bind=fixtures.planet_fixture(fixture)
+            manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
+            plan,path,save=self.setup_plan(fixture)
+            plan['sourceDomains']=[dict(sourceId=m['sources'][0]['id'],**m['sources'][0]['sourceDomain'])]
+            result=assembly_pipeline(manifest,fixture.root/'planet-job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=20000000,freeBytes=0,maxProcesses=2))
+            self.assertEqual(result['status'],'complete',str(result))
+            complete=json.loads((fixture.root/'planet-job'/'assembly-complete.json').read_text())
+            self.assertEqual(complete['producerDescriptor']['sourceDomains'],plan['sourceDomains'])
+            self.assertIn('unknown',complete['sourceCoverage'])
+            self.assertEqual((fixture.root/'planet-job'/'membership'/'footprints.jsonl').read_text(),'')
+        finally: fixture.doCleanups()
+
 if __name__=='__main__': unittest.main()

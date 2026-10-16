@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import re
 import sys
-from global_source import validate_manifest
+from global_source import validate_manifest, planet_retained_paths
 from global_source_supervisor import supervise
 from spot_paths import safe_path
 
@@ -19,11 +19,13 @@ def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, no
     with plan_path.open('rb') as handle: body=handle.read(1024*1024+1)
     if len(body)>1024*1024 or hashlib.sha256(body).hexdigest()!=plan_sha256: raise ValueError('assembly size/digest mismatch')
     plan=json.loads(body)
-    if not isinstance(plan,dict) or set(plan)-{'geographyMode'}!=set(('schemaVersion','boundaries','footprints','membership','stream','catalogue','retained')) or type(plan['schemaVersion']) is not int or plan['schemaVersion']!=1: raise ValueError('assembly schema')
+    if not isinstance(plan,dict) or set(plan)-{'geographyMode','sourceDomains'}!=set(('schemaVersion','boundaries','footprints','membership','stream','catalogue','retained')) or type(plan['schemaVersion']) is not int or plan['schemaVersion']!=1: raise ValueError('assembly schema')
     geography_mode=plan.get('geographyMode','all-nodes')
     if geography_mode not in ('all-nodes','selected-references'): raise ValueError('geography mode')
     if not isinstance(plan['boundaries'],list) or not 1<=len(plan['boundaries'])<=100: raise ValueError('boundary inventory')
-    retained=[manifest_path,plan_path,*[safe_path(s['path']) for s in manifest['sources']],*[safe_path(p) for p in accounting_paths]]
+    expected_domains=[dict(sourceId=s['id'],**s['sourceDomain']) for s in manifest['sources'] if 'sourceDomain' in s]
+    if plan.get('sourceDomains',[])!=expected_domains: raise ValueError('assembly planet domain mismatch')
+    retained=[*planet_retained_paths(manifest),manifest_path,plan_path,*[safe_path(s['path']) for s in manifest['sources']],*[safe_path(p) for p in accounting_paths]]
     for pin in [*[s['input'] for s in plan['boundaries']],plan['footprints']]:
         if not isinstance(pin,dict) or set(pin)!=set(('path','bytes','sha256')) or not isinstance(pin['path'],str) or not Path(pin['path']).is_absolute(): raise ValueError('absolute input pin required')
         if type(pin['bytes']) is not int or not 0<=pin['bytes']<=128*1024**2 or not isinstance(pin['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',pin['sha256']): raise ValueError('invalid input pin')

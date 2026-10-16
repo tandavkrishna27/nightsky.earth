@@ -57,3 +57,27 @@ test('selected geography mode is pinned and must match producer evidence',async(
  Object.assign(f.plan,{geographyMode:'automatic-fallback'});
  await assert.rejects(loadAssemblyPlan(f.path,await f.save()));
 });
+test('planet descriptor requires matching producer identity and rejects oversized evidence before staging',async()=>{
+ const f=await fixture();const p={path:'evidence.json',bytes:1,sha256:digest('e')};const domain={schemaVersion:1,kind:'planet-domain-v1',sourceUrl:'https://example.org/fixture.osm',edition:'fixture',provider:'Synthetic',providerWholeWorldEvidence:p,providerObject:{version:'v1',etag:'etag',md5:'a'.repeat(32)},raw:{bytes:3,sha256:digest('raw')},nativeVintage:'2026-10-01T00:00:00Z',nativeVintageEvidence:p,domain:{west:-180,south:-90,east:180,north:90},selectionPolicy:'named-complete-way-v1-polar85',coverageClaim:'source-domain-only'};
+ const linked=join(f.root,'nested');await mkdir(linked);await writeFile(join(linked,'evidence.json'),'e');const observation=JSON.stringify({schemaVersion:1,kind:'native-vintage-observation',raw:domain.raw,nativeVintage:domain.nativeVintage});await writeFile(join(linked,'native.json'),observation);domain.nativeVintageEvidence={path:'native.json',bytes:Buffer.byteLength(observation),sha256:digest(observation)};
+ const body=JSON.stringify(domain),path=join(linked,'planet-domain.json');await writeFile(path,body);
+ const sourceDomains=[{sourceId:'s0',kind:'planet-domain-v1',path,bytes:Buffer.byteLength(body),sha256:digest(body)}];Object.assign(f.plan,{sourceDomains});
+ assert.equal((await loadAssemblyPlan(f.path,await f.save()) as any).sourceDomains.length,1);
+ await writeFile(join(linked,'evidence.json'),'x');await assert.rejects(loadAssemblyPlan(f.path,await f.save()),/checksum|digest/);await writeFile(join(linked,'evidence.json'),'e');
+ await rm(join(linked,'native.json'));await assert.rejects(loadAssemblyPlan(f.path,await f.save()),/ENOENT/);await writeFile(join(linked,'native.json'),observation);
+ const wrong=observation.replace('2026-10-01','2026-10-02');await writeFile(join(linked,'native.json'),wrong);await assert.rejects(loadAssemblyPlan(f.path,await f.save()),/checksum|digest/);await writeFile(join(linked,'native.json'),observation);
+ await writeFile(join(linked,'native.json'),wrong);domain.nativeVintageEvidence.sha256=digest(wrong);const mismatchedBody=JSON.stringify(domain);await writeFile(path,mismatchedBody);sourceDomains[0].sha256=digest(mismatchedBody);await assert.rejects(loadAssemblyPlan(f.path,await f.save()),/native vintage observation/);
+ domain.nativeVintageEvidence.sha256=digest(observation);await writeFile(join(linked,'native.json'),observation);await writeFile(path,body);sourceDomains[0].sha256=digest(body);
+ await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job),/planet domain/);await assert.rejects(access(join(f.job,'membership-input')));
+ const done=JSON.parse(await readFile(join(f.producer,'complete.json'),'utf8'));done.sourceDomains=sourceDomains;done.files['lineage.jsonl'].bytes=128*1024**2+1;await writeFile(join(f.producer,'complete.json'),JSON.stringify(done));
+ await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job));await assert.rejects(access(join(f.job,'membership-input')));
+ done.files['lineage.jsonl'].bytes=0;await writeFile(join(f.producer,'complete.json'),JSON.stringify(done));
+ const evidence=await assembleMembership(f.path,await f.save(),f.producer,f.job);assert.match(evidence.sourceCoverage,/unknown/);
+});
+
+test('each producer stream exceeding assembly pin capacity fails before staging',async()=>{
+ for(const name of ['candidates.jsonl','lineage.jsonl','exclusions.jsonl']){
+  const f=await fixture(),done=JSON.parse(await readFile(join(f.producer,'complete.json'),'utf8'));done.files[name].bytes=128*1024**2+1;
+  await writeFile(join(f.producer,'complete.json'),JSON.stringify(done));await assert.rejects(assembleMembership(f.path,await f.save(),f.producer,f.job));await assert.rejects(access(join(f.job,'membership-input')));
+ }
+});
