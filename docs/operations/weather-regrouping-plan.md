@@ -13,7 +13,7 @@ Goal: produce a deterministic offline 27+3 replacement proposal for the rejected
   in `weather_coverage.py`, with adversarial fixtures.
 - [x] Replay against read-only retained metadata, commit a portable proposed
   packet and proof receipt, and record exact hashes and unresolved review gates.
-- [ ] Run affected/full ERA5 tests, independent review, commit/push this branch,
+- [x] Run affected/full ERA5 tests, independent review, commit/push this branch,
   watch exact-commit CI, and write `SESSION-weather-HANDOFF.md`.
 
 No provider requests, browser work, credentials, data downloads, shared tracker

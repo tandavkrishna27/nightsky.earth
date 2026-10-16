@@ -76,7 +76,17 @@ discovers `test_*.py`. No aggregate test file, shared tracker, geography/event
 implementation, other branch, serving data or source dataset was modified.
 Acceptance totals remain **12 Done / 9 Partial / 6 Not started**.
 
-Final reviewed implementation commit and exact-commit CI are recorded in the
-delivery update below after the initial implementation commit. The final branch
-tip can be resolved with `git rev-parse codex/weather-readiness`; the delivery
-chat supplies the full pushed tip SHA (a commit cannot contain its own SHA).
+## Final delivery record
+
+Final reviewed implementation commit:
+`274c355c2045063a21ccc2e7a6607537c99ac87b` (pushed).
+Its [exact-commit CI run](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38937463860)
+completed successfully: **all six jobs green**, Node/ERA5/OSM on both Linux and
+Windows. The working tree was clean after that push.
+
+The final lane commit contains only this CI record and the completed plan
+checkbox. Resolve its exact identity with `git rev-parse codex/weather-readiness`;
+the delivery chat supplies the full final pushed SHA and its separate exact-tip
+CI result (a commit cannot contain its own SHA). No implementation, packet,
+source pin or proof changed after the reviewed implementation commit. Stop here
+for the concrete proposal/budget/form-review handoff; no further waves are implied.
