@@ -1,5 +1,15 @@
 # Events lane handoff — 17 October 2026
 
+## Current bounded calendar-acquisition preparation
+
+Rights-report delivery **`d20ca374f5da9f886801756055525c23d97f77b3`** passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38966950874). The coordinator then authorized at most two exact-target HEAD checks (one per edition), headers **32 KiB/request**, time **15 s/request / 30 s cumulative**, no retry/redirect/body/GET fallback, followed by an owner proposal rather than source-body acquisition.
+
+The [bounded acquisition proposal](imo-calendar-acquisition-proposal.md) records **one HEAD** to the retained bare-domain 2026 URL: **200 text/html**, advertised length **2,980 bytes**, ETag/Last-Modified retained, no Location, **734 ms**. This is not a verified PDF or its size. No body stream was read. The 2027 landing title was retained but its exact download target was not; the source researcher confirmed the missing target. A clarification asks for the actual observed link; no filename was guessed and no second request was made without an exact URL.
+
+The later owner envelope proposes **4 MiB per edition / 8 MiB combined**, with finite header/time/request bounds, no retries or redirect following, type/signature/incomplete-body checks, isolated staging and exact provenance capture. These are proposed caps, not source sizes or approval. The packet is **not executable** while an exact target is unknown or the 2026 route advertises HTML. Body inspection, permission outreach, rights admission, product selection and scientific validation remain separate gates; no body, email, runtime row or launch subset is authorized by this preparation. All nineteen identities remain visible and the thirteen-row proposal remains unadopted.
+
+The coordinator explicitly holds the source gate until a viable exact official PDF target or owner input is available; no known-HTML GET or further fetch round is proposed. Independent review found **no actionable finding** and checked selected HEAD values against the retained metadata. **Sixteen local links/fragments**, the metadata/bounds consistency check and whitespace check pass. This documentation-only delivery changes no test/runtime/configuration/accepted evidence; its exact commit and CI outcome follow after push/watch.
+
 ## Current finite IMO rights and retained-material assessment
 
 The preceding planet-pair delivery **`b9bba97a804d9ae9456a7f3263fab95649f758ce`** passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38966054826). Implementation remains `35fb5456c455ae796e9180ccfcf18e00bbb20e01`; this follow-up does not alter it. The coordinator reports integration into `80a584d`, with all six integration jobs green, and a separate `5359e88` documentation follow-up; this lane neither merges nor verifies those other tips as its own delivery.

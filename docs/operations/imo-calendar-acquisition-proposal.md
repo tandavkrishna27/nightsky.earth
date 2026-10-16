@@ -1,0 +1,28 @@
+# Bounded IMO calendar inspection proposal — 17 October 2026
+
+**Owner proposal only; no body acquisition authorized or performed.** The [rights assessment](imo-calendar-rights-admission.md) at `d20ca374f5da9f886801756055525c23d97f77b3` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38966950874). This follow-up prepares exact-source inspection bounds, not a reuse grant or row admission. All nineteen identities remain visible; the thirteen-shower proposal is unadopted.
+
+## Authorized metadata check
+
+The follow-up permits at most **two HEAD requests**, one per exact 2026/2027 URL, **32 KiB maximum response headers per request**, **15 seconds per request / 30 seconds cumulative request time**, no retries, redirect following, PDF opening, response-body reading or GET fallback. The client used .NET `HttpClientHandler` with `MaxResponseHeadersLength = 32` (KiB), `AllowAutoRedirect = false`, cookies/default credentials disabled, a HEAD request, `ResponseHeadersRead`, and a 15-second timeout. Only selected metadata was retained; no body stream was read.
+
+| Edition / exact target | Result | Meaning |
+| --- | --- | --- |
+| [2026 retained official URL](https://imo.net/files/meteor-shower/cal2026.pdf) | HEAD at **2026-10-16 21:12:10 UTC** (17 October locally); **200**, `Content-Type: text/html`, `Content-Length: 2980`, ETag `"ba4-65bb01b9531b2"`, Last-Modified **2026-09-17 16:16:35 +00:00**; no Location header; elapsed **734 ms**. | This advertises HTML at the PDF-named target. The length is the advertised representation length, **not a measured PDF size**. No PDF body/identity/version/rights was verified. No fallback, alternate host, redirect or retry was attempted. |
+| 2027 | The earlier official landing-page observation names the 2027 calendar, but its exact download target is not preserved in the retained notes. No URL was inferred and no HEAD request was issued without it. | Exact target and all size/type/ETag metadata remain unknown. A clarification asks for the observed link. This check neither opens the landing page again nor guesses a `cal2027.pdf` path. |
+
+The 2026 metadata is retained locally in ignored `dist/imo-2026-head-metadata.json`; the complete selected values are recorded above for review. HEAD metadata is not a promise that a future GET will return the same type/bytes. A 200 response does not establish a PDF, edition authenticity, completeness or reuse rights. The checked 2026 target is **unavailable as a verified calendar source**; its known HTML response is not a candidate for a calendar-body GET. The unresolved 2027 target likewise makes that edition's proposal non-executable. Hold the source gate until a viable exact official PDF target is supplied and reviewed; this preparation authorizes no additional fetch round.
+
+## Proposed later body envelope
+
+If the owner separately authorizes an exact-source inspection, propose **one request per verified exact edition URL**, **4 MiB body bytes per edition / 8 MiB combined**, **32 KiB headers per request**, **30 seconds per request / 60 seconds cumulative network time**, no retries, no redirects, no parallel requests and no alternate-host or guessed-path fallback. These are proposed hard caps, **not actual source sizes or an acquisition approval**. Do not make a body request to the currently HTML-advertising 2026 target until a verified PDF route and a fresh metadata decision support it; no further metadata request is authorized here.
+
+The approval packet must list both exact target URLs and their verified provenance, the metadata outcome and unknown sizes, the permitted review purpose, a dedicated local staging destination, these caps and the following stop conditions. If the current 2027 target remains unknown or the 2026 route remains HTML, present that unresolved condition; do not treat this proposal as executable.
+
+1. Start only with explicit body-request authorization for the named targets and purpose. Source inspection, any permission outreach, and normalized runtime redistribution remain separate decisions; approval of one does not approve the others.
+2. Stop on TLS/connection error, timeout, redirect, non-success status, absent/non-PDF declared type or declared length exceeding a cap. Do not follow Location or use GET to diagnose an HTML placeholder. Unknown length is not permission to exceed the streaming cap.
+3. Count bytes as they arrive and abort before retaining bytes beyond either body budget; use a unique partial staging file and never overwrite an existing source artifact. Stop on a non-PDF signature or invalid/incomplete PDF. Preserve an error/metadata record rather than admitting a partial document; do not retry after any stop condition.
+4. After a permitted complete body, record exact URL, retrieval time, digest/byte count, edition/revision, author/editor, page/table locators, notices and third-party credits. Inspect the actual date/radiant fields and source definitions without importing normalized runtime rows. Do not fetch linked datasets, other editions, ephemeris services or observation archives.
+5. Stop the admission path if the source identity/edition, provenance, field rights or scientific conventions remain unresolved. Follow the separate rights/selection/full-window geometry gates in the [assessment](imo-calendar-rights-admission.md#missing-steps-in-dependency-order); a successful body retrieval alone closes none of them.
+
+This is a finite body-inspection proposal for owner review. It performs no source contact, body request, source-row transcription, scope selection, fitting or deployment.
