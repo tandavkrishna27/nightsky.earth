@@ -1,0 +1,5 @@
+# Maintaining Sky Events
+
+Edit shared/skyEventCatalog.ts; use one year-specific occurrence per event. Research the actual primary source for that year. Record every timing source and time scale. Exact UTC instants may convert; approximate source dates must remain labelled. Do not copy TD or TT values into UTC fields. Write original explanations, equipment/visibility context and a contextual question. Use the required almanac/NASA attribution. Never copy a future year from recurrence.
+
+Mark drafts before review; only reviewed records appear. Update the month coverage manifest only after reviewing the selected-event scope. Withdrawn published records retain an explanatory noindex route; drafts remain 404. Run npm run validate:sky-events, npm run test:unit, npm run test:browser and npm run build. Preview builds allow coverage gaps with honest UI; release builds reject missing current-plus-eleven months. Review monthly, extend yearly, and keep source-audit.md current. No automation or remote API is implied.

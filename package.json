@@ -15,7 +15,8 @@
     "test:browser": "playwright test --config=playwright.config.ts",
     "check:tests": "tsc -p tsconfig.tests.json --noEmit",
     "build:release": "tsx scripts/build-website.ts --release",
-    "test:host": "playwright test --config=playwright.host.config.ts"
+    "test:host": "playwright test --config=playwright.host.config.ts",
+    "validate:sky-events": "tsx scripts/validate-sky-events.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
