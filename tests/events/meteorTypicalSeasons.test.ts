@@ -63,7 +63,7 @@ test("approximate calendar survives discovery without inventing annual dates or 
  assert.ok(guidance, "Approximate calendar guidance is missing");
  assert.equal(guidance.availability.status, "partial");
  assert.match(guidance.availability.reason, /other showers.*unavailable/i);
- assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"],["LYR","April"],["PER","August"],["LEO","around Nov. 17 or 18"],["QUA","early-January"],["DSX","late September and early October"],["ARI","on or near June 8th"],["CAP","late July"],["DRA","October"],["NTA","middle and late November"],["STA","October and early November"],["HYD","December"]]);
+ assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"],["GEM","December"],["LYR","April"],["PER","August"],["LEO","around Nov. 17 or 18"],["QUA","early-January"],["DSX","late September and early October"],["ARI","on or near June 8th"],["CAP","late July"],["DRA","October"],["NTA","middle and late November"],["STA","October and early November"],["HYD","December"],["AND","early November"],["SDA","end of July"],["URS","December"],["ZPE","first half of June"]]);
  for (const row of guidance.entries) {
   assert.equal(row.precision,"verbal-period");
   assert.equal(row.recurrenceBasis,"typical-annual");
@@ -135,6 +135,10 @@ for (const [code, wording, url] of [
  ["NTA", "middle and late November", "https://arxiv.org/html/2202.05141v1"],
  ["STA", "October and early November", "https://arxiv.org/html/2202.05141v1"],
  ["HYD", "December", "https://science.nasa.gov/image-article/apod-2023-september-9-comet-nishimura-grows/"],
+ ["AND", "early November", "https://www.emeteornews.net/2021/12/01/andromedid-activity-in-2021/"],
+ ["SDA", "end of July", "https://www.emeteornews.net/2026/03/30/the-southern-delta-aquariids-2000-2025/"],
+ ["URS", "December", "https://www.hou.usra.edu/meetings/lpsc2021/pdf/1275.pdf"],
+ ["ZPE", "first half of June", "https://www.ta3.sk/caosp/Eedition/FullTexts/vol37no1/pp31-48.pdf"],
 ]) test(`${code} source closure retains annual precision and excludes local visibility inference`, async () => {
  const result = await query();
  const row = result.meteorCalendarGuidance?.entries.find(entry => String(entry.code) === code);
@@ -145,7 +149,12 @@ for (const [code, wording, url] of [
  assert.ok(result.sources.some(source => source.url === url));
  assert.equal(row.precision, "verbal-period");
  assert.equal(row.requestedWindowOverlap, "not-evaluated");
- if (["DSX", "ARI"].includes(code)) assert.match(row.caveat, /daytime/i);
+ if (["DSX", "ARI", "ZPE"].includes(code)) assert.match(row.caveat, /daytime/i);
+ if (code === "AND") {
+  assert.match(row.caveat, /most years/i);
+  assert.match(row.caveat, /low annual activity/i);
+  assert.match(row.caveat, /outbursts.*separate/i);
+ }
  assert.deepEqual(result.events, []);
  for (const patch of [{startUtc:"2028-06-08T00:00:00Z"}, {localVisibility:"visible"}, {precision:"day"}]) {
   assert.equal(skyEventsResultSchema.safeParse({...result,meteorCalendarGuidance:{...result.meteorCalendarGuidance,entries:[{...row,...patch}]}}).success,false);
