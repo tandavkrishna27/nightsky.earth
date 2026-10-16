@@ -78,3 +78,16 @@ test("learning retains a calculated elongation without inferring local visibilit
   assert.ok(result.factors.some(f => f.name === "Sky events" && f.impact === "unknown"));
   assert.ok(result.sources.some(s => s.url === supplied.events[0].source.url));
 });
+
+test("learning retains a sourced planet-pair conjunction without favorable visibility", async () => {
+  const pairWindow = { startUtc: "2026-06-09T10:00:00Z", endUtc: "2026-06-09T14:00:00Z", timeZone: "Europe/London" };
+  const supplied = await searchSkyEvents({ placeId, window: pairWindow, eventTypes: ["planetary-conjunction"] }, index);
+  const pair = supplied.events.find(event => event.pairConjunction);
+  assert.ok(pair, "calculated pair event is present");
+  assert.deepEqual(pair.pairConjunction?.bodies, ["Venus", "Jupiter"]);
+  const result = await planObservingSession({ placeId, window: pairWindow, activity: "learning" }, services(async () => supplied));
+  assert.deepEqual(result.evidence.events, supplied);
+  assert.equal(pair.localVisibility, "not-evaluated");
+  assert.ok(result.factors.some(f => f.name === "Sky events" && f.impact === "unknown"));
+  assert.ok(result.sources.some(source => source.url === pair.source.url));
+});

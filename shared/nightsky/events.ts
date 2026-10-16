@@ -4,6 +4,15 @@ import { MAX_EVENT_RESULTS, placeIdSchema, resultSchema, sourceRecordSchema, tim
 
 export const searchSkyEventsInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, eventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10).optional(), limit: z.number().int().min(1).max(MAX_EVENT_RESULTS).default(15) });
 const calendarDateWindowSchema = z.strictObject({ startDate: z.string().date(), endDate: z.string().date() }).refine(({ startDate, endDate }) => endDate >= startDate, "Calendar date window end must not precede its start.");
+export const PLANET_PAIR_BODIES = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"] as const;
+const pairBodiesSchema = z.tuple([z.enum(PLANET_PAIR_BODIES), z.enum(PLANET_PAIR_BODIES)]).refine(bodies => PLANET_PAIR_BODIES.indexOf(bodies[0]) < PLANET_PAIR_BODIES.indexOf(bodies[1]), "Pair bodies must be distinct and in canonical order.");
+export const pairConjunctionSchema = z.strictObject({ bodies: pairBodiesSchema, definition: z.literal("geocentric-right-ascension-of-date"), corrections: z.literal("light-time-and-aberration"), angularSeparationDeg: z.number().finite().min(0).max(180), crossingDirection: z.enum(["ascending", "descending"]) });
+export const planetPairCoverageSchema = z.strictObject({
+  status: z.enum(["partial", "out-of-horizon"]), completeness: z.literal("not-certified"),
+  supportedStartUtc: z.literal("2025-01-01T00:00:00.000Z"), supportedEndUtc: z.literal("2027-12-31T23:59:59.999Z"), pairCount: z.literal(21),
+  unresolved: z.array(z.strictObject({ bodies: pairBodiesSchema, startUtc: utcInstantSchema, endUtc: utcInstantSchema, reason: z.string().trim().min(1).max(200) }).refine(row => Date.parse(row.endUtc) >= Date.parse(row.startUtc), "Unresolved interval must be ordered.")).max(256),
+});
+export type PlanetPairCoverage = z.infer<typeof planetPairCoverageSchema>;
 export const skyEventSchema = z.strictObject({
   eventId: z.string().trim().min(1).max(160),
   name: z.string().trim().min(1).max(200),
@@ -12,10 +21,15 @@ export const skyEventSchema = z.strictObject({
   activityCalendarDateWindow: calendarDateWindowSchema.optional(),
   peakCalendarDateWindow: calendarDateWindowSchema.optional(),
   greatestElongation: z.strictObject({ body: z.enum(["Mercury", "Venus"]), elongationDeg: z.number().finite().min(0).max(180), viewingGeometry: z.enum(["morning", "evening"]) }).optional(),
+  pairConjunction: pairConjunctionSchema.optional(),
   localVisibility: z.enum(["visible", "partially-visible", "not-visible", "not-evaluated", "unknown"]),
   description: z.string().trim().max(800).optional(),
   source: sourceRecordSchema,
 }).superRefine((event, ctx) => {
+  if (event.pairConjunction !== undefined) {
+    if (event.eventType !== "planetary-conjunction" || !event.peakUtc || event.localVisibility !== "not-evaluated") ctx.addIssue({ code: "custom", message: "Pair conjunction metadata requires an instantaneous planetary conjunction with unevaluated local visibility." });
+    if (event.startUtc !== undefined || event.endUtc !== undefined || event.activityCalendarDateWindow !== undefined || event.peakCalendarDateWindow !== undefined) ctx.addIssue({ code: "custom", message: "Pair conjunction is a crossing instant, not a duration or calendar interval." });
+  }
   if (event.eventType === "greatest-elongation") {
     if (!event.greatestElongation || !event.peakUtc) ctx.addIssue({ code: "custom", message: "Greatest elongation requires its geometry and peak instant." });
     if (event.startUtc !== undefined || event.endUtc !== undefined || event.activityCalendarDateWindow !== undefined || event.peakCalendarDateWindow !== undefined) ctx.addIssue({ code: "custom", message: "Greatest elongation is an instant, not an activity or calendar interval." });
@@ -57,6 +71,7 @@ export const skyEventsResultSchema = resultSchema({
   window: timeWindowSchema,
   events: z.array(skyEventSchema).max(MAX_EVENT_RESULTS),
   meteorCalendarGuidance: meteorCalendarGuidanceSchema.optional(),
+  planetPairCoverage: planetPairCoverageSchema.optional(),
   meteorTypicalSeasons: z.array(meteorTypicalSeasonSchema).max(2).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate typical season code.").optional(),
   unsupportedEventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10),
 });
