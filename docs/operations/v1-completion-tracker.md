@@ -123,10 +123,15 @@ All nine Partial and six Not started headings are represented. None is deleted, 
 4. Put discoveries under their existing stage. Explicitly identify scope changes and owner decisions; do not create a new numbered finish line.
 5. Report stage/row IDs, rows advanced/closed, blockers and the next concrete action. Never substitute a freshly regrouped wave count.
 
+## Current resource decision
+
+The fresh geography observation shows room for the proposed raw receipt, but not the earlier full-build allocation plus unchanged reserve. No download is authorized. Read-only retention review identified `.data/lineage-scale-proof-20261016-v1/artifacts` as generated synthetic outputs (14,554,607,140 logical bytes in the recorded inventory). Root preserved 27 compact manifests/root records totaling 3,585,739 bytes outside that child; [preservation receipt](data-pilot-evidence/lineage-scale-cleanup-preservation-20261017.json). Original measurement receipts, frozen worker/configuration and inputs remain retained. Owner deletion decision is pending; zero reclaimed bytes assumed. Removing bulk artifacts would remove original descendant closure and require replay for another full inspection.
+
 ## Delivery ledger
 
 | Date / commit | Rows advanced | Evidence / remaining gates |
 | --- | --- | --- |
+| 17 Oct / `9508359` | S2-G3/H3/E1/E2; S3-M2 preparation | Two actual retained private boundary subjects admitted; all 27 authenticated form selections verified without submission; public-cloud metadata dossier; local Mercury/Venus greatest elongation. Independent integration review clear, 68 affected Node cases + 19 weather readiness cases and all TypeScript configurations passed. [All six exact-tip CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/38960599881). Actual global acquisition, full-build capacity, meteor/conjunction gaps and real release measurements remain open. |
 | 16 Oct / acquisition readiness | G3/H3 subtasks | [Delivery](acquisition-readiness-delivery.md): exact retained-history reconciliation, bounded global executor and advisory geography capacity plan. Four history owners remain held; no downloads or deployment; original counts unchanged. |
 | 16 Oct / global preparation | G3/H3/E2 subtasks | [Delivery](global-preparation-delivery.md): opt-in selective index with identical retained outputs, offline grouped history requests and ten annual calendar contexts. No new downloads or deployment; original counts unchanged. |
 | 16 Oct / source resolution | G3/H2/H3/E2 subtasks | [Delivery](source-resolution-delivery.md): exact planet size/checksum and capacity snapshot, existing weather-result metadata and successful strict sample validation, six sourced annual periods. Original counts and production gates unchanged. |

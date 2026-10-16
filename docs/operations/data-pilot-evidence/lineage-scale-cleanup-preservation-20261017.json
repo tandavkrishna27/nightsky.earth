@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "status": "preserved-before-proposed-cleanup",
+  "createdAt": "2026-10-16T20:15:52.662151+00:00",
+  "source": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\lineage-scale-proof-20261016-v1\\artifacts",
+  "preserved": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\lineage-scale-proof-20261016-v1\\preserved-metadata-20261017",
+  "files": [
+    {
+      "path": "catalog.json",
+      "bytes": 3541,
+      "sha256": "e4633b21f13b52607b61cf7f806f36d89780119246cc4a3a5982b8579157d95b"
+    },
+    {
+      "path": "conflict-release-0.json",
+      "bytes": 2199,
+      "sha256": "cb649bd557293ba71687ba207dcb7788e4ca5cce8d47d0dc0082ecc5e1b67b74"
+    },
+    {
+      "path": "conflict-release-1.json",
+      "bytes": 2212,
+      "sha256": "f332814d8a37b73f89165c8481074f1eafafc9a8345c06957ff040f5f0a5a522"
+    },
+    {
+      "path": "release-0.json",
+      "bytes": 654123,
+      "sha256": "c82d0d8bccdeb09fddf0628e975d9c9199f1d648fb96a6e16e7e6a5de1581966"
+    },
+    {
+      "path": "release-1.json",
+      "bytes": 619371,
+      "sha256": "470ae1424779fc1c22909a64deb6b85a2ae474c8a942cd5407dc605d0f875d59"
+    },
+    {
+      "path": "release-2.json",
+      "bytes": 616890,
+      "sha256": "112cd9665b66da71e7f90df85e171ee9424abbbad5d0e2ec0cfef763a797fc09"
+    },
+    {
+      "path": "release-3.json",
+      "bytes": 619465,
+      "sha256": "45b8d797e0b8c949df09d43c143d3cfd774b141d62f35a113738737264a5be50"
+    },
+    {
+      "path": "release-4.json",
+      "bytes": 610792,
+      "sha256": "0557d426333ae31a3bcc53313530fa164e895f06555b5b85d7ab55c8765037e3"
+    },
+    {
+      "path": "release-5.json",
+      "bytes": 369875,
+      "sha256": "9270611847432e36d4cd17609d08dcbf4ac7a5debae6532273a23082e2bfd3ed"
+    },
+    {
+      "path": "catalog.json.members/objects/root.json",
+      "bytes": 2332,
+      "sha256": "417e58db4917c62301d6d6b560942a8fa89ed043d36b56d6f7a93b872f01f27b"
+    },
+    {
+      "path": "catalog.json.sources/objects/root.json",
+      "bytes": 4718,
+      "sha256": "61d5527251a029a54b794d733d6022e6c2d4311c54de8b1df7c9c85400b14e8c"
+    },
+    {
+      "path": "conflict-release-0.json.members/objects/root.json",
+      "bytes": 1148,
+      "sha256": "a4dca84e91a75b9ae294e028ba13277219cb80a4da3ebc3ffab1e0e0fade3169"
+    },
+    {
+      "path": "conflict-release-0.json.sources/objects/root.json",
+      "bytes": 455,
+      "sha256": "83654948b4ca4cfba340558901f936bad1c9c7ff54e061da120bd860d53345fd"
+    },
+    {
+      "path": "conflict-release-1.json.members/objects/root.json",
+      "bytes": 1148,
+      "sha256": "c98553af0a0d9a9cad05515897aa4651f622d3dbbe42771f59bf575fd87a854a"
+    },
+    {
+      "path": "conflict-release-1.json.sources/objects/root.json",
+      "bytes": 455,
+      "sha256": "b63f9f88722ddd6ff62f7a193ff2b0306600abf1559fc13e8d68c3142e65c0cb"
+    },
+    {
+      "path": "release-0.json.members/objects/root.json",
+      "bytes": 8097,
+      "sha256": "b305a60196de9708f4be846310be17a4633e60232da87983a03f255ee6313a99"
+    },
+    {
+      "path": "release-0.json.sources/objects/root.json",
+      "bytes": 4637,
+      "sha256": "e49259723ab851f6efff8682db3c95c591f862b6a50b69d86a357f42d6bf1f7b"
+    },
+    {
+      "path": "release-1.json.members/objects/root.json",
+      "bytes": 8097,
+      "sha256": "8a4102d1ccdc46759a28cc955c9eeca42a881f682d686600384a59184337de7e"
+    },
+    {
+      "path": "release-1.json.sources/objects/root.json",
+      "bytes": 4734,
+      "sha256": "eccab72d582f94061aacfb7c9e40b35f90a3909c5b01739b297fada1efdff882"
+    },
+    {
+      "path": "release-2.json.members/objects/root.json",
+      "bytes": 8097,
+      "sha256": "9c324ef3adc8dad88cda28da4f4cb2562352913ff9f4ab4ffed745dcc49900e1"
+    },
+    {
+      "path": "release-2.json.sources/objects/root.json",
+      "bytes": 4749,
+      "sha256": "f61dddf0e6d94bee9209b99e9704089763149fa7c4a1ab5e31bccfaac4cf8e79"
+    },
+    {
+      "path": "release-3.json.members/objects/root.json",
+      "bytes": 8097,
+      "sha256": "27dfbd986109f0ed3421294294dc1f3f66d18cd4a44a088cacee9ec6ffb916e4"
+    },
+    {
+      "path": "release-3.json.sources/objects/root.json",
+      "bytes": 4759,
+      "sha256": "5dcc58d5ebac6970c25d3488c9eae2dee7e6f7f0e1b06321b97ce507fc1c2b9f"
+    },
+    {
+      "path": "release-4.json.members/objects/root.json",
+      "bytes": 8097,
+      "sha256": "b78f88da48df320aab53eee00311ef7623fc6af0a1abe608007d447c0d86e6ca"
+    },
+    {
+      "path": "release-4.json.sources/objects/root.json",
+      "bytes": 4764,
+      "sha256": "9c5bad02df04324036e5c19aa669679445104a6408cecc3f2d64853596306bb7"
+    },
+    {
+      "path": "release-5.json.members/objects/root.json",
+      "bytes": 8081,
+      "sha256": "1c8680a388f2bdf525e9c8ce72828044df5881458cf248f32ba4ba3187fb3385"
+    },
+    {
+      "path": "release-5.json.sources/objects/root.json",
+      "bytes": 4806,
+      "sha256": "19bf5e3a52876db6d59f84b4a6700a26e5a09c037a99709225e76407aa1b476f"
+    }
+  ],
+  "totalBytes": 3585739,
+  "deleted": false,
+  "limitations": [
+    "Compact manifests do not retain descendant object closure.",
+    "Original bulk tree remains present pending owner decision.",
+    "Historical run reports and frozen build inputs remain outside proposed deletion."
+  ]
+}
