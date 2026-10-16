@@ -1,3 +1,4 @@
+import { skyEvents, coverageMonths } from "../../shared/skyEventCatalog";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildWebsiteOutputs, classifyPath } from "../../shared/websiteBuild";
@@ -9,7 +10,9 @@ test("preview output is isolated from news and publication", () => {
     facts: releaseFacts,
     listing: { published: false, url: null },
     routes: siteRoutes,
-    meteors: [],
+    events: [],
+    coverageMonths,
+    now: new Date("2026-10-16"),
     legacyMeteorIds: ["perseids"],
   });
   assert.ok(output.robots.includes("Disallow: /"));
@@ -27,7 +30,9 @@ test("release rejects incomplete factual approvals", () => {
       facts: releaseFacts,
       listing: { published: false, url: null },
       routes: siteRoutes,
-      meteors: [],
+      events: [],
+      coverageMonths,
+      now: new Date("2026-10-16"),
       legacyMeteorIds: [],
     }),
   );
@@ -61,10 +66,35 @@ test("a complete synthetic release has an indexable sitemap without preview head
     facts,
     listing: { published: false, url: null },
     routes: siteRoutes,
-    meteors: [],
+    events: [
+      skyEvents[0],
+      { ...skyEvents[0], id: "draft-2026", reviewStatus: "draft" },
+      { ...skyEvents[0], id: "withdrawn-2026", reviewStatus: "withdrawn" },
+    ],
+    coverageMonths,
+    now: new Date("2026-10-16"),
     legacyMeteorIds: ["perseids"],
   });
   assert.ok(output.sitemap.includes("https://nightsky.earth/resources"));
   assert.ok(!output.headers.includes("/*\n  X-Robots-Tag"));
   assert.ok(!output.sitemap.includes("/meteor-nights"));
+  assert.ok(output.sitemap.includes("/sky-events/" + skyEvents[0].id));
+  assert.ok(!output.sitemap.includes("draft-2026"));
+  assert.ok(!output.sitemap.includes("withdrawn-2026"));
+  assert.ok(!output.redirects.includes("/sky-events/draft-2026"));
+  assert.ok(output.redirects.includes("/sky-events/withdrawn-2026"));
+  assert.throws(
+    () =>
+      buildWebsiteOutputs({
+        release: true,
+        facts,
+        listing: { published: false, url: null },
+        routes: siteRoutes,
+        events: [],
+        coverageMonths: [],
+        now: new Date("2026-10-16"),
+        legacyMeteorIds: [],
+      }),
+    /unreviewed sky-event months/,
+  );
 });

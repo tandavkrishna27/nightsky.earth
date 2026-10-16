@@ -19,7 +19,7 @@ export const siteRoutes:readonly SiteRoute[]=[
  ['/about','About NightSky','Helping curiosity find its way to time under the stars.'],
  ['/contact','Contact NightSky','Questions, feedback and corrections for NightSky.'],
  ['/get-started','Get started with NightSky','Availability, example questions and help starting with NightSky.'],
- ['/meteor-showers','Meteor showers','Understand the factors that shape a night of meteor watching.'],
+ ['/sky-events','Sky Events calendar','A reviewed selection of meteor showers, eclipses, Moon phases and planetary events.'],
  ['/sources','Sources & coverage','Understand what a NightSky answer is based on.'],
  ['/privacy','Privacy','Privacy information and publication status.'],
  ['/terms','Terms','Service terms and publication status.'],

@@ -4,6 +4,7 @@ import PluginAction from "@/components/PluginAction";
 import VideoBackground from "@/components/VideoBackground";
 import QuestionExplorer from "@/components/home/QuestionExplorer";
 import PlatformAvailability from "@/components/home/PlatformAvailability";
+import UpcomingEvents from "@/components/sky-events/UpcomingEvents";
 import SEO from "@/components/SEO";
 import stars from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
 import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
@@ -138,19 +139,7 @@ export default function Home() {
           Discover The Collective <span aria-hidden="true">→</span>
         </Link>
       </section>
-      <section className="meteor-callout page-width">
-        <div>
-          <p className="eyebrow">A reason to look up</p>
-          <h2>Next Meteor Showers</h2>
-          <p>
-            Preparing for a meteor shower? Start with darkness, Moon conditions,
-            and a comfortable place to watch.
-          </p>
-        </div>
-        <Link className="action action-outline" href="/meteor-showers">
-          Explore meteor showers <span aria-hidden="true">↗</span>
-        </Link>
-      </section>
+      <UpcomingEvents home />
       <section
         className="closing-section"
         style={{

@@ -1,3 +1,4 @@
+import {skyEvents,coverageMonths} from "../shared/skyEventCatalog";
 import { createServer, type Server } from "node:http";
 import type { Express } from "express";
 import { readFileSync } from "node:fs";
@@ -5,7 +6,7 @@ import { resolve } from "node:path";
 import { serveNews } from "./news";
 import { buildWebsiteOutputs } from "../shared/websiteBuild";
 import { siteRoutes } from "../shared/website";
-import { reviewedMeteors, legacyMeteorIds } from "../shared/meteorContent";
+import { legacyMeteorIds } from "../shared/meteorContent";
 import { releaseFacts } from "../client/src/content/releaseFacts";
 export async function registerRoutes(app: Express): Promise<Server> {
   let release = false;
@@ -34,8 +35,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.all("/api/*", (_req, res) =>
     res.status(404).json({ error: "API route not found" }),
   );
-  app.get("/meteor-nights", (_req, res) =>
-    res.redirect(301, "/meteor-showers"),
+  app.get(["/meteor-nights","/meteor-showers"], (_req, res) =>
+    res.redirect(301, "/sky-events?category=meteor-showers"),
   );
   app.get(["/experiences", "/experiences/*"], (_req, res) =>
     res
@@ -63,7 +64,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       facts: releaseFacts,
       listing: { published: false, url: null },
       routes: siteRoutes,
-      meteors: reviewedMeteors,
+      events: skyEvents,
+      coverageMonths,
       legacyMeteorIds,
     });
     res

@@ -37,6 +37,10 @@ const content = {
         "This local preview has no signup, community submission form or added analytics. You can explore its editorial pages without submitting personal information.",
       ],
       [
+        "Calendar preferences",
+        "If you choose a calendar time zone or view, this website saves that preference in this browser’s local storage. Use browser time zone removes the saved zone override; clearing this site’s browser storage removes both preferences. These choices are not submitted to a NightSky account.",
+      ],
+      [
         "Plugin processing and external providers",
         "The released service’s inputs, hosting, external recipients and operational logging need factual confirmation before this policy is published. ChatGPT’s own processing is governed by its applicable policies separately.",
       ],

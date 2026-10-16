@@ -124,6 +124,6 @@ test("route metadata is singular and archive copy is clean UTF-8", async ({
   await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
   await page.goto("/meteor-shower/perseids");
   await expect(
-    page.getByRole("link", { name: "Explore meteor showers →", exact: true }),
+    page.getByRole("link", { name: "Explore sky events →", exact: true }),
   ).toBeVisible();
 });

@@ -4,18 +4,29 @@ import {
   type ListingConfig,
   SITE_ORIGIN,
 } from "./website";
-import { legacyMeteorIds, type ReviewedMeteor } from "./meteorContent";
+import { legacyMeteorIds } from "./meteorContent";
 import {
   releaseBlockers,
   type ReleaseFacts,
 } from "../client/src/content/releaseFacts";
+import { skyEvents } from "./skyEventCatalog";
+import {
+  validateSkyEvents,
+  validateCoverage,
+  type SkyEvent,
+  type CoverageMonth,
+} from "./skyEvents";
+import { legacyCalendarDestination } from "./skyEventRoutes";
 export function classifyPath(path: string) {
-  if (path === "/meteor-nights")
-    return { status: 301, location: "/meteor-showers" };
+  if (path === "/meteor-nights" || path === "/meteor-showers")
+    return { status: 301, location: legacyCalendarDestination };
   if (path === "/experiences" || path.startsWith("/experiences/"))
     return { status: 410 };
   if (
     siteRoutes.some((r) => r.path === path) ||
+    skyEvents.some(
+      (e) => e.reviewStatus !== "draft" && path === "/sky-events/" + e.id,
+    ) ||
     /^\/news\/\d+$/.test(path) ||
     (path.startsWith("/meteor-shower/") &&
       legacyMeteorIds.includes(path.slice(15)))
@@ -34,17 +45,30 @@ export function buildWebsiteOutputs({
   facts,
   listing,
   routes,
-  meteors,
+  events,
+  coverageMonths,
+  now = new Date(),
   legacyMeteorIds: ids,
 }: {
   release: boolean;
   facts: ReleaseFacts;
   listing: ListingConfig;
   routes: readonly SiteRoute[];
-  meteors: readonly ReviewedMeteor[];
+  events: readonly SkyEvent[];
+  coverageMonths: readonly CoverageMonth[];
+  now?: Date;
   legacyMeteorIds: readonly string[];
 }) {
+  const validated = validateSkyEvents(events);
+  const gaps = validateCoverage(coverageMonths, now);
+  for (const event of validated)
+    if (event.lastReviewedAt > now.toISOString().slice(0, 10))
+      throw Error("Future review date: " + event.id);
   if (release) {
+    if (gaps.length)
+      throw Error(
+        "Release blocked: unreviewed sky-event months " + gaps.join(", "),
+      );
     const blockers = releaseBlockers(facts, listing);
     if (blockers.length)
       throw new Error("Release blocked: " + blockers.join(", "));
@@ -52,7 +76,9 @@ export function buildWebsiteOutputs({
   const paths = release
     ? [
         ...routes.filter((x) => x.sitemap).map((x) => x.path),
-        ...meteors.map((x) => "/meteor-shower/" + x.id),
+        ...validated
+          .filter((x) => x.reviewStatus === "reviewed")
+          .map((x) => "/sky-events/" + x.id),
       ]
     : [];
   return {
@@ -67,10 +93,15 @@ export function buildWebsiteOutputs({
       : "User-agent: *\nDisallow: /\n",
     headers: release ? "" : "/*\n  X-Robots-Tag: noindex, nofollow\n",
     redirects:
-      "/api/news /.netlify/functions/news 200\n/api/news/* /.netlify/functions/news?article=:splat 200\n/meteor-nights /meteor-showers 301\n/experiences /.netlify/functions/retired 200\n/experiences/* /.netlify/functions/retired 200\n" +
+      "/api/news /.netlify/functions/news 200\n/api/news/* /.netlify/functions/news?article=:splat 200\n/meteor-nights /sky-events?category=meteor-showers 301\n/meteor-showers /sky-events?category=meteor-showers 301\n/experiences /.netlify/functions/retired 200\n/experiences/* /.netlify/functions/retired 200\n" +
       routes.map((x) => `${x.path} /index.html 200`).join("\n") +
       "\n" +
-      ids.map((id) => `/meteor-shower/${id} /index.html 200`).join("\n") +
+      [
+        ...ids.map((id) => `/meteor-shower/${id} /index.html 200`),
+        ...validated
+          .filter((e) => e.reviewStatus !== "draft")
+          .map((e) => `/sky-events/${e.id} /index.html 200`),
+      ].join("\n") +
       "\n/news/* /index.html 200\n/* /404.html 404\n",
   };
 }

@@ -5,7 +5,7 @@ const groups: { title: string; links: string[][] }[] = [
     title: "Explore",
     links: [
       ["/resources", "Resources"],
-      ["/meteor-showers", "Meteor Showers"],
+      ["/sky-events", "Sky Events"],
       ["/community", "The Collective"],
       ["/news", "News"],
       ["/about", "About"],

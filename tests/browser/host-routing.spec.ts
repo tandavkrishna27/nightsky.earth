@@ -12,7 +12,8 @@ test("production-shaped routes, metadata and independent sitemap", async ({
     "/contact",
     "/get-started",
     "/news",
-    "/meteor-showers",
+    "/sky-events",
+    "/sky-events/full-moon-2026-10-26",
     "/sources",
     "/privacy",
     "/terms",
@@ -24,7 +25,11 @@ test("production-shaped routes, metadata and independent sitemap", async ({
   }
   const redirect = await request.get("/meteor-nights", { maxRedirects: 0 });
   expect(redirect.status()).toBe(301);
-  expect(redirect.headers().location).toBe("/meteor-showers");
+  expect(redirect.headers().location).toBe("/sky-events?category=meteor-showers");
+  const oldIndex = await request.get("/meteor-showers", {maxRedirects:0});
+  expect(oldIndex.status()).toBe(301);
+  expect(oldIndex.headers().location).toBe("/sky-events?category=meteor-showers");
+  expect((await request.get("/sky-events/not-a-record")).status()).toBe(404);
   expect((await request.get("/experiences")).status()).toBe(410);
   expect((await request.get("/unknown-page")).status()).toBe(404);
   expect((await request.get("/meteor-shower/invalid")).status()).toBe(404);

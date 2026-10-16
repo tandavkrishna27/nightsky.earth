@@ -1,6 +1,6 @@
 # About and Sky Events design
 
-Status: proposed design for user review; documentation only. This expands the agreed website direction and calendar discussion into a reviewable specification. Implementation has not started.
+Status: approved by user and implemented locally on 2026-10-16. Verification: docs/website/about-sky-events-verification.md. This document records the design used for implementation.
 
 ## Outcome and boundaries
 

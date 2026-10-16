@@ -1,3 +1,4 @@
+import {skyEvents,coverageMonths} from "../shared/skyEventCatalog";
 import { build as viteBuild, resolveConfig, loadEnv } from "vite";
 import { build as esbuild } from "esbuild";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
@@ -6,7 +7,7 @@ import {
   resolveBuildListing,
 } from "../shared/websiteBuild";
 import { siteRoutes } from "../shared/website";
-import { reviewedMeteors, legacyMeteorIds } from "../shared/meteorContent";
+import { legacyMeteorIds } from "../shared/meteorContent";
 import { releaseFacts } from "../client/src/content/releaseFacts";
 process.env.NODE_ENV = "production";
 const release = process.argv.includes("--release");
@@ -20,7 +21,8 @@ const output = buildWebsiteOutputs({
   facts: releaseFacts,
   listing,
   routes: siteRoutes,
-  meteors: reviewedMeteors,
+  events: skyEvents,
+      coverageMonths,
   legacyMeteorIds,
 });
 process.env.VITE_WEBSITE_RELEASE = String(release);

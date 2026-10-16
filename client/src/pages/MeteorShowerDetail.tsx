@@ -26,8 +26,8 @@ export default function MeteorShowerDetail() {
               withheld until reviewed.
             </p>
           )}
-          <Link className="action action-outline" href="/meteor-showers">
-            Explore meteor showers →
+          <Link className="action action-outline" href="/sky-events?category=meteor-showers">
+            Explore sky events →
           </Link>
         </div>
       </EditorialPage>
