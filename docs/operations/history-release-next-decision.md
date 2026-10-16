@@ -1,5 +1,7 @@
 # Next decision for actual historical coverage
 
+**Subsequent authorized evidence:** [16 October public source check](public-source-check-20261016.md) supersedes source-discovery unknowns below where explicitly stated; no runtime data or original completion gate was promoted.
+
 Decision: redesign the acquisition route before asking to run the prepared legacy sample. Its 96 scalar cell-hours would check contemporary legacy response packaging, but would not choose a feasible worldwide route. Prefer a finite verification of the distinct CDS time-series route; direct ARCO is a second candidate if its access and read amplification can be admitted. Neither candidate is currently executable with an admitted format contract. This review used retained local evidence only; no source, account, credential, model, installation or deployment operation occurred.
 
 ## What exists, and what does not

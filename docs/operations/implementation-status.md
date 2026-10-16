@@ -1,5 +1,7 @@
 # NightSky V1 implementation status
 
+**Authorized source check, 16 October:** [results and ledger](public-source-check-20261016.md): 12 public metadata attempts, 208,666 bytes, no datasets. Exact 2027 NASA forecast record found; Natural Earth public-domain/version evidence obtained; CDS point/date syntax remains unresolved. Runtime/data selection and original ticket counts unchanged.
+
 **Active production completion goal, 16 October:** [frozen baseline and acceptance contract](v1-production-completion-goal.md) records `c7e898c`, six successful exact-commit CI jobs and owner-deferred Claude testing. Next is practical source admission/acquisition, then actual release construction, local resource measurements and assembled-product acceptance. No downloads or deployment are authorized by the goal.
 
 **Lineage implementation and source-admission wave, 16 October:** [current record](lineage-implementation-admission-wave.md) implements explicit schema-6/schema-5 bounded global and child lineage publication, lazy serving and independent operator union admission. Full synthetic scale acceptance passed: 18,033,393 pins, 56,039 pairs, six children, 43 min 25 s and about 322 MiB peak main RSS. The new-format lineage ceiling is addressed for this tested inventory; actual data/baseline acceptance remains open. The 429-layer/eight-extract source packet is actionable but all sources remain quarantined. Original **12 Done / 9 Partial / 6 Not started** unchanged; no data acquired or deployment.

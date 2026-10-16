@@ -1,5 +1,7 @@
 # Geography release: next decision
 
+**Subsequent authorized evidence:** [16 October public source check](public-source-check-20261016.md) supersedes source-discovery unknowns below where explicitly stated; no runtime data or original completion gate was promoted.
+
 As of baseline `c7e898c`, the next useful decision is **retain the detailed gbOpen membership route and resolve its three blocked records, or explicitly select a replacement membership source**. Do not authorize the eight PBF bodies yet. The retained packet supports a concrete source inventory, not actual global release data. This note used local evidence only; it authorizes no requests, acquisition or publication.
 
 [Inventory](source-admission-inventory.json), [admission contract](offline-source-admission.md), [resolution evidence](geography-admission-resolution-wave.md), [build proposal](production-geography-build-proposal.md) and [completed producer acceptance](geographic-bounded-inventory-wave.md), [current sequence](v1-completion-wave-sequence.md) and [lineage implementation](lineage-implementation-admission-wave.md) establish:

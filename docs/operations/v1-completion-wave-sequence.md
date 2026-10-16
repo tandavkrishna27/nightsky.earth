@@ -1,5 +1,7 @@
 # Sequence after offline build preparation
 
+**Current source decision, 16 October:** [completed authorized metadata check](public-source-check-20261016.md) identifies the 2027 NASA report, a uniform public-domain boundary alternative and incomplete time-series request metadata. Next resolve the source/query choices and obtain a finite actual-body allowance; do not repeat completed lineage/producer work.
+
 **Current engineering, 16 October:** [lineage implementation](lineage-implementation-admission-wave.md) replaces the previously design-only global/child lineage path and adds the source-admission validator. Full-scale synthetic acceptance passed in one bounded run; actual data/source acceptance remains separate. Source identity/rights/clip and actual provider format gates remain before any separate acquisition allowance.
 
 **Earlier preparation snapshot, 16 October (lineage implementation now superseded by the record above):** [reviewed preparation](admission-schedule-executor-wave.md) completes the compact global schedule and gated executor preparation. Next implement bounded global/child lineage references and resolve geography/CDS-host admission, then obtain a finite sample/body allowance. No acquisition or deployment is authorized by preparation.
