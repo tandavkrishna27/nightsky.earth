@@ -21,3 +21,7 @@ No runtime plugin skill/input changes were needed; the shared event output and M
 The weather packet can now be presented for approval as one finite diagnostic: one request, four quarter-degree cells, 24 hours, at most 2 MiB raw, 128 MiB sampled output/scratch and a 30-minute whole-job deadline, with the exact further controls in its packet. It can stop without a usable result and cannot prove global acquisition feasibility.
 
 Geography still needs its actual extraction footprint/edition decision before bulk acquisition. Its supervised local pipeline is ready for admitted inputs within the documented caps; this does not mean all global inputs fit. E2 can continue field-specific source admission without inventing exact seasons. All work stays under the existing G3/H2/H3/E2 rows, then R1 assembly, S3 production measurement and S4 assembled-product acceptance.
+
+## CI follow-up
+
+The first Windows ERA5 run exposed a test assertion comparing equivalent short and canonical path spellings. Runtime scratch canonicalization was correct. The test now checks resolved paths and covers actual Windows 8.3 spellings; all 143 ERA5 tests passed locally after correction. Source pins and runtime behavior are unchanged. A subsequent exact-commit CI run is required for closure.

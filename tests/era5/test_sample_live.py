@@ -206,10 +206,34 @@ class ScratchEnvironment(unittest.TestCase):
             with patch.dict(live.os.environ, {'TEMP': 'outside', 'TMP': 'outside', 'CDSAPI_KEY': 'fixture-secret'}):
                 self.assertTrue(hasattr(live, 'worker_environment'), 'bounded worker environment missing')
                 env = live.worker_environment(directory, decoding=True)
-            self.assertEqual(env['TEMP'], str(Path(directory).absolute()))
-            self.assertEqual(env['TMP'], str(Path(directory).absolute()))
+            for name in ('TEMP', 'TMP', 'TMPDIR', 'SQLITE_TMPDIR'):
+                self.assertEqual(env[name], str(Path(directory).resolve()), name)
             self.assertNotIn('CDSAPI_KEY', env)
             self.assertEqual(env['OPENBLAS_NUM_THREADS'], '1')
+
+    @unittest.skipUnless(live.os.name == 'nt', 'Windows short path spelling')
+    def test_short_and_long_temp_paths_use_same_canonical_directory(self):
+        import ctypes
+        from ctypes import wintypes
+        short_path = ctypes.WinDLL('kernel32', use_last_error=True).GetShortPathNameW
+        short_path.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+        short_path.restype = wintypes.DWORD
+        with tempfile.TemporaryDirectory(prefix='era5 scratch long directory ') as directory:
+            canonical = str(Path(directory).resolve())
+            size = short_path(canonical, None, 0)
+            if not size:
+                raise ctypes.WinError(ctypes.get_last_error())
+            buffer = ctypes.create_unicode_buffer(size)
+            written = short_path(canonical, buffer, size)
+            self.assertGreater(written, 0)
+            self.assertLess(written, size)
+            if buffer.value.casefold() == canonical.casefold():
+                self.skipTest('8.3 short names are disabled for this volume')
+            self.assertTrue(Path(buffer.value).samefile(directory))
+            for spelling in (canonical, buffer.value):
+                env = live.worker_environment(spelling, decoding=True)
+                for name in ('TEMP', 'TMP', 'TMPDIR', 'SQLITE_TMPDIR'):
+                    self.assertEqual(env[name], canonical, (spelling, name))
 
     def test_aliased_temp_root_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

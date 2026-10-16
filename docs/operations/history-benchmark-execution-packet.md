@@ -98,3 +98,9 @@ TDD: oversized metadata and asset headers failed first; encoded asset failed fir
 - `sample_live.py --plan`: offline output matches the request and plan digests above.
 
 No source/credential/network operation was used by these tests. Synthetic temporary data are not scientific coverage. Shared adapter header protection also applies to time-series transport; no time-series request or provenance admission was changed.
+
+### Windows CI path-spelling correction
+
+The first Windows CI run passed 141 of 142 tests and failed only the scratch-environment assertion: the runner supplied `C:\Users\RUNNER~1\...`, while the executor correctly canonicalized it to `C:\Users\runneradmin\...`. The test now compares `Path.resolve()` and checks all four temp variables (`TEMP`, `TMP`, `TMPDIR`, `SQLITE_TMPDIR`). A real Windows `GetShortPathNameW` regression confirms short and long spellings produce the same canonical scratch directory; it skips only if short names are unavailable on that volume. Runtime behavior and source pins are unchanged.
+
+Fresh local full ERA5 run after this test-only correction: **143 passed in 8.482 seconds**, including the 8.3-path regression without a skip. Existing NumPy deprecation warnings remain. A new remote CI result is still required; this local result does not claim that CI was rerun.
