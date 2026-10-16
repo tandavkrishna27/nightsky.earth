@@ -91,6 +91,12 @@ length/hash are retained inside the wrapper; the index hashes the wrapper file.
 
 ## Exact next metadata request, prepared and not executed
 
+**Readiness qualification:** the initial local inventory found no compatible
+parser. A subsequent coordinator-approved isolated dependency setup is recorded
+below; actual parser/executor fixtures are still required. This four-request
+sequence is a design, not an executable approval candidate. No source-access
+permission is requested before that preparation and independent review.
+
 The next missing fact is an immutable snapshot. The
 [current Icechunk specification](https://icechunk.io/en/stable/reference/spec-v2-1/)
 defines a binary `repo` entry point for V2.x. A branch's `snapshot_index` selects
@@ -133,8 +139,9 @@ No recursive listing, ref/history traversal or data-access code is included.
 Offline parsing would need separately reviewed, locally available support for
 the header, optional Zstd, compatible FlatBuffers and any required FlexBuffers;
 no package is installed by this dossier. Proposed parser bounds: 16 MiB expanded
-bytes per object, 32 nesting levels, 100,000 aggregate entries, 256 MiB process-tree
-RSS and 15 seconds per object within the shared deadline. Preserve raw metadata
+bytes per object, 32 nesting levels, 100,000 aggregate entries, 256 MiB main-worker
+RSS, a 512 MiB hard Job process-tree commit limit with two active processes, and
+15 seconds per object within the shared deadline. Preserve raw metadata
 in quarantine. A bound failure is a result, not permission to raise limits.
 These proposed caps are neither measured object sizes nor an execution allowance.
 
@@ -154,8 +161,8 @@ loads coordinate data. `chunks=None` does not remove those reads. Separately,
 [Icechunk expiration and garbage collection](https://icechunk.io/en/stable/understanding/expiration/)
 can delete old snapshots/data; an ID alone is no retention guarantee.
 
-This finite public inspection stops at the binary-metadata boundary. An owner
-can review the exact small request above without authorizing observation chunks.
+This finite public inspection stops at the binary-metadata boundary. The exact
+small source request remains a design until a tested parser/executor is ready.
 Snapshot retention, full `expver=1`/QC-valid clocks, deterministic member assurance,
 physical transfer accounting, exact retained subtraction, decode equivalence and
 measured solar/timezone aggregation remain separate gates. No source admission,
@@ -170,7 +177,105 @@ first attempt lacked system `tzdata`; its successful rerun used explicit
 UTC+05:30 for these instants, without an install. `git diff --check` passed.
 An independent reviewer checked captures, screenshot, transcriptions, exact
 hourly extent and primary specification/schema claims; no actionable findings
-remain. The prior runtime milestone passed 195 ERA5 tests; this continuation
-changes only documentation/evidence and does not repeat that suite.
+remain. The prior runtime milestone passed 195 ERA5 tests; the catalogue-only
+delivery changed documentation/evidence and did not repeat that suite.
 The initial staged whitespace check identified those README spaces; packaging
 was corrected and the original capture bytes were independently reverified.
+
+## Local executor/parser preparation result
+
+The follow-up required completing local preparation before any future execution
+approval, with no package installation. A scoped, read-only inventory found:
+
+| Existing environment | Available | Missing |
+| --- | --- | --- |
+| Lane Python 3.14.3 | Standard-library `compression.zstd` | `flatbuffers`, `flatbuffers.flexbuffers`, `icechunk`, `zstandard` |
+| Configured bundled Python 3.12.14 | Python standard library | All of the above, including `compression.zstd` |
+| Configured bundled Node 24.19.0 | Node standard library | Resolvable `flatbuffers`, `flexbuffers`, `icechunk`, `@flatbuffers/flatbuffers`, `zstd-codec`, `fzstd` |
+| Repository / executable path | Existing Windows Job supervision and ctypes RSS measurement | Icechunk `.fbs` schemas/generated bindings, declared compatible parser dependency, `flatc` executable |
+
+The [local readiness record](data-pilot-evidence/2026-10-17-icechunk-parser-readiness.json)
+retains the module-discovery results. That local inventory used no package
+manager, install, generic Icechunk/Xarray client or network request. Zstd alone cannot validate
+FlatBuffers offsets, tables/unions or embedded FlexBuffers. Writing an ad-hoc
+binary reader without a compatible reviewed schema/runtime and malformed-input
+corpus would not make this proposal execution-ready.
+
+The [specific dependency plan](icechunk-parser-dependency-plan-20261017.md)
+identifies exact maintained candidates, versions, licences, hashes,
+footprint and offline-only APIs. The coordinator reviewed and approved precisely
+the seven pinned development wheels; their isolated setup and actual hashes are
+recorded in the [setup receipt](data-pilot-evidence/2026-10-17-icechunk-development-setup.json).
+The official Icechunk 2.3.0 wheel integrates native format handling;
+the smaller generated Python FlatBuffers route lacks a whole-buffer verifier.
+The official wheel is installed and its fixed descriptor path has been tested
+with synthetic metadata-only local objects. A raw repo receipt would
+remain `quarantined-unparsed`, with `mainSnapshotId=null` and
+`scientificAdmission=false`; it is transport evidence, not usable snapshot
+progress, and is not proposed as the next milestone.
+
+The existing [Windows Job supervisor](../../scripts/osm/global_source_supervisor.py)
+and [worker containment check](../../scripts/era5/timeseries_sample.py) provide
+reusable containment patterns without `psutil`; neither existing file is modified.
+The new offline tests invoke the Job supervisor in a sanitized native-fixture
+child. The original required fixture list includes
+for malformed/duplicate headers, missing or changed ETags, unexpected status or
+encoding, overflow/truncation, redirects, deadline/slow reads, exclusive output
+and quarantine receipts, plus parent-enforced process-tree deadline/memory tests.
+A full parser additionally needs malformed offsets/unions, unsupported version/
+features, decompression bombs, nesting/count and schema-consistency fixtures.
+The initial **existing-dependencies-only** parser block is resolved by the
+separate bounded development setup, using 70,453,339 archive-plus-target bytes
+under the approved 128 MiB limit. The finite local implementation exposes a more
+specific capability limit: the maintained Python feature API returns known IDs
+only, and the reviewed native open path does not reject unknown stored IDs.
+Reserved extensions are not exposed either. Known-format fixed descriptor
+inspection works, but the required rejection of unsupported features cannot yet
+be certified for an arbitrary source repo. The coordinator therefore refined the
+metadata-only contract to report Icechunk 2.3.0's bounded interpretation with
+`unsupportedFeatureExclusionProved=false` and `scientificAdmission=false`.
+Unknown extensions are not inferred absent, nor does this establish broader
+compatibility. This refinement permits finite metadata preparation; it does not
+authorize source access or scientific admission. The dependency plan records the
+evidence and exact interpretation limit. No source metadata or observation
+request has occurred.
+
+## Offline implementation verification
+
+The [bounded transport](../../scripts/era5/icechunk_metadata.py) defaults to a
+nonexecuting plan and requires separately supplied, fresh byte-pinned authority
+before live adapter construction. Its fixed source cap remains four serial
+requests, 1 MiB per declared object / 2 MiB aggregate received bodies, no retries
+or redirects, 32 KiB headers, 30 seconds per HTTP operation, 15 seconds per parse
+and 120 seconds shared. The parent supervises 256 MiB main-worker peak RSS and a
+512 MiB hard Job process-tree commit limit with two active processes. The
+[official local parser](../../scripts/era5/icechunk_offline.py) retains distinct
+raw/expanded/native-input hashes, canonical and internal snapshot identities,
+actual parser versions and six fixed descriptor keys. Bounded standard-library
+recompression accommodates the native reader's rejection of compression code 0
+without changing original-byte transfer accounting.
+
+The [verification receipt](data-pilot-evidence/2026-10-17-icechunk-offline-verification.json)
+records fresh parent runs of only the two focused test modules. Python 3.14.3:
+25 discovered, 19 passed, six outer skips delegated to the passing contained
+native harness, where all six actually executed. Python 3.12.14: 25 discovered,
+17 passed, eight honest optional/Zstd skips. Both default CLIs are offline;
+installed dependencies still match all 293 file pins. No broad local suite was
+repeated; unchanged full CI discovery is reserved for the pushed milestone.
+
+The instrumented native fixture records exactly six attempted descriptor keys,
+guards public cloud factories, and captures actual native snapshot-fetch events
+plus a deliberately missing snapshot metadata positive control. No manifest or
+chunk fetch event occurs in its marked parsing interval. Pinned source review
+confirms the metadata branch returns node `user_data`, false preloading returns
+before fetching, and reviewed asset-manager trace events precede storage GETs.
+This is qualified application/native-event evidence, not comprehensive Rust
+syscall or kernel network tracing, and not merely success with absent files.
+
+Independent review identified two defects, now regression-tested and fixed:
+malformed-Zstd exception normalization and a missing final retained-handle peak
+RSS sample after worker exit. Actual normal Job containment and supervisor pipe
+identity helpers were checked. No full live exchange, overcommit/process-limit
+stress, production 120-second kill, or constructed unknown native union/feature/
+reserved-extension case is claimed tested. These limits remain explicit in the
+receipt and do not establish scientific admission or authorize source access.

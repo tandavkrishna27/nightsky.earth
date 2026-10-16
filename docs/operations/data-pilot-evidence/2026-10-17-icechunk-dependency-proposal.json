@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "kind": "icechunk-isolated-development-dependency-proposal",
+  "observedLocalDate": "2026-10-17",
+  "status": "proposed-not-installed",
+  "installationAuthorized": false,
+  "sourceDataAccessAuthorized": false,
+  "executionReady": false,
+  "python": "3.14.3 conventional CPython Windows x86-64",
+  "target": ".data/icechunk-metadata-deps",
+  "packages": [
+    {
+      "name": "icechunk",
+      "version": "2.3.0",
+      "license": "Apache-2.0",
+      "metadataUrl": "https://pypi.org/pypi/icechunk/2.3.0/json",
+      "filename": "icechunk-2.3.0-cp312-abi3-win_amd64.whl",
+      "url": "https://files.pythonhosted.org/packages/12/f0/a01d345e820b567267dea79bb9de5f942b2e11f8c39855745926c20c4a08/icechunk-2.3.0-cp312-abi3-win_amd64.whl",
+      "bytes": 16264949,
+      "sha256": "0dc5a0938f8198f648f41ac82170b750772b769ed41f5e05c991b8e08ab3d447",
+      "requiresDist": [
+        "zarr>=3.1.0"
+      ]
+    },
+    {
+      "name": "zarr",
+      "version": "3.1.6",
+      "license": "MIT",
+      "metadataUrl": "https://pypi.org/pypi/zarr/3.1.6/json",
+      "filename": "zarr-3.1.6-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/de/7c/ba8ca8cbe9dbef8e83a95fc208fed8e6686c98b4719aaa0aa7f3d31fe390/zarr-3.1.6-py3-none-any.whl",
+      "bytes": 295655,
+      "sha256": "b5a82c5079d1c3d4ee8f06746fa3b9a98a7d804300fa3f4be154362a33e1207e",
+      "requiresDist": [
+        "donfig>=0.8",
+        "google-crc32c>=1.5",
+        "numcodecs>=0.14",
+        "numpy>=2.0",
+        "packaging>=22.0",
+        "typing-extensions>=4.12",
+        "typer; extra == \"cli\"",
+        "cupy-cuda12x; extra == \"gpu\"",
+        "universal-pathlib; extra == \"optional\"",
+        "fsspec>=2023.10.0; extra == \"remote\"",
+        "obstore>=0.5.1; extra == \"remote\""
+      ]
+    },
+    {
+      "name": "donfig",
+      "version": "0.8.1.post1",
+      "license": "MIT",
+      "metadataUrl": "https://pypi.org/pypi/donfig/0.8.1.post1/json",
+      "filename": "donfig-0.8.1.post1-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/0c/d5/c5db1ea3394c6e1732fb3286b3bd878b59507a8f77d32a2cebda7d7b7cd4/donfig-0.8.1.post1-py3-none-any.whl",
+      "bytes": 21592,
+      "sha256": "2a3175ce74a06109ff9307d90a230f81215cbac9a751f4d1c6194644b8204f9d",
+      "requiresDist": [
+        "pyyaml",
+        "sphinx>=4.0.0; extra == \"docs\"",
+        "numpydoc; extra == \"docs\"",
+        "pytest; extra == \"docs\"",
+        "cloudpickle; extra == \"docs\"",
+        "pytest; extra == \"test\"",
+        "cloudpickle; extra == \"test\""
+      ]
+    },
+    {
+      "name": "google-crc32c",
+      "version": "1.9.0",
+      "license": "Apache-2.0",
+      "metadataUrl": "https://pypi.org/pypi/google-crc32c/1.9.0/json",
+      "filename": "google_crc32c-1.9.0-cp314-cp314-win_amd64.whl",
+      "url": "https://files.pythonhosted.org/packages/d3/fd/81cefea6adae7bd92abb23d4567d199f6485a20ec0a305ca5fa04c52b9c5/google_crc32c-1.9.0-cp314-cp314-win_amd64.whl",
+      "bytes": 35535,
+      "sha256": "af73200fa9791ccd380f3598235dba8d82b8af0905df045b3dc60b59836e8ddd",
+      "requiresDist": null
+    },
+    {
+      "name": "numcodecs",
+      "version": "0.17.0",
+      "license": "MIT",
+      "metadataUrl": "https://pypi.org/pypi/numcodecs/0.17.0/json",
+      "filename": "numcodecs-0.17.0-cp314-cp314-win_amd64.whl",
+      "url": "https://files.pythonhosted.org/packages/dc/88/9460630aa3517f1745da87201a96ba84169f2ebee9558b223c0e5a35ab44/numcodecs-0.17.0-cp314-cp314-win_amd64.whl",
+      "bytes": 1534816,
+      "sha256": "4f43ba0d834ce012ed482996a7424df9077a47d5899ede2d1d54fe85e6eb12fa",
+      "requiresDist": [
+        "numpy>=2.0",
+        "typing_extensions",
+        "msgpack; extra == \"msgpack\"",
+        "zfpy>=1.0.0; extra == \"zfpy\"",
+        "pcodec<2,>=1; extra == \"pcodec\"",
+        "crc32c>=2.7; extra == \"crc32c\"",
+        "google-crc32c>=1.5; extra == \"google-crc32c\"",
+        "sphinx; extra == \"docs\"",
+        "sphinx-issues; extra == \"docs\"",
+        "pydata-sphinx-theme; extra == \"docs\"",
+        "numpydoc; extra == \"docs\"",
+        "myst-parser; extra == \"docs\"",
+        "coverage; extra == \"test\"",
+        "pytest; extra == \"test\"",
+        "pytest-cov; extra == \"test\"",
+        "pyzstd; extra == \"test\"",
+        "importlib_metadata; extra == \"test-extras\""
+      ]
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3",
+      "license": "MIT",
+      "metadataUrl": "https://pypi.org/pypi/PyYAML/6.0.3/json",
+      "filename": "pyyaml-6.0.3-cp314-cp314-win_amd64.whl",
+      "url": "https://files.pythonhosted.org/packages/23/20/bb6982b26a40bb43951265ba29d4c246ef0ff59c9fdcdf0ed04e0687de4d/pyyaml-6.0.3-cp314-cp314-win_amd64.whl",
+      "bytes": 156429,
+      "sha256": "4a2e8cebe2ff6ab7d1050ecd59c25d4c8bd7e6f400f5f82b96557ac0abafd0ac",
+      "requiresDist": null
+    },
+    {
+      "name": "packaging",
+      "version": "26.3",
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "metadataUrl": "https://pypi.org/pypi/packaging/26.3/json",
+      "filename": "packaging-26.3-py3-none-any.whl",
+      "url": "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl",
+      "bytes": 129956,
+      "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c",
+      "requiresDist": null
+    }
+  ],
+  "reuse": [
+    {
+      "name": "numpy",
+      "version": "2.5.4",
+      "license": "BSD-3-Clause",
+      "scope": "Existing lane-owned environment; unchanged"
+    },
+    {
+      "name": "typing-extensions",
+      "version": "4.16.0",
+      "license": "PSF-2.0",
+      "scope": "Existing lane-owned environment; unchanged"
+    }
+  ],
+  "artifactBytes": 18438932,
+  "artifactHashStatus": "Registry-advertised, not downloaded or independently hashed",
+  "expandedInstallBytes": null,
+  "proposedCombinedArchiveAndExpandedBytesLimit": 134217728,
+  "icechunkSourceCommit": "cb526569fac748e7a52a04591d08fcc9b276dfae",
+  "schemas": [
+    {
+      "name": "common.fbs",
+      "url": "https://raw.githubusercontent.com/earth-mover/icechunk/cb526569fac748e7a52a04591d08fcc9b276dfae/icechunk-format/flatbuffers/common.fbs",
+      "bytes": 1521,
+      "sha256": "a1e847904665f3714c8b2c3936d5ecebd2f2059243daed529b7c5b940358ec35",
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "repo.fbs",
+      "url": "https://raw.githubusercontent.com/earth-mover/icechunk/cb526569fac748e7a52a04591d08fcc9b276dfae/icechunk-format/flatbuffers/repo.fbs",
+      "bytes": 5447,
+      "sha256": "dec87e7f19940254eaa1bb2494c072791d3173625f4813209b7fa37c295502b9",
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "snapshot.fbs",
+      "url": "https://raw.githubusercontent.com/earth-mover/icechunk/cb526569fac748e7a52a04591d08fcc9b276dfae/icechunk-format/flatbuffers/snapshot.fbs",
+      "bytes": 6156,
+      "sha256": "a14f61544b54d58d463a07a9ab748c44fd557618dd0b02cfc88001403e7ecbba",
+      "license": "Apache-2.0"
+    }
+  ],
+  "metadataRequestsOnly": true,
+  "packageArtifactsDownloaded": 0,
+  "installs": 0
+}

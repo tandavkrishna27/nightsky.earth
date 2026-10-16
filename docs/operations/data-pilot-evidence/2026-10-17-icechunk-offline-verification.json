@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "kind": "icechunk-offline-preparation-verification",
+  "observedAt": "2026-10-16T20:42:02.615767+00:00",
+  "scope": "Coordinator-refined bounded observational metadata interpretation by Icechunk 2.3.0",
+  "sourceRequests": 0,
+  "sourceAccessAuthorized": false,
+  "scientificAdmission": false,
+  "unsupportedFeatureExclusionProved": false,
+  "maintainedParser": {
+    "icechunk": "2.3.0",
+    "zarr": "3.1.6",
+    "python": "3.14.3",
+    "sourceCommit": "cb526569fac748e7a52a04591d08fcc9b276dfae"
+  },
+  "code": [
+    {
+      "path": "scripts/era5/icechunk_metadata.py",
+      "bytes": 26913,
+      "sha256": "3d21605324a3d774565b82cab09701d122c6b4ed46dd96a164f1abd9dbf2b5cf"
+    },
+    {
+      "path": "scripts/era5/icechunk_offline.py",
+      "bytes": 11587,
+      "sha256": "25e182694e036785ae0a96e11d7df1fea98a73ff09f0c982225e9d2767037b21"
+    },
+    {
+      "path": "tests/era5/test_icechunk_metadata.py",
+      "bytes": 13236,
+      "sha256": "3ae37adfc95f436eddc36d89d9efeefb1ac33b82e69f5b13784a6ac110785f70"
+    },
+    {
+      "path": "tests/era5/test_icechunk_offline.py",
+      "bytes": 15564,
+      "sha256": "4c4c73da7aa87033583583997537a775d3664b988db6c1888539f34a679a4df6"
+    }
+  ],
+  "dependencyReceipt": "2026-10-17-icechunk-development-setup.json",
+  "installedFilesReverified": 293,
+  "combinedDependencyBytes": 70453339,
+  "focusedCommand": "-B -m unittest discover -s tests/era5 -p 'test_icechunk_*.py' -v",
+  "focusedRuns": [
+    {
+      "runtime": "3.14.3",
+      "discovered": 25,
+      "passed": 19,
+      "skipped": 6,
+      "seconds": 1.352,
+      "exitCode": 0,
+      "containedNativeFixturesPassed": 6,
+      "skipReason": "Six native methods are delegated to the passing contained-child harness"
+    },
+    {
+      "runtime": "3.12.14",
+      "discovered": 25,
+      "passed": 17,
+      "skipped": 8,
+      "seconds": 0.423,
+      "exitCode": 0,
+      "skipReason": "No stdlib Zstd or approved 3.14 native target; six native methods are delegated only to that optional child"
+    }
+  ],
+  "defaultCli": [
+    {
+      "runtime": "3.14.3",
+      "exitCode": 0,
+      "result": {
+        "executionEligible": false,
+        "interpretation": "bounded-observational-metadata-as-interpreted-by-icechunk-2.3.0",
+        "interpretationLimitations": [
+          "official-api-does-not-expose-unknown-feature-flags-or-reserved-extensions"
+        ],
+        "limits": {
+          "activeProcesses": 2,
+          "aggregateBodyBytes": 2097152,
+          "expandedBytes": 16777216,
+          "headerBytes": 32768,
+          "httpSeconds": 30,
+          "jobCommitBytes": 536870912,
+          "objectBytes": 1048576,
+          "parseSeconds": 15,
+          "redirects": 0,
+          "requests": 4,
+          "retries": 0,
+          "rssBytes": 268435456,
+          "wallSeconds": 120
+        },
+        "repoUrl": "https://earthmover-icechunk-era5.s3.us-east-1.amazonaws.com/icechunkV2/repo",
+        "required": "fresh trusted byte-pinned packet, approved allowance and Windows Job containment",
+        "scientificAdmission": false,
+        "snapshotUrlTemplate": "https://earthmover-icechunk-era5.s3.us-east-1.amazonaws.com/icechunkV2/snapshots/{ID}",
+        "status": "offline-no-execution",
+        "unsupportedFeatureExclusionProved": false
+      }
+    },
+    {
+      "runtime": "3.12.14",
+      "exitCode": 0,
+      "result": {
+        "executionEligible": false,
+        "interpretation": "bounded-observational-metadata-as-interpreted-by-icechunk-2.3.0",
+        "interpretationLimitations": [
+          "official-api-does-not-expose-unknown-feature-flags-or-reserved-extensions"
+        ],
+        "limits": {
+          "activeProcesses": 2,
+          "aggregateBodyBytes": 2097152,
+          "expandedBytes": 16777216,
+          "headerBytes": 32768,
+          "httpSeconds": 30,
+          "jobCommitBytes": 536870912,
+          "objectBytes": 1048576,
+          "parseSeconds": 15,
+          "redirects": 0,
+          "requests": 4,
+          "retries": 0,
+          "rssBytes": 268435456,
+          "wallSeconds": 120
+        },
+        "repoUrl": "https://earthmover-icechunk-era5.s3.us-east-1.amazonaws.com/icechunkV2/repo",
+        "required": "fresh trusted byte-pinned packet, approved allowance and Windows Job containment",
+        "scientificAdmission": false,
+        "snapshotUrlTemplate": "https://earthmover-icechunk-era5.s3.us-east-1.amazonaws.com/icechunkV2/snapshots/{ID}",
+        "status": "offline-no-execution",
+        "unsupportedFeatureExclusionProved": false
+      }
+    }
+  ],
+  "attemptedAccessEvidence": {
+    "applicationBoundary": "Real IcechunkStore.get records exactly the six descriptor keys and denies other keys; public cloud factories guarded",
+    "nativeTrace": "Actual snapshot download event plus a deliberately missing snapshot metadata ID positive control; no manifest/chunk download events in marked parse interval",
+    "sourceReview": "Pinned asset-manager download events precede their storage GETs; metadata branch returns node user_data; false preload condition avoids preloading",
+    "limitation": "Qualified boundary/source-call evidence, not exhaustive native storage or kernel filesystem/network tracing"
+  },
+  "containmentEvidence": "Actual 512 MiB/two-process Windows Job and sanitized native child; independent actual Job/parent-owned pipe helper check; shared/phase deadline and RSS monitor seams, including final exited-worker peak RSS regression",
+  "independentReview": "Clear under the refined metadata-only interpretation contract; no actionable findings remain",
+  "reviewFixes": [
+    "Normalize malformed stdlib Zstd exceptions",
+    "Sample retained-handle peak RSS after worker exit before success"
+  ],
+  "notTested": [
+    "Live TLS/DNS/certificate/source exchange",
+    "Constructed unknown union/feature/opaque-extension native fixtures",
+    "512 MiB overcommit stress or process-limit exhaustion",
+    "Full production 120-second hard kill/live supervisor path"
+  ],
+  "authority": "No real execution allowance created; future source access needs separately approved fresh packet and allowance"
+}

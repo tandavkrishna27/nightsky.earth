@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "icechunk-local-parser-readiness",
+  "observedLocalDate": "2026-10-17",
+  "timezone": "Asia/Calcutta",
+  "scope": "Initial pre-install inventory of owned lane environment, configured bundled Python/Node, repository schemas/manifests and flatc executable discovery; no broad filesystem dependency sweep",
+  "runtimes": [
+    {
+      "runtime": "Python",
+      "version": "3.14.3",
+      "modules": {
+        "flatbuffers": false,
+        "flatbuffers.flexbuffers": false,
+        "icechunk": false,
+        "compression.zstd": true,
+        "zstandard": false
+      }
+    },
+    {
+      "runtime": "Python",
+      "version": "3.12.14",
+      "modules": {
+        "flatbuffers": false,
+        "flatbuffers.flexbuffers": false,
+        "icechunk": false,
+        "compression.zstd": false,
+        "zstandard": false
+      }
+    },
+    {
+      "runtime": "Node",
+      "version": "v24.19.0",
+      "modules": {
+        "flatbuffers": false,
+        "flexbuffers": false,
+        "icechunk": false,
+        "@flatbuffers/flatbuffers": false,
+        "zstd-codec": false,
+        "fzstd": false
+      }
+    }
+  ],
+  "repositorySchemasOrGeneratedBindingsFound": false,
+  "repositoryDeclaredFlatbuffersOrIcechunkDependencyFound": false,
+  "flatcOnPathFound": false,
+  "installs": 0,
+  "networkRequests": 0,
+  "executionReady": false,
+  "snapshotParserReady": false,
+  "receiptOnlyFallback": "An opaque quarantined receipt is transport evidence only: mainSnapshotId null, scientificAdmission false. It does not resolve a usable snapshot and is not recommended as the next milestone.",
+  "subsequentDevelopmentSetup": "2026-10-17-icechunk-development-setup.json",
+  "subsequentPreparation": "The exact seven-wheel setup was later approved and completed. Official local-file parser and bounded fake-transport fixtures now implement Icechunk 2.3.0 metadata interpretation. The initial module availability and zero-install counts above describe inventory time only. Source access remains unapproved; unsupportedFeatureExclusionProved=false and scientificAdmission=false. See icechunk-parser-dependency-plan-20261017.md for the current reviewed scope."
+}
