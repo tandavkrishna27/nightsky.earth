@@ -1,0 +1,277 @@
+{
+  "status": "complete",
+  "scope": "Offline retained geometry and synthetic coordinate validation only; no worldwide extraction or observing-site claim",
+  "job": {
+    "elapsedSeconds": 38.458,
+    "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+    "limits": {
+      "commitBytes": 2147483648,
+      "diskBytes": 402653184,
+      "freeBytes": 1073741824,
+      "maxProcesses": 3,
+      "rssBytes": 2147483648,
+      "wallSeconds": 300
+    },
+    "peakLogicalBytes": 158377673,
+    "peakRssBytes": 1449615360,
+    "platform": "win32",
+    "reason": null,
+    "stages": [
+      {
+        "elapsedSeconds": 13.214,
+        "exitCode": 0,
+        "stage": 0
+      },
+      {
+        "elapsedSeconds": 10.108,
+        "exitCode": 0,
+        "stage": 1
+      },
+      {
+        "elapsedSeconds": 2.825,
+        "exitCode": 0,
+        "stage": 2
+      },
+      {
+        "elapsedSeconds": 12.285,
+        "exitCode": 0,
+        "stage": 3
+      }
+    ],
+    "status": "complete"
+  },
+  "runtime": {
+    "nodeMaxOldSpaceMiB": 1280,
+    "comparisonLimitPerStage": 200000000
+  },
+  "sourceSha256": {
+    ".data/geography-partition-size-probe-20261016-v2/quarantined-unresolved-descriptor.json": "6b00eb498065f144dbf5c00ec7602a334e7413efcf7ed8048319216854c1f39d",
+    ".cache/s2-geography-acquisition-20261016-r2/raw/ne_10m_admin_0_countries.geojson": "239eec57ac17f100a11e2536cffc56752c318b50ae765b0918ff7aab4ce8f255",
+    ".cache/s2-geography-acquisition-20261016-r2/raw/ne_10m_admin_1_states_provinces.geojson": "22d0e3ad85eb3e27f17cabf8ba2d50e554fbc27a87796ff891d958185da62fb5",
+    ".superpowers/sdd/2026-10-16-n4/nine-membership-probes-v2.json": "ab43644b77cba92f923eedd7a2fb54d44a9adcbbe6150616557fcefb76f678f7"
+  },
+  "descriptorSha256": "3a9301c26a8cbea8d8b865926ce81ca7cbed6bb244c2c7c24ec7087eda2d4ddb",
+  "retainedInputsUnchanged": true,
+  "stages": {
+    "ingestion": {
+      "elapsedMs": 12876,
+      "comparisons": 129300576,
+      "sourceFeatures": 4854,
+      "unresolvedFeatures": 70,
+      "totalCandidates": null,
+      "unknownCountryCandidates": null,
+      "probeCount": 0
+    },
+    "preparation": {
+      "elapsedMs": 9891,
+      "comparisons": 125609300,
+      "sourceFeatures": 4854,
+      "unresolvedFeatures": 70,
+      "totalCandidates": null,
+      "unknownCountryCandidates": null,
+      "probeCount": 0
+    },
+    "direct-probes": {
+      "elapsedMs": 2618,
+      "comparisons": 41297485,
+      "sourceFeatures": null,
+      "unresolvedFeatures": null,
+      "totalCandidates": null,
+      "unknownCountryCandidates": null,
+      "probeCount": 17
+    },
+    "membership": {
+      "elapsedMs": 12011,
+      "comparisons": "actual unavailable; internally enforced <=200000000",
+      "sourceFeatures": null,
+      "unresolvedFeatures": null,
+      "totalCandidates": 23,
+      "unknownCountryCandidates": 16,
+      "probeCount": 17
+    }
+  },
+  "normalizations": {
+    "consecutivePositionAuditRecords": 47,
+    "consecutivePositionsRemoved": 52,
+    "tangentHoleExtractions": [
+      {
+        "kind": "extract-tangent-hole",
+        "level": 0,
+        "providerId": "EGY",
+        "polygon": 0,
+        "ring": 0,
+        "repeatedPositionIndices": [
+          765,
+          770
+        ],
+        "indexBasis": "after-consecutive-identical-removal",
+        "inputRingLength": 1801,
+        "outputShellLength": 1796,
+        "outputHoleLength": 6,
+        "existingHoles": 2,
+        "orderedEdgesPreserved": true,
+        "additionalClosurePositions": 1
+      },
+      {
+        "kind": "extract-tangent-hole",
+        "level": 1,
+        "providerId": "BRA-1294",
+        "polygon": 0,
+        "ring": 0,
+        "repeatedPositionIndices": [
+          263,
+          348
+        ],
+        "indexBasis": "after-consecutive-identical-removal",
+        "inputRingLength": 1417,
+        "outputShellLength": 1332,
+        "outputHoleLength": 86,
+        "existingHoles": 0,
+        "orderedEdgesPreserved": true,
+        "additionalClosurePositions": 1
+      }
+    ]
+  },
+  "outputFiles": {
+    ".data/nine-global-staged-validation-20261016-v6/direct-probes-validation.json": {
+      "bytes": 4910,
+      "sha256": "01a5d00dc426bfb9d28da2ec2d15c1cfe0b9c191f7c7acc954b8d80f18cddda8"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingestion-validation.json": {
+      "bytes": 1231,
+      "sha256": "3a6a7c164d4e91295b3d422a38f2af1cdb8e4deed90e3131c31ba69a4c54a0fb"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/job-complete.json": {
+      "bytes": 22,
+      "sha256": "d12df96e8d922d035ca400abb39171428d8596f829f9bad5d707ef1c145e372c"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/job-report.json": {
+      "bytes": 621,
+      "sha256": "fad32af82548877a3397965be29fed63e78da05a8bf9367d951c154c460c1b0e"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/membership-validation.json": {
+      "bytes": 237058,
+      "sha256": "7e1d52066f4049684275c5d643c10151ad50b51640a50b4a00ecff3208bbe83a"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/preparation-validation.json": {
+      "bytes": 1447,
+      "sha256": "4f2ad83558086d892e9e2d65dfa839179e970cc0383b98a09c658f85397c5c0a"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/probe-specifications.json": {
+      "bytes": 5488,
+      "sha256": "1ca6a157a08a7f738e63048cd1007c521d6083e99c45636d5b6154485a6b193c"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/retained-input-checksums.json": {
+      "bytes": 5032,
+      "sha256": "5e614f4dd95eeccd07fe622adfbcde84998915ab54337ad4ec6d4b746c38945d"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-0.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-0.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-1.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-1.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-2.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-2.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-3.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/stage-3.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingested/audit.json": {
+      "bytes": 4040327,
+      "sha256": "3cbda439d1d39ab755390a703d845b9b18051ffbe5240701ab3283cffe6f9ad7"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingested/boundaries-0.geojson": {
+      "bytes": 12596289,
+      "sha256": "c05e09728d6fa92c56f44c54ccda87b8bdbd14d1733d9307d2d9e51b69259d99"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingested/boundaries-1.geojson": {
+      "bytes": 24718304,
+      "sha256": "63599bc852fa013b398ff222de5d23f8dea2e578d2d17ae2a6b36d4f6bc9b642"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingested/boundaries-2.geojson": {
+      "bytes": 7940290,
+      "sha256": "16a8e80eef9b135cf8b4536d93c2d924546cace5d7a33912077ed86fa23dd1ce"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingested/complete.json": {
+      "bytes": 793,
+      "sha256": "c85a300092b7c65afa2340beb19d8e517c2fb093ac907f958b2967c4178a89ba"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/ingested/preparation.json": {
+      "bytes": 160621,
+      "sha256": "7108d94eae1869205c696d96ad8dafa843c4c4cff61ecf0edb6370ba23f80159"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/membership/candidates.jsonl": {
+      "bytes": 12732,
+      "sha256": "d5954ccaff954542d8cb8b377c5106dca453a100b052c6150653f8943c8ca319"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/membership/complete.json": {
+      "bytes": 161367,
+      "sha256": "cbca8deb503f387ddf2137505b1caa7d948a010f3e18a6696b1d09ccd08f663a"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/membership/footprints.jsonl": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/membership/regions.jsonl": {
+      "bytes": 3536603,
+      "sha256": "e06b947dd61f2da1fe81ed1b67799f860c3920c9a1d2c54a4fbcd2ab2c230d1f"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/audit.json": {
+      "bytes": 160983,
+      "sha256": "fd0b9edf634978cf417d156307bba402fce48e19f9ed4838e91a903ca5510690"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/boundaries-0.geojson": {
+      "bytes": 12596289,
+      "sha256": "c05e09728d6fa92c56f44c54ccda87b8bdbd14d1733d9307d2d9e51b69259d99"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/boundaries-1.geojson": {
+      "bytes": 24718304,
+      "sha256": "63599bc852fa013b398ff222de5d23f8dea2e578d2d17ae2a6b36d4f6bc9b642"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/boundaries-2.geojson": {
+      "bytes": 7940290,
+      "sha256": "16a8e80eef9b135cf8b4536d93c2d924546cace5d7a33912077ed86fa23dd1ce"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/boundary-shards.json": {
+      "bytes": 160585,
+      "sha256": "c7a8f91697897b491aed1bf65619e778b3d5d10c2c426d7d3b193f7410cf597b"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/candidates.jsonl": {
+      "bytes": 12263,
+      "sha256": "9340869068d846ced8d08be8b15e209c881669b73a75ac6ee161d1b9be3a5ba6"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/complete.json": {
+      "bytes": 790,
+      "sha256": "dc60f498dd5a7126562ab72896345861d3e005d263648170bc21e6f3eb309e12"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/footprints.jsonl": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    ".data/nine-global-staged-validation-20261016-v6/prepared/membership-input.json": {
+      "bytes": 160765,
+      "sha256": "f710b15376b37fc461ba75a1ad55f0064cdaff355e6ae7da3482fa7115df7a2f"
+    }
+  }
+}

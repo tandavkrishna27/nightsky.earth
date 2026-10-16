@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 import {ingestNaturalEarth,ingestSyntheticNaturalEarth} from '../../scripts/osm/natural-earth-ingest';
 import {prepareGeographicCoverage} from '../../scripts/osm/prepare-geographic-coverage';
 import {buildBoundaryMetadata} from '../../scripts/osm/boundary-metadata';
+const directedEdges=(rings:number[][][])=>rings.flatMap(r=>r.slice(0,-1).map((p,i)=>JSON.stringify([p,r[i+1]]))).sort();
 const ring=(a:number,b:number,c:number,d:number)=>[[a,b],[c,b],[c,d],[a,d],[a,b]];
 const source={name:'Synthetic only',url:'https://example.org',attribution:'Synthetic only',dataClass:'catalog'};
 const region=(id:string,adminLevel:number)=>({regionId:`region:v1:${id}`,name:id,countryCode:'IND',adminLevel,boundaryRevision:'synthetic-only',sources:[source]});
@@ -155,4 +156,48 @@ test('multipart bbox pruning preserves overlap, containment, touching and near-t
  for(const part of [polygon(1,1,3,3),polygon(0.5,0.5,1.5,1.5),polygon(2,0,3,2),polygon(2+5e-11,0,3,2)])assert.throws(()=>validateMultipart([polygon(0,0,2,2),part],()=>{}),/multipart/);
  let work=0;const sparse=Array.from({length:100},(_,i)=>polygon(i*3,0,i*3+1,1));validateMultipart(sparse,()=>{if(++work>6000)throw new Error('Sparse multipart work');});assert.ok(work<6000);
  let ticks=0;assert.throws(()=>validateMultipart(sparse,()=>{if(++ticks>10)throw new Error('Box budget');}),/Box budget/);
+});
+
+test('explicit repeated-vertex policy extracts inward hole preserving existing holes and audit',async()=>{
+ for(const offset of [0,2]){
+ const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));
+ const originalExterior=[[0,0],[2,1],[1,2],[0,0],[0,10],[10,10],[10,0],[0,0]];
+ const open=originalExterior.slice(0,-1),rotated=[...open.slice(offset),...open.slice(0,offset)],exterior=[...rotated,rotated[0]];
+ raw.features[0].geometry={type:'Polygon',coordinates:[exterior,ring(4,4,5,5),ring(7,7,8,8)]};
+ const b=Buffer.from(JSON.stringify(raw));await writeFile(path,b);Object.assign(layer.input,{bytes:b.length,sha256:createHash('sha256').update(b).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${b.length}\0`).update(b).digest('hex')});
+ await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out),/intersect/i);
+ f.descriptor.repeatedVertexPolicy='extract-tangent-holes';await writeFile(f.input,JSON.stringify(f.descriptor));await ingestSyntheticNaturalEarth(f.input,f.out);
+ const normalized=JSON.parse(await readFile(join(f.out,'boundaries.geojson'),'utf8')),rings=normalized.features[0].geometry.coordinates;
+ assert.equal(rings.length,4);assert.deepEqual(directedEdges(rings),directedEdges(raw.features[0].geometry.coordinates));assert.deepEqual(rings.slice(1,3),[ring(4,4,5,5),ring(7,7,8,8)]);
+ const {boundaries,contains}=await import('../../scripts/osm/geographic-geometry');const parsed=boundaries(normalized,10000,()=>{});
+ assert.equal(contains([1,1],parsed[0],()=>{}),0);assert.equal(contains([3,3],parsed[0],()=>{}),1);assert.equal(contains([0,0],parsed[0],()=>{}),-1);
+ const audit=JSON.parse(await readFile(join(f.out,'audit.json'),'utf8'));assert.equal(audit.transformations[0].kind,'extract-tangent-hole');assert.deepEqual(audit.transformations[0].repeatedPositionIndices,offset===0?[0,3]:[1,5]);assert.equal(audit.transformations[0].orderedEdgesPreserved,true);
+ await prepareGeographicCoverage(join(f.out,'preparation.json'),join(f.dir,'prepared'));
+ }
+});
+
+test('repeated-vertex opt-in still rejects lobes, multiple repeats and interference with existing holes',async()=>{
+ for(const [exterior,holes] of [
+  [[[0,0],[2,0],[2,2],[0,0],[-2,0],[-2,-2],[0,0]],[]],
+  [[[0,0],[2,1],[1,2],[0,0],[3,1],[1,3],[0,0],[0,10],[10,10],[10,0],[0,0]],[]],
+  [[[0,0],[2,1],[1,2],[0,0],[0,10],[10,10],[10,0],[0,0]],[ring(.9,.9,1.1,1.1)]],
+  [[[0,0],[-2,1],[-1,2],[0,0],[0,10],[10,10],[10,0],[0,0]],[]],
+ ] as [number[][],number[][][]][]){
+  const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));
+  raw.features[0].geometry={type:'Polygon',coordinates:[exterior,...holes]};const body=Buffer.from(JSON.stringify(raw));await writeFile(path,body);Object.assign(layer.input,{bytes:body.length,sha256:createHash('sha256').update(body).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${body.length}\0`).update(body).digest('hex')});
+  f.descriptor.repeatedVertexPolicy='extract-tangent-holes';await writeFile(f.input,JSON.stringify(f.descriptor));await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out),/unsupported|hole|intersect/i);await assert.rejects(access(join(f.out,'complete.json')));
+ }
+});
+
+test('combined duplicate and tangent-hole policies label indices after consecutive deduplication',async()=>{
+ const f=await fixture(),layer=f.descriptor.layers[0],path=join(f.dir,layer.input.path),raw=JSON.parse(await readFile(path,'utf8'));
+ raw.features[0].geometry={type:'Polygon',coordinates:[[[0,0],[0,0],[2,1],[1,2],[0,0],[0,10],[10,10],[10,0],[0,0]]]};
+ const body=Buffer.from(JSON.stringify(raw));await writeFile(path,body);Object.assign(layer.input,{bytes:body.length,sha256:createHash('sha256').update(body).digest('hex'),gitBlobSha1:createHash('sha1').update(`blob ${body.length}\0`).update(body).digest('hex')});
+ f.descriptor.geometryPolicy='remove-consecutive-identical';f.descriptor.repeatedVertexPolicy='extract-tangent-holes';await writeFile(f.input,JSON.stringify(f.descriptor));await ingestSyntheticNaturalEarth(f.input,f.out);
+ const audit=JSON.parse(await readFile(join(f.out,'audit.json'),'utf8'));assert.deepEqual(audit.transformations[0].removedPositionIndices,[1]);assert.equal(audit.transformations[1].indexBasis,'after-consecutive-identical-removal');assert.deepEqual(audit.transformations[1].repeatedPositionIndices,[0,3]);
+ const normalized=JSON.parse(await readFile(join(f.out,'boundaries.geojson'),'utf8'));assert.equal(normalized.features[0].geometry.coordinates.length,2);assert.deepEqual(directedEdges(normalized.features[0].geometry.coordinates),directedEdges([raw.features[0].geometry.coordinates[0].filter((p:number[],i:number,r:number[][])=>i===0||p[0]!==r[i-1][0]||p[1]!==r[i-1][1])]));
+});
+
+test('offline ingestion accepts explicit 200M comparison ceiling and rejects larger budgets',async()=>{
+ const f=await fixture();await assert.rejects(ingestSyntheticNaturalEarth(f.input,f.out,{maxComparisons:200000001}),/Unsupported budget/);await assert.rejects(access(join(f.out,'complete.json')));await ingestSyntheticNaturalEarth(f.input,f.out,{maxComparisons:200000000});
 });

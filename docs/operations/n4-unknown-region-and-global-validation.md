@@ -38,3 +38,6 @@ Diagnostic completion does not admit the source, publish membership, establish e
 
 Next: decide and implement safe topology handling for those nine records, then rerun full ingestion/preparation/membership with retained inputs. This is source-level work, not another sequence of manually testing cities.
 
+
+
+Follow-up: [nine-geometry resolution](n4-nine-geometry-resolution.md) completes the retained ingestion/preparation/membership pipeline and supersedes the nine-rejection blocker above. The earlier diagnostic remains historical evidence.

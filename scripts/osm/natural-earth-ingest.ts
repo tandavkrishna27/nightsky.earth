@@ -4,12 +4,12 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import * as z from 'zod4';
 import {regionRefSchema} from '../../shared/nightsky/discovery';
-import {boundaries,inside,ringsIntersect,isUnresolved,boundaryId,validateMultipart} from './geographic-geometry';
+import {boundaries,isUnresolved,boundaryId} from './geographic-geometry';
 import {naturalEarthPolicy,naturalEarthRegion} from './natural-earth-policy';
 const relative=z.string().min(1).max(240).refine(p=>!isAbsolute(p)&&!p.includes(':')&&!p.includes('\\')&&p.split('/').every(s=>!!s&&s!=='.'&&s!=='..'),'Unsafe relative path');
 const pin=z.strictObject({path:relative,bytes:z.number().int().positive().max(48*1024*1024),sha256:z.string().regex(/^[a-f0-9]{64}$/),gitBlobSha1:z.string().regex(/^[a-f0-9]{40}$/)});
 const partitions=z.array(z.strictObject({level:z.union([z.literal(0),z.literal(1)]),providerIds:z.array(z.string().min(1).max(100)).min(1).max(10000)})).min(1).max(100);
-const policies={unresolvedIdentityPolicy:z.enum(['block','preserve-unknown']).optional(),partitions:partitions.optional(),crsPolicy:z.enum(['reject','verified-crs84']).optional(),geometryPolicy:z.enum(['preserve','remove-consecutive-identical']).optional()};
+const policies={repeatedVertexPolicy:z.enum(['reject','extract-tangent-holes']).optional(),unresolvedIdentityPolicy:z.enum(['block','preserve-unknown']).optional(),partitions:partitions.optional(),crsPolicy:z.enum(['reject','verified-crs84']).optional(),geometryPolicy:z.enum(['preserve','remove-consecutive-identical']).optional()};
 const unresolved=z.array(z.strictObject({providerId:z.string().min(1).max(100),reason:z.enum(['missing-name','country-assignment','region-identity'])})).max(10000);
 const layerFields={unresolved:unresolved.optional(),level:z.union([z.literal(0),z.literal(1)]),input:pin,idField:z.string().min(1).max(100)};
 const identity=regionRefSchema.omit({boundaryRevision:true,sources:true});
@@ -31,7 +31,7 @@ export async function ingestNaturalEarth(input:string,output:string,limits:Natur
 export async function ingestSyntheticNaturalEarth(input:string,output:string,limits:NaturalEarthLimits={}){return ingest(input,output,true,limits);}
 async function ingest(input:string,output:string,synthetic:boolean,limits:NaturalEarthLimits){
  const maxInputBytes=limits.maxInputBytes??64*1024*1024,maxVertices=limits.maxVertices??100000,maxComparisons=limits.maxComparisons??10000000,maxOutputBytes=limits.maxOutputBytes??128*1024*1024,maxMilliseconds=limits.maxMilliseconds??60000;
- for(const [n,c] of [[maxInputBytes,64*1024*1024],[maxVertices,1000000],[maxComparisons,100000000],[maxOutputBytes,128*1024*1024],[maxMilliseconds,1800000]])if(!Number.isSafeInteger(n)||n<1||n>c)throw new Error('Unsupported budget');
+ for(const [n,c] of [[maxInputBytes,64*1024*1024],[maxVertices,1000000],[maxComparisons,200000000],[maxOutputBytes,128*1024*1024],[maxMilliseconds,1800000]])if(!Number.isSafeInteger(n)||n<1||n>c)throw new Error('Unsupported budget');
  const maxTotalVertices=limits.maxTotalVertices??maxVertices;if(!Number.isSafeInteger(maxTotalVertices)||maxTotalVertices<1||maxTotalVertices>2000000)throw new Error('Unsupported aggregate vertex budget');
  const start=Date.now();let work=0,totalBytes=0,vertices=0;const tick=()=>{limits.signal?.throwIfAborted();if(Date.now()-start>=maxMilliseconds)throw new Error('Deadline budget');if(++work>maxComparisons)throw new Error('Comparison budget');};tick();
  const snapshots:{path:string;body:Buffer}[]=[];
@@ -57,6 +57,23 @@ async function ingest(input:string,output:string,synthetic:boolean,limits:Natura
     }
     geometry={type:parsed.type,coordinates:parsed.type==='Polygon'?polygons[0]:polygons};
    }
+   if(manifest.repeatedVertexPolicy==='extract-tangent-holes'){
+    const parsed=z.strictObject({type:z.enum(['Polygon','MultiPolygon']),coordinates:z.unknown()}).parse(geometry);
+    const polygons=z.array(z.array(z.array(z.tuple([z.number().finite(),z.number().finite()])))).parse(parsed.type==='Polygon'?[parsed.coordinates]:parsed.coordinates);
+    for(const [polygon,rings] of polygons.entries()){
+     if(!rings.length)throw new Error('Empty rings');const exterior=rings[0],seenPositions=new Map<string,number>();let repeat:[number,number]|undefined;
+     for(let i=0;i<exterior.length-1;i++){tick();const key=`${exterior[i][0]},${exterior[i][1]}`,previous=seenPositions.get(key);if(previous!==undefined){if(repeat)throw new Error('Unsupported multiple repeated exterior vertices');repeat=[previous,i];}else seenPositions.set(key,i);}
+     if(!repeat)continue;const [first,second]=repeat,loop=exterior.slice(first,second+1),remainder=[...exterior.slice(0,first+1),...exterior.slice(second+1)];
+     // Original directed edges occur exactly once in these two rings. Opposite signs
+     // are necessary; the canonical validator below proves simple rings, containment,
+     // tangent contact and disjointness from every original hole before any output.
+     const area=(ring:number[][])=>{let sum=0;const origin=ring[0];for(let i=0;i<ring.length-1;i++){tick();sum+=(ring[i][0]-origin[0])*(ring[i+1][1]-origin[1])-(ring[i+1][0]-origin[0])*(ring[i][1]-origin[1]);}return sum;};
+     const loopArea=area(loop),remainderArea=area(remainder);if(!Number.isFinite(loopArea)||!Number.isFinite(remainderArea)||loopArea*remainderArea>=0||Math.abs(loopArea)<1e-10||Math.abs(remainderArea)<1e-10)throw new Error('Unsupported repeated exterior orientation');
+     const shell=Math.abs(loopArea)>Math.abs(remainderArea)?loop:remainder,hole=shell===loop?remainder:loop;
+     rings[0]=shell;rings.push(hole);transformations.push({kind:'extract-tangent-hole',level:layer.level,providerId:id,polygon,ring:0,repeatedPositionIndices:repeat,indexBasis:manifest.geometryPolicy==='remove-consecutive-identical'?'after-consecutive-identical-removal':'original-source-ring',inputRingLength:exterior.length,outputShellLength:shell.length,outputHoleLength:hole.length,existingHoles:rings.length-2,orderedEdgesPreserved:true,additionalClosurePositions:1});
+    }
+    geometry={type:parsed.type,coordinates:parsed.type==='Polygon'?polygons[0]:polygons};
+   }
    features.push({type:'Feature',properties:region,geometry});provenance.push({level:layer.level,providerId:id,...(unknown?{boundaryId:region.boundaryId}:{regionId:region.regionId})});}
   if(seen.size!==Object.keys(layer.mapping).length+unresolvedIds.size)throw new Error('Unused provider mapping');
  }
@@ -65,12 +82,12 @@ async function ingest(input:string,output:string,synthetic:boolean,limits:Natura
  const byProvider=new Map(provenance.map((p,index)=>[`${p.level}:${p.providerId}`,features[index]]));
  const groups=manifest.partitions?manifest.partitions.map(part=>part.providerIds.map(id=>{tick();return byProvider.get(`${part.level}:${id}`)!;})):[features];
  const normalized={type:'FeatureCollection',features};const validated=groups.flatMap(group=>boundaries({type:'FeatureCollection',features:group},maxVertices,tick,manifest.unresolvedIdentityPolicy==='preserve-unknown'));
- for(const b of validated){for(const p of b.polygons)for(const r of p){vertices+=r.length;if(vertices>maxTotalVertices)throw new Error('Aggregate vertex budget');}validateMultipart(b.polygons,tick);}
+ for(const b of validated){for(const p of b.polygons)for(const r of p){vertices+=r.length;if(vertices>maxTotalVertices)throw new Error('Aggregate vertex budget');}}
  syntax(output);const out=resolve(output);await safe(dirname(out));await mkdir(out);let written=0;const files:Record<string,{bytes:number;sha256:string}>={};
  async function write(name:string,value:unknown){tick();await safe(out);const body=Buffer.from(JSON.stringify(value)+'\n');written+=body.length;if(written>maxOutputBytes)throw new Error('Output budget');const h=await open(join(out,name),'wx');try{await h.writeFile(body);}finally{await h.close();}files[name]={bytes:body.length,sha256:digest(body)};}
  if(manifest.partitions){for(const [index,group] of groups.entries())await write(`boundaries-${index}.geojson`,{type:'FeatureCollection',features:group});}else await write('boundaries.geojson',normalized);
  await write('preparation.json',manifest.partitions?{schemaVersion:2,boundaries:groups.map((group,index)=>({input:{path:`boundaries-${index}.geojson`,...files[`boundaries-${index}.geojson`]},regionIds:group.filter(f=>!isUnresolved(f.properties)).map(f=>f.properties.regionId),unresolvedBoundaryIds:group.filter(f=>isUnresolved(f.properties)).map(f=>boundaryId(f.properties))})),extractions:[],intendedCells:[]}:{schemaVersion:1,boundaries:{input:{path:'boundaries.geojson',...files['boundaries.geojson']},idField:'regionId',mapping:Object.fromEntries(features.map(f=>[f.properties.regionId,f.properties]))},extractions:[],intendedCells:[]});
- await write('audit.json',{schemaVersion:1,profile:manifest.profile,synthetic,policy:synthetic?null:naturalEarthPolicy,inputs:manifest,provenance,crs,transformations,modifications:['Provider properties replaced by explicit RegionRef mapping; all geometry parts and holes retained',transformations.length?'Consecutive identical coordinate positions removed only at audited indices; raw pinned files retained':'All source coordinate positions preserved'],residuals:{unknownProviderMappings:residuals.length,unresolvedIdentities:residuals,coverage:'unknown',access:'unknown',limitations:['1:10m generalized de facto country boundaries','ADM1 beta; missing disputed/overseas/tiny states remain unknown','No extraction coverage or candidate access proof; unique strict interior membership required']}});
+ await write('audit.json',{schemaVersion:1,profile:manifest.profile,synthetic,policy:synthetic?null:naturalEarthPolicy,inputs:manifest,provenance,crs,transformations,modifications:['Provider properties replaced by explicit RegionRef mapping; all geometry parts and holes retained',transformations.length?'Only explicitly enabled audited geometry restructuring applied; directed edges retained by tangent-hole extraction with one added closure position; consecutive identical positions removed only at recorded indices; raw pinned files retained':'All source coordinate positions preserved'],residuals:{unknownProviderMappings:residuals.length,unresolvedIdentities:residuals,coverage:'unknown',access:'unknown',limitations:['1:10m generalized de facto country boundaries','ADM1 beta; missing disputed/overseas/tiny states remain unknown','No extraction coverage or candidate access proof; unique strict interior membership required']}});
  for(const snapshot of snapshots){const current=await read(snapshot.path,maxInputBytes,undefined,true);if(!current.equals(snapshot.body))throw new Error('Input mutation');}
  const completion={schemaVersion:1,profile:manifest.profile,synthetic,sourceFeatures:features.length,resolvedFeatures:features.length-residuals.length,unresolvedFeatures:residuals.length,files:{...files},vertices,originalVertices,comparisons:work};await write('complete.pending.json',completion);for(const snapshot of snapshots){const current=await read(snapshot.path,maxInputBytes,undefined,true);if(!current.equals(snapshot.body))throw new Error('Input mutation');}tick();await safe(out);await rename(join(out,'complete.pending.json'),join(out,'complete.json'));return completion;
 }

@@ -1,0 +1,405 @@
+{
+  "originalCount": 15,
+  "correctedCount": 17,
+  "evidence": [
+    {
+      "id": "EGY",
+      "point": [
+        35.525147000000004,
+        23.058811499999997
+      ],
+      "previousExpected": "outside",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 3.644392690488122e-15,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 765,
+        "a": [
+          35.621087,
+          23.139293
+        ],
+        "b": [
+          35.429207,
+          22.97833
+        ]
+      }
+    },
+    {
+      "id": "BRA-1294",
+      "point": [
+        -47.309315999999995,
+        -16.030003
+      ],
+      "previousExpected": "outside",
+      "source": "outside",
+      "ingested": "outside",
+      "prepared": "outside",
+      "nearest": {
+        "distance": 0.0017548932935912446,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 263,
+        "a": [
+          -47.302482,
+          -16.040054
+        ],
+        "b": [
+          -47.308683,
+          -16.02729
+        ]
+      }
+    },
+    {
+      "id": "USA",
+      "point": [
+        -171.090037,
+        63.603909
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 263,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -171.090037,
+          63.603909
+        ],
+        "b": [
+          -171.07079,
+          63.602484
+        ]
+      }
+    },
+    {
+      "id": "USA",
+      "point": [
+        -165.488718,
+        66.409003
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 339,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -165.488718,
+          66.409003
+        ],
+        "b": [
+          -165.489695,
+          66.408677
+        ]
+      }
+    },
+    {
+      "id": "USA",
+      "point": [
+        -165.342641,
+        66.436713
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 341,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -165.342641,
+          66.436713
+        ],
+        "b": [
+          -165.378367,
+          66.4289
+        ]
+      }
+    },
+    {
+      "id": "CAN",
+      "point": [
+        -74.712961,
+        44.999254
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 19599,
+        "a": [
+          -74.653066,
+          45.042548
+        ],
+        "b": [
+          -74.712961,
+          44.999254
+        ]
+      }
+    },
+    {
+      "id": "EGY",
+      "point": [
+        35.621087,
+        23.139293
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 764,
+        "a": [
+          35.57468,
+          23.212565
+        ],
+        "b": [
+          35.621087,
+          23.139293
+        ]
+      }
+    },
+    {
+      "id": "CHE-3423",
+      "point": [
+        7.384232,
+        47.413101
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 120,
+        "a": [
+          7.411207,
+          47.398296
+        ],
+        "b": [
+          7.384232,
+          47.413101
+        ]
+      }
+    },
+    {
+      "id": "USA-3563",
+      "point": [
+        -171.090037,
+        63.603909
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 148,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -171.090037,
+          63.603909
+        ],
+        "b": [
+          -171.07079,
+          63.602484
+        ]
+      }
+    },
+    {
+      "id": "USA-3563",
+      "point": [
+        -165.488718,
+        66.409003
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 176,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -165.488718,
+          66.409003
+        ],
+        "b": [
+          -165.489695,
+          66.408677
+        ]
+      }
+    },
+    {
+      "id": "USA-3563",
+      "point": [
+        -165.342641,
+        66.436713
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 178,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -165.342641,
+          66.436713
+        ],
+        "b": [
+          -165.378367,
+          66.4289
+        ]
+      }
+    },
+    {
+      "id": "USA-3552",
+      "point": [
+        -76.033103,
+        37.954671
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 5,
+        "ring": 0,
+        "segment": 10,
+        "a": [
+          -76.027453,
+          37.95079
+        ],
+        "b": [
+          -76.033103,
+          37.954671
+        ]
+      }
+    },
+    {
+      "id": "BMU-5137",
+      "point": [
+        -64.705381,
+        32.336059
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          -64.705381,
+          32.336059
+        ],
+        "b": [
+          -64.713132,
+          32.342648
+        ]
+      }
+    },
+    {
+      "id": "BRA-1294",
+      "point": [
+        -47.302482,
+        -16.040054
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 0,
+        "ring": 0,
+        "segment": 262,
+        "a": [
+          -47.27021,
+          -16.027135
+        ],
+        "b": [
+          -47.302482,
+          -16.040054
+        ]
+      }
+    },
+    {
+      "id": "ARE",
+      "point": [
+        56.263026,
+        25.249223
+      ],
+      "previousExpected": "boundary",
+      "source": "boundary",
+      "ingested": "boundary",
+      "prepared": "boundary",
+      "nearest": {
+        "distance": 0,
+        "polygon": 1,
+        "ring": 0,
+        "segment": 0,
+        "a": [
+          56.263026,
+          25.249223
+        ],
+        "b": [
+          56.259578,
+          25.275982
+        ]
+      }
+    },
+    {
+      "id": "EGY",
+      "point": [
+        35.428857470000004,
+        22.9768992
+      ],
+      "distance": 0.0008400742314311879,
+      "source": "outside",
+      "ingested": "outside",
+      "prepared": "outside",
+      "loopInside": 1
+    },
+    {
+      "id": "BRA-1294",
+      "point": [
+        -47.92674952,
+        -15.7659625
+      ],
+      "distance": 0.27516944479597844,
+      "source": "outside",
+      "ingested": "outside",
+      "prepared": "outside",
+      "loopInside": 1
+    }
+  ]
+}

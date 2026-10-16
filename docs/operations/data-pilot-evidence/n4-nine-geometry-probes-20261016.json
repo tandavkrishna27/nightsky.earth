@@ -1,0 +1,271 @@
+{
+  "probes": [
+    {
+      "id": "EGY",
+      "point": [
+        35.525147000000004,
+        23.058811499999997
+      ],
+      "expected": "boundary",
+      "basis": "corrected oracle: source and serialized conservative boundary predicate agree; see v2 evidence"
+    },
+    {
+      "id": "BRA-1294",
+      "point": [
+        -47.309315999999995,
+        -16.030003
+      ],
+      "expected": "outside",
+      "basis": "inward loop parity"
+    },
+    {
+      "id": "USA",
+      "point": [
+        -171.090037,
+        63.603909
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "USA",
+      "point": [
+        -165.488718,
+        66.409003
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "USA",
+      "point": [
+        -165.342641,
+        66.436713
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "CAN",
+      "point": [
+        -74.712961,
+        44.999254
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "EGY",
+      "point": [
+        35.621087,
+        23.139293
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "CHE-3423",
+      "point": [
+        7.384232,
+        47.413101
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "USA-3563",
+      "point": [
+        -171.090037,
+        63.603909
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "USA-3563",
+      "point": [
+        -165.488718,
+        66.409003
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "USA-3563",
+      "point": [
+        -165.342641,
+        66.436713
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "USA-3552",
+      "point": [
+        -76.033103,
+        37.954671
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "BMU-5137",
+      "point": [
+        -64.705381,
+        32.336059
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "BRA-1294",
+      "point": [
+        -47.302482,
+        -16.040054
+      ],
+      "expected": "boundary",
+      "basis": "exact shared vertex"
+    },
+    {
+      "id": "ARE",
+      "point": [
+        56.263026,
+        25.249223
+      ],
+      "expected": "boundary",
+      "basis": "island vertex, inside enclosing shell and hole"
+    },
+    {
+      "id": "EGY",
+      "point": [
+        35.428857470000004,
+        22.9768992
+      ],
+      "expected": "outside",
+      "basis": "strict extracted-hole interior; conservative loop inside=1; min edge distance 0.0008400742314311879 degrees"
+    },
+    {
+      "id": "BRA-1294",
+      "point": [
+        -47.92674952,
+        -15.7659625
+      ],
+      "expected": "outside",
+      "basis": "strict extracted-hole interior; conservative loop inside=1; min edge distance 0.27516944479597844 degrees"
+    }
+  ],
+  "areIsland": [
+    [
+      [
+        56.263026,
+        25.249223
+      ],
+      [
+        56.259578,
+        25.275982
+      ],
+      [
+        56.265075,
+        25.281175
+      ],
+      [
+        56.273812,
+        25.281289
+      ],
+      [
+        56.288328,
+        25.271926
+      ],
+      [
+        56.282979,
+        25.255476
+      ],
+      [
+        56.263026,
+        25.249223
+      ]
+    ]
+  ],
+  "areEnclosingHole": [
+    [
+      56.260625,
+      25.331075
+    ],
+    [
+      56.233625,
+      25.312526
+    ],
+    [
+      56.235668,
+      25.296287
+    ],
+    [
+      56.23888,
+      25.286247
+    ],
+    [
+      56.244887,
+      25.277988
+    ],
+    [
+      56.235126,
+      25.267476
+    ],
+    [
+      56.208375,
+      25.255374
+    ],
+    [
+      56.206123,
+      25.230596
+    ],
+    [
+      56.207625,
+      25.220835
+    ],
+    [
+      56.219958,
+      25.215258
+    ],
+    [
+      56.235771,
+      25.211175
+    ],
+    [
+      56.252204,
+      25.217635
+    ],
+    [
+      56.281763,
+      25.23691
+    ],
+    [
+      56.29315,
+      25.245846
+    ],
+    [
+      56.316426,
+      25.253355
+    ],
+    [
+      56.344375,
+      25.266528
+    ],
+    [
+      56.349123,
+      25.294025
+    ],
+    [
+      56.309369,
+      25.301328
+    ],
+    [
+      56.290688,
+      25.327543
+    ],
+    [
+      56.260625,
+      25.331075
+    ]
+  ]
+}
