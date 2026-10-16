@@ -91,7 +91,8 @@ test("listsV1UnsupportedEventClasses", async () => {
   assert.ok(!result.unsupportedEventTypes.includes("planetary-conjunction"));
   assert.ok(!result.unsupportedEventTypes.includes("opposition"));
   assert.ok(result.events.some(event => event.eventType === "opposition"));
-  assert.match(result.caveats.join(" "), /Apparent planet-pair conjunctions.*unsupported/);
+  assert.equal(result.planetPairCoverage?.completeness,"not-certified");
+  assert.match(result.caveats.join(" "), /closest approach.*unsupported/i);
   assert.ok(result.unsupportedEventTypes.includes("comet"));
 });
 
@@ -130,4 +131,41 @@ test("default discovery includes greatest elongations and the final sorted resul
   assert.equal(withAlignments.availability.status, "partial");
   assert.match(withAlignments.caveats.join(" "), /heliocentric/);
   assert.match(withAlignments.caveats.join(" "), /3D/);
+});
+
+test("pair conjunction coverage is partial even when empty and keeps legacy horizons and unsupported classes separate", async () => {
+  const query = (startUtc:string,endUtc:string,eventTypes?:string[],limit=25)=>searchSkyEvents({placeId:place(1).placeId,window:window(startUtc,endUtc,"Asia/Kolkata"),eventTypes,limit},index);
+  const empty=await query("2026-06-09T00:00:00Z","2026-06-09T00:00:01Z",["planetary-conjunction"]);
+  assert.equal(empty.planetPairCoverage?.status,"partial");
+  assert.equal(empty.planetPairCoverage?.completeness,"not-certified");
+  assert.equal(empty.planetPairCoverage?.pairCount,21);
+  assert.equal(empty.availability.status,"partial");
+  assert.equal(empty.events.length,0);
+  for(const year of [2025,2027]) {
+    const boundary=await query(`${year}-01-01T00:00:00Z`,`${year}-01-02T00:00:00Z`,["planetary-conjunction"]);
+    assert.equal(boundary.planetPairCoverage?.status,"partial");
+  }
+  const legacy=await query("2024-06-01T00:00:00Z","2024-07-01T00:00:00Z",["planetary-conjunction"]);
+  assert.equal(legacy.planetPairCoverage?.status,"out-of-horizon");
+  assert.equal(legacy.availability.status,"partial");
+  assert.ok(legacy.events.some(row=>row.eventType==="planetary-conjunction"&&!row.pairConjunction));
+  assert.ok(legacy.events.every(row=>!row.pairConjunction));
+  assert.equal((await query("2026-06-08T00:00:00Z","2026-06-11T00:00:00Z",["moon-phase"])).planetPairCoverage,undefined);
+  const discovery=await query("2026-06-08T00:00:00Z","2026-06-11T00:00:00Z");
+  assert.ok(discovery.events.some(row=>row.pairConjunction));
+  const mixed=await query("2028-01-01T00:00:00Z","2028-02-01T00:00:00Z",["planetary-conjunction","moon-phase","comet"]);
+  assert.deepEqual(mixed.unsupportedEventTypes,["comet"]);
+  assert.equal(mixed.planetPairCoverage?.status,"out-of-horizon");
+  assert.ok(mixed.events.some(row=>row.eventType==="moon-phase"));
+  assert.ok(mixed.events.every(row=>!row.pairConjunction));
+  const annual=await query("2026-01-01T00:00:00Z","2026-12-31T23:59:59Z",["planetary-conjunction"]);
+  const limited=await query("2026-01-01T00:00:00Z","2026-12-31T23:59:59Z",["planetary-conjunction"],2);
+  assert.equal(annual.events.length,25);
+  assert.deepEqual(limited.events,annual.events.slice(0,2));
+  assert.match(limited.availability.reason,/truncated/);
+  assert.doesNotMatch(limited.caveats.join(" "),/complete list/i);
+  assert.ok(annual.events.every((row,i)=>i===0||row.peakUtc!>=annual.events[i-1]!.peakUtc!));
+  assert.ok(annual.planetPairCoverage!.unresolved.length<=256);
+  assert.equal(skyEventsResultSchema.safeParse({...annual,planetPairCoverage:{...annual.planetPairCoverage,status:"available"}}).success,false);
+  assert.equal(skyEventsResultSchema.safeParse({...annual,planetPairCoverage:{...annual.planetPairCoverage,completeness:"certified"}}).success,false);
 });
