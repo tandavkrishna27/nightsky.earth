@@ -54,6 +54,7 @@ def budget(root):
         total += entry.stat().st_size
     if total > TREE_LIMIT:
         raise ValueError('Output budget exceeded')
+    return total
 
 def save(root, state):
     target = owned(root,'checkpoint.json'); temp = owned(root,'checkpoint.pending')
@@ -94,6 +95,7 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, co
     The separately gated adapter supplies the reviewed CDS wire implementation.
     """
     # Contract changes identity only; resource and state protections stay fixed.
+    attempt_began = time.monotonic()
     contract_identity = identity() if contract is None else contract.identity()
     contract_plan = plan() if contract is None else contract.plan()
     if deadline_cap is not None and (type(deadline_cap) not in (int,float) or
@@ -155,6 +157,10 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, co
             if status=='failed': state['phase']='remote-failed'; save(root,state); raise ValueError('Remote failed')
             state['phase']=status; save(root,state)
             if status=='successful': break
+        state['timings'] = dict(scope='current-attempt',
+                                submitToReadySeconds=round(time.monotonic()-attempt_began, 6))
+        save(root,state)
+        transfer_began = time.monotonic()
         url=asset_url(transport.asset(state['jobId'],timeout=remaining()),transport.asset_hosts)
         state['phase']='download-uncertain'; save(root,state)
         response=transport.open_asset(url,timeout=remaining(),authenticated=False,redirects=False)
@@ -173,6 +179,7 @@ def _run(root, transport, *, clock=time.time, sleep=time.sleep, resume=False, co
             if not size or (length is not None and int(length)!=size): raise ValueError('Incomplete asset')
             if hashlib.sha256(path.read_bytes()).hexdigest()!=digest.hexdigest(): raise ValueError('Asset mutated')
             state.update(phase='downloaded-unvalidated',rawBytes=size,rawSha256=digest.hexdigest())
+            state['timings']['transferSeconds'] = round(time.monotonic()-transfer_began, 6)
             save(root,state)
             return state
         finally: response.close()

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "scope": "retained subset only; no worldwide admission",
+  "date": "2026-10-16",
+  "job": ".data/supervised-membership-assembly-20261016-v3",
+  "producer": ".data/osm/retained-geography-20261015-v3-job/normalized",
+  "candidateCount": 84,
+  "boundaryFeatures": 4854,
+  "countryCounts": {
+    "unknown": 28,
+    "FRO": 46,
+    "MCO": 9,
+    "FRA": 1
+  },
+  "candidateFactsPreserved": true,
+  "allRawFilePinsVerified": true,
+  "allAccessUnknown": true,
+  "sourceCoverage": "unknown; footprint stream empty",
+  "report": {
+    "elapsedSeconds": 31.573,
+    "enforcement": "Windows Job hard tree commit and active-process ceiling; sampled main RSS/disk/reserve at 20ms; shared deadline for all stages",
+    "limits": {
+      "commitBytes": 2147483648,
+      "diskBytes": 402653184,
+      "freeBytes": 1073741824,
+      "maxProcesses": 3,
+      "rssBytes": 2147483648,
+      "wallSeconds": 300
+    },
+    "peakLogicalBytes": 277175007,
+    "peakRssBytes": 902082560,
+    "platform": "win32",
+    "reason": null,
+    "stages": [
+      {
+        "elapsedSeconds": 31.225,
+        "exitCode": 0,
+        "stage": 0
+      }
+    ],
+    "status": "complete"
+  },
+  "catalogue": {
+    "path": ".data/supervised-membership-assembly-20261016-v3/catalogue/catalogue-79b546e599de169714f9134ac55ada0070925de1cb72c8736f854b3e47e8297f.json",
+    "sha256": "79b546e599de169714f9134ac55ada0070925de1cb72c8736f854b3e47e8297f",
+    "root": {
+      "schemaVersion": 2,
+      "catalogueRevision": "osm-9ab73d8f11ed317af0a1128a34f7d910877ab5fb7cd8050487f901e0c1f0654e",
+      "trees": {
+        "spatial": {
+          "path": "pages/e49698dda89d1b4bd9b66f75f7f80951ba682f0f95daab8d2a17971ac9921a78.json",
+          "sha256": "e49698dda89d1b4bd9b66f75f7f80951ba682f0f95daab8d2a17971ac9921a78",
+          "bytes": 71391,
+          "rows": 84,
+          "kind": "candidates",
+          "bounds": {
+            "south": 43.731293,
+            "north": 62.335955,
+            "west": -7.682903,
+            "east": 7.436282
+          }
+        },
+        "id": {
+          "path": "pages/0ee925140e8958ae1889ca5c3eb7be21e1f63e7371e1d106482b33af11484333.json",
+          "sha256": "0ee925140e8958ae1889ca5c3eb7be21e1f63e7371e1d106482b33af11484333",
+          "bytes": 28016,
+          "rows": 84,
+          "kind": "ids",
+          "minKey": "place:v1:osm:node:10173929017",
+          "maxKey": "place:v1:osm:way:857881140"
+        },
+        "name": {
+          "path": "pages/9b6b28660724597cf5e0051bc995bc19613d691a06a0bac15e4c0a2b1a3029aa.json",
+          "sha256": "9b6b28660724597cf5e0051bc995bc19613d691a06a0bac15e4c0a2b1a3029aa",
+          "bytes": 7056,
+          "rows": 84,
+          "kind": "names",
+          "minKey": "airplane watching",
+          "maxKey": "\u00f3nav\u00edksm\u00f8l"
+        },
+        "membership": {
+          "path": "pages/729d957488fd32547b7874073fac34f133ec6249dfc52f10b228c54b74a6738c.json",
+          "sha256": "729d957488fd32547b7874073fac34f133ec6249dfc52f10b228c54b74a6738c",
+          "bytes": 41651,
+          "rows": 112,
+          "kind": "memberships",
+          "minKey": "region:v1:ne-0-465241",
+          "maxKey": "region:v1:ne-1-4d434f2b30303f"
+        },
+        "regions": {
+          "path": "pages/1d0ed5119b05142ca54ea7b586d13f7d14207f632e842bcc2ed357d1a63b1f67.json",
+          "sha256": "1d0ed5119b05142ca54ea7b586d13f7d14207f632e842bcc2ed357d1a63b1f67",
+          "bytes": 1590,
+          "rows": 5,
+          "kind": "directory",
+          "minKey": "region:v1:ne-0-414257",
+          "maxKey": "region:v1:ne-1-5a57452d353333"
+        },
+        "footprints": {
+          "path": "pages/e4be049816c08dee5aa8668cf42f81f9dda3daa383c19032edc3b87149431957.json",
+          "sha256": "e4be049816c08dee5aa8668cf42f81f9dda3daa383c19032edc3b87149431957",
+          "bytes": 143,
+          "rows": 0,
+          "kind": "directory"
+        }
+      }
+    },
+    "stats": {
+      "inputRows": 84,
+      "metadataRows": 4784,
+      "inputBytes": 4056756,
+      "scratchBytes": 7372930,
+      "outputBytes": 3688899,
+      "maxBufferedRows": 1000,
+      "maxOpenSortReaders": 5,
+      "mergeLevels": 1,
+      "pages": 11
+    }
+  },
+  "planSha256": "02ff1b21da97ac7aef8ffb5cd3e40aac0c26a7bd0bb803b272b74b40b2b5b64f",
+  "producerDescriptorSha256": "d2f0f32ec560db22f2495da8825d084160ab646b9720e7b204d699bda4e49d3c"
+}

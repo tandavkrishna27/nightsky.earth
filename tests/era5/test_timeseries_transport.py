@@ -11,6 +11,7 @@ class Tests(unittest.TestCase):
         import timeseries_executor as s
         class Response:
             status_code=202
+            headers={}
             def iter_content(self, size): yield json.dumps({'links':[{'rel':'monitor','href':t.BASE+'/jobs/job-1'}]}).encode()
             def close(self): pass
         class Session:

@@ -121,6 +121,8 @@ test("astronomy MCP tools return schema-valid structured calculations", async ()
     const reviewedPeak = events.payload.result.structuredContent.events.find((event: { name: string }) => event.name === "October Draconids");
     assert.equal(reviewedPeak?.peakUtc, "2026-10-09T02:10:00Z");
     assert.equal(reviewedPeak?.activityCalendarDateWindow, undefined);
+    assert.deepEqual(events.payload.result.structuredContent.meteorCalendarGuidance.entries.map((row: { sourceWording: string }) => row.sourceWording), ["early May", "late October"]);
+    assert.equal(events.payload.result.structuredContent.meteorCalendarGuidance.entries[1].requestedWindowOverlap, "not-evaluated");
     const weather = await post(base, { jsonrpc: "2.0", id: 5, method: "tools/call", params: { name: "get_night_conditions", arguments: args } });
     assert.equal(weather.payload.result.structuredContent.availability.status, "available");
     assert.equal(weather.payload.result.structuredContent.nightContext.moonIlluminationPercent >= 0, true);

@@ -30,10 +30,25 @@ export const meteorTypicalSeasonSchema = z.strictObject({
   caveat: z.string().trim().min(1).max(500), source: sourceRecordSchema,
 }).refine(row => row.solarLongitudeEndDeg >= row.solarLongitudeStartDeg, "Source longitude interval must be ordered.");
 export type MeteorTypicalSeason = z.infer<typeof meteorTypicalSeasonSchema>;
+// Published verbal recurrence is reference guidance, never a dated SkyEvent.
+export const meteorCalendarGuidanceSchema = z.strictObject({
+  availability: z.strictObject({ status: z.literal("partial"), reason: z.string().trim().min(1).max(500) }),
+  entries: z.array(z.strictObject({
+    code: z.enum(["ETA", "ORI"]), name: z.string().trim().min(1).max(100),
+    evidenceKind: z.literal("approximate-calendar-guidance"),
+    sourceWording: z.string().trim().min(1).max(100),
+    precision: z.literal("verbal-period"), recurrenceBasis: z.literal("typical-annual"),
+    requestedWindowOverlap: z.literal("not-evaluated"),
+    sourceLocator: z.string().trim().min(1).max(200),
+    caveat: z.string().trim().min(1).max(500), source: sourceRecordSchema,
+  })).max(2).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate calendar guidance code."),
+});
+export type MeteorCalendarGuidance = z.infer<typeof meteorCalendarGuidanceSchema>;
 export const skyEventsResultSchema = resultSchema({
   placeId: placeIdSchema,
   window: timeWindowSchema,
   events: z.array(skyEventSchema).max(MAX_EVENT_RESULTS),
+  meteorCalendarGuidance: meteorCalendarGuidanceSchema.optional(),
   meteorTypicalSeasons: z.array(meteorTypicalSeasonSchema).max(2).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate typical season code.").optional(),
   unsupportedEventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "equinox-solstice", "moon-phase", "comet", "other"])).max(9),
 });

@@ -27,7 +27,8 @@
     "scripts/osm/prepare-geographic-coverage.ts",
     "scripts/validate-retained-source-adapters.ts",
     "scripts/osm/source-admission.ts",
-    "scripts/osm/natural-earth-ingest.ts"
+    "scripts/osm/natural-earth-ingest.ts",
+    "scripts/osm/membership-assembly.ts"
   ],
   "exclude": [
     "node_modules",

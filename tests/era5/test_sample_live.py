@@ -151,6 +151,123 @@ class LivePreparation(unittest.TestCase):
             result = live.decode(directory, state)
             self.assertEqual(result['phase'], 'validated-sample-only')
             self.assertEqual(result['validation']['scalarCellHours'], 96)
+            self.assertIn('decodeMetrics', result, 'missing bounded decoder measurements')
+            self.assertGreaterEqual(result['decodeMetrics']['elapsedSeconds'], 0)
+            self.assertGreater(result['decodeMetrics']['peakRssBytes'], 0)
 
+
+
+class HeaderBounds(unittest.TestCase):
+    def test_metadata_oversize_headers_stop_before_body_read(self):
+        adapter = LivePreparation().adapter()
+        response = Response(b'{}')
+        response.headers = {'X-Oversize': 'x' * 65536}
+        adapter.api.responses = [response]
+        with self.assertRaises(ValueError):
+            adapter.status('abc', 3)
+        self.assertTrue(response.closed)
+
+    def test_asset_oversize_headers_stop_before_body_read(self):
+        adapter = LivePreparation().adapter(); adapter.asset_size = 1
+        response = Response(b'x')
+        response.headers = {'X-Oversize': 'x' * 65536}
+        adapter.download.responses = [response]
+        with self.assertRaises(ValueError):
+            adapter.open_asset('https://cds.climate.copernicus.eu/raw', 3)
+        self.assertTrue(response.closed)
+
+class TransferEncodingBounds(unittest.TestCase):
+    def test_encoded_asset_is_closed_before_decompression(self):
+        adapter = LivePreparation().adapter(); adapter.asset_size = 1
+        response = Response(b'x'); response.headers = {'Content-Encoding': 'gzip'}
+        adapter.download.responses = [response]
+        with self.assertRaises(ValueError):
+            adapter.open_asset('https://cds.climate.copernicus.eu/raw', 3)
+        self.assertTrue(response.closed)
+
+class AdditionalHeaderBounds(unittest.TestCase):
+    def test_many_small_headers_are_rejected(self):
+        adapter = LivePreparation().adapter()
+        response = Response(b'{}'); response.headers = {f'X-{n}': 'a' for n in range(65)}
+        adapter.api.responses = [response]
+        with self.assertRaises(ValueError): adapter.status('abc', 3)
+        self.assertTrue(response.closed)
+
+    def test_unencoded_small_metadata_still_parses(self):
+        adapter = LivePreparation().adapter()
+        response = Response(b'{"status":"running"}')
+        response.headers = {'Content-Encoding': 'identity', 'Content-Length': '20'}
+        adapter.api.responses = [response]
+        self.assertEqual(adapter.status('abc', 3), 'running')
+
+class ScratchEnvironment(unittest.TestCase):
+    def test_decoder_temp_is_owned_and_credentials_removed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.dict(live.os.environ, {'TEMP': 'outside', 'TMP': 'outside', 'CDSAPI_KEY': 'fixture-secret'}):
+                self.assertTrue(hasattr(live, 'worker_environment'), 'bounded worker environment missing')
+                env = live.worker_environment(directory, decoding=True)
+            self.assertEqual(env['TEMP'], str(Path(directory).absolute()))
+            self.assertEqual(env['TMP'], str(Path(directory).absolute()))
+            self.assertNotIn('CDSAPI_KEY', env)
+            self.assertEqual(env['OPENBLAS_NUM_THREADS'], '1')
+
+    def test_aliased_temp_root_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertTrue(hasattr(live, 'worker_environment'), 'bounded worker environment missing')
+            # Use a real Windows junction; directory symlinks require privileges.
+            import subprocess
+            target = Path(directory) / 'target'; target.mkdir()
+            alias = Path(directory) / 'alias'
+            if live.os.name == 'nt':
+                result = subprocess.run(['cmd', '/c', 'mklink', '/J', str(alias), str(target)], capture_output=True)
+                if result.returncode: self.skipTest('junction creation unavailable')
+            else: alias.symlink_to(target, target_is_directory=True)
+            try:
+                with self.assertRaises(ValueError): live.worker_environment(alias, decoding=True)
+            finally:
+                if live.os.name == 'nt': alias.rmdir()
+                else: alias.unlink()
+
+class ParentStorageBound(unittest.TestCase):
+    @unittest.skipUnless(live.os.name == 'nt', 'Windows Job containment')
+    def test_parent_kills_scratch_writer_and_preserves_failure_bytes(self):
+        import argparse
+        real_popen = live.subprocess.Popen
+        children = []
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'output'; output.mkdir()
+            fixture = ('import os,time; from pathlib import Path; '
+                       'Path(os.environ["TEMP"],"scratch.bin").write_bytes(b"x"*2048); time.sleep(5)')
+            def spawn(command, **kwargs):
+                child = real_popen([sys._base_executable, '-c', fixture], **kwargs)
+                children.append(child); return child
+            args = argparse.Namespace(output=str(output), resume=False)
+            with patch.object(live.subprocess, 'Popen', side_effect=spawn), patch.object(core, 'TREE_LIMIT', 1024):
+                with self.assertRaisesRegex(ValueError, 'Output budget exceeded'):
+                    live.supervise(args)
+            self.assertIsNotNone(children[0].poll())
+            self.assertEqual((output / 'scratch.bin').stat().st_size, 2048)
+
+class MeasurementReceipt(unittest.TestCase):
+    @unittest.skipUnless(live.os.name == 'nt', 'Windows Job containment')
+    def test_supervisor_retains_sanitized_metrics_for_local_worker(self):
+        import argparse
+        real_popen = live.subprocess.Popen
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'output'; output.mkdir()
+            fixture = ('import os,time; from pathlib import Path; '
+                       'Path(os.environ["TEMP"],"scratch.bin").write_bytes(b"x"*2048); time.sleep(.15)')
+            def spawn(command, **kwargs):
+                return real_popen([sys._base_executable, '-c', fixture], **kwargs)
+            with patch.object(live.subprocess, 'Popen', side_effect=spawn):
+                live.supervise(argparse.Namespace(output=str(output), resume=False))
+            receipt = output / 'benchmark-metrics.json'
+            self.assertTrue(receipt.exists(), 'missing benchmark measurement receipt')
+            metrics = json.loads(receipt.read_text())
+            self.assertGreater(metrics['elapsedSeconds'], 0)
+            self.assertGreater(metrics['peakMainRssBytes'], 0)
+            self.assertGreaterEqual(metrics['peakOutputAndScratchBytes'], 2048)
+            self.assertEqual(metrics['status'], 'completed')
+            self.assertNotIn('CDSAPI_KEY', receipt.read_text())
 
 if __name__ == '__main__': unittest.main()

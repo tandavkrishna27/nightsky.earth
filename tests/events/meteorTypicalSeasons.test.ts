@@ -51,7 +51,32 @@ test("composed plan retains reference metadata without turning it into occurrenc
  const window={startUtc:"2027-01-02T00:00:00Z",endUtc:"2027-01-02T06:00:00Z",timeZone:"Asia/Kolkata"};
  const result=await planObservingSession({placeId:"place:v1:geonames:1",activity:"meteor-shower",target:"ORI",window},{index,getAstronomy:unavailable,getNightConditions:unavailable,getTargetVisibility:unavailable,getLocationContext:unavailable,searchEvents:(placeId,requested)=>searchSkyEvents({placeId,window:requested,eventTypes:["meteor-shower"]},index)});
  assert.equal(result.evidence?.events?.meteorTypicalSeasons?.length,2);
+ assert.equal(result.evidence?.events?.meteorCalendarGuidance?.entries[1]?.sourceWording,"late October");
  assert.deepEqual(result.evidence?.events?.events,[]);
  assert.match(result.evidence?.events?.caveats.join(" ")??"",/overlap.*not evaluated/i);
  assert.ok(result.evidence?.meteorRadiantSamples?.every(row=>row.status!=="available"));
+});
+
+test("approximate calendar survives discovery without inventing annual dates or overlap", async () => {
+ const result = await query();
+ const guidance = (result as any).meteorCalendarGuidance;
+ assert.ok(guidance, "Approximate calendar guidance is missing");
+ assert.equal(guidance.availability.status, "partial");
+ assert.match(guidance.availability.reason, /other showers.*unavailable/i);
+ assert.deepEqual(guidance.entries.map((row:any)=>[row.code,row.sourceWording]), [["ETA","early May"],["ORI","late October"]]);
+ for (const row of guidance.entries) {
+  assert.equal(row.precision,"verbal-period");
+  assert.equal(row.recurrenceBasis,"typical-annual");
+  assert.equal(row.requestedWindowOverlap,"not-evaluated");
+  assert.equal(row.sourceLocator,"Section 1, introduction, page 1");
+  assert.equal(row.source.licenseUrl,"https://creativecommons.org/licenses/by/4.0/");
+  assert.equal(row.peakUtc,undefined);
+  for(const patch of [{peakUtc:"2028-05-05T00:00:00Z"},{precision:"day"},{requestedWindowOverlap:"overlaps"},{source:undefined}]) {
+   assert.equal(skyEventsResultSchema.safeParse({...result, meteorCalendarGuidance:{...guidance,entries:[{...row,...patch}]}}).success,false);
+  }
+ }
+ assert.deepEqual(result.events,[]);
+ assert.equal(skyEventsResultSchema.safeParse({...result,meteorCalendarGuidance:undefined}).success,true);
+ assert.equal(skyEventsResultSchema.safeParse({...result,meteorCalendarGuidance:{...guidance,entries:[guidance.entries[0],guidance.entries[0]]}}).success,false);
+ assert.equal((await query(["moon-phase"]) as any).meteorCalendarGuidance,undefined);
 });

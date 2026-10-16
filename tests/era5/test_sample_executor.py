@@ -94,4 +94,16 @@ class Tests(unittest.TestCase):
         self.assertTrue(v.validate_records([header,*rows])['accepted'])
         header['experimentVersions']=['5']
         with self.assertRaises(ValueError): v.validate_records([header,*rows])
-if __name__=='__main__': unittest.main()
+
+class PhaseMeasurements(unittest.TestCase):
+    def test_successful_fixture_records_separate_attempt_durations(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(s.time, 'monotonic', side_effect=[100, 105, 106, 110]):
+                result = s.run_fixture(directory, Transport())
+            self.assertIn('timings', result, 'missing benchmark phase timings')
+            self.assertEqual(result['timings']['submitToReadySeconds'], 5)
+            self.assertEqual(result['timings']['transferSeconds'], 4)
+            self.assertEqual(result['timings']['scope'], 'current-attempt')
+
+if __name__ == '__main__': unittest.main()

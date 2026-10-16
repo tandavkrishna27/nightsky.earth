@@ -2,6 +2,8 @@
 
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
+**Supervised assembly and guidance, 16 October:** [delivery](assembly-guidance-delivery.md) connects the existing geography stages under containment, prepares a measured single-job weather packet with offline protections, and adds two source-backed approximate annual meteor descriptions to MCP/planner output. Actual global sources/history/science gates remain open; original 12/9/6 unchanged. No downloads or deployment.
+
 **Production source research, 16 October:** [decisions and sequence](production-source-research-decision.md) compare global geography routes, narrow the historical provenance question using current provider documentation, and propose approximate meteor guidance separately from precise events. Documentation only; no new runtime coverage or acquisition. Original 12/9/6 unchanged.
 
 **G3/H2/E2 retained integration, 16 October:** [delivery](g3-h2-e2-retained-delivery.md) joins 84 actual candidates against all 4,854 prepared boundaries and builds the catalogue in 10.064 seconds, preserves ERA5 quarantine after provenance review, and binds meteor peak loading to reviewed source identities. Local 890 tests pass, one existing skip; types and eight review cases pass. Global production inputs, historical scientific admission and event source gaps remain open. Original 12/9/6 counts unchanged; no downloads or deployment.

@@ -19,6 +19,19 @@ BASE = 'https://cds.climate.copernicus.eu/api/retrieve/v1'
 # No retained evidence establishes cache host names. Any such response stops
 # before fetch; widening this immutable set requires a reviewed source change.
 ASSET_HOSTS = frozenset({'cds.climate.copernicus.eu'})
+HEADER_LIMIT = 65536
+HEADER_COUNT = 64
+
+
+def bounded_headers(response):
+    """Post-parse admission bound; parser allocations remain Job-contained."""
+    if len(response.headers) > HEADER_COUNT or sum(
+            len(str(k).encode('utf-8')) + len(str(v).encode('utf-8')) + 4
+            for k, v in response.headers.items()) > HEADER_LIMIT:
+        raise ValueError('Response header bound exceeded')
+    # Refuse requests' transparent decompression before iter_content.
+    if response.headers.get('Content-Encoding', 'identity').lower() != 'identity':
+        raise ValueError('Encoded HTTP body rejected')
 
 
 class Adapter:
@@ -54,6 +67,7 @@ class Adapter:
             emit('request')
             response = self.api.request(method, BASE + path, timeout=(min(5, timeout), timeout),
                                         allow_redirects=False, stream=True, **kwargs)
+            bounded_headers(response)
             emit('response')
             if response.status_code not in (200, 201, 202):
                 failure = 'http-status'
@@ -118,6 +132,11 @@ class Adapter:
                                          stream=True, allow_redirects=False)
         except Exception:
             raise ValueError('Asset transport failed') from None
+        try:
+            bounded_headers(response)
+        except Exception:
+            response.close()
+            raise
         expected = self.asset_size
         deadline = time.monotonic() + timeout
 
@@ -148,6 +167,20 @@ def canonical_output(output):
     root = Path(output).absolute()
     core.owned(root, 'checkpoint.json')
     return str(root.resolve())
+
+
+def worker_environment(output, *, decoding=False):
+    """Keep library scratch inside the flat, sampled output budget."""
+    root = canonical_output(output)
+    environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1', TEMP=root, TMP=root,
+                       TMPDIR=root, SQLITE_TMPDIR=root)
+    environment['PYTHONPATH'] = os.pathsep.join([str(Path(__file__).resolve().parent),
+                                               str(Path(sys.prefix) / 'Lib' / 'site-packages')])
+    if decoding:
+        environment.update(OPENBLAS_NUM_THREADS='1', OMP_NUM_THREADS='1',
+                           MKL_NUM_THREADS='1', NUMEXPR_NUM_THREADS='1')
+        environment.pop('CDSAPI_KEY', None)
+    return environment
 
 
 def authorize(path, output):
@@ -186,13 +219,12 @@ def decode(root, state):
     if os.name != 'nt':
         raise ValueError('Windows Job containment required; raw remains unaccepted')
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'osm'))
-    from global_source_supervisor import WindowsJob
+    from global_source_supervisor import WindowsJob, rss_bytes
+    began = time.monotonic()
+    peak_rss = 0
     root = Path(root)
     output = core.owned(root, 'validation.json')
-    environment = dict(os.environ, OPENBLAS_NUM_THREADS='1', OMP_NUM_THREADS='1',
-                       MKL_NUM_THREADS='1', NUMEXPR_NUM_THREADS='1', PYTHONDONTWRITEBYTECODE='1')
-    environment['PYTHONPATH'] = os.environ.get('PYTHONPATH', str(Path(sys.prefix) / 'Lib' / 'site-packages'))
-    environment.pop('CDSAPI_KEY', None)
+    environment = worker_environment(root, decoding=True)
     job = WindowsJob(256 * 1024**2, 1)
     child = None
     deadline = min(state['deadline'], time.time() + 60)
@@ -204,6 +236,7 @@ def decode(root, state):
                                      stderr=subprocess.DEVNULL, env=environment, creationflags=4)
             job.assign_resume(child)
             while child.poll() is None:
+                peak_rss = max(peak_rss, rss_bytes(child))
                 if time.time() >= deadline or output.stat().st_size > 4096:
                     raise ValueError('Decoder bound exceeded; raw remains unaccepted')
                 core.budget(root)
@@ -215,6 +248,8 @@ def decode(root, state):
                           member=0,expver='0001',sourceSha256=state['rawSha256']):
             raise ValueError('Decoder receipt rejected')
         state.update(phase='validated-sample-only', validation=result)
+        state['decodeMetrics'] = dict(elapsedSeconds=round(time.monotonic()-began, 6),
+                                      peakRssBytes=peak_rss, samplingIntervalSeconds=.02)
         core.save(root, state)
         return state
     finally:
@@ -252,16 +287,18 @@ def supervise(args):
     if os.name != 'nt':
         raise ValueError('Windows Job containment required before credential access')
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'osm'))
-    from global_source_supervisor import WindowsJob
+    from global_source_supervisor import WindowsJob, rss_bytes
+    began = time.monotonic()
+    monotonic_deadline = began + core.SECONDS
+    peak_rss = peak_bytes = 0
+    status = 'stopped'
     deadline = time.time() + core.SECONDS
     checkpoint = Path(args.output) / 'checkpoint.json'
     if args.resume and checkpoint.exists():
         deadline = min(deadline, json.loads(checkpoint.read_text())['deadline'])
     if deadline <= time.time():
         raise ValueError('Original deadline exceeded')
-    environment = dict(os.environ, PYTHONDONTWRITEBYTECODE='1')
-    environment['PYTHONPATH'] = os.pathsep.join([str(Path(__file__).resolve().parent),
-                                               str(Path(sys.prefix) / 'Lib' / 'site-packages')])
+    environment = worker_environment(args.output)
     worker = ('import argparse,json,sample_live; '
               'sample_live.execute(argparse.Namespace(**json.loads(__import__("sys").argv[1])))')
     job = WindowsJob(512 * 1024**2, 2)
@@ -272,11 +309,17 @@ def supervise(args):
                                  env=environment, creationflags=4)
         job.assign_resume(child)
         while child.poll() is None:
-            if time.time() >= deadline:
+            if time.time() >= deadline or time.monotonic() >= monotonic_deadline:
                 raise ValueError('Whole execution deadline exceeded; reconcile checkpoint')
+            peak_rss = max(peak_rss, rss_bytes(child))
+            if Path(args.output).exists():
+                peak_bytes = max(peak_bytes, core.budget(args.output))
             time.sleep(.02)
+        if Path(args.output).exists():
+            peak_bytes = max(peak_bytes, core.budget(args.output))
         if child.returncode:
             raise ValueError('Execution stopped; preserve and reconcile checkpoint')
+        status = 'completed'
     finally:
         try:
             job.stop()
@@ -286,6 +329,21 @@ def supervise(args):
             job.drain(timeout=3)
         finally:
             job.close()
+            # A small receipt must never widen a failed storage allowance.
+            # Keep only scalar measurements, never exception/URL/token text.
+            metrics = dict(schemaVersion=1, status=status,
+                           elapsedSeconds=round(time.monotonic()-began, 6),
+                           peakMainRssBytes=peak_rss,
+                           peakOutputAndScratchBytes=peak_bytes,
+                           samplingIntervalSeconds=.02)
+            payload = json.dumps(metrics, sort_keys=True).encode()
+            try:
+                if Path(args.output).exists() and core.budget(args.output)+len(payload)<=core.TREE_LIMIT:
+                    with core.owned(args.output, 'benchmark-metrics.json').open('xb') as stream:
+                        stream.write(payload)
+                        stream.flush(); os.fsync(stream.fileno())
+            except (OSError, ValueError):
+                pass  # Preserve original failure; absent receipt is not success.
 
 
 def execute(args):

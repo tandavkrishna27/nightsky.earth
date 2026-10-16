@@ -112,3 +112,5 @@ import './places/naturalEarth.test';
 
 import './places/geographicSweep.test';
 import './mcp/unknown-region-assembled.test';
+
+import './places/membershipAssembly.test';

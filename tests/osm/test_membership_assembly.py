@@ -1,0 +1,106 @@
+import hashlib
+import json
+import os
+from pathlib import Path
+import sys
+import unittest
+sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'scripts'/'osm'))
+import test_global_source_pipeline as fixtures
+
+class Assembly(unittest.TestCase):
+    def setup_plan(self, fixture):
+        source=dict(name='Synthetic',url='https://example.org',attribution='Synthetic',dataClass='catalog')
+        feature=dict(type='Feature',properties=dict(regionId='region:v1:country',name='Country',countryCode='IND',adminLevel=0,boundaryRevision='fixture',sources=[source]),geometry=dict(type='Polygon',coordinates=[[[19,9],[21,9],[21,11],[19,11],[19,9]]]))
+        boundary=fixture.root/'boundary.json';boundary.write_text(json.dumps(dict(type='FeatureCollection',features=[feature])))
+        footprint=fixture.root/'footprints.jsonl';footprint.write_text('')
+        def pin(path): return dict(path=str(path),bytes=path.stat().st_size,sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+        plan=dict(schemaVersion=1,boundaries=[dict(input=pin(boundary),regionIds=['region:v1:country'])],footprints=pin(footprint),membership={},stream={},catalogue={},retained=[])
+        path=fixture.root/'assembly.json'
+        def save():
+            body=json.dumps(plan).encode();path.write_bytes(body);return hashlib.sha256(body).hexdigest()
+        return plan,path,save
+
+    @unittest.skipUnless(os.name=='nt','Windows Job integration')
+    def test_raw_membership_catalogue_preserves_lineage_and_unknown_coverage(self):
+        from supervised_membership_assembly import assembly_pipeline
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            m=fixture.manifest([fixture.node(),fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
+            plan,path,save=self.setup_plan(fixture)
+            result=assembly_pipeline(manifest,fixture.root/'job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=20000000,freeBytes=0,maxProcesses=2))
+            self.assertEqual(result['status'],'complete',str(result)+str([(p.name,p.read_text()) for p in (fixture.root/'job').glob('*.stderr')]))
+            row=json.loads((fixture.root/'job'/'membership'/'candidates.jsonl').read_text())
+            self.assertEqual(row['regionIds'],['region:v1:country']);self.assertEqual(len(row['sources']),2)
+            self.assertEqual(row['accessEvidence']['status'],'unknown')
+            self.assertEqual((fixture.root/'job'/'membership'/'footprints.jsonl').read_text(),'')
+            self.assertTrue((fixture.root/'job'/'assembly-complete.json').exists())
+            self.assertEqual((fixture.root/'job'/'raw-manifest.json').read_bytes(),manifest.read_bytes())
+            self.assertTrue((fixture.root/'job'/'normalized'/'lineage.jsonl').exists())
+        finally: fixture.doCleanups()
+
+    def test_bad_pin_and_retained_overlap_reject_before_job(self):
+        from supervised_membership_assembly import assembly_pipeline
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
+            plan,path,save=self.setup_plan(fixture)
+            for change in ('size','retained'):
+                if change=='size': plan['boundaries'][0]['input']['bytes']=0
+                else:
+                    plan,path,save=self.setup_plan(fixture);plan['retained']=[str(fixture.root)]
+                with self.assertRaises(ValueError): assembly_pipeline(manifest,fixture.root/'job',path,save(),{})
+                self.assertFalse((fixture.root/'job').exists())
+        finally: fixture.doCleanups()
+
+
+    @unittest.skipUnless(os.name=='nt','Windows Job integration')
+    def test_membership_failure_retains_raw_evidence_without_completion(self):
+        from supervised_membership_assembly import assembly_pipeline
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
+            plan,path,save=self.setup_plan(fixture);plan['membership']={'maxComparisons':1}
+            old=fixture.root/'old-failure';old.mkdir();(old/'evidence').write_bytes(b'keep')
+            plan['retained']=[str(old)]
+            result=assembly_pipeline(manifest,fixture.root/'job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=20000000,freeBytes=0,maxProcesses=2))
+            self.assertEqual(result['status'],'bounded-stop');self.assertEqual(len(result['stages']),3)
+            self.assertTrue((fixture.root/'job'/'normalized'/'complete.json').exists())
+            self.assertFalse((fixture.root/'job'/'job-complete.json').exists());self.assertFalse((fixture.root/'job'/'assembly-complete.json').exists())
+            self.assertEqual((old/'evidence').read_bytes(),b'keep')
+            (old/'large').write_bytes(b'x'*100000)
+            with self.assertRaisesRegex(ValueError,'disk limit'):
+                assembly_pipeline(manifest,fixture.root/'small-job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=50000,freeBytes=0,maxProcesses=2))
+            self.assertFalse((fixture.root/'small-job').exists())
+        finally: fixture.doCleanups()
+
+
+    @unittest.skipUnless(os.name=='nt','Windows Job integration')
+    def test_bad_content_pin_stops_inside_supervision_before_raw(self):
+        from supervised_membership_assembly import assembly_pipeline
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            m=fixture.manifest([fixture.node()]);manifest=fixture.root/'manifest.json';manifest.write_text(json.dumps(m),encoding='utf8')
+            plan,path,save=self.setup_plan(fixture);plan['boundaries'][0]['input']['sha256']='0'*64
+            result=assembly_pipeline(manifest,fixture.root/'job',path,save(),dict(wallSeconds=30,rssBytes=256*1024**2,commitBytes=512*1024**2,diskBytes=20000000,freeBytes=0,maxProcesses=2))
+            self.assertEqual(result['status'],'bounded-stop');self.assertEqual(len(result['stages']),1)
+            self.assertFalse((fixture.root/'job'/'normalized').exists());self.assertFalse((fixture.root/'job'/'job-complete.json').exists())
+        finally: fixture.doCleanups()
+
+
+    def test_limits_reader_rejects_growth_without_an_unbounded_read(self):
+        from supervised_membership_assembly import load_limits
+        from unittest.mock import patch
+        from io import BytesIO
+        class GrowingFile(BytesIO):
+            def read(self, size=-1):
+                if size<0 or size>4097: raise AssertionError('unbounded limits read')
+                return super().read(size)
+        fixture=fixtures.Pipeline();fixture.setUp()
+        try:
+            path=fixture.root/'limits.json';path.write_text('{}')
+            with patch.object(Path,'open',return_value=GrowingFile(b' '*4097+b'{}')):
+                with self.assertRaisesRegex(ValueError,'limits byte cap'): load_limits(path)
+            self.assertEqual(load_limits(path),{})
+        finally: fixture.doCleanups()
+
+if __name__=='__main__': unittest.main()
