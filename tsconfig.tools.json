@@ -28,7 +28,8 @@
     "scripts/validate-retained-source-adapters.ts",
     "scripts/osm/source-admission.ts",
     "scripts/osm/natural-earth-ingest.ts",
-    "scripts/osm/membership-assembly.ts"
+    "scripts/osm/membership-assembly.ts",
+    "scripts/osm/planet-policy-preparation.ts"
   ],
   "exclude": [
     "node_modules",

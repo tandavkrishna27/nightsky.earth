@@ -15,6 +15,10 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'scripts/osm'))
 import planet_receipt as receipt
 
+# Match receive(): Windows venv redirectors spawn an extra process and cannot
+# run within the receipt's deliberate one-process Job limit.
+WORKER_PYTHON = getattr(sys, '_base_executable', sys.executable)
+
 
 class Reply(BytesIO):
     def __init__(self, body, source, **changes):
@@ -296,7 +300,7 @@ class PlanetReceiptTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             limits = {**receipt.LIMITS, 'connectSeconds': 1, 'wallSeconds': 3, 'freeBytes': 1}
-            report = receipt._supervise_worker([sys.executable, '-c', 'import time; time.sleep(30)'], root, limits, [])
+            report = receipt._supervise_worker([WORKER_PYTHON, '-I', '-S', '-B', '-c', 'import time; time.sleep(30)'], root, limits, [])
             self.assertEqual(report['status'], 'bounded-stop')
             self.assertIn('connection/header deadline', report['reason'])
             self.assertLess(report['elapsedSeconds'], 10)
@@ -307,7 +311,7 @@ class PlanetReceiptTests(unittest.TestCase):
     def test_independent_supervisor_records_worker_failure(self):
         with tempfile.TemporaryDirectory() as folder:
             limits = {**receipt.LIMITS, 'freeBytes': 1}
-            report = receipt._supervise_worker([sys.executable, '-c', 'raise SystemExit(9)'], folder, limits, [])
+            report = receipt._supervise_worker([WORKER_PYTHON, '-I', '-S', '-B', '-c', 'raise SystemExit(9)'], folder, limits, [])
             self.assertEqual(report['status'], 'bounded-stop')
             self.assertEqual(report['exitCode'], 9)
             self.assertEqual(report['retainedPartialBytes'], 0)
@@ -316,7 +320,7 @@ class PlanetReceiptTests(unittest.TestCase):
     def test_exit_zero_without_transport_evidence_is_not_success(self):
         with tempfile.TemporaryDirectory() as folder:
             limits = {**receipt.LIMITS, 'freeBytes': 1}
-            report = receipt._supervise_worker([sys.executable, '-c', 'pass'], folder, limits, [])
+            report = receipt._supervise_worker([WORKER_PYTHON, '-I', '-S', '-B', '-c', 'pass'], folder, limits, [])
             self.assertEqual(report['status'], 'bounded-stop')
             self.assertEqual(report['exitCode'], 0)
             self.assertIn('without complete response acceptance', report['reason'])
@@ -356,7 +360,7 @@ except Exception as error:
     raise SystemExit(8)
 raise SystemExit(9)
 '''
-            command = [sys.executable, '-I', '-S', '-B', '-c', code,
+            command = [WORKER_PYTHON, '-I', '-S', '-B', '-c', code,
                        str(Path(receipt.__file__).parent), str(root), json.dumps(limits)]
             with patch.dict(os.environ, {'PLANET_TEST_INHERITED_ENV': 'synthetic-value'}):
                 report = receipt._supervise_worker(command, root, limits, [],
@@ -386,8 +390,9 @@ raise SystemExit(9)
         with tempfile.TemporaryDirectory() as folder:
             limits = {**receipt.LIMITS, 'connectSeconds': 1, 'wallSeconds': 3, 'freeBytes': 1}
             with patch.object(receipt, '_write_new', side_effect=fail_intent):
-                report = receipt._supervise_worker([sys.executable, '-c', 'import time; time.sleep(30)'], folder, limits, [])
+                report = receipt._supervise_worker([WORKER_PYTHON, '-I', '-S', '-B', '-c', 'import time; time.sleep(30)'], folder, limits, [])
             self.assertEqual(report['status'], 'bounded-stop')
+            self.assertIn('connection/header deadline', report['reason'])
             self.assertIsNotNone(report['exitCode'])
             self.assertLess(report['elapsedSeconds'], 10)
 

@@ -120,3 +120,6 @@ import './places/geographyCapacityPlan.test';
 
 import './places/planetSourceAdmission.test';
 import './era5/replan-history-ownership.test';
+
+import './places/planetPolicyPreparation.test';
+import './places/planetReceiptContract.test';
