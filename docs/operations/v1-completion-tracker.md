@@ -39,6 +39,40 @@ Row IDs stay fixed after completion. Root owns integration/docs. Heavy builds sh
 
 G2/G3, H2/H3 and E2 can advance independently where inputs exist. Do not reopen completed generic adapters without a concrete finding.
 
+## Dependencies through completion
+
+The arrows below are acceptance dependencies, not a ban on preparing later checklists early. Geography source/extract preparation can run alongside boundary work; final geographic membership joins both. Each lane may obtain its own bounded allowance without waiting for an unrelated lane.
+
+```mermaid
+flowchart TD
+  S1[ S1 frozen engineering baseline ] --> G2[ G2 boundary bodies and mappings ]
+  S1 --> G3[ G3 candidate extracts and coverage ]
+  S1 --> H2[ H2 weather sample and decoder ]
+  S1 --> E2[ E2 event and optional-source reconciliation ]
+  H2 --> H3[ H3 actual eligible history ]
+  G2 --> R1[ R1 integrate actual release files ]
+  G3 --> R1
+  H3 --> R1
+  E2 --> R1
+  R1 --> S3[ S3 measure actual releases ]
+  S3 --> S4[ S4 assembled journeys, fixes and audit ]
+  S4 --> Hosted[ Later authorized hosting and client validation ]
+  Hosted --> Review[ Official review readiness and submission ]
+  Review --> Publish[ Separately authorized publication ]
+```
+
+| Stable row | Status | Concrete action and completion evidence |
+| --- | --- | --- |
+| S3-M1 | Pending R1 | Pin actual inputs/artifacts; measure supervised build/refresh duration, disk/scratch and peak memory. Retain reproducible commands, workload and results. |
+| S3-M2 | Pending R1; final fit needs M1 | Measure startup, response latency, bounded concurrent workload and cache behavior; calculate serving/current/rollback/reserve totals against the proposed small-server envelope. This does not prove actual Hetzner fit. |
+| S4-T1 | Pending R1; final acceptance after S3 | Assemble exact plugin/data tuple; verify five skills and fourteen tools; run the existing fifteen journeys and eight review cases, including negative/error/missing-data paths and permitted live APIs. Record actual native discovery/reference/tool use, not prompt-only substitution. |
+| S4-T2 | Pending T1 and owner's session | Owner tries their questions. Retain versioned findings; no owner testing result may be invented or closed autonomously. Claude stays deferred. |
+| S4-T3 | Pending M1/M2/T1/T2 | Fix material failures, rerun affected regressions, perform final requirement/security/source/privacy review and full release checks; freeze the reviewed package/data digests and exact-commit CI. Use the [existing acceptance checklist](v1-remaining-ticket-release-matrix.md#complete-local-testing-checklist-for-the-release-candidate). |
+
+Later order: owner host/identity inputs and concrete deployment approval → staging HTTPS/TLS/proxy/retention/capacity/rollback (14), real connection/draft/location contract (3B/3C/4B), complete metadata/policies/native-client matrix and official review packet (12A/12B/13/15) → explicitly authorized submission (16) → review fixes → separately authorized publication (16). Tester pilot (17) can start after usable staging with invitation authorization; it need not wait for publication. Website (18) remains independent. These are existing ticket gates, not extra local stages.
+
+If actual source feasibility fails, record the failure and a concrete alternative under its existing row. A coverage reduction requires an explicit owner decision; neither an unavailable answer nor a successful tiny sample closes promised global coverage. Early measurements and journeys may run on accepted subsets, but final S3/S4 evidence must use the intended actual release.
+
 ## Ordered next batch
 
 - [ ] N1: Prepare the geography acquisition packet: exact two pinned bodies totaling 54,014,085 bytes, scratch/time bounds and stop conditions; reuse retained licence/listing metadata.
@@ -78,3 +112,7 @@ All nine Partial and six Not started headings are represented. None is deleted, 
 | 16 Oct / `3466986` | S2-E1; source preparation | [Source/event delivery](source-admission-three-lane-wave-20261016.md): twelve actual 2027 maxima, package 1.0.13. |
 | 16 Oct / `b80becb` | S2-G1, S2-H1 | [Offline adapters](offline-timeseries-boundaries-wave.md): reviewed, tested, six CI jobs green. Actual bodies/science/release gates open. |
 | 16 Oct / tracker reconciliation | Reporting only | Original four-stage owner contract restored. No code, acquisition or ticket acceptance changed. |
+
+## Tracker review — 16 October 2026
+
+Reviewed against the original remaining-ticket matrix, four-stage contract and latest adapter evidence. All 15 remaining headings map to a stage or explicit later gate; 12 + 9 + 6 = 27. Corrected the initial tracker's overly compressed S3/S4 sequence by adding stable measurement/test rows, owner-testing dependency, explicit later hosted order and independent geography/history/event joins. No original acceptance or product scope changed. Historical snapshots stay linked and labelled. Documentation checks cover local links and whitespace; no application tests are needed for this documentation-only change.
