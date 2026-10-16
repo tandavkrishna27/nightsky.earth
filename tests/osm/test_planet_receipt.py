@@ -285,19 +285,23 @@ class PlanetReceiptTests(unittest.TestCase):
 
     def test_inventory_rejects_replaced_directory_after_enumeration(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder)/'data';root.mkdir();(root/'original').write_bytes(b'x')
-            original=os.scandir;moved=Path(folder)/'original-directory'
+            # Hosted Windows TEMP may use RUNNER~1; match the canonical path
+            # supplied to scandir so the mutation hook actually executes.
+            parent=receipt.safe_path(folder)
+            root=parent/'data';root.mkdir();(root/'original').write_bytes(b'x')
+            original=os.scandir;moved=parent/'original-directory';mutated=[]
             class Entries:
                 def __init__(self,path):self.inner=original(path);self.path=Path(path)
                 def __enter__(self):return self.inner.__enter__()
                 def __exit__(self,*args):
                     result=self.inner.__exit__(*args)
                     if self.path==root and not moved.exists():
-                        root.rename(moved);root.mkdir()
+                        root.rename(moved);root.mkdir();mutated.append(True)
                     return result
             with patch.object(receipt.os,'scandir',side_effect=Entries):
                 with self.assertRaisesRegex(ValueError,'mutation|changed'):
                     receipt._inventory([root])
+            self.assertEqual(mutated,[True],'fixture must replace the directory during enumeration')
 
     def test_inventory_rejects_nonregular_child_metadata(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -430,7 +434,7 @@ class PlanetReceiptTests(unittest.TestCase):
         def popen(*args,**kwargs):
             launched[0]=True;return original_popen(*args,**kwargs)
         with tempfile.TemporaryDirectory() as folder:
-            parent=Path(folder);root=parent/'job';root.mkdir();(root/'attempt-intent.json').write_bytes(b'intent');retained=parent/'retained';retained.mkdir();(retained/'old').write_bytes(b'old')
+            parent=receipt.safe_path(folder);root=parent/'job';root.mkdir();(root/'attempt-intent.json').write_bytes(b'intent');retained=parent/'retained';retained.mkdir();(retained/'old').write_bytes(b'old')
             with patch.object(receipt,'_inventory',side_effect=inventory),patch.object(receipt.subprocess,'Popen',side_effect=popen):
                 report=receipt._supervise_worker([WORKER_PYTHON,'-I','-S','-B','-c','raise SystemExit(9)'],root,{**receipt.LIMITS,'freeBytes':1},[retained])
             self.assertEqual(report['exitCode'],9)

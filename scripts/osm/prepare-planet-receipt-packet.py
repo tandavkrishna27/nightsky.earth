@@ -250,6 +250,10 @@ def prepare(*,clock=time.monotonic):
     # separate roots so the future receipt directory is never inside a retained
     # parent. No other worktree's contents or account directories are inspected.
     budget=InventoryBudget(MAX_ENTRIES,MAX_SECONDS,clock)
+    budget.check();repo=safe_path(REPO);budget.check()
+    plugin=safe_path(PLUGIN);budget.check()
+    if repo==plugin:
+        raise ValueError('distinct geography checkout required; run the preparer from the intended geography-readiness checkout, not plugin-v1')
     roots=[PLUGIN/'.data',PLUGIN/'.cache']
     budget.check()
     cache=safe_path(REPO/'.cache')

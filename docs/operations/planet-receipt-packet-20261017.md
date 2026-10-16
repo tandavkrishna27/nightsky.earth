@@ -181,7 +181,15 @@ catalogue/host/rollback measurements and publication decisions remain open.
 ## Reproducibility and validation
 
 `scripts/osm/prepare-planet-receipt-packet.py` defaults to read-only preparation
-and prints a bounded summary. `--write` exclusively saves the two r2 draft
+and prints a bounded summary. Run the script from the intended, distinct
+`geography-readiness` checkout, with the retained `plugin-v1` checkout as its
+sibling. Running its integrated copy inside `plugin-v1` makes the retained
+plugin cache and the preparation checkout's cache the same directory; the
+preparer rejects that layout before discovery or inventory. Both roots are
+canonicalized within the unchanged preparation deadline before comparison, so
+alternate spellings do not permit overlapping accounting. The working
+directory alone does not relocate the script's checkout.
+`--write` exclusively saves the two r2 draft
 artifacts; it refuses to overwrite either existing file. Output JSON is capped
 at 256 KiB each. Once retained, a changed observation needs an explicitly
 reviewed new artifact revision rather than silent replacement.

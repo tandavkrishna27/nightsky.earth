@@ -127,6 +127,16 @@ class PlanetReceiptPacketTests(unittest.TestCase):
             self.assertEqual(observation['networkRequests'],0)
             self.assertFalse(observation['rawBodyAcquired'])
 
+    def test_prepare_requires_distinct_geography_checkout_before_discovery(self):
+        with tempfile.TemporaryDirectory() as folder:
+            plugin=Path(folder)/'plugin-v1';plugin.mkdir();(plugin/'.cache').mkdir()
+            with patch.object(packet,'REPO',plugin),patch.object(packet,'PLUGIN',plugin):
+                with patch.object(packet.os,'scandir',side_effect=AssertionError('must refuse before discovery')) as discovery:
+                    with patch.object(packet,'inventory_roots',side_effect=AssertionError('must refuse before inventory')) as inventory:
+                        with self.assertRaisesRegex(ValueError,'distinct geography checkout.*geography-readiness'):
+                            packet.prepare()
+            discovery.assert_not_called();inventory.assert_not_called()
+
     def test_prepare_bounds_cache_discovery_before_consuming_all_entries(self):
         consumed=[]
         class Entries:
