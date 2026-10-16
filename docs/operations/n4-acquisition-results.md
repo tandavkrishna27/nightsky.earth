@@ -1,5 +1,7 @@
 # N4 bounded acquisition results — 16 October 2026
 
+**Latest follow-up:** [retained geography preflight and fresh weather job](n4-preflight-and-weather-r2.md) records actual ingestion blockers and the now-successful remote weather job with local retrieval pending. Earlier no-current-job observations below remain dated history.
+
 ## Renewed geography allowance: successful retry
 
 The owner renewed the two-file geography allowance and read-only CDS request-history check. The corrected runner used fresh `.cache/s2-geography-acquisition-20261016-r2/`, preserving all earlier failed/uncertain artifacts. Both exact GETs succeeded; total bodies **54,014,085 bytes**. Expected lengths and immutable Git blob identities matched; measured SHA-256s and sanitized results are in the [retry evidence](data-pilot-evidence/2026-10-16-n4-geography-r2.json).
