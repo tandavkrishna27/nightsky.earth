@@ -109,7 +109,23 @@ test("greatest elongations match independently published NAOJ times and full ang
   assert.match(result.caveats.join(" "), /morning.*evening.*not.*local/i);
 });
 
-test("both planets retain both elongation geometries and modeled local angular maxima without claiming independent Venus morning validation", async () => {
+test("Venus morning time matches the published NAOJ 2025 almanac without borrowing an angle", async () => {
+  // (c) NAOJ. Published 2025 almanac, printed pp. 2-3 (legend/definition),
+  // p. 114 (planetary phenomena): June 1, 12h JCST, Venus greatest west.
+  // https://eco.mtk.nao.ac.jp/koyomi/cande/pdf/cande2025.pdf#page=114
+  // JCST = UTC + 9h; adopted Delta UT1 = 0, Delta T = 69s. Whole-hour
+  // display, rounding unspecified. Keep the preselected 60-minute envelope;
+  // the table supplies no angle, so this is a TIME-only independent check.
+  const result = await search("2025-06-01T00:00:00Z", "2025-06-02T00:00:00Z", ["greatest-elongation"]);
+  assert.equal(result.events.length, 1);
+  const event = result.events[0]!;
+  assert.equal(event.greatestElongation?.body, "Venus");
+  assert.equal(event.greatestElongation?.viewingGeometry, "morning");
+  assert.ok(Math.abs(Date.parse(event.peakUtc!) - Date.parse("2025-06-01T03:00:00Z")) <= 60*60_000);
+  assert.equal(event.localVisibility, "not-evaluated");
+});
+
+test("both planets retain both elongation geometries and modeled local angular maxima without claiming independent Venus morning angle validation", async () => {
   const result = await search("2025-01-01T00:00:00Z", "2025-12-31T23:59:59Z", ["greatest-elongation"]);
   for (const body of ["Mercury", "Venus"]) {
     assert.ok(result.events.some(row => row.greatestElongation?.body === body && row.greatestElongation.viewingGeometry === "morning"));
