@@ -1,5 +1,7 @@
 # Sequence after offline build preparation
 
+**Latest source delivery, 16 October:** [three-lane record](source-admission-three-lane-wave-20261016.md) integrates twelve actual 2027 maxima; current global boundary-body proposal has exact immutable paths, while time-series date/location serialization still needs official evidence. No large geometry/weather downloads or deployment.
+
 **Current source decision, 16 October:** [completed authorized metadata check](public-source-check-20261016.md) identifies the 2027 NASA report, a uniform public-domain boundary alternative and incomplete time-series request metadata. Next resolve the source/query choices and obtain a finite actual-body allowance; do not repeat completed lineage/producer work.
 
 **Current engineering, 16 October:** [lineage implementation](lineage-implementation-admission-wave.md) replaces the previously design-only global/child lineage path and adds the source-admission validator. Full-scale synthetic acceptance passed in one bounded run; actual data/source acceptance remains separate. Source identity/rights/clip and actual provider format gates remain before any separate acquisition allowance.

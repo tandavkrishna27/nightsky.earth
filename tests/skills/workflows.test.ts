@@ -4,6 +4,19 @@ import { join } from "node:path";
 import test from "node:test";
 
 const root = process.cwd();
+
+test("all workflows distinguish admitted 2027 maxima from prior-year forecasts", () => {
+  for (const name of ["find-observing-place", "plan-stargazing-night", "plan-sky-event", "plan-astrophotography", "prepare-outing"]) {
+    const body = readFileSync(join(root, "plugins/nightsky/skills", name, "SKILL.md"), "utf8");
+    assert.match(body, /12.*2027/);
+    assert.match(body, /LEO.*2027/);
+    assert.match(body, /UT.*minute/);
+    assert.doesNotMatch(body, /LYR, ORI, LEO, NTA, STA and HYD lack calendar timing/);
+    const canonical = readFileSync(join(root, "docs/product/workflows", `${name}.md`), "utf8");
+    assert.doesNotMatch(canonical, /2025–2026 NASA peak-calendar coverage/);
+    assert.doesNotMatch(canonical, /Only QUA, ETA, SDA, PER, CAP and GEM overlap the NASA timing list/);
+  }
+});
 const tools = ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"];
 const skillNames = ["find-observing-place", "plan-stargazing-night", "plan-astrophotography", "plan-sky-event", "prepare-outing"];
 

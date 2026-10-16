@@ -1,5 +1,7 @@
 # Meteor coverage matrix — 14 October 2026
 
+**Current update, 16 October:** [2027 source admission](meteor-2027-source-admission.md) adds twelve exact reviewed UT-minute maxima. Active total is now 38 across 2025–2027; 2025/2026 data is unchanged. LEO has a 2027 peak, increasing timed/radiant overlap to seven codes across the catalogs; model-only codes are HYD, LYR, NTA, ORI and STA. The union remains 19. All full UTC seasons and other-year recurrence remain unsupported. The dated 2025/2026 tables and audit snapshots below retain their historical scope.
+
 This is a source/runtime audit at baseline `f6d043b`, not acceptance of reduced V1 scope. The objective remains a global, free meteor journey. Current support is partial: 26 year-specific peak records, 12 bounded radiant models and two source-only typical intervals. Their union is **19 distinct shower codes**. There is no complete UTC activity season, guaranteed visibility or personal meteor-rate model for any row below.
 
 ## Sources and exact local paths

@@ -33,6 +33,11 @@ try{
   if (mode === "full") {
   for(const name of ["resolve_place","get_clear_sky_climatology","plan_observing_session","compare_observing_options","recommend_specialist_tools"])assert.ok(listed.tools.some(tool=>tool.name===name));
   const suggested=await rpc(3,"tools/call",{name:"recommend_specialist_tools",arguments:{activity:"general-stargazing"}});assert.equal(suggested.isError,undefined);assert.ok(suggested.structuredContent.recommendations.length);
+  const meteor=await rpc(4,"tools/call",{name:"search_sky_events",arguments:{placeId:"place:v1:geonames:1259229",window:{startUtc:"2027-11-20T00:00:00Z",endUtc:"2027-11-21T00:00:00Z",timeZone:"Asia/Kolkata"},eventTypes:["meteor-shower"]}});
+  assert.equal(meteor.isError,undefined);assert.equal(meteor.structuredContent.availability.status,"partial");
+  const leonids=meteor.structuredContent.events.find(event=>event.name==="Leonids");
+  assert.equal(leonids?.peakUtc,"2027-11-20T04:38:00Z");assert.equal(leonids?.localVisibility,"not-evaluated");
+  assert.equal(leonids?.source.url,"https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf");
   } else {
     assert.deepEqual(listed.tools.map(tool=>tool.name),["resolve_place"]);
   }

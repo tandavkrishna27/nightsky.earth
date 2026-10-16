@@ -29,7 +29,7 @@ test("returnsReviewedYearSpecificMeteorPeakWithoutInventedSeason", async () => {
 });
 
 test("doesNotRecurForecastPeaksIntoUnreviewedYears", async () => {
-  const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2027-01-02T00:00:00Z", "2027-01-05T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
+  const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2028-01-02T00:00:00Z", "2028-01-05T00:00:00Z", "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
   assert.deepEqual(result.events, []);
   assert.equal(result.availability.status, "partial");
 });

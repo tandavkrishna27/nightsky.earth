@@ -41,7 +41,7 @@ For a requested historical month, use `get_clear_sky_climatology` with the resol
 
 Candidate records describe mapped representative points with source-linked geometry. Access, darkness, safety and horizon remain unknown without affirmative evidence; preserve omissions, attribution and source vintage. Use the conditional discovery and candidate-planning flow below for installed capabilities.
 
-Meteor timing has 13 original NASA forecast maxima in each of 2025 and 2026, with year-specific source evidence and no activity widths or annual recurrence. GMN near-anchor radiant models cover twelve showers independently; only QUA, ETA, SDA, PER, CAP and GEM overlap these calendars. LYR, ORI, LEO, NTA, STA and HYD lack calendar timing. Other NASA codes lack modeled radiants. Keep exact returned peak instants and unavailable/outside-model results. Follow the canonical sky-event workflow for these distinctions.
+Meteor timing has 13 original NASA forecast maxima per year for 2025/2026 and 12 for 2027, with year-specific sources and no activity widths or annual recurrence. LEO has timing only in 2027; SSG/AND are omitted from that forecast, not proven absent. The 2027 source labels UT to minute precision; ISO UTC representation does not establish subminute accuracy. Twelve GMN radiant models independently overlap seven timed codes across these years: QUA, ETA, SDA, PER, CAP, GEM and LEO. LYR, ORI, NTA, STA and HYD lack calendar timing. Other timed codes lack modeled radiants. Preserve exact returned instants, model-domain limits and unavailable results; follow the canonical sky-event workflow.
 
 ## Interpret evidence and answer a beginner
 

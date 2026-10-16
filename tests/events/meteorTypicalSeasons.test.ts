@@ -6,7 +6,7 @@ import { skyEventsResultSchema } from "../../shared/nightsky/events";
 import { planObservingSession } from "../../server/nightsky/planner";
 
 const index = new GeoNamesPlaceIndex([{ geonameId: 1, name: "Pune", asciiName: "Pune", alternateNames: "", latitude: 18.52, longitude: 73.85, countryCode: "IN", countryName: "India", featureClass: "P", featureCode: "PPL", population: 1000, timeZone: "Asia/Kolkata", modificationDate: "2026-01-01" }], "fixture-v1");
-const query = (eventTypes = ["meteor-shower"]) => searchSkyEvents({placeId:"place:v1:geonames:1", window:{startUtc:"2027-01-02T00:00:00Z",endUtc:"2027-01-05T00:00:00Z",timeZone:"Asia/Kolkata"},eventTypes},index);
+const query = (eventTypes = ["meteor-shower"]) => searchSkyEvents({placeId:"place:v1:geonames:1", window:{startUtc:"2028-01-02T00:00:00Z",endUtc:"2028-01-05T00:00:00Z",timeZone:"Asia/Kolkata"},eventTypes},index);
 
 test("meteor query exposes original typical intervals without claiming date overlap or adding dated events", async () => {
  const result = await query();

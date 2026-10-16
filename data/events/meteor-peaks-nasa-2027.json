@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "vintage": "NASA-MEO-2027-issued-2026-10-16",
+  "reviewedAt": "2026-10-16T05:09:42Z",
+  "sourceUrl": "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf",
+  "rightsEvidenceUrl": "https://ntrs.nasa.gov/citations/20260009360",
+  "rightsStatement": "NASA NTRS PUBLIC distribution; GOV_PUBLIC_USE_PERMITTED. Ownership not inferred.",
+  "table": "Table 3, page 9",
+  "coverage": "Twelve original 2027 forecast maxima only; source UT at minute precision represented as ISO UTC without a subminute accuracy claim. No activity seasons, rates, or recurring years. Radiant support is separate. SSG and AND omitted by source, not established physically absent.",
+  "peaks": [
+    { "code": "QUA", "id": "quadrantids", "name": "Quadrantids", "peakUtc": "2027-01-04T00:48:00Z" },
+    { "code": "ETA", "id": "eta-aquariids", "name": "Eta Aquariids", "peakUtc": "2027-05-06T22:28:00Z" },
+    { "code": "ZPE", "id": "daytime-zeta-perseids", "name": "Daytime Zeta Perseids", "peakUtc": "2027-06-03T12:51:00Z" },
+    { "code": "ARI", "id": "daytime-arietids", "name": "Daytime Arietids", "peakUtc": "2027-06-10T08:02:00Z" },
+    { "code": "SDA", "id": "southern-delta-aquariids", "name": "Southern Delta Aquariids", "peakUtc": "2027-07-30T06:52:00Z" },
+    { "code": "CAP", "id": "alpha-capricornids", "name": "Alpha Capricornids", "peakUtc": "2027-07-31T10:41:00Z" },
+    { "code": "PER", "id": "perseids", "name": "Perseids", "peakUtc": "2027-08-13T20:20:00Z" },
+    { "code": "DSX", "id": "daytime-sextantids", "name": "Daytime Sextantids", "peakUtc": "2027-10-02T05:51:00Z" },
+    { "code": "DRA", "id": "october-draconids", "name": "October Draconids", "peakUtc": "2027-10-09T08:20:00Z" },
+    { "code": "LEO", "id": "leonids", "name": "Leonids", "peakUtc": "2027-11-20T04:38:00Z" },
+    { "code": "GEM", "id": "geminids", "name": "Geminids", "peakUtc": "2027-12-14T19:13:00Z" },
+    { "code": "URS", "id": "ursids", "name": "Ursids", "peakUtc": "2027-12-22T22:07:00Z" }
+  ]
+}
