@@ -8,6 +8,36 @@ from global_source import validate_manifest, planet_retained_paths, admitted_raw
 from production_admission import verify_production_admission
 from global_source_supervisor import supervise
 from spot_paths import safe_path
+from normalized_partitions import strict_json, LAYOUT, MAX_OUTPUT_BYTES
+
+
+def _v2_capacity(plan, manifest, limits):
+    pin=plan['capacityPlan']
+    if not isinstance(pin,dict) or set(pin)!={'path','bytes','sha256'} or not isinstance(pin['path'],str) or not Path(pin['path']).is_absolute() or type(pin['bytes']) is not int or not 1<=pin['bytes']<=65536 or not isinstance(pin['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',pin['sha256']):raise ValueError('capacity metadata pin')
+    path=safe_path(pin['path'])
+    with path.open('rb') as stream:body=stream.read(65537)
+    if len(body)!=pin['bytes'] or hashlib.sha256(body).hexdigest()!=pin['sha256']:raise ValueError('capacity metadata size/digest mismatch')
+    capacity=strict_json(body.decode('utf8'))
+    if not isinstance(capacity,dict) or set(capacity)!={'schemaVersion','kind','freeBytes','reserveBytes','retainedBytes','rawSourceAlreadyRetainedBytes','allocations','limits'} or capacity['schemaVersion']!=2 or capacity['kind']!='partitioned-geography-capacity-v1':raise ValueError('capacity version/schema')
+    def numbers(value):
+        if isinstance(value,(int,float,bool)) and (type(value) is not int or not 0<=value<=9007199254740991):raise ValueError('capacity safe integral numbers required')
+        if isinstance(value,dict):
+            for item in value.values():numbers(item)
+        elif isinstance(value,list):
+            for item in value:numbers(item)
+    numbers(capacity)
+    stage=capacity.get('limits');alloc=capacity.get('allocations')
+    if not isinstance(stage,dict) or set(stage)!={'raw','membership','catalogue','supervisor'} or not isinstance(alloc,dict):raise ValueError('capacity stage schema')
+    if stage['raw']!=manifest['limits'] or stage['supervisor']!=limits:raise ValueError('capacity raw/supervisor controls mismatch')
+    credit=capacity['rawSourceAlreadyRetainedBytes']
+    if type(credit) is not int or not 0<=credit<=min(capacity['retainedBytes'],stage['raw']['sourceBytes'],sum(source['bytes'] for source in manifest['sources'])) or alloc.get('raw',-1)<stage['raw']['sourceBytes']-credit:raise ValueError('retained source credit or raw allocation')
+    if plan['evidenceLayout']!=LAYOUT or manifest.get('evidenceLayout')!=LAYOUT:raise ValueError('capacity layout mismatch')
+    total=plan['maxNormalizedOutputBytes'];candidate=plan['maxCandidateInputBytes']
+    if type(total) is not int or not 1<=total<=MAX_OUTPUT_BYTES or type(candidate) is not int or not 1<=candidate<=total or stage['raw']['outputBytes']!=total or alloc.get('normalizedOutput')!=total or alloc.get('stagedCandidates')!=0:raise ValueError('explicit aggregate capacity mismatch')
+    if not isinstance(stage['membership'],dict) or stage['membership']!={**plan['membership'],'maxCandidateInputBytes':candidate} or stage['catalogue']!=plan['catalogue']:raise ValueError('capacity downstream controls mismatch')
+    # The fixed TS admission gate performs the complete versioned allocation
+    # evaluation and retains this exact pin before any Job can be launched.
+    return path
 
 
 def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, node='node', python=None, accounting_paths=(), admission_path=None, admission_sha256=None):
@@ -15,18 +45,32 @@ def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, no
     if manifest_path.stat().st_size>1024*1024: raise ValueError('manifest byte limit')
     with manifest_path.open('rb') as handle: manifest_body=handle.read(1024*1024+1)
     if len(manifest_body)>1024*1024: raise ValueError('manifest byte limit')
-    manifest=validate_manifest(json.loads(manifest_body))
+    decoded=json.loads(manifest_body)
+    # V2 cardinality is checked from bounded metadata before source path/domain expansion.
+    manifest=strict_json(manifest_body.decode('utf8')) if isinstance(decoded,dict) and decoded.get('schemaVersion')==2 else validate_manifest(decoded)
     if not isinstance(plan_sha256,str) or not re.fullmatch('[a-f0-9]{64}',plan_sha256): raise ValueError('assembly digest required')
     with plan_path.open('rb') as handle: body=handle.read(1024*1024+1)
     if len(body)>1024*1024 or hashlib.sha256(body).hexdigest()!=plan_sha256: raise ValueError('assembly size/digest mismatch')
     plan=json.loads(body)
-    if not isinstance(plan,dict) or set(plan)-{'geographyMode','sourceDomains'}!=set(('schemaVersion','boundaries','footprints','membership','stream','catalogue','retained')) or type(plan['schemaVersion']) is not int or plan['schemaVersion']!=1: raise ValueError('assembly schema')
+    if not isinstance(plan,dict) or type(plan.get('schemaVersion')) is not int or plan['schemaVersion'] not in (1,2):raise ValueError('assembly schema')
+    if plan['schemaVersion']==2:plan=strict_json(body.decode('utf8'))
+    version=plan['schemaVersion'];required={'schemaVersion','boundaries','footprints','membership','stream','catalogue','retained'}
+    if version==2:required|={'evidenceLayout','maxNormalizedOutputBytes','maxCandidateInputBytes','capacityPlan'}
+    if set(plan)-{'geographyMode','sourceDomains'}!=required or manifest['schemaVersion']!=version:raise ValueError('assembly layout version/schema mismatch')
+    if not isinstance(plan['retained'],list) or len(plan['retained'])>100:raise ValueError('retained inventory')
+    if version==2:
+        if not isinstance(manifest.get('sources'),list) or not 1<=len(manifest['sources'])<=64 or any(not isinstance(source,dict) for source in manifest['sources']) or not isinstance(plan.get('boundaries'),list):raise ValueError('version-2 bounded source/boundary inventory')
+        if len(plan['retained'])+len(manifest['sources'])+len(plan.get('boundaries',[]))+len(accounting_paths)+5+3*sum('sourceDomain' in source for source in manifest['sources'])>64:raise ValueError('version-2 retained root cardinality exceeds 64')
+        manifest=validate_manifest(manifest)
+        capacity_path=_v2_capacity(plan,manifest,limits)
+
     geography_mode=plan.get('geographyMode','all-nodes')
     if geography_mode not in ('all-nodes','selected-references'): raise ValueError('geography mode')
     if not isinstance(plan['boundaries'],list) or not 1<=len(plan['boundaries'])<=100: raise ValueError('boundary inventory')
     expected_domains=[dict(sourceId=s['id'],**s['sourceDomain']) for s in manifest['sources'] if 'sourceDomain' in s]
     if plan.get('sourceDomains',[])!=expected_domains: raise ValueError('assembly planet domain mismatch')
     retained=[*planet_retained_paths(manifest),manifest_path,plan_path,*[safe_path(s['path']) for s in manifest['sources']],*[safe_path(p) for p in accounting_paths]]
+    if version==2:retained.append(capacity_path)
     for pin in [*[s['input'] for s in plan['boundaries']],plan['footprints']]:
         if not isinstance(pin,dict) or set(pin)!=set(('path','bytes','sha256')) or not isinstance(pin['path'],str) or not Path(pin['path']).is_absolute(): raise ValueError('absolute input pin required')
         if type(pin['bytes']) is not int or not 0<=pin['bytes']<=128*1024**2 or not isinstance(pin['sha256'],str) or not re.fullmatch('[a-f0-9]{64}',pin['sha256']): raise ValueError('invalid input pin')
@@ -47,6 +91,7 @@ def assembly_pipeline(manifest_path, root, plan_path, plan_sha256, limits, *, no
     # Shared evidence is counted once; explicit retained overlaps stay rejected.
     for pin in [admitted.get('admission',{}),*admitted.get('metadataPins',[]),*admitted.get('codePins',[])]:
         if not pin.get('path'): continue
+        if version==2 and len(retained)>=63 and pin['path'] not in [str(path) for path in retained]:raise ValueError('version-2 retained root cardinality exceeds 64')
         path=safe_path(pin['path'])
         if path not in retained: retained.append(path)
     commands=production_commands(manifest_path,root,plan_path,plan_sha256,manifest_body,geography_mode,node,python,

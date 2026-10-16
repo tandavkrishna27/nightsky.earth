@@ -18,6 +18,10 @@ The prior implementation failed the new 4,854-feature/256-candidate one-million-
 
 The production snapshot's repository-owned membership import closure is now pinned in both languages: 17 total files, 12 additions. Actual classifier/geometry/assembly file mutations in an isolated checkout invalidate old snapshots. Python gate-time mutation cases cover all 12 additions. Existing metadata/retained-path accounting and ceilings are unchanged. Any old execution envelope must be regenerated because the executable snapshot identity changes. No source review authority was expanded.
 
+## Separately authorized candidate partition follow-up
+
+The [partition implementation report](candidate-partition-implementation-20261017.md) supersedes the earlier statement that a partition/merge path is absent. The approved exact design adds explicit v2 aggregate/capacity admission, bounded raw and enriched parts, one shared membership session, one publisher, and the unchanged schema-2 consumer. The historical v1 proposal and its 385 MiB allocation remain unchanged. Executable closure grows from 17 to 25 files; old snapshots require regeneration. Actual global fit, planet authority and source execution remain unestablished. The report records independent review, direct new-test results, the one opt-in >128 MiB contract run and final exact-tip CI.
+
 ## Capacity and r2 status
 
 The immutable v1 inventory observed 17,658,924,658 retained logical bytes and 282,277,814,272 free bytes. Raw receipt plus 1 MiB evidence and the 128 GiB reserve left 49,456,785,044 bytes, while the proposed full-build allocation was short by 739,596,652 bytes including the two preparation JSON files. The first receiver inventory probe hit its unchanged 30-second limit; it did not establish compatibility. The old derived `changed:false` must be treated as unknown. New probes report `comparisonEstablished:false` and `changed:null` on timeout.

@@ -15,6 +15,8 @@ import unicodedata
 import xml.etree.ElementTree as ET
 
 from spot_paths import safe_path
+from normalized_partitions import (LAYOUT,MAX_OUTPUT_BYTES,MAX_SAFE_INTEGER,MAX_DESCRIPTOR_BYTES,
+    PartRegistry,write_partitioned_stream,verify_partitioned_streams,strict_json)
 
 POLICY = 'named-complete-way-v1-polar85'
 LIMITS = {'sourceBytes', 'scratchBytes', 'outputBytes', 'rowBytes', 'nodes', 'candidates', 'referencesPerWay', 'seconds', 'freeBytes'}
@@ -76,11 +78,16 @@ def planet_retained_paths(manifest):
 
 
 def validate_manifest(m):
-    if set(m) != {'schemaVersion', 'policy', 'authorization', 'sources', 'limits'} or m['schemaVersion'] != 1 or m['policy'] != POLICY:
+    partitioned=m.get('schemaVersion')==2 and type(m.get('schemaVersion')) is int
+    fields={'schemaVersion', 'policy', 'authorization', 'sources', 'limits'}|({'evidenceLayout'} if partitioned else set())
+    if set(m) != fields or m['schemaVersion'] not in (1,2) or m['policy'] != POLICY:
         raise ValueError('manifest schema/policy')
+    if m['schemaVersion']==2 and not partitioned:raise ValueError('manifest schema/policy')
+    if partitioned and (m['evidenceLayout']!=LAYOUT or any(type(m['evidenceLayout'].get(key)) is not int for key in ('maxPartBytes','maxParts'))):raise ValueError('partition evidence layout')
     if not isinstance(m['authorization'], str) or not m['authorization'].strip(): raise ValueError('authorization required')
     limits = m['limits']
     if set(limits) != LIMITS or any(type(v) is not int or v < (0 if k=='freeBytes' else 1) for k,v in limits.items()): raise ValueError('explicit positive limits required')
+    if partitioned and (any(value>MAX_SAFE_INTEGER for value in limits.values()) or limits['outputBytes']>MAX_OUTPUT_BYTES):raise ValueError('partition explicit safe aggregate output limit')
     if limits['rowBytes'] > 4*1024*1024 or limits['referencesPerWay'] > 100000 or limits['seconds'] > 172800: raise ValueError('unsupported limit')
     if not isinstance(m['sources'], list) or not 1 <= len(m['sources']) <= 64: raise ValueError('source count')
     ids=set(); paths=set(); total=0
@@ -109,7 +116,45 @@ def manifest_revision(m):
     validate_manifest(m)
     # Machine path and operational ceilings do not change geographic identity.
     identity={'policy':m['policy'],'sources':[{k:({dk:dv for dk,dv in v.items() if dk!='path'} if k=='sourceDomain' else v) for k,v in s.items() if k!='path'} for s in m['sources']]}
+    if m['schemaVersion']==2:identity.update(evidenceLayout=m['evidenceLayout'])
     return 'osm-'+hashlib.sha256(canonical(identity).encode()).hexdigest()
+
+
+def partition_counts(db,manifest,completed,check=lambda:None):
+    """Recompute frozen table witnesses; only O(source count) Python state."""
+    if not 1<=len(manifest['sources'])<=64 or type(completed) is not int or not 0<=completed<=len(manifest['sources']):raise ValueError('frozen source cardinality')
+    source_ids=[source['id'] for source in manifest['sources']]
+    allowed=set(source_ids[:completed])
+    def bounded(query,stats=False):
+        result={};check()
+        for row in db.execute(query):
+            check();source=row[0]
+            if source not in allowed or source in result or len(result)>=len(allowed):raise ValueError('frozen unknown/duplicate source counters')
+            result[source]=tuple(row[1:]) if stats else row[1]
+        return result
+    stats=bounded('SELECT source,selected,accepted,excluded FROM source_counts LIMIT 65',True)
+    if set(stats)!=allowed:raise ValueError('frozen completed source counters')
+    lineages=bounded('SELECT source,count(*) FROM lineage GROUP BY source LIMIT 65')
+    exclusions=bounded('SELECT source,count(*) FROM exclusions GROUP BY source LIMIT 65')
+    rows=[]
+    for source in source_ids:
+        selected,accepted,excluded=stats.get(source,(0,0,0));lineage=lineages.get(source,0)
+        if any(type(n) is not int or not 0<=n<=MAX_SAFE_INTEGER for n in (selected,accepted,excluded,lineage)) or selected!=accepted+excluded or excluded!=exclusions.get(source,0) or accepted<lineage:raise ValueError('frozen per-source count reconciliation')
+        rows.append(dict(id=source,selected=selected,accepted=accepted,excluded=excluded,lineage=lineage))
+    a=db.execute('SELECT count(*) FROM candidates').fetchone()[0];l=sum(lineages.values());e=sum(exclusions.values())
+    s=sum(row['selected'] for row in rows);r=sum(row['accepted'] for row in rows);d=r-l
+    if not a<=l<=4*a or d<0 or s!=r+e or any(n>MAX_SAFE_INTEGER for n in (a,l,e,s,r,d)):raise ValueError('frozen global count reconciliation')
+    return dict(accepted=a,lineage=l,exclusions=e,selectedOccurrences=s,acceptedOccurrences=r,duplicateAcceptedOccurrences=d,sources=rows)
+
+
+def partition_descriptor(path,check):
+    check();path=safe_path(path)
+    with path.open('rb') as handle:
+        before=os.fstat(handle.fileno())
+        if not stat.S_ISREG(before.st_mode) or before.st_size>MAX_DESCRIPTOR_BYTES:raise ValueError('partition descriptor byte limit')
+        payload=handle.read(before.st_size+1);after=os.fstat(handle.fileno())
+    if len(payload)!=before.st_size or (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns)!=(after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns):raise ValueError('partition descriptor mutation')
+    safe_path(path);check();return payload,strict_json(payload.decode('utf8'))
 
 
 def clean(value):
@@ -296,9 +341,12 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
     if admission_check is not None: admission_check('raw-before')
     if geography_mode not in ('all-nodes','selected-references'): raise ValueError('geography mode')
     m=validate_manifest(manifest); revision=manifest_revision(m); limits=m['limits']; output=safe_path(output)
+    partitioned=m['schemaVersion']==2
     if any(safe_path(s['path']).is_relative_to(output) for s in m['sources']): raise ValueError('source inside output')
+    if partitioned and resume and not (output/'complete.json').is_file():raise ValueError('partial partition resume refused; retain evidence and use a separately admitted new attempt')
     if output.exists() and not resume: raise FileExistsError(output)
-    output.mkdir(parents=True,exist_ok=resume); start=time.monotonic()
+    if not (partitioned and resume):output.mkdir(parents=True,exist_ok=resume)
+    start=time.monotonic()
     guard=ResourceGuard(output,limits,start); check=guard.check
     source_witnesses={}
     def verify_sources():
@@ -316,6 +364,34 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
     verify_sources()
     source_domains=[dict(sourceId=s['id'],**s['sourceDomain']) for s in m['sources'] if 'sourceDomain' in s]
     manifest_hash=hashlib.sha256(canonical(m).encode()).hexdigest(); dbpath=safe_path(output/'scratch.sqlite'); checkpoint=safe_path(output/'checkpoint.json')
+    def checkpoint_identity(counts):
+        return dict(schemaVersion=2,kind='partitioned-normalized-checkpoint-v1',manifestSha256=manifest_hash,
+            catalogueRevision=revision,geographyMode=geography_mode,evidenceLayout=m['evidenceLayout'],
+            completedSources=len(m['sources']),countsSha256=hashlib.sha256(canonical(counts).encode()).hexdigest(),
+            **({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {}))
+    if partitioned and resume:
+        checkpoint_bytes,state=partition_descriptor(checkpoint,check)
+        completion_bytes,done=partition_descriptor(output/'complete.json',check)
+        db=sqlite3.connect(dbpath.as_uri()+'?mode=ro',uri=True)
+        try:
+            db.set_progress_handler(lambda:(check() or 0),1000)
+            counts=partition_counts(db,m,len(m['sources']),check)
+        finally:db.close()
+        if set(state)!=set(checkpoint_identity(counts))|{'databaseSha256'} or any(canonical(state.get(k))!=canonical(v) for k,v in checkpoint_identity(counts).items()) or state['databaseSha256']!=digest(dbpath,check):raise ValueError('frozen checkpoint identity/digest/counts mismatch')
+        identity=dict(schemaVersion=2,kind='partitioned-normalized-osm-v1',catalogueRevision=revision,
+            manifestSha256=manifest_hash,policy=m['policy'],geographyMode=geography_mode,sourceDomains=source_domains,
+            counts=counts,checkpoint=dict(bytes=len(checkpoint_bytes),sha256=hashlib.sha256(checkpoint_bytes).hexdigest()),
+            **({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {}))
+        if set(done)!=set(identity)|{'streams'} or any(canonical(done.get(k))!=canonical(v) for k,v in identity.items()):raise ValueError('frozen completion identity/counts mismatch')
+        verify_partitioned_streams(output,done['streams'],check,row_limit=limits['rowBytes'],max_bytes=limits['outputBytes'],
+            expected_counts=dict(candidates=counts['accepted'],lineage=counts['lineage'],exclusions=counts['exclusions']))
+        verify_sources()
+        if admission_check is not None:admission_check('resume')
+        verify_sources()
+        verify_partitioned_streams(output,done['streams'],check,row_limit=limits['rowBytes'],max_bytes=limits['outputBytes'],
+            expected_counts=dict(candidates=counts['accepted'],lineage=counts['lineage'],exclusions=counts['exclusions']))
+        if partition_descriptor(checkpoint,check)[0]!=checkpoint_bytes or partition_descriptor(output/'complete.json',check)[0]!=completion_bytes or digest(dbpath,check)!=state['databaseSha256']:raise ValueError('frozen completed verification mutation')
+        check(force=True);return output
     completed=0
     if resume:
         state=descriptor(checkpoint)
@@ -348,12 +424,31 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
         # files are accounted by the bounded inventories, not by this pragma.
         db.execute(f'PRAGMA max_page_count={max_pages}')
         db.executescript('CREATE TABLE IF NOT EXISTS nodes(id INTEGER PRIMARY KEY, lat REAL, lon REAL); CREATE TABLE IF NOT EXISTS candidates(id TEXT PRIMARY KEY, body TEXT, vintage TEXT); CREATE TABLE IF NOT EXISTS lineage(id TEXT, source TEXT, PRIMARY KEY(id,source)); CREATE TABLE IF NOT EXISTS exclusions(source TEXT,id TEXT,reason TEXT); CREATE INDEX IF NOT EXISTS exclusion_order ON exclusions(source,id,reason);')
+        if partitioned:
+            db.executescript('CREATE TABLE source_counts(source TEXT PRIMARY KEY,selected INTEGER NOT NULL,accepted INTEGER NOT NULL,excluded INTEGER NOT NULL); CREATE INDEX lineage_source ON lineage(source);')
+            db.set_progress_handler(lambda:(check() or 0),1000)
+        written=0
+        def consume(amount):
+            nonlocal written
+            if type(amount) is not int or amount<0:raise ValueError('aggregate output byte amount')
+            if written+amount>limits['outputBytes']:raise ValueError(f"aggregate output byte limit: written={written}, pending={amount}, allowance={limits['outputBytes']}, deficit={written+amount-limits['outputBytes']}")
+            check(amount);written+=amount
         def save(count):
             check(force=True)
             db.commit(); payload={'manifestSha256':manifest_hash,'databaseSha256':digest(dbpath,check),'completedSources':count,'catalogueRevision':revision,'geographyMode':geography_mode,**({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {})}
+            if partitioned:
+                counts=partition_counts(db,m,count,check)
+                payload.update(schemaVersion=2,kind='partitioned-normalized-checkpoint-v1',evidenceLayout=m['evidenceLayout'],
+                    countsSha256=hashlib.sha256(canonical(counts).encode()).hexdigest())
             temp=output/'checkpoint.tmp'
-            encoded=canonical(payload).encode();check(len(encoded))
-            with safe_path(temp).open('xb') as f: f.write(encoded)
+            encoded=canonical(payload).encode()
+            if partitioned:
+                if len(encoded)>MAX_DESCRIPTOR_BYTES:raise ValueError('checkpoint descriptor byte limit')
+                consume(len(encoded))
+            else:check(len(encoded))
+            with safe_path(temp).open('xb') as f:
+                f.write(encoded)
+                if partitioned:f.flush();os.fsync(f.fileno())
             safe_path(temp); safe_path(checkpoint)
             os.replace(temp,checkpoint)
             check(force=True)
@@ -361,6 +456,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
         for index,s in enumerate(m['sources']):
             if index<completed: continue
             db.execute('BEGIN'); db.execute('DELETE FROM nodes'); node_count=0; candidate_count=db.execute('SELECT count(*) FROM candidates').fetchone()[0]
+            selected_occurrences=accepted_occurrences=excluded_occurrences=0
             if geography_mode=='selected-references':
                 # The disk-backed placeholder set shares the main database cap.
                 # No global Python reference set or location index is retained.
@@ -391,6 +487,7 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
             for kind, oid, tags, point, refs in entities(s,limits,check):
                 cat=category(tags); name=clean(tags.get('name') or tags.get('name:en') or tags.get('official_name'))
                 if not cat: continue
+                if partitioned:selected_occurrences+=1
                 reason='relation' if kind=='relation' else 'unnamed' if not name else None
                 if kind=='way' and not reason:
                     points=[db.execute('SELECT lat,lon FROM nodes WHERE id=?',(ref,)).fetchone() for ref in refs]
@@ -403,7 +500,9 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
                 if not reason and not valid(point): reason='invalid-geometry'
                 identity=f'place:v1:osm:{kind}:{oid}'
                 if reason:
+                    if partitioned:excluded_occurrences+=1
                     db.execute('INSERT INTO exclusions VALUES(?,?,?)',(s['id'],identity,reason)); continue
+                if partitioned:accepted_occurrences+=1
                 body=canonical(dict(placeId=identity,name=name,category=cat,latitude=round(point[0],6),longitude=round(point[1],6),sourceCompleteness=min(3,1+sum(bool(clean(tags.get(k))) for k in ('website','access','opening_hours'))),regionIds=[],accessEvidence={'status':'unknown'},caveats=['Named nodes and complete ways only; access, darkness and mapped completeness unknown.']))
                 prev=db.execute('SELECT body,vintage FROM candidates WHERE id=?',(identity,)).fetchone()
                 if prev and prev!=(body,s['vintage']): raise ValueError('candidate identity conflict: '+identity)
@@ -412,9 +511,13 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
                 db.execute('INSERT OR IGNORE INTO lineage VALUES(?,?)',(identity,s['id']))
                 if candidate_count>limits['candidates']: raise ValueError('candidate limit')
                 if db.execute('SELECT count(*) FROM lineage WHERE id=?',(identity,)).fetchone()[0]>4: raise ValueError('candidate source limit')
+            if partitioned:
+                if selected_occurrences>MAX_SAFE_INTEGER:raise ValueError('source counter safe integer limit')
+                db.execute('INSERT INTO source_counts VALUES(?,?,?,?)',(s['id'],selected_occurrences,accepted_occurrences,excluded_occurrences))
             check(force=True); save(index+1); hook('source-complete'); verify_sources(); check(force=True)
         verify_sources()
-        sources={s['id']:s for s in m['sources']}; written=0; inventory={}
+        sources={s['id']:s for s in m['sources']}; inventory={}
+        if not partitioned:written=0
         def write(name, rows):
             nonlocal written
             check(force=True)
@@ -434,15 +537,49 @@ def build(manifest, output, *, resume=False, hook=lambda stage: None, geography_
                     s=sources[sid]
                     row['sources'].append(dict(name='OpenStreetMap contributors',url=s['url'],attribution=s['attribution'],dataClass='catalog',vintage=s['vintage'],licenseUrl=s['licenseUrl'],modified=True,product='OSM '+sid+' '+s['sha256']))
                 yield row
-        write('candidates.jsonl',candidates())
-        write('exclusions.jsonl',(dict(source=s,id=i,reason=r) for s,i,r in db.execute('SELECT * FROM exclusions ORDER BY source,id,reason')))
-        write('lineage.jsonl',(dict(placeId=i,source=s,sha256=sources[s]['sha256'],vintage=sources[s]['vintage'],policy=m['policy']) for i,s in db.execute('SELECT * FROM lineage ORDER BY id,source')))
+        exclusion_rows=lambda:(dict(source=s,id=i,reason=r) for s,i,r in db.execute('SELECT * FROM exclusions ORDER BY source,id,reason'))
+        lineage_rows=lambda:(dict(placeId=i,source=s,sha256=sources[s]['sha256'],vintage=sources[s]['vintage'],policy=m['policy']) for i,s in db.execute('SELECT * FROM lineage ORDER BY id,source'))
+        if partitioned:
+            counts=partition_counts(db,m,len(m['sources']),check);registry=PartRegistry();streams={}
+            def checked_rows(rows):
+                for row in rows:
+                    check()
+                    if len((canonical(row)+'\n').encode())>limits['rowBytes']:raise ValueError('output row byte limit')
+                    yield row
+            for family,rows in (('candidates',candidates()),('lineage',lineage_rows()),('exclusions',exclusion_rows())):
+                streams[family]=write_partitioned_stream(output,family,checked_rows(rows),check,consume,registry=registry)
+            verify_partitioned_streams(output,streams,check,row_limit=limits['rowBytes'],max_bytes=limits['outputBytes'],
+                expected_counts=dict(candidates=counts['accepted'],lineage=counts['lineage'],exclusions=counts['exclusions']))
+        else:
+            write('candidates.jsonl',candidates())
+            write('exclusions.jsonl',exclusion_rows())
+            write('lineage.jsonl',lineage_rows())
         verify_sources(); check()
         if admission_check is not None: admission_check('raw-after')
-        payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode,**({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {}),**({'sourceDomains':source_domains} if source_domains else {}))).encode()
-        check(len(payload))
-        with safe_path(output/'complete.json').open('xb') as f: f.write(payload)
-        check(force=True)
+        if partitioned:
+            frozen_counts=partition_counts(db,m,len(m['sources']),check)
+            checkpoint_bytes,state=partition_descriptor(checkpoint,check)
+            if counts!=frozen_counts or set(state)!=set(checkpoint_identity(counts))|{'databaseSha256'} or any(canonical(state.get(k))!=canonical(v) for k,v in checkpoint_identity(counts).items()) or state['databaseSha256']!=digest(dbpath,check):raise ValueError('frozen checkpoint identity/digest/counts mismatch')
+            verify_partitioned_streams(output,streams,check,row_limit=limits['rowBytes'],max_bytes=limits['outputBytes'],
+                expected_counts=dict(candidates=counts['accepted'],lineage=counts['lineage'],exclusions=counts['exclusions']))
+            payload=canonical(dict(schemaVersion=2,kind='partitioned-normalized-osm-v1',catalogueRevision=revision,
+                manifestSha256=manifest_hash,policy=m['policy'],geographyMode=geography_mode,sourceDomains=source_domains,
+                streams=streams,counts=counts,checkpoint=dict(bytes=len(checkpoint_bytes),sha256=hashlib.sha256(checkpoint_bytes).hexdigest()),
+                **({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {}))).encode()
+            if len(payload)>MAX_DESCRIPTOR_BYTES:raise ValueError('completion descriptor byte limit')
+            consume(len(payload))
+        else:
+            payload=canonical(dict(schemaVersion=1,catalogueRevision=revision,manifestSha256=manifest_hash,files=inventory,coverage='unknown; clipping metadata is not coverage',policy=m['policy'],geographyMode=geography_mode,**({'admissionSnapshotSha256':admission_snapshot} if admission_snapshot is not None else {}),**({'sourceDomains':source_domains} if source_domains else {}))).encode()
+            check(len(payload))
+        if partitioned:
+            pending=safe_path(output/'complete.pending.json');complete=safe_path(output/'complete.json')
+            with pending.open('xb') as f:f.write(payload);f.flush();os.fsync(f.fileno())
+            check(force=True)
+            if safe_path(complete).exists():raise FileExistsError(complete)
+            safe_path(pending);os.rename(pending,complete)
+        else:
+            with safe_path(output/'complete.json').open('xb') as f: f.write(payload)
+            check(force=True)
         return output
     finally:
         db.close()

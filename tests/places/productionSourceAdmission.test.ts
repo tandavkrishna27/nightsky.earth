@@ -154,3 +154,40 @@ test('exact envelope caps source count, mapping count, metadata size and rejects
 test('unsafe numeric manifest controls cannot change Python canonical producer identity through JavaScript rounding',async()=>{
  const f=await fixture();try{f.manifest.limits.sourceBytes=Number.MAX_SAFE_INTEGER+1;await f.repin();await assert.rejects(verifyProductionAdmissionWithContext(f.options(),f.context),/exact safe integral/);}finally{await rm(f.root,{recursive:true,force:true});}
 });
+
+async function versionTwoFixture(){
+ const f=await fixture(),MiB=1024**2,GiB=1024**3;
+ const raw={sourceBytes:3,scratchBytes:2*MiB,outputBytes:512*MiB,rowBytes:1024,nodes:10,candidates:10,referencesPerWay:10,seconds:30,freeBytes:0};
+ const membership={maxCandidateInputBytes:512*MiB,maxBoundaryBytes:MiB,maxVertices:100000,maxTotalVertices:100000,maxComparisons:1000000,maxRows:10,maxOutputBytes:MiB,maxMilliseconds:1000};
+ const catalogue={chunkRows:100,mergeFanIn:2,maxRows:10,fanout:8,maxInputRows:10,maxMetadataRows:10000,maxInputBytes:GiB,maxOutputBytes:MiB,maxScratchBytes:MiB,timeoutMs:1000};
+ const capacity:any={schemaVersion:2,kind:'partitioned-geography-capacity-v1',freeBytes:16*GiB,reserveBytes:0,retainedBytes:0,rawSourceAlreadyRetainedBytes:0,allocations:{raw:3,index:MiB,journal:MiB,normalizedOutput:512*MiB,boundaries:MiB,stagedCandidates:0,stagedBoundaries:MiB,footprints:MiB,membership:MiB,sort:MiB,catalogue:MiB,failureReports:MiB,rollback:0},limits:{raw,membership,catalogue,supervisor:{wallSeconds:60,rssBytes:256*MiB,commitBytes:512*MiB,diskBytes:GiB,freeBytes:0,maxProcesses:2}}};
+ f.manifest.schemaVersion=2;f.manifest.limits=raw;f.manifest.evidenceLayout={kind:'partitioned-jsonl-v1',maxPartBytes:128*MiB,maxParts:64};
+ f.plan.schemaVersion=2;f.plan.evidenceLayout=f.manifest.evidenceLayout;f.plan.maxNormalizedOutputBytes=raw.outputBytes;f.plan.maxCandidateInputBytes=membership.maxCandidateInputBytes;
+ const {maxCandidateInputBytes,...controls}=membership;f.plan.membership=controls;f.plan.catalogue=catalogue;f.plan.stream={maxRowBytes:65536,maxBytes:MiB,maxRows:10};
+ async function capacityPin(){f.plan.capacityPlan=f.abs(await f.file('capacity.json',capacity));await f.repin();}
+ await capacityPin();return {...f,capacity,capacityPin};
+}
+test('version-two admission binds the exact explicit aggregate capacity, layout and code snapshot',async()=>{
+ const f=await versionTwoFixture();try{
+  const first=await verifyProductionAdmissionWithContext(f.options(),f.context);
+  assert.ok(first.metadataPins.some(p=>p.path===f.plan.capacityPlan.path));
+  const identity={policy:f.manifest.policy,evidenceLayout:f.manifest.evidenceLayout,sources:f.manifest.sources.map((source:any)=>Object.fromEntries(Object.entries(source).filter(([key])=>key!=='path').map(([key,value])=>[key,key==='sourceDomain'?Object.fromEntries(Object.entries(value as any).filter(([key])=>key!=='path')):value])))};
+  assert.equal(first.producerCatalogueRevision,'osm-'+h(canonical(identity)));
+  await verifyProductionAdmissionWithContext({...f.options(),expectedSnapshot:first.snapshotSha256},f.context);
+  f.capacity.freeBytes++;await f.capacityPin();
+  await assert.rejects(verifyProductionAdmissionWithContext({...f.options(),expectedSnapshot:first.snapshotSha256},f.context),/snapshot\/resume identity changed/);
+  await assert.rejects(verifyProductionAdmission(f.options()),/quarantined/);
+ }finally{await rm(f.root,{recursive:true,force:true});}
+});
+test('version-two gate rejects missing, inconsistent or changed capacity without caller authority',async()=>{
+ for(const mode of ['missing','tampered','raw','candidate','version']){
+  const f=await versionTwoFixture();try{
+   if(mode==='missing')delete f.plan.capacityPlan;
+   if(mode==='tampered')await writeFile(f.plan.capacityPlan.path,'{}');
+   if(mode==='raw')f.manifest.limits.outputBytes++;
+   if(mode==='candidate')f.plan.maxCandidateInputBytes++;
+   if(mode==='version')f.manifest.schemaVersion=1;
+   await f.repin();await assert.rejects(verifyProductionAdmissionWithContext(f.options(),f.context),undefined);
+  }finally{await rm(f.root,{recursive:true,force:true});}
+ }
+});

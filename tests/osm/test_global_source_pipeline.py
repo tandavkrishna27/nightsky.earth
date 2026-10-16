@@ -1,4 +1,5 @@
 import hashlib
+from contextlib import closing
 import json
 from pathlib import Path
 import sys
@@ -50,6 +51,189 @@ class Pipeline(unittest.TestCase):
 
     def run_build(self, manifest, name='out', **kwargs):
         return build(manifest, self.root/name, **kwargs)
+
+    def partition_manifest(self,bodies):
+        value=self.manifest(bodies);value['schemaVersion']=2
+        value['evidenceLayout']=dict(kind='partitioned-jsonl-v1',maxPartBytes=134217728,maxParts=64)
+        return value
+
+    def partition_rows(self,output,done,family):
+        return [json.loads(line) for pin in done['streams'][family]['parts'] for line in (output/pin['path']).read_bytes().splitlines()]
+
+    def test_v2_source_occurrences_reconcile_frozen_complete_families(self):
+        unnamed='<node id="9" lat="10" lon="20"><tag k="leisure" v="park"/></node>'
+        relation='<relation id="999"><tag k="name" v="Relation"/><tag k="leisure" v="park"/></relation>'
+        invalid='<node id="1" lat="100" lon="20"><tag k="name" v="Park"/><tag k="leisure" v="park"/></node>'
+        manifest=self.partition_manifest([self.node()*2+unnamed*2+relation,self.node()+invalid])
+        output=self.run_build(manifest,'partitioned');done=json.loads((output/'complete.json').read_text())
+        self.assertEqual(set(done),{'schemaVersion','kind','catalogueRevision','manifestSha256','policy','geographyMode','sourceDomains','streams','counts','checkpoint'})
+        self.assertEqual(done['schemaVersion'],2);self.assertEqual(done['kind'],'partitioned-normalized-osm-v1');self.assertEqual(done['sourceDomains'],[])
+        expected=dict(accepted=1,lineage=2,exclusions=4,selectedOccurrences=7,acceptedOccurrences=3,duplicateAcceptedOccurrences=1,
+            sources=[dict(id='s0',selected=5,accepted=2,excluded=3,lineage=1),dict(id='s1',selected=2,accepted=1,excluded=1,lineage=1)])
+        self.assertEqual(done['counts'],expected)
+        checkpoint=json.loads((output/'checkpoint.json').read_text())
+        self.assertEqual(checkpoint['countsSha256'],hashlib.sha256(global_source.canonical(expected).encode()).hexdigest())
+        self.assertEqual(checkpoint['completedSources'],2);self.assertEqual(checkpoint['evidenceLayout'],manifest['evidenceLayout'])
+        self.assertEqual(done['checkpoint'],dict(bytes=(output/'checkpoint.json').stat().st_size,sha256=global_source.digest(output/'checkpoint.json')))
+        exclusions=self.partition_rows(output,done,'exclusions')
+        self.assertEqual(exclusions.count(dict(source='s0',id='place:v1:osm:node:9',reason='unnamed')),2)
+        self.assertIn(dict(source='s1',id='place:v1:osm:node:1',reason='invalid-geometry'),exclusions)
+        self.assertEqual(len(self.partition_rows(output,done,'candidates')),1)
+        self.assertEqual(len(self.partition_rows(output,done,'lineage')),2)
+
+    def test_v2_preserves_v1_selected_facts_and_all_original_evidence_bytes(self):
+        bodies=[self.node()+'<node id="9" lat="0" lon="0"><tag k="leisure" v="park"/></node>',self.node()]
+        legacy=self.manifest(bodies);old=self.run_build(legacy,'legacy-parts-parity')
+        current=self.partition_manifest(bodies);new=self.run_build(current,'new-parts-parity');done=json.loads((new/'complete.json').read_text())
+        self.assertNotEqual(manifest_revision(legacy),manifest_revision(current))
+        for family in ('lineage','exclusions'):
+            self.assertEqual(b''.join((new/pin['path']).read_bytes() for pin in done['streams'][family]['parts']),(old/(family+'.jsonl')).read_bytes())
+        old_rows=[json.loads(line) for line in (old/'candidates.jsonl').read_bytes().splitlines()]
+        new_rows=self.partition_rows(new,done,'candidates')
+        for row in old_rows:row.pop('catalogueRevision')
+        for row in new_rows:row.pop('catalogueRevision')
+        self.assertEqual(old_rows,new_rows)
+
+    def test_v2_empty_selection_and_strict_explicit_layout_budget(self):
+        manifest=self.partition_manifest(['<node id="1" lat="0" lon="0"/>'])
+        output=self.run_build(manifest,'empty-partitions');done=json.loads((output/'complete.json').read_text())
+        for family in done['streams'].values():self.assertEqual(family,dict(bytes=0,rows=0,sha256=hashlib.sha256(b'').hexdigest(),parts=[]))
+        for key,value in [('outputBytes',True),('outputBytes',9007199254740992),('outputBytes',64*134217728+2*1048576+1)]:
+            bad=json.loads(json.dumps(manifest));bad['limits'][key]=value
+            with self.subTest(value=value),self.assertRaises(ValueError):self.run_build(bad,'invalid-explicit-budget')
+        bad=json.loads(json.dumps(manifest));bad['evidenceLayout']['maxParts']=65
+        with self.assertRaises(ValueError):self.run_build(bad,'invalid-layout')
+
+    def test_v2_partial_resume_refuses_before_any_output_mutation(self):
+        manifest=self.partition_manifest([self.node(),self.node()])
+        def interrupt(stage):raise InterruptedError('retain incomplete attempt')
+        with self.assertRaises(InterruptedError):self.run_build(manifest,'partial-partitions',hook=interrupt)
+        output=self.root/'partial-partitions';before={p.name:p.read_bytes() for p in output.iterdir() if p.is_file()}
+        with self.assertRaisesRegex(ValueError,'partial.*resume|resume.*partial'):
+            self.run_build(manifest,'partial-partitions',resume=True)
+        self.assertEqual(before,{p.name:p.read_bytes() for p in output.iterdir() if p.is_file()})
+        absent=self.root/'absent-partitions'
+        with self.assertRaisesRegex(ValueError,'partial.*resume|resume.*partial'):
+            self.run_build(manifest,'absent-partitions',resume=True)
+        self.assertFalse(absent.exists())
+
+    def test_v2_completed_verification_is_readonly_and_rejects_repinned_omissions(self):
+        manifest=self.partition_manifest([self.node()]);output=self.run_build(manifest,'complete-partitions')
+        before={str(p.relative_to(output)):(p.stat().st_mtime_ns,p.read_bytes()) for p in output.rglob('*') if p.is_file()}
+        self.assertEqual(self.run_build(manifest,'complete-partitions',resume=True),output)
+        self.assertEqual(before,{str(p.relative_to(output)):(p.stat().st_mtime_ns,p.read_bytes()) for p in output.rglob('*') if p.is_file()})
+        done=json.loads((output/'complete.json').read_text());done['streams']['lineage']=dict(bytes=0,rows=0,sha256=hashlib.sha256(b'').hexdigest(),parts=[])
+        (output/'complete.json').write_text(global_source.canonical(done))
+        with self.assertRaisesRegex(ValueError,'frozen|counts|unexpected'):
+            self.run_build(manifest,'complete-partitions',resume=True)
+
+    def test_v2_rejects_boolean_counter_substitution_on_completed_verification(self):
+        manifest=self.partition_manifest([self.node()]);output=self.run_build(manifest,'typed-counts')
+        done=json.loads((output/'complete.json').read_text());done['counts']['accepted']=True
+        (output/'complete.json').write_text(global_source.canonical(done))
+        with self.assertRaisesRegex(ValueError,'identity|counts'):
+            self.run_build(manifest,'typed-counts',resume=True)
+
+    def test_v2_counts_commit_with_selection_and_conflicts_leave_no_completion(self):
+        manifest=self.partition_manifest([self.node(),self.node('Changed')])
+        with self.assertRaisesRegex(ValueError,'identity conflict'):
+            self.run_build(manifest,'partition-conflict')
+        output=self.root/'partition-conflict'
+        with closing(global_source.sqlite3.connect(output/'scratch.sqlite')) as db:
+            self.assertEqual(db.execute('SELECT source,selected,accepted,excluded FROM source_counts').fetchall(),[('s0',1,1,0)])
+            self.assertEqual(db.execute('SELECT count(*) FROM candidates').fetchone()[0],1)
+        self.assertFalse((output/'complete.json').exists())
+
+    def test_v2_late_output_or_admission_mutation_never_completes(self):
+        manifest=self.partition_manifest([self.node()]);snapshot='a'*64
+        def late(phase):
+            if phase=='raw-after':
+                part=self.root/'late-part'/'parts'/'candidates-00000.jsonl'
+                part.write_bytes(part.read_bytes().replace(b'Park',b'Dark'))
+        with self.assertRaisesRegex(ValueError,'digest'):
+            self.run_build(manifest,'late-part',admission_check=late,admission_snapshot=snapshot)
+        self.assertFalse((self.root/'late-part'/'complete.json').exists())
+        def reject(phase):
+            if phase=='raw-after':raise ValueError('changed admission snapshot')
+        with self.assertRaisesRegex(ValueError,'changed admission'):
+            self.run_build(manifest,'late-admission',admission_check=reject,admission_snapshot=snapshot)
+        self.assertFalse((self.root/'late-admission'/'complete.json').exists())
+
+    def test_v2_budget_charges_each_checkpoint_and_reports_exact_deficit(self):
+        manifest=self.partition_manifest([self.node()]);manifest['limits']['outputBytes']=1
+        with self.assertRaisesRegex(ValueError,r'aggregate output.*deficit=[1-9][0-9]*'):
+            self.run_build(manifest,'partition-budget')
+        output=self.root/'partition-budget'
+        self.assertFalse((output/'complete.json').exists());self.assertFalse((output/'checkpoint.json').exists())
+
+    def test_v2_final_guard_failure_retains_pending_descriptor_without_completion(self):
+        manifest=self.partition_manifest([self.node()]);output=self.root/'final-partition-stop';original=global_source.ResourceGuard.check
+        def fail_final(guard,*args,**kwargs):
+            if (output/'complete.json').exists() or (output/'complete.pending.json').exists():raise ValueError('synthetic final resource stop')
+            return original(guard,*args,**kwargs)
+        with patch.object(global_source.ResourceGuard,'check',fail_final):
+            with self.assertRaisesRegex(ValueError,'final resource stop'):
+                self.run_build(manifest,'final-partition-stop')
+        self.assertFalse((output/'complete.json').exists())
+
+    def test_v2_cross_source_native_vintage_conflict_cannot_merge(self):
+        manifest=self.partition_manifest([self.node(),self.node()]);source=manifest['sources'][1]
+        path=Path(source['path']);payload=path.read_bytes().replace(b'2026-10-01T00:00:00Z',b'2026-10-02T00:00:00Z');path.write_bytes(payload)
+        source.update(vintage='2026-10-02T00:00:00Z',bytes=len(payload),sha256=hashlib.sha256(payload).hexdigest())
+        with self.assertRaisesRegex(ValueError,'identity conflict'):
+            self.run_build(manifest,'partition-vintage-conflict')
+        self.assertFalse((self.root/'partition-vintage-conflict'/'complete.json').exists())
+
+    def test_v2_second_part_abort_retains_first_part_and_refuses_resume(self):
+        manifest=self.partition_manifest([self.node()+self.node().replace('id="1"','id="2"')]);output=self.root/'second-part-stop'
+        original_writer=global_source.write_partitioned_stream;original_check=global_source.ResourceGuard.check
+        def small_parts(*args,**kwargs):return original_writer(*args,**kwargs,part_limit=1000)
+        def stop(guard,*args,**kwargs):
+            if (output/'parts/candidates-00001.jsonl').exists():raise ValueError('second part global stop')
+            return original_check(guard,*args,**kwargs)
+        with patch.object(global_source,'write_partitioned_stream',small_parts),patch.object(global_source.ResourceGuard,'check',stop):
+            with self.assertRaisesRegex(ValueError,'second part global stop'):
+                self.run_build(manifest,'second-part-stop')
+        self.assertGreater((output/'parts/candidates-00000.jsonl').stat().st_size,0)
+        self.assertFalse((output/'complete.json').exists())
+        with self.assertRaisesRegex(ValueError,'partial partition resume'):
+            self.run_build(manifest,'second-part-stop',resume=True)
+
+    def test_v2_completed_resume_rechecks_parts_inventory_and_sources_after_admission(self):
+        for mode in ('part','extra','source'):
+            with self.subTest(mode=mode):
+                manifest=self.partition_manifest([self.node()]);name='resume-late-'+mode;snapshot='d'*64
+                output=self.run_build(manifest,name,admission_check=lambda phase:None,admission_snapshot=snapshot)
+                marker=(output/'complete.json').read_bytes();mtime=(output/'complete.json').stat().st_mtime_ns
+                def mutate(phase):
+                    if phase!='resume':return
+                    if mode=='extra':(output/'parts'/'unlisted.jsonl').write_bytes(b'')
+                    else:
+                        target=output/'parts'/'candidates-00000.jsonl' if mode=='part' else Path(manifest['sources'][0]['path'])
+                        target.write_bytes(target.read_bytes().replace(b'Park',b'Dark'))
+                with self.assertRaisesRegex(ValueError,'digest|unexpected|admitted source|mutation|hash'):
+                    self.run_build(manifest,name,resume=True,admission_check=mutate,admission_snapshot=snapshot)
+                self.assertEqual((output/'complete.json').read_bytes(),marker)
+                self.assertEqual((output/'complete.json').stat().st_mtime_ns,mtime)
+
+    def test_v2_counter_queries_reject_unbounded_source_results_before_collecting(self):
+        manifest=self.partition_manifest([self.node()])
+        for mode in ('stats','lineage','exclusions','duplicate'):
+            with self.subTest(mode=mode):
+                consumed=[]
+                def unbounded(stats=False,duplicate=False):
+                    for index in range(1000):
+                        consumed.append(index);source='s0' if duplicate else f'unknown-{index}'
+                        yield (source,1,1,0) if stats else (source,1)
+                class DB:
+                    def execute(self,query):
+                        if 'FROM source_counts' in query:return unbounded(True,mode=='duplicate') if mode in ('stats','duplicate') else [('s0',1,1,0)]
+                        if 'FROM lineage' in query:return unbounded() if mode=='lineage' else [('s0',1)]
+                        if 'FROM exclusions' in query:return unbounded() if mode=='exclusions' else []
+                        return SimpleNamespace(fetchone=lambda:(1,))
+                with self.assertRaisesRegex(ValueError,'frozen|source'):
+                    global_source.partition_counts(DB(),manifest,1)
+                self.assertLessEqual(len(consumed),65,'unknown or repeated SQL source rows must stop before allocation grows')
 
     def test_duplicate_lineage_and_resume(self):
         m=self.manifest([self.node(), self.node()]); out=self.run_build(m)

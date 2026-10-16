@@ -26,7 +26,15 @@ CODE_FILES = ('scripts/osm/production-source-admission.ts',
               'scripts/osm/build-source-catalogue.ts', 'scripts/osm/source-build-config.ts',
               'scripts/osm/build-streamed-catalogue.ts', 'scripts/osm/normalized-input-bytes.ts',
               'server/places/catalogueFormat.ts', 'shared/nightsky/discovery.ts',
-              'shared/nightsky/common.ts', 'shared/nightsky/places.ts')
+              'shared/nightsky/common.ts', 'shared/nightsky/places.ts',
+              'scripts/osm/partitioned-assembly-plan.ts',
+              'scripts/osm/partitioned-candidates.ts',
+              'scripts/osm/geography-capacity-plan.ts',
+              'scripts/osm/global_source.py',
+              'scripts/osm/normalized_partitions.py',
+              'scripts/osm/spot_paths.py',
+              'scripts/osm/supervised_membership_assembly.py',
+              'scripts/osm/global_source_supervisor.py')
 PHASES = {'preflight', 'raw-before', 'raw-after', 'assembly-before', 'assembly-after', 'resume'}
 MAX_OUTPUT = 1024**2
 
