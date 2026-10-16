@@ -15,37 +15,46 @@ import News from "./pages/News";
 import NewsArticle from "./pages/NewsArticle";
 import SupportingPage from "./pages/SupportingPages";
 import NotFound from "./pages/not-found";
+import BackgroundMusic from "./components/BackgroundMusic";
+import ExperienceShell from "./components/ExperienceShell";
 export default function App() {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <PageShell>
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/resources" component={Resources} />
-            <Route path="/community" component={Community} />
-            <Route path="/about" component={About} />
-            <Route path="/contact" component={Contact} />
-            <Route path="/get-started" component={GetStarted} />
-            <Route path="/news" component={News} />
-            <Route path="/news/:id" component={NewsArticle} />
-            <Route path="/meteor-showers" component={MeteorNights} />
-            <Route path="/meteor-nights">
-              <Redirect to="/meteor-showers" />
-            </Route>
-            <Route path="/meteor-shower/:id" component={MeteorShowerDetail} />
-            <Route path="/sources">
-              <SupportingPage kind="sources" />
-            </Route>
-            <Route path="/privacy">
-              <SupportingPage kind="privacy" />
-            </Route>
-            <Route path="/terms">
-              <SupportingPage kind="terms" />
-            </Route>
-            <Route component={NotFound} />
-          </Switch>
-        </PageShell>
+        <BackgroundMusic audioUrl="/cosmic-music.mp3">
+          <ExperienceShell>
+            <PageShell>
+              <Switch>
+                <Route path="/" component={Home} />
+                <Route path="/resources" component={Resources} />
+                <Route path="/community" component={Community} />
+                <Route path="/about" component={About} />
+                <Route path="/contact" component={Contact} />
+                <Route path="/get-started" component={GetStarted} />
+                <Route path="/news" component={News} />
+                <Route path="/news/:id" component={NewsArticle} />
+                <Route path="/meteor-showers" component={MeteorNights} />
+                <Route path="/meteor-nights">
+                  <Redirect to="/meteor-showers" />
+                </Route>
+                <Route
+                  path="/meteor-shower/:id"
+                  component={MeteorShowerDetail}
+                />
+                <Route path="/sources">
+                  <SupportingPage kind="sources" />
+                </Route>
+                <Route path="/privacy">
+                  <SupportingPage kind="privacy" />
+                </Route>
+                <Route path="/terms">
+                  <SupportingPage kind="terms" />
+                </Route>
+                <Route component={NotFound} />
+              </Switch>
+            </PageShell>
+          </ExperienceShell>
+        </BackgroundMusic>
       </QueryClientProvider>
     </HelmetProvider>
   );

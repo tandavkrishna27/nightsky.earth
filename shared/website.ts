@@ -2,7 +2,7 @@ export const SITE_ORIGIN = 'https://nightsky.earth';
 export const SUPPORT_EMAIL = 'NightSky.earth2026@gmail.com';
 export type ListingConfig = {published:boolean;url:string|null};
 export function resolvePluginAction(config:ListingConfig) {
-  const unavailable={label:'Get started',href:'/get-started',external:false};
+  const unavailable={label:'Get NightSky for ChatGPT',href:'/get-started',external:false};
   try {
     const url=new URL(config.url || '');
     if(!config.published || url.protocol!=='https:' || url.hostname!=='chatgpt.com' || url.username || url.password || url.port || ['/', '/apps','/plugins','/gpts'].includes(url.pathname.replace(/\/$/,'') || '/')) return unavailable;

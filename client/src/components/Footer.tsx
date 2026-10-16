@@ -14,7 +14,8 @@ const groups: { title: string; links: string[][] }[] = [
   {
     title: "Help",
     links: [
-      ["/get-started", "Get started"],
+      ["/#how-it-works", "How it works"],
+      ["/get-started", "Get NightSky for ChatGPT"],
       ["/contact", "Contact"],
       ["/sources", "Sources & coverage"],
     ],
@@ -44,7 +45,21 @@ export default function Footer() {
           <div className="footer-column" key={group.title}>
             <h2>{group.title}</h2>
             {group.links.map(([href, label]) => (
-              <Link key={href} href={href}>
+              <Link
+                key={href}
+                href={href}
+                onClick={
+                  href.includes("#")
+                    ? () => {
+                        requestAnimationFrame(() =>
+                          document
+                            .getElementById(href.split("#")[1])
+                            ?.scrollIntoView(),
+                        );
+                      }
+                    : undefined
+                }
+              >
                 {label}
               </Link>
             ))}

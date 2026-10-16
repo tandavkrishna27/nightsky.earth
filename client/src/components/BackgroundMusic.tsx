@@ -1,98 +1,95 @@
-import { useRef, useEffect, useState, createContext, useContext } from "react";
-
-interface BackgroundMusicContextType {
-  isMuted: boolean;
-  toggleMute: () => void;
-  isPlaying: boolean;
-  startMusic: () => void;
-}
-
-const BackgroundMusicContext = createContext<BackgroundMusicContextType>({
-  isMuted: false,
-  toggleMute: () => {},
+import {
+  useRef,
+  useState,
+  createContext,
+  useContext,
+  type ReactNode,
+} from "react";
+const MusicContext = createContext({
+  isMuted: true,
   isPlaying: false,
+  isPending: false,
   startMusic: () => {},
+  toggleMute: () => {},
 });
-
-export const useBackgroundMusic = () => useContext(BackgroundMusicContext);
-
-interface BackgroundMusicProps {
+export const useBackgroundMusic = () => useContext(MusicContext);
+export default function BackgroundMusic({
+  audioUrl,
+  volume = 0.3,
+  children,
+}: {
   audioUrl: string;
   volume?: number;
-  shouldStart?: boolean;
-  children: React.ReactNode;
-}
-
-export default function BackgroundMusic({ 
-  audioUrl, 
-  volume = 0.3,
-  shouldStart = false,
-  children 
-}: BackgroundMusicProps) {
+  children: ReactNode;
+}) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const initialized = useRef(false);
+  const requestId = useRef(0);
+  const [isMuted, setIsMuted] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
-  const hasStartedRef = useRef(false);
-
-  // Function to start music unmuted from 5 seconds
+  const [isPending, setIsPending] = useState(false);
   const startMusic = () => {
-    if (!audioRef.current || hasStartedRef.current) return;
-    
     const audio = audioRef.current;
-    hasStartedRef.current = true;
-    
-    // Set volume and position
+    if (!audio) return;
+    const request = ++requestId.current;
+    setIsPending(true);
     audio.volume = volume;
-    audio.currentTime = 5;
     audio.muted = false;
-    
-    // Start playing
-    audio.play()
+    if (!initialized.current) {
+      try {
+        audio.currentTime = 5;
+      } catch {
+        /* Metadata may not be available yet. */
+      }
+    }
+    void audio
+      .play()
       .then(() => {
+        if (request !== requestId.current) return;
+        initialized.current = true;
+        setIsPending(false);
+        setIsMuted(false);
         setIsPlaying(true);
-        console.log('🎵 Cosmic music playing unmuted from 5s...');
       })
-      .catch((error) => {
-        console.log('Music playback failed:', error);
+      .catch(() => {
+        if (request !== requestId.current) return;
+        audio.muted = true;
+        setIsPending(false);
+        setIsMuted(true);
+        setIsPlaying(false);
       });
   };
-
-  // Start music when shouldStart becomes true
-  useEffect(() => {
-    if (shouldStart && !hasStartedRef.current) {
-      startMusic();
-    }
-  }, [shouldStart]);
-
-  useEffect(() => {
-    if (audioRef.current && hasStartedRef.current) {
-      audioRef.current.muted = isMuted;
-    }
-  }, [isMuted]);
-
   const toggleMute = () => {
-    setIsMuted((prev) => {
-      const newMutedState = !prev;
-      
-      // If unmuting and audio hasn't started, try to start it
-      if (!newMutedState && audioRef.current && audioRef.current.paused) {
-        audioRef.current.currentTime = 5;
-        audioRef.current.play().catch(console.log);
-      }
-      
-      return newMutedState;
-    });
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isMuted && !isPending) startMusic();
+    else {
+      requestId.current++;
+      audio.muted = true;
+      audio.pause();
+      setIsPending(false);
+      setIsMuted(true);
+      setIsPlaying(false);
+    }
   };
-
   return (
-    <BackgroundMusicContext.Provider value={{ isMuted, toggleMute, isPlaying, startMusic }}>
+    <MusicContext.Provider
+      value={{ isMuted, isPlaying, isPending, startMusic, toggleMute }}
+    >
       <audio
         ref={audioRef}
         src={audioUrl}
         loop
-        preload="auto"
+        preload="metadata"
+        onError={() => {
+          requestId.current++;
+          if (audioRef.current) audioRef.current.muted = true;
+          setIsPending(false);
+          setIsMuted(true);
+          setIsPlaying(false);
+        }}
       />
       {children}
-    </BackgroundMusicContext.Provider>
+    </MusicContext.Provider>
   );
 }

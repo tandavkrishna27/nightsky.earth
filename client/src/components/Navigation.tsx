@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import PluginAction from "./PluginAction";
 const links = [
-  ["/resources", "Resources"],
-  ["/community", "The Collective"],
-  ["/news", "News"],
   ["/about", "About"],
+  ["/community", "The Collective"],
+  ["/resources", "Resources"],
+  ["/news", "News"],
 ];
 export default function Navigation() {
   const [open, setOpen] = useState(false);

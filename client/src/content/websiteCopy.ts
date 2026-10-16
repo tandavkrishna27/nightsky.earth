@@ -1,12 +1,12 @@
 export const homeCopy = {
   hero: {
-    eyebrow: "Your night-sky companion",
+    eyebrow: "Your night-sky companion, through AI",
     headline: "Where Earth meets the stars.",
-    body: "Explore the night sky with NightSky in ChatGPT. Understand what you could see, choose when to go, and prepare for your time under the stars.",
+    body: "Bring the night sky into the conversation. NightSky is a plugin for your AI assistant, helping you explore the universe, prepare for nights outside, and develop what you want to create beneath the stars.",
   },
   journeys: {
     title: "Journeys Under the Infinite.",
-    body: "A quiet evening, a first photograph, a moment you don’t want to miss. Start with what draws you outside.",
+    body: "A quiet evening, a creative idea, a moment you don’t want to miss. Start with what draws you outside.",
   },
   universe: {
     title: "The Universe, Explained Beautifully.",
@@ -29,8 +29,8 @@ export const activities = [
     label: "Observe",
   },
   {
-    title: "A photograph to work towards",
-    body: "Bring your subject and equipment into the conversation, from a first attempt to a more considered session.",
+    title: "Capture the night",
+    body: "Photography, time-lapses, and video: start with what you want to make. Explore the night, the equipment you have, and the skills you want to develop.",
     topic: "photography",
     label: "Create",
   },

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => sessionStorage.setItem("nightsky-entered", "true")); });
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/news**", (r) =>
     r.fulfill({ json: { count: 0, results: [] } }),
@@ -30,7 +31,7 @@ test("shell, product story and examples", async ({ page }) => {
     .getByRole("button", { name: "Copy question", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Couldn’t copy");
-  expect(await page.locator("audio").count()).toBe(0);
+  expect(await page.locator("audio").count()).toBe(1);
   expect(await page.locator("video").count()).toBe(0);
 });
 test("resources filtering and history", async ({ page }) => {
@@ -51,7 +52,7 @@ test("editorial routes do not invent membership or form success", async ({
 }) => {
   await page.goto("/community");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "For everyone who looks up.",
+    "The Collective",
   );
   await expect(page.locator("form")).toHaveCount(0);
   await page.goto("/contact");

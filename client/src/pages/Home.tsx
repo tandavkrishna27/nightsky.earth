@@ -3,6 +3,7 @@ import { homeCopy, activities } from "@/content/websiteCopy";
 import PluginAction from "@/components/PluginAction";
 import VideoBackground from "@/components/VideoBackground";
 import QuestionExplorer from "@/components/home/QuestionExplorer";
+import PlatformAvailability from "@/components/home/PlatformAvailability";
 import SEO from "@/components/SEO";
 import stars from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
 import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
@@ -30,6 +31,7 @@ export default function Home() {
               Explore what’s possible <span aria-hidden="true">↓</span>
             </a>
           </div>
+          <p className="hero-availability">Launching first on ChatGPT.</p>
         </div>
         <div className="hero-foot">
           <span>For the nights that stay with you.</span>
@@ -38,6 +40,7 @@ export default function Home() {
           </a>
         </div>
       </section>
+      <PlatformAvailability />
       <section id="possibilities" className="section page-width">
         <div className="section-heading">
           <p className="eyebrow">01 / Find your beginning</p>
@@ -74,7 +77,7 @@ export default function Home() {
           </div>
           <QuestionExplorer />
         </div>
-        <div className="page-width getting-started-strip">
+        <div id="how-it-works" className="page-width getting-started-strip">
           {[
             [
               "01",
@@ -113,8 +116,8 @@ export default function Home() {
             [person, "Observe.", "Take time to notice what is above you."],
             [
               trails,
-              "Photograph.",
-              "Explore a subject and learn through the attempt.",
+              "Create.",
+              "Make a photograph, a time-lapse, a story of your own.",
             ],
             [
               milky,
