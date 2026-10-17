@@ -15,6 +15,15 @@ const geometrySchema = z.discriminatedUnion('type', [
     z.strictObject({ type: z.literal('Polygon'), coordinates: polygon }),
     z.strictObject({ type: z.literal('MultiPolygon'), coordinates: z.array(polygon).min(1).max(32) })
 ]);
+const datasourceSchema = z.object({
+    sourcename: z.string().max(120).optional(), attribution: z.string().max(500).optional(),
+    license: z.string().max(160).optional(), url: z.url().max(2048).optional()
+});
+const detailsFeatureSchema = z.object({
+    type: z.literal('Feature'),
+    properties: z.object({ feature_type: z.literal('details'), place_id: z.string().min(1).max(2048), datasource: datasourceSchema.optional() }),
+    geometry: geometrySchema
+});
 const metadataSchema = z.strictObject({
     region: apiRegionSelectionRefSchema,
     upstreamId: z.string().min(1).max(2048),
@@ -81,26 +90,40 @@ function validateTopology(polygons: Ring[][]) {
     }
 }
 
+/** Select only the requested place's Details geometry. Other feature geometries are
+ * never a fallback. Every call owns a fresh parse, independent of snapshot closures.
+ * Public datasource fields are retained; arbitrary metadata and raw OSM tags are not.
+ */
+export function selectOriginalGeometryFeature(body: string, upstreamId: string) {
+    if (Buffer.byteLength(body, 'utf8') > 262144) throw new RangeError('Geometry response exceeds byte cap.');
+    const response = z.object({ type: z.literal('FeatureCollection'), features: z.array(z.object({
+        type: z.literal('Feature'), properties: z.object({ feature_type: z.string().min(1).max(160) }).passthrough()
+    }).passthrough()).min(1).max(20) }).parse(JSON.parse(body));
+    const details = response.features.filter(feature => feature.properties.feature_type === 'details');
+    if (details.length !== 1) throw new RangeError('Exactly one Details feature is required.');
+    const feature = detailsFeatureSchema.parse(details[0]);
+    if (feature.properties.place_id !== upstreamId) throw new RangeError('Selected region identity mismatch.');
+    const geometry = feature.geometry;
+    validateTopology(geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates);
+    if (feature.properties.datasource) Object.freeze(feature.properties.datasource);
+    return feature;
+}
+
 /** Decode a response obtained for already resolved identity. Request metadata is a caller
  * receipt, not proof of live acquisition. No raw response or credentials are retained.
  * Source vintage remains unknown; SHA-256 identifies this normalized snapshot only.
  */
 export function decodeOriginalGeometrySnapshot(body: string, metadata: unknown) {
-    if (Buffer.byteLength(body, 'utf8') > 262144) throw new RangeError('Geometry response exceeds byte cap.');
     const meta = metadataSchema.parse(metadata);
     if (Date.parse(meta.expiresAt) <= Date.parse(meta.fetchedAt) || Date.parse(meta.expiresAt) - Date.parse(meta.fetchedAt) > 3600000) throw new RangeError('Invalid snapshot lifetime.');
-    const response = z.object({ type: z.literal('FeatureCollection'), features: z.array(z.object({
-        type: z.literal('Feature'), properties: z.object({ feature_type: z.literal('details'), place_id: z.string() }), geometry: geometrySchema
-    })).length(1) }).parse(JSON.parse(body));
-    const feature = response.features[0]!;
-    if (feature.properties.place_id !== meta.upstreamId) throw new RangeError('Selected region identity mismatch.');
+    const feature = selectOriginalGeometryFeature(body, meta.upstreamId);
     const geometry = feature.geometry;
+    const datasource = feature.properties.datasource;
     const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
-    validateTopology(polygons);
-    const revision = createHash('sha256').update(JSON.stringify({ ...meta, geometry, policy: GEOMETRY_POLICY })).digest('hex');
+    const revision = createHash('sha256').update(JSON.stringify({ ...meta, geometry, ...(datasource ? { datasource } : {}), policy: GEOMETRY_POLICY })).digest('hex');
     // Closure owns validated coordinates: callers cannot mutate geometry after hashing.
     return Object.freeze({ region: Object.freeze({ ...meta.region }), geometryRevision: revision, sourceVintage: 'unknown' as const,
-        fetchedAt: meta.fetchedAt, expiresAt: meta.expiresAt, policy: GEOMETRY_POLICY,
+        fetchedAt: meta.fetchedAt, expiresAt: meta.expiresAt, policy: GEOMETRY_POLICY, ...(datasource ? { datasource } : {}),
         classify(coordinates: unknown, now: number): State {
             const p = position.parse(coordinates);
             if (!Number.isFinite(now) || now < Date.parse(meta.fetchedAt) || now >= Date.parse(meta.expiresAt)) return 'unknown';

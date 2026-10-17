@@ -24,7 +24,7 @@ const PARAMS: Record<string, string[]> = {
     '/searchJSON': ['q', 'name_equals', 'country', 'adminCode1', 'featureClass', 'featureCode', 'maxRows', 'startRow', 'style', 'lang'],
     '/getJSON': ['geonameId', 'style', 'lang'],
     '/timezoneJSON': ['lat', 'lng', 'radius'],
-    '/v1/geocode/search': ['text', 'type', 'filter', 'lang', 'limit', 'format'],
+    '/v1/geocode/search': ['text', 'country', 'state', 'type', 'filter', 'bias', 'lang', 'limit', 'format'],
     '/v2/place-details': ['id', 'features'],
     '/v2/places': ['categories', 'name', 'filter', 'bias', 'limit', 'offset', 'lang'],
 };
@@ -48,6 +48,8 @@ export class ApiHttpClient {
     async json(provider: ApiProviderId, path: string, query: Record<string, string>, deadline = Date.now() + 15000): Promise<unknown> {
         const expected = provider === 'geonames' ? ['/searchJSON', '/getJSON', '/timezoneJSON'] : ['/v1/geocode/search', '/v2/places', ...(this.config.geometryEnabled && this.config.geometrySourceAccepted ? ['/v2/place-details'] : [])];
         if (!expected.includes(path) || Object.keys(query).some(k => !PARAMS[path]?.includes(k)))
+            throw new ApiProviderError('unsupported-query');
+        if (path === '/v1/geocode/search' && query.text !== undefined && (query.country !== undefined || query.state !== undefined))
             throw new ApiProviderError('unsupported-query');
         if (path === '/v2/place-details' && (!query.id || query.id.length > 2048 || query.features !== 'details,details.full_geometry')) throw new ApiProviderError('unsupported-query');
         const credential = provider === 'geonames' ? this.config.geonamesUsername : this.config.geoapifyApiKey;

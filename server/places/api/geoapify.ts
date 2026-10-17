@@ -5,7 +5,19 @@ import { COUNTRY_ISO3 } from './countryCodes';
 import * as z from 'zod4';
 import type { ApiHttpClient } from './http';
 import type { ApiSourceRecord } from './types';
-import type { Category } from '../../../shared/nightsky/discovery';
+import type { Category, ResolveObservingRegionInput } from '../../../shared/nightsky/discovery';
+const COUNTRY_ISO2 = new Map(Object.entries(COUNTRY_ISO3).map(([alpha2, alpha3]) => [alpha3, alpha2.toLowerCase()]));
+/** One documented forward-geocode query; never retry aliases or loosen country scope. */
+export function geoapifyRegionQuery(input: ResolveObservingRegionInput): Record<string, string> {
+    const country = input.countryCode ? COUNTRY_ISO2.get(input.countryCode) : undefined;
+    if (input.countryCode && !country) throw new ApiProviderError('unsupported-query');
+    return {
+        ...(input.adminLevel === 0 ? { country: input.regionQuery, type: 'country' }
+            : input.adminLevel === 1 ? { state: input.regionQuery, type: 'state' } : { text: input.regionQuery }),
+        ...(country ? { filter: `countrycode:${country}` } : {}),
+        bias: 'countrycode:none', limit: '5', format: 'geojson',
+    };
+}
 export const GEOAPIFY_SOURCE = {
     name: 'Geoapify / OpenStreetMap', url: 'https://www.geoapify.com/', attribution: 'Powered by Geoapify; map data © OpenStreetMap contributors (ODbL).', dataClass: 'context' as const, licenseUrl: 'https://www.openstreetmap.org/copyright'
 };
@@ -44,6 +56,8 @@ export async function geoapifyRecords(http: ApiHttpClient, path: '/v1/geocode/se
         if (!parsed.success)
             throw new ApiProviderError('invalid-response');
         const f = parsed.data;
+        if ((f.properties.result_type === 'country' || f.properties.result_type === 'state') && !COUNTRY_ISO3[f.properties.country_code?.toUpperCase() ?? ''])
+            throw new ApiProviderError('invalid-response');
         const name = f.properties.name ?? f.properties.formatted?.slice(0, 160);
         if (!name)
             throw new ApiProviderError('invalid-response');

@@ -103,7 +103,7 @@ test('country region uses its own provider place filter without a centroid', asy
     assert.equal(result.candidates.length, 1);
     assert.match(urls[1]!, /filter=place%3Acountry-1/);
     assert.equal(result.candidates[0]?.distanceKm, undefined);
-    assert.equal(result.sortBasis, 'source-completeness-then-name-id');
+    assert.equal(result.sortBasis, 'name-then-id');
 });
 test('conflicting duplicate upstream identity invalidates the response', async () => {
     const s = createApiServices({

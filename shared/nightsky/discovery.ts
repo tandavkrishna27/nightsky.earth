@@ -126,6 +126,7 @@ export const searchDiscoveryResultSchema = resultSchema({
     geometryRevision: z.string().regex(/^[a-f0-9]{64}$/), sourceVintage: z.literal('unknown'),
     fetchedAt: z.string().datetime(), expiresAt: z.string().datetime(), policy: z.literal('snapshot-planar-v1'),
     source: sourceRecordSchema,
+    additionalSources: z.array(sourceRecordSchema).max(1).optional(),
   })).max(10).optional(),
   candidates: z.array(candidateRefSchema).max(10),
   sortBasis: z.enum([
@@ -134,6 +135,7 @@ export const searchDiscoveryResultSchema = resultSchema({
     "minimum-distance",
     "maximum-distance",
     "source-completeness-then-name-id",
+    "name-then-id",
   ]),
   coverage: z.string().trim().min(1).max(300),
   discoveryCoverage: discoveryCoverageSchema,

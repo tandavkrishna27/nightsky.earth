@@ -8,7 +8,7 @@ import { uniqueRecords } from './records';
 import { ApiSelectionStore } from './selectionStore';
 import { ApiHttpClient, type ApiConfiguration } from './http';
 import { geonamesResolve, GEONAMES_API_SOURCE } from './geonames';
-import { geoapifyRecords, GEOAPIFY_SOURCE, CATEGORY_MAP } from './geoapify';
+import { geoapifyRecords, geoapifyRegionQuery, GEOAPIFY_SOURCE, CATEGORY_MAP } from './geoapify';
 import type { DiscoveryProvider, ApiSourceRecord } from './types';
 const source = (r: ApiSourceRecord) => ({
     name: r.providerId, url: r.sourceUrl, attribution: r.attribution, dataClass: 'context' as const, issuedAt: r.fetchedAt, licenseUrl: r.providerId === 'geoapify' ? 'https://www.openstreetmap.org/copyright' : 'https://creativecommons.org/licenses/by/4.0/'
@@ -25,6 +25,13 @@ const distance = (a: {
     return 6371 * 2 * Math.asin(Math.min(1, Math.sqrt(h)));
 };
 const caveats = ['Provider records do not verify darkness, public access, night opening, permits, safety or current closures.'];
+const geometrySources = (g: GeometrySnapshot) => g.datasource && Object.values(g.datasource).some(value => value?.trim()) ? [{
+    name: g.datasource.sourcename?.trim() || 'Geoapify upstream data',
+    url: g.datasource.url || GEOAPIFY_SOURCE.url,
+    attribution: g.datasource.attribution?.trim() || GEOAPIFY_SOURCE.attribution,
+    dataClass: 'context' as const, issuedAt: g.fetchedAt,
+    ...(g.datasource.license?.trim() ? { product: g.datasource.license.trim() } : {}),
+}] : undefined;
 export class ApiDiscoveryProvider implements DiscoveryProvider {
     private http: ApiHttpClient;
     private geometry: GeometryAcquisition;
@@ -161,11 +168,7 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
         let failed = false;
         if (this.config.geoapifyApiKey) {
             try {
-                const rows = await geoapifyRecords(this.http, '/v1/geocode/search', {
-                    text: parsed.regionQuery, ...(parsed.adminLevel !== undefined ? {
-                        type: parsed.adminLevel === 0 ? 'country' : 'state'
-                    } : {}), limit: '5', format: 'geojson'
-                }, this.now);
+                const rows = await geoapifyRecords(this.http, '/v1/geocode/search', geoapifyRegionQuery(parsed), this.now);
                 for (const { record: r } of rows.items) {
                     const e = r.regionEvidence;
                     if (!e || (parsed.countryCode && e.countryCode !== parsed.countryCode) || (parsed.adminLevel !== undefined && e.adminLevel !== parsed.adminLevel))
@@ -246,6 +249,8 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
             });
             if (!r)
                 throw new CalculationPlaceClarificationError('resolve-again', 'The API origin snapshot expired. Resolve again.');
+            if (r.regionEvidence)
+                throw new CalculationPlaceClarificationError('resolve-again', 'A country or state center is not an observing origin. Select its region scope or resolve a named town or site.');
             return r;
         });
         let geometry = new Map<string, GeometrySnapshot>();
@@ -341,8 +346,8 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
         if (selected.length > parsed.limit)
             truncated = true;
         return searchDiscoveryResultSchema.parse({
-            ...base, ...(needsGeometry ? { geometryEvidence: Array.from(geometry.values()).map(g => ({ ...g.region, geometryRevision: g.geometryRevision, sourceVintage: g.sourceVintage, fetchedAt: g.fetchedAt, expiresAt: g.expiresAt, policy: 'snapshot-planar-v1', source: { ...GEOAPIFY_SOURCE, url: 'https://apidocs.geoapify.com/docs/place-details/', issuedAt: g.fetchedAt } })) } : {}), sources: selected.length ? Array.from(new Map(selected.flatMap(c => c.sources).map(s => [JSON.stringify(s), s])).values()) : [GEOAPIFY_SOURCE], sourceAttempts, ...(!origins.length ? {
-                sortBasis: 'source-completeness-then-name-id'
+            ...base, ...(needsGeometry ? { geometryEvidence: Array.from(geometry.values()).map(g => ({ ...g.region, geometryRevision: g.geometryRevision, sourceVintage: g.sourceVintage, fetchedAt: g.fetchedAt, expiresAt: g.expiresAt, policy: 'snapshot-planar-v1', source: { ...GEOAPIFY_SOURCE, url: 'https://apidocs.geoapify.com/docs/place-details/', issuedAt: g.fetchedAt }, ...(geometrySources(g) ? { additionalSources: geometrySources(g) } : {}) })) } : {}), sources: selected.length ? Array.from(new Map(selected.flatMap(c => c.sources).map(s => [JSON.stringify(s), s])).values()) : [GEOAPIFY_SOURCE], sourceAttempts, ...(!origins.length ? {
+                sortBasis: 'name-then-id'
             } : {}), candidates: selected.slice(0, parsed.limit), availability: {
                 status: failure ? 'partial' : selected.length ? 'available' : 'not-covered', reason: failure ? 'A source request failed or a candidate has unknown snapshot membership; returned candidates preserve every requested constraint.' : 'Bounded source search completed; access and darkness are unverified.'
             }, truncationReason: truncated ? 'Provider page or requested candidate limit reached.' : undefined, discoveryCoverage: {
