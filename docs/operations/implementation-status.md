@@ -1,5 +1,7 @@
 # NightSky V1 implementation status
 
+**Current status authority — 17 October API-first regroom:** Use the [current tracker](v1-completion-tracker.md), [reconciled ticket matrix](v1-remaining-ticket-release-matrix.md) and [API-first implementation plan](../superpowers/plans/2026-10-17-api-first-v1-regroom.md). API/search discovery replaces mandatory bulk catalogue construction. History/events remain explicit independent requirements. Entries below are dated implementation evidence, not the current acquisition sequence. Original counts remain 12 Done / 9 Partial / 6 Not started pending actual acceptance; no completion credit for deferral.
+
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
 **Acquisition readiness, 16 October:** [Delivery](acquisition-readiness-delivery.md) reconciles retained history with explicit holdbacks, prepares the bounded global acquisition path and checks geography allocation arithmetic. Execution and production coverage remain separate gates. No new downloads or deployment; original 12/9/6 unchanged.

@@ -1,5 +1,7 @@
 # NightSky V1 Task Sequence and Parallel Work Map
 
+**Historical sequence — superseded for current execution on 17 October 2026.** Follow [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current tracker](../../operations/v1-completion-tracker.md) and [ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md). Counts and next-wave directions below are historical snapshots. Do not restart bulk catalogue acquisition from this map. Original ticket IDs/evidence remain preserved.
+
 **Purpose:** Companion to the [V1 execution plan](2026-10-10-nightsky-v1-execution-ready.md). This document maps every numbered/lettered task to its prerequisites, safe parallel work, and release impact. The execution plan remains the source for task acceptance criteria and test details.
 
 **Planning snapshot:** 13 October 2026. Current implementation counts and evidence are maintained in the [implementation status audit](../../operations/implementation-status.md), also dated 13 October 2026. This map does not change task completion status.

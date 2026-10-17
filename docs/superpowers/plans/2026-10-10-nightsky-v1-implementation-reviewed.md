@@ -1,6 +1,8 @@
 # NightSky.earth V1 Implementation Plan
 
-> **Planning status:** Roadmap and decision record. The authoritative ordered implementation checklist is [the V1 execution plan](2026-10-10-nightsky-v1-execution-ready.md). Older subsystem work-package files are retained as background only; do not execute their stale website, sharing, or calendar tasks.
+**Current execution authority (17 October 2026):** The owner approved API/search-based discovery with multiple suitable free sources. Use [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) and [tracker](../../operations/v1-completion-tracker.md) for changed acceptance/dependencies. Preserve original ticket IDs and evidence below. Mandatory bulk planet/catalogue launch prerequisites are superseded; historical-weather and event capabilities are not automatically removed.
+
+> **Planning status:** Roadmap and decision record. Original ticket definitions are in [the V1 execution plan](2026-10-10-nightsky-v1-execution-ready.md); current changed acceptance and order are in [the API-first regroom](2026-10-17-api-first-v1-regroom.md). Older subsystem work-package files are retained as background only; do not execute their stale website, sharing, or calendar tasks.
 
 **Goal:** Deliver the free, assistant-first NightSky.earth V1: help a user discover source-linked candidate observing places and plan what to see and when for their activity, place and date. The discovery and planning journey ships through ChatGPT first and a shared MCP service for other compatible assistants.
 

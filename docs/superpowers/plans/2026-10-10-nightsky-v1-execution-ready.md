@@ -1,8 +1,10 @@
 # NightSky.earth V1 Execution Plan
 
+**Current execution authority (17 October 2026):** The owner approved API/search-based discovery with multiple suitable free sources. Use [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) and [tracker](../../operations/v1-completion-tracker.md) for changed acceptance/dependencies. Preserve original ticket IDs and evidence below. Mandatory bulk planet/catalogue launch prerequisites are superseded; historical-weather and event capabilities are not automatically removed.
+
 15 October discovery extension: [global design and combinations](../../product/global-discovery-design.md) and [implementation tasks/dependencies](2026-10-15-nightsky-global-discovery.md). Documentation only; existing ticket counts and checkboxes unchanged. Actual global acquisition, installed-model validation and deployment remain separate gates.
 
-> **For agentic workers:** Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` when the owner chooses an execution approach. Follow the [task sequence and dependency map](2026-10-12-nightsky-v1-sequence-and-dependency-map.md): complete prerequisites, work within the developer-ready packets, and parallelize only isolated lanes with stable interfaces. Do not deploy, submit, or publish without the owner’s explicit authorization.
+> **For agentic workers:** Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` when the owner chooses an execution approach. Follow the [API-first regroom](2026-10-17-api-first-v1-regroom.md): complete prerequisites, work within the developer-ready packets, and parallelize only isolated lanes with stable interfaces. Do not deploy, submit, or publish without the owner’s explicit authorization.
 
 **Goal:** Build the free, assistant-first NightSky.earth V1 so a person can find source-linked candidate observing places, choose a suitable time for their activity, understand what they may see, inspect the sky and weather evidence, and prepare for the outing.
 
@@ -12,7 +14,7 @@
 
 **Tech stack:** Node.js 24 LTS baseline; existing TypeScript 5.6, Express 4, React 18, Vite 5, Zod 3, and `tsx`; evaluate the current stable MCP TypeScript SDK v2 packages (`@modelcontextprotocol/server` and the Express adapter) and their runtime requirements in Task 1. The v2 SDK expects Standard Schema-compatible schemas such as Zod v4; test the `zod/v4` subpath against the current app before changing existing Zod 3 consumers. Use `node:test` through `tsx` with fixture-backed tests. Verify all runtime/library combinations in the Windows/Linux CI matrix before deployment.
 
-**Spec:** [Product scope V1–V3](../../product-scope-v1-v3.md). The earlier [core service](2026-10-10-nightsky-v1-core-service.md), [user workflows](2026-10-10-nightsky-v1-workflows.md), and [platform launch](2026-10-10-nightsky-v1-platform-launch.md) files are historical work-package notes; this document is the only execution checklist.
+**Spec:** [Product scope V1–V3](../../product-scope-v1-v3.md). The earlier [core service](2026-10-10-nightsky-v1-core-service.md), [user workflows](2026-10-10-nightsky-v1-workflows.md), and [platform launch](2026-10-10-nightsky-v1-platform-launch.md) files are historical work-package notes; this document preserves the original ticket IDs; the API-first regroom linked above owns current changed acceptance and execution order.
 
 ## Global Constraints
 
@@ -60,7 +62,7 @@
 
 There are 19 numbered task groups (0–18). Groups 3, 4, 7, 10, 11, and 12 include independently reviewable lettered tasks; Task 0 contains six separately passable preflight gates.
 
-For the complete per-task dependency order, parallel lanes, Task 0 gate breakdown, and Mermaid map, see the [V1 sequence and dependency map](2026-10-12-nightsky-v1-sequence-and-dependency-map.md). This companion map explains ordering; the task descriptions below remain the source for implementation steps and acceptance criteria.
+For current dependency order and parallel lanes, see the [API-first regroom](2026-10-17-api-first-v1-regroom.md) and [current tracker](../../operations/v1-completion-tracker.md). The [old sequence map](2026-10-12-nightsky-v1-sequence-and-dependency-map.md) is historical; task descriptions below preserve original definitions subject to the current acceptance amendments.
 
 ## Delivery groups
 

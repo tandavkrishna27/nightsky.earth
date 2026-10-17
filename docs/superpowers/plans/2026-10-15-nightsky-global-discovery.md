@@ -1,5 +1,7 @@
 # NightSky global discovery implementation plan
 
+**Current execution authority (17 October 2026):** The owner approved API/search-based discovery with multiple suitable free sources. Use [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) and [tracker](../../operations/v1-completion-tracker.md) for changed acceptance/dependencies. Preserve original ticket IDs and evidence below. Mandatory bulk planet/catalogue launch prerequisites are superseded; historical-weather and event capabilities are not automatically removed.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking. Preserve the owner's execution method and final-audit timing.
 
 **Goal:** Support bounded global candidate discovery across named places, countries, states and combined scopes, followed by planning at the selected candidate's actual point.
