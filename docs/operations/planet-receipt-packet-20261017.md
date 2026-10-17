@@ -156,6 +156,10 @@ not measured pagefile storage length.
 
 ## Work still required before a receipt
 
+### Later r2 attempt — root ceiling stop, no cleanup
+
+After Git recovery and the coordinator's explicit storage-settled signal, the existing reviewed `--write` mode ran once with all retained files and zero reclamation credit. It stopped before inventory with `receiver 64-root ceiling exhausted by assigned cache children`: 78 children now exceed the fixed 53-child allowance, requiring at least 89 combined roots against the unchanged 64-root maximum. No r2 inventory/draft was written, so `--probe-existing` was not run and compatibility remains unknown. The [retained stop report](data-pilot-evidence/planet-receipt-r2-preparation-stop-20261017.json) pins the actual log and fresh counters. The [next decision](geography-next-acquisition-capacity-decision-20261017.md#fresh-authorized-r2-preparation-result) proposes reviewing whole-cache accounting with a future attempt outside that retained parent; no path layout, cap or runtime code changed in this attempt. Unanswered cleanup approval means retain everything, not wait for permission to retain files or perform authorized read-only checks.
+
 Obtain the actual separate operator decision. A later actual allowance must
 contain its real reference, be independently retained and included in the
 retained-path list, and be bound by its exact physical-file SHA-256. Re-run the
