@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
+import { V1_TOOL_ANNOTATIONS } from "../../server/mcp/registerTools";
+import { OPTIONAL_SKY_TOOL_NAMES } from "../../server/mcp/optionalSkyTools";
+import { LIGHT_POLLUTION_TOOL_NAMES } from "../../server/mcp/lightPollutionTools";
 
 const root = process.cwd();
 
@@ -17,7 +20,7 @@ test("all workflows distinguish admitted 2027 maxima from prior-year forecasts",
     assert.doesNotMatch(canonical, /Only QUA, ETA, SDA, PER, CAP and GEM overlap the NASA timing list/);
   }
 });
-const tools = ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"];
+const tools: readonly string[] = [...Object.keys(V1_TOOL_ANNOTATIONS), ...OPTIONAL_SKY_TOOL_NAMES, ...LIGHT_POLLUTION_TOOL_NAMES];
 const skillNames = ["find-observing-place", "plan-stargazing-night", "plan-astrophotography", "plan-sky-event", "prepare-outing"];
 
 function read(path: string): string { return readFileSync(join(root, path), "utf8"); }
