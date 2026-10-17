@@ -41,3 +41,9 @@ The owner explicitly approved a real-data local test: ten minutes, eight request
 The existing `nightsky@nightsky-native-acceptance-20261017` installation was updated through the supported CLI to **1.0.16**, not duplicated. Package SHA-256: `bb7e3e255262b00750e46562bdf9ddf544e835e5d7ba9391dbe7f1e5ce1bd927`. Real API-mode launcher started at `http://127.0.0.1:8765/mcp`; an HTTP inventory check returned 20 tools without any provider call. This proves local transport, not native-host skill loading or answer acceptance. The owner was asked to refresh/select the plugin and paste the complete Hyderabad planning answer.
 
 The extra JPL-only public-error request was explained but has not received affirmative authorization; its script is offline preparation only. No extra JPL request is implied by approval of the separate native session.
+
+## Real tool-level Hyderabad plan
+
+Within the same approved eight-request native-session envelope, the coordinator called the actual HTTP MCP resolver and aggregate planner (no model). Hyderabad was resolved by Geoapify with source-verified Asia/Kolkata. The plan requested 17 October 2026 22:00 to 18 October 04:00 IST. Five source requests returned HTTP 200: Geoapify geocode and nearby places, MET Norway, WeatherAPI and OpenWeather; **162,202 accepted bytes**. The three separate forecasts contained **9 / 7 / 2 samples** respectively. Overall weather remained partial because evidence is incomplete; no forecast averaging or site-access verification was inferred.
+
+Normalized local evidence is retained in ignored `dist/native-real-hyderabad-plan-20261017.json`, labelled `synthetic:false` and `nativeModel:false`. This establishes the assembled real API/MCP planning path, not complete native skill loading or the owner's answer acceptance. Three of the eight request slots remained at this observation; the original ten-minute deadline was not extended.
