@@ -1,4 +1,4 @@
-export type UpstreamProvider = "met" | "noaa" | "geonames" | "geoapify";
+export type UpstreamProvider = "met" | "weatherapi" | "openweather" | "noaa" | "geonames" | "geoapify";
 export interface UpstreamBounds {
   globalConcurrency?: number;
   providerConcurrency?: number;
@@ -219,3 +219,4 @@ export function upstreamRequestKey(
       .join("")
   );
 }
+

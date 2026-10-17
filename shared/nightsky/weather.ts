@@ -22,12 +22,24 @@ export const weatherForecastSchema = z.strictObject({
 export type WeatherForecast = z.infer<typeof weatherForecastSchema>;
 
 export const getNightConditionsInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, includeHourly: z.boolean().default(true) }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A night-conditions request may cover at most 24 hours so its darkness context stays specific to one observing night.");
+export const weatherProviderIdSchema = z.enum(["met", "weatherapi", "openweather"]);
+export const weatherProviderOutcomeSchema = z.strictObject({
+  providerId: weatherProviderIdSchema,
+  status: z.enum(["available", "partial", "stale", "unavailable", "not-covered", "out-of-horizon"]),
+  reason: z.string().trim().min(1).max(500),
+  source: sourceRecordSchema,
+});
+export const weatherProviderOutcomesSchema = z.array(weatherProviderOutcomeSchema).max(4).refine(
+  outcomes => new Set(outcomes.map(outcome => outcome.providerId)).size === outcomes.length,
+  "Weather provider IDs must be unique.",
+);
 export const nightConditionsResultSchema = resultSchema({
   placeId: placeIdSchema,
   sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(),
   displayTimeZone: ianaTimeZoneSchema.optional(),
   window: timeWindowSchema,
   forecasts: z.array(weatherForecastSchema).max(4),
+  providerOutcomes: weatherProviderOutcomesSchema.optional(),
   nightContext: z.strictObject({
     darkness: z.discriminatedUnion("status", [
       z.strictObject({ status: z.literal("available"), startUtc: utcInstantSchema, endUtc: utcInstantSchema, localStart: z.string(), localEnd: z.string() }),
@@ -56,3 +68,4 @@ export const auroraOutlookResultSchema = resultSchema({
   latitudeBand: z.enum(["equatorial", "mid-latitude", "high-latitude", "polar", "unknown"]),
 });
 export type AuroraOutlookResult = z.infer<typeof auroraOutlookResultSchema>;
+

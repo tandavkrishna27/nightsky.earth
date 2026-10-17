@@ -20,3 +20,23 @@ export interface WeatherPlace {
 export interface WeatherProvider {
   getForecast(place: WeatherPlace, window: { startUtc: string; endUtc: string; timeZone: string }): Promise<WeatherProviderResult>;
 }
+
+export type WeatherProviderId = "met" | "weatherapi" | "openweather";
+export interface WeatherProviderEntry {
+  id: WeatherProviderId;
+  provider: WeatherProvider;
+  enabled: boolean;
+}
+export interface WeatherCollection {
+  outcomes: Array<{ providerId: WeatherProviderId; result: WeatherProviderResult }>;
+}
+export interface WeatherCollectionService {
+  getForecasts(place: WeatherPlace, window: { startUtc: string; endUtc: string; timeZone: string }): Promise<WeatherCollection>;
+}
+export interface WeatherAdapterOptions {
+  apiKey: string;
+  fetcher: typeof fetch;
+  now: () => number;
+  controls: import("../upstreamControls").UpstreamControls;
+  quota: import("../quotaTypes").ProviderQuota;
+}
