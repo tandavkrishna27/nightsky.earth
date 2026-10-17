@@ -44,6 +44,8 @@ The coordinator preserved 27 metadata/root records (3,585,739 bytes) and reports
 
 ## Remaining gates
 
+The [next acquisition and capacity decision](geography-next-acquisition-capacity-decision-20261017.md) is the current finite proposal after Git recovery: hold acquisition/build now; settle the owner storage decision before r2; consider only a separately authorized identity receipt after fresh inventory/compatibility/containment review; then require actual native/source admission and a complete coupled v3 count/byte/validation/geometry/time/storage envelope before any build. The prior synthetic fixture and historical capacity table do not establish those actual gates. The coordinator owns the interrupted aggregate rerun and current integrated-tip CI.
+
 The selected planet is absent from policy and trusted reviews. Actual local SHA-256, native vintage and source-domain evidence require separately authorized receipt. The r2 packet remains a preparation draft with null approval and execution disabled. Completed selection/footprints, end-to-end throughput, stream/work/capacity fit, derivative distribution decisions, catalogue/query/concurrency/rollback measurements and concrete serving installation approval remain outstanding. Preparation stays separate from the 2 CPU / 4 GB Hetzner serving host. Natural Earth admission does not confer global scanning, public redistribution, deployment or planet approval.
 
 Acceptance totals remain coordinator-owned **12 Done / 9 Partial / 6 Not Started**. No worldwide completion or serving-fit claim is made.
