@@ -22,7 +22,7 @@
 
 ## Research addendum — 17 October 2026
 
-See the [consolidated API and cleanup plan](../../operations/api-provider-research-and-cleanup-plan.md) and its three primary-source reports. Recommended location shortlist: GeoNames + Geoapify Free; public Overpass/Nominatim are not default production backends. Retain MET Norway, NOAA and local astronomy. Evaluate CDS point time-series for exact history; Open-Meteo/7Timer hosting eligibility is conditional. Optional sources do not automatically expand V1. Source research is complete for this pass; admission contracts, account configuration, live checks and implementation remain open.
+See the [consolidated API and cleanup plan](../../operations/api-provider-research-and-cleanup-plan.md) and its three primary-source reports. Location shortlist: GeoNames + Geoapify Free; public Overpass/Nominatim are not default production backends. Retain MET Norway, NOAA and local astronomy. The later source decision selects Open-Meteo ERA5 as the conditional historical route; CDS is not the active implementation route. Initial Geoapify/MET/WeatherAPI/OpenWeather activation and durable quota accounting have evidence, while broader admission, post-trial entitlement and remaining historical/geometry/event coverage remain open. See the [current tracker](../../operations/v1-completion-tracker.md) rather than restarting account setup or the earlier CDS evaluation. Optional sources do not automatically expand V1.
 
 Cleanup follows the consolidated plan: exact raw-file manual list first; preserve required GeoNames reference until API runtime replacement passes; keep optional builders/tests and metadata. No deletion is performed by this addendum.
 
@@ -156,6 +156,6 @@ Keep remaining unsupported combinations, historical coverage, source rights/acti
 
 ## Immediate next concrete work — corrected after implementation
 
-Follow [multiple-weather activation](2026-10-17-multi-weather-activation.md) for new provider admission, persistent quotas, adapters, shared conditions/planner integration and local verification. Existing B/C/D implementation is not work to restart. Remaining unsupported geographic combinations, historical API feasibility and event/source gaps remain separate parent obligations. API account creation is not live acceptance.
+Follow the [parallel local completion run](../../operations/parallel-completion-run-20261017.md) for remaining geography, practical historical API delivery and event guidance, alongside API-mode policy, measurement and rehearsal work. The [multiple-weather activation plan](2026-10-17-multi-weather-activation.md) retains its implemented evidence and unresolved acceptance gates; existing B/C/D and durable quota/account setup are not work to restart. API account creation and initial connectivity are not universal live acceptance. Previously consumed live allowances grant no further requests.
 
 Self-review: provider contracts precede adapters; shared files have one owner; source-specific forecasts must survive planning; free entitlement is checked per endpoint; history remains required; optional catalogue code is preserved. The follow-up document is a plan, not passing-test or activation evidence.

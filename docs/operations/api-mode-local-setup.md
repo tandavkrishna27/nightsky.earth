@@ -86,3 +86,27 @@ Recovery: verify the previous process is dead before removing only a stale lock;
 On 17 October 2026, the existing Geoapify, WeatherAPI and OpenWeather keys and MET contact string were stored in the owner-only/SYSTEM local file `C:/Users/TK/.nightsky/providers.env`. This is outside Git and does not select/admit providers, initialize quota state or send requests. Use Node 24 `--env-file` to load it into an explicitly approved child process; never print its contents or copy it into reports. The earlier account-verification paragraphs describe the pre-configuration state. The bounded live proposal records the remaining quota, source and execution gates.
 
 Subsequently the owner confirmed these accounts were unused elsewhere. The explicit initializer created `C:/Users/TK/.nightsky/provider-quota.json` successfully and released its lock; owner/SYSTEM permissions were verified. Its path is now in the private environment file. No provider call occurred. Preserve this ledger; do not initialize it again or delete it to reset allowance.
+
+## Optional historical summary serving
+
+The standalone API-mode server now supports an explicitly configured, read-only
+historical summary cache. Leave both settings absent for the default behavior:
+
+| Variable | Contract |
+| --- | --- |
+| `NIGHTSKY_API_HISTORY_CACHE_DIRECTORY` | Dedicated absolute local directory; bounded to 64 summary entries; linked paths rejected |
+| `NIGHTSKY_API_HISTORY_ADMISSION` | Strict JSON admission identifying the reviewed hosted source, method and policy revision; see the history handoff |
+
+Both settings are required together. Startup rejects non-API discovery modes and
+legacy climate artifact/release settings combined with this cache. A valid JSON
+record is not evidence that the source has been accepted: operator preflight
+continues to report admission/resource validation pending. No real admission was
+configured in this completion run.
+
+Planning requests only read completed summaries. They never fetch, enqueue or
+rebuild history. The separately authorized operator worker and its exact request,
+quota, byte, time and cache bounds are documented in
+[the history handoff](API-HISTORY-COMPLETION.md). That worker is not started by the
+server. No production baseline was acquired. Durable summaries and acquisition
+journals can contain destination coordinates and request URLs; see the updated
+privacy draft and establish retention before enabling this path.

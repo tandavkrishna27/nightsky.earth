@@ -146,3 +146,83 @@ test("additional reviewed shower names and codes reach their own bounded radiant
     }
   }
 });
+
+function realEventServices(): PlannerServices {
+  return { ...services(), searchEvents: (p, w) => searchSkyEvents({ placeId: p, window: w, eventTypes: ["meteor-shower"] }, index) };
+}
+function meteorWindow(startUtc: string, endUtc: string) { return { startUtc, endUtc, timeZone: "Europe/London" }; }
+
+test("Draconid source-general civil guidance retains northern qualifications and one unsupported model explanation", async () => {
+  const result = await planObservingSession({ placeId, activity: "meteor-shower", target: "Draconids", window: meteorWindow("2026-10-08T18:00:00Z", "2026-10-09T04:00:00Z") }, realEventServices());
+  const factor = result.factors.find(row => row.name === "Meteor civil calendar guidance")!;
+  assert.ok(factor);
+  assert.match(factor.assessment, /source-general visibility dates 10-06 to 10-10/);
+  assert.doesNotMatch(factor.assessment, /typical annual/);
+  assert.match(factor.assessment, /Northern hemisphere/);
+  assert.match(factor.assessment, /2026.*October 9.*2 a.m.*UT-as-published.*approximate/);
+  assert.ok(result.sources.some(row => row.url === "https://astronomia.ign.es/en/draconidas"));
+  assert.equal(result.evidence!.meteorRadiantSamples!.length, 1);
+  assert.equal(result.evidence!.meteorRadiantSamples![0]!.status, "unsupported");
+  assert.match(result.factors.find(row => row.name === "Meteor radiant visibility")!.assessment, /no reviewed model/i);
+  assert.doesNotMatch(result.factors.find(row => row.name === "Meteor radiant visibility")!.assessment, /outside.*fit window/i);
+  assert.ok(result.gaps.some(row => /no reviewed model/i.test(row)));
+  assert.equal(result.evidence!.meteorRadiantSamples![0]!.evaluatedAt, "2026-10-08T18:00:00.000Z");
+  assert.ok(!("altitudeDeg" in result.evidence!.meteorRadiantSamples![0]!));
+  assert.ok(result.evidence!.astronomy);
+  assert.ok(result.evidence!.weather);
+});
+
+test("Ursid civil hour reference and NASA forecast stay distinct in a selected plan", async () => {
+  const result = await planObservingSession({ placeId, activity: "meteor-shower", target: "URS", window: meteorWindow("2026-12-22T12:00:00Z", "2026-12-23T04:00:00Z") }, realEventServices());
+  const factor = result.factors.find(row => row.name === "Meteor civil calendar guidance")!;
+  assert.match(factor.assessment, /December 22 at 22h universal time.*UT-as-published.*hour precision; numerical uncertainty not supplied/);
+  assert.equal(result.evidence!.meteorRadiantSamples!.length, 1);
+  assert.equal(result.evidence!.meteorRadiantSamples![0]!.status, "unsupported");
+  assert.match(result.factors.find(row => row.name === "Meteor radiant visibility")!.assessment, /no reviewed model/i);
+  assert.doesNotMatch(result.factors.find(row => row.name === "Meteor radiant visibility")!.assessment, /outside.*fit window/i);
+  assert.ok(result.gaps.some(row => /no reviewed model/i.test(row)));
+  assert.ok(result.evidence!.events!.events.some(row => row.peakUtc === "2026-12-22T15:54:00Z"));
+  assert.ok(result.sources.some(row => row.url === "https://astronomia.ign.es/en/ursidas"));
+  assert.ok(result.sources.some(row => row.vintage === "NASA-MEO-2026-issued-2025-10-17"));
+});
+
+test("selected Orionid summaries exclude the Draconid maximum and preserve date precision", async () => {
+  for (const [start, end] of [["2026-10-09T01:00:00Z", "2026-10-09T03:00:00Z"], ["2027-10-21T18:00:00Z", "2027-10-22T04:00:00Z"]]) {
+    const result = await planObservingSession({ placeId, activity: "meteor-shower", target: "ORI", window: meteorWindow(start!, end!) }, realEventServices());
+    assert.doesNotMatch(result.factors.find(row => row.name === "Meteor shower and sky events")!.assessment, /Draconids/i);
+    const factor = result.factors.find(row => row.name === "Meteor civil calendar guidance")!;
+    assert.match(factor.assessment, /10-02 to 11-07/);
+    if (start!.startsWith("2026")) {
+      assert.match(factor.assessment, /unspecified-by-source.*day precision; secondary peaks possible/);
+      assert.ok(result.evidence!.meteorRadiantSamples!.every(row => row.status === "outside-model"));
+      assert.ok(result.evidence!.events!.events.some(row => /Draconids/i.test(row.name)));
+    } else {
+      assert.match(factor.assessment, /2026 maximum does not apply/);
+      assert.ok(result.evidence!.meteorRadiantSamples!.some(row => row.status === "available"));
+    }
+    assert.doesNotMatch(factor.assessment, /1 a.m./);
+  }
+});
+
+test("ambiguous meteor selections do not inherit a single Draconid event", async () => {
+  const w = meteorWindow("2026-10-09T01:00:00Z", "2026-10-09T03:00:00Z");
+  const inferred = await planObservingSession({ placeId, activity: "meteor-shower", window: w }, realEventServices());
+  assert.equal(inferred.evidence!.meteorRadiantSamples![0]?.code, "DRA");
+  for (const target of ["Taurids", "Delta Aquariids", "SSS", "#168", "GIA"]) {
+    const result = await planObservingSession({ placeId, activity: "meteor-shower", target, window: w }, realEventServices());
+    assert.deepEqual(result.evidence!.meteorRadiantSamples, []);
+    assert.doesNotMatch(result.factors.find(row => row.name === "Meteor shower and sky events")!.assessment, /Draconids/i);
+    const choice = result.gaps.find(row => /choose one reviewed shower/.test(row))!;
+    for (const code of ["ZPE", "ARI", "SSG", "DSX", "DRA", "AND", "URS"]) assert.match(choice, new RegExp(`\\b${code}\\b`));
+  }
+});
+
+test("an outside-model starting point preserves later usable cadence and endpoint samples", async () => {
+  const w = meteorWindow("2026-08-07T20:00:00Z", "2026-08-08T20:00:00Z");
+  const result = await planObservingSession({ placeId, activity: "meteor-shower", target: "PER", window: w }, services());
+  const samples = result.evidence!.meteorRadiantSamples!;
+  assert.equal(samples.length, 97);
+  assert.equal(samples[0]!.status, "outside-model");
+  assert.ok(samples.some(row => row.status === "available"));
+  assert.equal(samples.at(-1)!.evaluatedAt, "2026-08-08T20:00:00.000Z");
+});

@@ -16,7 +16,7 @@ import { suggestVisibleTargets } from "./suggestions";
 import { composeCandidateWindows, usableWeatherForecast } from "./windows";
 import { formatForecastValue, formatLocalInstant } from "../../shared/nightsky/format";
 import { evaluateRadiant } from "../events/meteorRadiants";
-import { meteorRadiantResultSchema, type MeteorRadiantResult } from "../../shared/nightsky/meteors";
+import { meteorRadiantResultSchema, resolveMeteorIdentity, METEOR_CODES, type MeteorRadiantResult } from "../../shared/nightsky/meteors";
 
 type GetLocationContextResult = z.infer<typeof getLocationContextResultSchema>;
 type SearchObservingLocationsResult = z.infer<typeof searchObservingLocationsResultSchema>;
@@ -111,7 +111,8 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (includeEventEvidence && events && !isError(events)) {
     sourceRecords.push(...events.sources, ...events.events.map(event => event.source));
     addAll(caveats, events.caveats);
-    const relevant = events.events.filter((event) => input.activity !== "meteor-shower" || event.eventType === "meteor-shower");
+    const selectedMeteorCode = input.target ? meteorCode(input.target) : undefined;
+    const relevant = events.events.filter((event) => input.activity !== "meteor-shower" || event.eventType === "meteor-shower" && (!input.target || selectedMeteorCode !== undefined && meteorCode(event.name) === selectedMeteorCode));
     const hasEvaluatedVisibility = relevant.some(event => ["visible", "partially-visible", "not-visible"].includes(event.localVisibility));
     const eventImpact = !relevant.length || !hasEvaluatedVisibility ? "unknown" : relevant.every(event => event.localVisibility === "not-visible") ? "unfavorable" : relevant.every(event => event.localVisibility === "visible") ? "favorable" : "mixed";
     factors.push({
@@ -150,7 +151,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       sourceRecords.push(civilGuidance.source);
       caveats.add(civilGuidance.caveat);
       const maximumApplies = new Date(input.window.startUtc).getUTCFullYear() === civilGuidance.maximumYear && new Date(input.window.endUtc).getUTCFullYear() === civilGuidance.maximumYear;
-      factors.push({ name: "Meteor civil calendar guidance", assessment: `${civilGuidance.name}: typical annual source dates ${civilGuidance.startMonthDay} to ${civilGuidance.endMonthDay}; exact activity boundaries and time zone are unspecified. ${civilGuidance.geographicQualification}.${maximumApplies ? ` Approximate ${civilGuidance.maximumYear} maximum: ${civilGuidance.maximumWording}; numerical uncertainty is not supplied.` : " The separately retained 2026 maximum does not apply to this requested year."} Requested-window activity overlap is not established.`, impact: "unknown", sourceNames: [civilGuidance.source.name] });
+      factors.push({ name: "Meteor civil calendar guidance", assessment: `${civilGuidance.name}: ${civilGuidance.recurrenceBasis === "typical-annual" ? "typical annual source dates" : "source-general visibility dates"} ${civilGuidance.startMonthDay} to ${civilGuidance.endMonthDay}; boundaries/time zone unspecified. ${civilGuidance.geographicQualification}.${maximumApplies ? ` ${civilGuidance.maximumYear} maximum: ${civilGuidance.maximumWording}; ${civilGuidance.maximumTimeBasis}; ${civilGuidance.maximumUncertainty}.` : " The separately retained 2026 maximum does not apply to this requested year."} Window overlap not established.`, impact: "unknown", sourceNames: [civilGuidance.source.name] });
     }
     if (code) {
       const start = Date.parse(input.window.startUtc), end = Date.parse(input.window.endUtc);
@@ -158,7 +159,11 @@ export async function planObservingSession(inputValue: unknown, services: Planne
         const instants = [start];
         for (let instant = start + 900_000; instant < end; instant += 900_000) instants.push(instant);
         instants.push(end);
-        for (const instant of instants) meteorRadiantSamples.push(meteorRadiantResultSchema.parse({ ...evaluateRadiant(code, instant, { latitude: calculation.latitude, longitude: calculation.longitude }), evaluatedAt: new Date(instant).toISOString() }));
+        for (const instant of instants) {
+          const sample = meteorRadiantResultSchema.parse({ ...evaluateRadiant(code, instant, { latitude: calculation.latitude, longitude: calculation.longitude }), evaluatedAt: new Date(instant).toISOString() });
+          meteorRadiantSamples.push(sample);
+          if (sample.status === "unsupported") break; // No reviewed model exists for this identity.
+        }
       } catch { meteorRadiantSamples.length = 0; gaps.push("The local radiant model could not be evaluated; retry the selected shower and time."); }
     }
     const available = meteorRadiantSamples.filter(sample => sample.status === "available");
@@ -172,8 +177,8 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       caveats.add("Radiant fits use observations from 2018-12-10 to 2021-05-22; annual reuse through 2030 is extrapolation. Point samples at 15-minute cadence plus the exact endpoint do not establish continuous visibility, full-season activity, meteor rates or exact peak times.");
       caveats.add("Moon separation compares a modeled geocentric mean radiant with a topocentric Moon direction in equatorial-of-date coordinates; parameter uncertainties are not propagated confidence intervals.");
     } else {
-      factors.push({ name: "Meteor radiant visibility", assessment: "Unknown: select a reviewed shower whose coordinates or drift model covers this date. Radiant altitude and Moon separation remain unknown outside the licensed fit windows.", impact: "unknown", sourceNames: [] });
-      gaps.push(code ? meteorRadiantSamples.length ? "Meteor radiant altitude and moon-to-radiant separation are not calculated where the model is outside its nominal radiant fit window." : "Meteor radiant altitude and moon-to-radiant separation are unavailable because the local model could not be evaluated." : `Meteor radiant altitude is unknown: choose one reviewed shower (${Array.from(new Set(Object.values(METEOR_ALIASES))).join(", ")}); an unknown or ambiguous event list cannot select a radiant.`);
+      factors.push({ name: "Meteor radiant visibility", assessment: meteorRadiantSamples.some(sample => sample.status === "unsupported") ? "Unknown: no reviewed model exists for this shower identity. Radiant altitude and Moon separation remain unknown; this does not establish physical inactivity." : "Unknown: select a reviewed shower whose coordinates or drift model covers this date. Radiant altitude and Moon separation remain unknown outside the licensed fit windows.", impact: "unknown", sourceNames: [] });
+      gaps.push(code ? meteorRadiantSamples[0]?.status === "unsupported" ? "Meteor radiant altitude and moon-to-radiant separation are unknown because no reviewed model exists for this shower identity." : meteorRadiantSamples.length ? "Meteor radiant altitude and moon-to-radiant separation are not calculated where the model is outside its nominal radiant fit window." : "Meteor radiant altitude and moon-to-radiant separation are unavailable because the local model could not be evaluated." : `Meteor radiant altitude is unknown: choose one reviewed shower (${METEOR_CODES.join(", ")}); an unknown or ambiguous event list cannot select a radiant.`);
     }
     for (const sample of meteorRadiantSamples) if (sample.status !== "available") gaps.push(`${sample.code} radiant ${sample.status}: ${sample.reason}`);
     gaps.push("Complete meteor activity seasons and full-season radiant coverage remain unavailable. The enabled meteor calendar supplies year-specific forecast maxima; bounded radiant fits and forecast peaks do not establish activity-season boundaries.");
@@ -277,11 +282,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
 function settled<T>(callback: () => Promise<T>): Promise<T | Error> { return callback().catch((error: unknown) => error instanceof Error ? error : new Error("Provider failed.")); }
 function isError(value: unknown): value is Error { return value instanceof Error; }
 function conciseAssessment(value: string): string { return value.length <= 500 ? value : `${value.slice(0, 410)}… Full exact values and source records are retained in structured evidence.`; }
-const METEOR_ALIASES: Readonly<Record<string, string>> = { per: "PER", perseids: "PER", gem: "GEM", geminids: "GEM", ori: "ORI", orionids: "ORI", eta: "ETA", "eta aquariids": "ETA", lyr: "LYR", lyrids: "LYR", sda: "SDA", "southern delta aquariids": "SDA", "delta aquariids": "SDA", qua: "QUA", quadrantids: "QUA", leo: "LEO", leonids: "LEO", cap: "CAP", "alpha capricornids": "CAP", capricornids: "CAP", nta: "NTA", "northern taurids": "NTA", sta: "STA", "southern taurids": "STA", hyd: "HYD", "sigma hydrids": "HYD" };
-function meteorCode(query: string): string | undefined {
-  const key = query.trim().toLowerCase().replaceAll("-", " ").replace(/\s+(?:meteor\s+)?shower$/, "");
-  return Object.hasOwn(METEOR_ALIASES, key) ? METEOR_ALIASES[key] : undefined;
-}
+const meteorCode = resolveMeteorIdentity;
 function sourceNames(sources: SourceRecord[]): string[] { return Array.from(new Set(sources.map(({ name }) => name))).slice(0, 8); }
 function addAll(target: Set<string>, values: string[]): void { values.forEach((value) => target.add(value)); }
 function dedupeSources(sources: SourceRecord[]): SourceRecord[] { return Array.from(new Map(sources.map((source) => [JSON.stringify(source), source])).values()); }

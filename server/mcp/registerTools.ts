@@ -125,7 +125,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     resolveCalculationPlace: input => resolvePoint(input, index),
     getAstronomy: dependencies.plannerServices?.getAstronomy ?? ((place, window, point) => getAstronomyWindow(place, window, index, point)),
     getNightConditions: dependencies.plannerServices?.getNightConditions ?? ((placeId, window, point) => getNightConditionsForPlan(placeId, window, index, dependencies, point)),
-    searchEvents: dependencies.plannerServices?.searchEvents ?? ((placeId, window, point) => searchSkyEvents({ placeId, window }, index, point)),
+    searchEvents: dependencies.plannerServices?.searchEvents ?? ((placeId, window, point) => searchSkyEvents({ placeId, window, ...candidatePointMetadata(point) }, index, point)),
     getTargetVisibility: dependencies.plannerServices?.getTargetVisibility ?? ((place, target, window, point) => getTargetVisibility(target, place, window, index, point)),
     getLocationContext: dependencies.plannerServices?.getLocationContext ?? (async (placeId, point) => {
       if (point) return contextForPoint(point, index);
@@ -137,7 +137,8 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
       const coordinates = point ?? resolvedCoordinatesForPlace(index!, placeId);
       if (!coordinates) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
       const place = { placeId, ...coordinates };
-      return (dependencies.auroraProvider ?? ((resolvedPlace, requestedWindow) => getNoaaAuroraOutlook(resolvedPlace, requestedWindow, { fetcher: dependencies.fetcher, cache: dependencies.cache, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.noaa })))(place, window);
+      const result = await (dependencies.auroraProvider ?? ((resolvedPlace, requestedWindow) => getNoaaAuroraOutlook(resolvedPlace, requestedWindow, { fetcher: dependencies.fetcher, cache: dependencies.cache, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.noaa })))(place, window);
+      return auroraOutlookResultSchema.parse({ ...result, ...candidatePointMetadata(point), caveats: [...result.caveats, ...candidateZoneCaveats(point)] });
     }),
     searchCandidates: dependencies.plannerServices?.searchCandidates ?? (async (placeId: string, point?: CalculationPlace) => {
       if (dependencies.discoveryProvider && point) return dependencies.discoveryProvider.search(searchDiscoveryInputSchema.parse({placeId,sourceRevision:point.sourceRevision,limit:5}));

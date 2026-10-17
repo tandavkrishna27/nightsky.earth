@@ -2,13 +2,16 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { mkdtemp, writeFile, rm, realpath } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, realpath, readFile, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
-import { createConfiguredNightSkyPluginApp, closeConfiguredNightSkyPluginApp } from '../dist/plugin.js';
+import { createHash } from 'node:crypto';
+import { performance } from 'node:perf_hooks';
 
 const saved = { ...process.env };
-let server, app, fixtureDirectory;
+let server, app, fixtureDirectory, closeConfiguredNightSkyPluginApp, rssTimer;
+let sampledPeakRssBytes = process.memoryUsage().rss;
+const sampleRss = () => { sampledPeakRssBytes = Math.max(sampledPeakRssBytes, process.memoryUsage().rss); };
 try {
   for (const key of Object.keys(process.env)) if (key.startsWith('NIGHTSKY_') || key === 'MET_NORWAY_USER_AGENT') delete process.env[key];
   fixtureDirectory = await realpath(await mkdtemp(join(tmpdir(), 'nightsky-api-fixture-')));
@@ -26,9 +29,23 @@ try {
     NIGHTSKY_WEATHERAPI_KEY: 'offline-fixture-key', NIGHTSKY_OPENWEATHER_KEY: 'offline-fixture-key',
     MET_NORWAY_USER_AGENT: 'NightSky synthetic test (fixture@example.invalid)',
   });
+  const bundleUrl = new URL('../dist/plugin.js', import.meta.url);
+  const bundle = await readFile(bundleUrl);
+  const compiledBundle = { sha256: createHash('sha256').update(bundle).digest('hex'), bytes: bundle.byteLength };
+  const quotaInitialBytes = (await stat(quotaPath)).size;
+  sampleRss();
+  rssTimer = setInterval(sampleRss, 10);
+  rssTimer.unref();
+  const moduleStarted = performance.now();
+  const runtime = await import(bundleUrl.href);
+  const moduleImportMs = performance.now() - moduleStarted;
+  closeConfiguredNightSkyPluginApp = runtime.closeConfiguredNightSkyPluginApp;
+  sampleRss();
   let calls = 0;
-  app = await createConfiguredNightSkyPluginApp({ log: () => {}, fetcher: async input => {
+  const appStarted = performance.now();
+  app = await runtime.createConfiguredNightSkyPluginApp({ log: () => {}, fetcher: async input => {
     calls++;
+    sampleRss();
     const url = new URL(String(input));
     const times = ['2026-10-17T15:00:00Z', '2026-10-17T16:00:00Z', '2026-10-17T17:00:00Z', '2026-10-17T18:00:00Z'];
     if (url.hostname === 'api.met.no') {
@@ -51,14 +68,25 @@ try {
     if (url.pathname === '/timezoneJSON') return Response.json({ timezoneId: 'Asia/Kolkata', lat: 18.52, lng: 73.85 });
     throw Error('Unexpected synthetic endpoint');
   }});
+  const appInitializationMs = performance.now() - appStarted;
+  const moduleAndAppInitializationMs = performance.now() - moduleStarted;
+  sampleRss();
+  const listenerStarted = performance.now();
   server = createServer(app).listen(0, '127.0.0.1');
   await once(server, 'listening');
+  const listenerReadyMs = performance.now() - listenerStarted;
+  sampleRss();
   const base = `http://127.0.0.1:${server.address().port}`;
   let id = 0;
+  const requests = [];
   const rpc = async (method, params) => {
+    const started = performance.now();
     const response = await fetch(`${base}/mcp`, {method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params}),signal:AbortSignal.timeout(10000)});
     assert.equal(response.status,200);
     const raw=await response.text(), event=raw.split('\n').find(line=>line.startsWith('data: '));
+    const elapsedMs = performance.now() - started;
+    sampleRss();
+    requests.push({ operation: params?.name ?? method, status: response.status, elapsedMs, responseUtf8Bytes: Buffer.byteLength(raw, 'utf8') });
     const body=JSON.parse(event?event.slice(6):raw);
     assert.equal(body.error,undefined,JSON.stringify(body));
     assert.equal(body.result.isError,undefined,JSON.stringify(body.result));
@@ -80,8 +108,31 @@ try {
   assert.equal(weather.forecasts.length, 2, JSON.stringify(weather.providerOutcomes));
   assert.deepEqual(weather.forecasts.map(f => f.samples[0].values.totalCloudCover.value), [0, 100]);
   assert.ok(calls >= 4 && calls <= 5);
+  const quotaFinalBytes = (await stat(quotaPath)).size;
+  sampleRss();
+  const report = {
+    schemaVersion: 1, synthetic: true, liveEvidenceEligible: false,
+    runtime: { node: process.version, platform: process.platform, architecture: process.arch },
+    compiledBundle,
+    configuration: { discoveryMode: 'api', weatherProviders: ['met', 'weatherapi', 'openweather'], localGeographyFiles: false },
+    initialization: { moduleImportMs, appInitializationMs, moduleAndAppInitializationMs, listenerReadyMs },
+    requests, fakeProviderCalls: calls, sampledPeakRssBytes,
+    fixtureQuotaFile: { initialBytes: quotaInitialBytes, finalBytes: quotaFinalBytes },
+    limitations: [
+      'Module import plus app cold initialization in this script, not process-spawn startup; Node startup, script imports, scratch setup and bundle hashing are excluded from initialization timings.',
+      'Bundle SHA-256 identifies dist/plugin.js only; external dependencies and a complete deployment artifact are not attested.',
+      'Sequential loopback HTTP/MCP requests with fixed fake provider responses; no live provider latency, throughput, coverage or hosting acceptance.',
+      'Request latency ends after reading the response body, before JSON parsing and assertions; UTF-8 bytes include the decoded SSE envelope where present, not network headers or wire compression.',
+      'RSS is process-wide, sampled at phase/request/provider boundaries and every 10 ms when the event loop runs; it is not OS peak memory or per-request allocation.',
+      'Quota bytes describe only the synthetic quota JSON file, excluding lock/marker files, backups, caches, rollback and deployment storage; scratch files are removed in finally.',
+    ],
+  };
+  assert.equal(requests.length, 4);
+  assert.ok(requests.every(r => Number.isFinite(r.elapsedMs) && r.elapsedMs >= 0 && r.responseUtf8Bytes > 0));
+  console.log(JSON.stringify(report));
   console.log('SYNTHETIC: built API-mode resolution, astronomy and three-source weather partial outage verified without local geography files or external requests. Not live-source acceptance.');
 } finally {
+  if (rssTimer) clearInterval(rssTimer);
   if(server){server.closeAllConnections();await new Promise(done=>server.close(done));}
   if (app) await closeConfiguredNightSkyPluginApp(app);
   if (fixtureDirectory) {

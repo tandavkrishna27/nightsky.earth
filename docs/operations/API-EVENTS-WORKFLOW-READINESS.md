@@ -1,5 +1,7 @@
 # API event workflow readiness — 17 October 2026
 
+Coordinator update: the recorded URS failure below was subsequently addressed by shared meteor identity resolution and planner integration, with DRA/URS/ambiguity/out-of-domain regressions. See [assembled verification](parallel-completion-run-20261017.md); the original failed observation remains historical evidence.
+
 This implements the workflow lane of the API-first planning continuation at baseline `bc8de008`. It does not establish full V1 acceptance, source activation, installed-host behavior or production readiness.
 
 All five canonical workflows and source skills now distinguish a useful session plan from a peak-optimized meteor recommendation. Missing exact maxima/full-season coverage do not block ordinary stargazing, photography, preparation or learning. A selected meteor session retains its shower and user-chosen window with qualified darkness/weather/preparation and supported radiant samples. A concept-only lesson does not require a destination/date; local claims still require a selected point, current identity/revision and verified or explicitly chosen display timezone. Equipment teaching remains conversational: the planner does not accept an equipment profile or calculate exposure settings.

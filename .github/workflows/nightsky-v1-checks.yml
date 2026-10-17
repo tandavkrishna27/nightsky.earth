@@ -51,6 +51,9 @@ jobs:
       - name: Measure API fixture runtime without live source access
         run: node --import tsx scripts/measure-api-runtime.ts
 
+      - name: Measure bounded offline concurrency and provider failures
+        run: node --import tsx scripts/measure-api-load.ts
+
       - name: Verify offline operator template stays explicitly incomplete
         run: node --import tsx --input-type=module -e "import {operatorPreflightCli} from './scripts/plugin-operator-preflight.ts'; if(await operatorPreflightCli(['--config','config/plugin-operator.example.json'])!==2) throw Error('Template must stay incomplete');"
 
@@ -68,6 +71,9 @@ jobs:
 
       - name: Exercise all eight review cases through local MCP
         run: npm run test:review-cases
+
+      - name: Exercise all eight review cases through API fixture selection
+        run: node --import tsx scripts/verify-review-cases.ts --offline --api-fixture --out dist/api-review-rehearsal
 
       - name: Build website and MCP service
         run: npm run build

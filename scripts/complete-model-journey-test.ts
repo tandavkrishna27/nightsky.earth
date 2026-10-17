@@ -1,4 +1,8 @@
-/** Opt-in local CLI rehearsal. Imports never start a model or server. */
+/** Opt-in local CLI rehearsal. Imports never start a model or server.
+ * --api-fixture uses fake API responses and real selection/discovery/planning;
+ * the default retains legacy catalogue fixtures. Either mode still requires
+ * explicit --run for model execution and is not native acceptance evidence.
+ */
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync, readFileSync, existsSync, mkdtempSync } from 'node:fs';
 import { resolve, relative, isAbsolute } from 'node:path';
@@ -13,6 +17,8 @@ import { buildGlobalCatalogue } from './osm/build-global-catalogue';
 import { loadCatalogueFiles } from '../server/places/catalogueFiles';
 import { createGlobalCatalogue } from '../server/places/globalCatalogue';
 import { buildLocalPluginPackage } from './build-local-plugin-package';
+import { createApiServices } from '../server/places/api/configuration';
+import type { NightSkyDependencies } from '../server/mcp/registerTools';
 
 export type LoadingMode='native'|'prompt-fed';
 export const limits={deadlineMs:120000,shutdownMs:5000,calls:12,stdout:250*1024,stderr:32*1024,batchMs:30*60*1000};
@@ -68,22 +74,69 @@ export async function boundedChild(command:string,args:string[],cwd:string,deadl
 export function checkpoint(path:string,records:unknown[]){mkdirSync(resolve(path,'..'),{recursive:true});writeFileSync(path,JSON.stringify({updatedAt:new Date().toISOString(),records},null,2)+'\n');}
 export function readCheckpoint(path:string):Array<{id:string;status:string}>{return existsSync(path)?JSON.parse(readFileSync(path,'utf8')).records:[];}
 
-export async function createFixtureServer(root:string){
+async function catalogueFixtureDependencies(root:string){
  const cities=new GeoNamesPlaceIndex([[990001,'Fictionvale','Fictionvale','',51.5,-.12,'GB','Synthetic Country',0,'Europe/London'],[990002,'Synthetic Sydney','Synthetic Sydney','',-33.87,151.21,'AU','Synthetic Australia',0,'Australia/Sydney'],[990003,'Synthetic Tromso','Synthetic Tromso','',69.65,18.96,'NO','Synthetic Norway',0,'Europe/Oslo']],'synthetic-model-only');
  const source={name:'Synthetic catalogue',url:'https://example.test/synthetic-catalogue',attribution:'Invented local fixture only',dataClass:'catalog' as const,vintage:'synthetic-2026'};
  const regions=[{regionId:'region:v1:synthetic-country',name:'Synthetic Country',countryCode:'GBR',adminLevel:0 as const,boundaryRevision:'synthetic-v1',sources:[source]},{regionId:'region:v1:synthetic-state',name:'Synthetic State',countryCode:'GBR',adminLevel:1 as const,boundaryRevision:'synthetic-v1',sources:[source]}];
  const candidates=[{placeId:'place:v1:osm:node:990001',name:'Fiction Park',category:'park' as const,latitude:51.52,longitude:-.1,accessEvidence:{status:'unknown' as const},sources:[source],caveats:['Synthetic fixture; access and sky quality unverified'],catalogueRevision:'synthetic-v1',sourceCompleteness:1,countryCode:'GBR',regionIds:regions.map(r=>r.regionId)}];
  const built=await buildGlobalCatalogue({catalogueRevision:'synthetic-v1',candidates,regions,footprints:[{geometryBasis:'full-cell',footprintId:'synthetic-cell',bounds:{south:51,north:52,west:-1,east:0},sources:[source],vintage:'synthetic',regionIds:regions.map(r=>r.regionId)}]},assertContained(root,'catalogue'));
  const catalogue=createGlobalCatalogue(await loadCatalogueFiles(built.path,{expectedSha256:built.sha256}),{cities});
+ return {placeIndex:cities,catalogue,regionIndex:catalogue.regions};
+}
+export type FixtureMode = 'catalogue' | 'api';
+export function selectFixtureMode(args:string[]):FixtureMode { return args.includes('--api-fixture')?'api':'catalogue'; }
+export function validateFixtureResume(records:Array<{fixtureMode?:string;id?:string}>, mode:FixtureMode){
+ if(records.some(record=>(record.fixtureMode??'catalogue')!==mode)) throw Error('Cannot mix fixture modes in resumed evidence');
+}
+export async function createFixtureServer(root:string, options:{mode?:FixtureMode} = {}){
+ const fixtureMode = options.mode ?? 'catalogue';
+ if (!['catalogue','api'].includes(fixtureMode)) throw Error('Unknown fixture mode');
+ let fixtureAttempts = 0;
+ let logicalTime = Date.parse('2026-10-15T12:00:00Z');
+ const apiFetcher:typeof fetch = async input => {
+  if (++fixtureAttempts > 500) throw Error('API fixture transport cap');
+  const url = new URL(String(input));
+  const places = [
+   {geonameId:990001,name:'Fictionvale',lat:51.5,lng:-.12,zone:'Europe/London'},
+   {geonameId:990002,name:'Synthetic Sydney',lat:-33.87,lng:151.21,zone:'Australia/Sydney'},
+   {geonameId:990003,name:'Synthetic Tromso',lat:69.65,lng:18.96,zone:'Europe/Oslo'},
+  ];
+  if(url.hostname==='secure.geonames.org'&&url.pathname==='/searchJSON'){
+   const query=(url.searchParams.get('q')??'').toLowerCase();
+   if(query==='synthetic provider outage') return Response.json({error:'Synthetic unavailable'}, {status:503});
+   // GeoNames carries no trusted timezone in this adapter. Ordinary cities
+   // intentionally fall back to Geoapify's source-supplied timezone field.
+   return Response.json({geonames:query==='synthetic unknown zone'?[{geonameId:990004,name:'Synthetic Unknown Zone',lat:51.5,lng:-.12}]:[]});
+  }
+  if(url.hostname==='api.geoapify.com'&&['/v1/geocode/search','/v2/places'].includes(url.pathname)){
+   const query=(url.searchParams.get('text')??url.searchParams.get('state')??url.searchParams.get('country')??'').toLowerCase();
+   if(query==='synthetic provider outage') return Response.json({error:'Synthetic unavailable'}, {status:503});
+   const city = places.find(p=>query===p.name.toLowerCase());
+   const cityFeature = (p:typeof places[number], id=String(p.geonameId)) => ({type:'Feature',properties:{place_id:`synthetic-city-${id}`,name:p.name,timezone:{name:p.zone}},geometry:{type:'Point',coordinates:[p.lng,p.lat]}});
+   if(url.pathname==='/v1/geocode/search'&&city) return Response.json({features:[cityFeature(city)]});
+   if(query==='synthetic ambiguous') return Response.json({features:[cityFeature({...places[0],name:'Synthetic Ambiguous West'},'ambiguous-west'),cityFeature({...places[0],name:'Synthetic Ambiguous East',lng:.2},'ambiguous-east')]});
+   if(query==='synthetic source conflict') return Response.json({features:[cityFeature(places[0]),cityFeature({...places[0],lng:1})]});
+   const region=query==='synthetic country'?'country':query==='synthetic state'?'state':undefined;
+   const filter=url.searchParams.get('filter')??'';
+   const local = filter.startsWith('circle:-0.12,51.5,') || filter.startsWith('circle:-0.1,51.52,') || ['place:synthetic-country','place:synthetic-state'].includes(filter);
+   const properties=region?{place_id:`synthetic-${region}`,name:`Synthetic ${region==='country'?'Country':'State'}`,result_type:region,country_code:'gb'}:{place_id:'synthetic-fiction-park',name:'Fiction Park',categories:['leisure.park'],timezone:{name:'Europe/London'}};
+   return Response.json({features:(region||url.pathname==='/v2/places'&&local)?[{type:'Feature',properties,geometry:{type:'Point',coordinates:[-.1,51.52]}}]:[]});
+  }
+  throw Error('Unexpected API fixture request; no live fallback');
+ };
+ const dependencies:NightSkyDependencies = fixtureMode==='api'
+  ? {...createApiServices({geonamesUsername:'synthetic-fixture',geoapifyApiKey:'synthetic-fixture',userAgent:'NightSky offline journey (fixture@example.invalid)',fetcher:apiFetcher,now:()=>logicalTime+=1001}),
+     placeIndexLoader:async()=>{throw Error('API fixture must not load local cities');}}
+  : await catalogueFixtureDependencies(root);
  let external=0,id=0,revision=0;let budget=new EvidenceBudget();const app=express();app.use(express.json({limit:'32kb'}));
  app.use((req,res,next)=>{if(req.body?.method==='tools/call'){try{budget.call(req.body.params.name,req.body.params.arguments);}catch{res.status(429).end();return;}}next();});
- mountMcpRoute(app,{allowedHosts:['127.0.0.1'],placeIndex:cities,catalogue,regionIndex:catalogue.regions,maxRequestsPerWindow:1000,maxGlobalRequestsPerWindow:1000,
+ mountMcpRoute(app,{allowedHosts:['127.0.0.1'],...dependencies,maxRequestsPerWindow:1000,maxGlobalRequestsPerWindow:1000,
  fetcher:async()=>{external++;throw Error('External provider forbidden');},osmCandidateIndexLoader:async()=>undefined,
  plannerServices:{getClimatology:async()=>{throw Error('Synthetic historical context unavailable');}},
  weatherProvider:{getForecast:async(_place,window)=>window.startUtc.startsWith('2027')?{status:'out-of-horizon',reason:'Synthetic future forecast unavailable',source:{name:'Synthetic forecast',url:'https://example.test/forecast',attribution:'Invented local fixture; no actual provider request',dataClass:'forecast'}}:{status:'available',reason:'Synthetic fixture only',forecast:{availability:{status:'available',reason:'Synthetic fixture only'},source:{name:'Synthetic forecast',url:'https://example.test/forecast',attribution:'Invented local fixture; no visibility accuracy claim',dataClass:'forecast',issuedAt:revision?'2026-10-15T15:00:00Z':'2026-10-15T12:00:00Z'},forecastHorizonHours:48,samples:[{validAt:'2026-10-15T22:00:00Z',values:{totalCloudCover:{value:revision?85:12,unit:'%'}}}],missingFields:[{field:'visibility',reason:'Not supplied'}]}}},
  auroraProvider:async()=>{throw Error('Synthetic aurora unavailable');}});
  const server=createServer(app).listen(0,'127.0.0.1');await once(server,'listening');const address=server.address();if(!address||typeof address==='string')throw Error('Loopback unavailable');const endpoint=`http://127.0.0.1:${address.port}/mcp`;
- return {endpoint,get budget(){return budget;},externalAttempts:()=>external,beginCase:(name:string)=>{budget=new EvidenceBudget();revision=name==='replan'?1:0;},rpc:async(method:string,params:unknown)=>{const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params})});const raw=await response.text();const line=raw.split('\n').find(l=>l.startsWith('data: '));return JSON.parse(line?line.slice(6):raw);},close:async()=>{server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));}};
+ return {endpoint,fixtureMode,get budget(){return budget;},fixtureAttempts:()=>fixtureAttempts,advanceFixtureTime:(milliseconds:number)=>{if(!Number.isSafeInteger(milliseconds)||milliseconds<0||milliseconds>86400000)throw Error('Invalid fixture clock advance');logicalTime+=milliseconds;},externalAttempts:()=>external,beginCase:(name:string)=>{budget=new EvidenceBudget();revision=name==='replan'?1:0;},rpc:async(method:string,params:unknown)=>{const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params})});const raw=await response.text();const line=raw.split('\n').find(l=>l.startsWith('data: '));return JSON.parse(line?line.slice(6):raw);},close:async()=>{server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));}};
 }
 export function materializePackages(root:string,endpoint:string){
  const result={} as Record<'codex'|'claude',{directory:string;sha256:string}>;
@@ -138,7 +191,9 @@ async function main(){
  const args=process.argv.slice(2);const selectedIds=selectJourneyIds(args);validateExecution(args,selectedIds.length);
  const client=args.includes('--claude')?'claude':'codex';const mode:LoadingMode=args.includes('--prompt-fed')?'prompt-fed':'native';
  const base=resolve('.superpowers/sdd/2026-10-15-nightsky-global-discovery/model-rehearsal');mkdirSync(base,{recursive:true});const resume=args[args.indexOf('--resume')+1];const root=args.includes('--resume')?validateResume(base,resume):mkdtempSync(resolve(base,`${client}-`));
- const server=await createFixtureServer(root);const records:any[]=args.includes('--resume')?readCheckpoint(resolve(root,'checkpoint.json')):[];const started=Date.now();
+ const fixtureMode=selectFixtureMode(args);const records:any[]=args.includes('--resume')?readCheckpoint(resolve(root,'checkpoint.json')):[];
+ validateFixtureResume(records,fixtureMode);
+ const server=await createFixtureServer(root,{mode:fixtureMode});const started=Date.now();
  try{
   const inventory=await server.rpc('tools/list',{});if(inventory.result?.tools?.length!==14)throw Error('Complete fourteen-tool backend required');
   const packages=materializePackages(root,server.endpoint);writeFileSync(resolve(root,'packages.json'),JSON.stringify(packages,null,2));
@@ -162,11 +217,11 @@ async function main(){
    const loadingEvidence=events.filter(e=>e.type==='system'||e.item?.type==='tool_search'||e.item?.type==='mcp_tool_call'||e.message?.content?.some?.((c:any)=>c.type==='tool_use'&&c.name==='Skill'));
    const nativeLoading=client==='claude'&&mode==='native'?nativeClaudeLoading(events,journey.id,packages.claude.directory):undefined;
    const loadingComplete=!nativeLoading||(nativeLoading.skillInvoked&&nativeLoading.referenceRead&&nativeLoading.allowedOnly);
-   records.push({id:journey.id,attempt:records.filter(r=>r.id===journey.id).length+1,runAt:new Date().toISOString(),client,loadingMode:mode,status:result.code===0&&answer&&loadingComplete?'manual-review':'blocked',transportComplete:result.code===0&&!result.reason,nativeLoading,answer:sanitize(answer),traces:server.budget.traces,loadingEvidence:JSON.parse(sanitize(JSON.stringify(loadingEvidence))),model:events.find(e=>e.model)?.model??null,...result,stdout:sanitize(result.stdout),externalAttempts:server.externalAttempts()});
+   records.push({id:journey.id,fixtureMode,fixtureAttempts:server.fixtureAttempts(),attempt:records.filter(r=>r.id===journey.id).length+1,runAt:new Date().toISOString(),client,loadingMode:mode,status:result.code===0&&answer&&loadingComplete?'manual-review':'blocked',transportComplete:result.code===0&&!result.reason,nativeLoading,answer:sanitize(answer),traces:server.budget.traces,loadingEvidence:JSON.parse(sanitize(JSON.stringify(loadingEvidence))),model:events.find(e=>e.model)?.model??null,...result,stdout:sanitize(result.stdout),externalAttempts:server.externalAttempts()});
    checkpoint(resolve(root,'checkpoint.json'),records);console.log(JSON.stringify({client,id:journey.id,status:records.at(-1).status,toolCalls:server.budget.traces.length,reason:result.reason}));
    if(!answer||result.reason||!loadingComplete)break;
   }
-  writeFileSync(resolve(root,'complete-model-report.md'),`# Complete model rehearsal\n\nDate: ${new Date().toISOString()}\nClient: ${client}; requested loading: ${mode}.\nComplete packages: five skills each; backend: fourteen tools.\nExternal provider attempts: ${server.externalAttempts()}.\nCases recorded: ${records.length}. Whole answers and skill loading require manual review in checkpoint.json; transport success is not semantic success. Native loading has not been claimed by this runner.\n`);console.log(JSON.stringify({evidenceFolder:root,client,mode,cases:records.length}));
+  writeFileSync(resolve(root,'complete-model-report.md'),`# Complete model rehearsal\n\nDate: ${new Date().toISOString()}\nClient: ${client}; requested loading: ${mode}; fixture mode: ${fixtureMode}.\nComplete packages: five skills each; backend: fourteen tools.\nExternal provider attempts: ${server.externalAttempts()}; synthetic API transport attempts: ${server.fixtureAttempts()}.\nAPI fixtures use an advancing synthetic provider clock; they do not measure provider pacing or live performance. Catalogue and API results must not be combined as one acceptance run.\nCases recorded: ${records.length}. Whole answers and skill loading require manual review in checkpoint.json; transport success is not semantic success. Native loading has not been claimed by this runner.\n`);console.log(JSON.stringify({evidenceFolder:root,client,mode,fixtureMode,cases:records.length}));
  }finally{await server.close();}
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)main().catch(e=>{console.error(sanitize(e.message));process.exitCode=1;});

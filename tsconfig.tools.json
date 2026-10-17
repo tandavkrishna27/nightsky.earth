@@ -2,6 +2,8 @@
   "extends": "./tsconfig.json",
   "include": [
     "scripts/validate-api-live.ts",
+    "scripts/measure-api-load.ts",
+    "scripts/validate-geometry-live.ts",
     "scripts/build-local-plugin-package.ts",
     "scripts/verify-local-plugin-packages.ts",
     "scripts/model-journey-test.ts",

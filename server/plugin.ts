@@ -2,7 +2,7 @@
 import express, { type ErrorRequestHandler } from "express";
 import { createServer } from "node:http";
 import { isIP } from "node:net";
-import { resolve } from "node:path";
+import { resolve, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mountHealthRoute, type HealthDependencies } from "./health";
 import { mountMcpRoute, type McpRouteDependencies } from "./mcp/route";
@@ -13,6 +13,8 @@ import { loadCatalogueFiles } from "./places/catalogueFiles";
 import { createGlobalCatalogue } from "./places/globalCatalogue";
 import { loadGeoNamesPlaceIndex } from "./places/geonames";
 import { climateArtifactConfiguration } from "./providers/climate/configuration";
+import { createConfiguredApiHistoryProvider } from "./providers/climate/apiHistoryConfiguration";
+import { hostedMethodAdmissionSchema } from "../shared/nightsky/climate";
 import { createApiServices } from "./places/api/configuration";
 import { createPersistentQuota, type PersistentQuota } from "./providers/quotaState";
 import { createConfiguredWeatherCollection, parseWeatherConfiguration, PROVIDER_QUOTA_POLICIES } from "./providers/weather/configuration";
@@ -82,10 +84,22 @@ export function pluginDiscoveryMode(environment: Record<string, string | undefin
     if (mode === "regional" && !environment.NIGHTSKY_OSM_REGIONAL_MANIFEST) throw Error("Regional discovery mode requires an explicit manifest.");
     return mode as "api" | "catalogue" | "regional" | "legacy";
 }
+/** Pure startup validation: hosted history is optional, explicit and API-only. */
+export function pluginApiHistoryConfiguration(environment: Record<string, string | undefined>) {
+    const directory = environment.NIGHTSKY_API_HISTORY_CACHE_DIRECTORY, admission = environment.NIGHTSKY_API_HISTORY_ADMISSION;
+    if (directory === undefined && admission === undefined) return undefined;
+    if (pluginDiscoveryMode(environment) !== "api" || ["NIGHTSKY_CLIMATE_ARTIFACT", "NIGHTSKY_CLIMATE_SHA256", "NIGHTSKY_ERA5_RELEASE_MANIFEST", "NIGHTSKY_ERA5_RELEASE_SHA256"].some(key => environment[key] !== undefined)) throw Error("API history conflicts with discovery or legacy climate configuration.");
+    if (!directory?.trim() || directory.length > 4096 || /[\x00-\x1f\x7f]/.test(directory) || !isAbsolute(directory) || directory.replace(/\\/g, "/").startsWith("//") || !admission || admission.length > 2048) throw Error("Invalid paired API history configuration.");
+    try { hostedMethodAdmissionSchema.parse(JSON.parse(admission)); } catch { throw Error("Invalid API history hosted admission."); }
+    return { NIGHTSKY_API_HISTORY_CACHE_DIRECTORY: directory, NIGHTSKY_API_HISTORY_ADMISSION: admission };
+}
 /** Shared production artifact loading; callers own listener lifecycle. */
 export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAppDependencies, "fetcher" | "log"> = {}) {
+    const historyConfiguration = pluginApiHistoryConfiguration(process.env);
+    const discoveryMode = pluginDiscoveryMode(process.env);
     climateArtifactConfiguration({NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256});
     const weatherConfig = parseWeatherConfiguration(process.env);
+    const climateProvider = discoveryMode === "api" ? await createConfiguredApiHistoryProvider(historyConfiguration ?? {}) : undefined;
     let quota: PersistentQuota | undefined;
     try {
     if (weatherConfig.quotaPath) quota = await createPersistentQuota({path:weatherConfig.quotaPath, now:Date.now, policies:PROVIDER_QUOTA_POLICIES});
@@ -93,7 +107,6 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     const finish = (app: express.Express) => { let closing: Promise<void> | undefined; runtimeCleanup.set(app, () => closing ??= quota?.close() ?? Promise.resolve()); return app; };
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
-    const discoveryMode = pluginDiscoveryMode(process.env);
     if (discoveryMode === "api") {
         const services = createApiServices({
             geonamesUsername: process.env.NIGHTSKY_GEONAMES_USERNAME,
@@ -104,7 +117,7 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
             fetcher: overrides.fetcher,
             quota: quota ?? { reserve: async () => ({allowed:false,reason:"quota-state-unavailable"}) },
         });
-        return finish(createNightSkyPluginApp({ ...services, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
+        return finish(createNightSkyPluginApp({ ...services, climateProvider, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
     }
     const global = pluginGlobalConfiguration({NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST:process.env.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST,NIGHTSKY_GLOBAL_CATALOGUE_SHA256:process.env.NIGHTSKY_GLOBAL_CATALOGUE_SHA256,NIGHTSKY_OSM_REGIONAL_MANIFEST:process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST,NIGHTSKY_OSM_REGIONAL_SHA256:process.env.NIGHTSKY_OSM_REGIONAL_SHA256,NIGHTSKY_OSM_CANDIDATE_INDEX:process.env.NIGHTSKY_OSM_CANDIDATE_INDEX});
     const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });

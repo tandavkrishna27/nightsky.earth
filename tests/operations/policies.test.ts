@@ -27,6 +27,32 @@ test("standalone draft pages render readable content and a genuine support mail 
   assert.match(support, /href="mailto:nightsky.earth2026@gmail.com"/);
 });
 
+test("rendered privacy discloses configured API destinations and durable quota records", () => {
+  const html = renderToStaticMarkup(React.createElement(Router, { ssrPath: "/privacy" }, React.createElement(Privacy)));
+  for (const provider of [/Geoapify/, /GeoNames/, /WeatherAPI/, /OpenWeather/]) assert.match(html, provider);
+  assert.match(html, /Named-place queries/);
+  assert.match(html, /region queries are sent to configured Geoapify/);
+  assert.match(html, /selected destination coordinates without additional rounding/);
+  assert.match(html, /bounded in-memory caches/);
+  assert.match(html, /persistent quota ledger/);
+  assert.match(html, /provider account labels/);
+  assert.doesNotMatch(html, /their query processing does not contact those source services/);
+  assert.match(html, /Verified publisher legal name/);
+  assert.match(html, /support-message retention.*pending/);
+});
+
+test("rendered privacy distinguishes operator history acquisition and durable location evidence", () => {
+  const html = renderToStaticMarkup(React.createElement(Router, { ssrPath: "/privacy" }, React.createElement(Privacy)));
+  assert.match(html, /disabled by default/);
+  assert.match(html, /Open-Meteo receives canonical grid-cell coordinates and requested date ranges/);
+  assert.match(html, /runtime lookup only reads completed summaries/);
+  assert.match(html, /original requested destination coordinates/);
+  assert.match(html, /request URLs containing grid-cell coordinates and dates/);
+  assert.match(html, /no automatic eviction or deletion/);
+  assert.match(html, /Raw response bodies are transient/);
+  assert.match(html, /retention and maintenance require operator review/);
+});
+
 test("privacy terms and support paths bypass mounted audio and entry gates", async () => {
   for (const path of ["/privacy", "/terms", "/support"]) assert.equal(isPolicyPath(path), true);
   assert.equal(isPolicyPath("/"), false);

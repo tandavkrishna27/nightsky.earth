@@ -1,5 +1,7 @@
 # API events completion lane — 17 October 2026
 
+Coordinator integration update: all six planner changes and regression cases are now applied on `codex/plugin-v1`. The lane handoff below preserves its original delivery boundary; see [assembled verification](parallel-completion-run-20261017.md) for the integrated result.
+
 Reviewed implementation: **`0a157b2190c4bf19cf6022c12a8ddfe1c0ca9245`**, on `codex/api-events-completion`, from reviewed baseline `bc8de008bc60d6b47f8422cf15787584d16e2698`. A documentation-only handoff commit follows; take both local commits. Nothing pushed, deployed, installed or published. Old branch preserved; no other worktree, shared tracker, CI configuration or `tests/all.test.ts` edit.
 
 ## Exact result

@@ -6,7 +6,7 @@ import { lstat, open, realpath } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
 import { constants } from 'node:fs';
 import express from 'express';
-import { pluginListenerConfiguration, pluginToolMode, pluginRegionalConfiguration, pluginGlobalConfiguration, pluginDiscoveryMode } from '../../server/plugin';
+import { pluginListenerConfiguration, pluginToolMode, pluginRegionalConfiguration, pluginGlobalConfiguration, pluginDiscoveryMode, pluginApiHistoryConfiguration } from '../../server/plugin';
 import { configureMcpProxyTrust } from '../../server/mcp/proxyTrust';
 import { parseWeatherConfiguration } from '../../server/providers/weather/configuration';
 import { climateArtifactConfiguration } from '../../server/providers/climate/configuration';
@@ -14,7 +14,7 @@ const text = z.string().min(1).max(4096).refine(v => !/[\x00-\x1f\x7f]/.test(v))
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const bytes = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const evidence = text.nullable();
-const envKeys = ['NIGHTSKY_WEATHER_PROVIDERS', 'NIGHTSKY_WEATHER_ADMITTED_PROVIDERS', 'NIGHTSKY_QUOTA_STATE_PATH', 'NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
+const envKeys = ['NIGHTSKY_API_HISTORY_CACHE_DIRECTORY', 'NIGHTSKY_API_HISTORY_ADMISSION', 'NIGHTSKY_WEATHER_PROVIDERS', 'NIGHTSKY_WEATHER_ADMITTED_PROVIDERS', 'NIGHTSKY_QUOTA_STATE_PATH', 'NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
 const runtimeSchema = z.object(Object.fromEntries(envKeys.map(k => [k, text.optional()]))).strict();
 const discoveryEvidence = z.object({ mode: z.enum(['api', 'catalogue', 'regional', 'legacy']), providers: z.array(z.enum(['geonames', 'geoapify'])).max(2), configurationEvidence: evidence, policyEvidence: evidence, budgetEvidence: evidence }).strict();
 const weatherIds = z.array(z.enum(['met','weatherapi','openweather'])).min(1).max(4).refine(v=>new Set(v).size===v.length);
@@ -107,6 +107,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
     if (prod && stage && prod.hostname === stage.hostname)
         fail('STAGING_NOT_DISTINCT');
     try {
+        pluginApiHistoryConfiguration(e);
         parseWeatherConfiguration(e);
         pluginListenerConfiguration(e);
         pluginToolMode(e);
@@ -137,6 +138,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
         fail('CLIMATE_SELECTION_CONFLICT');
     if (e.NIGHTSKY_OSM_CANDIDATE_MAX_BYTES && (!/^\d+$/.test(e.NIGHTSKY_OSM_CANDIDATE_MAX_BYTES) || Number(e.NIGHTSKY_OSM_CANDIDATE_MAX_BYTES) > 512 * 1024 ** 2 || Number(e.NIGHTSKY_OSM_CANDIDATE_MAX_BYTES) < 1))
         fail('OSM_BYTE_LIMIT_INVALID');
+    if (e.NIGHTSKY_API_HISTORY_CACHE_DIRECTORY !== undefined || e.NIGHTSKY_API_HISTORY_ADMISSION !== undefined) missing('API_HISTORY_ADMISSION_RESOURCE_VALIDATION_PENDING');
     const current = c.releases.current, rollback = c.releases.rollback;
     if (!current || !rollback)
         missing('RELEASE_TUPLE_MISSING');

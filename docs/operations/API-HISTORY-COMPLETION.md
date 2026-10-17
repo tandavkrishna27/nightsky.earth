@@ -1,5 +1,7 @@
 # API history completion — local implementation handoff, 2026-10-17
 
+Coordinator integration update: the optional provider is now wired into API-mode standalone startup, with strict paired configuration, legacy-mode conflict rejection and a pending operator admission/resource gate. Four lane suites and the runtime suite are registered. The original handoff below records the lane delivery; see [assembled verification](parallel-completion-run-20261017.md). No acquisition has been enabled.
+
 Branch: `codex/api-history-completion`, based on
 `bc8de008bc60d6b47f8422cf15787584d16e2698`. The delivery chat records the reviewed
 local commit SHA. No push, live history request, credential inspection, dataset
