@@ -1,3 +1,4 @@
+import {registerPublicUniverseTools,PUBLIC_UNIVERSE_TOOL_NAMES} from './publicUniverseTools';
 import * as z from 'zod4';
 import type { McpServer } from '@modelcontextprotocol/server';
 import { calculationPlaceInputSchema, type CalculationPlace } from '../../shared/nightsky/discovery';
@@ -7,7 +8,7 @@ import { astronomySearchInputSchema, astronomySearchOutputSchema, astronomyPosit
 import { spaceWeatherInputSchema, spaceWeatherResultSchema, smallBodyInputSchema, smallBodyResultSchema, observerEphemerisResultSchema, observerEphemerisInputSchema } from '../providers/space';
 
 /** Source-optional inventory; these names are not part of the default fourteen tools. */
-export const OPTIONAL_SKY_TOOL_NAMES = ['find_moon_aware_windows','search_astronomy_objects','get_external_body_positions','get_space_weather_events','resolve_small_body','get_small_body_ephemeris'] as const;
+export const OPTIONAL_SKY_TOOL_NAMES = ['find_moon_aware_windows','search_astronomy_objects','get_external_body_positions','get_space_weather_events','resolve_small_body','get_small_body_ephemeris',...PUBLIC_UNIVERSE_TOOL_NAMES] as const;
 const [moonWindowsTool,objectSearchTool,bodyPositionsTool,spaceWeatherTool,smallBodyTool,ephemerisTool] = OPTIONAL_SKY_TOOL_NAMES;
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0,10)===v);
 const clock = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
@@ -21,6 +22,7 @@ function answer<T extends object>(result:T, sourceUrl:string) {
 }
 /** Optional capabilities use the same revision-pinned location resolver as core tools. */
 export function registerOptionalSkyTools(server:McpServer, services:OptionalSkyProviders, resolvePoint:(input:z.infer<typeof calculationPlaceInputSchema>)=>Promise<CalculationPlace>) {
+  if(services.publicUniverse) registerPublicUniverseTools(server,services.publicUniverse,resolvePoint);
   if(services.darkSky) server.registerTool(moonWindowsTool,{
     title:'Compare Moon-aware observing windows',description:'Compare full local evening windows using Dark Sky Planner. Resolve a named place first. Excluded full windows may have useful later moonless intervals; this does not evaluate weather, light pollution or access.',
     inputSchema:calculationPlaceInputSchema.safeExtend({startDate:day,endDate:day,startTime:clock,endTime:clock,moonIlluminationThresholdPercent:z.number().min(0).max(100).default(10)}),
@@ -36,3 +38,4 @@ export function registerOptionalSkyTools(server:McpServer, services:OptionalSkyP
     server.registerTool(ephemerisTool,{title:'Get a small-body observer position',description:'Calculate one airless JPL observer position for an explicitly resolved SPK identity and selected place. Elevation is explicit. No brightness, terrain or continuous visibility is inferred.',inputSchema:calculationPlaceInputSchema.safeExtend({spkId:observerEphemerisInputSchema.shape.spkId,atUtc:observerEphemerisInputSchema.shape.atUtc,elevationMeters:z.number().min(-500).max(9000)}),outputSchema:observerEphemerisResultSchema,annotations},async input=>{const p=await resolvePoint(input);return answer(await services.space!.getObserverEphemeris({spkId:input.spkId,atUtc:input.atUtc,latitude:p.latitude,longitude:p.longitude,elevationMeters:input.elevationMeters}),'https://ssd-api.jpl.nasa.gov/doc/horizons.html');});
   }
 }
+

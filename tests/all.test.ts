@@ -220,3 +220,12 @@ import './skills/light-pollution-workflows.test';
 import './operations/light-pollution-validation.test';
 
 import './skills/host-aware-outing.test';
+import './providers/public-universe-configuration.test.ts';
+import './providers/public-universe-contracts.test.ts';
+import './providers/public-universe-date-query.test.ts';
+import './providers/public-universe-deadlines.test.ts';
+import './providers/public-universe-provider.test.ts';
+import './providers/public-universe-store.test.ts';
+import './providers/public-universe-transport.test.ts';
+import './mcp/public-universe-tools.test';
+import './skills/public-universe-workflows.test';
