@@ -81,6 +81,7 @@ export function createPublicUniverseProvider(options: Options) {
         try {
             const input = inputParse(getReferenceDetailsInputSchema, value), deadline = transport.operationDeadline(), limitations: string[] = ['Reference facts do not establish local viewing potential or transit predictions.'];
             let record: ReferenceRecord | null = null;
+            const additionalSources:ReferenceRecord['sources']=[];
             let extra: Record<string, unknown> = {};
             const sections: NonNullable<ReferenceDetailsResult['data']>['sections'] = [];
             let retrievedAt = new Date(now()).toISOString();
@@ -115,8 +116,12 @@ export function createPublicUniverseProvider(options: Options) {
                     const response = await request({ kind: operation, id: hostId }, deadline);
                     retrievedAt = response.retrievedAt;
                     const host = c.parseHostDetail(response.value, hostId);
-                    extra = { host: { id: host.id, name: host.name, coordinateMetadata: host.coordinate_metadata, planets: host.planets.map(p => n.exoplanetRecord(p, limitations)) } };
+                    const evidence=n.hostEvidence(host);
+                    const planets=host.planets.map(p=>n.exoplanetRecord(p,limitations));
+                    additionalSources.push(evidence.source,...planets.flatMap(p=>p.sources));
+                    extra = { host: { id: host.id, name: host.name, coordinates:evidence.coordinates,distance:evidence.distance,provenance:evidence.provenance,coordinateMetadata: host.coordinate_metadata, planets } };
                     limitations.push('Host coordinates are archive ICRS inputs without proper motion; remote revision association unverified.');
+                    limitations.push('Host distance errors retain the source signed error fields in pc; dataset citation is provider documentation, not a per-row URL.');
                 }
                 else {
                     if (domain !== 'solar-system' && domain !== 'starter-targets' && domain !== 'exoplanets')
@@ -135,7 +140,9 @@ export function createPublicUniverseProvider(options: Options) {
                     else if (domain === 'exoplanets') {
                         const row = c.parseExoplanetDetail(response.value, identity.upstreamId, identity.hostId ?? undefined);
                         record = n.exoplanetRecord(row, limitations);
-                        record.remoteRevisionAssociation = store.compare(input, n.exoplanetIdentity(row)).association;
+                        // Compare documentary provenance for changed selections, but it cannot establish catalogue/build revision association.
+                        store.compare(input, n.exoplanetIdentity(row));
+                        record.remoteRevisionAssociation = 'unverified';
                         for (const section of input.sections)
                             sections.push({ section, status: 'unavailable', reason: 'Optional solar object section is unsupported for this domain.', records: [] });
                     }
@@ -165,7 +172,7 @@ export function createPublicUniverseProvider(options: Options) {
                     record.selection = { referenceId: input.referenceId, revision: input.revision };
                 }
             }
-            return referenceDetailsResultSchema.parse({ ...envelope(operation), retrievedAt, status: sections.some(s => s.status !== 'available') ? 'partial' : 'available', sources: record?.sources ?? [], limitations: limitations.slice(0, 20), data: { record, sections, ...extra } });
+            return referenceDetailsResultSchema.parse({ ...envelope(operation), retrievedAt, status: sections.some(s => s.status !== 'available') ? 'partial' : 'available', sources: [...(record?.sources??[]),...additionalSources].slice(0,30), limitations: limitations.slice(0, 20), data: { record, sections, ...extra } });
         }
         catch (error) {
             return referenceDetailsResultSchema.parse(failure(operation, error));

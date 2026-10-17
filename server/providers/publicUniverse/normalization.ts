@@ -92,4 +92,16 @@ export function exoplanetRecord(row: ExoplanetRecord, limitations: string[]): Re
     return { domain: 'exoplanets', upstreamId: row.id, name: row.name, aliases: [], sources: [{ id: row.source, url: row.source_url, retrievedAt: timestamp(row.retrieved_at), ...unknownRights }], measurements, observingSupported: false };
 }
 export function exoplanetIdentity(row: ExoplanetRecord): IdentitySnapshot { return { domain: 'exoplanets', upstreamId: row.id, hostId: row.host_id, upstreamSourceIdentity: { lineage: 'exoplanet-row', source: row.source, source_url: row.source_url, retrieved_at: row.retrieved_at } }; }
+/** Host route has no row URL. This is the documented dataset citation, never a per-row association. */
+export function hostEvidence(host:ReturnType<typeof import('./contracts').parseHostDetail>){
+    const citation={url:'https://doi.org/10.26133/NEA13',label:'NASA Exoplanet Archive PSCompPars; provider documentation citation',association:'provider-documentation' as const};
+    const retrievedAt=timestamp(host.retrieved_at);
+    return {
+        coordinates:{raDeg:host.ra_deg??null,decDeg:host.dec_deg??null,unit:'deg' as const,frame:'ICRS' as const,coordinateSourcePlanet:host.coordinate_source_planet},
+        // Preserve returned signed errors verbatim; do not silently reinterpret their signs.
+        distance:{value:host.distance_pc??null,unit:'pc' as const,errorPlus:host.distance_error_plus_pc??null,errorMinus:host.distance_error_minus_pc??null},
+        provenance:{source:host.source,retrievedAt,rowUrl:null,citation},
+        source:{id:'host-provider-documentation',url:citation.url,retrievedAt,...unknownRights,attribution:citation.label,modifications:'Citation supplied by provider documentation; no per-host row URL or catalogue revision association is supplied.'} satisfies ReferenceSource,
+    };
+}
 

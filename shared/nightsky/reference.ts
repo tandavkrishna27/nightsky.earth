@@ -406,6 +406,9 @@ export const referenceDetailsResultSchema = z.strictObject({
         host: z.strictObject({
             id: text,
             name: text,
+            coordinates: z.strictObject({raDeg:z.number().finite().min(0).lt(360).nullable(),decDeg:z.number().finite().min(-90).max(90).nullable(),unit:z.literal('deg'),frame:z.literal('ICRS'),coordinateSourcePlanet:text}),
+            distance: z.strictObject({value:z.number().finite().nonnegative().nullable(),unit:z.literal('pc'),errorPlus:z.number().finite().nullable(),errorMinus:z.number().finite().nullable()}),
+            provenance: z.strictObject({source:text,retrievedAt:z.iso.datetime(),rowUrl:z.null(),citation:z.strictObject({url:z.url().max(2048),label:text,association:z.literal('provider-documentation')})}),
             coordinateMetadata: z.strictObject({
                 input: evidenceNote,
                 heliocentric: evidenceNote,

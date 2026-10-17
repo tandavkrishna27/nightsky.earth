@@ -88,9 +88,13 @@ test('exoplanet list retains transaction snapshot; details preserve signed error
     assert.equal(found.data!.catalogueSnapshot!.build_identifier, 'build');
     const result = await p.getReferenceDetails({ kind: 'selected-object', ...found.data!.matches[0].selection!, sections: [] });
     assert.equal(result.status, 'available');
+    assert.equal(result.data!.record!.remoteRevisionAssociation, 'unverified');
+    assert.equal('catalogueSnapshot' in result.data!, false);
     assert.equal(result.data!.record!.measurements[0].uncertaintyMinus, .1);
     assert.equal(result.data!.record!.measurements[0].reference, 'Paper');
     assert.equal(result.data!.record!.measurements.some(m => m.name === 'mass'), false);
+    row.retrieved_at='2026-01-02';
+    assert.equal((await p.getReferenceDetails({kind:'selected-object',...found.data!.matches[0].selection!,sections:[]})).status,'stale');
     await p.close();
 });
 test('null discovery plan remains available incomplete screening and request binding survives normalization', async () => {
@@ -147,6 +151,7 @@ test('all section routes preserve explicit association, inline reuse, units and 
 test('close approaches bind selected exact id, dates and Earth; host detail maps bounded actual coordinate metadata', async () => {
     const row = { id: 'synthetic-b', name: 'Synthetic b', host_id: 'synthetic', source: 'Archive', source_url: 'https://example.org', retrieved_at: '2026-01-01', source_data: {} };
     const host = { id: 'synthetic', name: 'Synthetic host', source: 'Archive', retrieved_at: '2026-01-01', coordinate_source_planet: row.id, coordinate_metadata: { input: 'ICRS without proper motion', heliocentric: 'Synthetic', unit: 'pc', galactocentric: { galcen_distance_pc: 8000, z_sun_pc: 20, roll_deg: 0, galcen_ra_deg: 266, galcen_dec_deg: -29 }, astropy_version: 'synthetic' }, planets: [row] };
+    Object.assign(host,{ra_deg:12,dec_deg:-3,distance_pc:4,distance_error_plus_pc:.2,distance_error_minus_pc:-.1});
     const p = createPublicUniverseProvider({ quota, quotaOwner: 'test', admitted: true, fetcher: async (url) => {
             const u = new URL(String(url));
             if (u.pathname.endsWith('/search'))
@@ -168,6 +173,14 @@ test('close approaches bind selected exact id, dates and Earth; host detail maps
     assert.equal(h.status, 'available', JSON.stringify(h));
     assert.equal(h.data!.host!.coordinateMetadata!.unit, 'pc');
     assert.equal(h.data!.host!.planets[0].upstreamId, row.id);
+    assert.deepEqual(h.data!.host!.coordinates,{raDeg:12,decDeg:-3,unit:'deg',frame:'ICRS',coordinateSourcePlanet:row.id});
+    assert.deepEqual(h.data!.host!.distance,{value:4,unit:'pc',errorPlus:.2,errorMinus:-.1});
+    assert.equal(h.data!.host!.provenance.source,'Archive');
+    assert.equal(h.data!.host!.provenance.retrievedAt,'2026-01-01T00:00:00.000Z');
+    assert.equal(h.data!.host!.provenance.rowUrl,null);
+    assert.equal(h.data!.host!.provenance.citation.association,'provider-documentation');
+    assert.ok(h.sources.some(s=>s.id==='Archive'&&s.url==='https://example.org'));
+    assert.ok(h.sources.some(s=>s.id==='host-provider-documentation'));
     await p.close();
 });
 test('detail sections share one deadline and retain successful base after deadline expires', async () => {
