@@ -7,7 +7,7 @@ import type { WeatherProviderId, WeatherProviderResult } from "../../server/prov
 const index = new GeoNamesPlaceIndex([{ geonameId: 2643743, name: "London", asciiName: "London", alternateNames: "", latitude: 51.5, longitude: -0.12, countryCode: "GB", countryName: "United Kingdom", featureClass: "P", featureCode: "PPLC", population: 8_000_000, timeZone: "Europe/London", modificationDate: "2026-10-01" }], "fixture-2026-10");
 const window = { startUtc: "2026-10-25T00:00:00Z", endUtc: "2026-10-25T06:00:00Z", timeZone: "Europe/London" };
 const input = { placeId: "place:v1:geonames:2643743", window, activity: "general-stargazing" };
-function fixture(name: string, cloud: number, times = ["2026-10-25T00:00:00Z", "2026-10-25T03:00:00Z"]): WeatherProviderResult { return { status: "available", reason: "Synthetic forecast.", forecast: { availability: { status: "available", reason: "Synthetic samples." }, source: { name, url: "https://example.test/weather", attribution: "Synthetic fixture.", dataClass: "forecast" }, forecastHorizonHours: 48, samples: times.map(validAt => ({ validAt, values: { totalCloudCover: { value: cloud, unit: "%" } } })), missingFields: [{ field: "lowCloudCover", reason: "Not supplied." }] } }; }
+function fixture(name: string, cloud: number, times = ["2026-10-25T00:00:00Z", "2026-10-25T03:00:00Z"]): WeatherProviderResult { return { status: "available", reason: "Synthetic forecast.", forecast: { availability: { status: "available", reason: "Synthetic samples." }, source: { name, url: "https://example.test/weather", attribution: "Synthetic fixture.", dataClass: "forecast", validStartUtc: window.startUtc, validEndUtc: window.endUtc }, forecastHorizonHours: 48, samples: times.map(validAt => ({ validAt, values: { totalCloudCover: { value: cloud, unit: "%" } } })), missingFields: [{ field: "lowCloudCover", reason: "Not supplied." }] } }; }
 function handlers(dependencies: NightSkyDependencies) { const tools = new Map<string, (input: any) => Promise<any>>(); registerNightSkyTools({ registerTool: (name: string, _options: unknown, fn: any) => tools.set(name, fn) } as any, { placeIndex: index, osmCandidateIndexLoader: async () => undefined, ...dependencies }); return tools; }
 function collection(results: Array<[WeatherProviderId, WeatherProviderResult]>) { return createWeatherCollection(results.map(([id, result]) => ({ id, enabled: true, provider: { getForecast: async (point, requested) => { assert.deepEqual(point, { placeId: input.placeId, latitude: 51.5, longitude: -0.12 }); assert.deepEqual(requested, window); return result; } } })), { deadlineMs: 100 }); }
 test("conditions, plan and comparison retain disagreeing source evidence and exact missing status through DST", async () => {
@@ -69,4 +69,12 @@ test("three maximum-length source records and full series retain factors and att
   assert.equal(plan.evidence.weather.forecasts.length, 3); assert.equal(plan.factors.filter((f: any) => /forecast/.test(f.name)).length, 6);
   for (const [, result] of results) assert.ok(plan.sources.some((s: any) => s.attribution === result.forecast!.source.attribution));
   assert.ok(plan.summary.length <= 1200); assert.ok(plan.factors.length <= 20); assert.ok(plan.sources.length <= 64);
+});
+
+test("claimed available source with truncated horizon remains partial", async () => {
+  const result = fixture("Short horizon", 0);
+  result.forecast!.source.validEndUtc = "2026-10-25T03:00:00Z";
+  const tools = handlers({ weatherCollection: collection([["met", result]]) });
+  const direct = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
+  assert.equal(direct.availability.status, "partial"); assert.equal(direct.providerOutcomes[0].status, "available");
 });

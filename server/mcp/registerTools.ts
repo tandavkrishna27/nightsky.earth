@@ -396,7 +396,13 @@ async function getNightConditionsForPlan(placeId: string, window: { startUtc: st
   }
   const providerOutcomes = collection.outcomes.map(({ providerId, result }) => ({ providerId, status: result.status, reason: result.reason, source: result.forecast?.source ?? result.source ?? configurationSource(providerId) }));
   const usable = collection.outcomes.flatMap(({ result }) => ["available", "partial", "stale"].includes(result.status) && result.forecast ? [result.forecast] : []).filter(forecast => ["available", "partial", "stale"].includes(forecast.availability.status) && forecast.samples.some(sample => Date.parse(sample.validAt) >= Date.parse(window.startUtc) && Date.parse(sample.validAt) <= Date.parse(window.endUtc)));
-  const status = !dependencies.weatherCollection ? collection.outcomes[0]!.result.status : !usable.length ? "unavailable" : collection.outcomes.length > 0 && collection.outcomes.every(({ result }) => result.status === "available" && result.forecast?.availability.status === "available") && usable.length === collection.outcomes.length ? "available" : "partial";
+  const coversWindow = usable.every(forecast => {
+    const instants = forecast.samples.map(sample => Date.parse(sample.validAt));
+    const start = forecast.source.validStartUtc ? Date.parse(forecast.source.validStartUtc) : Math.min(...instants);
+    const end = forecast.source.validEndUtc ? Date.parse(forecast.source.validEndUtc) : Math.max(...instants);
+    return start <= Date.parse(window.startUtc) && end >= Date.parse(window.endUtc);
+  });
+  const status = !dependencies.weatherCollection ? collection.outcomes[0]!.result.status : !usable.length ? "unavailable" : collection.outcomes.length > 0 && collection.outcomes.every(({ result }) => result.status === "available" && result.forecast?.availability.status === "available") && usable.length === collection.outcomes.length && coversWindow ? "available" : "partial";
   const reason = !dependencies.weatherCollection ? collection.outcomes[0]!.result.reason : status === "available" ? "All requested weather sources supplied the requested window." : status === "partial" ? "Some requested weather evidence is missing or incomplete; inspect each source outcome." : "No requested source supplied usable forecast samples in this window.";
   const darknessIntervals = astronomicalDarknessIntervals(astronomy);
   return nightConditionsResultSchema.parse({
