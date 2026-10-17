@@ -8,10 +8,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "node --import tsx -e \"process.env.NODE_ENV='development'; import('./server/index.ts')\"",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:./viteDev.js && esbuild server/viteDev.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/viteDev.js && esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:./viteDev.js && esbuild server/viteDev.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/viteDev.js && esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js && npm run build:light-pollution-browser",
     "start": "node -e \"process.env.NODE_ENV='production'; import('./dist/index.js')\"",
     "start:plugin": "node dist/plugin.js",
-    "build:plugin": "esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js",
+    "build:plugin": "esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js && npm run build:light-pollution-browser",
     "check": "tsc && tsc -p tsconfig.era5.json && tsc -p tsconfig.tools.json",
     "test": "tsx --test tests/all.test.ts",
     "data:refresh-geonames": "tsx scripts/refresh-geonames.ts",
@@ -28,7 +28,8 @@
     "data:aggregate-observations": "tsx scripts/era5/build-observation-aggregates.ts",
     "data:prepare-geographic-coverage": "tsx scripts/osm/prepare-geographic-coverage.ts",
     "data:plan-production-history": "tsx scripts/era5/plan-production-history.ts",
-    "data:validate-retained-adapters": "tsx scripts/validate-retained-source-adapters.ts"
+    "data:validate-retained-adapters": "tsx scripts/validate-retained-source-adapters.ts",
+    "build:light-pollution-browser": "esbuild scripts/light-pollution-browser-worker.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/light-pollution-browser-worker.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -128,6 +129,7 @@
     "vite": "^5.4.20"
   },
   "optionalDependencies": {
-    "bufferutil": "^4.0.8"
+    "bufferutil": "^4.0.8",
+    "playwright-core": "1.64.1"
   }
 }

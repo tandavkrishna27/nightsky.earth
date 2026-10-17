@@ -7,6 +7,7 @@
     "scripts/serve-native-bounded.ts",
     "scripts/validate-jpl-error-live.ts",
     "scripts/initialize-sky-quota.ts",
+    "scripts/initialize-light-pollution-quota.ts",
     "scripts/migrate-seventimer-quota.ts",
     "scripts/initialize-provider-quota.ts",
     "scripts/measure-api-load.ts",
@@ -41,7 +42,8 @@
     "scripts/osm/source-admission.ts",
     "scripts/osm/natural-earth-ingest.ts",
     "scripts/osm/membership-assembly.ts",
-    "scripts/osm/planet-policy-preparation.ts"
+    "scripts/osm/planet-policy-preparation.ts",
+    "scripts/light-pollution-browser-worker.ts"
   ],
   "exclude": [
     "node_modules",

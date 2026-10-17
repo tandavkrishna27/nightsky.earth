@@ -60,3 +60,25 @@ test('unexpected provider-result validation exceptions settle as unavailable',as
  const output=await compareLightPollution([point],[provider({lookup:async()=>hostile})]);
  assert.equal(output.results[0].errorCode,'invalid_provider_result');
 });
+
+test('batch adapter receives one deduplicated comparison and restores IDs despite reversed output',async()=>{
+ let calls=0;let singles=0;const batch=provider({lookup:async p=>{singles++;return result(p);},lookupMany:async points=>{calls++;assert.equal(points.length,2);return points.map(p=>result(p)).reverse();}});
+ const output=await compareLightPollution([point,{...point,candidateId:'b'},{...point,candidateId:'c',latitude:21}],[batch]);
+ assert.equal(calls,1);assert.equal(singles,0);assert.deepEqual(output.results.map(r=>[r.candidateId,r.requestedPoint.latitude]),[['a',20],['b',20],['c',21]]);
+});
+test('batch missing, duplicate and mismatched rows fail per point; cancellation settles ignoring batch',async()=>{
+ const other={...point,candidateId:'b',latitude:21};
+ for(const rows of [[result()], [result(),result()], [result(),{...result(other),requestedPoint:{latitude:22,longitude:77}}]]){
+ const output=await compareLightPollution([point,other],[provider({lookupMany:async()=>rows})]);assert.equal(output.results[1].errorCode,'invalid_provider_result');
+ }
+ const c=new AbortController();const pending=compareLightPollution([point],[provider({lookupMany:async()=>new Promise(()=>{})})],c.signal);c.abort();assert.equal((await pending).results[0].errorCode,'cancelled');
+});
+
+test('outer cancellation preserves completed browser batch rows and settles ignored batch',async()=>{
+ const {BrowserBoundary}=await import('../../server/providers/lightPollution/browser');let secondStarted!:()=>void;const started=new Promise<void>(resolve=>{secondStarted=resolve;});
+ const boundary=new BrowserBoundary({enabled:true,sourceId:'darkskysites',run:async(p,signal)=>{if(p.candidateId==='a')return {...result(p),transport:'browser'};secondStarted();return new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(Error('cancelled')),{once:true}));}});
+ const batch=provider({transport:'browser',lookupMany:(points,signal)=>boundary.compare(points,signal)});const c=new AbortController();
+ const pending=compareLightPollution([point,{...point,candidateId:'b',latitude:21}],[batch],c.signal);await started;c.abort();
+ const rows=(await pending).results;assert.equal(rows[0].status,'available');assert.equal(rows[0].sqm,21);assert.equal(rows[1].status,'unavailable');assert.equal(rows[1].sqm,null);await boundary.close();
+ const ignoring=new AbortController();let dispatched!:()=>void;const entered=new Promise<void>(resolve=>{dispatched=resolve;});const start=Date.now();const unresolved=compareLightPollution([point],[provider({lookupMany:async()=>{dispatched();return new Promise(()=>{});}})],ignoring.signal);await entered;ignoring.abort();assert.equal((await unresolved).results[0].errorCode,'cancelled');assert.ok(Date.now()-start<500);
+});

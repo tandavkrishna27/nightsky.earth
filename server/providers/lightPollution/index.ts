@@ -22,16 +22,37 @@ async function lookup(point:LightPollutionPoint,provider:LightPollutionProvider,
  },()=>finish(unavailable(point,provider,signal?.aborted?'cancelled':'provider_error')));
  });
 }
+
+async function lookupMany(points:LightPollutionPoint[],provider:LightPollutionProvider,signal?:AbortSignal):Promise<LightPollutionResult[]> {
+ const bad=(code:string)=>points.map(p=>unavailable(p,provider,code));
+ if(signal?.aborted)return bad('cancelled');
+ return new Promise(resolve=>{
+ let settled=false;let cancellationGrace:ReturnType<typeof setTimeout>|undefined;const finish=(rows:LightPollutionResult[])=>{if(settled)return;settled=true;if(cancellationGrace)clearTimeout(cancellationGrace);signal?.removeEventListener('abort',abort);resolve(rows);};
+ // Cooperative batches return completed rows when aborted. Give them one bounded
+ // cleanup interval, then settle ignoring providers without losing responsiveness.
+ const abort=()=>{if(!cancellationGrace)cancellationGrace=setTimeout(()=>finish(bad('cancelled')),50);};signal?.addEventListener('abort',abort,{once:true});
+ Promise.resolve().then(()=>{if(signal?.aborted)return bad('cancelled');return provider.lookupMany!(points.map(p=>({...p})),signal);}).then(raw=>{
+ try{if(!Array.isArray(raw)||raw.length>5){finish(bad('invalid_provider_result'));return;}
+ finish(points.map(point=>{try{const matches=raw.filter(row=>row?.candidateId===point.candidateId);if(matches.length!==1)return unavailable(point,provider,'invalid_provider_result');const parsed=lightPollutionResultSchema.safeParse(matches[0]);if(!parsed.success)return unavailable(point,provider,'invalid_provider_result');const r=parsed.data;if(r.sourceId!==provider.sourceId||r.transport!==provider.transport||r.requestedPoint.latitude!==point.latitude||r.requestedPoint.longitude!==point.longitude)return unavailable(point,provider,'invalid_provider_result');return r;}catch{return unavailable(point,provider,'invalid_provider_result');}}));
+ }catch{finish(bad('invalid_provider_result'));}
+ },()=>finish(bad(signal?.aborted?'cancelled':'provider_error')));
+ });
+}
 export async function compareLightPollution(points:LightPollutionPoint[],providers:LightPollutionProvider[],signal?:AbortSignal):Promise<{results:LightPollutionResult[]}> {
  const validPoints=lightPollutionPointsSchema.parse(points);
  const unique=new Map<string,LightPollutionProvider>();
  for(const provider of providers){lightPollutionAdapterSchema.parse({sourceId:provider.sourceId,transport:provider.transport});const key=JSON.stringify([provider.sourceId,provider.transport]);if(!unique.has(key))unique.set(key,provider);}
- const work=new Map<string,Promise<LightPollutionResult>>();
- const results=await Promise.all(validPoints.flatMap(point=>Array.from(unique.values()).map(provider=>{
- const key=JSON.stringify([provider.sourceId,provider.transport,point.latitude,point.longitude]);
- let pending=work.get(key);if(!pending){pending=lookup(point,provider,signal);work.set(key,pending);}
- return pending.then(result=>lightPollutionResultSchema.parse({...result,candidateId:point.candidateId}));
+ const coordinateKey=(point:LightPollutionPoint)=>JSON.stringify([point.latitude,point.longitude]);
+ const distinct=Array.from(new Map(validPoints.map(p=>[coordinateKey(p),p])).values());
+ // Preserve the first candidate identity for each exact coordinate before rebinding duplicates.
+ const firstPoints=distinct.map(p=>validPoints.find(v=>coordinateKey(v)===coordinateKey(p))!);
+ const work=new Map<LightPollutionProvider,Promise<Map<string,LightPollutionResult>>>();
+ for(const provider of Array.from(unique.values())){
+ const pending=provider.lookupMany?lookupMany(firstPoints,provider,signal):Promise.all(firstPoints.map(point=>lookup(point,provider,signal)));
+ work.set(provider,pending.then(rows=>new Map(rows.map((row,i)=>[coordinateKey(firstPoints[i]),row]))));
+ }
+ const results=await Promise.all(validPoints.flatMap(point=>Array.from(unique.values()).map(async provider=>{
+ const rows=await work.get(provider)!;const result=rows.get(coordinateKey(point))!;return lightPollutionResultSchema.parse({...result,candidateId:point.candidateId});
  })));
  return {results};
 }
-

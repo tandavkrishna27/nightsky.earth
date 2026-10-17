@@ -42,5 +42,5 @@ export const lightPollutionResultSchema = z.strictObject({
  if(r.status==='unavailable'&&r.errorCode===null)issue('Unavailable results require an error code.');
 });
 export type LightPollutionResult = z.infer<typeof lightPollutionResultSchema>;
-export interface LightPollutionProvider {sourceId:LightPollutionResult['sourceId'];transport:LightPollutionResult['transport'];lookup(point:LightPollutionPoint,signal?:AbortSignal):Promise<LightPollutionResult>}
+export interface LightPollutionProvider {sourceId:LightPollutionResult['sourceId'];transport:LightPollutionResult['transport'];lookup(point:LightPollutionPoint,signal?:AbortSignal):Promise<LightPollutionResult>;lookupMany?(points:LightPollutionPoint[],signal?:AbortSignal):Promise<LightPollutionResult[]>}
 
