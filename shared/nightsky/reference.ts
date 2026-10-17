@@ -125,6 +125,17 @@ export const referenceRecordSchema = z.strictObject({
     selection: referenceSelectionSchema.optional(),
     sources: z.array(referenceSourceSchema).max(20),
     measurements: z.array(referenceMeasurementSchema).max(40),
+    astrometry: z.strictObject({
+        status: text,
+        frame: text.nullable().optional(),
+        equinox: text.nullable().optional(),
+        reference_epoch_jyear: z.number().finite().nullable().optional(),
+        observation_epoch_jyear: z.number().finite().nullable().optional(),
+        motion_model: text.optional(),
+        pm_ra_cosdec_arcsec_per_year: z.number().finite().nullable().optional(),
+        pm_dec_arcsec_per_year: z.number().finite().nullable().optional(),
+        reason: text.optional(),
+    }).optional(),
     observingSupported: z.boolean().optional(),
     remoteRevisionAssociation: z.enum(["verified", "unverified"]).optional()
 });

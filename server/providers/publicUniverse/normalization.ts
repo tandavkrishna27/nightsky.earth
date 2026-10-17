@@ -19,7 +19,7 @@ export function starterRecord(row: StarterRecord, p: StarterProvenance): Referen
         measurements.push({ name: 'magnitude', value: row.magnitude, unit: 'mag', reference: `Catalogue band=${row.magnitude_band ?? 'unknown'}; flag=${row.magnitude_flag ?? 'unknown'}; code=${row.magnitude_code ?? 'unknown'}` });
     if (row.separation_arcsec !== undefined)
         measurements.push({ name: 'separation', value: row.separation_arcsec, unit: 'arcsec' });
-    return { domain: 'starter-targets', upstreamId: row.id, name: row.name, aliases: row.aliases, sources: [starterSource(p)], measurements, observingSupported: isSupportedStarterId(row.id) && !!row.astrometry.frame && !!row.astrometry.motion_model };
+    return { domain: 'starter-targets', upstreamId: row.id, name: row.name, aliases: row.aliases, sources: [starterSource(p)], measurements, astrometry: row.astrometry, observingSupported: isSupportedStarterId(row.id) && !!row.astrometry.frame && !!row.astrometry.motion_model };
 }
 const quantities: [
     string,
