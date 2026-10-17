@@ -104,7 +104,9 @@ export function buildRoute(r: PublicUniverseRequest): {
                 invalid();
             path = '/api/v1/objects/' + segment(r.id) + '/close-approaches';
             query.set('from', r.from);
-            query.set('to', r.to);
+            // Upstream compares ISO timestamp text inclusively, not calendar dates.
+            // Keep the public date bound while including its final fractional second.
+            query.set('to', r.to + 'T23:59:59.999999999Z');
             query.set('body', 'Earth');
             query.set('limit', limit(r.limit));
             break;
