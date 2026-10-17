@@ -64,3 +64,14 @@ test("window classification is explicit and installed skill behavior remains pen
   for (const state of ["full-window", "partial-window", "none", "unknown"]) assert.ok(text.includes(state));
   assert.match(text, /installed.*skill.*(?:deferred|pending)/i);
 });
+
+test("event guidance uses current sampled evidence without stale three-point instructions", () => {
+  for (const path of ["plugins/nightsky/skills/plan-sky-event/SKILL.md", "docs/product/workflows/plan-sky-event.md"]) {
+    const text = readFileSync(path, "utf8");
+    assert.doesNotMatch(text, /three exact radiant samples/i);
+    assert.match(text, /conjunctionWindows/);
+    assert.match(text, /97/);
+    assert.match(text, /meteorCivilGuidance/);
+    assert.match(text, /six.*pair/i);
+  }
+});

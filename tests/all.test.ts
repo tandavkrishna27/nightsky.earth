@@ -173,3 +173,6 @@ import "./events/conjunctionWindow.test.ts";
 import "./places/api-geometry-snapshot.test.ts";
 import "./providers/climate/open-meteo-history-pilot.test.ts";
 import "./places/api-geometry-acquisition.test.ts";
+import "./providers/climate/open-meteo-history-serving.test.ts";
+import "./mcp/hosted-history-planning.test.ts";
+import "./operations/geometry-live-validation.test.ts";

@@ -1,0 +1,1 @@
+{"mode":"live","envelope":"geometry-live-v1-6-9-120-zero-retries","status":"stopped","attempts":[{"sequence":1,"path":"/v1/geocode/search","query":{"text":"Vatican City","type":"country","limit":"5","format":"geojson"},"cost":1,"status":200,"bytes":136,"elapsedMs":445,"outcome":"received"}],"results":[],"productionEnabled":false,"sourceAccepted":false}

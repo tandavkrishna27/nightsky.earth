@@ -11,7 +11,7 @@ export const OPEN_METEO_HISTORY_METHOD = Object.freeze({
   sampling: "hourly-dark-time-samples",
   thresholdsPercentInclusive: [10, 25, 50],
   missingness: "null-and-absent-hours-remain-missing; no-local-fill-or-interpolation",
-  denominators: "independent-summary-and-local-hour-bins; expected-dark-hours-includes-missing; frequencies-use-valid-dark-hours",
+  denominators: "independent-summary-and-UTC-hour-bins; expected-dark-hours-includes-missing; frequencies-use-valid-dark-hours",
   quality: { minimumCompleteness: 0.9, minimumRepresentedYears: 27, minimumPerYearCompleteness: 0.8, maximumBadYears: 0, zeroDenominator: "omit-numeric-statistics" },
   precision: "hosted-cloud-storage-integer-percent-quantization; divide-by-100-only; do-not-round-wire-values",
   provenance: "retain-requested-point-returned-cell-raw-response-sha256-retrieval-time",

@@ -1,5 +1,7 @@
 # Events source resolution — 17 October 2026
 
+> Superseded in part: IGN civil guidance and reuse admission are resolved in `meteor-source-admission-20261017.md`; the finite follow-up matrix and current skill behavior are in `events-skills-wave-20261017.md`. The candidate-only wording below records the earlier inspection, not current admission status.
+
 ## Disposition
 
 Finite official-source inspection only; no datasets downloaded, live provider API calls, peak/radiant artifact changes, policy activation or deployment. All nineteen retained identities remain. The thirteen-shower proposal is not activated. New material below is research evidence, not admission or scientific certification.
