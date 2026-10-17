@@ -144,3 +144,19 @@ import './places/api-discovery.test';
 import './mcp/api-discovery-planning.test';
 
 import './operations/api-runtime-measurement.test';
+
+import "./providers/weather-collection-contract.test.ts";
+
+import "./providers/quota-state.test.ts";
+
+import "./providers/weather-api.test.ts";
+
+import "./providers/openweather.test.ts";
+
+import "./providers/weather-collection.test.ts";
+
+import "./mcp/multi-weather-planning.test.ts";
+
+import "./providers/weather-configuration.test.ts";
+
+import "./skills/multi-weather-workflows.test.ts";

@@ -45,6 +45,9 @@ jobs:
       - name: Exercise bounded global discovery and exact selected-site planning offline
         run: node --import tsx --test tests/mcp/global-discovery.test.ts
 
+      - name: Exercise synthetic three-source weather and partial outage contracts
+        run: node --import tsx --test tests/mcp/multi-weather-planning.test.ts tests/providers/weather-collection.test.ts tests/skills/multi-weather-workflows.test.ts
+
       - name: Measure API fixture runtime without live source access
         run: node --import tsx scripts/measure-api-runtime.ts
 

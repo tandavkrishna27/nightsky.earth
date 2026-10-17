@@ -75,6 +75,14 @@ For unsupported-query, report the missing semantics and never silently remove a 
 
 Preserve provider identity, complete credential-free source links, attribution and freshness, including fetchedAt/expiresAt when returned. Distinguish API sourceRevision from installed catalogueRevision, source vintage and footprint coverage. Retain partial/truncation/stop reasons and separate no-results from unavailable or unsupported. Preserve conflicts between sources without averaging points or zones.
 
+## Multiple weather sources
+
+For each returned weather source, report its identity, status/reason, native cadence, valid times and forecast horizon, plus complete credential-free source links and attribution. Include issuedAt only when supplied; fetchedAt is retrieval time, never model issue time. A configured source is not necessarily admitted or live-verified. Label synthetic fixtures explicitly.
+
+Preserve disagreements between sources; never average forecasts or create a blended weather score. Compare only like fields over matching valid times and accumulation periods. Keep missing fields unknown, including absent cloud layers, seeing and transparency; an absent value is not zero. Never interpolate three-hour samples into hourly certainty or extend a source beyond its returned horizon. Explain a failed, stale, partial, unconfigured or out-of-horizon source while retaining usable independent forecasts. If no forecast samples overlap darkness, state that gap explicitly.
+
+Use the exact selected point and its revision for every weather source; keep the selected display timezone and UTC instants through local midnight and DST. Do not replace it with a provider's returned city centre. Forecast agreement alone does not support a go/no-go recommendation or establish safe access, clear horizons or photographic success. Describe conditional opportunities from supported astronomy, weather and access evidence; keep unresolved conditions visible.
+
 ## Optional host capabilities
 
 Use optional host capabilities only when actually available in this conversation. Preserve declared approximate-origin and town-centre distance semantics; consented host hints do not become exact site coordinates. For near me, obtain consent before using an approximate host location hint actually supplied by the host; resolve a named town and label distances from its centre. If no location capability or supplied hint is exposed (capability or hint absent), ask only for town and country; do not offer to request host location permission or promise a future hint. Never imply any client supplies personal location by default.
