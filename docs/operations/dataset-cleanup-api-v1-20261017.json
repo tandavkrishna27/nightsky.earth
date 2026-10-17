@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "observedUtc": "2026-10-17T03:55:19.8006945Z",
+  "purpose": "API-based V1 raw dataset cleanup inventory",
+  "workspace": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main",
+  "status": "retained-policy-blocked",
+  "execution": "Root exact-file native PowerShell deletion attempt was rejected by automatic exec policy before execution. No deletion performed; no alternate deletion attempt.",
+  "rawFileCount": 48,
+  "rawLogicalBytes": 1863767351.0,
+  "rawFiles": [
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\geonames\\IN.zip",
+      "bytes": 15752614,
+      "role": "downloaded GeoNames India supplement archive",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.cache\\s2-geography-acquisition-20261016-r2\\raw\\ne_10m_admin_1_states_provinces.geojson",
+      "bytes": 40726851,
+      "role": "downloaded Natural Earth administrative boundary source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.cache\\s2-geography-acquisition-20261016-r2\\raw\\ne_10m_admin_0_countries.geojson",
+      "bytes": 13287234,
+      "role": "downloaded Natural Earth administrative boundary source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\hanle-2025-01-total-cloud-cover.nc",
+      "bytes": 80862,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\india-latest.osm.pbf",
+      "bytes": 1709857118,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2026-01-boundary.nc",
+      "bytes": 25261,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-12.nc",
+      "bytes": 85584,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-11.nc",
+      "bytes": 82422,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-10.nc",
+      "bytes": 81956,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-09.nc",
+      "bytes": 82239,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-08.nc",
+      "bytes": 81827,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-07.nc",
+      "bytes": 81804,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-06.nc",
+      "bytes": 82041,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-05.nc",
+      "bytes": 82453,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-04.nc",
+      "bytes": 84261,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-03.nc",
+      "bytes": 85165,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-02.nc",
+      "bytes": 81974,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2025-01.nc",
+      "bytes": 84985,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\kodaikanal-munnar-2024-12-boundary.nc",
+      "bytes": 25261,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2026-01-boundary.nc",
+      "bytes": 25261,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-12.nc",
+      "bytes": 81651,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-11.nc",
+      "bytes": 79464,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-10.nc",
+      "bytes": 81083,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-09.nc",
+      "bytes": 79770,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-08.nc",
+      "bytes": 81633,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-07.nc",
+      "bytes": 81043,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-06.nc",
+      "bytes": 80255,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-05.nc",
+      "bytes": 82054,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-04.nc",
+      "bytes": 80912,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-03.nc",
+      "bytes": 81694,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-02.nc",
+      "bytes": 79229,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2025-01.nc",
+      "bytes": 80862,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\pilot-2025\\raw\\hanle-2024-12-boundary.nc",
+      "bytes": 25261,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\kodaikanal-munnar-2025-01-total-cloud-cover.nc",
+      "bytes": 84985,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\timeseries-sample-19901230-r2-retrieval\\inspected-member.nc",
+      "bytes": 14815,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\grouped-pilot-20261015-v1\\raw\\kodaikanal-munnar-03-1991-1992.nc",
+      "bytes": 143140,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\grouped-pilot-20261015-v1\\raw\\hanle-03-1991-1992.nc",
+      "bytes": 136897,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\history-1991-1992\\raw\\kodaikanal-munnar-1991-01.nc",
+      "bytes": 84930,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\history-1991-1992\\raw\\hanle-1992-01.nc",
+      "bytes": 80615,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\history-1991-1992\\raw\\hanle-1991-01.nc",
+      "bytes": 81449,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\history-1991-1992\\raw\\hanle-1990-12-boundary.nc",
+      "bytes": 25261,
+      "role": "downloaded or extracted ERA5 NetCDF source sample",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\global-pilot-20261015-v1\\monaco\\monaco.osm.pbf",
+      "bytes": 692392,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\faroe-local-recheck-20261015-v1\\faroe-islands\\faroe-islands.osm.pbf",
+      "bytes": 7735542,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\bhutan-offline-20261014-v1\\source.osm.pbf",
+      "bytes": 23618779,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\geographic-continuation-20261015-v1\\faroe-islands\\faroe-islands.osm.pbf",
+      "bytes": 7735542,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\bhutan-offline-rebuild-20261014-v1\\source.osm.pbf",
+      "bytes": 23618779,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\fiji-continuation-20261015-v1\\fiji\\fiji.osm.pbf",
+      "bytes": 17249749,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    },
+    {
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\osm\\monaco-local-recheck-20261015-v1\\monaco\\monaco.osm.pbf",
+      "bytes": 692392,
+      "role": "downloaded OSM regional source body",
+      "status": "retained",
+      "workspaceContained": true,
+      "reparseAncestors": []
+    }
+  ],
+  "preserve": [
+    ".worktrees/plugin-v1/.data/geonames/cities500.json.gz",
+    "Code, git metadata, dependencies and virtual environments",
+    "Credentials and configuration",
+    "Compact evidence, fixtures, request and validation reports"
+  ],
+  "syntheticExcluded": [
+    {
+      "preserve": "Sibling preserved-metadata-20261017, evidence.json and reports",
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\lineage-scale-proof-20261016-v1\\artifacts",
+      "role": "Synthetic scale-proof outputs; excluded from raw list; current recursive size not measured"
+    },
+    {
+      "role": "large-contract-* synthetic test outputs; excluded from raw list; retain compact reports and fixture/code files",
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\.cache\\partition-implementation"
+    }
+  ],
+  "impact": "Future removal of raw bodies prevents offline rebuilds without reacquisition. GeoNames runtime gzip remains required and is preserved.",
+  "evidence": "Historical hash/receipt reports describe prior acquisition and are not proof that a file remains present after deletion. No files are deleted by this inventory.",
+  "redownloadPolicy": "Do not automatically redownload these datasets. API/search-based V1 work should not restore bulk offline acquisition."
+}

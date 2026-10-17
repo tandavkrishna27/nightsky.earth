@@ -55,3 +55,15 @@ No new acquisition approval is recorded here. The pending planet receipt questio
 The owner confirmed API-based V1 may use multiple suitable sources and authorized local downloaded-data cleanup. Provider adapters must expose source identity, freshness, coverage and missing fields. Use explicit fallback rules; do not average incompatible products or hide disagreements. A free/public source is not automatically unrestricted. Respect per-provider identification, caching, attribution and request limits; no silent paid fallback. Existing privacy/input restrictions remain in force; provider-sourced candidate coordinates do not automatically enable arbitrary user GPS/address inputs.
 
 Cleanup must enumerate exact resolved dataset paths inside the workspace and reject symlink/reparse escapes before deletion. Preserve code, Git history, dependencies, credentials and compact evidence. Record removed data and any feature/configuration impact. Historical-weather requirements remain unchanged even if its retained sample is deleted; missing artifacts must be reported honestly and must not silently trigger a replacement download.
+
+## Provider research follow-through
+
+Official documentation checked on 17 October:
+
+| Candidate | Supported role / current conclusion |
+| --- | --- |
+| [Photon public demo](https://github.com/komoot/photon#demo-server) | Project usage is permitted within reasonable request volume; excessive use may be throttled/banned, with no availability guarantee. Candidate geocoding/tag-filtered search adapter; not an exhaustive catalogue or production SLA. |
+| [Overpass public-instance guidance](https://dev.overpass-api.de/overpass-doc/en/preface/commons.html) | Explicitly warns about general applications relying on public instances as their backend. Do not choose the standard public endpoint as an assumed sustainable production fallback. A separately suitable provider would need evaluation. |
+| [GeoNames web services](https://www.geonames.org/export/web-services.html) | Candidate named-place resolution/timezone service; account, quota and endpoint-specific coverage must be pinned before implementation. Existing runtime currently uses a local GeoNames reference, not this API. |
+
+Multiple adapters are an architecture choice, not proof that every needed free service is available. The next implementation plan must select suitable sources and explicit fallback behavior without paid dependencies or silently replacing one exhaustive source with unrestricted public-endpoint scraping.
