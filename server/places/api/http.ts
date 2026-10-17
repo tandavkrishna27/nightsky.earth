@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import type { ProviderQuota } from '../../providers/quotaTypes';
 import { UpstreamControls } from '../../providers/upstreamControls';
 export type ApiProviderId = 'geonames' | 'geoapify';
 export type ApiAttemptStatus = 'not-configured' | 'quota-exhausted' | 'timeout' | 'unavailable' | 'invalid-response' | 'unsupported-query' | 'no-results' | 'success' | 'partial';
@@ -15,6 +16,7 @@ export interface ApiConfiguration {
     fetcher?: typeof fetch;
     now?: () => number;
     controls?: UpstreamControls;
+    quota?: ProviderQuota & { setProviderState?(providerId: string, state: { disabled?: boolean; blockedUntil?: number }): Promise<void> };
 }
 const PARAMS: Record<string, string[]> = {
     '/searchJSON': ['q', 'name_equals', 'country', 'adminCode1', 'featureClass', 'featureCode', 'maxRows', 'startRow', 'style', 'lang'],
@@ -112,6 +114,12 @@ export class ApiHttpClient {
             throw new ApiProviderError('unavailable');
         if ((this.blockedUntil[provider] ?? 0) > now || hourly.length >= (provider === 'geonames' ? 400 : 200) || daily.length >= (provider === 'geonames' ? 2000 : 1000))
             throw new ApiProviderError('quota-exhausted');
+        if (this.config.quota) {
+            let reservation;
+            try { reservation = await this.config.quota.reserve(provider, 1); }
+            catch { throw new ApiProviderError('quota-exhausted'); }
+            if (!reservation.allowed) throw new ApiProviderError('quota-exhausted');
+        }
         this.lastStart[provider] = now;
         this.hourly[provider] = [...hourly, now];
         this.daily[provider] = [...daily, now];
@@ -137,12 +145,15 @@ export class ApiHttpClient {
                     }, signal: controller.signal, redirect: 'error'
                 }), controller.signal);
                 const response = this.config.controls ? await this.config.controls.fetch(provider, key, fetchOperation, controller.signal) : await fetchOperation();
-                if (response.status === 401 || response.status === 403)
+                if (response.status === 401 || response.status === 403) {
                     this.disabled.add(provider);
+                    await this.config.quota?.setProviderState?.(provider, { disabled: true });
+                }
                 if (response.status === 429) {
                     const raw = response.headers.get('Retry-After');
                     const delay = raw && /^\d+$/.test(raw) ? Number(raw) * 1000 : raw ? Date.parse(raw) - now : 60000;
                     this.blockedUntil[provider] = now + Math.max(60000, Number.isFinite(delay) ? delay : 60000);
+                    await this.config.quota?.setProviderState?.(provider, { blockedUntil: this.blockedUntil[provider] });
                     throw new ApiProviderError('quota-exhausted');
                 }
                 if (!response.ok)
@@ -170,3 +181,5 @@ export class ApiHttpClient {
         }
     }
 }
+
+
