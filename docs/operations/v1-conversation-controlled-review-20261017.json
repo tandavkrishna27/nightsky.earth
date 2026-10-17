@@ -1,0 +1,464 @@
+[
+  {
+    "caseId": "hyderabad-corrections",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#hyderabad-corrections",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turns 2–4 explicitly retain outdoor/open-sky discovery and Geminids; no unsolicited venue."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 4 retains north of Hyderabad, open sky and Geminids; travel tolerance remains unanswered and is requested again."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks town/country; turn 2 asks travel tolerance; turn 4 offers distance choices for the still-unanswered tolerance, without requiring a date."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turns 3–4 explain broad sky, blocking objects, lighting and late-night access; no listing is treated as suitability."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turns 2–4 explicitly say sites and access are unverified; no measured darkness, Moon or weather claims."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turns 3–4 give concrete suitability/access checks and a bounded travel question; absent candidate evidence is not padded."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 2 identifies the disconnected installation; no search or provider action is claimed."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Turns 2–4 preserve origin and successive open-sky/north/Geminids corrections; repeated travel question seeks an unanswered input."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "city-only",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#city-only",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 starts an outdoor search around Hyderabad."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 retains Hyderabad and does not introduce a venue or date constraint."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks only travel tolerance with three distance choices."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 identifies sky view, nearby lighting and confirmed night access, with darkness unknown."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly lacks verified candidates and darkness evidence."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 provides provisional criteria and the next narrowing question without padding a shortlist."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 claims no lookup or measured conditions."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn retains supplied city and does not restart with unnecessary origin questions."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "explicit-observatory",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#explicit-observatory",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 honors a guided observatory visit rather than forcing the default discovery path."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 retains Hyderabad and guided-visit preference."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks only travel tolerance; booking/dates are verification needs, not a mandatory questionnaire."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 links visit suitability to guided programmes, opening information and booking requirements."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly lacks verified programmes/opening hours and names no confirmed option."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 directs checking official visitor information and narrows travel scope."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 claims no completed search or booking."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn preserves the explicit hosted preference throughout."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "free-no-camping",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#free-no-camping",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 pursues a night observing visit north of Hyderabad; no commercial venue substitution."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly keeps north, free charge and observing without camping."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks only how far north the user will travel."
+      },
+      "suitabilityReasoning": {
+        "score": 1,
+        "evidence": "Turn 1 explains free night entry and non-camping access, but omits meteor-specific broad sky and lighting criteria."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 states fees/access are unverified; free access is framed as a requirement, not a confirmed fact."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 supplies specific fee/access checks and travel clarification without inventing sites."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 claims no executed search or confirmed permission."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn preserves the supplied exclusions; no silent switch to camping."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "disconnected-no-search",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#disconnected-no-search",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 addresses meteor observing outside Hyderabad."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 retains Hyderabad and meteors."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks one ordinary-text travel-tolerance question."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 specifies broad sky, low nearby lighting and land-manager night access."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 avoids specific-site recommendations without verification."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 gives practical investigation criteria and the next scope question."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly says place tools and web search are unavailable; no action is fabricated."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn uses the stated location/activity without restarting."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "empty-data",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#empty-data",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 addresses the requested shortlist and explains why it cannot be supported."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 preserves Hyderabad and the request for suitable places without manufacturing three options."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks one named-area question to support investigation."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 specifies sky exposure, lighting and night access as verification needs."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 accurately distinguishes a complete zero-candidate fixture from absence of suitable real-world places."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 proposes checking a known place and asks for a named area."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 labels the supplied result a fixture rather than claiming a live search."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn retains the requested locality and does not invent prior selections."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "travel-unknown",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#travel-unknown",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 directly addresses closest and the 45-minute travel question."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 preserves the 45-minute requirement and starting-point dependence."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 requests relevant origin/mode/departure inputs through a routing-app next step; no irrelevant date/location interrogation."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 distinguishes straight-line city-centre distance from road travel suitability."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 makes no closest or 45-minute claim; missing numeric values are consistent with the context containing no actual values."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 gives a concrete routing check using starting area, mode and departure time."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly lacks road routes and claims no route calculation."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn preserves the stated travel limit without substituting a different trip."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "photography-learning",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#photography-learning",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 gives a phone photography learning exercise."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 retains phone/beginner context without requiring other gear."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 correctly needs no place/date and asks no unnecessary question."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 uses stable support, shutter timer and night mode for a relevant first exercise; exposure guidance stays basic."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 labels guidance general technique and predicts no sky outcome or meteor/Milky Way capture."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 supplies a concrete supported-versus-handheld comparison and sharpness check."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 claims no tools, weather check or tailored calculated exposure."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn maintains the learning goal throughout."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "family-mobility",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#family-mobility",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 prioritizes a short seated session with little walking."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 retains children and limited walking needs."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks only the missing town/named starting area."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 identifies drop-off distance/surface, toilets and night opening as relevant checks."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly lacks verified accessibility and certifies no safe terrain."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 gives specific checks and a seat preparation step."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 claims no facility or access lookup."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Single turn maintains mobility needs without switching to an unsuitable excursion."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "chosen-place",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#chosen-place",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 continues meteor watching at candidate A."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 retains candidate A and unknown night access."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks only the date needed for Moon/weather planning."
+      },
+      "suitabilityReasoning": {
+        "score": 1,
+        "evidence": "Turn 1 gives relevant reclining/eye-adjustment preparation but omits an explicit broad-sky orientation/view instruction."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 distinguishes general preparation from unchecked date-specific Moon/weather and unknown access."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 gives permission verification and practical equipment steps without restarting discovery."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly says Moon/weather have not been checked."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Turn 1 keeps candidate A throughout with no silent point or source substitution."
+      }
+    },
+    "criticalFailures": []
+  },
+  {
+    "caseId": "date-change",
+    "status": "reviewed",
+    "evidenceKind": "controlled-agent",
+    "reviewer": "independent-subagent",
+    "responseRef": "docs/operations/v1-conversation-controlled-answers-20261017.json#date-change",
+    "scores": {
+      "intentFit": {
+        "score": 2,
+        "evidence": "Turn 1 changes the observing date while preserving the meteor plan."
+      },
+      "constraintRetention": {
+        "score": 2,
+        "evidence": "Turn 1 explicitly retains candidate A, meteors, free access as a requirement and no camping."
+      },
+      "clarificationQuality": {
+        "score": 2,
+        "evidence": "Turn 1 asks the exact calendar date behind following Saturday."
+      },
+      "suitabilityReasoning": {
+        "score": 2,
+        "evidence": "Turn 1 identifies Moon, darkness and weather as evidence needing refresh."
+      },
+      "evidenceAccuracy": {
+        "score": 2,
+        "evidence": "Turn 1 refuses to reuse the earlier forecast for the new night and makes no updated timing claims."
+      },
+      "actionability": {
+        "score": 2,
+        "evidence": "Turn 1 provides the precise date clarification needed before recalculation."
+      },
+      "toolHonesty": {
+        "score": 2,
+        "evidence": "Turn 1 says refresh is needed without claiming it occurred."
+      },
+      "continuity": {
+        "score": 2,
+        "evidence": "Turn 1 retains site and exclusions while invalidating stale time-dependent evidence."
+      }
+    },
+    "criticalFailures": []
+  }
+]

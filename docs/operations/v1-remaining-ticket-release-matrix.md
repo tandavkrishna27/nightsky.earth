@@ -124,3 +124,9 @@ Earlier observations included three-place 2025 history, March historical samples
 ## Readiness decision
 
 **API discovery/multi-weather implementation and initial bounded live connectivity are complete; capability gaps and public-launch acceptance remain open.** Follow the tracker’s six completion blocks. Historical admission/implementation, event evidence, geographic combinations, measured assembled behavior and hosted/client/release gates remain open. Preserve **12/9/6 across 27 headings** until actual acceptance evidence changes. Catalogue deferral changes the work required, not the completion count.
+
+## V1 conversation acceptance amendment — 17 October 2026
+
+[Approved contract](../product/v1-outdoor-discovery-contract.md) and [implementation plan](../superpowers/plans/2026-10-17-v1-outdoor-conversation.md) add explicit outdoor-default discovery, activity suitability, constraint continuity and useful clarification acceptance within existing Tasks **8, 12B and 15**. Existing Done evidence for 10A/11A/11B remains scoped to its original local deliverables and receives regression coverage. This amendment does not create tickets, move agreed work to V2, or claim a completed original criterion. Original counts remain 12/9/6 until evidence closes a full criterion.
+
+Internal 1.0.x package revisions distinguish changed instructions and installed bytes; they are still the same V1 product scope. Existing source/history/event, native client, hosting, publication and pilot requirements remain in the six tracker blocks.

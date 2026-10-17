@@ -1,12 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { unzipSync, strFromU8, strToU8 } from 'fflate';
 import { buildLocalPluginPackage, validateLocalPackageFiles } from '../../scripts/build-local-plugin-package';
-import { buildPluginPackage } from '../../scripts/build-plugin-package';
+import { composeWorkflowReference, buildPluginPackage } from '../../scripts/build-plugin-package';
 
 const names = ['find-observing-place', 'plan-stargazing-night', 'plan-astrophotography', 'plan-sky-event', 'prepare-outing'];
 const digest = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
@@ -40,7 +39,7 @@ for (const host of ['codex', 'claude'] as const) {
     for (const entry of a.inventory) { assert.equal(entry.bytes, files[entry.path].length); assert.equal(entry.sha256, digest(files[entry.path])); }
     for (const name of names) {
       const reference = `skills/${name}/references/workflow.md`;
-      assert.deepEqual(Buffer.from(files[reference]), readFileSync(new URL(`../../docs/product/workflows/${name}.md`, import.meta.url)));
+      assert.deepEqual(Buffer.from(files[reference]), Buffer.from(composeWorkflowReference(name)));
       assert.match(strFromU8(files[`skills/${name}/SKILL.md`]), /`references\/workflow\.md`/);
       assert.doesNotMatch(strFromU8(files[`skills/${name}/SKILL.md`]), /docs\/product\/workflows/);
       const missing = { ...files }; delete missing[reference];

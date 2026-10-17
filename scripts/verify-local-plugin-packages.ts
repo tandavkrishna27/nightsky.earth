@@ -25,7 +25,10 @@ for (const host of ['codex', 'claude'] as const) {
     const skill = strFromU8(files[`skills/${name}/SKILL.md`]);
     assert.ok(skill.includes('references/workflow.md'));
     assert.ok(!skill.includes('docs/product/workflows/'));
-    assert.deepEqual(Buffer.from(files[`skills/${name}/references/workflow.md`]), readFileSync(`docs/product/workflows/${name}.md`));
+    const canonical = readFileSync(`docs/product/workflows/${name}.md`, 'utf8');
+    const contract = readFileSync('docs/product/outdoor-conversation-contract.md', 'utf8').trimEnd();
+    assert.equal(canonical.split('<!-- outdoor-conversation -->').length - 1, 1);
+    assert.equal(strFromU8(files[`skills/${name}/references/workflow.md`]), canonical.replace('<!-- outdoor-conversation -->', () => contract));
   }
   const directory = resolve('dist/local-plugin-rehearsal', host);
   mkdirSync(directory, { recursive: true });

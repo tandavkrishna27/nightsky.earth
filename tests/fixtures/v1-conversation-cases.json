@@ -1,0 +1,205 @@
+[
+  {
+    "id": "hyderabad-corrections",
+    "provenance": "Owner-reported failure sequence paraphrase; not a verbatim transcript or a current-build observation.",
+    "context": "Disconnected older installation; listings do not establish observing suitability.",
+    "turns": [
+      {
+        "user": "closest place to me",
+        "expected": [
+          "Start outdoor discovery and ask for a named town or city because origin is missing."
+        ],
+        "forbidden": [
+          "Do not infer precise location, claim closest without an origin, or demand an indoor/outdoor choice."
+        ]
+      },
+      {
+        "user": "Hyderabad India",
+        "expected": [
+          "Retain Hyderabad, India as provisional origin and explain outdoor candidate suitability and distance limits."
+        ],
+        "forbidden": [
+          "Do not default to an unsolicited observatory or claim nearest-to-user road ranking from a city centre."
+        ]
+      },
+      {
+        "user": "open sky?",
+        "expected": [
+          "Carry the correction into candidate reasoning; distinguish an area to investigate from a verified site."
+        ],
+        "forbidden": [
+          "Do not select a campsite from a business listing alone."
+        ]
+      },
+      {
+        "user": "north of Hyderabad for Geminids",
+        "expected": [
+          "Retain Hyderabad and open-sky intent; apply north as geographic travel direction and Geminid meteor needs, disclose filtering limits, and ask date/year only when needed for timed conditions."
+        ],
+        "forbidden": [
+          "Do not treat north as telescope bearing, discard the direction or shower, invent after-midnight permission, or recommend a commercial listing without suitability evidence."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "city-only",
+    "provenance": "Authored regression variant.",
+    "context": "Named city; no date or exact origin; no verified local candidates.",
+    "turns": [
+      {
+        "user": "Where can I stargaze around Hyderabad?",
+        "expected": [
+          "Give provisional outdoor discovery criteria and ask at most one decision-changing question."
+        ],
+        "forbidden": [
+          "Do not demand date, precise location and indoor/outdoor selection before helping."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "explicit-observatory",
+    "provenance": "Authored regression variant.",
+    "context": "User explicitly wants a hosted visit; no opening data.",
+    "turns": [
+      {
+        "user": "I want to visit an observatory near Hyderabad with a guide.",
+        "expected": [
+          "Honor explicit hosted preference; explain booking and opening information still needed."
+        ],
+        "forbidden": [
+          "Do not force the outdoor-default discovery path or invent visit availability."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "free-no-camping",
+    "provenance": "Authored regression variant.",
+    "context": "No verified fees or permission data.",
+    "turns": [
+      {
+        "user": "Find a free place for meteors north of Hyderabad. No camping.",
+        "expected": [
+          "Preserve geography, activity, free-only and no camping; distinguish investigation from confirmed access."
+        ],
+        "forbidden": [
+          "Do not label unverified access free, or substitute a paid campsite."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disconnected-no-search",
+    "provenance": "Authored regression variant.",
+    "context": "No NightSky tools, host search, location hints or question widget exposed.",
+    "turns": [
+      {
+        "user": "Can you find somewhere outside Hyderabad for meteors?",
+        "expected": [
+          "Be honest about unavailable lookup; offer practical provisional criteria and ordinary-text clarification."
+        ],
+        "forbidden": [
+          "Do not claim web search, provider calls or measured conditions, or require a widget."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "empty-data",
+    "provenance": "Authored regression variant.",
+    "context": "Fixture search result: zero candidates; status complete; no other search capability.",
+    "turns": [
+      {
+        "user": "Show me two or three suitable places near Hyderabad.",
+        "expected": [
+          "Explain empty results and offer an honest next step or areas to investigate with uncertainty."
+        ],
+        "forbidden": [
+          "Do not pad results or invent two or three exact sites."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "travel-unknown",
+    "provenance": "Authored regression variant.",
+    "context": "Only city centre and straight-line distances known; no road routes or user origin.",
+    "turns": [
+      {
+        "user": "Which is closest and can I reach it in 45 minutes?",
+        "expected": [
+          "Explain centre-distance versus driving-time limits; ask for relevant origin or routing evidence."
+        ],
+        "forbidden": [
+          "Do not claim nearest to user or guaranteed 45-minute travel."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "photography-learning",
+    "provenance": "Authored regression variant.",
+    "context": "Beginner with phone; no date or location needed for general technique.",
+    "turns": [
+      {
+        "user": "I want to learn night-sky photography with my phone. Where do I start?",
+        "expected": [
+          "Give a practical beginner step, stable support and exposure guidance; separate technique from measured conditions."
+        ],
+        "forbidden": [
+          "Do not block learning on date/location or promise a Milky Way photograph."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "family-mobility",
+    "provenance": "Authored regression variant.",
+    "context": "No verified toilets, terrain, opening hours or accessible paths.",
+    "turns": [
+      {
+        "user": "I am taking children and someone who cannot walk far to watch stars.",
+        "expected": [
+          "Carry family and mobility needs; prioritize verified short access and facilities, keeping unknowns explicit."
+        ],
+        "forbidden": [
+          "Do not claim safe accessible terrain or facilities from category or name alone."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "chosen-place",
+    "provenance": "Authored regression variant.",
+    "context": "User selected candidate A; its exact point and source identity retained; access unknown.",
+    "turns": [
+      {
+        "user": "Let's use candidate A. Help me prepare for meteors.",
+        "expected": [
+          "Continue with chosen site and broad-sky meteor preparation; identify unresolved access."
+        ],
+        "forbidden": [
+          "Do not restart discovery, switch site silently or imply access is confirmed."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "date-change",
+    "provenance": "Authored regression variant.",
+    "context": "Previous plan uses candidate A, meteors, free/no camping and a prior dated forecast.",
+    "turns": [
+      {
+        "user": "Keep that place, but move the plan to the following Saturday.",
+        "expected": [
+          "Retain site and exclusions; resolve ambiguous calendar date and refresh date-sensitive evidence when available."
+        ],
+        "forbidden": [
+          "Do not reuse the old forecast, Moon timing or access window as current evidence."
+        ]
+      }
+    ]
+  }
+]

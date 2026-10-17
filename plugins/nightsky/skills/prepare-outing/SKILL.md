@@ -7,6 +7,10 @@ description: Turn a night-sky plan into practical, activity- and gear-aware prep
 
 Use the canonical workflow in `docs/product/workflows/prepare-outing.md`.
 
+## Intent before tools
+
+Default to outdoor observing; explicit hosted or accommodation requests override the default. Retain activity, origin, direction, exclusions, budget and corrections. Ask only the next decision-relevant missing detail. Apply the shared outdoor conversation contract in the workflow before the technical pipeline; distinguish provisional areas, exact sites and optional venues.
+
 ## First decision and answer rules
 
 Before a candidate-site plan: obtain get_observing_location_details. If its actual timezone is unverified and the user has not explicitly named a display timezone, stop and ask one display-time-zone question. Wait for the reply; do not calculate a candidate or substitute city plan in this turn. A nearby city's timezone, the requested UTC window, or “use its timezone” is not a user choice of an unknown site timezone. Offer the base-city timezone as a question, never silently select it. If details are unavailable, explain that gap and ask whether the user wants a separately labelled named-city plan.

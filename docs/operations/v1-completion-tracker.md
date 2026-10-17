@@ -2,7 +2,7 @@
 
 Updated: 17 October 2026. **Current plan: API-first, multiple suitable sources, no exhaustive owned global catalogue prerequisite.** This tracker supersedes earlier acquisition-wave sequencing. See the [owner decision](api-search-discovery-v1-decision.md), [regroomed execution plan](../superpowers/plans/2026-10-17-api-first-v1-regroom.md) and [27-ticket acceptance matrix](v1-remaining-ticket-release-matrix.md).
 
-Latest update: [validation-readiness wave](validation-readiness-wave-20261017.md) — geography diagnosis, preserving history accounting, and complete local package preparation. See the final section below for current readiness; earlier milestones are retained evidence.
+Latest completed execution: [source/native results](source-native-acceptance-results-20261017.md), commit `18d1be04f5921758bb6fb7b8c3556787e50c1ac7`, [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39027586708). Current work: [V1 outdoor conversation plan](../superpowers/plans/2026-10-17-v1-outdoor-conversation.md). All agreed outdoor defaults, activity-aware discovery, clarification and conversation-quality acceptance belong to V1.
 
 ## Remaining sequence — one checklist
 
@@ -27,9 +27,9 @@ Three parallel preparations now map to the existing blocks, not new waves:
 
 | Existing block | Concrete packet | Readiness |
 | --- | --- | --- |
-| 1: geography | [One structured country selection](geography-selection-next-packet.md) | One approved selection attempt returned zero features; [result](geography-selection-result-20261017.md). Allowance consumed; no retry or geometry follow-up |
-| 1: history | [One-year ERA5 shape probe](history-annual-next-packet.md) | Isolated probe prepared offline; durable Open-Meteo quota configuration and fresh live allowance remain prerequisites |
-| 3: experience | [Assembled API-mode Codex journey matrix](assembled-experience-next-packet.md) | Fifteen product journeys plus five boundary probes mapped; actual host/package and answer review remain; Claude deferred |
+| 1: geography | [Country selection results](source-native-acceptance-results-20261017.md) | Structured and revised filter-free attempts both empty; allowances consumed. Point discovery remains independent. Country geometry acceptance remains open |
+| 1: history | [Annual result and accounting](source-native-acceptance-results-20261017.md) | Accounting added preserving counters; one annual request passed: 8,784 hours, no missing/nulls. Allowance consumed. Production method/full-baseline admission remains open |
+| 3: experience | [Native installation](native-acceptance-path-20261017.md) and [V1 behaviour contract](../product/v1-outdoor-discovery-contract.md) | 1.0.14 installed; refreshed tool exposure remains unresolved. Outdoor behaviour correction and conversation variants are V1 acceptance. Claude deferred |
 
 Offline preparation was followed by exactly one owner-approved Geoapify selection request, which stopped empty. No historical request, private ledger reset, installation or deployment occurred. The earlier history runner was not suitable
 for a standalone calendar-year probe; this gap is explicit rather than using a
@@ -185,3 +185,20 @@ The [supported native installation](native-acceptance-path-20261017.md) returned
 Execution update: the owner subsequently approved both specific actions and then the separate annual request. [Results](source-native-acceptance-results-20261017.md): geography again returned `selection-empty` after exactly one request; accounting import preserved every previous entry; annual history validated 8,784 hours with zero missing/null values in 111,061 bytes. Both live allowances are consumed. Native 1.0.14 installation succeeded but refreshed host answer acceptance remains open. No production source admission or deployment follows from these outcomes.
 
 Continuation local verification: **1,466 passed / 0 failed / 2 skipped** and all TypeScript checks passed. New filter-probe regressions are registered in the aggregate CI suite. Exact pushed-commit CI is observed separately.
+
+## V1 conversation quality and remaining sequence
+
+The owner-approved [outdoor discovery contract](../product/v1-outdoor-discovery-contract.md), [shared packaged instructions](../product/outdoor-conversation-contract.md), [conversation scorecard](../product/v1-conversation-acceptance.md) and [implementation plan](../superpowers/plans/2026-10-17-v1-outdoor-conversation.md) belong to V1. Internal package revision 1.0.15 identifies these changed bytes; it does not defer the work to V2.
+
+| Existing block | Current evidence and next acceptance |
+| --- | --- |
+| 1 — sources/capabilities | Annual history response shape passed; full baseline/method admission remains. Both Vatican selection variants were empty; do not require that particular lookup for ordinary point discovery. Remaining event coverage and source limitations remain explicit. No fresh live allowance carries forward |
+| 2 — assembly/measurement | Shared contract composed into all five workflows and all host packages; local 1.0.15 build/fixture checks. Actual configured-source/host measurements remain separate |
+| 3 — experience/audit | Eleven regression variants extend the existing fifteen journeys/twenty harness cases. Controlled model review is separate from native tool exposure and owner acceptance; the normal host tool-loading gap remains open |
+| 4–6 — hosting/publication/pilot | Still V1 release stages in sequence; no deployment/publication authorization or real-user pilot evidence is implied |
+
+No extra wave counter or ticket set is introduced. Original 12 Done / 9 Partial / 6 Not started remains scoped original-deliverable accounting, not a claim that the revised conversational experience is fully accepted. [Evidence](v1-outdoor-conversation-evidence-20261017.md) retains baseline/revised answers and limits. The two-minute native listener in the preceding continuation closed with no native tool calls and zero external attempts; an owner refresh did not change this active conversation's tool inventory. No nested-model retry is authorized.
+
+Outdoor instruction/evaluation implementation: shared instructions now reach all five workflows and portable/Codex/Claude packages. Eleven controlled-agent cases passed independent scored review with zero critical failures; native-host acceptance remains pending. Supported local installation is now 1.0.15 under `nightsky-native-acceptance-20261017`. See the evidence record for exact response/score artifacts and two minor guidance omissions. All of this is V1.
+
+Current V1 conversation wave local aggregate: **1,475 passed / 0 failed / 2 skipped**, fresh types, build and packages passed; exact-commit CI is checked after push. Controlled 11/11 is a separate model-review count, not added to the automated-test total.

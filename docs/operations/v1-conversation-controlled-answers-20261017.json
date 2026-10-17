@@ -1,0 +1,113 @@
+[
+  {
+    "caseId": "hyderabad-corrections",
+    "turns": [
+      {
+        "user": "closest place to me",
+        "assistant": "What town and country are you starting from? I don't have your location or verified nearby observing sites."
+      },
+      {
+        "user": "Hyderabad India",
+        "assistant": "I'll use Hyderabad, India as your starting area for outdoor stargazing. This disconnected installation can't establish the closest suitable spot; a listing alone doesn't verify sky exposure or night access. How far are you willing to travel?"
+      },
+      {
+        "user": "open sky?",
+        "assistant": "Yes—an outdoor spot with a broad view of the sky. I haven't verified that any local site has that view or allows night visits. For a possible spot, check for buildings or trees blocking the sky, nearby lights, and permission to stay after dark."
+      },
+      {
+        "user": "north of Hyderabad for Geminids",
+        "assistant": "Understood: north of Hyderabad, with open sky for the Geminids. I don't have a verified site to name. A useful next step is to confirm a candidate's broad sky view, local lighting and late-night access with its land manager. What travel limit should I keep—roughly 25, 50 or 100 km from Hyderabad?"
+      }
+    ]
+  },
+  {
+    "caseId": "city-only",
+    "turns": [
+      {
+        "user": "Where can I stargaze around Hyderabad?",
+        "assistant": "I can help narrow an outdoor search around Hyderabad, but I don't have verified local candidates to recommend. A potential spot needs a clear sky view, limited nearby lighting and confirmed night access; its darkness is still unknown without evidence. How far outside the city would you travel—roughly 25, 50 or 100 km?"
+      }
+    ]
+  },
+  {
+    "caseId": "explicit-observatory",
+    "turns": [
+      {
+        "user": "I want to visit an observatory near Hyderabad with a guide.",
+        "assistant": "You're looking for a guided observatory visit near Hyderabad. I don't have verified visitor programmes or opening hours, so I can't name a confirmed option. The next step is to check an observatory's official visitor information for guided sessions, booking requirements and dates. How far from Hyderabad are you willing to travel?"
+      }
+    ]
+  },
+  {
+    "caseId": "free-no-camping",
+    "turns": [
+      {
+        "user": "Find a free place for meteors north of Hyderabad. No camping.",
+        "assistant": "I'll keep the search north of Hyderabad, free of charge and suitable for a night visit without camping. I don't have verified fees or access information to support a recommendation. Before choosing a spot, confirm free night entry and that you can stay for observing without booking a campsite. How far north are you willing to travel?"
+      }
+    ]
+  },
+  {
+    "caseId": "disconnected-no-search",
+    "turns": [
+      {
+        "user": "Can you find somewhere outside Hyderabad for meteors?",
+        "assistant": "I don't have connected place tools or web search here, so I can't check or recommend a specific site outside Hyderabad. For meteors, investigate places with broad sky views and little nearby lighting, then confirm night access with the land manager. How far outside Hyderabad would you be willing to travel?"
+      }
+    ]
+  },
+  {
+    "caseId": "empty-data",
+    "turns": [
+      {
+        "user": "Show me two or three suitable places near Hyderabad.",
+        "assistant": "The supplied fixture result contains zero candidates and marks its search complete. That doesn't establish that no suitable real-world places exist, and I can't support a shortlist from it. A useful next step is to verify sky exposure, lighting and night access for a place you already know. Is there a named area near Hyderabad you'd like to investigate?"
+      }
+    ]
+  },
+  {
+    "caseId": "travel-unknown",
+    "turns": [
+      {
+        "user": "Which is closest and can I reach it in 45 minutes?",
+        "assistant": "City-centre straight-line distances can't establish which place is closest to your starting point or reachable in 45 minutes. I don't have candidate distance values or road routes here to make that comparison. Check a routing app using your starting area, travel mode and intended departure time; treat any city-centre distance ranking as provisional."
+      }
+    ]
+  },
+  {
+    "caseId": "photography-learning",
+    "turns": [
+      {
+        "user": "I want to learn night-sky photography with my phone. Where do I start?",
+        "assistant": "Start by learning to keep the phone steady during a night photo. Rest it securely on a stable support, use a short shutter timer, and try its night mode if available. Compare that photo with a handheld shot and look for sharper points of light. This is general technique, not a prediction of what your sky will show. You don't need a location or date for this first exercise."
+      }
+    ]
+  },
+  {
+    "caseId": "family-mobility",
+    "turns": [
+      {
+        "user": "I am taking children and someone who cannot walk far to watch stars.",
+        "assistant": "A short session with seating and very little walking would be a useful starting point. Before choosing a site, confirm the distance and surface from drop-off to the observing area, toilets and night opening; I don't have verified accessibility information. Bring a seat so everyone can rest. What town or named area will you be starting from?"
+      }
+    ]
+  },
+  {
+    "caseId": "chosen-place",
+    "turns": [
+      {
+        "user": "Let's use candidate A. Help me prepare for meteors.",
+        "assistant": "We'll keep candidate A for meteor watching. First confirm permission to be there at night; its access is still unknown. For general preparation, bring a reclining seat or mat, warm layers and a dim light, and allow time for your eyes to adjust away from bright screens. I haven't checked date-specific Moon or weather conditions. What date are you planning to go?"
+      }
+    ]
+  },
+  {
+    "caseId": "date-change",
+    "turns": [
+      {
+        "user": "Keep that place, but move the plan to the following Saturday.",
+        "assistant": "I'll keep candidate A, meteor watching, free access and no camping as your requirements. The earlier forecast doesn't apply to the new night; Moon, darkness and weather evidence need refreshing before I can give updated times or conditions. What calendar date do you mean by the following Saturday?"
+      }
+    ]
+  }
+]

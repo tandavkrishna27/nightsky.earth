@@ -7,6 +7,25 @@ import { zipSync, strToU8, strFromU8, type Zippable } from 'fflate';
 const root = resolve(fileURLToPath(new URL('../plugins/nightsky/', import.meta.url)));
 const skillNames = ['find-observing-place', 'plan-stargazing-night', 'plan-astrophotography', 'plan-sky-event', 'prepare-outing'];
 const workflowRoot = fileURLToPath(new URL('../docs/product/workflows/', import.meta.url));
+const contractPath = resolve(workflowRoot, '../outdoor-conversation-contract.md');
+const contractMarker = '<!-- outdoor-conversation -->';
+function readCanonicalText(path: string): string {
+  const stat = lstatSync(path);
+  if (stat.isSymbolicLink() || !stat.isFile()) throw Error('Canonical workflow symlinks or non-files prohibited');
+  if (stat.size > 1024 * 1024) throw Error('Canonical workflow too large');
+  return new TextDecoder('utf-8', { fatal: true }).decode(readFileSync(path));
+}
+export function composeWorkflowReference(name: string): Uint8Array {
+  if (!skillNames.includes(name)) throw Error('Unknown canonical workflow name');
+  for (const directory of [resolve(workflowRoot, '../..'), resolve(workflowRoot, '..'), workflowRoot]) {
+    if (lstatSync(directory).isSymbolicLink()) throw Error('Canonical workflow symlinks prohibited');
+  }
+  const workflow = readCanonicalText(join(workflowRoot, name + '.md'));
+  if (workflow.split(contractMarker).length !== 2) throw Error('Exactly one outdoor contract marker required');
+  const contract = readCanonicalText(contractPath).trimEnd();
+  if (!contract.startsWith('## Outdoor discovery and conversation contract') || contract.includes(contractMarker)) throw Error('Invalid outdoor conversation contract');
+  return strToU8(workflow.replace(contractMarker, () => contract));
+}
 const hash = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 function endpointUrl(value: string) {
   const url = new URL(value);
@@ -53,6 +72,7 @@ export function validatePackageFiles(files: Record<string, Uint8Array>): void {
       if (!(tool in V1_TOOL_ANNOTATIONS)) throw Error(`Unknown tool inventory reference: ${tool}`);
     }
     if (!files[`skills/${name}/references/workflow.md`] || !skill.includes('`references/workflow.md`') || skill.includes('docs/product/workflows/')) throw Error(`Missing or broken workflow reference for ${name}`);
+    if (!Buffer.from(files[`skills/${name}/references/workflow.md`]).equals(composeWorkflowReference(name))) throw Error(`Canonical workflow reference mismatch: ${name}`);
   }
 }
 export function buildPluginPackage(options: { endpoint?: string } = {}) {
@@ -80,7 +100,7 @@ export function buildPluginPackage(options: { endpoint?: string } = {}) {
     const skill = strFromU8(files[skillPath]);
     if (!skill.includes('`' + sourceReference + '`')) throw Error(`Missing canonical workflow reference in ${skillPath}`);
     files[skillPath] = strToU8(skill.replaceAll(sourceReference, 'references/workflow.md'));
-    files[`skills/${name}/references/workflow.md`] = readFileSync(canonicalPath);
+    files[`skills/${name}/references/workflow.md`] = composeWorkflowReference(name);
   }
   files['mcp.json'] = strToU8(JSON.stringify({ $schema: 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json', mcpServers: { nightsky: { type: 'streamable-http', url: endpoint } } }, null, 2) + '\n');
   validatePackageFiles(files);

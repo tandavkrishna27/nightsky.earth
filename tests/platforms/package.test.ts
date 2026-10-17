@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { readFileSync } from 'node:fs';
 import { unzipSync, strFromU8 } from 'fflate';
-import { buildPluginPackage, validatePackageFiles } from '../../scripts/build-plugin-package';
+import { composeWorkflowReference, buildPluginPackage, validatePackageFiles } from '../../scripts/build-plugin-package';
 
 test('package rehearsal emits deterministic root ZIP, remote endpoint and digest inventory', () => {
   const a = buildPluginPackage(); const b = buildPluginPackage();
@@ -47,7 +46,7 @@ test('installed skills carry exact canonical workflows with working local refere
   for (const name of ['find-observing-place', 'plan-stargazing-night', 'plan-astrophotography', 'plan-sky-event', 'prepare-outing']) {
     const reference = `skills/${name}/references/workflow.md`;
     assert.ok(files[reference], `missing installed reference for ${name}`);
-    assert.deepEqual(Buffer.from(files[reference]), readFileSync(`docs/product/workflows/${name}.md`));
+    assert.deepEqual(Buffer.from(files[reference]), Buffer.from(composeWorkflowReference(name)));
     const skill = strFromU8(files[`skills/${name}/SKILL.md`]);
     assert.match(skill, /`references\/workflow\.md`/);
     assert.doesNotMatch(skill, /docs\/product\/workflows/);

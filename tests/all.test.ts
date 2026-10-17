@@ -194,3 +194,5 @@ import "./providers/quota-add-provider.test";
 import "./providers/climate/history-accounting-operator.test";
 import "./platforms/codex-local-fixture.test";
 import "./operations/geometry-filter-probe.test";
+import "./platforms/outdoor-contract-package.test";
+import "./skills/conversation-acceptance.test";
