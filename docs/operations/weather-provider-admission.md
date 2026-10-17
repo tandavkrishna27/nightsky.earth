@@ -41,3 +41,15 @@ All new adapters target five-second request/body deadlines, 512 KiB response cap
 ## Evidence references
 
 The source plan records checks on 2026-10-17 against [WeatherAPI pricing](https://www.weatherapi.com/pricing.aspx), [terms](https://www.weatherapi.com/terms.aspx), [docs](https://www.weatherapi.com/docs/), [OpenWeather pricing](https://openweathermap.org/price), [five-day forecast](https://openweathermap.org/api/forecast5) and [MET terms](https://docs.api.met.no/doc/TermsOfService.html). Those checks are carried as existing evidence, not fresh verification by this task. See `api-mode-local-setup.md` for account state and `docs/superpowers/plans/2026-10-17-multi-weather-activation.md` for remaining gates.
+
+### OpenWeather account entitlement follow-up
+
+On 2026-10-17, read-only inspection of the signed-in Services page (`https://home.openweathermap.org/myservices`) showed Weather / Free plan, 60 calls per minute and five-day three-hour forecast access; hourly and daily forecasts were unavailable. This resolves account-tier entitlement for the proposed forecast endpoint, not key activation, rights/cache review or live quality. The email-confirmation notice remained visible. No subscription was changed and no weather request was sent.
+
+### WeatherAPI adapter evidence follow-up
+
+Task 3 checked the official forecast schema and terms (https://www.weatherapi.com/docs/forecast-api/ and https://www.weatherapi.com/terms.aspx). The implementation targets forecast hours only; source issue time remains absent. Forecast cache is 15 minutes, below the documented 24-hour maximum. Free attribution and a concise end-user uncertainty/safety notice travel in source attribution and must remain visible through composed answers. Undocumented precipitation accumulation bounds and combined rain/snow probability are omitted with missing-field reasons. Synthetic adapter tests establish parser behavior, not account-key activation or live accuracy. Private setup, persistent quota integration and bounded live verification remain open.
+
+### OpenWeather offline adapter disposition
+
+The adapter preserves three-hour UTC samples and documented preceding-three-hour rain/snow volumes; it omits precipitation probability when its interval meaning is unverified. Cache retention is disabled (zero retained response bytes) pending confirmed permission. This is a conservative departure from the proposed optional cache cap. Authentication/backoff state may persist in the nonsecret quota checkpoint; that checkpoint contains no weather response. Account entitlement does not close rights, key activation or live-validation gates.
