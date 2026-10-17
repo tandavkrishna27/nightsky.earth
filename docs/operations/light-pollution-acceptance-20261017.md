@@ -6,12 +6,12 @@ Updated 17 October 2026. This is additional work within the existing V1 blocks, 
 
 | Component | Implemented evidence | Remaining acceptance |
 | --- | --- | --- |
-| LP1 comparison contract | One to five selected places or explicit coordinates; source/transport identity, exact binding, bounded provenance and unavailable states | Final aggregate regression and CI recorded below |
-| LP2 DarkSkySites API | Fixed official endpoint; private server key; dedicated persistent project quota; bounded in-memory evidence cache; no retries or browser fallback | Real two-point response validation, not yet run |
+| LP1 comparison contract | One to five selected places or explicit coordinates; source/transport identity, exact binding, bounded provenance and unavailable states | Passed; final evidence below |
+| LP2 DarkSkySites API | Fixed official endpoint; private server key; dedicated persistent project quota; bounded in-memory evidence cache; no retries or browser fallback | Passed two-point live API pilot; scientific accuracy remains unverified |
 | LP3 browser boundary | Isolated child protocol, bounded queue/deadlines, synthetic parser/network-policy/lifecycle checks, separately compiled optional worker | Public admission, actual DOM binding, browser egress and process-tree capacity remain unproven; worker is hard blocked |
 | LP4 DarkSkySites browser | Selected-card parser and injected visible-action workflow reject stale, hover, rounded and ambiguous evidence | Concrete selected-marker DOM extraction is not implemented or wired into the worker; experimental only |
 | LP5 MCP and workflows | Optional `compare_light_pollution`; four updated workflows and canonical references; adjacent attribution and qualified comparisons | Full package native host/owner acceptance remains pending |
-| LP6 assembly | All seven suites registered, offline CI checks, compiled API check with optional Playwright absent, portable package 1.0.17 | Final review, full regression, exact-commit CI, bounded live pilot and native acceptance |
+| LP6 assembly | All seven suites registered, offline CI checks, compiled API check with optional Playwright absent, portable package 1.0.17 | Review, regression, code CI and bounded live pilot passed; native/browser acceptance remains |
 
 No production scraper is claimed. Setting the browser environment flag does not override the worker's `browser_not_admitted` gate. API and browser views from the same source are not independent measurements. Light pollution is distinct from astronomical darkness, cloud, Moon, horizon and night access.
 
@@ -30,7 +30,7 @@ The key alone does not activate the service. Serving startup never initializes o
 
 Owner confirms the project is unused elsewhere and its dashboard shows **30,000 requests/month**. This establishes initial allowance evidence, not permission for an unbounded live run. Local accounting conservatively reserves attempts even when the upstream provider would not bill them. Provider request dispatch is capped at ten per second; quotas are project-wide, not multiplied by API keys. Multiple server instances must not operate independent copies of the same project allowance.
 
-## Prepared live test — not executed
+## Prepared live-test contract — executed once; see final receipt below
 
 `node --import tsx scripts/validate-light-pollution.ts --plan` makes no network calls and emits the exact approval packet. Proposed lookup points are Hyderabad **17.3850, 78.4867** and Shamirpet-area **17.6100, 78.5630**; these are comparison coordinates, not verified observing sites.
 
@@ -42,7 +42,7 @@ Live invocation requires an approved, exact matching packet and an existing init
 node --import tsx scripts/validate-light-pollution.ts --live --acknowledge-light-pollution-pilot --approval-packet <approved-packet.json> --journal <new-private-receipt.jsonl>
 ```
 
-One successful test demonstrates response integration, not scientific accuracy, global completeness or native skill loading. No new live approval has been consumed by this implementation work.
+One successful test demonstrates response integration, not scientific accuracy, global completeness or native skill loading. The approved live pilot below consumed this exact allowance; no rerun is authorized.
 
 ## Verification evidence
 
@@ -66,3 +66,18 @@ The final implementation commit `8a87540` was rerun locally: **1,669 passed / 0 
 The owner has approved fresh dedicated accounting and the exact two-point pilot above. Approval remains unused until final checks pass; no provider request or private ledger initialization has occurred yet.
 
 The test-only synchronization repair passed independent review and coordinator verification (11/11); the seven-suite command passed 111/111, and the implementer repeated 132 checks across concurrent runs. No production limits changed. Fresh CI is required for this follow-up.
+
+## Approved live pilot — completed
+
+Code commit `a2cb60642e7189bcc4ee63700ae5f02694e0762e` passed all six jobs in [CI run 39052258236](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39052258236) before the pilot. The dedicated private quota ledger was initialized once using the owner's confirmed unused allowance. Existing other-provider ledgers were not modified.
+
+| Exact point | DarkSkySites modelled SQM (mag/arcsec²) | Provider Bortle class | Dataset | Quality |
+| --- | --- | --- | --- | --- |
+| Hyderabad 17.3850, 78.4867 | 17.96 | 9 | August 2026 (`08_2026`) | screened; coverageVerified=false |
+| Shamirpet-area 17.6100, 78.5630 | 19.73 | 6 | August 2026 (`08_2026`) | screened; coverageVerified=false |
+
+Both official API calls returned HTTP 200 with exact returned coordinates, `seasonal_temporal_v1`, no fallback and one dataset checked. Attribution: [DarkSkySites](https://darkskysites.com/). Retrieved 17 October 2026 at 17:14:35–36 UTC. Higher comparable SQM suggests the Shamirpet point is darker in this model; unknown coverage prevents treating the estimate as independently validated site truth. These values do not establish weather, horizon, access or guaranteed visibility.
+
+Two requests consumed the complete approved pilot allowance. Received response bodies totaled **783 bytes** (390 + 393), elapsed **2,887 ms**, with zero retries. Safe structured evidence is retained privately; no raw response bodies or key entered Git. The dedicated ledger records two October 2026 reservations. Do not rerun the approval packet or reset accounting.
+
+**Current status:** API integration and bounded live response acceptance pass. Public browser operation and native full-package/owner acceptance remain open. The owner's installed plugin was not changed by this wave. No deployment occurred. The following documentation-only commit records this result; its CI is monitored separately from the code commit above.

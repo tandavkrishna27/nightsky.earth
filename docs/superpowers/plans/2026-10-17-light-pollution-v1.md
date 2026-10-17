@@ -178,3 +178,6 @@ See [acceptance and operator setup](../../operations/light-pollution-acceptance-
 Review found and fixed valid five-point comparisons exceeding the four-call provider concurrency ceiling. Regression cases cover all five calls, cancellation before the fifth, and quota exhaustion. Independent final reviewer rechecked the correction with no remaining blocking finding.
 
 CI runs synthetic parsers and a compiled hard-blocked child; it does **not** claim pinned real-Chromium DOM/lifecycle acceptance. The earlier LP6 real-browser CI criterion remains open, as do browser whole-process-tree/egress measurements. No Chromium or map datasets were downloaded. Account allowance is confirmed unused at 30,000/month; live approval remains separate.
+### Accepted local/API milestone
+
+Code a2cb606 passed all six CI jobs; the reviewed, explicitly approved two-point pilot then returned two HTTP200 results with exact binding (783 bytes,2.887 seconds,zero retries). Dedicated private quota records two reservations; no other counters changed. See the acceptance document for values/provenance and the consumed allowance. LP2 real-response gate is now passed; native full-package acceptance and LP3/LP4 public-browser gates remain open. No installed plugin update or deployment is implied.
