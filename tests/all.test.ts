@@ -160,3 +160,4 @@ import "./mcp/multi-weather-planning.test.ts";
 import "./providers/weather-configuration.test.ts";
 
 import "./skills/multi-weather-workflows.test.ts";
+import "./operations/api-live-validation.test.ts";

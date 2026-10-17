@@ -79,3 +79,10 @@ Initial budget creation is deliberately separate: `node --import tsx scripts/ini
 This adds a bounded nonsecret quota checkpoint, not a database or downloaded geography catalogue. It stores allowance counters and disable/backoff state; no credentials, queries or weather responses. One server process owns it. Ordinary standalone SIGTERM/SIGINT drains and closes within ten seconds; forced shutdown/crash retains a lock. Windows force-kill is not graceful shutdown. Embedders must call `closeConfiguredNightSkyPluginApp(app)` after closing their listener.
 
 Recovery: verify the previous process is dead before removing only a stale lock; retain checkpoint and initialization marker. Corrupt/lost state or interrupted writes fail closed. Restore verified state or follow a separately reviewed reset procedure; never delete the checkpoint to regain allowance. No recovery/deletion action was executed here.
+
+
+### Owner-authorized private setup follow-up
+
+On 17 October 2026, the existing Geoapify, WeatherAPI and OpenWeather keys and MET contact string were stored in the owner-only/SYSTEM local file `C:/Users/TK/.nightsky/providers.env`. This is outside Git and does not select/admit providers, initialize quota state or send requests. Use Node 24 `--env-file` to load it into an explicitly approved child process; never print its contents or copy it into reports. The earlier account-verification paragraphs describe the pre-configuration state. The bounded live proposal records the remaining quota, source and execution gates.
+
+Subsequently the owner confirmed these accounts were unused elsewhere. The explicit initializer created `C:/Users/TK/.nightsky/provider-quota.json` successfully and released its lock; owner/SYSTEM permissions were verified. Its path is now in the private environment file. No provider call occurred. Preserve this ledger; do not initialize it again or delete it to reset allowance.

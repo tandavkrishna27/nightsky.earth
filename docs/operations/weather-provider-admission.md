@@ -6,7 +6,7 @@ Decision date: 2026-10-17. This records offline implementation contracts from th
 
 | Provider | Fixed endpoint and request | Account / free permission | Activation |
 | --- | --- | --- | --- |
-| MET Norway (`met`) | Existing `https://api.met.no/weatherapi/locationforecast/2.0/compact`; selected latitude/longitude; preserve existing adapter parameters | Existing integration; preserve its contact, terms, cache and parsing behavior | Existing route retained; this task makes no new account or live acceptance claim |
+| MET Norway (`met`) | Existing `https://api.met.no/weatherapi/locationforecast/2.0/complete`; selected latitude/longitude; preserve existing adapter parameters | Existing integration; preserve its contact, terms, cache and parsing behavior | Existing route retained; this task makes no new account or live acceptance claim |
 | WeatherAPI (`weatherapi`) | Candidate `https://api.weatherapi.com/v1/forecast.json`; selected `q=lat,lon`, `days=3`, `aqi=no`, `alerts=no`, server-held key | Account/key exist; Business trial ends 2026-10-24 and dashboard says automatic Free transition. Reviewed plan records Free marketing limits of 100,000 calls/month and three days. Trial features are inadmissible | Blocked until exact Free schema, permitted use, attribution, caching and timezone semantics are evidenced and private setup / quota / bounded validation gates pass |
 | OpenWeather (`openweather`) | Candidate `https://api.openweathermap.org/data/2.5/forecast`; selected `lat`, `lon`, `units=metric`, `cnt=40`, server-held `appid` | Account exists; email-confirmation notice visible. Public five-day forecast shape does not prove this account's Free endpoint entitlement | Blocked pending account entitlement, rights/cache review and private setup / quota / bounded validation. One Call and historical endpoints excluded |
 
@@ -53,3 +53,18 @@ Task 3 checked the official forecast schema and terms (https://www.weatherapi.co
 ### OpenWeather offline adapter disposition
 
 The adapter preserves three-hour UTC samples and documented preceding-three-hour rain/snow volumes; it omits precipitation probability when its interval meaning is unverified. Cache retention is disabled (zero retained response bytes) pending confirmed permission. This is a conservative departure from the proposed optional cache cap. Authentication/backoff state may persist in the nonsecret quota checkpoint; that checkpoint contains no weather response. Account entitlement does not close rights, key activation or live-validation gates.
+
+
+### Private activation preparation — 17 October 2026
+
+With explicit owner authorization, the three existing Geoapify, WeatherAPI and OpenWeather keys were copied from signed-in dashboards into `C:/Users/TK/.nightsky/providers.env`, outside the repository. Windows ACL inspection confirmed access for the owner and SYSTEM only. Node environment loading was verified by booleans, without emitting values. MET contact configuration uses the confirmed NightSky support address. No credentials were rotated, no subscription changed, and no provider data request was sent.
+
+Loaded Geoapify usage showed zero requests/credits for 17 September–17 October; WeatherAPI showed zero calls this month. OpenWeather lists its existing key as Active but still displays an email-confirmation notice. Dashboard activity is account evidence, not a successful endpoint call. No quota checkpoint was initialized, and no runtime provider was marked live-verified. OpenWeather remaining allowance still needs evidence or owner attestation before initialization.
+
+The MET endpoint table above is corrected to `/complete`, matching the existing source code; the earlier `/compact` text was inaccurate. Use the exact endpoints and limits in [the bounded live proposal](api-live-validation-proposal.md), once reviewed, rather than the legacy MET-only rehearsal script.
+
+Fresh public-source checks confirm WeatherAPI forecast caching permits up to 24 hours; our 15-minute bound remains below it. Its attribution and end-user uncertainty notice must survive composed answers. [WeatherAPI terms](https://www.weatherapi.com/terms.aspx).
+
+OpenWeather's published Free licence uses an open-licence model; its FAQ requires visible credit/link/logo for relevant plans. Public release must resolve the applicable attribution/share-alike presentation; zero caching does not waive those obligations. Keep this distinct from private bounded endpoint testing and do not mark public source admission complete from an Active key. [Official licence explainer](https://openweathermap.org/storage/app/media/documents/License_explainer_25%20Feb_25.pdf), [FAQ](https://openweathermap.org/faq).
+
+Later in this wave, the owner confirmed all three accounts were unused elsewhere. The explicit existing initializer successfully created the local quota ledger using that attestation and the zero-usage dashboard observations. The ledger lock was released and owner/SYSTEM permissions verified. This resolves the initial allowance gate, not live provider validation or public release admission.
