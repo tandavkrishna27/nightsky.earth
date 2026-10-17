@@ -204,6 +204,22 @@ class PlanetReceiptPacketTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'cache.*changed'):
                     packet.prepare()
 
+    def test_inventory_mutation_stop_names_the_changed_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            scandir=packet.os.scandir
+            class Entries:
+                def __init__(self,path):self.path=Path(path);self.handle=scandir(path)
+                def __enter__(self):return self.handle.__enter__()
+                def __exit__(self,*args):
+                    result=self.handle.__exit__(*args)
+                    if self.path==data:os.utime(data,ns=(1_000_000_000,1_000_000_000))
+                    return result
+            with patch.object(packet.os,'scandir',side_effect=Entries):
+                with self.assertRaisesRegex(ValueError,'directory changed during enumeration') as stopped:
+                    packet.inventory_roots([data])
+            self.assertIn(str(data.resolve()),str(stopped.exception))
+
     def test_r2_preparation_retains_all_v1_evidence_once_with_distinct_outputs(self):
         captured=[]
         def inventory(roots,**kwargs):captured.extend(roots);raise RuntimeError('synthetic roots captured')

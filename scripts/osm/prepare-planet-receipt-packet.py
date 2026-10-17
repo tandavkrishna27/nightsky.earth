@@ -145,7 +145,8 @@ def inventory_roots(roots, *, max_entries=MAX_ENTRIES, max_seconds=MAX_SECONDS,
                     if stat.S_ISDIR(info.st_mode):pending.append((path,depth+1))
                     else:record(path,info)
             final=directory.lstat();_regular(final)
-            if _identity(initial)!=_identity(final):raise ValueError('retained directory changed during enumeration')
+            if _identity(initial)!=_identity(final):
+                raise ValueError(f'retained directory changed during enumeration: {directory}; before={_identity(initial)!r}; after={_identity(final)!r}')
         check();after=root.lstat();_regular(after)
         if _identity(before)!=_identity(after):raise ValueError('retained root changed during enumeration')
         safe_path(root)
