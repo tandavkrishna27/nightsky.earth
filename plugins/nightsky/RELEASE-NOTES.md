@@ -1,5 +1,9 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.21 - optional reference and target discovery
+
+Adds four optional Public Universe tools for bounded object reference search/details, equipment-aware target discovery and selected starter-catalogue windows. Existing local calculations and source defaults remain unchanged. The source is off by default and requires separate selection, admission and dedicated accounting; no API key is required. Results preserve source rights, coordinate frames, epochs, model limits and partial failures. These source calculations do not expand the local engine's supported targets. Offline verification is separate from live source and native-host acceptance. No deployment or publication.
+
 ## V1 local revision 1.0.20 - host-aware complete outings
 
 Adds bounded timestamped geometric orientation samples for supported targets. Shared workflows compose available native tools, preserve independent user preferences, support scouting points, distinguish failure reasons and tailor preparation/on-site guidance. No new browser implementation, paid source, catalogue or deployment. Native-host conversation acceptance remains separate from offline checks.

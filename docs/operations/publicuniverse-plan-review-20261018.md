@@ -35,7 +35,7 @@ The reviewer confirmed that the revised dedicated-ledger isolation and observing
 
 ## Remaining gates
 
-- Owner review of saved design/plan, then explicitly chosen subagent execution (already requested).
+- Owner approved the saved design/plan and subagent implementation on 18 October 2026. See [implementation evidence](publicuniverse-implementation-20261018.md) for subsequent reviews and tests.
 - Offline implementation/testing and independent whole-diff review.
 - Separately approved provider budget/live acceptance; no API key required.
 - Native-host conversation evidence remains separate; no deployment implied.
