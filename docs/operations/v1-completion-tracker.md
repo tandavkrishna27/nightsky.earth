@@ -15,9 +15,25 @@ These six blocks group the original tickets; they are not new tickets or a guara
 | 5 | Submission and publication | Later; explicit authorization required | Official validation/review and authorized publication; 15/16 |
 | 6 | Pilot and feedback | Later | Real invited-user evidence; 17 |
 
-Latest local milestone: [three-session completion run](parallel-completion-run-20261017.md), integrating geography, history and events with the API planner/runtime, privacy, package and rehearsal changes. **1,446 Node tests passed, zero failed, two skipped**; 214 ERA5 and 245 geography Python tests passed (13 skips); types, builds, both local packages and compiled runtime checks passed. Implementation commit `a34af2420f0289c54bc31f7357732434eb4e1dd1` is pushed; [exact-commit CI](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39023674592) was queued when this entry was written. Read its current conclusion directly. The preceding baseline `bc8de008` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39019791036); that earlier result does not validate this newer integration.
+Latest local milestone: [three-session completion run](parallel-completion-run-20261017.md), integrating geography, history and events with the API planner/runtime, privacy, package and rehearsal changes. **1,446 Node tests passed, zero failed, two skipped**; 214 ERA5 and 245 geography Python tests passed (13 skips); types, builds, both local packages and compiled runtime checks passed. Integration and its documentation follow-up are pushed at `627c3769c7bf3ea335444eaab864258381c1b807`; [all six exact-commit CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39023699488). The preceding baseline `bc8de008` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39019791036); that earlier result does not validate this newer integration.
 
 Current block 1 deliverables: distinct hosted historical method and one successful bounded pilot; staged opt-in geometry retrieval/discovery with snapshot evidence; IGN civil meteor guidance and bounded radiant sampling. See the [latest wave evidence](activation-integration-wave-20261017.md). Full history admission/baseline, real geometry acceptance and remaining event references stay open. The one-request history allowance is consumed; no further live calls are implied.
+
+## Next validation preparation
+
+Three parallel preparations now map to the existing blocks, not new waves:
+
+| Existing block | Concrete packet | Readiness |
+| --- | --- | --- |
+| 1: geography | [One structured country selection](geography-selection-next-packet.md) | One approved selection attempt returned zero features; [result](geography-selection-result-20261017.md). Allowance consumed; no retry or geometry follow-up |
+| 1: history | [One-year ERA5 shape probe](history-annual-next-packet.md) | Isolated probe prepared offline; durable Open-Meteo quota configuration and fresh live allowance remain prerequisites |
+| 3: experience | [Assembled API-mode Codex journey matrix](assembled-experience-next-packet.md) | Fifteen product journeys plus five boundary probes mapped; actual host/package and answer review remain; Claude deferred |
+
+Offline preparation was followed by exactly one owner-approved Geoapify selection request, which stopped empty. No historical request, private ledger reset, installation or deployment occurred. The earlier history runner was not suitable
+for a standalone calendar-year probe; this gap is explicit rather than using a
+full-baseline request or weakening its decoder. Current original counts remain
+unchanged. Validation evidence for these preparation changes is recorded in
+[next validation preparation](next-validation-preparation-20261017.md): **1452 tests passed, zero failed, two skipped**, all type checks passed; exact pushed-commit CI is checked separately.
 
 ## Where we stand
 

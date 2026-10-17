@@ -188,3 +188,4 @@ import "./providers/climate/api-history-store.test";
 import "./providers/climate/api-history-jobs.test";
 import "./providers/climate/api-history-provider.test";
 import "./operations/api-history-runtime.test";
+import "./providers/climate/annual-history-probe.test";

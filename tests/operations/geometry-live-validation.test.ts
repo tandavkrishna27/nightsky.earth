@@ -1,8 +1,17 @@
 import test from 'node:test';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {runGeometryValidation, selectCountry, createGeometryGuard, countryQuery} from '../../scripts/validate-geometry-live';
 test('default invocation is offline',async()=>{assert.equal((await runGeometryValidation([],{})).mode,'offline');});
+test('CLI refusal identifies the requested selection or extended packet',()=>{
+ for(const [arg,envelope] of [['--selection-live','geometry-selection-v2-va-1-1-30-zero-retries'],['--live','geometry-live-v2-6-9-120-zero-retries']]){
+  const child=spawnSync(process.execPath,['--import','tsx',fileURLToPath(new URL('../../scripts/validate-geometry-live.ts',import.meta.url)),arg],{env:{SystemRoot:process.env.SystemRoot},encoding:'utf8',timeout:10000});
+  assert.equal(child.error,undefined);assert.equal(child.status,1);assert.equal(child.stdout,'');
+  assert.deepEqual(JSON.parse(child.stderr),{status:'refused-or-failed',envelope});
+ }
+});
 test('country selection rejects duplicates and wrong metadata',()=>{const f={type:'Feature',properties:{place_id:'abc123',country_code:'va',result_type:'country'}};assert.equal(selectCountry({type:'FeatureCollection',features:[f]},'va'),'abc123');assert.throws(()=>selectCountry({type:'FeatureCollection',features:[f,f]},'va'));assert.throws(()=>selectCountry({type:'FeatureCollection',features:[f]},'sm'));});
 test('guard persists before network and forbids changes and repeats',async()=>{let calls=0;const rows:unknown[]=[];const g=createGeometryGuard({key:'secret',fetcher:async()=>{assert.ok(rows.length);calls++;return new Response('{}');},persist:async r=>{rows.push(r);}});try{g.expect('/v1/geocode/search',geocode('Vatican City'));const u=urlFor(geocode('Vatican City'));await g.fetcher(u);await assert.rejects(()=>g.fetcher(u));assert.equal(calls,1);assert.ok(!JSON.stringify(rows).includes('secret'));}finally{g.close();}});
 test('oversized body stops guard without retry',async()=>{const g=createGeometryGuard({key:'secret',fetcher:async()=>new Response('x'.repeat(262145)),persist:async()=>{}});try{g.expect('/v1/geocode/search',geocode('Vatican City'));await assert.rejects(()=>g.fetcher(urlFor(geocode('Vatican City'))));assert.equal(g.stopped,true);}finally{g.close();}});

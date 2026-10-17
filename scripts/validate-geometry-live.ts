@@ -132,5 +132,5 @@ export async function runGeometryValidation(args:string[],env:Record<string,stri
   const report={mode:'live',envelope,status,stopReason,phase,attempts:g.rows,results,productionEnabled:false,sourceAccepted:false};await persist({report});return report;
  }finally{g?.close();await journal?.close();await quota.close();}
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)runGeometryValidation(process.argv.slice(2),process.env).then(r=>console.log(JSON.stringify(r)),()=>{console.error(JSON.stringify({status:'refused-or-failed',envelope:GEOMETRY_ENVELOPE}));process.exitCode=1;});
+if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)runGeometryValidation(process.argv.slice(2),process.env).then(r=>console.log(JSON.stringify(r)),()=>{console.error(JSON.stringify({status:'refused-or-failed',envelope:process.argv.length===3&&process.argv[2]==='--selection-live'?GEOMETRY_SELECTION_ENVELOPE:GEOMETRY_ENVELOPE}));process.exitCode=1;});
 
