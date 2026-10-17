@@ -1,4 +1,4 @@
-export type UpstreamProvider = "met" | "weatherapi" | "openweather" | "noaa" | "geonames" | "geoapify" | "seventimer" | "darkskyplanner" | "astronomyapi" | "nasa-donki" | "jpl";
+export type UpstreamProvider = "met" | "weatherapi" | "openweather" | "noaa" | "geonames" | "geoapify" | "seventimer" | "darkskyplanner" | "astronomyapi" | "nasa-donki" | "jpl" | "darkskysites";
 export interface UpstreamBounds {
   globalConcurrency?: number;
   providerConcurrency?: number;
@@ -21,6 +21,7 @@ export class UpstreamControls {
   private blocked = new Map<UpstreamProvider, number>();
   private failures = new Map<UpstreamProvider, number>();
   private flights = new Map<string, Promise<Response>>();
+  private dispatches: Array<{ provider: UpstreamProvider; at: number }> = [];
   private bounds: Required<UpstreamBounds>;
   constructor(bounds: UpstreamBounds = {}) {
     this.bounds = {
@@ -145,6 +146,26 @@ export class UpstreamControls {
     const result = await work;
     return "clone" in result ? result.clone() : result;
   }
+  /** Final synchronous gate for adapters with asynchronous work before HTTP dispatch.
+   * Invoke the transport in operation itself: awaiting after this check would reopen
+   * the gap between admission and the actual request. Shares history across adapters.
+   */
+  dispatch<T>(provider: UpstreamProvider, operation: () => T): T {
+    const now = this.bounds.now();
+    this.dispatches = this.dispatches.filter(call => call.at > now - 1000);
+    if (this.dispatches.filter(call => call.provider === provider).length >= this.secondLimit(provider)) {
+      throw new Error("Upstream dispatch limit reached");
+    }
+    this.dispatches.push({ provider, at: now });
+    return operation();
+  }
+  private secondLimit(provider: UpstreamProvider): number {
+    return provider === "met"
+      ? Math.min(this.bounds.providerCallsPerSecond, 19)
+      : provider === "darkskysites"
+        ? Math.min(this.bounds.providerCallsPerSecond, 10)
+        : this.bounds.providerCallsPerSecond;
+  }
   private admissionLimitReached(
     provider: UpstreamProvider,
     now: number,
@@ -155,10 +176,7 @@ export class UpstreamControls {
     const startsThisSecond = providerCalls.filter(
       (call) => call.at > now - 1000,
     ).length;
-    const startsPerSecondLimit =
-      provider === "met"
-        ? Math.min(this.bounds.providerCallsPerSecond, 19)
-        : this.bounds.providerCallsPerSecond;
+    const startsPerSecondLimit = this.secondLimit(provider);
     return (
       this.active >= this.bounds.globalConcurrency ||
       (this.counts.get(provider) ?? 0) >= this.bounds.providerConcurrency ||
