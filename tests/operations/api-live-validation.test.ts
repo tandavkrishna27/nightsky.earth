@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createLiveGuard, ENVELOPE, runValidation, selectPublicRecord, checkedValidationQuota, forecastValidationFacts } from '../../scripts/validate-api-live';
 import { initializeProviderQuota } from '../../scripts/initialize-provider-quota';
+import { parseLocationForecast } from '../../server/providers/weather/metNorway';
 
 const geo = (text='Hanle, India') => `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(text)}&limit=5&format=geojson&apiKey=sentinel`;
 const setup = (extra:Record<string,unknown>={}) => {
@@ -134,4 +135,18 @@ test('derived forecast facts preserve mixed cadence, gaps, missing fields and un
  const facts=forecastValidationFacts(forecast,window);assert.deepEqual(facts.uniqueIntervalSeconds,[3600,10800]);assert.equal(facts.forecastHorizonHours,48);assert.equal(facts.sampleSpanHours,4);assert.deepEqual(facts.missingFields,['windSpeed']);assert.equal(JSON.stringify(facts).includes('987654'),false);
  forecast.samples[0].values.totalCloudCover.unit='sentinel';const bad=forecastValidationFacts(forecast,window);assert.equal(bad.checks.unitsExpected,false);assert.equal(JSON.stringify(bad).includes('sentinel'),false);
  assert.equal(forecastValidationFacts(undefined,window).checks.publicSchemaValid,false);
+});
+test('MET celsius aliases and overlapping periods are valid without importing earlier instantaneous weather',()=>{
+ const window={startUtc:'2026-10-17T06:54:00Z',endUtc:'2026-10-17T08:54:00Z',timeZone:'Asia/Kolkata'};
+ const payload={properties:{meta:{updated_at:'2026-10-17T06:00:00Z',units:{air_temperature:'celsius',dew_point_temperature:'celsius',precipitation_amount:'mm'}},timeseries:[6,7,8].map(hour=>({time:`2026-10-17T0${hour}:00:00Z`,data:{instant:{details:{air_temperature:12,dew_point_temperature:8}},next_1_hours:{details:{precipitation_amount:1}}}}))}};
+ const result=parseLocationForecast(payload,{placeId:'fixture',latitude:32.8,longitude:78.9},window,{checkedAt:'2026-10-17T06:54:00Z'});
+ assert.ok(result.forecast);assert.equal(result.forecast.samples[0].values.temperature,undefined);
+ const facts=forecastValidationFacts(result.forecast,window,'met');
+ assert.equal(facts.checks.unitsExpected,true);assert.deepEqual(facts.fieldUnits.temperature,['celsius']);assert.deepEqual(facts.fieldUnits.dewPoint,['celsius']);
+ assert.equal(facts.checks.samplesInsideRequestedWindow,false);assert.equal(facts.checks.valuesRelevantToWindow,true);assert.equal(facts.checks.instantaneousValuesInsideWindow,true);assert.equal(facts.checks.intervalsOverlapWindow,true);
+ assert.equal(facts.temporalEvidence.intervalValueCount,3);assert.equal(facts.temporalEvidence.earliestIntervalStartUtc,'2026-10-17T06:00:00.000Z');assert.equal(facts.temporalEvidence.latestIntervalEndUtc,'2026-10-17T09:00:00.000Z');
+ const invalid=structuredClone(result.forecast);invalid.samples[0].values.temperature={value:12,unit:'celsius'};
+ assert.equal(forecastValidationFacts(invalid,window,'met').checks.valuesRelevantToWindow,false);
+ invalid.samples[0].values.precipitationAmount!.periodStartUtc='2026-10-17T04:00:00Z';invalid.samples[0].values.precipitationAmount!.periodEndUtc='2026-10-17T05:00:00Z';
+ assert.equal(forecastValidationFacts(invalid,window,'met').checks.intervalsOverlapWindow,false);
 });

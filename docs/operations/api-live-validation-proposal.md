@@ -101,3 +101,29 @@ Three review findings were reproduced and fixed: quota reservation exceptions an
 ### Forecast validation facts
 
 The executor now retains the exact requested window, first/last normalized sample UTC times, unique consecutive sample intervals (at most 47), normalized forecast horizon and availability, observed sample span, bounded field/unit map, missing fields, coverage boundaries and schema/unit/order/window/cadence checks. These are derived from public-schema validated forecasts. Unexpected unit strings become a fixed marker; numerical weather values and response bodies remain excluded. MET mixed native cadence is reported without an assumed single interval; WeatherAPI/OpenWeather cadence checks use 3600/10800 seconds and remain unknown with fewer than two samples. Synthetic fixtures now provide multiple native samples for every provider; tests cover mixed cadence, partial horizon, absent fields, unexpected units and redaction. Latest affected suite: 14/14 passed; TypeScript checks passed.
+
+## Offline MET interpretation after the first bounded batch
+
+The owner-approved batch `owner-20261017-first` ran at code `83fa914` and finished on 2026-10-17 at 06:54:20.932 UTC. Its retained derived report records twelve HTTP 200 responses, three cases with usable samples from every admitted weather provider, and partial forecast outcomes. This note describes subsequent **offline interpretation and reporting corrections**, not another live validation.
+
+The original report, also retained as `docs/operations/evidence/api-live-first-20261017.json`, is unchanged. See the coordinator�s `api-live-validation-results-20261017.md` for batch results. SHA-256: `ae77ac25ae4078ffbb79c58b508226db193e16dc59a3349826fdf861a066497d`. The twelve-request allowance is exhausted. No additional API request was made for this investigation; no production adapter changed.
+
+### Temperature unit finding
+
+The reporter accepted only `°C` for temperature and dew point. The MET adapter preserves the provider's unit string, except that `˚C` falls back to its `°C` default. The conventional `celsius` unit therefore passes through the adapter but was classified as `unexpected-unit` by the reporter. An offline fixture through the actual MET parser reproduces this false positive for both temperature and dew point.
+
+The reporting helper now accepts `celsius` specifically for MET temperature/dew point alongside the existing `°C` spelling, retaining the recognized spelling in the bounded unit map. Other unrecognized units remain masked and fail the unit check. This changes reporting only; no weather values or conversions are altered.
+
+**Evidence limit:** the original report replaced the actual unit token with `unexpected-unit`, and raw forecast responses were deliberately not retained. Consequently, the exact unit received during that live batch cannot be recovered from its report. The alias mismatch is a demonstrated reporting defect and a plausible explanation of the observed flags, but this note does not retroactively mark the original live unit checks passed. An exact source-token verification remains unproven by the retained evidence.
+
+### Prior-hour timestamp finding
+
+The requested window starts at `2026-10-17T06:54:14.946Z`; MET's first retained sample timestamp is `2026-10-17T06:00:00.000Z` in all three cases. The original `samplesInsideRequestedWindow=false` is literally correct. It is insufficient as a contract failure check because MET intentionally retains precipitation intervals overlapping the requested window, including intervals starting before it. Its parser excludes out-of-window instantaneous temperature, cloud and other instantaneous fields; interval bounds remain intact rather than being clipped or converted to hourly certainty.
+
+The reporting helper preserves the descriptive sample-timestamp check and adds separate checks for instantaneous values inside the requested window, aggregation intervals overlapping it, and every value being relevant to it. Bounded temporal evidence records value counts and earliest/latest aggregation bounds, never numerical weather values. Existing sample-based coverage flags are not reinterpreted as full coverage of every field.
+
+An actual-parser synthetic fixture supplies `celsius` temperature/dew point plus 06:00–07:00, 07:00–08:00 and 08:00–09:00 precipitation intervals for a 06:54–08:54 window. It proves that the earlier sample retains precipitation without earlier instantaneous values, valid interval overlap passes the new checks, and injected out-of-window instantaneous values or nonoverlapping intervals fail. Existing MET period tests independently cover this behavior. The old report lacks the new per-value temporal facts and remains unchanged.
+
+### Offline verification
+
+The new regression failed on the original unit check before the reporting correction. After the correction, the validation executor suite and existing MET period suite pass together: **20 tests** (15 executor tests plus 5 MET period tests). `npm run check` passes. These are synthetic software checks, not a second live run or an upgrade of the original partial forecast outcomes.

@@ -94,18 +94,25 @@ export function checkedValidationQuota(quota:Pick<PersistentQuota,'reserve'|'set
 /** Public-schema facts only: never retain weather values or arbitrary provider unit strings. */
 export function forecastValidationFacts(value:unknown,window:{startUtc:string;endUtc:string;timeZone:string},provider?:Provider) {
  const requestedWindow=timeWindowSchema.parse(window);const parsed=weatherForecastSchema.safeParse(value);
- if(!parsed.success)return {requestedWindow,checks:{publicSchemaValid:false,unitsExpected:null,samplesInsideRequestedWindow:null},firstSampleUtc:null,lastSampleUtc:null,uniqueIntervalSeconds:[],forecastHorizonHours:null,sampleSpanHours:null,fieldUnits:{},missingFields:[],coverage:null,forecastStatus:null};
+ if(!parsed.success)return {requestedWindow,checks:{publicSchemaValid:false,unitsExpected:null,samplesInsideRequestedWindow:null,instantaneousValuesInsideWindow:null,intervalsOverlapWindow:null,valuesRelevantToWindow:null},temporalEvidence:null,firstSampleUtc:null,lastSampleUtc:null,uniqueIntervalSeconds:[],forecastHorizonHours:null,sampleSpanHours:null,fieldUnits:{},missingFields:[],coverage:null,forecastStatus:null};
  const forecast=parsed.data;const times=forecast.samples.map(sample=>Date.parse(sample.validAt));
  const deltas=times.slice(1).map((time,index)=>(time-times[index])/1000);
  const first=Math.min(...times),last=Math.max(...times);const start=Date.parse(window.startUtc),end=Date.parse(window.endUtc);
  const expected:Record<string,string>={totalCloudCover:'%',lowCloudCover:'%',mediumCloudCover:'%',highCloudCover:'%',precipitationProbability:'%',precipitationAmount:'mm',windSpeed:'m/s',windGust:'m/s',windDirection:'degrees',temperature:'°C',dewPoint:'°C',relativeHumidity:'%',visibility:'m'};
  const fieldUnits:Record<string,string[]>={};let unitsExpected=true;
+ let instantValueCount=0,intervalValueCount=0,outsideInstantCount=0,nonoverlapIntervalCount=0,earliestInterval=Infinity,latestInterval=-Infinity;
  for(const sample of forecast.samples)for(const [field,measurement] of Object.entries(sample.values))if(measurement){
-  const valid=measurement.unit===expected[field];if(!valid)unitsExpected=false;
-  const unit=valid?expected[field]:'unexpected-unit';const units=fieldUnits[field]??=[];if(!units.includes(unit))units.push(unit);
+  const metCelsius=provider==='met'&&(field==='temperature'||field==='dewPoint')&&measurement.unit==='celsius';
+  const valid=measurement.unit===expected[field]||metCelsius;if(!valid)unitsExpected=false;
+  const unit=valid?measurement.unit:'unexpected-unit';const units=fieldUnits[field]??=[];if(!units.includes(unit))units.push(unit);
+  if(measurement.periodStartUtc!==undefined&&measurement.periodEndUtc!==undefined) {
+   intervalValueCount++;const intervalStart=Date.parse(measurement.periodStartUtc),intervalEnd=Date.parse(measurement.periodEndUtc);
+   earliestInterval=Math.min(earliestInterval,intervalStart);latestInterval=Math.max(latestInterval,intervalEnd);
+   if(!(intervalStart<end&&intervalEnd>start))nonoverlapIntervalCount++;
+  } else {instantValueCount++;const at=Date.parse(sample.validAt);if(at<start||at>end)outsideInstantCount++;}
  }
  const nativeInterval=provider==='weatherapi'?3600:provider==='openweather'?10800:null;
- return {requestedWindow,firstSampleUtc:new Date(first).toISOString(),lastSampleUtc:new Date(last).toISOString(),uniqueIntervalSeconds:[...new Set(deltas)].sort((a,b)=>a-b).slice(0,47),forecastHorizonHours:forecast.forecastHorizonHours,sampleSpanHours:(last-first)/3600000,forecastStatus:forecast.availability.status,fieldUnits,missingFields:forecast.missingFields.map(field=>field.field),coverage:{startsAtOrBeforeWindowStart:first<=start,endsAtOrAfterWindowEnd:last>=end},expectedNativeIntervalSeconds:nativeInterval,checks:{publicSchemaValid:true,unitsExpected,samplesInsideRequestedWindow:times.every(time=>time>=start&&time<=end),strictlyIncreasing: deltas.every(delta=>delta>0),nativeCadenceMatches:nativeInterval===null||deltas.length===0?null:deltas.every(delta=>delta===nativeInterval)}};
+ return {requestedWindow,firstSampleUtc:new Date(first).toISOString(),lastSampleUtc:new Date(last).toISOString(),uniqueIntervalSeconds:[...new Set(deltas)].sort((a,b)=>a-b).slice(0,47),forecastHorizonHours:forecast.forecastHorizonHours,sampleSpanHours:(last-first)/3600000,forecastStatus:forecast.availability.status,fieldUnits,missingFields:forecast.missingFields.map(field=>field.field),coverage:{startsAtOrBeforeWindowStart:first<=start,endsAtOrAfterWindowEnd:last>=end},temporalEvidence:{instantValueCount,intervalValueCount,outsideWindowInstantValueCount:outsideInstantCount,nonoverlappingIntervalValueCount:nonoverlapIntervalCount,earliestIntervalStartUtc:Number.isFinite(earliestInterval)?new Date(earliestInterval).toISOString():null,latestIntervalEndUtc:Number.isFinite(latestInterval)?new Date(latestInterval).toISOString():null},expectedNativeIntervalSeconds:nativeInterval,checks:{publicSchemaValid:true,unitsExpected,samplesInsideRequestedWindow:times.every(time=>time>=start&&time<=end),instantaneousValuesInsideWindow:outsideInstantCount===0,intervalsOverlapWindow:nonoverlapIntervalCount===0,valuesRelevantToWindow:outsideInstantCount===0&&nonoverlapIntervalCount===0,strictlyIncreasing: deltas.every(delta=>delta>0),nativeCadenceMatches:nativeInterval===null||deltas.length===0?null:deltas.every(delta=>delta===nativeInterval)}};
 }
 
 /** Conservative exact locality selection; no extra geocoding or timezone calls. */
