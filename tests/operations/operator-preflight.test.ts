@@ -170,3 +170,20 @@ test('API current release does not bypass legacy rollback requirements',async()=
 test('full API release keeps point-history gate even with legacy history inventory',async()=>{const root=await mkdtemp(join(tmpdir(),'operator-api-'));try{await writeFile(join(root,'history'),'data');const c=config();Object.assign(c.runtimeEnvironment,{NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_MCP_TOOL_MODE:'full',MET_NORWAY_USER_AGENT:'NightSky.earth nightsky.earth2026@gmail.com',NIGHTSKY_CLIMATE_ARTIFACT:'history',NIGHTSKY_CLIMATE_SHA256:hash});c.artifacts=[{id:'history',kind:'climate-legacy',path:'history',sha256:hash,bytes:4,version:'v1'}];for(const r of [c.releases.current,c.releases.rollback]){r.discovery=apiEvidence();r.artifactIds=['history'];}const result=await operatorPreflight(c,root);assert.equal(result.status,'incomplete-owner-inputs');assert.ok(result.findings.includes('API_HISTORY_ROUTE_NOT_ADMITTED'));assert.ok(!result.findings.includes('FULL_MODE_INPUTS_MISSING'));}finally{await rm(root,{recursive:true,force:true});}});
 
 test('omitted tool mode uses full-mode preflight requirements',async()=>{const c=config();delete c.runtimeEnvironment.NIGHTSKY_MCP_TOOL_MODE;assert.ok((await operatorPreflight(c,'.')).findings.includes('FULL_MODE_INPUTS_MISSING'));});
+test('Geoapify-only operator evidence is accepted with unique provider IDs',async()=>{
+ const c=config();c.runtimeEnvironment.NIGHTSKY_DISCOVERY_MODE='api';
+ for(const r of [c.releases.current,c.releases.rollback])r.discovery={...apiEvidence(),providers:['geoapify']};
+ assert.equal((await operatorPreflight(c,'.')).status,'offline-pass');
+ c.releases.rollback.discovery.providers=['geoapify','geoapify'];assert.notEqual((await operatorPreflight(c,'.')).status,'offline-pass');
+});
+function weatherEvidence(providers:string[],admittedProviders:string[]=[]) { return {providers,admittedProviders,liveVerifiedProviders:[],configurationEvidence:'private-config-record',policyEvidence:'account-free-reviewed',budgetEvidence:'unused-budget-record'}; }
+test('weather release evidence permits rollback subsets and distinguishes admission from live verification',async()=>{
+ const c=config();Object.assign(c.runtimeEnvironment,{NIGHTSKY_WEATHER_PROVIDERS:'met,weatherapi',NIGHTSKY_WEATHER_ADMITTED_PROVIDERS:'weatherapi',NIGHTSKY_QUOTA_STATE_PATH:'private/quota.json'});
+ c.releases.current.weather=weatherEvidence(['met','weatherapi'],['weatherapi']);c.releases.rollback.weather=weatherEvidence(['met']);
+ assert.equal((await operatorPreflight(c,'.')).status,'offline-pass');
+ c.releases.rollback.weather=weatherEvidence(['openweather']);assert.ok((await operatorPreflight(c,'.')).findings.includes('WEATHER_ADMISSION_EVIDENCE_MISSING'));
+ delete c.runtimeEnvironment.NIGHTSKY_QUOTA_STATE_PATH;assert.ok((await operatorPreflight(c,'.')).findings.includes('WEATHER_QUOTA_CONFIGURATION_MISSING'));
+});
+test('weather private keys are excluded from operator JSON and reports',async()=>{
+ const c=config();c.runtimeEnvironment.NIGHTSKY_WEATHERAPI_KEY='do-not-report';const result=await operatorPreflight(c,'.');assert.equal(result.status,'invalid');assert.ok(!JSON.stringify(result).includes('do-not-report'));
+});

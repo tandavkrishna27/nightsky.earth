@@ -8,15 +8,18 @@ import { constants } from 'node:fs';
 import express from 'express';
 import { pluginListenerConfiguration, pluginToolMode, pluginRegionalConfiguration, pluginGlobalConfiguration, pluginDiscoveryMode } from '../../server/plugin';
 import { configureMcpProxyTrust } from '../../server/mcp/proxyTrust';
+import { parseWeatherConfiguration } from '../../server/providers/weather/configuration';
 import { climateArtifactConfiguration } from '../../server/providers/climate/configuration';
 const text = z.string().min(1).max(4096).refine(v => !/[\x00-\x1f\x7f]/.test(v));
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const bytes = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const evidence = text.nullable();
-const envKeys = ['NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
+const envKeys = ['NIGHTSKY_WEATHER_PROVIDERS', 'NIGHTSKY_WEATHER_ADMITTED_PROVIDERS', 'NIGHTSKY_QUOTA_STATE_PATH', 'NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
 const runtimeSchema = z.object(Object.fromEntries(envKeys.map(k => [k, text.optional()]))).strict();
 const discoveryEvidence = z.object({ mode: z.enum(['api', 'catalogue', 'regional', 'legacy']), providers: z.array(z.enum(['geonames', 'geoapify'])).max(2), configurationEvidence: evidence, policyEvidence: evidence, budgetEvidence: evidence }).strict();
-const release = z.object({ id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000), discovery: discoveryEvidence.optional() }).strict();
+const weatherIds = z.array(z.enum(['met','weatherapi','openweather'])).min(1).max(4).refine(v=>new Set(v).size===v.length);
+const weatherEvidence = z.object({providers:weatherIds,admittedProviders:z.array(z.enum(['met','weatherapi','openweather'])).max(4).refine(v=>new Set(v).size===v.length),liveVerifiedProviders:z.array(z.enum(['met','weatherapi','openweather'])).max(4).refine(v=>new Set(v).size===v.length),configurationEvidence:evidence,policyEvidence:evidence,budgetEvidence:evidence}).strict().refine(v=>[...v.admittedProviders,...v.liveVerifiedProviders].every(id=>v.providers.includes(id)));
+const release = z.object({ id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000), discovery: discoveryEvidence.optional(), weather: weatherEvidence.optional() }).strict();
 const lineageValidation=z.object({scratchDirectory:text,budgets:z.object({maxInputBytes:bytes.positive().max(64*1024**3),maxMemoryBytes:bytes.min(16*1024**2).max(2*1024**3),maxScratchBytes:bytes.positive().max(32*1024**3),maxOutputBytes:bytes.positive().max(32*1024**3),maxDurationMs:bytes.positive().max(60*60*1000)}).strict()}).strict();
 export const operatorConfigSchema = z.object({ schemaVersion: z.literal(1), lineageValidation:lineageValidation.optional(), status: z.enum(['template', 'selected']), endpoints: z.object({ production: evidence, staging: evidence, privacy: evidence, terms: evidence, support: evidence }).strict(), topology: z.object({ kind: z.enum(['direct', 'single-rewriting-proxy']), headerRewriteEvidence: evidence, restrictedBackendEvidence: evidence }).strict(), runtimeEnvironment: runtimeSchema, releases: z.object({ current: release.nullable(), rollback: release.nullable() }).strict(), artifacts: z.array(z.object({ id: text, kind: z.enum(['geonames', 'osm-single', 'osm-regional', 'global-catalogue', 'climate-legacy', 'era5-release', 'component']), path: text, sha256: hash, bytes: bytes, version: text }).strict()).max(10000), budget: z.object({ processes: z.number().int().min(1).max(64), memoryBytes: bytes, diskAvailableBytes: bytes, currentBytes: bytes, rollbackBytes: bytes, scratchBytes: bytes, reserveBytes: bytes, maxArtifactBytes: bytes.max(16 * 1024 ** 3), capacityEvidence: evidence, rollbackEvidence: evidence }).strict().nullable(), ownerEvidence: z.object({ identity: evidence, policies: evidence, retention: evidence, host: evidence, providerBudget: evidence }).strict() }).strict();
 export type OperatorConfig = z.infer<typeof operatorConfigSchema>;
@@ -104,6 +107,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
     if (prod && stage && prod.hostname === stage.hostname)
         fail('STAGING_NOT_DISTINCT');
     try {
+        parseWeatherConfiguration(e);
         pluginListenerConfiguration(e);
         pluginToolMode(e);
         pluginRegionalConfiguration(e);
@@ -170,13 +174,25 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
     let currentMode = 'legacy';
     try { currentMode = pluginDiscoveryMode(e); } catch { fail('DISCOVERY_CONFIGURATION_INVALID'); }
     if (current?.discovery && current.discovery.mode !== currentMode) fail('DISCOVERY_RELEASE_MODE_MISMATCH');
+    let weatherConfiguration: ReturnType<typeof parseWeatherConfiguration> | undefined;
+    try { weatherConfiguration = parseWeatherConfiguration(e); } catch { fail('WEATHER_CONFIGURATION_INVALID'); }
+    for (const r of [current,rollback]) if(r) {
+        const w = r.weather;
+        if(r===current && (weatherConfiguration?.providers || w) && (!w || w.providers.join(',')!==(weatherConfiguration?.providers??['met']).join(','))) missing('WEATHER_RELEASE_CONFIGURATION_MISMATCH');
+        if(r===current && w && w.admittedProviders.slice().sort().join(',')!==(weatherConfiguration?.admitted??[]).slice().sort().join(',')) fail('WEATHER_RELEASE_ADMISSION_MISMATCH');
+        if(w?.providers.some(id=>id!=='met')) {
+            if(!e.NIGHTSKY_QUOTA_STATE_PATH) missing('WEATHER_QUOTA_CONFIGURATION_MISSING');
+            if(c.budget?.processes!==1) fail('WEATHER_SINGLE_PROCESS_REQUIRED');
+            if(!w.configurationEvidence||!w.policyEvidence||!w.budgetEvidence||w.providers.some(id=>id!=='met'&&!w.admittedProviders.includes(id))) missing('WEATHER_ADMISSION_EVIDENCE_MISSING');
+        }
+    }
     const geographyKinds = ['geonames', 'osm-single', 'osm-regional', 'global-catalogue'];
     for (const r of [current, rollback]) if (r) {
         const mode = r === current ? currentMode : r.discovery?.mode ?? 'legacy';
         const assigned = c.artifacts.filter(a => r.artifactIds.includes(a.id));
         if (mode === 'api') {
             const d = r.discovery;
-            if (!d || d.providers.length !== 2 || new Set(d.providers).size !== 2 || !d.configurationEvidence || !d.policyEvidence || !d.budgetEvidence) missing('API_PROVIDER_EVIDENCE_MISSING');
+            if (!d || d.providers.length < 1 || new Set(d.providers).size !== d.providers.length || !d.configurationEvidence || !d.policyEvidence || !d.budgetEvidence) missing('API_PROVIDER_EVIDENCE_MISSING');
             if (c.budget?.processes !== 1) fail('API_SINGLE_PROCESS_REQUIRED');
             if (assigned.some(a => geographyKinds.includes(a.kind))) fail('API_GEOGRAPHY_ARTIFACT_CONFLICT');
         } else if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full' && r === rollback) {

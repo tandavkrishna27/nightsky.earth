@@ -14,6 +14,11 @@ import { createGlobalCatalogue } from "./places/globalCatalogue";
 import { loadGeoNamesPlaceIndex } from "./places/geonames";
 import { climateArtifactConfiguration } from "./providers/climate/configuration";
 import { createApiServices } from "./places/api/configuration";
+import { createPersistentQuota, type PersistentQuota } from "./providers/quotaState";
+import { createConfiguredWeatherCollection, parseWeatherConfiguration, PROVIDER_QUOTA_POLICIES } from "./providers/weather/configuration";
+const runtimeCleanup = new WeakMap<express.Express, () => Promise<void>>();
+/** Call after closing the listener when embedding the configured app. */
+export async function closeConfiguredNightSkyPluginApp(app: express.Express) { await runtimeCleanup.get(app)?.(); }
 export interface PluginAppDependencies extends McpRouteDependencies {
     trustedProxyAddresses?: string;
     health?: HealthDependencies;
@@ -35,6 +40,7 @@ export function pluginGlobalConfiguration(environment: {NIGHTSKY_GLOBAL_CATALOGU
     return {path,expectedSha256:expectedSha256.toLowerCase()};
 }
 export function createNightSkyPluginApp(dependencies: PluginAppDependencies = {}) {
+    if (dependencies.weatherProvider && dependencies.weatherCollection) throw Error("Conflicting weather provider configuration.");
     const app = express();
     app.disable("x-powered-by");
     configureMcpProxyTrust(app, dependencies.trustedProxyAddresses);
@@ -79,6 +85,12 @@ export function pluginDiscoveryMode(environment: Record<string, string | undefin
 /** Shared production artifact loading; callers own listener lifecycle. */
 export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAppDependencies, "fetcher" | "log"> = {}) {
     climateArtifactConfiguration({NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256});
+    const weatherConfig = parseWeatherConfiguration(process.env);
+    let quota: PersistentQuota | undefined;
+    try {
+    if (weatherConfig.quotaPath) quota = await createPersistentQuota({path:weatherConfig.quotaPath, now:Date.now, policies:PROVIDER_QUOTA_POLICIES});
+    const weatherCollection = createConfiguredWeatherCollection(process.env,{quota,fetcher:overrides.fetcher});
+    const finish = (app: express.Express) => { let closing: Promise<void> | undefined; runtimeCleanup.set(app, () => closing ??= quota?.close() ?? Promise.resolve()); return app; };
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
     const discoveryMode = pluginDiscoveryMode(process.env);
@@ -88,8 +100,9 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
             geoapifyApiKey: process.env.NIGHTSKY_GEOAPIFY_API_KEY,
             userAgent: process.env.NIGHTSKY_LOCATION_USER_AGENT ?? "NightSky.earth/1.0 (nightsky.earth2026@gmail.com)",
             fetcher: overrides.fetcher,
+            quota: quota ?? { reserve: async () => ({allowed:false,reason:"quota-state-unavailable"}) },
         });
-        return createNightSkyPluginApp({ ...services, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides });
+        return finish(createNightSkyPluginApp({ ...services, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
     }
     const global = pluginGlobalConfiguration({NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST:process.env.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST,NIGHTSKY_GLOBAL_CATALOGUE_SHA256:process.env.NIGHTSKY_GLOBAL_CATALOGUE_SHA256,NIGHTSKY_OSM_REGIONAL_MANIFEST:process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST,NIGHTSKY_OSM_REGIONAL_SHA256:process.env.NIGHTSKY_OSM_REGIONAL_SHA256,NIGHTSKY_OSM_CANDIDATE_INDEX:process.env.NIGHTSKY_OSM_CANDIDATE_INDEX});
     const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });
@@ -99,13 +112,16 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     const placeIndex = files ? await loadGeoNamesPlaceIndex() : undefined;
     if(files && !placeIndex) throw Error("Global catalogue requires the local GeoNames place index.");
     const catalogue = files && placeIndex ? createGlobalCatalogue(files,{cities:placeIndex}) : undefined;
-    return createNightSkyPluginApp({ catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides });
+    return finish(createNightSkyPluginApp({ weatherCollection, catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
+    } catch (error) { await quota?.close(); throw error; }
 }
 export async function startNightSkyPlugin() {
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
     const app = await createConfiguredNightSkyPluginApp();
     const server = createServer(app);
-    await new Promise<void>((done, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); done(); }); });
+    server.once("close", () => { void closeConfiguredNightSkyPluginApp(app); });
+    try { await new Promise<void>((done, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); done(); }); }); }
+    catch (error) { await closeConfiguredNightSkyPluginApp(app); throw error; }
     console.log("NightSky plugin listener ready.");
     return server;
 }
