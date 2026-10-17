@@ -103,11 +103,15 @@ test('standalone graceful SIGTERM and SIGINT release quota for immediate restart
 import { connect } from 'node:net';
 test('bounded shutdown with an undrained connection retains the quota crash lock',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'quota-drain-'));const probe=createServer();await new Promise<void>(done=>probe.listen(0,'127.0.0.1',done));const address=probe.address();assert.ok(address&&typeof address!=='string');const port=address.port;await new Promise<void>(done=>probe.close(()=>done()));
- const script=join(dir,'child.mjs');const quotaPath=join(dir,'quota.json');await writeFile(script,`import {startNightSkyPlugin} from ${JSON.stringify(pathToFileURL(join(process.cwd(),'server/plugin.ts')).href)};await startNightSkyPlugin({gracefulSignals:true,shutdownTimeoutMs:150});process.on('message',()=>{process.disconnect();process.emit('SIGTERM');});process.send('ready');`);
+ const script=join(dir,'child.mjs');const quotaPath=join(dir,'quota.json');await writeFile(script,`import {startNightSkyPlugin} from ${JSON.stringify(pathToFileURL(join(process.cwd(),'server/plugin.ts')).href)};const server=await startNightSkyPlugin({gracefulSignals:true,shutdownTimeoutMs:150});server.on('request',()=>process.send('request-active'));process.on('message',()=>{process.disconnect();process.emit('SIGTERM');});process.send('ready');`);
  const child=fork(script,[],{execArgv:['--import','tsx'],env:{...process.env,HOST:'127.0.0.1',PORT:String(port),NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_MCP_TOOL_MODE:'resolver-only',NIGHTSKY_QUOTA_STATE_PATH:quotaPath},silent:true});let socket:ReturnType<typeof connect>|undefined;
  try {
   await Promise.race([once(child,'message'),new Promise((_,reject)=>setTimeout(()=>reject(Error('startup timeout')),4000).unref())]);
-  socket=connect(port,'127.0.0.1');socket.on('error',()=>{});await once(socket,'connect');socket.write('GET /mcp HTTP/1.1\r\nHost: localhost\r\n');
+  socket=connect(port,'127.0.0.1');socket.on('error',()=>{});await once(socket,'connect');const activeRequest=once(child,'message');
+  // Complete headers start a real HTTP request; its deliberately incomplete
+  // JSON body keeps Express waiting while the child confirms request receipt.
+  socket.write('POST /mcp HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 100\r\n\r\n{');
+  const acknowledgement=await Promise.race([activeRequest,new Promise<never>((_,reject)=>setTimeout(()=>reject(Error('server never acknowledged active HTTP request')),4000).unref())]);assert.equal(acknowledgement[0],'request-active');
   const exited=once(child,'exit');child.send('shutdown');const result=await Promise.race([exited,new Promise<never>((_,reject)=>setTimeout(()=>reject(Error('shutdown timeout')),4000).unref())]);assert.equal(result[0],1);
   await access(quotaPath+'.lock');await assert.rejects(createPersistentQuota({path:quotaPath,now:Date.now,policies:PROVIDER_QUOTA_POLICIES}));
  }finally {socket?.destroy();if(child.exitCode===null){child.kill();await once(child,'exit');}await rm(dir,{recursive:true,force:true});}
