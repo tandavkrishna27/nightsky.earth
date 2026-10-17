@@ -20,6 +20,10 @@ function answer(result: ReferenceSearchResult | ReferenceDetailsResult | Referen
     if (data && 'record' in data) {
         if (data.record)
             lines.push(`${data.record.name}: ${data.record.measurements.slice(0, 6).map(m => `${m.name}: ${m.value ?? 'unknown'} ${m.unit}`).join('; ')}`);
+        if (data.record?.astrometry) {
+            const a=data.record.astrometry;
+            lines.push(`Astrometry: ${a.status}; frame: ${a.frame??'unknown'}; equinox: ${a.equinox??'unknown'}; reference epoch: ${a.reference_epoch_jyear??'unknown'}; observation epoch: ${a.observation_epoch_jyear??'unknown'}; motion model: ${a.motion_model??'unknown'} — catalogue coordinates, not a current position.${a.reason?` ${a.reason}`:''}`);
+        }
         if (data.meteor)
             lines.push(`${data.meteor.name} (${data.meteor.code}): ${data.meteor.totalParameterSets} parameter sets; annual peak forecast is separate.`);
         if (data.host)

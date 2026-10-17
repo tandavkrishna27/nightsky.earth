@@ -1,0 +1,188 @@
+[
+  {
+    "workflow": "find-observing-place",
+    "evidenceKind": "authored-synthetic",
+    "executionStatus": "not-run",
+    "provenance": "Invented conversation expectations for offline authoring review; no generated response or native-host execution is claimed.",
+    "documentEvidence": [
+      "Preserve host-native search, maps and browser",
+      "does not establish weather, terrain or access"
+    ],
+    "turns": [
+      {
+        "user": "Find an open observing place near Hyderabad for a binocular outing.",
+        "expected": [
+          "Resolve Hyderabad and retain existing place selection and access evidence. Use host-native maps or search under their permissions when useful."
+        ],
+        "forbidden": [
+          "Do not treat a reference-object search as geographic place discovery or claim source geometry proves access."
+        ],
+        "boundaries": [
+          "host-capability-preservation"
+        ]
+      },
+      {
+        "user": "The optional catalogue says this star is promising; can that decide our site?",
+        "expected": [
+          "Explain that the shortlist concerns celestial geometry. Keep independent forecasts and site access checks in the outing."
+        ],
+        "forbidden": [
+          "Do not replace weather or event evidence with an optional catalogue ranking."
+        ],
+        "boundaries": [
+          "weather-event-preservation"
+        ]
+      }
+    ]
+  },
+  {
+    "workflow": "plan-astrophotography",
+    "evidenceKind": "authored-synthetic",
+    "executionStatus": "not-run",
+    "provenance": "Invented conversation expectations for offline authoring review; no generated response or native-host execution is claimed.",
+    "documentEvidence": [
+      "integrated magnitude is not surface brightness",
+      "never feed these IDs to `get_target_visibility`"
+    ],
+    "turns": [
+      {
+        "user": "Find a wider deep-sky photography shortlist for binocular scouting tonight.",
+        "expected": [
+          "Use optional discovery only when exposed, with the resolved place, explicit window and relevant equipment. Retain ranking and incomplete-screening limitations."
+        ],
+        "forbidden": [
+          "Do not turn equipment preference or integrated magnitude into guaranteed detectability."
+        ],
+        "boundaries": [
+          "unsupported-local-target"
+        ]
+      },
+      {
+        "user": "The returned OpenNGC object is unsupported locally. Calculate its local track anyway.",
+        "expected": [
+          "Use selected starter windows only if that exact returned identity is supported by the optional source; otherwise state the missing capability and retain supported planning."
+        ],
+        "forbidden": [
+          "Do not send catalogue IDs to the local visibility engine or invent an arbitrary-object track."
+        ],
+        "boundaries": [
+          "unsupported-local-target"
+        ]
+      }
+    ]
+  },
+  {
+    "workflow": "plan-sky-event",
+    "evidenceKind": "authored-synthetic",
+    "executionStatus": "not-run",
+    "provenance": "Invented conversation expectations for offline authoring review; no generated response or native-host execution is claimed.",
+    "documentEvidence": [
+      "Meteor reference parameters are background context, not annual peak forecasts",
+      "Treat exoplanet and host facts as learning context"
+    ],
+    "turns": [
+      {
+        "user": "Plan the Geminids outing; the reference source has a different solar longitude.",
+        "expected": [
+          "Retain year-specific annual event timing and bounded radiant evidence as separate from background reference parameters. Explain source/model differences and keep independent forecasts."
+        ],
+        "forbidden": [
+          "Do not replace annual maxima with meteor reference parameters or average differing source values."
+        ],
+        "boundaries": [
+          "annual-meteor-separation",
+          "source-disagreement",
+          "weather-event-preservation"
+        ]
+      },
+      {
+        "user": "Tell me about this selected exoplanet host and when its transit is visible tonight.",
+        "expected": [
+          "Use selected host facts for learning; state that this capability does not calculate transit predictions or observing ephemerides."
+        ],
+        "forbidden": [
+          "Do not turn host coordinates or planet parameters into a local transit forecast."
+        ],
+        "boundaries": [
+          "exoplanet-learning"
+        ]
+      }
+    ]
+  },
+  {
+    "workflow": "plan-stargazing-night",
+    "evidenceKind": "authored-synthetic",
+    "executionStatus": "not-run",
+    "provenance": "Invented conversation expectations for offline authoring review; no generated response or native-host execution is claimed.",
+    "documentEvidence": [
+      "Astronomy Engine remains the default",
+      "If sources disagree, explain their source and model differences"
+    ],
+    "turns": [
+      {
+        "user": "Plan Hyderabad tonight and add a broader optional star shortlist.",
+        "expected": [
+          "Retain the default supported astronomy, independent weather and event evidence, then add a clearly sourced bounded optional shortlist."
+        ],
+        "forbidden": [
+          "Do not silently replace the main plan with source windows or infer an all-sky negative from an empty shortlist."
+        ],
+        "boundaries": [
+          "weather-event-preservation"
+        ]
+      },
+      {
+        "user": "The source windows disagree with the local engine, and a follow-up request fails.",
+        "expected": [
+          "Explain different source/model or coordinate assumptions without averaging. Preserve the existing outing and disclose the optional outage."
+        ],
+        "forbidden": [
+          "Do not claim the failed call succeeded, discard weather/event evidence, or substitute catalogue geometry for forecasts."
+        ],
+        "boundaries": [
+          "source-disagreement",
+          "weather-event-preservation"
+        ]
+      }
+    ]
+  },
+  {
+    "workflow": "prepare-outing",
+    "evidenceKind": "authored-synthetic",
+    "executionStatus": "not-run",
+    "provenance": "Invented conversation expectations for offline authoring review; no generated response or native-host execution is claimed.",
+    "documentEvidence": [
+      "If unavailable, continue the outing using existing supported calculations",
+      "Keep annual peak and forecast evidence on existing event routes"
+    ],
+    "turns": [
+      {
+        "user": "Make a preparation checklist for our selected meteor night with its optional shortlist.",
+        "expected": [
+          "Retain annual event evidence, independent weather, equipment and access preparation. Keep source credits on optional context."
+        ],
+        "forbidden": [
+          "Do not describe a meteor reference catalogue as the annual forecast or interpret exoplanet learning as an observing target."
+        ],
+        "boundaries": [
+          "annual-meteor-separation",
+          "weather-event-preservation",
+          "exoplanet-learning"
+        ]
+      },
+      {
+        "user": "The optional source is unavailable. Keep our selected place and session.",
+        "expected": [
+          "Continue the supported outing and preparation, name the missing optional evidence, and retain host-native navigation/search when available."
+        ],
+        "forbidden": [
+          "Do not restart the selection, erase the forecasts, invent successful calls or claim native-host acceptance from fixtures."
+        ],
+        "boundaries": [
+          "weather-event-preservation",
+          "host-capability-preservation"
+        ]
+      }
+    ]
+  }
+]
