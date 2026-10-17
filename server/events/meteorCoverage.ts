@@ -1,9 +1,12 @@
 import { readFileSync } from "node:fs";
 import { validateReviewedMeteorPeakCatalog } from "./meteorPeaks";
+import { meteorCalendarGuidance } from "./meteorCalendarGuidance";
+import { meteorCivilGuidance } from "./meteorCivilGuidance";
+import { METEOR_CODES } from "../../shared/nightsky/meteors";
 
 import * as z from "zod4";
 
-const retainedCodes = ["QUA", "LYR", "ETA", "ZPE", "ARI", "SSG", "SDA", "CAP", "PER", "DSX", "ORI", "DRA", "NTA", "STA", "LEO", "AND", "GEM", "URS", "HYD"] as const;
+const retainedCodes = METEOR_CODES;
 const inventorySchema = z.strictObject({
  schemaVersion: z.literal(1), selectionStatus: z.literal("pending-owner-decision"),
  maintainedSelection: z.null(), maintenanceOwner: z.null(), nextReviewDate: z.null(),
@@ -57,13 +60,19 @@ export function meteorCoverage(year: number): MeteorCoverageRow[] {
  const peakFile = `data/events/meteor-peaks-nasa-${year}.json`;
  const peaks = inventory.reviewedPeakYears.some(value => value === year)
   ? validateReviewedMeteorPeakCatalog(year, JSON.parse(readFileSync(peakFile, "utf8"))).peaks : undefined;
+ const verbalCodes = new Set<string>(meteorCalendarGuidance().entries.map(row => row.code));
+ const civilCodes = new Set<string>(meteorCivilGuidance().map(row => row.code));
  return inventory.retainedCodes.map(code => {
   const fit = radiants.rows.find(row => row.code === code);
   const withinFitYears = year >= radiants.localCalculationYears.first && year <= radiants.localCalculationYears.last;
   return { code, year, selection: "pending-owner-decision",
    peak: {status: !peaks ? "out-of-horizon" : peaks.some(row => row.code === code) ? "supported" : "missing",
     references: peaks?.some(row => row.code === code) ? [`${peakFile}#${code}`] : []},
-   activity: {status: "missing", references: [], ...(code === "ETA" || code === "ORI" ? {contextReferences: [`server/events/meteorTypicalSeasons.ts#${code}`]} : {})},
+   activity: {status: "missing", references: [], contextReferences: [
+    ...(code === "ETA" || code === "ORI" ? [`server/events/meteorTypicalSeasons.ts#${code}`] : []),
+    ...(verbalCodes.has(code) ? [`server/events/meteorCalendarGuidance.ts#${code}`] : []),
+    ...(civilCodes.has(code) ? [`server/events/meteorCivilGuidance.ts#${code}`] : []),
+   ]},
    radiant: {status: !fit ? "missing" : withinFitYears ? "partial" : "out-of-horizon",
     references: fit ? [`data/events/meteor-radiants-gmn-2021.json#${code}`] : [],
     ...(fit ? {domain: {frame: radiants.frame, anchorDeg: fit.referenceSolarLongitudeDeg,

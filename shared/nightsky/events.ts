@@ -68,21 +68,25 @@ export const meteorCalendarGuidanceSchema = z.strictObject({
 });
 export type MeteorCalendarGuidance = z.infer<typeof meteorCalendarGuidanceSchema>;
 export const meteorCivilGuidanceSchema = z.strictObject({
-  code: z.enum(["LYR", "LEO"]), name: z.string().min(1).max(100),
-  evidenceKind: z.literal("source-civil-calendar-guidance"), recurrenceBasis: z.literal("typical-annual"), calendar: z.literal("Gregorian"),
-  startMonthDay: z.string().regex(/^(04-16|11-06)$/), endMonthDay: z.string().regex(/^(04-25|11-30)$/),
+  code: z.enum(["LYR", "LEO", "ORI", "DRA", "URS"]), name: z.string().min(1).max(100),
+  evidenceKind: z.literal("source-civil-calendar-guidance"), recurrenceBasis: z.enum(["typical-annual", "source-general-period"]), calendar: z.literal("Gregorian"),
+  startMonthDay: z.string().regex(/^(04-16|11-06|10-02|10-06|12-17)$/), endMonthDay: z.string().regex(/^(04-25|11-30|11-07|10-10|12-26)$/),
   endpointMeaning: z.literal("source-named-calendar-days; exact activity boundaries unspecified"), timeZoneBasis: z.literal("unspecified-by-source"),
-  maximumYear: z.literal(2026), maximumWording: z.string().min(1).max(150), maximumTimeBasis: z.literal("UT-as-published"),
-  maximumUncertainty: z.literal("approximate; numerical uncertainty not supplied"), geographicQualification: z.string().min(1).max(200),
+  maximumYear: z.literal(2026), maximumWording: z.string().min(1).max(150), maximumTimeBasis: z.enum(["UT-as-published", "unspecified-by-source"]),
+  maximumUncertainty: z.enum(["approximate; numerical uncertainty not supplied", "day precision; secondary peaks possible; numerical uncertainty not supplied", "hour precision; numerical uncertainty not supplied"]), geographicQualification: z.string().min(1).max(200),
   requestedWindowOverlap: z.literal("not-evaluated"), sourceLocator: z.string().min(1).max(200), caveat: z.string().min(1).max(500), source: sourceRecordSchema,
-}).refine(row => row.code === "LYR" ? row.startMonthDay === "04-16" && row.endMonthDay === "04-25" : row.startMonthDay === "11-06" && row.endMonthDay === "11-30", "Civil guidance dates must match the source shower.");
+}).refine(row => {
+  const dates = { LYR: ["04-16", "04-25"], LEO: ["11-06", "11-30"], ORI: ["10-02", "11-07"], DRA: ["10-06", "10-10"], URS: ["12-17", "12-26"] }[row.code];
+  return row.startMonthDay === dates[0] && row.endMonthDay === dates[1];
+}, "Civil guidance dates must match the source shower.").refine(row => row.maximumTimeBasis === (row.code === "ORI" ? "unspecified-by-source" : "UT-as-published"), "Maximum time basis must preserve the source wording.")
+  .refine(row => row.recurrenceBasis === (row.code === "DRA" ? "source-general-period" : "typical-annual"), "Recurrence basis must preserve the source qualification.");
 export const skyEventsResultSchema = resultSchema({
   sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
   window: timeWindowSchema,
   events: z.array(skyEventSchema).max(MAX_EVENT_RESULTS),
   meteorCalendarGuidance: meteorCalendarGuidanceSchema.optional(),
-  meteorCivilGuidance: z.array(meteorCivilGuidanceSchema).max(2).optional(),
+  meteorCivilGuidance: z.array(meteorCivilGuidanceSchema).max(5).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate civil guidance code.").optional(),
   planetPairCoverage: planetPairCoverageSchema.optional(),
   meteorTypicalSeasons: z.array(meteorTypicalSeasonSchema).max(2).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate typical season code.").optional(),
   unsupportedEventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10),

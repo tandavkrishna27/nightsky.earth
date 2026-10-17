@@ -1,5 +1,25 @@
 import * as z from "zod4";
 import { utcInstantSchema } from "./common";
+
+/** Retained shower identities, independent of peak, season or radiant coverage. */
+export const METEOR_CODES = ["QUA", "LYR", "ETA", "ZPE", "ARI", "SSG", "SDA", "CAP", "PER", "DSX", "ORI", "DRA", "NTA", "STA", "LEO", "AND", "GEM", "URS", "HYD"] as const;
+export type MeteorCode = typeof METEOR_CODES[number];
+const meteorNames: Readonly<Record<MeteorCode, string>> = {
+  QUA: "Quadrantids", LYR: "Lyrids", ETA: "Eta Aquariids", ZPE: "Daytime Zeta Perseids", ARI: "Daytime Arietids",
+  SSG: "Southern mu Sagittariids", SDA: "Southern Delta Aquariids", CAP: "Alpha Capricornids", PER: "Perseids",
+  DSX: "Daytime Sextantids", ORI: "Orionids", DRA: "October Draconids", NTA: "Northern Taurids", STA: "Southern Taurids",
+  LEO: "Leonids", AND: "Andromedids", GEM: "Geminids", URS: "Ursids", HYD: "Sigma Hydrids",
+};
+const meteorAliases: Readonly<Record<string, MeteorCode>> = Object.fromEntries([
+  ...METEOR_CODES.flatMap(code => [[code.toLowerCase(), code], [meteorNames[code].toLowerCase(), code], [meteorNames[code].toLowerCase().replace(/s$/, ""), code]]),
+  ["draconids", "DRA"], ["draconid", "DRA"], ["capricornids", "CAP"], ["capricornid", "CAP"],
+  ["arietids", "ARI"], ["arietid", "ARI"],
+]);
+/** Ambiguous branch names (Taurids/Delta Aquariids) and different catalogue IDs stay unresolved. */
+export function resolveMeteorIdentity(query: string): MeteorCode | undefined {
+  const key = query.trim().toLowerCase().replace(/[‐‑–—-]/g, " ").replace(/\s+/g, " ").replace(/\s+(?:meteor\s+)?showers?$/, "");
+  return Object.hasOwn(meteorAliases, key) ? meteorAliases[key] : undefined;
+}
 const angle = z.number().finite();
 const uncertaintySchema = z.strictObject({ longitudeInterceptDeg: angle.positive(), longitudeSlopeDegPerSolarDeg: angle.positive(), latitudeInterceptDeg: angle.positive(), latitudeSlopeDegPerSolarDeg: angle.positive() });
 /** Exact source/model sample; available is model coverage, never a meteor sighting probability. */

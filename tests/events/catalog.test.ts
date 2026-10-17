@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { GeoNamesPlaceIndex } from "../../server/places/geonames";
 import { searchSkyEvents } from "../../server/events/catalog";
-import { skyEventsResultSchema } from "../../shared/nightsky/events";
+import { meteorCivilGuidanceSchema, skyEventsResultSchema } from "../../shared/nightsky/events";
 
 const index = new GeoNamesPlaceIndex([
   { geonameId: 1, name: "Pune", asciiName: "Pune", alternateNames: "", latitude: 18.5204, longitude: 73.8567, countryCode: "IN", countryName: "India", featureClass: "P", featureCode: "PPL", population: 1000, timeZone: "Asia/Kolkata", modificationDate: "2026-01-01" },
@@ -12,6 +12,49 @@ const index = new GeoNamesPlaceIndex([
 
 const place = (id: number) => ({ placeId: `place:v1:geonames:${id}`, timeZone: index.getById(id)!.timeZone });
 const window = (startUtc: string, endUtc: string, timeZone: string) => ({ startUtc, endUtc, timeZone });
+
+test("IGN civil guidance preserves Orionid date-only and Draconid/Ursid UT wording without creating UTC events", async () => {
+  const query = (year: number) => searchSkyEvents({ placeId: place(1).placeId, window: window(`${year}-10-20T00:00:00Z`, `${year}-10-23T00:00:00Z`, "Asia/Kolkata"), eventTypes: ["meteor-shower"] }, index);
+  const result = await query(2026);
+  const rows = result.meteorCivilGuidance!;
+  assert.deepEqual(rows.map(row => row.code), ["LYR", "LEO", "ORI", "DRA", "URS"]);
+  for (const [code, start, end, wording, basis, uncertainty] of [
+    ["ORI", "10-02", "11-07", "October 21; secondary peaks may increase activity in surrounding nights", "unspecified-by-source", "day precision; secondary peaks possible; numerical uncertainty not supplied"],
+    ["DRA", "10-06", "10-10", "October 9 at around 2 a.m. universal time", "UT-as-published", "approximate; numerical uncertainty not supplied"],
+    ["URS", "12-17", "12-26", "December 22 at 22h universal time", "UT-as-published", "hour precision; numerical uncertainty not supplied"],
+  ]) {
+    const row = rows.find(row => row.code === code)!;
+    assert.ok(row, code);
+    assert.equal(row.startMonthDay, start);
+    assert.equal(row.endMonthDay, end);
+    assert.equal(row.maximumWording, wording);
+    assert.equal(row.maximumTimeBasis, basis);
+    assert.equal(row.maximumUncertainty, uncertainty);
+    assert.equal(row.maximumYear, 2026);
+    assert.equal(row.timeZoneBasis, "unspecified-by-source");
+    assert.equal(row.requestedWindowOverlap, "not-evaluated");
+    assert.match(row.source.licenseUrl!, /ign\/portal\/info-aviso-legal/);
+    assert.match(row.source.attribution, /no IGN endorsement/);
+    assert.ok(result.sources.some(source => source.url === row.source.url));
+    assert.match(row.caveat, /radiant fit validity/);
+  }
+  assert.match(rows.find(row => row.code === "DRA")!.geographicQualification, /Northern hemisphere/);
+  assert.equal(rows.find(row => row.code === "DRA")!.recurrenceBasis, "source-general-period");
+  assert.doesNotMatch(rows.find(row => row.code === "DRA")!.source.product!, /annual/i);
+  assert.equal(rows.find(row => row.code === "ORI")!.recurrenceBasis, "typical-annual");
+  assert.equal(rows.find(row => row.code === "URS")!.recurrenceBasis, "typical-annual");
+  assert.match(rows.find(row => row.code === "URS")!.geographicQualification, /Northern hemisphere/);
+  assert.deepEqual(result.events, []); // No admitted NASA maximum here; IGN civil facts are not instants.
+  const later = await query(2028);
+  assert.deepEqual(later.events, []);
+  assert.deepEqual(later.meteorCivilGuidance, rows); // Unfiltered references retain maximumYear 2026.
+  assert.equal(skyEventsResultSchema.safeParse({ ...result, meteorCivilGuidance: rows.slice(0, 2) }).success, true);
+  assert.equal(skyEventsResultSchema.safeParse({ ...result, meteorCivilGuidance: [...rows, rows[0]] }).success, false);
+  const orionids = rows.find(row => row.code === "ORI")!;
+  assert.equal(meteorCivilGuidanceSchema.safeParse({ ...orionids, maximumTimeBasis: "UT-as-published" }).success, false);
+  assert.equal(meteorCivilGuidanceSchema.safeParse({ ...orionids, startMonthDay: "10-03" }).success, false);
+  assert.equal(meteorCivilGuidanceSchema.safeParse({ ...orionids, peakUtc: "2026-10-21T00:00:00Z" }).success, false);
+});
 
 test("findsMoonPhaseInRange", async () => {
   const result = await searchSkyEvents({ placeId: place(1).placeId, window: window("2026-03-01T00:00:00Z", "2026-03-10T00:00:00Z", "Asia/Kolkata"), eventTypes: ["moon-phase"] }, index);
