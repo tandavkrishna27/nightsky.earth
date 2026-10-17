@@ -89,6 +89,7 @@ export const sourceRecordSchema = z.strictObject({
 export type SourceRecord = z.infer<typeof sourceRecordSchema>;
 
 export const resultMetadataShape = {
+  sourceAttempts:z.array(z.strictObject({providerId:z.enum(["geonames","geoapify"]),status:z.enum(["not-configured","quota-exhausted","timeout","unavailable","invalid-response","unsupported-query","no-results","success","partial"])})).max(5).optional(),
   availability: availabilitySchema,
   sources: z.array(sourceRecordSchema).min(1).max(MAX_RESULT_SOURCES),
   caveats: z.array(z.string().trim().min(1).max(500)).max(MAX_RESULT_CAVEATS).default([]),
@@ -108,7 +109,7 @@ export function assertStructuredResultSize(value: unknown): void {
 export const placeIdSchema = z.string().regex(
   /^place:v1:[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$/,
   "Expected a versioned NightSky place ID.",
-);
+).refine(value=>!value.startsWith("place:v1:api:")||/^place:v1:api:(?:geonames|geoapify):[a-f0-9]{64}$/.test(value),"Expected an admitted API provider and hashed upstream identity.");
 
 export const latitudeSchema = z.number().finite().min(-90).max(90);
 export const longitudeSchema = z.number().finite().min(-180).max(180);
@@ -191,4 +192,16 @@ export function resolveTonightWindow(input: { localDate: string; timeZone: strin
   const startUtc = resolveLocalDateTimeToUtc(input.localDate, 18, 0, input.timeZone);
   const endUtc = resolveLocalDateTimeToUtc(nextCalendarDate(input.localDate), 6, 0, input.timeZone);
   return timeWindowSchema.parse({ startUtc, endUtc, timeZone: input.timeZone });
+}
+
+export const sourceRevisionSchema = z.string().regex(/^[a-f0-9]{64}$/, "Expected a source snapshot SHA-256.");
+export const timeZoneEvidenceSchema = z.discriminatedUnion("status", [z.strictObject({status:z.literal("verified"),timeZone:ianaTimeZoneSchema,source:sourceRecordSchema}),z.strictObject({status:z.literal("unknown")})]);
+export const apiSelectionRefSchema = z.strictObject({placeId:placeIdSchema.refine(value=>value.startsWith("place:v1:api:")),sourceRevision:sourceRevisionSchema});
+export type ApiSelectionRef = z.infer<typeof apiSelectionRefSchema>;
+
+/** Public revision kinds are mutually exclusive; API IDs always require their snapshot. */
+export function selectionRevisionRefinement(input:{placeId?:string;sourceRevision?:string;catalogueRevision?:string},ctx:z.RefinementCtx):void {
+ if(input.sourceRevision&&input.catalogueRevision)ctx.addIssue({code:"custom",message:"Catalogue and API source revisions cannot be combined."});
+ if(input.placeId?.startsWith("place:v1:api:")&&!input.sourceRevision)ctx.addIssue({code:"custom",path:["sourceRevision"],message:"API selections require the returned sourceRevision. Resolve again."});
+ if(input.sourceRevision&&input.placeId&&!input.placeId.startsWith("place:v1:api:"))ctx.addIssue({code:"custom",path:["sourceRevision"],message:"A source revision belongs only to an API selection."});
 }

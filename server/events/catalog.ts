@@ -30,11 +30,12 @@ const UNSUPPORTED_REASONS: Record<string, string> = {
   other: "This event class has no maintained V1 source or calculation.",
 };
 
-export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceIndex, calculationPlace?: CalculationPlace) {
+export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceIndex | undefined, calculationPlace?: CalculationPlace) {
   const input = searchSkyEventsInputSchema.parse(inputValue);
   const placeId = input.placeId;
   const coordinates = calculationCoordinates({placeId, timeZone: input.window.timeZone}, index, calculationPlace);
 
+  if(input.sourceRevision && input.sourceRevision!==coordinates.sourceRevision)throw new CalculationPlaceClarificationError("resolve-again","The selected source revision does not match the calculation point. Resolve again.");
   if (input.catalogueRevision && input.catalogueRevision !== coordinates.catalogueRevision) throw new CalculationPlaceClarificationError("resolve-again", "The selected catalogue revision does not match the calculation point. Resolve it again.");
   if (input.displayTimeZone && input.displayTimeZone !== coordinates.displayTimeZone) throw new CalculationPlaceClarificationError("time-zone-mismatch", "The requested display time zone must match the calculation point and window time zone.");
   const start = Date.parse(input.window.startUtc);
@@ -82,7 +83,7 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
   const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [...REVIEWED_METEOR_PEAK_SOURCES, METEOR_TYPICAL_SEASON_SOURCE, ...calendarGuidance!.entries.filter(row => !["ETA", "ORI"].includes(row.code)).map(row => row.source)] : [])];
   return skyEventsResultSchema.parse({
     availability: { status, reason: onlyOutOfRangePlanets ? "Planet alignment and greatest-elongation windows are supported only within 1900–2100." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : status === "unsupported" ? "Only unsupported event classes were requested." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : planetsOutOfRange ? "Other supported events are shown; planet calculations are outside the supported date horizon." : requestedTypes.includes("meteor-shower") ? `Dated meteor coverage is limited to 2025–2027 forecast maxima; two typical longitude intervals and ${calendarGuidance!.entries.length} approximate verbal calendar periods are reference metadata only. Complete activity seasons and other years' maxima remain unavailable.` : pairResult ? "Solar alignments retain their heliocentric definition; pair RA-crossing coverage is partial with uncertified completeness, limited to 2025–2027. Closest approach and local visibility are not established." : wantsElongation ? "Mercury/Venus greatest geocentric elongations were calculated; local visibility is not evaluated." : "Supported events were calculated or loaded from the versioned catalog." },
-    sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
+    sourceRevision:coordinates.sourceRevision,sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
     ...(pairResult ? {planetPairCoverage:pairResult.coverage} : {}),
     ...(requestedTypes.includes("meteor-shower") ? { meteorTypicalSeasons: meteorTypicalSeasons(), meteorCalendarGuidance: calendarGuidance } : {}),
   });

@@ -34,7 +34,7 @@ Cleanup follows the consolidated plan: exact raw-file manual list first; preserv
 - Host search/location absent or adversarial search text present: preserve input policy and source trust boundaries (E).
 - Historical API offers daytime/monthly means or too few years: do not relabel them as the required dark-time baseline (H).
 
-## Verified code-change matrix
+## Starting-point code-change matrix (pre-implementation audit)
 
 | Original tickets | Current implementation / required correction | Files and retained behavior |
 | --- | --- | --- |
@@ -147,6 +147,12 @@ Export `ResolveObservingRegionInput` from the existing `resolveObservingRegionIn
 - [ ] Once authorized, measure the actual selected service and remaining static/history/event inputs under realistic rate-limit, failure and refresh scenarios. Use the admitted limits; stop at the authorized envelope.
 - [ ] Close original Task 8 only with a working admitted API path, attribution, fallback/capability and ambiguity evidence. That closes the geography portion of S2; S2 also requires its independent historical-weather and event source/feature gates. Original 6 events and 9 history retain their acceptance. S3 closes on local actual-configured-service measurements before deployment; it does not require an already deployed host. Original 14 closes later with selected-host capacity, TLS/proxy/logging, deployment and rollback evidence.
 - [ ] Preserve original sequential owner/client gates: 3B hosted connection, 3C identity/URL, 4B real draft scan, 12A/B package/native clients, 13 policies, 15 ready review packet, 16 separately authorized submission/publication, 17 invited pilot. Task 18 remains separate website scope. No broad “API migration complete” checkbox substitutes for these.
+
+## Implementation progress — 17 October 2026
+
+A's bounded adapter design is recorded in `docs/operations/api-provider-admission.md`; live activation remains gated. B/C/D are implemented in an opt-in API route and locally reviewed and regression-tested; see `docs/operations/api-migration-wave-20261017.md`. E's five skills and canonical workflows are updated with offline instruction tests. F has API-mode bootstrap/preflight and compiled no-local-geography smoke. G has a fixture-only measurement harness. H's feasibility assessment is complete as an assessment, with scientific provenance and long-series resource feasibility unresolved. Exact original-ticket status is in the tracker; no full-ticket closure follows merely from these slices.
+
+Keep remaining unsupported combinations, historical coverage, source rights/activation, restart accounting and permitted live measurements visible. Do not interpret existing unchecked acceptance items as authorization for data downloads or deployment.
 
 ## Immediate next concrete work
 

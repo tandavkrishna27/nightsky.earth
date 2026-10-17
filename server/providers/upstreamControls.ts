@@ -1,4 +1,4 @@
-export type UpstreamProvider = "met" | "noaa";
+export type UpstreamProvider = "met" | "noaa" | "geonames" | "geoapify";
 export interface UpstreamBounds {
   globalConcurrency?: number;
   providerConcurrency?: number;

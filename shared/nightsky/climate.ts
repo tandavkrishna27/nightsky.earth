@@ -1,3 +1,4 @@
+import { selectionRevisionRefinement } from "./common";
 import * as z from "zod4";
 import { ianaTimeZoneSchema, placeIdSchema, resultSchema, utcInstantSchema } from "./common";
 
@@ -56,8 +57,9 @@ export const climateStatisticsSchema = z.strictObject({
   }
 });
 export type ClimateStatistics = z.infer<typeof climateStatisticsSchema>;
-export const getClearSkyClimatologyInputSchema = z.strictObject({ placeId: placeIdSchema, month: z.number().int().min(1).max(12), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() });
+export const getClearSkyClimatologyInputSchema = z.strictObject({ placeId: placeIdSchema, month: z.number().int().min(1).max(12), sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() }).superRefine(selectionRevisionRefinement);
 export const climateContextResultSchema = resultSchema({
+  sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   schemaVersion: z.literal(2), placeId: placeIdSchema, month: z.number().int().min(1).max(12), timeZone: ianaTimeZoneSchema,
   dataClass: z.literal("reanalysis"), historicalLabel: z.literal("historical-not-a-forecast"),
   methodVersion: z.literal(CLIMATE_METHOD_VERSION), sampleDefinition: z.literal("hourly-dark-time-samples"), unit: z.literal("fraction"),

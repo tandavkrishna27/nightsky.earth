@@ -1,3 +1,4 @@
+import { selectionRevisionRefinement } from "./common";
 import * as z from "zod4";
 import {
   hasCoordinatePair,
@@ -8,6 +9,7 @@ import {
   placeIdSchema,
   resultSchema,
   sourceRecordSchema,
+  timeZoneEvidenceSchema,
 } from "./common";
 
 export const placeRefSchema = z.strictObject({
@@ -15,11 +17,14 @@ export const placeRefSchema = z.strictObject({
   displayName: z.string().trim().min(1).max(160),
   timeZone: ianaTimeZoneSchema,
   indexVintage: z.string().trim().min(1).max(100),
-  catalogueRevision: z.string().trim().min(1).max(100).optional(),
-  timeZoneBasis: z.enum(["named-record", "explicit-display"]).optional(),
+  fetchedAt:z.string().datetime().optional(), expiresAt:z.string().datetime().optional(),
+  sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  timeZoneBasis: z.enum(["named-record", "api-source", "explicit-display"]).optional(),
   sources: z.array(sourceRecordSchema).min(1).max(4),
 });
 export type PlaceRef = z.infer<typeof placeRefSchema>;
+export const apiPlaceRefSchema = placeRefSchema.partial({indexVintage:true}).required({sourceRevision:true}).refine(ref=>ref.indexVintage===undefined,"API snapshots are not catalogue/index vintages.");
+export type ApiPlaceRef = z.infer<typeof apiPlaceRefSchema>;
 
 /** Server-private exact coordinates for calculations and provider calls. Never return this object to a model. */
 export const resolvedPlaceSchema = placeRefSchema.extend({
@@ -34,6 +39,8 @@ export const accessEvidenceSchema = z.discriminatedUnion("status", [
 ]);
 
 export const observingLocationCandidateSchema = z.strictObject({
+  timeZoneEvidence:timeZoneEvidenceSchema.optional(),
+  fetchedAt:z.string().datetime().optional(),expiresAt:z.string().datetime().optional(),
   placeId: placeIdSchema,
   name: z.string().trim().min(1).max(160),
   category: z.enum(["park", "viewpoint", "protected-area", "campground", "beach", "other"]),
@@ -63,7 +70,7 @@ export const resolvePlaceInputSchema = z.strictObject({
 export type ResolvePlaceInput = z.infer<typeof resolvePlaceInputSchema>;
 
 export const resolvePlaceResultSchema = resultSchema({
-  matches: z.array(placeRefSchema).max(5),
+  matches: z.array(z.union([placeRefSchema, placeRefSchema.omit({timeZone:true,indexVintage:true}).extend({sourceRevision:z.string().regex(/^[a-f0-9]{64}$/),timeZone:ianaTimeZoneSchema.optional(),timeZoneEvidence:z.union([z.strictObject({status:z.literal("unknown")}),z.strictObject({status:z.literal("verified"),timeZone:ianaTimeZoneSchema,source:sourceRecordSchema})])})])).max(5),
   selectionRequired: z.boolean(),
   locationSource: z.enum(["named-place", "host-approximate-location"]).optional(),
 });
@@ -83,8 +90,9 @@ export const searchObservingLocationsResultSchema = resultSchema({
   coverage: z.string().trim().min(1).max(300),
 });
 
-export const getLocationContextInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() });
+export const getLocationContextInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() }).superRefine(selectionRevisionRefinement);
 export const getLocationContextResultSchema = resultSchema({
+  sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
   groundLightContext: z.discriminatedUnion("status", [
     z.strictObject({ status: z.literal("available"), label: z.string().trim().min(1).max(120), value: z.number().finite(), unit: z.string().trim().min(1).max(30), source: sourceRecordSchema }),

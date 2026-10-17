@@ -6,16 +6,17 @@ import { lstat, open, realpath } from 'node:fs/promises';
 import { resolve, relative, isAbsolute, sep } from 'node:path';
 import { constants } from 'node:fs';
 import express from 'express';
-import { pluginListenerConfiguration, pluginToolMode, pluginRegionalConfiguration, pluginGlobalConfiguration } from '../../server/plugin';
+import { pluginListenerConfiguration, pluginToolMode, pluginRegionalConfiguration, pluginGlobalConfiguration, pluginDiscoveryMode } from '../../server/plugin';
 import { configureMcpProxyTrust } from '../../server/mcp/proxyTrust';
 import { climateArtifactConfiguration } from '../../server/providers/climate/configuration';
 const text = z.string().min(1).max(4096).refine(v => !/[\x00-\x1f\x7f]/.test(v));
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const bytes = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const evidence = text.nullable();
-const envKeys = ['NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
+const envKeys = ['NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
 const runtimeSchema = z.object(Object.fromEntries(envKeys.map(k => [k, text.optional()]))).strict();
-const release = z.object({ id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000) }).strict();
+const discoveryEvidence = z.object({ mode: z.enum(['api', 'catalogue', 'regional', 'legacy']), providers: z.array(z.enum(['geonames', 'geoapify'])).max(2), configurationEvidence: evidence, policyEvidence: evidence, budgetEvidence: evidence }).strict();
+const release = z.object({ id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000), discovery: discoveryEvidence.optional() }).strict();
 const lineageValidation=z.object({scratchDirectory:text,budgets:z.object({maxInputBytes:bytes.positive().max(64*1024**3),maxMemoryBytes:bytes.min(16*1024**2).max(2*1024**3),maxScratchBytes:bytes.positive().max(32*1024**3),maxOutputBytes:bytes.positive().max(32*1024**3),maxDurationMs:bytes.positive().max(60*60*1000)}).strict()}).strict();
 export const operatorConfigSchema = z.object({ schemaVersion: z.literal(1), lineageValidation:lineageValidation.optional(), status: z.enum(['template', 'selected']), endpoints: z.object({ production: evidence, staging: evidence, privacy: evidence, terms: evidence, support: evidence }).strict(), topology: z.object({ kind: z.enum(['direct', 'single-rewriting-proxy']), headerRewriteEvidence: evidence, restrictedBackendEvidence: evidence }).strict(), runtimeEnvironment: runtimeSchema, releases: z.object({ current: release.nullable(), rollback: release.nullable() }).strict(), artifacts: z.array(z.object({ id: text, kind: z.enum(['geonames', 'osm-single', 'osm-regional', 'global-catalogue', 'climate-legacy', 'era5-release', 'component']), path: text, sha256: hash, bytes: bytes, version: text }).strict()).max(10000), budget: z.object({ processes: z.number().int().min(1).max(64), memoryBytes: bytes, diskAvailableBytes: bytes, currentBytes: bytes, rollbackBytes: bytes, scratchBytes: bytes, reserveBytes: bytes, maxArtifactBytes: bytes.max(16 * 1024 ** 3), capacityEvidence: evidence, rollbackEvidence: evidence }).strict().nullable(), ownerEvidence: z.object({ identity: evidence, policies: evidence, retention: evidence, host: evidence, providerBudget: evidence }).strict() }).strict();
 export type OperatorConfig = z.infer<typeof operatorConfigSchema>;
@@ -166,11 +167,28 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
     }
     if (e.NIGHTSKY_GEONAMES_INDEX && !active.some(a => a.kind === 'geonames' && a.path === e.NIGHTSKY_GEONAMES_INDEX))
         fail('GEONAMES_INVENTORY_MISMATCH');
-    if (e.NIGHTSKY_MCP_TOOL_MODE === 'full') {
-        const previousArtifacts = c.artifacts.filter(a => rollback?.artifactIds.includes(a.id));
-        if (!previousArtifacts.some(a => a.kind === 'geonames') || !previousArtifacts.some(a => ['osm-single', 'osm-regional', 'global-catalogue'].includes(a.kind)) || !previousArtifacts.some(a => ['climate-legacy', 'era5-release'].includes(a.kind))) missing('ROLLBACK_PRODUCT_INVENTORY_MISSING');
-        if (!e.MET_NORWAY_USER_AGENT || !e.MET_NORWAY_USER_AGENT.includes('nightsky.earth2026@gmail.com') || !e.NIGHTSKY_GEONAMES_INDEX || !pairs.slice(0, 3).some(([k]) => e[k]) || !pairs.slice(3).some(([k]) => e[k]))
-            missing('FULL_MODE_INPUTS_MISSING');
+    let currentMode = 'legacy';
+    try { currentMode = pluginDiscoveryMode(e); } catch { fail('DISCOVERY_CONFIGURATION_INVALID'); }
+    if (current?.discovery && current.discovery.mode !== currentMode) fail('DISCOVERY_RELEASE_MODE_MISMATCH');
+    const geographyKinds = ['geonames', 'osm-single', 'osm-regional', 'global-catalogue'];
+    for (const r of [current, rollback]) if (r) {
+        const mode = r === current ? currentMode : r.discovery?.mode ?? 'legacy';
+        const assigned = c.artifacts.filter(a => r.artifactIds.includes(a.id));
+        if (mode === 'api') {
+            const d = r.discovery;
+            if (!d || d.providers.length !== 2 || new Set(d.providers).size !== 2 || !d.configurationEvidence || !d.policyEvidence || !d.budgetEvidence) missing('API_PROVIDER_EVIDENCE_MISSING');
+            if (c.budget?.processes !== 1) fail('API_SINGLE_PROCESS_REQUIRED');
+            if (assigned.some(a => geographyKinds.includes(a.kind))) fail('API_GEOGRAPHY_ARTIFACT_CONFLICT');
+        } else if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full' && r === rollback) {
+            const expected = mode === 'catalogue' ? ['global-catalogue'] : mode === 'regional' ? ['osm-regional'] : ['osm-single', 'osm-regional', 'global-catalogue'];
+            if (!assigned.some(a => a.kind === 'geonames') || !assigned.some(a => expected.includes(a.kind))) missing('ROLLBACK_PRODUCT_INVENTORY_MISSING');
+        }
+        if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full' && r === rollback && !assigned.some(a => ['climate-legacy', 'era5-release'].includes(a.kind))) missing('ROLLBACK_PRODUCT_INVENTORY_MISSING');
+    }
+    if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full') {
+        if (currentMode === 'api' || rollback?.discovery?.mode === 'api') missing('API_HISTORY_ROUTE_NOT_ADMITTED');
+        const geographyMissing = currentMode !== 'api' && (!e.NIGHTSKY_GEONAMES_INDEX || !pairs.slice(0, 3).some(([k]) => e[k]));
+        if (!e.MET_NORWAY_USER_AGENT || !e.MET_NORWAY_USER_AGENT.includes('nightsky.earth2026@gmail.com') || geographyMissing || !pairs.slice(3).some(([k]) => e[k])) missing('FULL_MODE_INPUTS_MISSING');
     }
     const b = c.budget;
     if (!b)

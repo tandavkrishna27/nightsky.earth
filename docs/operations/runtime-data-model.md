@@ -7,9 +7,9 @@ Updated 17 October 2026 after the [owner decision](api-search-discovery-v1-decis
 | Forecast/clouds | On-demand MET Norway adapter, requires identifying User-Agent | Keep bounded calls/cache; evaluate additional suitable free providers with separate labelled results |
 | Aurora | On-demand NOAA adapter | Keep source freshness, forecast limitations and bounded requests |
 | Sun/Moon/planet geometry | Local Astronomy Engine calculations | Preserve; no bulk map data needed |
-| Named-place lookup | Local GeoNames index, required gzip currently retained | Add suitable on-demand location API; preserve ambiguity and timezone validation; no undeclared raw GPS/address expansion |
-| Region/nearby candidate discovery | Local OSM/global catalogue adapters | Replace mandatory artifact dependency with bounded API discovery and optional host search; explicit coverage/access limitations |
-| Selected-site planning | Candidate identity/revision/display-timezone checks tied to local providers | Support validated provider-sourced candidates with trustworthy coordinates, source identity and timezone |
+| Named-place lookup | Opt-in GeoNames/Geoapify API lookup and immutable source selections; legacy index retained | Validate live endpoints/accounts and timezone evidence; host-hint reverse resolution is not admitted in API mode; named-town fallback remains |
+| Region/nearby candidate discovery | Opt-in bounded Geoapify radius/own-provider region filters; optional local adapters retained | Validate live coverage and policy; unsupported complex administrative combinations remain explicit; host search optional |
+| Selected-site planning | API sourceRevision and legacy catalogueRevision selections reach exact-point calculation | Regression-tested offline; live source quality and assembled owner experience remain gates |
 | Historical cloud statistics | Prepared ERA5 summaries/releases; no proved on-demand baseline route | Evaluate free historical API and implement only with equivalent period/quality/timezone/missingness semantics. No automatic deferral or bulk acquisition |
 | Maintained event references | Small reviewed files plus calculated events | Keep supported content; suitable APIs may supplement after source validation; no universal all-events claim |
 

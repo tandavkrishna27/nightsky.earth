@@ -136,3 +136,11 @@ import './places/partitionedCandidates.test';
 import './places/partitionedLargeContract.test';
 
 import './places/partitionedResources.test';
+
+import './places/api-selection.test';
+
+import './places/api-discovery.test';
+
+import './mcp/api-discovery-planning.test';
+
+import './operations/api-runtime-measurement.test';

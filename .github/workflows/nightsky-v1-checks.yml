@@ -45,6 +45,9 @@ jobs:
       - name: Exercise bounded global discovery and exact selected-site planning offline
         run: node --import tsx --test tests/mcp/global-discovery.test.ts
 
+      - name: Measure API fixture runtime without live source access
+        run: node --import tsx scripts/measure-api-runtime.ts
+
       - name: Verify offline operator template stays explicitly incomplete
         run: node --import tsx --input-type=module -e "import {operatorPreflightCli} from './scripts/plugin-operator-preflight.ts'; if(await operatorPreflightCli(['--config','config/plugin-operator.example.json'])!==2) throw Error('Template must stay incomplete');"
 
@@ -77,6 +80,9 @@ jobs:
 
       - name: Exercise standalone plugin production runtime
         run: node scripts/verify-plugin-runtime.mjs
+
+      - name: Exercise compiled API mode without local geography or live providers
+        run: node scripts/verify-api-runtime.mjs
 
       - name: Exercise compiled regional serving and operator configuration offline
         run: node scripts/verify-plugin-regional-runtime.mjs

@@ -26,7 +26,7 @@ const BODY_NAMES: Record<string, { body: string; type: "sun" | "moon" | "planet"
 };
 const MILKY_WAY_CORE = { ra: 17 + 45 / 60 + 40 / 3600, dec: -29.0078 };
 
-export async function getAstronomyWindow(place: CalculationObserverPlace, window: TimeWindow, index: GeoNamesPlaceIndex, calculationPlace?: CalculationPlace): Promise<AstronomyWindowResult> {
+export async function getAstronomyWindow(place: CalculationObserverPlace, window: TimeWindow, index: GeoNamesPlaceIndex | undefined, calculationPlace?: CalculationPlace): Promise<AstronomyWindowResult> {
   const checkedWindow = timeWindowSchema.parse(window);
   if (checkedWindow.timeZone !== place.timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
   const coordinates = calculationCoordinates(place, index, calculationPlace);
@@ -60,7 +60,7 @@ export async function getAstronomyWindow(place: CalculationObserverPlace, window
     availability: { status: "available", reason: "Calculated from the selected place point and display IANA time zone." },
     sources: [CALCULATION_SOURCE],
     caveats: [...displayTimeZoneCaveats(coordinates), "Solar threshold intervals are nested Sun-below-threshold intervals at -6, -12 and -18 degrees, clipped to the requested window; they are not exclusive twilight phase bands. Astronomical darkness uses the Sun's geometric center at -18 degrees. Terrain and local horizon obstructions are not modeled.", "Moon maximum altitude is sampled at intervals, so it is an estimate; it does not establish moonrise or moonset."],
-    placeId: place.placeId, window: checkedWindow, darknessState,
+    sourceRevision:coordinates.sourceRevision,placeId: place.placeId, window: checkedWindow, darknessState,
     astronomicalDarkness: selectedDarkness ? { status: "available", ...makeInterval(selectedDarkness.start, selectedDarkness.end, checkedWindow.timeZone) } : { status: "unavailable", reason: "The Sun does not reach 18 degrees below the geometric horizon during this window." },
     solarThresholdIntervals,
     sunBelowGeometricHorizonIntervals: belowAltitudeIntervals(Astronomy.Body.Sun, observer, start, end, 0).map(row => ({...makeInterval(row.start,row.end,checkedWindow.timeZone), localStart:formatLocalInstant(new Date(row.start).toISOString(),checkedWindow.timeZone,"en"),localEnd:formatLocalInstant(new Date(row.end).toISOString(),checkedWindow.timeZone,"en")})),
@@ -69,7 +69,7 @@ export async function getAstronomyWindow(place: CalculationObserverPlace, window
   return result;
 }
 
-export async function getTargetVisibility(targetQuery: string, place: CalculationObserverPlace, window: TimeWindow, index: GeoNamesPlaceIndex, calculationPlace?: CalculationPlace): Promise<TargetVisibilityResult> {
+export async function getTargetVisibility(targetQuery: string, place: CalculationObserverPlace, window: TimeWindow, index: GeoNamesPlaceIndex | undefined, calculationPlace?: CalculationPlace): Promise<TargetVisibilityResult> {
   const checkedWindow = timeWindowSchema.parse(window);
   if (checkedWindow.timeZone !== place.timeZone) throw new RangeError("The requested time zone does not match the resolved named place. Resolve the place again and use its returned time zone.");
   const coordinates = calculationCoordinates(place, index, calculationPlace);
@@ -79,7 +79,7 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
   if (!match && !milkyWay) {
     return targetVisibilityResultSchema.parse({
       availability: { status: "unsupported", reason: "This V1 target catalog supports the Sun, Moon, named planets, and the Milky Way core. Resolve other targets in a specialist sky app." },
-      sources: [CALCULATION_SOURCE], caveats: displayTimeZoneCaveats(coordinates), placeId: place.placeId,
+      sources: [CALCULATION_SOURCE], caveats: displayTimeZoneCaveats(coordinates), sourceRevision:coordinates.sourceRevision,placeId: place.placeId,
       target: { targetId: `unsupported:${query.slice(0, 80)}`, name: targetQuery.slice(0, 160), targetType: "deep-sky-object" }, intervals: [],
     });
   }
@@ -108,7 +108,7 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
   return targetVisibilityResultSchema.parse({
     availability: { status: "available", reason: "Geometric altitude calculated for the selected place and UTC window." },
     sources: [CALCULATION_SOURCE], caveats: [...displayTimeZoneCaveats(coordinates), "Visibility intervals use a 0-degree geometric horizon; terrain, buildings, atmospheric extinction, and instrument limits are not modeled.", ...(milkyWay ? ["Milky Way core is represented by a fixed J2000 direction near Sagittarius; this is a seasonal direction estimate, not a star-field model."] : [])],
-    placeId: place.placeId,
+    sourceRevision:coordinates.sourceRevision,placeId: place.placeId,
     target: { targetId: milkyWay ? "milky-way-core" : `body:${match!.body.toLowerCase()}`, name: milkyWay ? "Milky Way core" : match!.body, targetType },
     intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth), azimuthBasis: "maximum-altitude-sample", maximumAltitudeAtUtc: new Date(row.maximumAt).toISOString(), maximumAltitudeLocal: formatLocalInstant(new Date(row.maximumAt).toISOString(), checkedWindow.timeZone, "en") })),
   });

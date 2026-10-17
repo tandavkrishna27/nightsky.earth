@@ -1,8 +1,9 @@
+import { selectionRevisionRefinement } from "./common";
 import * as z from "zod4";
 import { ianaTimeZoneSchema } from "./common";
 import { MAX_EVENT_RESULTS, placeIdSchema, resultSchema, sourceRecordSchema, timeWindowSchema, utcInstantSchema } from "./common";
 
-export const searchSkyEventsInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, eventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10).optional(), limit: z.number().int().min(1).max(MAX_EVENT_RESULTS).default(15) });
+export const searchSkyEventsInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, eventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10).optional(), limit: z.number().int().min(1).max(MAX_EVENT_RESULTS).default(15) }).superRefine(selectionRevisionRefinement);
 const calendarDateWindowSchema = z.strictObject({ startDate: z.string().date(), endDate: z.string().date() }).refine(({ startDate, endDate }) => endDate >= startDate, "Calendar date window end must not precede its start.");
 export const PLANET_PAIR_BODIES = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"] as const;
 const pairBodiesSchema = z.tuple([z.enum(PLANET_PAIR_BODIES), z.enum(PLANET_PAIR_BODIES)]).refine(bodies => PLANET_PAIR_BODIES.indexOf(bodies[0]) < PLANET_PAIR_BODIES.indexOf(bodies[1]), "Pair bodies must be distinct and in canonical order.");
@@ -67,6 +68,7 @@ export const meteorCalendarGuidanceSchema = z.strictObject({
 });
 export type MeteorCalendarGuidance = z.infer<typeof meteorCalendarGuidanceSchema>;
 export const skyEventsResultSchema = resultSchema({
+  sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
   window: timeWindowSchema,
   events: z.array(skyEventSchema).max(MAX_EVENT_RESULTS),

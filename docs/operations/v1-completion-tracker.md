@@ -7,17 +7,17 @@ Updated: 17 October 2026. **Current plan: API-first, multiple suitable sources, 
 Original executable headings: **12 Done / 9 Partial / 6 Not started = 27**. Original numbered groups: **6 Done / 10 Partial / 3 Not started = 19**. A scope change is not implementation evidence and adds no completion credit. Done means the original local deliverable, not production readiness or immunity from regression checks.
 
 - Working local MCP/tool/skill baseline exists. MET Norway forecasts and NOAA aurora adapters, astronomy calculations and supported event calculations can be reused.
-- Current discovery still reads local OSM/catalogue artifacts. API/search discovery replacement is **not implemented**.
-- Place-name resolution still needs the small local GeoNames reference; migration to remote lookup is planned, not complete.
+- An opt-in API discovery implementation is implemented and locally verified: GeoNames/Geoapify adapters and source-revision selection. Legacy catalogue modes remain available; live provider acceptance is still pending.
+- API mode resolves names remotely and does not require local GeoNames/OSM files. Legacy modes still use their reference artifacts; do not delete those files on behalf of legacy runtime users.
 - Bulk planet receipt/build, exhaustive candidate membership/footprint preparation and their capacity gates are **deferred outside V1**. Do not resume them to close V1.
 - Historical-weather capability remains required for source-route evaluation. API-first access must preserve defined period, quality, timezone and missingness semantics; current prepared-history code is retained but does not establish an on-demand API route.
 - Event/source gaps, client integration, owner testing and later hosted/publication gates remain explicit.
 
 The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom-20261017.md) preserves engineering evidence and failed attempts. Synthetic/retained tests do not establish live API suitability or actual release acceptance.
 
-## Source research update — 17 October 2026
+## Source research and implementation update — 17 October 2026
 
-[Consolidated free API research and cleanup plan](api-provider-research-and-cleanup-plan.md): three official-source investigations completed. GeoNames + Geoapify are the recommended location shortlist; MET/NOAA/local astronomy retained; CDS point history remains a feasibility gate. No provider adapter implemented or ticket closed by this research. Cleanup is planned, not executed; original counts are unchanged.
+[Consolidated free API research and cleanup plan](api-provider-research-and-cleanup-plan.md): three official-source investigations completed. GeoNames + Geoapify are the recommended location shortlist; MET/NOAA/local astronomy retained; CDS point history remains a feasibility gate. The subsequent implementation wave adds adapters, runtime and workflow changes; offline review/tests are recorded separately and do not close live-source gates. Cleanup is planned, not executed; original counts are unchanged.
 
 ## Stable stages
 
@@ -32,17 +32,17 @@ The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom
 
 | ID | Original tickets | Status / concrete next result |
 | --- | --- | --- |
-| S2-G1 | 0, 4, 8 | Existing place APIs/schemas audited; select compliant free geocoding/discovery providers and define normalized identities, ambiguity, timezone and coverage contracts |
+| S2-G1 | 0, 4, 8 | Bounded GeoNames/Geoapify design recorded; API identity/selection and adapters locally verified. Live accounts/policy/endpoint checks and restart-safe quota admission remain open |
 | S2-G2 | 4, 8 | Historical boundary preparation completed within its scope; exhaustive boundary/membership build deferred. API-based region filtering and exact-site timezone validation remain to implement/test |
-| S2-G3 | 0, 8 | Implement on-demand discovery plus optional host search; source-aware candidate details and planning, no mandatory global catalogue. Preserve optional old adapters without enabling them by default |
+| S2-G3 | 0, 8 | Opt-in API discovery, snapshot details and planning locally verified; optional host-search guidance updated. Unsupported complex administrative combinations retain explicit gaps; no mandatory global catalogue |
 | S2-H1 | 0, 9 | Existing history preparation/decoder software retained; evaluate API-first history source, free-use limits and scientific/statistical equivalence |
 | S2-H2 | 9 | Retained sample acceptance is historical evidence only; no complete baseline or live API claim. Cleanup must not trigger automatic reacquisition |
 | S2-H3 | 0, 9 | Select practical history route and implement/validate it, or present a concrete unmet capability decision to owner. Do not silently drop history or restart bulk jobs |
 | S2-E1 | 6 | Existing calculated astronomy/events and small reviewed content retained; finish supported event coverage and regression checks |
 | S2-E2 | 0, 6 | Resolve remaining season/radiant/year/source rights gaps; use an API where suitable, otherwise explicit supported content/limitations. No invented universal event API |
-| S2-R1 | 3, 8, 12A, 14 | Wire actual API-mode runtime, package/preflight/configuration and skills; remove catalogue-only mandatory gates; integrate source/coverage evidence |
+| S2-R1 | 3, 8, 12A, 14 | API-mode bootstrap/preflight and five skills updated; no-local-geography compiled smoke added to CI. Full historical and hosted release gates remain independent |
 | S3-M1 | 0, 8, 9, 14 | Measure actual configured-service storage/cache/startup/peak memory and update/refresh cost; bulk planet build not required |
-| S3-M2 | 0, 8, 9, 14 | Measure per-tool and end-to-end latency, bounded concurrency, timeouts/429/fallback/cache behavior and small-host fit |
+| S3-M2 | 0, 8, 9, 14 | Synthetic offline measurement harness implemented; actual enabled-source latency/concurrency/quotas and small-host fit remain pending permitted live evidence |
 | S4-T1 | 12B, 15 | Run existing fifteen journeys/eight review cases in API mode, including absent host search, ambiguous locations and unavailable sources |
 | S4-T2 | 12B, 17 | Owner questions and feedback; actual tester activity only when authorized |
 | S4-T3 | 15 | Fix material findings, final source/security/privacy/requirements audit, package freeze and exact-commit CI |
@@ -68,6 +68,10 @@ flowchart TD
   M --> U[S4 journeys and owner review]
   U --> D[Later separately authorized deployment]
 ```
+
+## Current implementation evidence
+
+See [API local setup](api-mode-local-setup.md), [provider admission](api-provider-admission.md), [history feasibility](history-api-feasibility.md) and [event gaps](api-event-gaps-20261017.md). [Local wave evidence](api-migration-wave-20261017.md) records approved review fixes, full integration and targeted tests, built-runtime checks and remaining activation gaps. Exact-commit CI is checked after push. Original counts remain unchanged; unsupported scope and live activation gates are not marked complete.
 
 ## Code correction boundaries
 

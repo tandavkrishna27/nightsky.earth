@@ -2,6 +2,8 @@
 
 **Current status authority — 17 October API-first regroom:** Use the [current tracker](v1-completion-tracker.md), [reconciled ticket matrix](v1-remaining-ticket-release-matrix.md) and [API-first implementation plan](../superpowers/plans/2026-10-17-api-first-v1-regroom.md). API/search discovery replaces mandatory bulk catalogue construction. History/events remain explicit independent requirements. Entries below are dated implementation evidence, not the current acquisition sequence. Original counts remain 12 Done / 9 Partial / 6 Not started pending actual acceptance; no completion credit for deferral.
 
+**API implementation, 17 October:** Opt-in location adapters, source-revision planning, runtime/preflight, workflow updates and offline measurement/CI checks are implemented with [local review/test evidence](api-migration-wave-20261017.md). [Local setup and activation gates](api-mode-local-setup.md) distinguishes implemented local behavior from live acceptance; no data downloads or deployment.
+
 **Current progress:** use the [fixed four-stage completion tracker](v1-completion-tracker.md). Historical wave records below are evidence, not replacement sequences.
 
 **Acquisition readiness, 16 October:** [Delivery](acquisition-readiness-delivery.md) reconciles retained history with explicit holdbacks, prepares the bounded global acquisition path and checks geography allocation arithmetic. Execution and production coverage remain separate gates. No new downloads or deployment; original 12/9/6 unchanged.

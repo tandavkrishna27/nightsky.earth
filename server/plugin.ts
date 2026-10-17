@@ -13,6 +13,7 @@ import { loadCatalogueFiles } from "./places/catalogueFiles";
 import { createGlobalCatalogue } from "./places/globalCatalogue";
 import { loadGeoNamesPlaceIndex } from "./places/geonames";
 import { climateArtifactConfiguration } from "./providers/climate/configuration";
+import { createApiServices } from "./places/api/configuration";
 export interface PluginAppDependencies extends McpRouteDependencies {
     trustedProxyAddresses?: string;
     health?: HealthDependencies;
@@ -66,11 +67,30 @@ export function pluginToolMode(environment: { NIGHTSKY_MCP_TOOL_MODE?: string })
     if (mode !== "full" && mode !== "resolver-only") throw Error("Invalid MCP tool mode.");
     return mode;
 }
+/** Explicit API mode rejects stale geography-file configuration rather than loading it. */
+export function pluginDiscoveryMode(environment: Record<string, string | undefined>): "api" | "catalogue" | "regional" | "legacy" {
+    const mode = environment.NIGHTSKY_DISCOVERY_MODE ?? "legacy";
+    if (!["api", "catalogue", "regional", "legacy"].includes(mode)) throw Error("Invalid discovery mode.");
+    if (mode === "api" && Object.keys(environment).some(key => /^(NIGHTSKY_GEONAMES_INDEX|NIGHTSKY_OSM_|NIGHTSKY_GLOBAL_CATALOGUE_)/.test(key) && environment[key] !== undefined)) throw Error("API discovery mode conflicts with local geography configuration.");
+    if (mode === "catalogue" && !environment.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST) throw Error("Catalogue discovery mode requires an explicit manifest.");
+    if (mode === "regional" && !environment.NIGHTSKY_OSM_REGIONAL_MANIFEST) throw Error("Regional discovery mode requires an explicit manifest.");
+    return mode as "api" | "catalogue" | "regional" | "legacy";
+}
 /** Shared production artifact loading; callers own listener lifecycle. */
 export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAppDependencies, "fetcher" | "log"> = {}) {
     climateArtifactConfiguration({NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256});
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
+    const discoveryMode = pluginDiscoveryMode(process.env);
+    if (discoveryMode === "api") {
+        const services = createApiServices({
+            geonamesUsername: process.env.NIGHTSKY_GEONAMES_USERNAME,
+            geoapifyApiKey: process.env.NIGHTSKY_GEOAPIFY_API_KEY,
+            userAgent: process.env.NIGHTSKY_LOCATION_USER_AGENT ?? "NightSky.earth/1.0 (nightsky.earth2026@gmail.com)",
+            fetcher: overrides.fetcher,
+        });
+        return createNightSkyPluginApp({ ...services, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides });
+    }
     const global = pluginGlobalConfiguration({NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST:process.env.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST,NIGHTSKY_GLOBAL_CATALOGUE_SHA256:process.env.NIGHTSKY_GLOBAL_CATALOGUE_SHA256,NIGHTSKY_OSM_REGIONAL_MANIFEST:process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST,NIGHTSKY_OSM_REGIONAL_SHA256:process.env.NIGHTSKY_OSM_REGIONAL_SHA256,NIGHTSKY_OSM_CANDIDATE_INDEX:process.env.NIGHTSKY_OSM_CANDIDATE_INDEX});
     const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });
     const candidateProvider = regional && toolMode === "full" ? await loadRegionalOsmProvider(regional.path, { expectedSha256: regional.expectedSha256 }) : undefined;
@@ -90,5 +110,5 @@ export async function startNightSkyPlugin() {
     return server;
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-    startNightSkyPlugin().catch(() => { console.error("NightSky plugin startup failed. Check the configured listener and local artifacts."); process.exitCode = 1; });
+    startNightSkyPlugin().catch(() => { console.error("NightSky plugin startup failed. Check the configured listener, source mode and provider configuration."); process.exitCode = 1; });
 }

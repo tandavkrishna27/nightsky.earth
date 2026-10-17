@@ -63,7 +63,7 @@ export function mountMcpRoute(app: Express, dependencies: McpRouteDependencies =
   };
   dependencies = { ...dependencies, osmCandidateIndexLoader };
   // Keep one reader and its bounded artifact cache across stateless MCP servers.
-  if (!dependencies.climateProvider && !dependencies.plannerServices?.getClimatology) {
+  if (!dependencies.discoveryProvider && !dependencies.climateProvider && !dependencies.plannerServices?.getClimatology) {
     const environment = {NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256};
     climateArtifactConfiguration(environment);
     let providerPromise: Promise<NonNullable<NightSkyDependencies["climateProvider"]>> | undefined;

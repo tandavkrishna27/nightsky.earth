@@ -84,3 +84,23 @@ test("all fifteen product journeys return validated source-linked offline MCP ev
     });
   } finally {server.close();await once(server,"close");}
 });
+
+
+// These are shipped workflow contracts, not evidence that a native client loaded a skill.
+test("all five workflows preserve the API handoff without requiring host capabilities", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const names = ["find-observing-place", "plan-stargazing-night", "plan-astrophotography", "plan-sky-event", "prepare-outing"];
+  const cases = [
+    ["no host search", /Without host search, use the configured plugin discovery API/],
+    ["host search available", /Pass a search-discovered name through plugin resolution and details/],
+    ["ambiguous search result", /Ambiguous search results require user selection/],
+    ["failed sources", /When sources fail, return their gap; never invent candidates/],
+    ["API revision", /sourceRevision/],
+    ["catalogue revision", /catalogueRevision/],
+    ["scope unsupported", /unsupported-query.*never silently remove/],
+  ] as const;
+  for (const name of names) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+    const text = await readFile(path, "utf8");
+    for (const [scenario, expected] of cases) assert.match(text, expected, `${path}: ${scenario}`);
+  }
+});

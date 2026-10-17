@@ -1,3 +1,4 @@
+import { selectionRevisionRefinement } from "./common";
 import * as z from "zod4";
 import { ianaTimeZoneSchema } from "./common";
 import { dataClassSchema, placeIdSchema, resultSchema, sourceRecordSchema, timeWindowSchema, utcInstantSchema } from "./common";
@@ -20,10 +21,10 @@ export const weatherForecastSchema = z.strictObject({
 });
 export type WeatherForecast = z.infer<typeof weatherForecastSchema>;
 
-export const getNightConditionsInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, includeHourly: z.boolean().default(true) }).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A night-conditions request may cover at most 24 hours so its darkness context stays specific to one observing night.");
+export const getNightConditionsInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, includeHourly: z.boolean().default(true) }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A night-conditions request may cover at most 24 hours so its darkness context stays specific to one observing night.");
 export const nightConditionsResultSchema = resultSchema({
   placeId: placeIdSchema,
-  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(),
   displayTimeZone: ianaTimeZoneSchema.optional(),
   window: timeWindowSchema,
   forecasts: z.array(weatherForecastSchema).max(4),
@@ -42,10 +43,10 @@ export const nightConditionsResultSchema = resultSchema({
 });
 export type NightConditionsResult = z.infer<typeof nightConditionsResultSchema>;
 
-export const getAuroraOutlookInputSchema = z.strictObject({ placeId: placeIdSchema, catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema }).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "Aurora outlook windows may not exceed 24 hours.");
+export const getAuroraOutlookInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "Aurora outlook windows may not exceed 24 hours.");
 export const auroraOutlookResultSchema = resultSchema({
   placeId: placeIdSchema,
-  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(),
   displayTimeZone: ianaTimeZoneSchema.optional(),
   window: timeWindowSchema,
   outlook: z.discriminatedUnion("status", [

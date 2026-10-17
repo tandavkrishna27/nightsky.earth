@@ -21,7 +21,8 @@ type GetLocationContextResult = z.infer<typeof getLocationContextResultSchema>;
 type SearchObservingLocationsResult = z.infer<typeof searchObservingLocationsResultSchema>;
 
 export interface PlannerServices {
-  index: GeoNamesPlaceIndex;
+  index?: GeoNamesPlaceIndex;
+  getPlaceRef?(input: CalculationPlaceInput): Promise<import("../../shared/nightsky/places").PlaceRef | import("../../shared/nightsky/places").ApiPlaceRef>;
   resolveCalculationPlace?(input: CalculationPlaceInput): Promise<CalculationPlace>;
   getAstronomy(place: CalculationObserverPlace, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<AstronomyWindowResult>;
   getNightConditions(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<NightConditionsResult>;
@@ -38,15 +39,15 @@ type Factor = PlanResult["factors"][number];
 /** Compose source-linked evidence into a useful activity-specific plan. Provider failures remain visible gaps. */
 export async function planObservingSession(inputValue: unknown, services: PlannerServices): Promise<PlanResult> {
   const input = planObservingSessionInputSchema.parse(inputValue);
-  const selection = {placeId:input.placeId,catalogueRevision:input.catalogueRevision,displayTimeZone:input.displayTimeZone};
+  const selection = {placeId:input.placeId,catalogueRevision:input.catalogueRevision,sourceRevision:input.sourceRevision,displayTimeZone:input.displayTimeZone};
   const calculation = calculationPlaceSchema.parse(services.resolveCalculationPlace
     ? await services.resolveCalculationPlace(selection)
-    : resolveNamedCalculationPlace(selection, services.index));
-  if (calculation.placeId !== input.placeId || calculation.displayTimeZone !== input.window.timeZone || (input.displayTimeZone && input.displayTimeZone !== calculation.displayTimeZone) || (input.catalogueRevision && input.catalogueRevision !== calculation.catalogueRevision)) throw new CalculationPlaceClarificationError("time-zone-mismatch", "The selected calculation place, revision and requested display time zone must match. Resolve the place again.");
+    : resolveNamedCalculationPlace(selection, services.index!));
+  if (calculation.placeId !== input.placeId || calculation.displayTimeZone !== input.window.timeZone || (input.displayTimeZone && input.displayTimeZone !== calculation.displayTimeZone) || (input.catalogueRevision && input.catalogueRevision !== calculation.catalogueRevision) || (input.sourceRevision && input.sourceRevision !== calculation.sourceRevision)) throw new CalculationPlaceClarificationError("time-zone-mismatch", "The selected calculation place, revision and requested display time zone must match. Resolve the place again.");
   const observerPlace: CalculationObserverPlace = { placeId: input.placeId, timeZone: calculation.displayTimeZone, calculationPlace: calculation };
-  const place = calculation.catalogueRevision
-    ? {placeId:calculation.placeId, displayName:calculation.name, timeZone:calculation.displayTimeZone, indexVintage:calculation.catalogueRevision, catalogueRevision:calculation.catalogueRevision, timeZoneBasis:calculation.timeZoneBasis, sources:calculation.sources}
-    : services.index.toPlaceRef(services.index.getById(Number(input.placeId.slice("place:v1:geonames:".length)))!);
+  const place = services.getPlaceRef ? await services.getPlaceRef(selection) : calculation.catalogueRevision || calculation.sourceRevision
+    ? {placeId:calculation.placeId, displayName:calculation.name, timeZone:calculation.displayTimeZone, indexVintage:calculation.catalogueRevision, sourceRevision:calculation.sourceRevision, catalogueRevision:calculation.catalogueRevision, timeZoneBasis:calculation.timeZoneBasis, sources:calculation.sources}
+    : services.index!.toPlaceRef(services.index!.getById(Number(input.placeId.slice("place:v1:geonames:".length)))!);
   const [astronomy, conditions, events, locationContext, targetVisibility, aurora, candidates, climatology] = await Promise.all([
     settled(() => services.getAstronomy(observerPlace, input.window, calculation)),
     settled(() => services.getNightConditions(input.placeId, input.window, calculation)),

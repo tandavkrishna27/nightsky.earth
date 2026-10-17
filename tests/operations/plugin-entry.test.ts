@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { once } from "node:events";
 import { createServer } from "node:http";
 import test from "node:test";
-import { createNightSkyPluginApp, pluginListenerConfiguration } from "../../server/plugin";
+import { createNightSkyPluginApp, pluginListenerConfiguration, pluginDiscoveryMode } from "../../server/plugin";
 test("plugin listener defaults to loopback and rejects invalid ports/hosts", () => {
     assert.deepEqual(pluginListenerConfiguration({}), { host: "127.0.0.1", port: 5000 });
     assert.deepEqual(pluginListenerConfiguration({ HOST: "::1", PORT: "65535" }), { host: "::1", port: 65535 });
@@ -53,4 +53,9 @@ test("standalone plugin entry exposes only bounded health and MCP without websit
         server.closeAllConnections();
         await new Promise<void>(done => server.close(() => done()));
     }
+});
+
+test('discovery mode rejects local files in API mode and requires explicit legacy manifests',()=>{
+ assert.equal(pluginDiscoveryMode({}),'legacy');assert.equal(pluginDiscoveryMode({NIGHTSKY_DISCOVERY_MODE:'api'}),'api');
+ for(const environment of [{NIGHTSKY_DISCOVERY_MODE:'unknown'},{NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_GEONAMES_INDEX:'cities.gz'},{NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_OSM_CANDIDATE_INDEX:'old.json'},{NIGHTSKY_DISCOVERY_MODE:'catalogue'},{NIGHTSKY_DISCOVERY_MODE:'regional'}])assert.throws(()=>pluginDiscoveryMode(environment));
 });

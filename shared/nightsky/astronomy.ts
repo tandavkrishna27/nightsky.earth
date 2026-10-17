@@ -1,3 +1,4 @@
+import { selectionRevisionRefinement } from "./common";
 import * as z from "zod4";
 import { ianaTimeZoneSchema } from "./common";
 import { placeIdSchema, resultSchema, timeWindowSchema, utcInstantSchema } from "./common";
@@ -11,12 +12,13 @@ const localIntervalSchema = z.strictObject({
 
 export const getAstronomyWindowInputSchema = z.strictObject({
   placeId: placeIdSchema,
-  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(),
   displayTimeZone: ianaTimeZoneSchema.optional(),
   window: timeWindowSchema,
-}).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 5 * 24 * 60 * 60 * 1000, "Astronomy windows may not exceed 5 days.");
+}).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 5 * 24 * 60 * 60 * 1000, "Astronomy windows may not exceed 5 days.");
 
 export const astronomyWindowResultSchema = resultSchema({
+  sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
   window: timeWindowSchema,
   darknessState: z.enum(["full-window", "partial-window", "none", "unknown"]).describe("Astronomical darkness coverage of the requested window only: full-window covers all of it; partial-window covers part; none has no calculated darkness; unknown is unavailable evidence."),
@@ -44,13 +46,14 @@ export type AstronomyWindowResult = z.infer<typeof astronomyWindowResultSchema>;
 
 export const getTargetVisibilityInputSchema = z.strictObject({
   placeId: placeIdSchema,
-  catalogueRevision: z.string().trim().min(1).max(100).optional(),
+  sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(),
   displayTimeZone: ianaTimeZoneSchema.optional(),
   targetQuery: z.string().trim().min(1).max(120),
   window: timeWindowSchema,
-}).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 14 * 24 * 60 * 60 * 1000, "Target visibility windows may not exceed 14 days.");
+}).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 14 * 24 * 60 * 60 * 1000, "Target visibility windows may not exceed 14 days.");
 
 export const targetVisibilityResultSchema = resultSchema({
+  sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
   target: z.strictObject({ targetId: z.string().trim().min(1).max(120), name: z.string().trim().min(1).max(160), targetType: z.enum(["sun", "moon", "planet", "star", "deep-sky-object", "comet", "asteroid"]) }),
   intervals: z.array(z.strictObject({

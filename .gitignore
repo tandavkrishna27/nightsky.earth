@@ -72,3 +72,6 @@ migrations/
 # Netlify
 .netlify/
 __pycache__/
+
+# Local implementation/review scratch and test logs
+.superpowers/
