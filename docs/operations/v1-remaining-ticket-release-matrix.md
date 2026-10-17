@@ -1,5 +1,7 @@
 # V1 remaining-ticket and release matrix
 
+**Scope amendment (17 October):** Apply [owner-approved API/search discovery](api-search-discovery-v1-decision.md) to geography acceptance. Planet acquisition and exhaustive catalogue construction are deferred. No ticket is marked done merely by this change; reconcile acceptance against the new implementation.
+
 Current stage progress and ticket mapping: [fixed completion tracker](v1-completion-tracker.md). This matrix preserves original acceptance; dated implementation observations below are historical snapshots.
 
 Audit date: 15 October 2026. Read-only audit of baseline `c64d9fd`, branch `codex/plugin-v1`; this document adds no implementation, acquisition, installation, model run or release evidence.

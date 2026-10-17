@@ -1,5 +1,7 @@
 # V1 completion tracker
 
+**Current scope amendment (17 October):** The owner approved [API/search-based discovery for V1](api-search-discovery-v1-decision.md). Own exhaustive catalogue/planet acquisition is deferred, not a launch gate or completed work. Historical weather and events are unchanged. Earlier catalogue-dependent rows below are historical until reconciled against this controlling decision; original totals are not automatically increased.
+
 Updated: 17 October 2026. This is the single current progress tracker. Historical wave reports remain evidence, not replacement plans.
 
 ## Fixed scope and accounting

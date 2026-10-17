@@ -1,5 +1,7 @@
 # Global night-sky discovery design — 15 October 2026
 
+**V1 scope amendment (17 October):** The owner approved [API/search-based discovery](../operations/api-search-discovery-v1-decision.md). Its acceptance replaces the exhaustive local-catalogue gate in this earlier design. Host search remains capability-dependent, and the plugin API fallback still requires implementation and verification.
+
 Status: researched design and implementation handoff, not implemented global coverage. Owner requested a free global product, named-place/near-me/state discovery, no runtime database, a small Hetzner service, reusable cross-platform tools and no further country pilots. This wave performs documentation research and planning only: no source bodies, geography APIs, model calls, deployment or scope reduction.
 
 ## Decision

@@ -1,5 +1,7 @@
 # V1 production completion goal — 16 October 2026
 
+**Controlling scope amendment (17 October):** [Owner-approved API/search discovery](api-search-discovery-v1-decision.md) replaces exhaustive local catalogue/planet-build requirements for V1. S2 geography now requires the working provider/search path; S3 measures that service and remaining required artifacts. History/events remain unchanged. Preserve the earlier contract below as historical context where superseded.
+
 Current progress against these four permanent stages: [completion tracker](v1-completion-tracker.md). Baseline facts below remain preserved; later reviewed deliveries are recorded there.
 
 This is the active completion contract, using the existing tickets rather than creating a new completion count. The product remains global and free, with no database and a shared MCP backend plus five workflow skills. Deployment and new data downloads are not authorized. Claude testing is deferred by the owner; earlier results remain evidence with their original version and scope.
