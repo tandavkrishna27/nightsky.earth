@@ -1,3 +1,4 @@
+import { OPTIONAL_SKY_TOOL_NAMES } from '../server/mcp/optionalSkyTools';
 import { V1_TOOL_ANNOTATIONS } from '../server/mcp/registerTools';
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync, lstatSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -68,8 +69,8 @@ export function validatePackageFiles(files: Record<string, Uint8Array>): void {
   for (const name of skillNames) {
     const skill = strFromU8(files[`skills/${name}/SKILL.md`]);
     const workflow = files[`skills/${name}/references/workflow.md`] ? strFromU8(files[`skills/${name}/references/workflow.md`]) : '';
-    for (const tool of (skill + '\n' + workflow).match(/\b(?:resolve|get|search|plan|compare|recommend)_[a-z]+(?:_[a-z]+)+\b/g) ?? []) {
-      if (!(tool in V1_TOOL_ANNOTATIONS)) throw Error(`Unknown tool inventory reference: ${tool}`);
+    for (const tool of (skill + '\n' + workflow).match(/\b(?:find|resolve|get|search|plan|compare|recommend)_[a-z]+(?:_[a-z]+)+\b/g) ?? []) {
+      if (!(tool in V1_TOOL_ANNOTATIONS) && !(OPTIONAL_SKY_TOOL_NAMES as readonly string[]).includes(tool)) throw Error(`Unknown tool inventory reference: ${tool}`);
     }
     if (!files[`skills/${name}/references/workflow.md`] || !skill.includes('`references/workflow.md`') || skill.includes('docs/product/workflows/')) throw Error(`Missing or broken workflow reference for ${name}`);
     if (!Buffer.from(files[`skills/${name}/references/workflow.md`]).equals(composeWorkflowReference(name))) throw Error(`Canonical workflow reference mismatch: ${name}`);
@@ -107,7 +108,7 @@ export function buildPluginPackage(options: { endpoint?: string } = {}) {
   const entries: Zippable = {};
   const inventory = Object.keys(files).sort().map(path => { entries[path] = [files[path], { mtime: new Date('2020-01-01T00:00:00Z') }]; return { path, bytes: files[path].length, sha256: hash(files[path]) }; });
   const zip = zipSync(entries, { level: 9 });
-  return { zip, sha256: hash(zip), inventory, toolNames:Object.keys(V1_TOOL_ANNOTATIONS).sort(), endpoint, submissionReady: false, gates: ['publisher identity', 'frozen production endpoint', 'HTTPS policy and support URLs', 'verified organization/project and residency', 'official validation', 'production and host case evidence', 'reviewer video', 'source rights and coverage review', 'explicit submission authorization', 'separate publication authorization'] };
+  return { zip, sha256: hash(zip), inventory, toolNames:Object.keys(V1_TOOL_ANNOTATIONS).sort(), optionalToolNames:[...OPTIONAL_SKY_TOOL_NAMES].sort(), endpoint, submissionReady: false, gates: ['publisher identity', 'frozen production endpoint', 'HTTPS policy and support URLs', 'verified organization/project and residency', 'official validation', 'production and host case evidence', 'reviewer video', 'source rights and coverage review', 'explicit submission authorization', 'separate publication authorization'] };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2); const value = (flag: string) => { const i = args.indexOf(flag); return i < 0 ? undefined : args[i + 1]; };

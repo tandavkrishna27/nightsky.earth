@@ -9,3 +9,7 @@ Backend configuration can opt into GeoNames/Geoapify discovery without local geo
 ## V1 local revision 1.0.15 — outdoor conversation behaviour
 
 Outdoor observing is the default for place discovery. Activity-aware shortlists distinguish areas, specific sites and optional hosted/accommodation choices; clarification preserves the user's existing constraints. Shared instructions are packaged for every workflow and host projection. Conversation evaluations distinguish explicit reviewer scores, critical failures and native-host acceptance. This is a V1 local revision, not a V2 feature or public release.
+
+## V1 local revision 1.0.16 — optional sky sources
+
+Adds optional 7Timer categorical observing forecasts, Dark Sky Planner Moon-aware windows, AstronomyAPI search/body positions, NASA DONKI event context and JPL small-body identity/observer calculations. The default 14 tools remain; explicit source configuration can expose six additional tools. Workflow skills preserve source differences and unavailable results. Credentials alone do not activate sources. Free allowance, source acceptance and native-client checks remain separate gates; this is not a public release.

@@ -8,13 +8,15 @@ const weatherValueSchema = z.strictObject({ value: z.number().finite(), unit: z.
   "Aggregation intervals require both UTC bounds and an end after the start.",
 );
 const weatherFields = ["totalCloudCover", "lowCloudCover", "mediumCloudCover", "highCloudCover", "precipitationProbability", "precipitationAmount", "windSpeed", "windGust", "windDirection", "temperature", "dewPoint", "relativeHumidity", "visibility"] as const;
-const weatherValuesSchema = z.strictObject(Object.fromEntries(weatherFields.map((field) => [field, weatherValueSchema.optional()])) as Record<typeof weatherFields[number], z.ZodOptional<typeof weatherValueSchema>>).refine((values) => Object.values(values).some((value) => value !== undefined), "At least one weather value is required.");
+const weatherValuesSchema = z.strictObject(Object.fromEntries(weatherFields.map((field) => [field, weatherValueSchema.optional()])) as Record<typeof weatherFields[number], z.ZodOptional<typeof weatherValueSchema>>);
 
+const weatherBandSchema = z.strictObject({ code: z.number().int().min(-4).max(16), range: z.string().min(1).max(60), unit: z.enum(["%", "m/s", "arcseconds", "mag/airmass"]) });
+const weatherBandsSchema = z.strictObject({ totalCloudCover: weatherBandSchema.optional(), seeing: weatherBandSchema.optional(), transparency: weatherBandSchema.optional(), windSpeed: weatherBandSchema.optional(), relativeHumidity: weatherBandSchema.optional() });
 export const weatherForecastSchema = z.strictObject({
   availability: z.strictObject({ status: z.enum(["available", "partial", "stale", "unavailable", "not-covered", "unknown", "unsupported", "out-of-horizon"]), reason: z.string().trim().min(1).max(500) }),
   source: sourceRecordSchema,
   forecastHorizonHours: z.number().finite().nonnegative().max(24 * 366),
-  samples: z.array(z.strictObject({ validAt: utcInstantSchema, values: weatherValuesSchema })).min(1).max(48),
+  samples: z.array(z.strictObject({ validAt: utcInstantSchema, values: weatherValuesSchema, bands: weatherBandsSchema.optional() }).refine(sample => Object.values(sample.values).some(v => v !== undefined) || Object.values(sample.bands ?? {}).some(v => v !== undefined), "At least one weather value or category band is required.")).min(1).max(48),
   missingFields: z.array(z.strictObject({ field: z.enum(weatherFields), reason: z.string().trim().min(1).max(300) })).max(weatherFields.length),
 }).superRefine((forecast, ctx) => {
   if (forecast.source.dataClass !== "forecast") ctx.addIssue({ code: "custom", path: ["source", "dataClass"], message: "WeatherForecast source must be classified as forecast." });
@@ -22,7 +24,7 @@ export const weatherForecastSchema = z.strictObject({
 export type WeatherForecast = z.infer<typeof weatherForecastSchema>;
 
 export const getNightConditionsInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, includeHourly: z.boolean().default(true) }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A night-conditions request may cover at most 24 hours so its darkness context stays specific to one observing night.");
-export const weatherProviderIdSchema = z.enum(["met", "weatherapi", "openweather"]);
+export const weatherProviderIdSchema = z.enum(["met", "weatherapi", "openweather", "seventimer"]);
 export const weatherProviderOutcomeSchema = z.strictObject({
   providerId: weatherProviderIdSchema,
   status: z.enum(["available", "partial", "stale", "unavailable", "not-covered", "out-of-horizon"]),
@@ -68,4 +70,3 @@ export const auroraOutlookResultSchema = resultSchema({
   latitudeBand: z.enum(["equatorial", "mid-latitude", "high-latitude", "polar", "unknown"]),
 });
 export type AuroraOutlookResult = z.infer<typeof auroraOutlookResultSchema>;
-

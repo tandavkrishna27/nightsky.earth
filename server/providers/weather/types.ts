@@ -21,7 +21,7 @@ export interface WeatherProvider {
   getForecast(place: WeatherPlace, window: { startUtc: string; endUtc: string; timeZone: string }): Promise<WeatherProviderResult>;
 }
 
-export type WeatherProviderId = "met" | "weatherapi" | "openweather";
+export type WeatherProviderId = "met" | "weatherapi" | "openweather" | "seventimer";
 export interface WeatherProviderEntry {
   id: WeatherProviderId;
   provider: WeatherProvider;

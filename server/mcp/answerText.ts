@@ -61,6 +61,7 @@ export function planAnswerText(plan: PlanResult): string {
     const sample = forecast.samples[0];
     if (sample) {
       const values = Object.entries(sample.values).filter(([, value]) => value !== undefined).slice(0, 1).map(([field, value]) => `${field} ${value!.value} ${plain(value!.unit)} (${value!.periodStartUtc && value!.periodEndUtc ? `period ${value!.periodStartUtc} to ${value!.periodEndUtc}` : 'instant sample'})`);
+      for (const [field, band] of Object.entries(sample.bands ?? {})) { if (band) values.push(`${field} category ${band.code}: ${plain(band.range)} ${plain(band.unit)}`); }
       lines.push(`First sample example, valid ${sample.validAt}: ${values.join('; ')}.`);
     }
     if (forecast.missingFields.length) lines.push(forecast.missingFields.slice(0, 3).map(field => `${field.field} unknown`).join('; ') + '.');

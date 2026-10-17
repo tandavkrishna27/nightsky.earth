@@ -70,8 +70,20 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   const caveats = new Set<string>([
     "A forecast is model output, not an observation; local cloud and visibility can differ.",
     "This plan does not verify site access, night opening, permits, terrain, safety, or local horizon obstructions.",
-    "Seeing and transparency are not supplied by the current V1 forecast; do not infer them from cloud cover.",
+
   ]);
+  const usableBandFields = new Set<string>();
+  if (conditions && !isError(conditions)) for (const forecast of conditions.forecasts) {
+    if (!usableWeatherForecast(conditions, forecast)) continue;
+    for (const sample of forecast.samples) {
+      if (Date.parse(sample.validAt) < Date.parse(input.window.startUtc) || Date.parse(sample.validAt) > Date.parse(input.window.endUtc)) continue;
+      for (const field of ["seeing", "transparency"] as const) if (sample.bands?.[field]) usableBandFields.add(field);
+    }
+  }
+  const missingImagingFields = ["seeing", "transparency"].filter(field => !usableBandFields.has(field));
+  if (missingImagingFields.length === 2) caveats.add("Seeing and transparency are not supplied by usable forecast samples in this window; do not infer them from cloud cover. Stale samples cannot establish current conditions.");
+  else if (missingImagingFields.length) caveats.add(`${capitalize(missingImagingFields[0]!)} is not supplied by usable forecast samples in this window; do not infer it from cloud cover.`);
+  if (usableBandFields.size) caveats.add("Seeing and transparency category bands apply only at supplied native sample times. They do not establish continuous coverage, measured conditions, or guaranteed imaging quality.");
   if (calculation.timeZoneBasis === "explicit-display") caveats.add(`Times use the explicit display time zone ${calculation.displayTimeZone}; the actual site time zone is unverified.`);
   const sourceRecords: SourceRecord[] = [...place.sources];
 
@@ -247,7 +259,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
 
   if (conditions && !isError(conditions) && conditions.availability.status !== "available") gaps.push(`Weather evidence is ${conditions.availability.status}: ${conditions.availability.reason}`);
   if (locationContext && !isError(locationContext) && locationContext.access.status === "unknown") gaps.push("Confirm public access, opening hours, permits, and current closures directly before travel.");
-  if (input.activity === "astrophotography" || input.activity === "deep-sky-imaging") gaps.push("No seeing or transparency forecast is available; cloud cover alone cannot establish imaging quality.");
+  if ((input.activity === "astrophotography" || input.activity === "deep-sky-imaging") && missingImagingFields.length) gaps.push(`Usable ${missingImagingFields.join(" and ")} forecast evidence is unavailable in the requested window; missing or stale evidence and cloud cover alone cannot establish imaging quality.`);
   const suggestions = input.target ? [] : await suggestVisibleTargets(input.activity, observerPlace, input.window, services, astronomy && !isError(astronomy) ? astronomy : undefined);
   suggestions.forEach(target => { sourceRecords.push(...target.sources); addAll(caveats, target.caveats); });
   if (!input.target && ["general-stargazing", "visual-stargazing", "learning", "planet-observing", "moon-observing", "astrophotography"].includes(input.activity) && !suggestions.length) gaps.push("No target suggestions were returned under this activity's selection rules; this does not establish that all targets are below the horizon or visually undetectable. The local catalog covers Sun, Moon, planets and Milky Way core only.");
@@ -318,6 +330,16 @@ function weatherFactors(result: NightConditionsResult, activity: string, units: 
   const factors: Factor[] = [];
   for (const forecast of result.forecasts) {
     const usable = usableWeatherForecast(result, forecast);
+    for (const group of [{label:"seeing and transparency",fields:["seeing","transparency"]}, {label:"cloud, wind and humidity categories",fields:["totalCloudCover","windSpeed","relativeHumidity"]}] as const) {
+      const descriptions: string[] = [];
+      for (const field of group.fields) {
+        const samples=forecast.samples.filter(sample=>sample.bands?.[field] && Date.parse(sample.validAt)>=Date.parse(result.window.startUtc) && Date.parse(sample.validAt)<=Date.parse(result.window.endUtc));
+        if (!samples.length) continue;
+        const sample=samples[0]!,band=sample.bands![field]!;
+        descriptions.push(`${humanize(field)} ${band.range} ${band.unit} (category ${band.code}) at ${sample.validAt}; ${samples.length} native sample(s)`);
+      }
+      if (descriptions.length) factors.push({name:`${forecast.source.name.slice(0,70)} ${group.label} forecast`,assessment:`${usable ? "Native category evidence; no interpolation or whole-window quality assessment." : "Stale or unavailable evidence; cannot support a current quality assessment."} ${descriptions.join("; ")}. Full timestamped bands remain in evidence.`,impact:"unknown",sourceNames:[forecast.source.name]});
+    }
     for (const group of [{ label: "cloud and precipitation", fields: skyFields }, { label: "wind, temperature, and visibility", fields: otherFields }] as const) {
       const parts: string[] = [];
       const impacts: Factor["impact"][] = [];

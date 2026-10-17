@@ -1,3 +1,5 @@
+import { registerOptionalSkyTools } from './optionalSkyTools';
+import type { OptionalSkyProviders } from '../providers/skyConfiguration';
 import { apiAttributionText } from "../places/api/attribution";
 import type { DiscoveryProvider, SelectedPlaceResolver } from "../places/api/types";
 import { planAnswerText, sourceLinkedText } from "./answerText";
@@ -41,6 +43,7 @@ export interface NightSkyCache {
 
 /** Runtime dependencies are shared by every stateless MCP request. */
 export interface NightSkyDependencies {
+  skyProviders?: OptionalSkyProviders;
   /** Operator-selected rehearsal scope; never controlled by request metadata. */
   discoveryProvider?: DiscoveryProvider;
   selectedPlaceResolver?: SelectedPlaceResolver;
@@ -169,6 +172,11 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
 
   if (toolMode === "resolver-only") return;
+  if (dependencies.skyProviders) registerOptionalSkyTools(server, dependencies.skyProviders, async input => {
+    const index = dependencies.discoveryProvider ? undefined : dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
+    if (!index && !dependencies.selectedPlaceResolver) throw new Error('Resolve a place before requesting observer data.');
+    return resolvePoint(input, index);
+  });
 
   server.registerTool("get_astronomy_window", {
     title: "Calculate darkness and Moon conditions",

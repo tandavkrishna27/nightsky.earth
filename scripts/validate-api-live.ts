@@ -135,7 +135,8 @@ export async function runValidation(args:string[],environment:Record<string,stri
  const batch=environment.NIGHTSKY_LIVE_BATCH_ID;
  if(!batch||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(batch)||!config.quotaPath||!environment.NIGHTSKY_GEOAPIFY_API_KEY||environment.NIGHTSKY_DISCOVERY_MODE!=='api'||environment.NIGHTSKY_GEONAMES_USERNAME||environment.NIGHTSKY_LIVE_GEOAPIFY_ADMITTED!=='yes'||!config.providers?.length)throw refused();
  if(Object.keys(environment).some(key=>/^(NIGHTSKY_GEONAMES_INDEX|NIGHTSKY_OSM_|NIGHTSKY_GLOBAL_CATALOGUE_)/.test(key)&&environment[key]!==undefined))throw refused();
- const enabled=config.providers.filter(id=>id==='met'?!!environment.MET_NORWAY_USER_AGENT:config.admitted.includes(id)&&!!environment[id==='weatherapi'?'NIGHTSKY_WEATHERAPI_KEY':'NIGHTSKY_OPENWEATHER_KEY']);
+ if(config.providers.includes('seventimer')) throw refused();
+ const enabled=config.providers.filter((id):id is 'met'|'weatherapi'|'openweather'=>id!=='seventimer').filter(id=>id==='met'?!!environment.MET_NORWAY_USER_AGENT:config.admitted.includes(id)&&!!environment[id==='weatherapi'?'NIGHTSKY_WEATHERAPI_KEY':'NIGHTSKY_OPENWEATHER_KEY']);
  if(!enabled.length)throw refused();
  // Existing checkpoint only. The serving quota library validates ancestors/locks/contents.
  const state=await lstat(config.quotaPath);if(!state.isFile()||state.isSymbolicLink())throw refused();
@@ -164,14 +165,14 @@ export async function runValidation(args:string[],environment:Record<string,stri
     if(forecasts.outcomes.length===enabled.length&&forecasts.outcomes.every(({result})=>['available','partial'].includes(result.status)&&(result.forecast?.samples.length??0)>0))usableCases++;
     const selectedPoint={latitude:record.latitude,longitude:record.longitude};
     const requestedPoints=Object.fromEntries(enabled.filter(id=>guard!.attempts.some(attempt=>attempt.caseName===name&&attempt.provider===id)).map(id=>[id,id==='met'?roundedMetCoordinates(selectedPoint):selectedPoint]));
-    results.push({caseName:name,selectedPoint,requestedPoints,requestedWindow,sourceRevision:selected.sourceRevision,timeZone:'Asia/Kolkata',timeZoneProvider:'geoapify',elapsedMs:Math.round(performance.now()-caseStart),rssBytes:process.memoryUsage().rss,outcomes:forecasts.outcomes.map(({providerId,result})=>({providerId,status:result.status,samples:result.forecast?.samples.length??0,validationFacts:forecastValidationFacts(result.forecast,requestedWindow,providerId),missingFields:result.forecast?.missingFields.map(field=>field.field)??[],attribution:result.forecast?.source.attribution??result.source?.attribution??null}))});
+    results.push({caseName:name,selectedPoint,requestedPoints,requestedWindow,sourceRevision:selected.sourceRevision,timeZone:'Asia/Kolkata',timeZoneProvider:'geoapify',elapsedMs:Math.round(performance.now()-caseStart),rssBytes:process.memoryUsage().rss,outcomes:forecasts.outcomes.map(({providerId,result})=>({providerId,status:result.status,samples:result.forecast?.samples.length??0,validationFacts:forecastValidationFacts(result.forecast,requestedWindow,providerId === "seventimer" ? undefined : providerId),missingFields:result.forecast?.missingFields.map(field=>field.field)??[],attribution:result.forecast?.source.attribution??result.source?.attribution??null}))});
     }
    } catch {results.push({caseName:name,status:'failed'});}
    await persist({caseIndex:results.length,result:results.at(-1)});
    // Respect the per-source minimum start spacing between public cases.
    if(!guard.stopped)await (dependencies.pause?.()??new Promise(resolve=>setTimeout(resolve,1100)));
   }
-  const report={mode:'live',envelope:packet.envelope,batch,finishedAt:new Date().toISOString(),status:guard.stopped?'stopped':'completed',usableCases,validation:usableCases===packet.cases.length&&!guard.stopped?'all-admitted-sources-have-samples':'partial-failed-or-skipped',attempts:guard.attempts,results,skippedProviders:config.providers.filter(id=>!enabled.includes(id)),limitations:['Integration sample only; no forecast accuracy claim.','RSS is sampled, not peak.','No raw responses retained.']};
+  const report={mode:'live',envelope:packet.envelope,batch,finishedAt:new Date().toISOString(),status:guard.stopped?'stopped':'completed',usableCases,validation:usableCases===packet.cases.length&&!guard.stopped?'all-admitted-sources-have-samples':'partial-failed-or-skipped',attempts:guard.attempts,results,skippedProviders:config.providers.filter(id=>!enabled.some(selected=>selected===id)),limitations:['Integration sample only; no forecast accuracy claim.','RSS is sampled, not peak.','No raw responses retained.']};
   await persist({report});return report;
  } finally {guard?.close();await journal?.close();await quota.close();}
 }

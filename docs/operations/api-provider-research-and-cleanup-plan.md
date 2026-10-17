@@ -1,3 +1,5 @@
+> **7Timer terms superseded (2026-10-17):** The earlier 7Timer noncommercial-only/excluded conclusions below are historical and no longer govern the implemented adapter. The current official wiki permits data use in free or paid software. See the [reviewed source, opt-in setup and existing-ledger migration](api-mode-local-setup.md#7timer-activation-and-existing-ledger-migration-2026-10-17). Other providers retain their separate rights assessments.
+
 # Free API research and cleanup plan
 
 Updated 17 October 2026. This is the consolidated research/design record for the owner-approved API-first V1. It advances source selection; it does not claim adapters are implemented, providers fully admitted, or original tickets complete. No new downloads, provider jobs, account changes, deletion, or deployment were performed for this research.

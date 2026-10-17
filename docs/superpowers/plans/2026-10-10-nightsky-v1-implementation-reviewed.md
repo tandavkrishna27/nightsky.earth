@@ -1,3 +1,5 @@
+> **7Timer terms superseded (2026-10-17):** The earlier 7Timer noncommercial-only/excluded conclusions below are historical and no longer govern the implemented adapter. The current official wiki permits data use in free or paid software. See the [reviewed source, opt-in setup and existing-ledger migration](../../operations/api-mode-local-setup.md#7timer-activation-and-existing-ledger-migration-2026-10-17). Other providers retain their separate rights assessments.
+
 # NightSky.earth V1 Implementation Plan
 
 **Current execution authority (17 October 2026):** The owner approved API/search-based discovery with multiple suitable free sources. Use [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) and [tracker](../../operations/v1-completion-tracker.md) for changed acceptance/dependencies. Preserve original ticket IDs and evidence below. Mandatory bulk planet/catalogue launch prerequisites are superseded; historical-weather and event capabilities are not automatically removed.

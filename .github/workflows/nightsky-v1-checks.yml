@@ -48,6 +48,12 @@ jobs:
       - name: Exercise synthetic three-source weather and partial outage contracts
         run: node --import tsx --test tests/mcp/multi-weather-planning.test.ts tests/providers/weather-collection.test.ts tests/skills/multi-weather-workflows.test.ts
 
+      - name: Exercise optional sky sources and MCP contracts without credentials
+        run: node --import tsx --test tests/providers/sevenTimer.test.ts tests/providers/sevenTimer-migration.test.ts tests/operations/sky-live-probe.test.ts tests/providers/sky/sky.test.ts tests/providers/space/space.test.ts tests/providers/source-cache.test.ts tests/mcp/optional-sky-tools.test.ts tests/nightsky/sevenTimer-planner.test.ts tests/operations/sky-quota-setup.test.ts tests/skills/optional-sky-workflows.test.ts
+
+      - name: Verify sky diagnostic defaults to a no-network proposal
+        run: node --import tsx scripts/validate-sky-live.ts --plan
+
       - name: Measure API fixture runtime without live source access
         run: node --import tsx scripts/measure-api-runtime.ts
 

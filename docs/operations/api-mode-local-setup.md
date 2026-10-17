@@ -66,7 +66,7 @@ The adapter/collection/runtime implementation now exists; live activation remain
 
 | Variable | Meaning |
 | --- | --- |
-| NIGHTSKY_WEATHER_PROVIDERS | Explicit comma-separated subset of met,weatherapi,openweather; omit to preserve legacy MET behavior |
+| NIGHTSKY_WEATHER_PROVIDERS | Explicit comma-separated subset of met,weatherapi,openweather,seventimer; omit to preserve legacy MET behavior |
 | NIGHTSKY_WEATHER_ADMITTED_PROVIDERS | Explicit subset whose source requirements have been reviewed; a key alone does not activate a new provider |
 | NIGHTSKY_WEATHERAPI_KEY | Private WeatherAPI key; never put it in operator JSON or source control |
 | NIGHTSKY_OPENWEATHER_KEY | Private OpenWeather key; same restrictions |
@@ -110,3 +110,45 @@ quota, byte, time and cache bounds are documented in
 server. No production baseline was acquired. Durable summaries and acquisition
 journals can contain destination coordinates and request URLs; see the updated
 privacy draft and establish retention before enabling this path.
+
+## 7Timer activation and existing-ledger migration (2026-10-17)
+
+7Timer ASTRO is implemented as optional `seventimer`. Select it in `NIGHTSKY_WEATHER_PROVIDERS` and admit it in `NIGHTSKY_WEATHER_ADMITTED_PROVIDERS` only after accounting is ready. It requires no key, but requires the shared durable quota ledger. The fixed local policy is `operator-seventimer`: 20 requests/hour, 100/day and 1000/UTC month. These are conservative operator ceilings, not published provider entitlements or an SLA.
+
+The [current official 7Timer wiki](https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage), reviewed 2026-10-17, permits use of its data in free or paid software. Earlier repository statements treating 7Timer as noncommercial-only/excluded are superseded by this review. This does not change the rights assessment for Open-Meteo or Clear Sky Chart. ASTRO seeing/transparency, cloud, humidity and wind categories remain ranges at native three-hour sample times; no precise measurement or continuous quality guarantee is inferred.
+
+For a genuinely fresh ledger, the existing initializer includes the 7Timer policy when `seventimer` is selected. **The existing owner ledger must not be initialized again.** Selecting 7Timer before adding its entry makes shared accounting fail closed, including other providers using that ledger.
+
+For an existing ledger, the offline command below prints its fixed policy and requirements without opening the ledger or making requests:
+
+```powershell
+node --import tsx scripts/migrate-seventimer-quota.ts
+```
+
+Before applying, stop all ledger consumers and obtain complete recent usage evidence for this source and the applicable operator allowance. Prepare a private reviewed JSON packet with exactly these fields (the following describes fields, not runnable JSON):
+
+```text
+decision: "approved-add-seventimer-account"
+quotaPath: absolute path of the existing valid shared checkpoint
+expiresAt: future UTC ISO timestamp
+usage:
+  verifiedAllowance: true
+  verifiedAllAccountUsage: true
+  allConsumersQuiesced: true
+  evidence: 8–500 character nonsecret evidence reference
+  observedAt: Unix milliseconds of the verified snapshot
+  usedLast24Hours: verified nonnegative whole request count
+  usedCurrentMonth: verified nonnegative whole request count
+```
+
+The snapshot must be at most five minutes old, in the current UTC month, and not in the future. Keep all consumers stopped from snapshot through import. Unknown usage is not zero. Counts above the ceilings remain charged and prevent requests. Imported rolling usage is conservatively charged to both the hourly and daily windows from migration time. Monthly usage must cover rolling-day usage except on the first UTC day.
+
+After reviewing that exact packet and authorizing the ledger addition:
+
+```powershell
+node --import tsx scripts/migrate-seventimer-quota.ts --apply <private-reviewed-packet-path>
+```
+
+The command holds the existing exclusive lock and adds only the missing `seventimer` entry. It preserves every prior provider's counters, account labels, disable flags and backoff, retains the initialization marker, and rejects replay, missing/corrupt checkpoints, incomplete evidence and expired authority. It has no reset or network path. Do not delete checkpoints, markers or counters to enable it. After successful migration, enable the selected/admitted configuration and restart the single owner process. Selection rollback leaves the added accounting intact.
+
+Migration has been tested only with synthetic temporary ledgers. These instructions do not report a migration of the private owner ledger or authorize live calls.

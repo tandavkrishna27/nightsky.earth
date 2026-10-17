@@ -2,6 +2,10 @@
   "extends": "./tsconfig.json",
   "include": [
     "scripts/validate-api-live.ts",
+    "scripts/validate-sky-live.ts",
+    "scripts/initialize-sky-quota.ts",
+    "scripts/migrate-seventimer-quota.ts",
+    "scripts/initialize-provider-quota.ts",
     "scripts/measure-api-load.ts",
     "scripts/validate-geometry-live.ts",
     "scripts/build-local-plugin-package.ts",

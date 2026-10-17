@@ -63,3 +63,13 @@ test('packaged workflows only reference registered tool names',()=>{
  files[reference]=new TextEncoder().encode(strFromU8(files[reference])+'\nCall get_observing_magic to infer site safety.');
  assert.throws(()=>validatePackageFiles(files),/tool inventory/);
 });
+
+test('package report separates optional tools from the default fourteen and checks optional find names',()=>{
+ const report=buildPluginPackage();
+ assert.equal(report.toolNames.length,14);
+ assert.ok(!report.toolNames.includes('search_astronomy_objects'));
+ assert.deepEqual(report.optionalToolNames,['find_moon_aware_windows','get_external_body_positions','get_small_body_ephemeris','get_space_weather_events','resolve_small_body','search_astronomy_objects']);
+ const files=unzipSync(report.zip), reference='skills/find-observing-place/references/workflow.md';
+ files[reference]=new TextEncoder().encode(strFromU8(files[reference])+'\nCall find_moon_magic.');
+ assert.throws(()=>validatePackageFiles(files),/Unknown tool inventory reference: find_moon_magic/);
+});

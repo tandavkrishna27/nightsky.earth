@@ -1,3 +1,5 @@
+> **7Timer terms superseded (2026-10-17):** The earlier 7Timer noncommercial-only/excluded conclusions below are historical and no longer govern the implemented adapter. The current official wiki permits data use in free or paid software. See the [reviewed source, opt-in setup and existing-ledger migration](api-mode-local-setup.md#7timer-activation-and-existing-ledger-migration-2026-10-17). Other providers retain their separate rights assessments.
+
 # Weather, cloud history, and atmosphere API research
 
 Research date: 2026-10-17. Scope: official provider documentation only; no data retrievals, jobs, account creation, or endpoint probes. Findings establish documented suitability, not measured service performance. Proposed architecture and scientific cautions below are NightSky recommendations/inferences.
