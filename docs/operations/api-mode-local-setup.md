@@ -59,3 +59,23 @@ Implementation requirements:
 Initial roster: MET Norway (existing), WeatherAPI (adapter pending; Free limits), OpenWeather (adapter and free entitlement review pending). Geoapify is for location discovery, not a weather forecast provider. Other domains should use their own capability-specific adapters rather than forcing all APIs into one weather-shaped interface.
 
 Reference: https://openweathermap.org/price (checked 2026-10-17). No data request, key export or deployment occurred during this architecture check.
+
+## Implemented local multi-weather configuration
+
+The adapter/collection/runtime implementation now exists; live activation remains separate. See `docs/superpowers/plans/2026-10-17-multi-weather-activation.md` and `multi-weather-wave-20261017.md` for evidence and remaining gates.
+
+| Variable | Meaning |
+| --- | --- |
+| NIGHTSKY_WEATHER_PROVIDERS | Explicit comma-separated subset of met,weatherapi,openweather; omit to preserve legacy MET behavior |
+| NIGHTSKY_WEATHER_ADMITTED_PROVIDERS | Explicit subset whose source requirements have been reviewed; a key alone does not activate a new provider |
+| NIGHTSKY_WEATHERAPI_KEY | Private WeatherAPI key; never put it in operator JSON or source control |
+| NIGHTSKY_OPENWEATHER_KEY | Private OpenWeather key; same restrictions |
+| NIGHTSKY_QUOTA_STATE_PATH | Absolute local non-reparse path, shared by API discovery and weather quotas; parent directory must exist |
+
+API discovery now receives deny-all admission if durable quota configuration is missing. Operator preflight requires this path independently of weather selection. Keep credentials in a private server environment; these instructions do not imply keys were copied from browser accounts.
+
+Initial budget creation is deliberately separate: `node --import tsx scripts/initialize-provider-quota.ts` accepts no arguments and requires the private environment path, `NIGHTSKY_QUOTA_VERIFIED_UNUSED_BUDGET=yes`, and nonsecret `NIGHTSKY_QUOTA_VERIFICATION_EVIDENCE`. Use it only after independently verifying all configured account allowances are unused (or the full relevant reset/quiet periods have elapsed). Do not run it automatically at startup or to erase usage. It refuses to overwrite existing state.
+
+This adds a bounded nonsecret quota checkpoint, not a database or downloaded geography catalogue. It stores allowance counters and disable/backoff state; no credentials, queries or weather responses. One server process owns it. Ordinary standalone SIGTERM/SIGINT drains and closes within ten seconds; forced shutdown/crash retains a lock. Windows force-kill is not graceful shutdown. Embedders must call `closeConfiguredNightSkyPluginApp(app)` after closing their listener.
+
+Recovery: verify the previous process is dead before removing only a stale lock; retain checkpoint and initialization marker. Corrupt/lost state or interrupted writes fail closed. Restore verified state or follow a separately reviewed reset procedure; never delete the checkpoint to regain allowance. No recovery/deletion action was executed here.

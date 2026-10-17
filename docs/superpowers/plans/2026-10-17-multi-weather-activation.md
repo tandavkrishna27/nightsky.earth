@@ -166,3 +166,7 @@ Reviewed against code and parent scope. Corrections incorporated:
 | New wave could hide old unfinished history/geography/events | Explicit parent gates retained; counts unchanged |
 
 All five review-focus cases have owning tests. Shared signatures match task consumers. No runtime edits, tests, credential transfer or live data requests performed while writing this plan. Implementation review and actual test results remain future evidence.
+
+## Implementation follow-up
+
+Local implementation and review are recorded in `docs/operations/multi-weather-wave-20261017.md`. Tasks1–5 code and task6 runtime/workflow/CI code are implemented and reviewed; original acceptance gates remain separate. Private real-credential configuration, actual budget initialization, source-policy completion, bounded live task7 and deployment are not claimed. OpenWeather's authenticated Services page subsequently confirmed Free five-day/three-hour entitlement; live key activation remains unverified. Zero-cache OpenWeather and explicit NIGHTSKY_WEATHER_ADMITTED_PROVIDERS configuration are conservative implementation decisions documented in the wave report.
