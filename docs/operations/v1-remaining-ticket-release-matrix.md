@@ -4,6 +4,11 @@
 
 The [fixed completion tracker](v1-completion-tracker.md) supplies stage progress. This matrix reconciles the original [execution plan](../superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md), its [criterion audit](v1-acceptance-audit.md) and [implementation evidence](implementation-status.md). Current requirements below take precedence over dated bulk-build next actions. No code, tests, network activity, acquisition, installation, model run, deployment or release was performed by this documentation reconciliation.
 
+
+Current implementation is `b10f05451cb7ccd0cc6c77b4faabefbd6b4d7e66`, package **1.0.15**: retained verification **1,475 passed / 0 failed / 2 skipped**, plus **11/11 controlled-agent cases** separately counted. At 17:22 on 17 October the owner pasted a successful native Codex `Fictionvale` resolve invocation. This advances native tool evidence only: synthetic provenance and fixed 15 October expiry remain misleading, and real API, complete skill/reference loading and full native answer acceptance remain open. See [finite remaining acceptance and evidence reconciliation](v1-acceptance-reconciliation-20261017.md). The coordinator verified [exact-commit CI run 39029122239](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39029122239) successful during this turn; no new test execution is claimed by this edit.
+
+The [current local experience increment](local-experience-completion-20261017.md) is implemented/reviewed offline, including fixture clarity and the executable [Hyderabad request proposal](hyderabad-owner-real-api-setup.md). Its aggregate result and exact-commit CI await coordinator recording. Native skills/full real journey acceptance remains pending; original counts stay unchanged.
+
 ## Accounting and authority
 
 There are **27 executable headings in 19 numbered groups (0–18)**. Task 0's six gates are not six additional tickets. No ticket is replaced, added or closed by deferring catalogue construction.
@@ -44,7 +49,7 @@ Evidence references are scoped records; historical tests or retained artifacts d
 | 11A | Cited learning and photography guidance | Done | [Local checklist](local-completion-checklist.md) and [implementation status](implementation-status.md) retain scoped guidance evidence; event/history gaps must remain visible. |
 | 11B | App suggestions and preparation | Done | [Local checklist](local-completion-checklist.md) retains reviewed checklist/suggestion evidence; place tags remain unverified access information. |
 | 11C | Five shared guides and host packages | Done | [Local package readiness](local-package-readiness.md) and [discovery extension](global-discovery-execution.md) retain authoring evidence. API handoff/capability guidance was updated in the multi-weather implementation; final native use remains 12B/15. |
-| 12A | OpenAI package and host cases | Partial | API-mode package/configuration, local rehearsal and validators exist. Version 1.0.14 integrates 14 tools and five skills, with deterministic Codex/Claude packages verified locally; final identity/URLs, same real draft and official validation remain. |
+| 12A | OpenAI package and host cases | Partial | API-mode package/configuration, local rehearsal and validators exist. Version 1.0.15 integrates 14 tools and five skills, with deterministic Codex/Claude packages verified locally; final identity/URLs, same real draft and official validation remain. |
 | 12B | Separate assistant routes | Partial | [Model journey record](complete-model-journey-validation.md) retains bounded Codex evidence; actual host search/no-search fallback and full native matrix remain. Claude retest is deferred. |
 | 13 | Public listing/policy pages | Partial | [Policy preparation](policy-preparation.md) retains drafts. API provider flows, quota records and conditional location-bearing history cache/journals are now disclosed and tested. Legal/host facts, retention and final public URLs remain open. |
 | 14 | Deployment and operations | Partial | Offline operator/preflight and immutable-artifact accounting exist. Measure API-mode runtime/cache/upstream limits plus any enabled static/history/event artifacts; selected-host deployment/rollback remain. |
@@ -123,7 +128,7 @@ Earlier observations included three-place 2025 history, March historical samples
 
 ## Readiness decision
 
-**API discovery/multi-weather implementation and initial bounded live connectivity are complete; capability gaps and public-launch acceptance remain open.** Follow the tracker’s six completion blocks. Historical admission/implementation, event evidence, geographic combinations, measured assembled behavior and hosted/client/release gates remain open. Preserve **12/9/6 across 27 headings** until actual acceptance evidence changes. Catalogue deferral changes the work required, not the completion count.
+**API discovery/multi-weather implementation and initial bounded live connectivity are complete; capability gaps and public-launch acceptance remain open.** Follow the tracker’s six completion blocks. Historical method/full-baseline admission, event evidence, geographic combinations, measured assembled behavior and hosted/client/release gates remain open. Preserve **12/9/6 across 27 headings** until actual acceptance evidence changes. Catalogue deferral changes the work required, not the completion count.
 
 ## V1 conversation acceptance amendment — 17 October 2026
 

@@ -84,6 +84,27 @@ async function catalogueFixtureDependencies(root:string){
  return {placeIndex:cities,catalogue,regionIndex:catalogue.regions};
 }
 export type FixtureMode = 'catalogue' | 'api';
+export const fixtureClockStart = '2026-10-15T12:00:00Z';
+/** Fixture-only presentation. Never changes timestamps, selections or expiry checks. */
+function describeSyntheticGeography<T>(value:T, now:number):T {
+ const notice=`Synthetic offline fixture; no live Geoapify/GeoNames data. Simulated clock starts ${fixtureClockStart}, now ${new Date(now).toISOString()}; freshness uses this clock, not host wall-clock time. Expired selections still require resolution again. Dates are rehearsal dates, not tonight's forecast.`;
+ const visit=(input:unknown):unknown=>{
+  if(Array.isArray(input))return input.map(visit);
+  if(!input || typeof input!=='object')return input;
+  const record=Object.fromEntries(Object.entries(input).map(([key,item])=>[key,visit(item)]));
+  if(typeof record.attribution==='string' && typeof record.dataClass==='string'){
+   record.name=`Synthetic fixture (${record.name})`;
+   record.attribution=notice;
+   record.url='https://example.test/synthetic-geography';
+   delete record.licenseUrl;
+  }
+  return record;
+ };
+ const result=visit(value) as T;
+ const root=result as {availability?:{reason:string}};
+ if(root.availability)root.availability.reason=`${notice} ${root.availability.reason}`;
+ return result;
+}
 export function selectFixtureMode(args:string[]):FixtureMode { return args.includes('--api-fixture')?'api':'catalogue'; }
 export function validateFixtureResume(records:Array<{fixtureMode?:string;id?:string}>, mode:FixtureMode){
  if(records.some(record=>(record.fixtureMode??'catalogue')!==mode)) throw Error('Cannot mix fixture modes in resumed evidence');
@@ -92,7 +113,7 @@ export async function createFixtureServer(root:string, options:{mode?:FixtureMod
  const fixtureMode = options.mode ?? 'catalogue';
  if (!['catalogue','api'].includes(fixtureMode)) throw Error('Unknown fixture mode');
  let fixtureAttempts = 0;
- let logicalTime = Date.parse('2026-10-15T12:00:00Z');
+ let logicalTime = Date.parse(fixtureClockStart);
  const apiFetcher:typeof fetch = async input => {
   if (++fixtureAttempts > 500) throw Error('API fixture transport cap');
   const url = new URL(String(input));
@@ -124,8 +145,14 @@ export async function createFixtureServer(root:string, options:{mode?:FixtureMod
   }
   throw Error('Unexpected API fixture request; no live fallback');
  };
+ const api=createApiServices({geonamesUsername:'synthetic-fixture',geoapifyApiKey:'synthetic-fixture',userAgent:'NightSky offline journey (fixture@example.invalid)',fetcher:apiFetcher,now:()=>logicalTime+=1001});
  const dependencies:NightSkyDependencies = fixtureMode==='api'
-  ? {...createApiServices({geonamesUsername:'synthetic-fixture',geoapifyApiKey:'synthetic-fixture',userAgent:'NightSky offline journey (fixture@example.invalid)',fetcher:apiFetcher,now:()=>logicalTime+=1001}),
+  ? {discoveryProvider:{
+      resolvePlace:async input=>describeSyntheticGeography(await api.discoveryProvider.resolvePlace(input),logicalTime),
+      resolveRegion:async input=>describeSyntheticGeography(await api.discoveryProvider.resolveRegion(input),logicalTime),
+      search:async input=>describeSyntheticGeography(await api.discoveryProvider.search(input),logicalTime),
+      details:async input=>describeSyntheticGeography(await api.discoveryProvider.details(input),logicalTime),
+     },selectedPlaceResolver:{resolve:async input=>describeSyntheticGeography(await api.selectedPlaceResolver.resolve(input),logicalTime)},
      placeIndexLoader:async()=>{throw Error('API fixture must not load local cities');}}
   : await catalogueFixtureDependencies(root);
  let external=0,id=0,revision=0;let budget=new EvidenceBudget();const app=express();app.use(express.json({limit:'32kb'}));

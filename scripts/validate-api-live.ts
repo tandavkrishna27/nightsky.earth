@@ -14,6 +14,8 @@ import { timeWindowSchema } from '../shared/nightsky/common';
 
 export const ENVELOPE='api-live-v1-12-3-600-zero-retries';
 export const CASES=['Hanle, India','Kodaikanal, India','Munnar, India'] as const;
+export const HYDERABAD_ENVELOPE='owner-hyderabad-v1-4-1-120-zero-retries';
+const packetFor=(envelope:string)=>envelope===HYDERABAD_ENVELOPE?{envelope:HYDERABAD_ENVELOPE,cases:['Hyderabad, Telangana, India'],maxRequests:4,maxPerProvider:1,deadlineMs:120000}:{envelope:ENVELOPE,cases:[...CASES],maxRequests:12,maxPerProvider:3,deadlineMs:600000};
 type Provider='geoapify'|'met'|'weatherapi'|'openweather';
 type Point={latitude:number;longitude:number};
 type Attempt={sequence:number;provider:Provider;caseName:string;status:number|null;bytes:number;elapsedMs:number;outcome:'started'|'received'|'failed'};
@@ -22,19 +24,20 @@ const caps:Record<Provider,number>={geoapify:262144,met:4194304,weatherapi:52428
 const refused=()=>Error('Validation request refused.');
 
 export function createLiveGuard(options:{approved:string;providers:Provider[];fetcher:typeof fetch;persist:(row:Attempt)=>Promise<void>;now?:()=>number;attemptTimeoutMs?:number}) {
+ const packet=packetFor(options.approved);
  const now=options.now??(()=>performance.now()); const started=now(); const abort=new AbortController();
- const timer=setTimeout(()=>abort.abort(),600000); timer.unref();
+ const timer=setTimeout(()=>abort.abort(),packet.deadlineMs); timer.unref();
  let caseName=''; let point:Point|undefined; let fatal=false;
  const used=new Set<string>(); const attempts:Attempt[]=[]; const counts:Partial<Record<Provider,number>>={};
  function selectCase(name:string, selected?:Point) {
-  if(!(CASES as readonly string[]).includes(name)) throw refused();
+  if(!packet.cases.includes(name)) throw refused();
   caseName=name; point=selected;
  }
  const fetcher:typeof fetch=async(input,init)=>{
   let row:Attempt|undefined; let controller:AbortController|undefined; let timeout:ReturnType<typeof setTimeout>|undefined;
   let reader:ReadableStreamDefaultReader<Uint8Array>|undefined;let dispatchedAt:number|undefined;
   try {
-   if(options.approved!==ENVELOPE||fatal||abort.signal.aborted||now()-started>=600000||!caseName||input instanceof Request) throw refused();
+   if(options.approved!==packet.envelope||fatal||abort.signal.aborted||now()-started>=packet.deadlineMs||!caseName||input instanceof Request) throw refused();
    const url=new URL(String(input));
    const provider=(Object.keys(endpoints) as Provider[]).find(id=>endpoints[id]===url.origin+url.pathname);
    if(!provider||!options.providers.includes(provider)||url.username||url.password||url.hash||(init?.method??'GET')!=='GET'||init?.body) throw refused();
@@ -47,12 +50,12 @@ export function createLiveGuard(options:{approved:string;providers:Provider[];fe
    }
    if([...url.searchParams].length!==Object.keys(expected).length||Object.entries(expected).some(([key,value])=>!value||url.searchParams.get(key)!==value)) throw refused();
    const key=provider+':'+caseName;
-   if(used.has(key)||(counts[provider]??0)>=3||attempts.length>=12) throw refused();
+   if(used.has(key)||(counts[provider]??0)>=packet.maxPerProvider||attempts.length>=packet.maxRequests) throw refused();
    // Charge the batch before asynchronous persistence, so concurrent attempts cannot race caps.
    used.add(key); counts[provider]=(counts[provider]??0)+1;
    row={sequence:attempts.length+1,provider,caseName,status:null,bytes:0,elapsedMs:0,outcome:'started'}; attempts.push(row);
    try {await options.persist({...row});} catch {fatal=true;abort.abort();throw refused();}
-   if(abort.signal.aborted||now()-started>=600000) throw refused();
+   if(abort.signal.aborted||now()-started>=packet.deadlineMs) throw refused();
    controller=new AbortController();
    const signal=AbortSignal.any([controller.signal,abort.signal,...(init?.signal?[init.signal]:[])]);
    let rejectAbort:(error:Error)=>void=()=>{};
@@ -76,13 +79,13 @@ export function createLiveGuard(options:{approved:string;providers:Provider[];fe
   } catch {if(row)row.outcome='failed';controller?.abort();void reader?.cancel().catch(()=>{});throw refused();}
   finally {if(timeout)clearTimeout(timeout);if(row&&dispatchedAt!==undefined)row.elapsedMs=Math.max(0,Math.round(now()-dispatchedAt));if(row)try{await options.persist({...row});}catch{fatal=true;abort.abort();} }
  };
- return {fetcher,selectCase,attempts,get stopped(){return fatal||abort.signal.aborted||now()-started>=600000;},close(){clearTimeout(timer);abort.abort();}};
+ return {fetcher,selectCase,attempts,get stopped(){return fatal||abort.signal.aborted||now()-started>=packet.deadlineMs;},close(){clearTimeout(timer);abort.abort();}};
 }
 
-export function checkedValidationQuota(quota:Pick<PersistentQuota,'reserve'|'setProviderState'>,stop:()=>void) {
+export function checkedValidationQuota(quota:Pick<PersistentQuota,'reserve'|'setProviderState'>,stop:()=>void,stopOnDenial=false) {
  return {
   async reserve(provider:string,cost:number) {
-   try {const reservation=await quota.reserve(provider,cost);if(!reservation.allowed&&['quota-state-unavailable','quota-clock-rollback','quota-persistence-failed'].includes(reservation.reason))stop();return reservation;}
+   try {const reservation=await quota.reserve(provider,cost);if(!reservation.allowed&&(stopOnDenial||['quota-state-unavailable','quota-clock-rollback','quota-persistence-failed'].includes(reservation.reason)))stop();return reservation;}
    catch {stop();throw refused();}
   },
   async setProviderState(provider:string,state:{disabled?:boolean;blockedUntil?:number}) {
@@ -117,15 +120,17 @@ export function forecastValidationFacts(value:unknown,window:{startUtc:string;en
 
 /** Conservative exact locality selection; no extra geocoding or timezone calls. */
 export function selectPublicRecord(name:string, records:Awaited<ReturnType<typeof geoapifyRecords>>['items']) {
- const boxes:Record<string,number[]>={'Hanle, India':[32,34,77,80],'Kodaikanal, India':[9,11,76,79],'Munnar, India':[9,11,76,78]};
+ const boxes:Record<string,number[]>={'Hyderabad, Telangana, India':[17,18,78,79],'Hanle, India':[32,34,77,80],'Kodaikanal, India':[9,11,76,79],'Munnar, India':[9,11,76,78]};
  const box=boxes[name];if(!box)return undefined;
  const matches=records.map(row=>row.record).filter(r=>r.name.toLowerCase()===name.split(',')[0].toLowerCase()&&r.latitude>=box[0]&&r.latitude<=box[1]&&r.longitude>=box[2]&&r.longitude<=box[3]&&r.timeZoneEvidence.status==='verified'&&r.timeZoneEvidence.timeZone==='Asia/Kolkata');
  return matches.length===1?matches[0]:undefined;
 }
 
 export async function runValidation(args:string[],environment:Record<string,string|undefined>, dependencies:{fetcher?:typeof fetch;pause?:()=>Promise<void>}={}) {
- if(args.length===0)return {mode:'offline',envelope:ENVELOPE,cases:CASES,maxRequests:12,maxPerProvider:3,deadlineMs:600000,retries:0};
- if(args.length!==1||args[0]!=='--live'||environment.NIGHTSKY_LIVE_APPROVED_ENVELOPE!==ENVELOPE)throw refused();
+ const hyderabad=args.length===1&&(args[0]==='--hyderabad-proposal'||args[0]==='--hyderabad-live');
+ const packet=packetFor(hyderabad?HYDERABAD_ENVELOPE:ENVELOPE);
+ if(args.length===0||args.length===1&&args[0]==='--hyderabad-proposal')return {mode:'offline',...packet,retries:0};
+ if(args.length!==1||args[0]!== (hyderabad?'--hyderabad-live':'--live')||environment.NIGHTSKY_LIVE_APPROVED_ENVELOPE!==packet.envelope)throw refused();
  const config=parseWeatherConfiguration(environment);
  const batch=environment.NIGHTSKY_LIVE_BATCH_ID;
  if(!batch||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(batch)||!config.quotaPath||!environment.NIGHTSKY_GEOAPIFY_API_KEY||environment.NIGHTSKY_DISCOVERY_MODE!=='api'||environment.NIGHTSKY_GEONAMES_USERNAME||environment.NIGHTSKY_LIVE_GEOAPIFY_ADMITTED!=='yes'||!config.providers?.length)throw refused();
@@ -140,13 +145,13 @@ export async function runValidation(args:string[],environment:Record<string,stri
   journal=await open(join(dirname(config.quotaPath),`live-${batch}.jsonl`),'wx',0o600);
   let journalBytes=0;let tail=Promise.resolve();
   const persist=(value:unknown)=>{const line=JSON.stringify(value)+'\n';journalBytes+=Buffer.byteLength(line);if(journalBytes>262144)throw refused();const next=tail.then(async()=>{await journal!.write(line);await journal!.sync();});tail=next;return next;};
-  await persist({envelope:ENVELOPE,batch,startedAt:new Date().toISOString()});
+  await persist({envelope:packet.envelope,batch,startedAt:new Date().toISOString()});
   guard=createLiveGuard({approved:environment.NIGHTSKY_LIVE_APPROVED_ENVELOPE!,providers:['geoapify',...enabled],fetcher:dependencies.fetcher??fetch,persist});
-  const checkedQuota=checkedValidationQuota(quota,()=>guard!.close());
+  const checkedQuota=checkedValidationQuota(quota,()=>guard!.close(),hyderabad);
   const http=new ApiHttpClient({geoapifyApiKey:environment.NIGHTSKY_GEOAPIFY_API_KEY,userAgent:environment.NIGHTSKY_LOCATION_USER_AGENT??'NightSky.earth/1.0 (nightsky.earth2026@gmail.com)',quota:checkedQuota,fetcher:guard.fetcher});
   const collection=createConfiguredWeatherCollection({...environment,NIGHTSKY_WEATHER_PROVIDERS:enabled.join(','),NIGHTSKY_WEATHER_ADMITTED_PROVIDERS:enabled.filter(id=>config.admitted.includes(id)).join(',')},{quota:checkedQuota,fetcher:guard.fetcher})!;
   const store=new ApiSelectionStore();const start=Date.now();const results:unknown[]=[];let usableCases=0;
-  for(const name of CASES) {
+  for(const name of packet.cases) {
    if(guard.stopped)break;
    guard.selectCase(name);const caseStart=performance.now();
    try {
@@ -166,10 +171,10 @@ export async function runValidation(args:string[],environment:Record<string,stri
    // Respect the per-source minimum start spacing between public cases.
    if(!guard.stopped)await (dependencies.pause?.()??new Promise(resolve=>setTimeout(resolve,1100)));
   }
-  const report={mode:'live',envelope:ENVELOPE,batch,finishedAt:new Date().toISOString(),status:guard.stopped?'stopped':'completed',usableCases,validation:usableCases===3&&!guard.stopped?'all-admitted-sources-have-samples':'partial-failed-or-skipped',attempts:guard.attempts,results,skippedProviders:config.providers.filter(id=>!enabled.includes(id)),limitations:['Integration sample only; no forecast accuracy claim.','RSS is sampled, not peak.','No raw responses retained.']};
+  const report={mode:'live',envelope:packet.envelope,batch,finishedAt:new Date().toISOString(),status:guard.stopped?'stopped':'completed',usableCases,validation:usableCases===packet.cases.length&&!guard.stopped?'all-admitted-sources-have-samples':'partial-failed-or-skipped',attempts:guard.attempts,results,skippedProviders:config.providers.filter(id=>!enabled.includes(id)),limitations:['Integration sample only; no forecast accuracy claim.','RSS is sampled, not peak.','No raw responses retained.']};
   await persist({report});return report;
  } finally {guard?.close();await journal?.close();await quota.close();}
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href) {
- runValidation(process.argv.slice(2),process.env).then(report=>console.log(JSON.stringify(report)),()=>{console.error(JSON.stringify({status:'refused-or-failed',envelope:ENVELOPE,reason:'Check approval, admission, private configuration and retained quota/journal state. No automatic retry.'}));process.exitCode=1;});
+ runValidation(process.argv.slice(2),process.env).then(report=>console.log(JSON.stringify(report)),()=>{console.error(JSON.stringify({status:'refused-or-failed',envelope:process.argv[2]==='--hyderabad-live'?HYDERABAD_ENVELOPE:ENVELOPE,reason:'Check approval, admission, private configuration and retained quota/journal state. No automatic retry.'}));process.exitCode=1;});
 }

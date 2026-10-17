@@ -37,7 +37,7 @@ Files: `docs/product/v1-conversation-acceptance.md`, `tests/fixtures/v1-conversa
 - [x] Register tests in aggregate suite; update V1 tracker and acceptance mapping, retaining historical/event/native-host/hosting/publication gates.
 - [x] Advance internal package revision within 1.0.x to distinguish changed bytes; this is V1, not new product scope.
 - [x] Independent review; affected/full tests, types, package builds, controlled model-answer review with evidence limits.
-- [ ] Commit/push and observe exact-commit CI; report remaining native-host acceptance honestly.
+- [x] Commit/push completed at `b10f05451cb7ccd0cc6c77b4faabefbd6b4d7e66`; coordinator verified all six exact-commit CI jobs successful during this turn in [run 39029122239](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39029122239). Native acceptance remains scoped to the later owner-reported Fictionvale invocation; full skills/answer acceptance stays open.
 
 ## Execution ruling
 

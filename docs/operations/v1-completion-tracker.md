@@ -1,8 +1,14 @@
 # V1 completion tracker
 
+Latest local integration: [local experience completion](local-experience-completion-20261017.md) — three lanes implemented and independently reviewed; local aggregate 1,478 passed / 0 failed / 2 skipped, with the six newly registered Hyderabad cases separately passing in the 21-test affected suite. Types, packages and synthetic compiled-runtime checks passed. Exact-commit CI is checked after push. Real Hyderabad calls and native full-skill/answer acceptance remain pending.
+
 Updated: 17 October 2026. **Current plan: API-first, multiple suitable sources, no exhaustive owned global catalogue prerequisite.** This tracker supersedes earlier acquisition-wave sequencing. See the [owner decision](api-search-discovery-v1-decision.md), [regroomed execution plan](../superpowers/plans/2026-10-17-api-first-v1-regroom.md) and [27-ticket acceptance matrix](v1-remaining-ticket-release-matrix.md).
 
-Latest completed execution: [source/native results](source-native-acceptance-results-20261017.md), commit `18d1be04f5921758bb6fb7b8c3556787e50c1ac7`, [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39027586708). Current work: [V1 outdoor conversation plan](../superpowers/plans/2026-10-17-v1-outdoor-conversation.md). All agreed outdoor defaults, activity-aware discovery, clarification and conversation-quality acceptance belong to V1.
+Latest completed implementation: `b10f05451cb7ccd0cc6c77b4faabefbd6b4d7e66`, internal package **1.0.15**, [outdoor conversation evidence](v1-outdoor-conversation-evidence-20261017.md): **1,475 passed / 0 failed / 2 skipped** and **11/11 controlled-agent cases**. The controlled cases are not native-client acceptance. These are retained results, not tests rerun by this reconciliation; the coordinator verified [exact-commit CI run 39029122239](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39029122239) successful during this turn.
+
+Owner-reported native evidence at **17:22 on 17 October 2026**: Codex successfully invoked resolve for `Fictionvale`. This establishes a native tool invocation from the owner's pasted report. Synthetic provenance and a fixed 15 October expiry are misleading in that result; it does not establish a real provider result, current snapshot freshness, full skill/reference loading or end-to-end answer acceptance. The earlier blanket tool-exposure blocker is therefore superseded for this observed invocation. See the [current reconciliation and finite acceptance checklist](v1-acceptance-reconciliation-20261017.md).
+
+Current local experience work is **implemented and independently reviewed offline**: A clarifies synthetic fixture provenance and clock; B delivers real API setup plus the executable [bounded Hyderabad proposal](hyderabad-owner-real-api-setup.md); C reconciles acceptance evidence. See [integration evidence](local-experience-completion-20261017.md). The current increment's aggregate result and exact-commit CI remain pending coordinator recording; the b10f054 results above describe the preceding baseline. Native skill/reference loading and the full real API/model journey remain pending. This remains within blocks 1–3 and does not authorize provider requests. All agreed outdoor defaults, activity-aware discovery, clarification and conversation quality remain V1.
 
 ## Remaining sequence — one checklist
 
@@ -17,8 +23,7 @@ These six blocks group the original tickets; they are not new tickets or a guara
 | 5 | Submission and publication | Later; explicit authorization required | Official validation/review and authorized publication; 15/16 |
 | 6 | Pilot and feedback | Later | Real invited-user evidence; 17 |
 
-Latest local milestone: [three-session completion run](parallel-completion-run-20261017.md), integrating geography, history and events with the API planner/runtime, privacy, package and rehearsal changes. **1,446 Node tests passed, zero failed, two skipped**; 214 ERA5 and 245 geography Python tests passed (13 skips); types, builds, both local packages and compiled runtime checks passed. Integration and its documentation follow-up are pushed at `627c3769c7bf3ea335444eaab864258381c1b807`; [all six exact-commit CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39023699488). The preceding baseline `bc8de008` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39019791036); that earlier result does not validate this newer integration.
-
+Latest local milestone is the 1.0.15 implementation and verification above. The earlier [three-session integration](parallel-completion-run-20261017.md) and [source/native continuation](source-native-acceptance-results-20261017.md) remain dated evidence; their test/CI counts must not be read as the current total.
 Current block 1 deliverables: distinct hosted historical method and one successful bounded pilot; staged opt-in geometry retrieval/discovery with snapshot evidence; IGN civil meteor guidance and bounded radiant sampling. See the [latest wave evidence](activation-integration-wave-20261017.md). Full history admission/baseline, real geometry acceptance and remaining event references stay open. The one-request history allowance is consumed; no further live calls are implied.
 
 ## Next validation preparation
@@ -29,14 +34,9 @@ Three parallel preparations now map to the existing blocks, not new waves:
 | --- | --- | --- |
 | 1: geography | [Country selection results](source-native-acceptance-results-20261017.md) | Structured and revised filter-free attempts both empty; allowances consumed. Point discovery remains independent. Country geometry acceptance remains open |
 | 1: history | [Annual result and accounting](source-native-acceptance-results-20261017.md) | Accounting added preserving counters; one annual request passed: 8,784 hours, no missing/nulls. Allowance consumed. Production method/full-baseline admission remains open |
-| 3: experience | [Native installation](native-acceptance-path-20261017.md) and [V1 behaviour contract](../product/v1-outdoor-discovery-contract.md) | 1.0.14 installed; refreshed tool exposure remains unresolved. Outdoor behaviour correction and conversation variants are V1 acceptance. Claude deferred |
+| 3: experience | [Native installation](native-acceptance-path-20261017.md) and [V1 behaviour contract](../product/v1-outdoor-discovery-contract.md) | 1.0.15 installed; owner reports a native Fictionvale resolve invocation at 17:22. Fixture provenance/freshness correction, real API and full skills/answer acceptance remain open. Claude deferred |
 
-Offline preparation was followed by exactly one owner-approved Geoapify selection request, which stopped empty. No historical request, private ledger reset, installation or deployment occurred. The earlier history runner was not suitable
-for a standalone calendar-year probe; this gap is explicit rather than using a
-full-baseline request or weakening its decoder. Current original counts remain
-unchanged. Validation evidence for these preparation changes is recorded in
-[next validation preparation](next-validation-preparation-20261017.md): **1452 tests passed, zero failed, two skipped**, all type checks passed; exact pushed-commit CI is checked separately.
-
+The two approved country-selection variants returned empty. The later approved annual history request passed 8,784 hours with zero missing/null hours; both live allowances are consumed. These supersede earlier preparation-only statements. History production admission/full baseline and actual geographic acceptance remain open. Original counts remain unchanged.
 ## Where we stand
 
 Original executable headings: **12 Done / 9 Partial / 6 Not started = 27**. Original numbered groups: **6 Done / 10 Partial / 3 Not started = 19**. A scope change is not implementation evidence and adds no completion credit. Done means the original local deliverable, not production readiness or immunity from regression checks.
@@ -45,7 +45,7 @@ Original executable headings: **12 Done / 9 Partial / 6 Not started = 27**. Orig
 - An opt-in API discovery implementation is implemented and locally verified: GeoNames/Geoapify adapters and source-revision selection. Legacy catalogue modes remain available; initial Geoapify live connectivity passed, while broader provider acceptance remains pending.
 - API mode resolves names remotely and does not require local GeoNames/OSM files. Legacy modes still use their reference artifacts; do not delete those files on behalf of legacy runtime users.
 - Bulk planet receipt/build, exhaustive candidate membership/footprint preparation and their capacity gates are **deferred outside V1**. Do not resume them to close V1.
-- Historical-weather capability remains required for source-route evaluation. API-first access must preserve defined period, quality, timezone and missingness semantics; current prepared-history code is retained but does not establish an on-demand API route.
+- Historical-weather capability remains required. The optional operator-build/cache and read-only serving route is implemented; a successful annual probe does not establish an admitted 1991–2020 baseline. Request handlers never acquire history.
 - Event/source gaps, client integration, owner testing and later hosted/publication gates remain explicit.
 
 The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom-20261017.md) preserves engineering evidence and failed attempts. Synthetic/retained tests do not establish live API suitability or actual release acceptance.
@@ -176,7 +176,7 @@ Original ticket counts remain **12 Done / 9 Partial / 6 Not started**. This wave
 
 Current wave local aggregate: **1,462 passed / 0 failed / 2 skipped**; types, build, packages and compiled runtimes passed. Independent review found no material findings. The wave was pushed as `887cb46925b448783f45826895d36f94ceed7860`; [all six exact-commit CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39026264217).
 
-## Source and native acceptance continuation
+## Source and native acceptance continuation (dated history; current status above)
 
 See [continuation plan](../superpowers/plans/2026-10-17-source-native-acceptance.md). The [revised geography executor](geography-filter-probe-handoff-20261017.md) is implemented and reviewed offline under a new one-request envelope. [History usage reconciliation](history-usage-readiness-20261017.md) records the prior one-credit estimate and owner confirmation of no outside use; old packet implementation prerequisites were corrected. Requests and actual ledger mutation remain pending their concrete approvals.
 
@@ -194,7 +194,7 @@ The owner-approved [outdoor discovery contract](../product/v1-outdoor-discovery-
 | --- | --- |
 | 1 — sources/capabilities | Annual history response shape passed; full baseline/method admission remains. Both Vatican selection variants were empty; do not require that particular lookup for ordinary point discovery. Remaining event coverage and source limitations remain explicit. No fresh live allowance carries forward |
 | 2 — assembly/measurement | Shared contract composed into all five workflows and all host packages; local 1.0.15 build/fixture checks. Actual configured-source/host measurements remain separate |
-| 3 — experience/audit | Eleven regression variants extend the existing fifteen journeys/twenty harness cases. Controlled model review is separate from native tool exposure and owner acceptance; the normal host tool-loading gap remains open |
+| 3 — experience/audit | Eleven regression variants extend the existing fifteen journeys/twenty harness cases. Controlled model review is separate from native tool exposure and owner acceptance; owner-reported native resolve works; complete native skills/reference and answer acceptance remains open |
 | 4–6 — hosting/publication/pilot | Still V1 release stages in sequence; no deployment/publication authorization or real-user pilot evidence is implied |
 
 No extra wave counter or ticket set is introduced. Original 12 Done / 9 Partial / 6 Not started remains scoped original-deliverable accounting, not a claim that the revised conversational experience is fully accepted. [Evidence](v1-outdoor-conversation-evidence-20261017.md) retains baseline/revised answers and limits. The two-minute native listener in the preceding continuation closed with no native tool calls and zero external attempts; an owner refresh did not change this active conversation's tool inventory. No nested-model retry is authorized.

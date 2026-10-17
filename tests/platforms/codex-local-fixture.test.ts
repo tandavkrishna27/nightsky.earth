@@ -24,3 +24,48 @@ test('preparation binds complete package to verified offline endpoint then close
  assert.equal(config.mcpServers.nightsky.url,report.endpoint);
  await assert.rejects(fetch(report.endpoint));
 });
+
+test('native fixture declares synthetic provenance and clock while retaining expiry', async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'ns-provenance-')),{mode:'api'});
+ try {
+  const resolved=await server.rpc('tools/call',{name:'resolve_place',arguments:{placeQuery:'Fictionvale'}});
+  assert.match(resolved.result.content[0].text,/synthetic.*fixture/i);
+  assert.match(resolved.result.content[0].text,/2026-10-15T12:00:00/);
+  assert.match(resolved.result.content[0].text,/wall.clock/i);
+  const match=resolved.result.structuredContent.matches[0];
+  assert.match(match.fetchedAt,/^2026-10-15T/);
+  assert.match(match.expiresAt,/^2026-10-15T/);
+  assert.match(resolved.result.structuredContent.availability.reason,/Synthetic offline fixture/);
+  assert.ok(resolved.result.structuredContent.sources.every((s:{name:string})=>/synthetic/i.test(s.name)));
+  const selected={placeId:match.placeId,sourceRevision:match.sourceRevision};
+  const details=await server.rpc('tools/call',{name:'get_observing_location_details',arguments:selected});
+  assert.equal(details.result.isError,undefined);
+  assert.match(details.result.content[0].text,/synthetic/i);
+  server.advanceFixtureTime(3600001);
+  const expired=await server.rpc('tools/call',{name:'get_observing_location_details',arguments:selected});
+  assert.equal(expired.result.isError,true);
+  assert.equal(server.externalAttempts(),0);
+ } finally {await server.close();}
+});
+
+test('human listener closes at its requested duration and reports bounded fixture context',async()=>{
+ const {prepareCodexLocalFixture}=await import('../../scripts/prepare-codex-local-fixture');
+ const root=mkdtempSync(join(tmpdir(),'ns-duration-'));
+ const report=await prepareCodexLocalFixture(root,0,true,1);
+ assert.equal(report.sessionSeconds,1);
+ assert.equal(report.listenerRunning,false);
+ assert.equal(report.fixtureClock.start,'2026-10-15T12:00:00Z');
+ const listener=JSON.parse(readFileSync(join(root,'listener-report.json'),'utf8'));
+ assert.equal(listener.listenerRunning,false);
+ assert.equal(listener.externalAttempts,0);
+ await assert.rejects(fetch(report.endpoint));
+});
+
+test('human session duration is explicit and bounded without changing model or tool caps',async()=>{
+ const {validateFixtureSessionSeconds}=await import('../../scripts/prepare-codex-local-fixture');
+ assert.equal(validateFixtureSessionSeconds(),600);
+ assert.equal(validateFixtureSessionSeconds(1800),1800);
+ for(const invalid of [0,-1,1801,1.5,Infinity,NaN]) assert.throws(()=>validateFixtureSessionSeconds(invalid));
+ const {limits}=await import('../../scripts/complete-model-journey-test');
+ assert.equal(limits.deadlineMs,120000);assert.equal(limits.calls,12);
+});

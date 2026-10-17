@@ -39,6 +39,8 @@ test('API rehearsal resolves immutable snapshots and plans discovered candidates
         assert.equal(origin.timeZoneEvidence.status, 'verified');
         assert.equal(origin.timeZone, 'Europe/London');
         const found = await call('search_observing_locations', { placeId: origin.placeId, sourceRevision: origin.sourceRevision });
+        assert.match(found.availability.reason,/Synthetic offline fixture/);
+        assert.ok(found.sources.every((source:{name:string})=>source.name.startsWith('Synthetic fixture')));
         const selected = found.candidates[0];
         assert.equal(selected.name, 'Fiction Park');
         assert.equal(selected.accessEvidence.status, 'unknown');
@@ -47,6 +49,9 @@ test('API rehearsal resolves immutable snapshots and plans discovered candidates
         assert.equal(details.matches[0].sourceRevision, selected.sourceRevision);
         const window = { startUtc: '2026-10-15T18:00:00Z', endUtc: '2026-10-16T06:00:00Z', timeZone: 'Europe/London' };
         const plan = await call('plan_observing_session', { ...ref, window, activity: 'general-stargazing' });
+        const geographySources=plan.sources.filter((source:{name:string})=>/geoapify/i.test(source.name));
+        assert.ok(geographySources.length>0);
+        assert.ok(geographySources.every((source:{name:string;attribution:string})=>source.name.startsWith('Synthetic fixture') && /host wall-clock/.test(source.attribution)));
         assert.equal(plan.place.placeId, selected.placeId);
         assert.equal(plan.place.sourceRevision, selected.sourceRevision);
         assert.equal(plan.evidence.weather.forecasts[0].samples[0].values.totalCloudCover.value, 12);

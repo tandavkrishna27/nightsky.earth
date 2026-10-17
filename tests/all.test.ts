@@ -196,3 +196,4 @@ import "./platforms/codex-local-fixture.test";
 import "./operations/geometry-filter-probe.test";
 import "./platforms/outdoor-contract-package.test";
 import "./skills/conversation-acceptance.test";
+import "./operations/hyderabad-owner-validation.test";
