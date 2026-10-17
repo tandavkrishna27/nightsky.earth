@@ -60,3 +60,9 @@ See [browser admission review](light-pollution-browser-admission-20261017.md) fo
 ## Final local verification
 
 The full offline regression run passed **1,666 / 0 failures / 2 skipped** in 228.8 seconds. It loaded before the last five-point concurrency fix; all **110** focused light-pollution cases were independently rerun after that fix and passed. Post-fix types/build/package/compiled checks also passed. Exact-commit CI will rerun the final aggregate on Linux and Windows; its status is pending at this commit. No live provider calls occurred.
+
+The final implementation commit `8a87540` was rerun locally: **1,669 passed / 0 failed / 2 skipped** in 242.5 seconds. [CI run 39051514152](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39051514152) passed five jobs but failed the Windows focused pilot tests: 30/60 ms test deadlines expired before slow durable accounting completed, so no transport had started. The production code correctly refused late dispatch; the tests incorrectly assumed it had started. This requires test synchronization repair and a fresh exact-commit CI run, not a relaxed production deadline.
+
+The owner has approved fresh dedicated accounting and the exact two-point pilot above. Approval remains unused until final checks pass; no provider request or private ledger initialization has occurred yet.
+
+The test-only synchronization repair passed independent review and coordinator verification (11/11); the seven-suite command passed 111/111, and the implementer repeated 132 checks across concurrent runs. No production limits changed. Fresh CI is required for this follow-up.
