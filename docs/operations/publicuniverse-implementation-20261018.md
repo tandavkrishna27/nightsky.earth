@@ -54,3 +54,7 @@ The release code is pushed and its exact CI run passed. This evidence-only follo
 - Compiled backend SHA-256: `034d22b5df7ecc3ce80845eaef3345c1800bd7486d60e432d56b83e61ec241fd`.
 - Compiled synthetic API and light-pollution checks passed. `node scripts/verify-public-universe-runtime.mjs` confirms 18 tools with Pub selected, all four new names, unavailable status when unadmitted and zero external attempts. CI includes this compiled check and an explicit 11-module optional-source step.
 - Package installation is not native-host conversation acceptance. No real-data server was started and no provider allowance was spent.
+
+## Follow-up Windows fixture correction
+
+The documentation follow-up CI exposed a race in the existing ERA5 native-child test: receipt existence could precede completion of its text write. The inert test child now closes a sibling staging file before atomically replacing the receipt. Production containment, handshake, deadline and termination behaviour are unchanged. Independent review found no issues. Verification passed: all 16 tests in the affected module, 20 repeated native containment cases, and the complete ERA5 offline suite (222 tests, 8 skipped). The final correction commit is subject to the same six-job CI before handoff; no package rebuild is required for this test-only change.

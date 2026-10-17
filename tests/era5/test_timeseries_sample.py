@@ -242,7 +242,10 @@ class Tests(unittest.TestCase):
                 + 'sys.path.insert(0, ' + repr(str(Path(live.__file__).parent)) + ')\n'
                 + 'import timeseries_sample\ntimeseries_sample.require_containment()\n'
                 + 'timeseries_sample.require_handoff()\n'
-                + 'Path(sys.argv[1]).write_text("contained")\ntime.sleep(60)\n')
+                # Publish only after the receipt is closed: existence alone must
+                # never expose a just-created, not-yet-written file to the parent.
+                + 'receipt=Path(sys.argv[1])\nstaging=receipt.with_suffix(".tmp")\n'
+                + 'staging.write_text("contained")\nstaging.replace(receipt)\ntime.sleep(60)\n')
             job = live.job_class()(536870912, 1)
             child = None
             try:
