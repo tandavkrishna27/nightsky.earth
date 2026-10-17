@@ -97,3 +97,19 @@ for (const state of ["stale", "unavailable", "unknown", "unsupported", "availabl
   assert.equal(compared.comparisons[0].factors.find((f: any) => /cloud and precipitation forecast/.test(f.name)).impact, ["available", "partial"].includes(state) ? "favorable" : "unknown");
   assert.ok(compared.comparisons[0].candidateWindows.every((w: any) => w.weatherCoverage === (["available", "partial"].includes(state) ? "available" : "unknown")));
 });
+test("legacy malformed empty source rejects while collection isolates the same malformed source", async () => {
+  for (const source of [null, false, 0, "", {}]) {
+    const raw = { status: "unavailable" as const, reason: "Synthetic unavailable", source } as any;
+    const legacy = handlers({ weatherProvider: { getForecast: async () => raw } });
+    await assert.rejects(() => legacy.get("get_night_conditions")!({ ...input, includeHourly: true }));
+    const isolated = handlers({ weatherCollection: { getForecasts: async () => ({ outcomes: [{ providerId: "met", result: raw }, { providerId: "weatherapi", result: fixture("Independent source", 10) }] }) } });
+    const result = (await isolated.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
+    assert.equal(result.providerOutcomes[0].status, "unavailable"); assert.equal(result.forecasts.length, 1); assert.equal(result.forecasts[0].source.name, "Independent source");
+  }
+});
+test("legacy forecast identity remains authoritative over malformed empty-result metadata", async () => {
+  const raw = { ...fixture("Authoritative source", 10), source: false } as any;
+  const tools = handlers({ weatherProvider: { getForecast: async () => raw } });
+  const result = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
+  assert.equal(result.forecasts.length, 1); assert.equal(result.sources[0].name, "Authoritative source");
+});

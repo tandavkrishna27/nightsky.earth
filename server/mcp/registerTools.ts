@@ -384,10 +384,13 @@ async function getNightConditionsForPlan(placeId: string, window: { startUtc: st
     let result: WeatherProviderResult;
     try {
       result = userAgent || dependencies.weatherProvider
-        ? validateWeatherResult("met", await (dependencies.weatherProvider ?? { getForecast: (place, requestedWindow) => getMetNorwayForecast(place, requestedWindow, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId, latitude: coordinates.latitude, longitude: coordinates.longitude }, window))
+        ? await (dependencies.weatherProvider ?? { getForecast: (place, requestedWindow) => getMetNorwayForecast(place, requestedWindow, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId, latitude: coordinates.latitude, longitude: coordinates.longitude }, window)
         : { status: "unavailable", reason: "MET Norway is not configured because its required application/contact User-Agent has not been set." };
     } catch { result = { status: "unavailable", reason: "The weather source could not complete this request." }; }
-    collection = { outcomes: [{ providerId: "met", result: { ...result, source: weatherSources(result, dependencies.weatherProvider !== undefined)[0] } }] };
+    // Legacy injection rejects supplied malformed identity, while forecast.source remains authoritative.
+    // Keep this validation outside the network failure catch and before collection-style isolation.
+    const source = weatherSources(result, dependencies.weatherProvider !== undefined)[0];
+    collection = { outcomes: [{ providerId: "met", result: validateWeatherResult("met", { ...result, source }) }] };
   }
   const forecasts = collection.outcomes.flatMap(({ result }) => result.forecast ? [result.forecast] : []);
   if (!includeHourly) for (const forecast of forecasts) {
