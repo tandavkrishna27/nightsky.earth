@@ -1,3 +1,5 @@
+import { registerLightPollutionTools } from './lightPollutionTools';
+import type { LightPollutionProvider } from '../../shared/nightsky/lightPollution';
 import { registerOptionalSkyTools } from './optionalSkyTools';
 import type { OptionalSkyProviders } from '../providers/skyConfiguration';
 import { apiAttributionText } from "../places/api/attribution";
@@ -44,6 +46,7 @@ export interface NightSkyCache {
 /** Runtime dependencies are shared by every stateless MCP request. */
 export interface NightSkyDependencies {
   skyProviders?: OptionalSkyProviders;
+  lightPollutionProviders?: LightPollutionProvider[];
   /** Operator-selected rehearsal scope; never controlled by request metadata. */
   discoveryProvider?: DiscoveryProvider;
   selectedPlaceResolver?: SelectedPlaceResolver;
@@ -172,6 +175,11 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
 
   if (toolMode === "resolver-only") return;
+  if (dependencies.lightPollutionProviders) registerLightPollutionTools(server, dependencies.lightPollutionProviders, async input => {
+    const index = dependencies.discoveryProvider ? undefined : dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
+    if (!index && !dependencies.selectedPlaceResolver) throw new Error('Resolve a place before requesting light pollution.');
+    return resolvePoint(input, index);
+  });
   if (dependencies.skyProviders) registerOptionalSkyTools(server, dependencies.skyProviders, async input => {
     const index = dependencies.discoveryProvider ? undefined : dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index && !dependencies.selectedPlaceResolver) throw new Error('Resolve a place before requesting observer data.');

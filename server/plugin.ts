@@ -1,3 +1,5 @@
+import { createConfiguredLightPollutionProviders } from './providers/lightPollution/configuration';
+import { createLightPollutionBrowserProviders } from './providers/lightPollution/browser';
 import { createConfiguredSkyProviders, parseSkyConfiguration, SKY_QUOTA_POLICIES } from './providers/skyConfiguration';
 import { SEVENTIMER_QUOTA_POLICY } from './providers/weather/sevenTimer';
 /** Standalone assistant backend: no website, Vite or legacy news proxy. */
@@ -103,6 +105,8 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     const weatherConfig = parseWeatherConfiguration(process.env);
     const climateProvider = discoveryMode === "api" ? await createConfiguredApiHistoryProvider(historyConfiguration ?? {}) : undefined;
     const skyConfig = parseSkyConfiguration(process.env);
+    let lightPollution: Awaited<ReturnType<typeof createConfiguredLightPollutionProviders>> | undefined;
+    let browserLightPollution: ReturnType<typeof createLightPollutionBrowserProviders> | undefined;
     let skyQuota: PersistentQuota | undefined;
     let quota: PersistentQuota | undefined;
     try {
@@ -111,9 +115,12 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
       if (process.env.NIGHTSKY_SKY_QUOTA_STATE_PATH === weatherConfig.quotaPath) throw Error('Sky quotas require their own private ledger.');
       skyQuota = await createPersistentQuota({path:process.env.NIGHTSKY_SKY_QUOTA_STATE_PATH,now:Date.now,policies:SKY_QUOTA_POLICIES.filter(p=>skyConfig.selected.includes(p.providerId as typeof skyConfig.selected[number]))});
     }
+    lightPollution = await createConfiguredLightPollutionProviders(process.env,{fetcher:overrides.fetcher});
+    browserLightPollution = createLightPollutionBrowserProviders(process.env);
+    const lightPollutionProviders = lightPollution.selected.length || process.env.NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED === 'true' ? [...lightPollution.providers,...browserLightPollution.providers] : undefined;
     const skyProviders = createConfiguredSkyProviders(process.env,{quota:skyQuota,fetcher:overrides.fetcher});
     const weatherCollection = createConfiguredWeatherCollection(process.env,{quota,fetcher:overrides.fetcher});
-    const finish = (app: express.Express) => { let closing: Promise<void> | undefined; runtimeCleanup.set(app, () => closing ??= Promise.all([quota?.close(),skyQuota?.close()]).then(()=>{})); return app; };
+    const finish = (app: express.Express) => { let closing: Promise<void> | undefined; runtimeCleanup.set(app, () => closing ??= Promise.all([lightPollution?.close(),browserLightPollution?.close(),quota?.close(),skyQuota?.close()]).then(()=>{})); return app; };
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);
     const toolMode = pluginToolMode({ NIGHTSKY_MCP_TOOL_MODE: process.env.NIGHTSKY_MCP_TOOL_MODE });
     if (discoveryMode === "api") {
@@ -126,7 +133,7 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
             fetcher: overrides.fetcher,
             quota: quota ?? { reserve: async () => ({allowed:false,reason:"quota-state-unavailable"}) },
         });
-        return finish(createNightSkyPluginApp({ ...services, climateProvider, skyProviders, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
+        return finish(createNightSkyPluginApp({ ...services, climateProvider, skyProviders, lightPollutionProviders, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
     }
     const global = pluginGlobalConfiguration({NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST:process.env.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST,NIGHTSKY_GLOBAL_CATALOGUE_SHA256:process.env.NIGHTSKY_GLOBAL_CATALOGUE_SHA256,NIGHTSKY_OSM_REGIONAL_MANIFEST:process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST,NIGHTSKY_OSM_REGIONAL_SHA256:process.env.NIGHTSKY_OSM_REGIONAL_SHA256,NIGHTSKY_OSM_CANDIDATE_INDEX:process.env.NIGHTSKY_OSM_CANDIDATE_INDEX});
     const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });
@@ -136,8 +143,8 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     const placeIndex = files ? await loadGeoNamesPlaceIndex() : undefined;
     if(files && !placeIndex) throw Error("Global catalogue requires the local GeoNames place index.");
     const catalogue = files && placeIndex ? createGlobalCatalogue(files,{cities:placeIndex}) : undefined;
-    return finish(createNightSkyPluginApp({ skyProviders, weatherCollection, catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
-    } catch (error) { await Promise.all([quota?.close(),skyQuota?.close()]); throw error; }
+    return finish(createNightSkyPluginApp({ skyProviders, lightPollutionProviders, weatherCollection, catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
+    } catch (error) { await Promise.all([lightPollution?.close(),browserLightPollution?.close(),quota?.close(),skyQuota?.close()]); throw error; }
 }
 export async function startNightSkyPlugin(options: { gracefulSignals?: boolean; shutdownTimeoutMs?: number } = {}) {
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
