@@ -55,6 +55,15 @@ export const getTargetVisibilityInputSchema = z.strictObject({
 export const targetVisibilityResultSchema = resultSchema({
   sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
+  orientationSamples: z.array(z.strictObject({
+    atUtc: utcInstantSchema,
+    localTime: z.string().trim().min(1).max(160),
+    altitudeDegrees: z.number().finite().min(-90).max(90),
+    azimuthDegrees: z.number().finite().min(0).lt(360),
+    horizonBasis: z.literal("geometric-center"),
+    refraction: z.literal("none"),
+    azimuthReference: z.literal("true-north-clockwise"),
+  })).min(1).max(3).refine(rows => rows.every((row, i) => i === 0 || Date.parse(row.atUtc) > Date.parse(rows[i - 1]!.atUtc)), "Orientation timestamps must be unique and ascending").optional().describe("Positions only at the returned instants, including below-horizon samples. Not continuous tracking, terrain clearance or guaranteed visibility. Azimuth is unhelpful near zenith. Observer elevation is assumed zero."),
   target: z.strictObject({ targetId: z.string().trim().min(1).max(120), name: z.string().trim().min(1).max(160), targetType: z.enum(["sun", "moon", "planet", "star", "deep-sky-object", "comet", "asteroid"]) }),
   intervals: z.array(z.strictObject({
     ...localIntervalSchema.shape,

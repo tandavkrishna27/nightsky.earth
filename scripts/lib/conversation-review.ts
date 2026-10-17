@@ -3,7 +3,7 @@ import { z } from "zod";
 export const dimensions = ["intentFit", "constraintRetention", "clarificationQuality", "suitabilityReasoning", "evidenceAccuracy", "actionability", "toolHonesty", "continuity"] as const;
 export const criticalFailures = ["invented-access", "false-routing", "dropped-constraint", "fabricated-evidence", "listing-only-venue"] as const;
 export const evidenceKinds = ["fixture", "controlled-agent", "native-host", "owner-observed"] as const;
-export const requiredCases = ["hyderabad-corrections", "city-only", "explicit-observatory", "free-no-camping", "disconnected-no-search", "empty-data", "travel-unknown", "photography-learning", "family-mobility", "chosen-place", "date-change"] as const;
+export const requiredCases = ["hyderabad-corrections", "city-only", "explicit-observatory", "free-no-camping", "disconnected-no-search", "empty-data", "travel-unknown", "photography-learning", "family-mobility", "chosen-place", "date-change", "casual-scouting", "experienced-facilities", "casual-milky-way", "core-photography", "preference-change", "browser-denied", "quota-exhausted", "access-unknown", "restricted-site", "on-site-orientation"] as const;
 const text = z.string().trim().min(1);
 const caseSchema = z.object({
   id: z.enum(requiredCases), provenance: text,

@@ -519,3 +519,15 @@ test('missing and invalid source zones require explicit display choice at the ex
         assert.equal(point.longitude, 77);
     }
 });
+
+
+test('quota failure stays unavailable with explicit source attempts, never missing coverage',async()=>{
+ let calls=0;
+ const services=createApiServices({...config,quota:{reserve:async()=>({allowed:false,reason:'quota-exhausted'})},fetcher:async()=>{calls++;throw Error('must not dispatch');}});
+ const result=await services.discoveryProvider.resolvePlace({placeQuery:'Hyderabad'});
+ assert.equal(result.availability.status,'unavailable');
+ assert.equal(result.matches.length,0);
+ assert.ok(result.sourceAttempts?.every(row=>row.status==='quota-exhausted'));
+ assert.ok((result.sourceAttempts?.length??0)>0);
+ assert.equal(calls,0);
+});

@@ -4,7 +4,7 @@ import { registerOptionalSkyTools } from './optionalSkyTools';
 import type { OptionalSkyProviders } from '../providers/skyConfiguration';
 import { apiAttributionText } from "../places/api/attribution";
 import type { DiscoveryProvider, SelectedPlaceResolver } from "../places/api/types";
-import { planAnswerText, planAnswerSources, sourceLinkedText } from "./answerText";
+import { planAnswerText, planAnswerSources, sourceLinkedText, orientationAnswerText } from "./answerText";
 import * as z from "zod4";
 import { CatalogueRevisionError } from "../places/globalCatalogue";
 import { normalizeDiscoveryInput, searchDiscoveryInputSchema, searchDiscoveryResultSchema, candidateRefSchema, discoveryCoverageSchema, discoveryScopeSchema, originBasisSchema, resolveObservingRegionInputSchema, resolveObservingRegionResultSchema, getObservingLocationDetailsInputSchema, getObservingLocationDetailsResultSchema, type CatalogueReader, type RegionIndex, type CalculationPlace } from "../../shared/nightsky/discovery";
@@ -202,7 +202,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_target_visibility", {
     title: "Check when a sky target is above the horizon",
-    description: "Calculate geometric above-horizon intervals for the Sun, Moon, planets, or the Milky Way core at a resolved named place or revision-pinned candidate with explicit display time zone. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
+    description: "Calculate geometric above-horizon intervals and up to three timestamped orientation samples for the Sun, Moon, planets, or the Milky Way core at a resolved named place or revision-pinned candidate with explicit display time zone. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
     inputSchema: getTargetVisibilityInputSchema,
     outputSchema: targetVisibilityResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_target_visibility,
@@ -211,7 +211,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index && !dependencies.selectedPlaceResolver) throw new Error("The local GeoNames place index is unavailable.");
     const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     const result = await getTargetVisibility(input.targetQuery, { placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, point);
-    return { content: [{ type: "text", text: sourceLinkedText(`Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}`, result.sources) }], structuredContent: result };
+    return { content: [{ type: "text", text: sourceLinkedText(`Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}\n${orientationAnswerText(result)}`, result.sources) }], structuredContent: result };
   });
 
   server.registerTool("get_night_conditions", {

@@ -1,3 +1,4 @@
+import {createRequire} from 'node:module';
 import test from "node:test";
 import assert from "node:assert/strict";
 import { astronomyWindowResultSchema, targetVisibilityResultSchema } from "../../shared/nightsky/astronomy";
@@ -172,4 +173,63 @@ test('no astronomical darkness is distinguished from Sun below geometric horizon
  assert.ok(rows.length);
  assert.equal(Date.parse(rows[0].startUtc),Date.parse(selected.startUtc));
  assert.ok(Date.parse(rows[0].endUtc)<Date.parse(selected.endUtc));
+});
+
+
+test("orientation samples bind three exact instants with local labels and geometric semantics", async () => {
+  const w = window("2026-12-13T15:30:00Z", "2026-12-14T00:30:00Z", "Asia/Kolkata");
+  const result = await getTargetVisibility("Jupiter", place(7), w, index);
+  const samples = (result as any).orientationSamples;
+  assert.equal(samples?.length, 3);
+  assert.deepEqual(samples.map((s:any) => s.atUtc), [new Date(w.startUtc).toISOString(), new Date((Date.parse(w.startUtc)+Date.parse(w.endUtc))/2).toISOString(), new Date(Date.parse(w.endUtc)-1).toISOString()]);
+  for (const sample of samples) {
+    assert.equal(sample.horizonBasis, "geometric-center");
+    assert.equal(sample.refraction, "none");
+    assert.equal(sample.azimuthReference, "true-north-clockwise");
+    assert.ok(sample.localTime.includes("Asia/Kolkata"));
+    assert.ok(sample.altitudeDegrees >= -90 && sample.altitudeDegrees <= 90);
+    assert.ok(sample.azimuthDegrees >= 0 && sample.azimuthDegrees < 360);
+  }
+  assert.equal(targetVisibilityResultSchema.safeParse({...result, orientationSamples:[samples[1],samples[0]]}).success,false);
+  assert.equal(targetVisibilityResultSchema.safeParse({...result, orientationSamples:[samples[0],samples[0]]}).success,false);
+  assert.equal(targetVisibilityResultSchema.safeParse({...result, orientationSamples:Array(4).fill(samples[0])}).success,false);
+  const {orientationSamples: _, ...legacy} = result as any;
+  assert.equal(targetVisibilityResultSchema.safeParse(legacy).success,true);
+});
+
+test("orientation samples preserve below-horizon rows and Milky Way core scope", async () => {
+ const result = await getTargetVisibility("Milky Way core", place(5), window("2026-01-01T00:00:00Z", "2026-01-02T00:00:00Z", "Europe/Madrid"), index);
+ assert.equal((result as any).orientationSamples?.length,3);
+ assert.ok((result as any).orientationSamples.some((s:any)=>s.altitudeDegrees<0));
+ assert.ok(result.caveats.some(c=>c.includes("core")));
+});
+
+
+test("orientation samples agree with direct engine positions across hemispheres and timezone offsets", async()=>{
+ const engine = createRequire(import.meta.url)('astronomy-engine') as typeof import('astronomy-engine');
+ for(const id of [1,3,7]){
+  const city=index.getById(id)!;
+  const w=window('2026-12-13T15:30:00Z','2026-12-14T00:30:00Z',city.timeZone);
+  const result=await getTargetVisibility('Jupiter',place(id),w,index);
+  for(const sample of result.orientationSamples!){
+   const time=new Date(sample.atUtc), observer=new engine.Observer(city.latitude,city.longitude,0);
+   const equatorial=engine.Equator(engine.Body.Jupiter,time,observer,true,true);
+   const expected=engine.Horizon(time,observer,equatorial.ra,equatorial.dec);
+   assert.ok(Math.abs(sample.altitudeDegrees-expected.altitude)<1e-8);
+   assert.ok(Math.abs(sample.azimuthDegrees-expected.azimuth)<1e-8);
+   assert.ok(Date.parse(sample.atUtc)>=Date.parse(w.startUtc)&&Date.parse(sample.atUtc)<Date.parse(w.endUtc));
+   assert.ok(sample.localTime.includes(city.timeZone));
+   const expectedLocal = new Intl.DateTimeFormat('en',{timeZone:city.timeZone,year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(time);
+   assert.equal(sample.localTime,`${expectedLocal} (${city.timeZone})`);
+  }
+ }
+});
+
+
+test("orientation schema rejects out-of-range and reordered samples without wrapping interpolation",async()=>{
+ const r=await getTargetVisibility('Jupiter',place(7),window('2026-12-13T15:30:00Z','2026-12-14T00:30:00Z','Asia/Kolkata'),index);
+ const row=r.orientationSamples![0]!;
+ for(const patch of [{azimuthDegrees:360},{azimuthDegrees:-1},{altitudeDegrees:91},{altitudeDegrees:Number.NaN},{atUtc:'2026-12-13T21:00:00+05:30'},{refraction:'normal'}])assert.equal(targetVisibilityResultSchema.safeParse({...r,orientationSamples:[{...row,...patch}]}).success,false);
+ const wrap=[{...row,azimuthDegrees:359},{...r.orientationSamples![1]!,azimuthDegrees:1}];
+ assert.equal(targetVisibilityResultSchema.safeParse({...r,orientationSamples:wrap}).success,true);
 });

@@ -57,6 +57,9 @@ jobs:
       - name: Exercise light pollution contracts, API, worker, workflows and bounded pilot offline
         run: node --import tsx --test tests/providers/light-pollution-contract.test.ts tests/providers/darkskysites.test.ts tests/providers/light-pollution-browser.test.ts tests/providers/darkskysites-browser.test.ts tests/mcp/light-pollution-journeys.test.ts tests/skills/light-pollution-workflows.test.ts tests/operations/light-pollution-validation.test.ts
 
+      - name: Exercise host-aware outings and timestamped orientation offline
+        run: node --import tsx --test tests/skills/host-aware-outing.test.ts tests/skills/conversation-acceptance.test.ts tests/nightsky/astronomy.test.ts tests/mcp/answer-text.test.ts
+
       - name: Verify light pollution pilot defaults to a no-network proposal
         run: node --import tsx scripts/validate-light-pollution.ts --plan
 

@@ -110,6 +110,11 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
     sources: [CALCULATION_SOURCE], caveats: [...displayTimeZoneCaveats(coordinates), "Visibility intervals use a 0-degree geometric horizon; terrain, buildings, atmospheric extinction, and instrument limits are not modeled.", ...(milkyWay ? ["Milky Way core is represented by a fixed J2000 direction near Sagittarius; this is a seasonal direction estimate, not a star-field model."] : [])],
     sourceRevision:coordinates.sourceRevision,placeId: place.placeId,
     target: { targetId: milkyWay ? "milky-way-core" : `body:${match!.body.toLowerCase()}`, name: milkyWay ? "Milky Way core" : match!.body, targetType },
+    orientationSamples: Array.from(new Set([start, Math.floor((start + end) / 2), end - 1])).sort((a,b)=>a-b).map(instant => {
+      const position = positionAt(instant);
+      const atUtc = new Date(instant).toISOString();
+      return { atUtc, localTime: formatLocalInstant(atUtc, checkedWindow.timeZone, "en"), altitudeDegrees: clamp(position.altitude, -90, 90), azimuthDegrees: normalizeDegrees(position.azimuth), horizonBasis: "geometric-center" as const, refraction: "none" as const, azimuthReference: "true-north-clockwise" as const };
+    }),
     intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth), azimuthBasis: "maximum-altitude-sample", maximumAltitudeAtUtc: new Date(row.maximumAt).toISOString(), maximumAltitudeLocal: formatLocalInstant(new Date(row.maximumAt).toISOString(), checkedWindow.timeZone, "en") })),
   });
 }

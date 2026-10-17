@@ -1,5 +1,14 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.20 - host-aware complete outings
+
+Adds bounded timestamped geometric orientation samples for supported targets. Shared workflows compose available native tools, preserve independent user preferences, support scouting points, distinguish failure reasons and tailor preparation/on-site guidance. No new browser implementation, paid source, catalogue or deployment. Native-host conversation acceptance remains separate from offline checks.
+
+
+## V1 local revision 1.0.19 - outdoor discovery conversation
+
+Outdoor candidates precede hosted venues. Organisations are distinguished from exact observing sites. Missing travel limits do not block bounded discovery, and the assistant resolves candidates before requesting user pins. Disconnected tools remain explicit. Native conversation verification remains pending.
+
 ## V1 local revision 1.0.18 — clearer answers and relevant credits
 
 Keeps useful values and brief beginner explanations prominent, with mandatory linked credits beside the relevant data. Default answers omit unrelated catalogue references and duplicate bibliographies; full source and licence evidence remains in structured results. Selected and inferred meteor-shower guidance retains its relevant source. All five workflows now distinguish compact presentation from on-request evidence details. Place discovery explicitly evaluates a bounded shortlist before claiming a darkness range or nearest evaluated candidate. No new provider access, public browser admission, credits website or deployment is enabled by this change; native acceptance of the revised package remains separate from offline checks.

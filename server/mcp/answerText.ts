@@ -1,3 +1,4 @@
+import type { TargetVisibilityResult } from '../../shared/nightsky/astronomy';
 import type { SourceRecord } from '../../shared/nightsky/common';
 import type { PlanResult } from '../../shared/nightsky/planning';
 import { formatLocalInstant } from '../../shared/nightsky/format';
@@ -86,6 +87,16 @@ function twilightPhases(outer: Interval[], inner: Interval[], window: PlanResult
   });
 }
 
+/** Quote positions at their actual instants; no interpolation or terrain claims. */
+export function orientationAnswerText(target: TargetVisibilityResult): string {
+  const samples = target.orientationSamples ?? [];
+  if (!samples.length) return 'Time-specific orientation samples unavailable; use an on-site sky app without inferring a bearing.';
+  const lines = ['Orientation: returned instants only; azimuth is clockwise from true north, altitude is height above the geometric horizon. No refraction; observer elevation assumed zero; terrain and obstructions are not modelled.'];
+  for (const sample of samples) lines.push(`${plain(target.target.name)} at ${plain(sample.localTime)}: altitude ${sample.altitudeDegrees.toFixed(1)} degrees; ${sample.altitudeDegrees >= 89 ? 'near zenith: compass direction is unhelpful' : `azimuth ${sample.azimuthDegrees.toFixed(1)} degrees`}${sample.altitudeDegrees <= 0 ? '; at or below the geometric horizon' : '; geometric position, not guaranteed visibility'}.`);
+  lines.push('Use your sky app to identify the target; request a new calculation for another time, not an interpolated track.');
+  return lines.join('\n');
+}
+
 /** A bounded answer-ready view. Detailed geometry remains available without becoming setup advice. */
 export function planAnswerText(plan: PlanResult, options: {target?: string; includeSourceLinks?: boolean} = {}): string {
   const lines = [
@@ -129,7 +140,6 @@ export function planAnswerText(plan: PlanResult, options: {target?: string; incl
   const moon = astronomy?.moon;
   if (moon) lines.push(`Moon illumination ${moon.illuminationPercent.toFixed(1)}%; observing impact remains unknown. Geometric below-horizon timing does not establish minimal moonlight.`);
   if (moon) lines.push(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees ${moon.maximumAltitudeAtUtc ? `at ${formatLocalInstant(moon.maximumAltitudeAtUtc, plan.requestedWindow.timeZone, 'en')}` : 'at time unknown'}; sampled maximum within this session, not a continuous optimum.`);
-  lines.push('No compass-direction setup advice is supplied. Use an on-site sky chart; sampled bearings are not whole-session directions.');
   const names = new Map([...(plan.evidence?.target ? [plan.evidence.target] : []), ...(plan.suggestions ?? [])].map(target => [target.target.targetId, target.target.name]));
   for (const row of plan.candidateWindows) {
     const start = row.localStart ?? formatLocalInstant(row.window.startUtc, row.window.timeZone, 'en');
@@ -141,6 +151,7 @@ export function planAnswerText(plan: PlanResult, options: {target?: string; incl
     for (const row of moon.belowHorizonIntervals ?? []) lines.push(`Moon centre below geometric horizon: ${row.localStart} to ${row.localEnd}, clipped to this session; not apparent limb moonset.`);
   }
   lines.push(...plan.gaps.map(gap => `Unknown or limitation: ${plain(gap)}`));
+  lines.push(...(plan.evidence?.target ? orientationAnswerText(plan.evidence.target).split('\n') : ['Time-specific orientation samples unavailable; use an on-site sky chart without invented bearings.']));
   const body: string[] = [];
   let bytes = 0;
   for (const line of lines) {

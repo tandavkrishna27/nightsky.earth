@@ -201,5 +201,176 @@
         ]
       }
     ]
+  },
+  {
+    "id": "casual-scouting",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "I am a casual stargazer near Hyderabad. Give me promising coordinates; I will investigate access.",
+        "expected": [
+          "Offer evaluated coordinates as scouting points with concise unknown access",
+          "Do not infer experience from scouting preference"
+        ],
+        "forbidden": [
+          "Require verified access before giving coordinates",
+          "Invent a safe stopping place"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "experienced-facilities",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "I am experienced but want easy parking and toilets this trip.",
+        "expected": [
+          "Prioritise practical requirements",
+          "Research approach evidence when tools permit"
+        ],
+        "forbidden": [
+          "Assume experienced means remote trekking"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "casual-milky-way",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "I want to see the Milky Way, just with my eyes.",
+        "expected": [
+          "Distinguish band and bright core when relevant",
+          "Ask date/place only as needed for local visibility"
+        ],
+        "forbidden": [
+          "Assume photography equipment is necessary"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "core-photography",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "Help me photograph the Milky Way core with my camera.",
+        "expected": [
+          "Ask camera lens and support for tailored settings",
+          "Evaluate darkness Moon and core opportunity separately"
+        ],
+        "forbidden": [
+          "Promise a usable photo from clear clouds alone"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "preference-change",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "Actually skip facilities; no driving limit, but no hiking.",
+        "expected": [
+          "Replace earlier constraints",
+          "Keep no hiking while widening candidate discovery"
+        ],
+        "forbidden": [
+          "Restore previous driving restriction"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "browser-denied",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "I declined Chrome access. Can we still plan?",
+        "expected": [
+          "Use exposed MCP and search if available",
+          "Keep missing numerical evidence unknown"
+        ],
+        "forbidden": [
+          "Claim browser inspection succeeded"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "quota-exhausted",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "The darkness tool reports quota_unavailable. Is this place too bright?",
+        "expected": [
+          "Explain quota is not coverage or brightness evidence",
+          "Reuse valid existing results and label research leads"
+        ],
+        "forbidden": [
+          "Report no coverage from quota failure"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "access-unknown",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "Can you give me the coordinates even if access is unknown?",
+        "expected": [
+          "Label scouting point and unknown approach",
+          "Keep known restrictions visible"
+        ],
+        "forbidden": [
+          "Invent night permission"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "restricted-site",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "This candidate is officially closed at night.",
+        "expected": [
+          "Do not recommend entering after closure",
+          "Offer other candidates without inventing permission"
+        ],
+        "forbidden": [
+          "Treat darkness as permission"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "on-site-orientation",
+    "provenance": "Owner-approved 2026-10-18 host-aware outing design; specification, not executed evidence",
+    "context": "Use only exposed capabilities and retain previous constraints",
+    "turns": [
+      {
+        "user": "Where should I look at 11 pm after I get there?",
+        "expected": [
+          "Use exact location date timezone and timestamped target samples",
+          "Ask app preference and provide short on-site guidance"
+        ],
+        "forbidden": [
+          "Turn a maximum-altitude bearing into a whole-session direction"
+        ]
+      }
+    ]
   }
 ]

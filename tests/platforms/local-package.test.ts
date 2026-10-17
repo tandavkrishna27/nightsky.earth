@@ -129,9 +129,9 @@ test('all complete workflows prefer aggregate planning and require evidence chec
   }
 });
 
-test('each packaged skill puts clarification and no-direction rules ahead of historical guidance',()=>{
+test('each packaged skill puts clarification and timestamped-direction rules ahead of historical guidance',()=>{
  const files=unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
- for(const name of names){const text=strFromU8(files[`skills/${name}/SKILL.md`]);const primary=text.slice(0,2500);assert.match(primary,/Do not give compass-direction setup advice/);assert.match(primary,/stop and ask one display-time-zone question/);assert.match(primary,/complete source links/);}
+ for(const name of names){const text=strFromU8(files[`skills/${name}/SKILL.md`]);const primary=text.slice(0,2500);assert.match(primary,/Give on-site directions only from timestamped returned orientation evidence/);assert.match(primary,/stop and ask one display-time-zone question/);assert.match(primary,/complete source links/);}
 });
 
 test('every packaged workflow ends with a final orientation and source audit',()=>{

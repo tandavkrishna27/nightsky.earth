@@ -218,3 +218,5 @@ import './providers/darkskysites-browser.test';
 import './mcp/light-pollution-journeys.test';
 import './skills/light-pollution-workflows.test';
 import './operations/light-pollution-validation.test';
+
+import './skills/host-aware-outing.test';

@@ -77,7 +77,7 @@ test('API-mode MCP boundary keeps location credits but omits duplicate and unrel
  }finally{await server.close();}
 });
 
-test('planning text exposes complete source links and omits setup bearings',async()=>{
+test('planning text exposes source links and only timestamped setup bearings',async()=>{
  const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-text-')));
  try{
   const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'planet-observing',target:'Jupiter',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
@@ -85,9 +85,9 @@ test('planning text exposes complete source links and omits setup bearings',asyn
   assert.match(text,/https:\/\/www.geonames.org\//);
   assert.match(text,/https:\/\/github.com\/cosinekitty\/astronomy/);
   assert.match(text,/https:\/\/example.test\/forecast/);
-  assert.match(text,/No compass-direction setup advice/);
+  assert.match(text,/Orientation: returned instants only/);
   assert.match(text,/05:34.*Europe\/London/);
-  assert.doesNotMatch(text,/looking SE|face SE|azimuth/i);
+  assert.doesNotMatch(text,/looking SE|face SE/);
  }finally{await server.close();}
 });
 
@@ -148,7 +148,7 @@ test('answer brief leads with issued forecast values and exclusive Sydney twilig
   // Long geometry previously pushed provider facts outside the bounded text entirely.
   plan.candidateWindows=Array.from({length:8},()=>({window:plan.requestedWindow,localStart:'geometry '.repeat(50),localEnd:'geometry '.repeat(50)}));
   const text=planAnswerText(plan);
-  const front=text.split('No compass-direction')[0];
+  const front=text.split('Orientation:')[0];
   assert.match(front,/Synthetic forecast issued 2026-10-15T12:00:00Z/);
   assert.match(front,/valid 2026-10-15T22:00:00Z.*totalCloudCover 12 %.*instant sample/i);
   assert.match(front,/visibility unknown/);
@@ -236,14 +236,48 @@ test('Sydney brief labels twilight starts and ends and pairs Moon maximum with i
  try{
   const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990002',activity:'astrophotography',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Australia/Sydney'}}});
   const plan=response.result.structuredContent,moon=plan.evidence.astronomy.moon;
-  const front=planAnswerText(plan).split('No compass-direction')[0];
+  const front=planAnswerText(plan).split('Orientation:')[0];
   assert.match(front,/Civil twilight phase: START Oct 16, 2026, 05:47 \(Australia\/Sydney\); END Oct 16, 2026, 06:17 \(Australia\/Sydney\)/);
   assert.match(front,/Nautical twilight phase: START Oct 16, 2026, 05:17.*END Oct 16, 2026, 05:47/);
   assert.match(front,/Astronomical twilight phase: START Oct 16, 2026, 05:00.*END Oct 16, 2026, 05:17/);
   assert.ok(front.includes(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees at ${formatLocalInstant(moon.maximumAltitudeAtUtc,'Australia/Sydney','en')}`));
   delete moon.maximumAltitudeAtUtc;
-  const unknown=planAnswerText(plan).split('No compass-direction')[0];
+  const unknown=planAnswerText(plan).split('Orientation:')[0];
   assert.match(unknown,/Moon maximum sampled altitude .*time unknown/);
   assert.doesNotMatch(unknown,/undefined/);
+ }finally{await server.close();}
+});
+
+
+test('target MCP boundary exposes timestamped geometry without continuous visibility claims', async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-orientation-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'get_target_visibility',arguments:{placeId:'place:v1:geonames:990001',targetQuery:'Jupiter',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
+  const samples=response.result.structuredContent.orientationSamples;
+  assert.equal(samples.length,3);
+  const text=response.result.content.map((r:any)=>r.text??'').join('\n');
+  assert.match(text,/returned instants only/);
+  assert.match(text,/true north/);
+  assert.match(text,/terrain/);
+  assert.equal(server.externalAttempts(),0);
+ }finally{await server.close();}
+});
+
+
+test('bounded plan retains viewing window and limitations before optional orientation',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-orientation-budget-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'planet-observing',target:'Jupiter',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent;
+  plan.summary='context '.repeat(350);
+  plan.evidence.astronomy=undefined;
+  plan.evidence.weather={...plan.evidence.weather,forecasts:[]};
+  plan.candidateWindows=[{window:plan.requestedWindow,localStart:'ESSENTIAL_START',localEnd:'ESSENTIAL_END',darknessOverlapIntervals:[{localStart:'DARK_START',localEnd:'DARK_END'}]}];
+  plan.gaps=['ESSENTIAL LIMITATION'];
+  const text=planAnswerText(plan);
+  assert.match(text,/ESSENTIAL_START to ESSENTIAL_END/);
+  assert.match(text,/DARK_START to DARK_END/);
+  assert.match(text,/ESSENTIAL LIMITATION/);
  }finally{await server.close();}
 });
