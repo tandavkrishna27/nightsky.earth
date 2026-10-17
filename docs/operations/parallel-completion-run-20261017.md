@@ -76,7 +76,7 @@ runtime and privacy integration.
 - Public rehearsal archive SHA-256:
   `9eeaf7c22e88636ae8e2072aa51391a6eb007923113163db68e6440ec9642f86`.
 
-Full aggregate Node suite: **1,446 passed, zero failed, two skipped** (1,448 total; 244.6 seconds). Exact-commit CI is checked after push; its result will be appended without treating prior CI as evidence for this integration.
+Full aggregate Node suite: **1,446 passed, zero failed, two skipped** (1,448 total; 244.6 seconds). Reviewed implementation pushed as `a34af2420f0289c54bc31f7357732434eb4e1dd1`. [Its exact-commit CI run](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39023674592) was queued at documentation time. Check the run conclusion directly; prior CI is not evidence for this integration. Any documentation-only follow-up has its own [branch CI run](https://github.com/tandavkrishna27/nightsky.earth/actions?query=branch%3Acodex%2Fplugin-v1).
 
 ## What remains inside the fixed blocks
 
