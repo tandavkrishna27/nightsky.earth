@@ -87,6 +87,8 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (conditions && !isError(conditions)) {
     sourceRecords.push(...conditions.sources, ...conditions.forecasts.map(({ source }) => source));
     addAll(caveats, conditions.caveats);
+    for (const outcome of conditions.providerOutcomes ?? []) if (outcome.status !== "available") gaps.push(`${outcome.source.name} ${outcome.status}: ${outcome.reason}`.slice(0, 400));
+    for (const steps of conditions.nightContext.forecastStepsDuringDarkness) if (!steps.validTimesUtc.length) gaps.push(`${steps.source} supplies no forecast samples during calculated astronomical darkness.`);
     if (conditions.forecasts.some(({ samples }) => samples.some(({ values }) => Object.values(values).some((value) => value?.periodEndUtc)))) caveats.add("Precipitation intervals may overlap or extend beyond the session; never sum overlapping totals or treat longer-period values as hourly.");
     factors.push(...weatherFactors(conditions, input.activity, input.units, input.locale));
     if (!conditions.forecasts.length) {
@@ -94,7 +96,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       gaps.push(`${capitalize(conditions.availability.status)}: ${conditions.availability.reason}`);
     }
     for (const forecast of conditions.forecasts) {
-      for (const missing of forecast.missingFields) gaps.push(`${humanize(missing.field)} is missing: ${missing.reason}`);
+      for (const missing of forecast.missingFields) gaps.push(`${forecast.source.name}: ${humanize(missing.field)} is missing: ${missing.reason}`.slice(0, 400));
       if (forecast.availability.status === "out-of-horizon") gaps.push(`${forecast.source.name} does not forecast this date yet; no forecast is inferred.`);
     }
     if (!conditions.forecasts.length) gaps.push(`Weather forecast unavailable: ${conditions.availability.reason}`);
@@ -222,10 +224,14 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (input.activity === "eclipse") gaps.push("A general session interval cannot establish eclipse contacts or safe viewing; use the selected event's source-linked visibility and safety guidance.");
   if (conditions && !isError(conditions) && conditions.forecasts.some(forecast => forecast.samples.some(sample => sample.values.totalCloudCover && !sample.values.totalCloudCover.periodEndUtc))) gaps.push("Cloud forecasts contain instant or sparse samples, not cloud coverage intervals; no continuous weather window is inferred.");
   if (["meteor-shower", "deep-sky-imaging", "astrophotography", "aurora"].includes(input.activity) && !(astronomy && !isError(astronomy) && astronomy.moon.horizonBasis === "geometric-center-zero-degrees" && astronomy.moon.belowHorizonIntervals !== undefined)) gaps.push("Moon illumination is whole-session context; Moon-above-horizon timing is not supplied for the entire candidate window.");
-  const cloudCoverMax = conditions && !isError(conditions)
-    ? maxForecastValue(conditions, "totalCloudCover")
-    : undefined;
-  const prep = [...getPreparationChecklist(input.activity, { experience: input.experience, equipment: input.equipment, cloudCoverMax }), ...(learningGuide?.guidance ?? [])].slice(0, 20);
+  const weather = conditions && !isError(conditions) ? conditions : undefined;
+  const onlyForecast = weather?.forecasts.length === 1 ? weather.forecasts[0] : undefined;
+  const cloudValues = onlyForecast?.samples.flatMap(sample => sample.values.totalCloudCover?.unit === "%" ? [sample.values.totalCloudCover.value] : []) ?? [];
+  const cloudCoverMax = cloudValues.length ? Math.max(...cloudValues) : undefined;
+  const checklist = getPreparationChecklist(input.activity, { experience: input.experience, equipment: input.equipment, cloudCoverMax });
+  if ((weather?.forecasts.length ?? 0) > 1) checklist[2] = "Review each source's cloud forecast and valid times before departure; sources may disagree and are not combined.";
+  const sourceCloudWarnings = (weather?.forecasts ?? []).flatMap(forecast => forecast.samples.some(sample => sample.values.totalCloudCover?.unit === "%" && sample.values.totalCloudCover.value >= 70) ? [`${forecast.source.name} includes substantial cloud in its samples; check the source's exact valid times before choosing a night.`] : []);
+  const prep = [...checklist, ...sourceCloudWarnings, ...(learningGuide?.guidance ?? [])].slice(0, 20);
   const summary = makeSummary(input.activity, factors, conditions && !isError(conditions) ? conditions.availability.status : "unavailable", gaps);
   const target = targetVisibility && !isError(targetVisibility) ? targetVisibility : undefined;
   const candidateWindows = composeCandidateWindows(input.activity, input.window, astronomy && !isError(astronomy) ? astronomy : undefined, target ? [target] : suggestions, conditions && !isError(conditions) ? conditions : undefined, input.locale);
@@ -324,7 +330,7 @@ function weatherFactors(result: NightConditionsResult, activity: string, units: 
       const hasInstantValues = group.fields.some(field => forecast.samples.some(sample => sample.values[field] && (!sample.values[field]!.periodStartUtc || !sample.values[field]!.periodEndUtc)));
       const sampleNote = !hasCloudIntervals && group.label === "cloud and precipitation" ? (hasInstantValues ? " Instant samples present; not continuous coverage or a clear-night assessment." : " Whole-window cloud coverage is not established.") : "";
       const cloudNote = activity === "aurora" && group.label === "cloud and precipitation" ? " Clouds can obstruct the view independently of aurora activity." : "";
-      factors.push({ name: `${forecast.source.name} ${group.label} forecast`, assessment: `${parts.join("; ")}; ${forecast.samples.length} sample(s), ${validRange}.${sampleNote}${cloudNote}`, impact: group.label === "cloud and precipitation" && hasCloudIntervals ? aggregateImpact(impacts) : "unknown", sourceNames: [forecast.source.name] });
+      factors.push({ name: `${forecast.source.name.slice(0, 70)} ${group.label} forecast`, assessment: `${parts.join("; ")}; ${forecast.samples.length} sample(s), ${validRange}.${sampleNote}${cloudNote}`, impact: group.label === "cloud and precipitation" && hasCloudIntervals ? aggregateImpact(impacts) : "unknown", sourceNames: [forecast.source.name] });
     }
   }
   return factors;
@@ -342,14 +348,10 @@ function aggregateImpact(values: Factor["impact"][]): Factor["impact"] {
   if (values.every((value) => value === values[0])) return values[0]!;
   return "mixed";
 }
-function maxForecastValue(result: NightConditionsResult, field: "totalCloudCover"): number | undefined {
-  const values = result.forecasts.flatMap(({ samples }) => samples.flatMap(({ values }) => values[field] ? [values[field]!.value] : []));
-  return values.length ? Math.max(...values) : undefined;
-}
 function makeSummary(activity: string, factors: Factor[], weatherStatus: string, gaps: string[]): string {
   const darkness = factors.find(({ name }) => name === "Astronomical darkness")?.assessment;
-  const cloud = factors.find(({ name }) => /cloud and precipitation forecast/.test(name))?.assessment;
+  const clouds = factors.filter(({ name }) => /cloud and precipitation forecast/.test(name));
   const lead = `${capitalize(activity.replaceAll("-", " "))} plan`;
-  const cloudText = cloud ? cloud.replace(/[.;]+$/, "") : "cloud forecast unavailable";
+  const cloudText = clouds.length > 1 ? clouds.map(factor => `${factor.sourceNames.join(", ")}: ${factor.assessment.split(";")[0]}`).join("; ") : clouds[0]?.assessment.replace(/[.;]+$/, "") ?? "cloud forecast unavailable";
   return `${lead}: ${darkness ? `darkness ${darkness}` : "darkness data unavailable"}; forecast evidence ${weatherStatus}; ${cloudText}. ${gaps.length ? `${gaps.length} evidence gap(s) need attention.` : "No material evidence gaps were found."}`;
 }

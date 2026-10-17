@@ -19,7 +19,8 @@ import { searchSkyEvents } from "../events/catalog";
 import { getMetNorwayForecast, MET_NORWAY_SOURCE, type MetRateLimiter } from "../providers/weather/metNorway";
 import { sourceRecordSchema } from "../../shared/nightsky/common";
 import type { WeatherProviderResult } from "../providers/weather/types";
-import type { WeatherProvider } from "../providers/weather/types";
+import type { WeatherProvider, WeatherCollectionService, WeatherCollection } from "../providers/weather/types";
+import { configurationSource, validateWeatherCollection, validateWeatherResult } from "../providers/weather/collection";
 import { controlsFor, type UpstreamControls, type UpstreamProvider } from "../providers/upstreamControls";
 import { auroraOutlookResultSchema, getAuroraOutlookInputSchema, getNightConditionsInputSchema, nightConditionsResultSchema, type AuroraOutlookResult } from "../../shared/nightsky/weather";
 import { getNoaaAuroraOutlook } from "../providers/aurora/noaaSwpc";
@@ -61,6 +62,7 @@ export interface NightSkyDependencies {
   /** Operator-installed regional provider shared by direct and composed requests. */
   candidateProvider?: { search(input: SearchObservingLocationsInput, options: { place: SearchPlace }): ReturnType<typeof searchObservingLocations> };
   weatherProvider?: WeatherProvider;
+  weatherCollection?: WeatherCollectionService;
   weatherUserAgent?: string;
   weatherRateLimiter?: MetRateLimiter;
   auroraProvider?: (place: { placeId: string; latitude: number; longitude: number }, window: { startUtc: string; endUtc: string; timeZone: string }) => Promise<AuroraOutlookResult>;
@@ -87,6 +89,7 @@ export const V1_TOOL_ANNOTATIONS = {
 
 /** No domain tools are registered until their real handler and schema are ready. */
 export function registerNightSkyTools(server: McpServer, dependencies: NightSkyDependencies): void {
+  if (dependencies.weatherCollection && dependencies.weatherProvider) throw new TypeError("Configure weatherCollection or weatherProvider, not both.");
   const toolMode = dependencies.toolMode ?? "full";
   if (toolMode !== "full" && toolMode !== "resolver-only") throw new TypeError("Invalid MCP tool mode.");
   for (const timeout of Object.values(dependencies.providerTimeoutsMs ?? {})) {
@@ -205,45 +208,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index && !dependencies.selectedPlaceResolver) throw new Error("The local GeoNames place index is unavailable.");
     const coordinates = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-    const astronomy = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, coordinates);
-    const userAgent = dependencies.weatherUserAgent ?? process.env.MET_NORWAY_USER_AGENT;
-    const providerResult = userAgent || dependencies.weatherProvider
-      ? await (dependencies.weatherProvider ?? { getForecast: (place, window) => getMetNorwayForecast(place, window, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId: input.placeId, latitude:coordinates.latitude, longitude:coordinates.longitude }, input.window)
-      : { status: "unavailable" as const, reason: "MET Norway is not configured because its required application/contact User-Agent has not been set." };
-    const forecasts = providerResult.forecast ? [providerResult.forecast] : [];
-    if (!input.includeHourly) {
-      for (const forecast of forecasts) {
-        const chosen: typeof forecast.samples = [];
-        let lastBucket = -1;
-        for (const sample of forecast.samples) {
-          const bucket = Math.floor(Date.parse(sample.validAt) / (3 * 60 * 60 * 1000));
-          if (bucket !== lastBucket) chosen.push(sample);
-          lastBucket = bucket;
-        }
-        forecast.samples = chosen;
-      }
-    }
-    const darkness = astronomy.astronomicalDarkness;
-    const darknessIntervals = astronomicalDarknessIntervals(astronomy);
-    const forecastStepsDuringDarkness = forecasts.map((forecast) => ({
-      source: forecast.source.name,
-      validTimesUtc: forecast.samples.filter(({ validAt }) => darknessIntervals.some(interval => Date.parse(validAt) >= Date.parse(interval.startUtc) && Date.parse(validAt) <= Date.parse(interval.endUtc))).map(({ validAt }) => validAt),
-    }));
-    const result = nightConditionsResultSchema.parse({
-      availability: { status: providerResult.status, reason: providerResult.reason },
-      placeId: input.placeId,
-      ...candidatePointMetadata(coordinates),
-      window: input.window,
-      forecasts,
-      nightContext: {
-        darkness,
-        astronomicalDarknessIntervals: darknessIntervals,
-        moonIlluminationPercent: astronomy.moon.illuminationPercent,
-        forecastStepsDuringDarkness,
-      },
-      sources: weatherSources(providerResult, dependencies.weatherProvider !== undefined),
-      caveats: [...candidateZoneCaveats(coordinates), weatherCaveat(dependencies.weatherProvider !== undefined), ...(providerResult.deprecationWarning ? [providerResult.deprecationWarning] : [])],
-    });
+    const result = await getNightConditionsForPlan(input.placeId, input.window, index, dependencies, coordinates, input.includeHourly);
     return { content: [{ type: "text", text: `${result.sources[0].name}: ${result.availability.reason}` }], structuredContent: result };
   });
 
@@ -398,26 +363,47 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
 }
 
-async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex | undefined, dependencies: NightSkyDependencies, point?: CalculationPlace) {
+async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex | undefined, dependencies: NightSkyDependencies, point?: CalculationPlace, includeHourly = true) {
   const coordinates = point ?? resolvedCoordinatesForPlace(index!, placeId);
   if (!coordinates) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
   const astronomy = await getAstronomyWindow({ placeId, timeZone: window.timeZone }, window, index, point);
   const userAgent = dependencies.weatherUserAgent ?? process.env.MET_NORWAY_USER_AGENT;
-  const providerResult = userAgent || dependencies.weatherProvider
-    ? await (dependencies.weatherProvider ?? { getForecast: (place, requestedWindow) => getMetNorwayForecast(place, requestedWindow, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId, latitude:coordinates.latitude,longitude:coordinates.longitude }, window)
-    : { status: "unavailable" as const, reason: "MET Norway is not configured because its required application/contact User-Agent has not been set." };
-  const forecasts = providerResult.forecast ? [providerResult.forecast] : [];
-  const darkness = astronomy.astronomicalDarkness;
+  let collection: WeatherCollection;
+  if (dependencies.weatherCollection) {
+    // The runtime collection is bounded itself; enforce the same ceiling for host-injected services.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const fallback = () => ({ outcomes: [{ providerId: "met" as const, result: { status: "unavailable" as const, reason: "The weather collection could not complete this request.", source: UNSPECIFIED_WEATHER_SOURCE } }] });
+    try {
+      collection = await Promise.race([
+        Promise.resolve().then(() => dependencies.weatherCollection!.getForecasts({ placeId, latitude: coordinates.latitude, longitude: coordinates.longitude }, window)).then(validateWeatherCollection),
+        new Promise<WeatherCollection>(resolve => { timer = setTimeout(() => resolve(fallback()), 12_000); }),
+      ]);
+    } catch { collection = fallback(); }
+    finally { if (timer) clearTimeout(timer); }
+  } else {
+    let result: WeatherProviderResult;
+    try {
+      result = userAgent || dependencies.weatherProvider
+        ? validateWeatherResult("met", await (dependencies.weatherProvider ?? { getForecast: (place, requestedWindow) => getMetNorwayForecast(place, requestedWindow, { userAgent: userAgent!, fetcher: dependencies.fetcher, cache: dependencies.cache, rateLimiter: dependencies.weatherRateLimiter, controls: dependencies.upstreamControls, timeoutMs: dependencies.providerTimeoutsMs?.met }) }).getForecast({ placeId, latitude: coordinates.latitude, longitude: coordinates.longitude }, window))
+        : { status: "unavailable", reason: "MET Norway is not configured because its required application/contact User-Agent has not been set." };
+    } catch { result = { status: "unavailable", reason: "The weather source could not complete this request." }; }
+    collection = { outcomes: [{ providerId: "met", result: { ...result, source: weatherSources(result, dependencies.weatherProvider !== undefined)[0] } }] };
+  }
+  const forecasts = collection.outcomes.flatMap(({ result }) => result.forecast ? [result.forecast] : []);
+  if (!includeHourly) for (const forecast of forecasts) {
+    const buckets = new Set<number>();
+    forecast.samples = forecast.samples.filter(sample => { const bucket = Math.floor(Date.parse(sample.validAt) / 10_800_000); if (buckets.has(bucket)) return false; buckets.add(bucket); return true; });
+  }
+  const providerOutcomes = collection.outcomes.map(({ providerId, result }) => ({ providerId, status: result.status, reason: result.reason, source: result.forecast?.source ?? result.source ?? configurationSource(providerId) }));
+  const usable = collection.outcomes.flatMap(({ result }) => ["available", "partial", "stale"].includes(result.status) && result.forecast ? [result.forecast] : []).filter(forecast => ["available", "partial", "stale"].includes(forecast.availability.status) && forecast.samples.some(sample => Date.parse(sample.validAt) >= Date.parse(window.startUtc) && Date.parse(sample.validAt) <= Date.parse(window.endUtc)));
+  const status = !dependencies.weatherCollection ? collection.outcomes[0]!.result.status : !usable.length ? "unavailable" : collection.outcomes.length > 0 && collection.outcomes.every(({ result }) => result.status === "available" && result.forecast?.availability.status === "available") && usable.length === collection.outcomes.length ? "available" : "partial";
+  const reason = !dependencies.weatherCollection ? collection.outcomes[0]!.result.reason : status === "available" ? "All requested weather sources supplied the requested window." : status === "partial" ? "Some requested weather evidence is missing or incomplete; inspect each source outcome." : "No requested source supplied usable forecast samples in this window.";
   const darknessIntervals = astronomicalDarknessIntervals(astronomy);
-  const forecastStepsDuringDarkness = forecasts.map((forecast) => ({
-    source: forecast.source.name,
-    validTimesUtc: forecast.samples.filter(({ validAt }) => darknessIntervals.some(interval => Date.parse(validAt) >= Date.parse(interval.startUtc) && Date.parse(validAt) <= Date.parse(interval.endUtc))).map(({ validAt }) => validAt),
-  }));
   return nightConditionsResultSchema.parse({
-    availability: { status: providerResult.status, reason: providerResult.reason }, placeId, ...candidatePointMetadata(point), window, forecasts,
-    nightContext: { darkness, astronomicalDarknessIntervals: darknessIntervals, moonIlluminationPercent: astronomy.moon.illuminationPercent, forecastStepsDuringDarkness },
-    sources: weatherSources(providerResult, dependencies.weatherProvider !== undefined),
-    caveats: [...candidateZoneCaveats(point), weatherCaveat(dependencies.weatherProvider !== undefined), ...(providerResult.deprecationWarning ? [providerResult.deprecationWarning] : [])],
+    availability: { status, reason }, placeId, ...candidatePointMetadata(point), window, forecasts, providerOutcomes,
+    nightContext: { darkness: astronomy.astronomicalDarkness, astronomicalDarknessIntervals: darknessIntervals, moonIlluminationPercent: astronomy.moon.illuminationPercent, forecastStepsDuringDarkness: forecasts.map(forecast => ({ source: forecast.source.name, validTimesUtc: forecast.samples.filter(({ validAt }) => darknessIntervals.some(interval => Date.parse(validAt) >= Date.parse(interval.startUtc) && Date.parse(validAt) <= Date.parse(interval.endUtc))).map(({ validAt }) => validAt) })) },
+    sources: providerOutcomes.length ? providerOutcomes.map(outcome => outcome.source) : [UNSPECIFIED_WEATHER_SOURCE],
+    caveats: [...candidateZoneCaveats(point), weatherCaveat(dependencies.weatherProvider !== undefined || dependencies.weatherCollection !== undefined), ...collection.outcomes.flatMap(({ result }) => result.deprecationWarning ? [result.deprecationWarning] : [])],
   });
 }
 
