@@ -30,6 +30,8 @@ const record = (x: unknown): x is Record<string, unknown> => !!x && typeof x ===
 async function exists(path: string) { try { await lstat(path); return true; } catch (e) { if ((e as NodeJS.ErrnoException).code === 'ENOENT') return false; throw e; } }
 /** Check every ancestor and target: no symlink/junction traversal, network paths or alternate streams. */
 async function safePath(path: string) {
+    const normalized = path.replace(/\\/g, '/');
+    if (normalized.startsWith('//') || (process.platform === 'win32' && !/^[a-zA-Z]:[\\/]$/.test(parse(path).root))) throw new Error('Unsafe quota path.');
     if (!isAbsolute(path) || path.startsWith('\\\\') || path.includes('\0') || path.slice(parse(path).root.length).includes(':')) throw new Error('Unsafe quota path.');
     let cursor = dirname(path);
     for (;;) {

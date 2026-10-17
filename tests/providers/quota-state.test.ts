@@ -122,3 +122,20 @@ test('reservation persistence refusal prevents the discovery fetch entirely', as
  let calls = 0; const client = new ApiHttpClient({ userAgent: 'test', geoapifyApiKey: 'synthetic', quota: q, fetcher: async () => { calls++; return new Response('{}'); } });
  await assert.rejects(client.json('geoapify', '/v1/geocode/search', { text: 'test' })); assert.equal(calls, 0); await q.close();
 });
+test('discovery persists raw error headers before stalled or oversized response bodies', async t => {
+ for (const status of [401, 403, 429]) for (const bodyKind of ['stalled', 'oversized']) {
+  const f = await fixture(t); const now = Date.now;
+  let q = await createPersistentQuota({ path: f.path, now, policies: [{ providerId: 'geoapify', accountLabel: 'fixture-account', hourlyLimit: 200, dailyLimit: 1000 }] });
+  await q.initializeVerifiedBudget({ verifiedUnusedBudget: true, evidence: 'Synthetic unused account verified' });
+  const body = bodyKind === 'stalled' ? new ReadableStream<Uint8Array>({ start() {} }) : new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new Uint8Array(262145)); controller.close(); } });
+  const client = new ApiHttpClient({ userAgent: 'test', geoapifyApiKey: 'synthetic', quota: q, fetcher: async () => new Response(body, { status, headers: { 'Retry-After': '300' } }) });
+  await assert.rejects(client.json('geoapify', '/v1/geocode/search', { text: 'test' }, Date.now() + 300)); await q.close();
+  q = await createPersistentQuota({ path: f.path, now, policies: [{ providerId: 'geoapify', accountLabel: 'fixture-account', hourlyLimit: 200, dailyLimit: 1000 }] });
+  assert.equal((await q.reserve('geoapify', 1)).allowed, false, `${status} ${bodyKind} durable state`); await q.close();
+ }
+});
+test('UNC and device path variants are rejected before filesystem access', async () => {
+ for (const path of ['//quota.invalid/share/quota.json', '\\\\quota.invalid\\share\\quota.json', '//?/C:/quota.json', '\\\\?\\C:\\quota.json', '//./C:/quota.json', '\\\\.\\C:\\quota.json']) {
+  await assert.rejects(createPersistentQuota({ path, now: Date.now, policies }), /Unsafe quota path/, path);
+ }
+});

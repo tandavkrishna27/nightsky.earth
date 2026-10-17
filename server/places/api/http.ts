@@ -139,21 +139,32 @@ export class ApiHttpClient {
         });
         try {
             const work = (async () => {
-                const fetchOperation = () => this.controls.fetch(provider, key, () => (this.config.fetcher ?? fetch)(url, {
+                const fetchOperation = () => this.controls.fetch(provider, key, async () => {
+                    const response = await (this.config.fetcher ?? fetch)(url, {
                     headers: {
                         'User-Agent': this.config.userAgent, Accept: 'application/json'
                     }, signal: controller.signal, redirect: 'error'
-                }), controller.signal);
+                    });
+                    // Persist status as soon as headers arrive: controls buffer the body.
+                    try {
+                        if (response.status === 401 || response.status === 403) {
+                            this.disabled.add(provider);
+                            await this.config.quota?.setProviderState?.(provider, { disabled: true });
+                        }
+                        if (response.status === 429) {
+                            const raw = response.headers.get('Retry-After');
+                            const delay = raw && /^\d+$/.test(raw.trim()) ? Number(raw) * 1000 : raw ? Date.parse(raw) - now : 60000;
+                            this.blockedUntil[provider] = now + Math.max(60000, Number.isFinite(delay) ? delay : 60000);
+                            await this.config.quota?.setProviderState?.(provider, { blockedUntil: this.blockedUntil[provider] });
+                        }
+                    } catch (error) {
+                        void response.body?.cancel().catch(() => {});
+                        throw error;
+                    }
+                    return response;
+                }, controller.signal);
                 const response = this.config.controls ? await this.config.controls.fetch(provider, key, fetchOperation, controller.signal) : await fetchOperation();
-                if (response.status === 401 || response.status === 403) {
-                    this.disabled.add(provider);
-                    await this.config.quota?.setProviderState?.(provider, { disabled: true });
-                }
                 if (response.status === 429) {
-                    const raw = response.headers.get('Retry-After');
-                    const delay = raw && /^\d+$/.test(raw) ? Number(raw) * 1000 : raw ? Date.parse(raw) - now : 60000;
-                    this.blockedUntil[provider] = now + Math.max(60000, Number.isFinite(delay) ? delay : 60000);
-                    await this.config.quota?.setProviderState?.(provider, { blockedUntil: this.blockedUntil[provider] });
                     throw new ApiProviderError('quota-exhausted');
                 }
                 if (!response.ok)
