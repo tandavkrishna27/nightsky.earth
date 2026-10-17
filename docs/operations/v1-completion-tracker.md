@@ -79,6 +79,12 @@ See the [implementation plan](../superpowers/plans/2026-10-17-api-first-v1-regro
 
 ## Verification and cleanup status
 
-Latest verified pushed baseline: `e0916cee3a1c7656a12cfd1319ea4ecd7158a2ea`, [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39001214466). This includes the reviewed Windows directory/path corrections and API scope decision. Local preparer verification ran 22 tests: 21 passed, one privilege skip. That baseline includes the original-ticket regroom. The current source-research update changes documentation, not runtime implementation; its own exact-tip CI must be checked after push.
+Latest verified pushed implementation baseline: `8b35b2556c9ea805235c65041ec9b0833faff715`, [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39003796579). This includes opt-in API discovery and exact-site planning. The current account/setup and multi-weather planning documents do not establish new runtime or live-provider evidence.
 
 Owner authorized downloaded-data cleanup. Automatic execution policy rejected deletion before execution. [48-file manifest/report](dataset-cleanup-api-v1-20261017.md) and [manual folder guide](manual-dataset-cleanup-20261017.md) identify about 1.86 GB, still retained at last verification. Preserve the required GeoNames gzip until replacement exists. No 95 GB planet body was downloaded. No new dataset/provider job, deployment or publication is authorized by this regroom.
+
+## Immediate implementation sequence — reviewed 17 October 2026
+
+Use the [multiple-weather activation plan](../superpowers/plans/2026-10-17-multi-weather-activation.md). Its seven tasks are slices within existing tickets, not seven new product waves or a replacement V1 backlog. Source admission/contracts first; persistent quotas, WeatherAPI and OpenWeather adapters in parallel; collection/planner integration; private setup and offline verification; then separately authorized live measurement. OpenWeather remains optional until free endpoint entitlement is established. Geoapify and WeatherAPI accounts exist; local credential configuration is pending. GeoNames signup remains blocked.
+
+Counts remain **12 Done / 9 Partial / 6 Not started**. Multi-weather work revalidates existing weather/planning deliverables; S2-G1 source controls, S3 and S4 remain open. History, event gaps and complex region combinations remain separate required decisions/work. No source account or documentation change closes those gates.

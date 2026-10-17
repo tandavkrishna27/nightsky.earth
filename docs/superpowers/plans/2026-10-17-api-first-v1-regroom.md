@@ -154,10 +154,8 @@ A's bounded adapter design is recorded in `docs/operations/api-provider-admissio
 
 Keep remaining unsupported combinations, historical coverage, source rights/activation, restart accounting and permitted live measurements visible. Do not interpret existing unchecked acceptance items as authorization for data downloads or deployment.
 
-## Immediate next concrete work
+## Immediate next concrete work — corrected after implementation
 
-1. Complete A's bounded source-admission table and H's historical API feasibility in parallel; neither starts data acquisition.
-2. Freeze B's selection/timezone/coverage contract after A, including no-local-GeoNames behavior.
-3. Implement C then D against recorded fixture responses from admitted schemas; join E/F and finish G with authorized real evidence.
+Follow [multiple-weather activation](2026-10-17-multi-weather-activation.md) for new provider admission, persistent quotas, adapters, shared conditions/planner integration and local verification. Existing B/C/D implementation is not work to restart. Remaining unsupported geographic combinations, historical API feasibility and event/source gaps remain separate parent obligations. API account creation is not live acceptance.
 
-Self-review: every code correction maps to an original heading; all five review-focus cases have owning tests; provider choice remains explicitly gated; history remains required; optional catalogue code is preserved. This document is a plan, not implementation, passing-test or source-admission evidence.
+Self-review: provider contracts precede adapters; shared files have one owner; source-specific forecasts must survive planning; free entitlement is checked per endpoint; history remains required; optional catalogue code is preserved. The follow-up document is a plan, not passing-test or activation evidence.

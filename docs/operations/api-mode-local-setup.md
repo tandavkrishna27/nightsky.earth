@@ -29,3 +29,33 @@ History remains governed by [history feasibility](history-api-feasibility.md); d
 ## Cleanup
 
 Use the [cleanup plan](api-provider-research-and-cleanup-plan.md). This migration does not delete downloaded files, optional builders, credentials, virtual environments or evidence. Confirm API-mode behavior before removing a legacy dependency. Website work and any website database dependencies are separate.
+
+## Account verification — 2026-10-17
+
+Read-only checks of the owner's signed-in dashboards confirmed:
+
+- Geoapify NightSky project: Free, 3,000 credits/day, existing API key.
+- WeatherAPI: account and API key exist; Business trial ends 2026-10-24. Dashboard explicitly says it automatically moves to Free without an upgrade. Implement and validate against Free limits, never trial-only features.
+- GeoNames: owner reports signup failure; remains unconfigured. Geoapify fallback is available in code, but account creation alone is not runtime activation.
+- CDS: previously configured; no new historical job authorized by this account check.
+
+No credentials are recorded here. This check did not copy credentials into local configuration, call data APIs, change subscriptions, or deploy. WeatherAPI needs a new reviewed adapter and free-tier request/response contract; its account is not evidence that it is integrated. Remaining activation work includes private credential configuration, restart-safe quotas, bounded live verification, and independent provider-labelled forecasts. Preserve MET Norway as the existing forecast source.
+
+## Multiple weather providers — agreed extension
+
+Owner requested easy addition of services and created OpenWeather as well (2026-10-17). Signed-in OpenWeather home shows an email-confirmation notice; endpoint entitlement and key activation are not yet verified. No subscription was changed.
+
+Current implementation already has WeatherProvider/getForecast and a public forecasts array (maximum four). Runtime injection currently selects a single provider; multi-provider orchestration is remaining work, not already implemented.
+
+Implementation requirements:
+
+1. Keep one adapter per service behind WeatherProvider; add a configured registry with stable IDs and capabilities (fields, horizon, cadence, geographic coverage, attribution and free endpoint entitlement).
+2. Add bounded concurrent orchestration, at most four enabled providers, independent timeout/cache/quota state per provider and an overall tool deadline. A failed provider must not discard successful sources. Record each attempted source's status, including empty failures.
+3. Preserve separate forecast series, source issue/fetch/valid times when supplied, units, accumulation intervals and missing fields. Do not average providers, invent hourly values from three-hour steps, or claim independent models solely because service brands differ.
+4. Apply the same orchestration to night conditions and planner/compare paths. Keep primary-provider compatibility; make source selection explicit in answers and never silently replace one series with another.
+5. Each new adapter needs documented free-plan endpoints, rights/attribution, private configuration, quota cost, fixtures and failure cases before bounded live validation. Trial access must not establish free entitlement. OpenWeather One Call is a separate pay-per-call product; do not enable it automatically.
+6. Required tests: one/two/three sources; partial failure; missing key; quota exhaustion; restart; mixed cadence/horizon; stale/empty/malformed results; secret redaction; attribution; all sources unavailable; identical exact requested coordinates across adapters.
+
+Initial roster: MET Norway (existing), WeatherAPI (adapter pending; Free limits), OpenWeather (adapter and free entitlement review pending). Geoapify is for location discovery, not a weather forecast provider. Other domains should use their own capability-specific adapters rather than forcing all APIs into one weather-shaped interface.
+
+Reference: https://openweathermap.org/price (checked 2026-10-17). No data request, key export or deployment occurred during this architecture check.
