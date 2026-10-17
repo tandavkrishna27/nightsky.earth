@@ -91,3 +91,59 @@ test("learning retains a sourced planet-pair conjunction without favorable visib
   assert.ok(result.factors.some(f => f.name === "Sky events" && f.impact === "unknown"));
   assert.ok(result.sources.some(source => source.url === pair.source.url));
 });
+
+test("pair planning keeps local daylight geometry separate from missing forecast and crossing", async () => {
+  const pairWindow = { startUtc: "2026-06-09T10:00:00Z", endUtc: "2026-06-09T14:00:00Z", timeZone: "Europe/London" };
+  const supplied = await searchSkyEvents({ placeId, window: pairWindow, eventTypes: ["planetary-conjunction"] }, index);
+  const result = await planObservingSession({ placeId, window: pairWindow, activity: "planet-observing" }, services(async () => supplied));
+  assert.ok(result.evidence?.conjunctionWindows?.length, "local geometry missing");
+  const geometry = result.evidence.conjunctionWindows[0];
+  assert.ok(geometry.samples.every(sample => sample.sunAltitudeDeg > 0));
+  assert.equal(geometry.continuousVisibility, "not-established");
+  assert.equal(geometry.detectability, "not-assessed");
+  assert.equal(result.evidence.weather?.forecasts.length, 0);
+  assert.ok(result.gaps.some(gap => gap.includes("conjunction") && gap.includes("forecast")));
+  assert.deepEqual(result.evidence.events, supplied);
+});
+
+for (const status of ["available", "stale"] as const) test(`conjunction keeps ${status} three-hour forecast evidence source-native`, async () => {
+  const pairWindow = { startUtc: "2026-06-09T10:00:00Z", endUtc: "2026-06-09T14:00:00Z", timeZone: "Europe/London" };
+  const supplied = await searchSkyEvents({ placeId, window: pairWindow, eventTypes: ["planetary-conjunction"] }, index);
+  const providers = services(async () => supplied);
+  const forecastSource = { ...source, name: "Three-hour fixture", dataClass: "forecast" as const };
+  const samples = ["2026-06-09T10:00:00Z", "2026-06-09T13:00:00Z"].map(validAt => ({ validAt, values: { totalCloudCover: { value: 20, unit: "%" } } }));
+  providers.getNightConditions = async () => ({ availability: { status, reason: "Fixture" }, sources: [forecastSource], caveats: [], placeId, window: pairWindow, forecasts: [{ availability: { status, reason: "Fixture" }, source: forecastSource, forecastHorizonHours: 24, samples, missingFields: [] }], nightContext: { darkness: { status: "unknown", reason: "Fixture" }, forecastStepsDuringDarkness: [] } });
+  const result = await planObservingSession({ placeId, window: pairWindow, activity: "planet-observing" }, providers);
+  assert.deepEqual(result.evidence.weather?.forecasts[0].samples, samples);
+  assert.equal(result.gaps.some(gap => gap.startsWith("Local conjunction weather is unknown")), status === "stale");
+  assert.ok(!result.factors.find(factor => factor.name === "Local conjunction geometry")?.assessment.includes("hourly"));
+});
+
+test("planner caps local pair geometry at six and keeps omitted event evidence", async () => {
+  const pairWindow = { startUtc: "2026-06-09T10:00:00Z", endUtc: "2026-06-09T14:00:00Z", timeZone: "Europe/London" };
+  const supplied = await searchSkyEvents({ placeId, window: pairWindow, eventTypes: ["planetary-conjunction"] }, index);
+  const pair = supplied.events.find(event => event.pairConjunction)!;
+  supplied.events = Array.from({ length: 7 }, (_, i) => ({ ...pair, eventId: `fixture:pair:${i}` }));
+  const result = await planObservingSession({ placeId, window: pairWindow, activity: "planet-observing" }, services(async () => supplied));
+  assert.equal(result.evidence.conjunctionWindows?.length, 6);
+  assert.equal(result.evidence.events?.events.length, 7);
+  assert.ok(result.gaps.some(gap => gap.includes("first six")));
+  assert.deepEqual(result.evidence.conjunctionWindows?.map(row => row.eventId), supplied.events.slice(0, 6).map(event => event.eventId));
+});
+
+test("local pair samples follow selected point coordinates", async () => {
+  const pairWindow = { startUtc: "2026-06-09T10:00:00Z", endUtc: "2026-06-09T14:00:00Z", timeZone: "Europe/London" };
+  const supplied = await searchSkyEvents({ placeId, window: pairWindow, eventTypes: ["planetary-conjunction"] }, index);
+  const oppositeIndex = new GeoNamesPlaceIndex([{ geonameId: 1, name: "Opposite fixture point", asciiName: "Opposite", alternateNames: "", latitude: -51.5, longitude: 179.88, countryCode: "GB", countryName: "United Kingdom", featureClass: "P", featureCode: "PPL", population: 1, timeZone: "Europe/London", modificationDate: "2026-10-01" }], "fixture");
+  const providers = services(async () => supplied);
+  providers.index = oppositeIndex;
+  const result = await planObservingSession({ placeId, window: pairWindow, activity: "planet-observing" }, providers);
+  assert.ok(result.evidence.conjunctionWindows?.[0].samples.every(sample => sample.sunAltitudeDeg < 0));
+});
+
+test("planner rejects a window over 24 hours before requesting evidence", async () => {
+  let calls = 0;
+  const providers = services(async () => { calls++; return events(); });
+  await assert.rejects(planObservingSession({ placeId, window: { ...window, endUtc: "2026-10-17T04:00:00Z" }, activity: "planet-observing" }, providers), /24 hours/);
+  assert.equal(calls, 0);
+});

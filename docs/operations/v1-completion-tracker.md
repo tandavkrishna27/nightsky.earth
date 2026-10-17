@@ -50,12 +50,12 @@ The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom
 | ID | Original tickets | Status / concrete next result |
 | --- | --- | --- |
 | S2-G1 | 0, 4, 8 | Bounded GeoNames/Geoapify design recorded; API identity/selection and adapters locally verified. Private accounts, persistent quota initialization and the first bounded live batch are verified; public policy/attribution and broader acceptance remain open |
-| S2-G2 | 4, 8 | Historical boundary preparation completed within its scope; exhaustive boundary/membership build deferred. Expanded API scope/timezone fixtures and inactive membership composition are implemented; actual membership source and live site/region acceptance remain open |
+| S2-G2 | 4, 8 | Historical boundary preparation completed within its scope; exhaustive boundary/membership build deferred. Expanded scope/timezone fixtures, inactive membership composition and a bounded snapshot-relative geometry decoder/classifier are implemented. Selected-region Geoapify geometry is the proposed route; budget/admission/live verification remain open |
 | S2-G3 | 0, 8 | Opt-in API discovery, snapshot details and planning locally verified; optional host-search guidance updated. Unsupported complex administrative combinations retain explicit gaps; no mandatory global catalogue |
-| S2-H1 | 0, 9 | Existing history tooling retained; conditional Open-Meteo ERA5 offline partition/decoder contract implemented. Free-use eligibility, scientific provenance and measured accounting remain open |
+| S2-H1 | 0, 9 | Existing history tooling retained; conditional Open-Meteo ERA5 offline partition/decoder contract implemented. Current free/ad-free/no-affiliate facts are settled. Official source inspection establishes whole-percent quantization and a one-unit pilot estimate; distinct historical method admission and separately authorized wire validation remain open |
 | S2-H2 | 9 | Retained sample acceptance is historical evidence only; no complete baseline or live API claim. Cleanup must not trigger automatic reacquisition |
 | S2-H3 | 0, 9 | Select practical history route and implement/validate it, or present a concrete unmet capability decision to owner. Do not silently drop history or restart bulk jobs |
-| S2-E1 | 6 | Existing calculated astronomy/events retained; all nineteen meteor identities now have a validated offline evidence inventory. Full supported seasons, source gaps and local event acceptance remain open |
+| S2-E1 | 6 | Existing calculated astronomy/events retained; all nineteen meteor identities now have a validated offline evidence inventory. Sampled local conjunction geometry is now integrated with separate weather evidence. Full supported meteor seasons, reference gaps and continuous-window acceptance remain open |
 | S2-E2 | 0, 6 | Resolve remaining season/radiant/year/source rights gaps; use an API where suitable, otherwise explicit supported content/limitations. No invented universal event API |
 | S2-R1 | 3, 8, 12A, 14 | API-mode bootstrap/preflight and five skills updated; no-local-geography compiled smoke added to CI. Full historical and hosted release gates remain independent |
 | S3-M1 | 0, 8, 9, 14 | Measure actual configured-service storage/cache/startup/peak memory and update/refresh cost; bulk planet build not required |
@@ -127,3 +127,11 @@ Post-live reporting correction independently approved. Final local suite: 1,265 
 ## Capability wave evidence — 17 October 2026
 
 [History, geography and event offline work](capability-closure-wave-20261017.md) passed lane reviews and final combined review. Integrated verification: **1,294 passed, zero failed, two skipped**, TypeScript/plugin build/package generation passed. New tests are included in CI. No live requests, downloads, deployment or runtime source admission occurred. Block 1 remains in progress with the explicit source and scope gates above; original counts remain **12/9/6**, not a measure of this wave’s engineering output.
+
+## Source-resolution continuation — 17 October 2026
+
+Current block remains **1 — capability gaps**. Owner confirmed the product is currently free with no advertisements or affiliate links; do not reopen those settled facts. Official-source research and supported offline implementation proceed in parallel. Host search may discover names/access references where available; plugin resolution, exact selected-point calculations and source-qualified conditions remain necessary. The existing workflow already handles search absence and untrusted web content.
+
+Previous offline capability commit `7839e5526013f408c5fdc64083ed1a1e1e63c84c` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39013346282). The current continuation does not authorize a weather-data request, geometry download, deployment or publication. See [source-resolution wave](source-resolution-wave-20261017.md) for reviewed outcomes and finite remaining decisions. Original counts stay 12/9/6; this is progress inside block 1, not a new wave sequence.
+
+Source-resolution continuation verification: independent lane/final reviews approved; **1,309 tests passed, zero failed, two skipped**; TypeScript, plugin build and package generation passed. [Wave evidence](source-resolution-wave-20261017.md) records implemented behavior, source decisions and exact remaining gates. New suites run in existing CI.

@@ -78,3 +78,15 @@ export const skyEventsResultSchema = resultSchema({
   unsupportedEventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10),
 });
 export type EventResult = z.infer<typeof skyEventsResultSchema>;
+
+export const conjunctionWindowSchema = z.strictObject({
+  eventId: z.string().min(1).max(160), bodies: pairBodiesSchema,
+  startUtc: utcInstantSchema, endUtc: utcInstantSchema,
+  method: z.literal("15-minute-point-samples"), horizonBasis: z.literal("geometric-center-zero-degrees"),
+  continuousVisibility: z.literal("not-established"), detectability: z.literal("not-assessed"),
+  samples: z.array(z.strictObject({ atUtc: utcInstantSchema, altitudeDeg: z.tuple([z.number().finite().min(-90).max(90), z.number().finite().min(-90).max(90)]), sunAltitudeDeg: z.number().finite().min(-90).max(90), moonAltitudeDeg: z.number().finite().min(-90).max(90), moonIlluminationPercent: z.number().finite().min(0).max(100) })).min(2).max(97),
+}).superRefine((row, ctx) => {
+  const start = Date.parse(row.startUtc), end = Date.parse(row.endUtc);
+  if (row.samples.length < 2 || !(end > start) || end - start > 86400000 || Date.parse(row.samples[0].atUtc) !== start || Date.parse(row.samples[row.samples.length - 1].atUtc) !== end || row.samples.some((sample, i) => i > 0 && (Date.parse(sample.atUtc) <= Date.parse(row.samples[i - 1].atUtc) || Date.parse(sample.atUtc) - Date.parse(row.samples[i - 1].atUtc) > 900000))) ctx.addIssue({ code: "custom", message: "Samples must cover ordered endpoints within 24 hours at gaps of at most 15 minutes." });
+});
+export type ConjunctionWindow = z.infer<typeof conjunctionWindowSchema>;

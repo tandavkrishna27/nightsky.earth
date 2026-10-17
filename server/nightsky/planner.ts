@@ -1,3 +1,4 @@
+import { sampleConjunctionWindow } from "../events/intervalVisibility";
 import { resolveNamedCalculationPlace, CalculationPlaceClarificationError, type CalculationObserverPlace, type CalculationPlaceInput } from "../places/calculationPlace";
 import { calculationPlaceSchema, type SearchDiscoveryResult, type CalculationPlace } from "../../shared/nightsky/discovery";
 import { planObservingSessionInputSchema, planResultSchema, type PlanResult } from "../../shared/nightsky/planning";
@@ -124,6 +125,22 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     gaps.push("Sky events could not be checked.");
   }
 
+  const conjunctionWindows: ReturnType<typeof sampleConjunctionWindow>[] = [];
+  if (includeEventEvidence && events && !isError(events)) {
+    const pairs = events.events.filter(event => event.pairConjunction);
+    for (const event of pairs.slice(0, 6)) {
+      try { conjunctionWindows.push(sampleConjunctionWindow({ eventId: event.eventId, bodies: event.pairConjunction!.bodies, latitude: calculation.latitude, longitude: calculation.longitude, startUtc: input.window.startUtc, endUtc: input.window.endUtc })); }
+      catch { gaps.push(`Local conjunction geometry could not be evaluated for ${event.name}.`); }
+    }
+    if (pairs.length > 6) gaps.push("Local conjunction sampling is limited to the first six returned pair events.");
+    if (conjunctionWindows.length) {
+      caveats.add("Conjunction geometry uses 15-minute point samples plus the endpoint at a zero-elevation geometric horizon. Between-sample visibility, terrain, buildings, atmospheric extinction and detectability are not established. Solar and Moon altitude/illumination are context, not visibility thresholds.");
+      if (!conditions || isError(conditions) || !conditions.forecasts.some(forecast => usableWeatherForecast(conditions, forecast) && forecast.samples.length)) gaps.push("Local conjunction weather is unknown: no usable source-native forecast samples are available; geometry does not imply clear skies.");
+      factors.push({ name: "Local conjunction geometry", assessment: `${conjunctionWindows.length} pair window(s) sampled for both body altitudes, Sun altitude and Moon context. Consult separate source-native forecast evidence; these samples do not establish continuous visibility or detectability.`, impact: "unknown", sourceNames: ["Astronomy Engine"] });
+      sourceRecords.push({ name: "Astronomy Engine", url: "https://github.com/cosinekitty/astronomy", attribution: "Astronomy Engine by Don Cross, MIT License. Local geometric altitude and lunar illumination calculations by NightSky.earth.", dataClass: "calculation", product: "Conjunction observing geometry", vintage: "astronomy-engine-2.1.19", licenseUrl: "https://github.com/cosinekitty/astronomy/blob/master/LICENSE", modified: true });
+    }
+  }
+
   const meteorRadiantSamples: MeteorRadiantResult[] = [];
   if (input.activity === "meteor-shower") {
     const matchingEvents = events && !isError(events) ? events.events.filter(event => event.eventType === "meteor-shower") : [];
@@ -242,7 +259,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     availability: { status: gaps.length ? "partial" : "available", reason: gaps.length ? "A useful plan was assembled, with missing evidence listed explicitly." : "The requested planning evidence was assembled." },
     sources: uniqueSources.length ? uniqueSources : [place.sources[0]!], caveats: Array.from(caveats).slice(0, 20), goal: input.activity, place, requestedWindow: input.window,
     summary, candidateWindows, factors: factors.slice(0, 20).map(factor => ({ ...factor, name: factor.name.slice(0, 120), assessment: conciseAssessment(factor.assessment) })), gaps: Array.from(new Set(gaps)), preparation: prep.map(item => item.length <= 300 ? item : `${item.slice(0, 230)}… Review the full equipment list you supplied before departure.`),
-    suggestions, timedPreparation, evidence: { ...(astronomy && !isError(astronomy) ? { astronomy } : {}), ...(target ? { target } : {}), ...(conditions && !isError(conditions) ? { weather: conditions } : {}), ...(includeEventEvidence && events && !isError(events) ? { events } : {}), ...(aurora && !isError(aurora) ? { aurora } : {}), ...(climatology && !isError(climatology) ? { history: climatology } : {}), ...(locationContext && !isError(locationContext) ? { location: locationContext } : {}), ...(candidates && !isError(candidates) ? { candidates } : {}), ...(input.activity === "meteor-shower" ? { meteorRadiantSamples } : {}) },
+    suggestions, timedPreparation, evidence: { ...(conjunctionWindows.length ? { conjunctionWindows } : {}), ...(astronomy && !isError(astronomy) ? { astronomy } : {}), ...(target ? { target } : {}), ...(conditions && !isError(conditions) ? { weather: conditions } : {}), ...(includeEventEvidence && events && !isError(events) ? { events } : {}), ...(aurora && !isError(aurora) ? { aurora } : {}), ...(climatology && !isError(climatology) ? { history: climatology } : {}), ...(locationContext && !isError(locationContext) ? { location: locationContext } : {}), ...(candidates && !isError(candidates) ? { candidates } : {}), ...(input.activity === "meteor-shower" ? { meteorRadiantSamples } : {}) },
   });
   return result;
 }

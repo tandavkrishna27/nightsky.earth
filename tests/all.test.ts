@@ -167,3 +167,7 @@ import "./providers/climate/open-meteo-history-contract.test.ts";
 import "./events/meteorCoverage.test.ts";
 
 import "./places/api-region-membership.test.ts";
+
+import "./events/conjunctionWindow.test.ts";
+
+import "./places/api-geometry-snapshot.test.ts";
