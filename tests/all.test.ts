@@ -1,4 +1,5 @@
 import "./shared/contracts.test.ts";
+import "./mcp/complete-optional-journeys.test.ts";
 import "./places/discoveryScope.test.ts";
 import "./places/catalogueFiles.test.ts";
 import "./places/streamedCatalogue.test.ts";
@@ -207,3 +208,6 @@ import './providers/source-cache.test';
 import './operations/sky-quota-setup.test';
 import './operations/sky-live-probe.test';
 import './providers/sevenTimer-migration.test';
+import './operations/sky-continuation-probe.test';
+import './operations/native-bounded-session.test';
+import './operations/jpl-error-probe.test';

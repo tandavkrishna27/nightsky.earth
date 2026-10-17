@@ -3,6 +3,9 @@
   "include": [
     "scripts/validate-api-live.ts",
     "scripts/validate-sky-live.ts",
+    "scripts/validate-sky-continuation.ts",
+    "scripts/serve-native-bounded.ts",
+    "scripts/validate-jpl-error-live.ts",
     "scripts/initialize-sky-quota.ts",
     "scripts/migrate-seventimer-quota.ts",
     "scripts/initialize-provider-quota.ts",

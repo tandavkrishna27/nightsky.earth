@@ -29,6 +29,7 @@ export interface PersistentQuota extends ProviderQuota {
     addVerifiedProvider(policy: QuotaPolicy, usage: VerifiedProviderUsage): Promise<void>;
     /** Operator must verify the entire configured budget is unused before creating a fresh checkpoint. */
     initializeVerifiedBudget(attestation: { verifiedUnusedBudget: true; evidence: string }): Promise<void>;
+    initializeVerifiedUsage(usage: Record<string, VerifiedProviderUsage>): Promise<void>;
     setProviderState(providerId: string, state: { disabled?: boolean; blockedUntil?: number }): Promise<void>;
     close(): Promise<void>;
 }
@@ -129,6 +130,14 @@ export async function createPersistentQuota(options: { path: string; now: () => 
             if (!(await exists(path + '.initialized'))) throw new Error('Missing quota initialization marker.');
         } else mayInitialize = !(await exists(path + '.initialized'));
     } catch { failed = true; }
+    async function initialize(next: Checkpoint) {
+        try {
+            await ownership();
+            const marker = await open(path + '.initialized', constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, 0o600);
+            try { await marker.writeFile('Verified budget initialization.\n'); await marker.sync(); } finally { await marker.close(); }
+            mayInitialize = false; await persist(next);
+        } catch (e) { failed = true; throw new Error('Quota initialization failed.'); }
+    }
     return {
         addVerifiedProvider(policyInput, usageInput) { return serialize(async () => {
             const p = structuredClone(policyInput), u = structuredClone(usageInput);
@@ -175,12 +184,20 @@ export async function createPersistentQuota(options: { path: string; now: () => 
             if (!mayInitialize || checkpoint || failed || closed || attestation?.verifiedUnusedBudget !== true || typeof attestation.evidence !== 'string' || attestation.evidence.trim().length < 8 || attestation.evidence.length > 500) throw new Error('Verified unused budget attestation required; existing state cannot be reset.');
             const now = options.now(); if (!validTime(now)) throw new Error('Invalid quota clock.');
             const next: Checkpoint = { version: 1, lastNow: now, entries: Object.fromEntries(policies.map(p => [p.providerId, { accountLabel: p.accountLabel, buckets: {}, months: {}, disabled: false, blockedUntil: 0 }])) };
-            try {
-                await ownership();
-                const marker = await open(path + '.initialized', constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, 0o600);
-                try { await marker.writeFile('Verified unused budget initialization.\n'); await marker.sync(); } finally { await marker.close(); }
-                mayInitialize = false; await persist(next);
-            } catch (e) { failed = true; throw new Error('Quota initialization failed.'); }
+            await initialize(next);
+        }); },
+        initializeVerifiedUsage(usageInput) { return serialize(async () => {
+            const usage=structuredClone(usageInput), now=options.now();
+            if (!mayInitialize || checkpoint || failed || closed || !validTime(now) || !record(usage) || !exactKeys(usage,policies.map(p=>p.providerId))) throw Error('Fresh checkpoint and complete verified usage required.');
+            const entries: Record<string, Entry> = {};
+            for (const p of policies) {
+                const u=usage[p.providerId];
+                if (!validImport({policy:p,usage:u}) || u.observedAt>now || now-u.observedAt>300000 ||
+                    new Date(u.observedAt).toISOString().slice(0,7)!==new Date(now).toISOString().slice(0,7) ||
+                    (new Date(now).getUTCDate()>1 && u.usedCurrentMonth<u.usedLast24Hours)) throw Error('Fresh verified allowance and complete usage required.');
+                entries[p.providerId]={accountLabel:p.accountLabel,buckets:u.usedLast24Hours?{[String(Math.floor(now/MINUTE))]:u.usedLast24Hours}:{},months:u.usedCurrentMonth?{[new Date(now).toISOString().slice(0,7)]:u.usedCurrentMonth}:{},disabled:false,blockedUntil:0,imported:{policy:p,usage:u}};
+            }
+            await initialize({version:1,lastNow:now,entries});
         }); },
         setProviderState(providerId, state) { return serialize(async () => {
             if (!checkpoint || !policies.some(p => p.providerId === providerId) || (state.disabled !== undefined && typeof state.disabled !== 'boolean') || (state.blockedUntil !== undefined && !validTime(state.blockedUntil))) throw new Error('Invalid provider state.');
@@ -193,5 +210,3 @@ export async function createPersistentQuota(options: { path: string; now: () => 
         }); }
     };
 }
-
-

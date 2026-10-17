@@ -39,3 +39,27 @@ test('corrupt ledgers and initialization-only markers cannot be replaced',async 
   if(mode==='marker')await assert.rejects(readFile(path));
  }
 });
+
+test('reviewed usage initialization preserves diagnostic charges and refuses reset',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'sky-used-'));t.after(()=>rm(dir,{recursive:true,force:true}));
+ const path=join(dir,'quota.json'),env=config(path),packetPath=join(dir,'review.json'),now=Date.now();
+ const usage=Object.fromEntries(['darkskyplanner','astronomyapi','nasa-donki','jpl'].map(id=>[id,{verifiedAllowance:true,verifiedAllAccountUsage:true,allConsumersQuiesced:true,evidence:'Synthetic verified entitlement and all consumption',observedAt:now,usedLast24Hours:id==='jpl'?2:1,usedCurrentMonth:id==='jpl'?2:1}]));
+ const packet={decision:'approved-initialize-sky-usage',quotaPath:path,expiresAt:new Date(now+60000).toISOString(),usage};
+ await writeFile(packetPath,JSON.stringify(packet));
+ assert.equal((await runSkyQuotaSetup(['--initialize-with-usage',packetPath],env)).mode,'initialized-with-usage');
+ const saved=await readFile(path,'utf8'),state=JSON.parse(saved);
+ for(const [id,entry] of Object.entries(state.entries) as [string,any][]){assert.equal(Object.values(entry.buckets)[0],id==='jpl'?2:1);assert.equal(Object.values(entry.months)[0],id==='jpl'?2:1);assert.equal(entry.imported.usage.verifiedAllowance,true);}
+ await assert.rejects(runSkyQuotaSetup(['--initialize-with-usage',packetPath],env));assert.equal(await readFile(path,'utf8'),saved);
+ const quota=await createPersistentQuota({path,now:Date.now,policies:skyQuotaPoliciesForInitialization(env)});assert.equal((await quota.reserve('jpl',19)).allowed,false);await quota.close();
+});
+
+test('reviewed usage rejects stale, incomplete, unverified and expired snapshots',async t=>{
+ for(const invalid of ['stale','missing','unverified','expired','wrong-path']){
+  const dir=await mkdtemp(join(tmpdir(),'sky-bad-used-'));t.after(()=>rm(dir,{recursive:true,force:true}));const path=join(dir,'quota.json'),packetPath=join(dir,'review.json'),now=Date.now();
+  const usage:any={jpl:{verifiedAllowance:invalid!=='unverified',verifiedAllAccountUsage:true,allConsumersQuiesced:true,evidence:'Synthetic complete usage evidence',observedAt:invalid==='stale'?now-360000:now,usedLast24Hours:2,usedCurrentMonth:2}};
+  if(invalid==='missing')delete usage.jpl;
+  await writeFile(packetPath,JSON.stringify({decision:'approved-initialize-sky-usage',quotaPath:invalid==='wrong-path'?join(dir,'other.json'):path,expiresAt:new Date(now+(invalid==='expired'?-1:60000)).toISOString(),usage}));
+  await assert.rejects(runSkyQuotaSetup(['--initialize-with-usage',packetPath],{...config(path),NIGHTSKY_SKY_PROVIDERS:'jpl'}));
+  await assert.rejects(readFile(path));await assert.rejects(readFile(path+'.initialized'));
+ }
+});
