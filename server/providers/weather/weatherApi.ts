@@ -57,7 +57,21 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
         bytes: number;
         at: number;
     }>();
-    let cacheBytes = 0, active = false, lastStart = -Infinity;
+    let cacheBytes = 0, active = false, lastStart = -Infinity, disabled = false, blockedUntil = 0;
+    const quota = options.quota as WeatherAdapterOptions["quota"] & {
+        setProviderState?(providerId: string, state: { disabled?: boolean; blockedUntil?: number }): Promise<void>;
+    };
+    const persistFailure = async (status: number, retryAfter: string | null = null) => {
+        if (status === 401 || status === 403) {
+            disabled = true;
+            await quota.setProviderState?.("weatherapi", { disabled: true });
+        }
+        if (status === 429) {
+            const delay = retryAfter && /^\d+$/.test(retryAfter) ? Number(retryAfter) * 1000 : Date.parse(retryAfter ?? "") - options.now();
+            blockedUntil = options.now() + Math.min(86400000, Math.max(60000, Number.isFinite(delay) ? delay : 60000));
+            await quota.setProviderState?.("weatherapi", { blockedUntil });
+        }
+    };
     const unavailable = (reason: string): WeatherProviderResult => ({ status: "unavailable", reason, source: SOURCE });
     return { async getForecast(place, requestedWindow) {
             let window: ReturnType<typeof timeWindowSchema.parse>;
@@ -71,6 +85,8 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
             }
             if (!options.apiKey.trim())
                 return unavailable("WeatherAPI.com is not configured.");
+            if (disabled || blockedUntil > options.now())
+                return unavailable("WeatherAPI.com authentication or rate-limit admission is blocked.");
             const key = `${place.latitude},${place.longitude}`;
             const now = options.now();
             for (const [id, entry] of Array.from(cache))
@@ -105,6 +121,7 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
                             const incoming = await options.fetcher(url, { method: "GET", redirect: "error", signal: controller.signal, headers: { Accept: "application/json" } });
                             if (incoming.redirected || !incoming.ok) {
                                 void incoming.body?.cancel().catch(() => { });
+                                await persistFailure(incoming.status, incoming.headers.get("Retry-After"));
                                 return new Response(null, { status: incoming.status >= 300 ? incoming.status : 502 });
                             }
                             const declared = Number(incoming.headers.get("Content-Length"));
@@ -148,8 +165,14 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
                         if (!response.ok)
                             return unavailable(`WeatherAPI.com returned HTTP ${response.status}; no forecast is available.`);
                         const raw: unknown = await response.json();
-                        if (typeof raw === "object" && raw !== null && "error" in raw)
+                        if (typeof raw === "object" && raw !== null && "error" in raw) {
+                            const error = raw.error;
+                            if (typeof error === "object" && error !== null && "code" in error) {
+                                if ([2006, 2008, 2009].includes(Number(error.code))) await persistFailure(401);
+                                if (Number(error.code) === 2007) await persistFailure(429);
+                            }
                             throw Error("Provider error");
+                        }
                         const payload = payloadSchema.parse(raw);
                         controller.signal.throwIfAborted();
                         const forecast = normalize(payload, window, now);

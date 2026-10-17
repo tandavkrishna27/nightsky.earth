@@ -39,6 +39,14 @@ test("WeatherAPI total deadline bounds stalled response body", async () => { let
 test("WeatherAPI thrown transport errors are redacted", async () => { const { provider } = setup(async () => { throw Error("https://api.weatherapi.com/?key=synthetic-secret"); }); const r = await provider.getForecast(place, window); assert.equal(r.status, "unavailable"); assert.doesNotMatch(JSON.stringify(r), /synthetic-secret|key=/); });
 test("WeatherAPI rejects trial-shaped extra days", async () => { const payload = fixture(); payload.forecast.forecastday = Array.from({ length: 4 }, () => fixture().forecast.forecastday[0]); const { provider } = setup(async () => Response.json(payload)); assert.equal((await provider.getForecast(place, window)).status, "unavailable"); });
 test("WeatherAPI never accepts an HTTP-200 error alongside forecast data", async () => { const { provider } = setup(async () => Response.json({ ...fixture(), error: { code: 2006, message: "synthetic-secret" } })); assert.equal((await provider.getForecast(place, window)).status, "unavailable"); });
+test("WeatherAPI persists auth disable and bounded Retry-After when quota supports state", async () => {
+    for (const status of [401, 403, 429]) {
+        const states: Array<{disabled?:boolean;blockedUntil?:number}> = [];
+        const provider=createWeatherApiProvider({apiKey:"synthetic-secret",now:()=>epoch*1000,controls:new UpstreamControls(),fetcher:async()=>new Response(null,{status,headers:{"Retry-After":"120"}}),quota:{reserve:async()=>({allowed:true,reason:"ok"}),setProviderState:async(_id:string,state:{disabled?:boolean;blockedUntil?:number})=>{states.push(state);}} as import("../../server/providers/quotaTypes").ProviderQuota});
+        await provider.getForecast(place,window);
+        assert.deepEqual(states,status===429?[{blockedUntil:epoch*1000+120000}]:[{disabled:true}]);
+    }
+});
 test("WeatherAPI cache expires at fifteen minutes and evicts oldest after 128 entries", async () => { let calls = 0; const { provider, advance } = setup(async () => { calls++; return Response.json(fixture()); }); for (let i = 0; i < 129; i++) {
     await provider.getForecast({ ...place, longitude: i }, window);
     advance(1001);
