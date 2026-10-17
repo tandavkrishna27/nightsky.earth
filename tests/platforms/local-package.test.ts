@@ -141,7 +141,7 @@ test('every packaged workflow ends with a final orientation and source audit',()
   assert.match(tail,/Final answer audit/);
   assert.match(tail,/including parenthetical advice/);
   assert.match(tail,/candidate distance or access/);
-  assert.match(tail,/Shorten advice before dropping a source/);
+  assert.match(tail,/Shorten advice before dropping a required credit or claim-supporting source/);
  }
 });
 
@@ -155,11 +155,13 @@ test('packaged answer procedure reserves evidence and safety within a bounded an
  }
 });
 
-test('packaged aggregate citation procedure preserves the complete source block and treats empty events as claims', () => {
+test('packaged aggregate citation procedure keeps relevant credits and full structured provenance', () => {
  const files = unzipSync(buildLocalPluginPackage({host:'claude',endpoint:'http://localhost:4010/mcp'}).zip);
  for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
   const text = strFromU8(files[path]); const audit = text.slice(text.indexOf('## Final answer audit'));
-  assert.match(audit, /aggregate plan.*copy.*complete Sources URL block.*answer-ready text/);
+  assert.match(audit, /aggregate plan.*relevant answer-ready references.*not as a mandatory block to copy/);
+  assert.match(audit, /Keep full catalogue provenance in structured output/);
+  assert.doesNotMatch(audit, /copy its complete Sources URL block/);
   assert.match(audit, /Negative or empty-event claims use sources/);
   assert.match(audit, /Omit incidental empty-event sentences from non-event plans/);
   assert.match(audit, /focused tool answers.*relevant sources only/);

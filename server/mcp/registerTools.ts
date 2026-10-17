@@ -4,7 +4,7 @@ import { registerOptionalSkyTools } from './optionalSkyTools';
 import type { OptionalSkyProviders } from '../providers/skyConfiguration';
 import { apiAttributionText } from "../places/api/attribution";
 import type { DiscoveryProvider, SelectedPlaceResolver } from "../places/api/types";
-import { planAnswerText, sourceLinkedText } from "./answerText";
+import { planAnswerText, planAnswerSources, sourceLinkedText } from "./answerText";
 import * as z from "zod4";
 import { CatalogueRevisionError } from "../places/globalCatalogue";
 import { normalizeDiscoveryInput, searchDiscoveryInputSchema, searchDiscoveryResultSchema, candidateRefSchema, discoveryCoverageSchema, discoveryScopeSchema, originBasisSchema, resolveObservingRegionInputSchema, resolveObservingRegionResultSchema, getObservingLocationDetailsInputSchema, getObservingLocationDetailsResultSchema, type CatalogueReader, type RegionIndex, type CalculationPlace } from "../../shared/nightsky/discovery";
@@ -352,7 +352,8 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index && !dependencies.selectedPlaceResolver) throw new Error("The local GeoNames place index is unavailable.");
     const services = plannerServicesFor(index);
     const result = await planObservingSession(input, services);
-    return { content: [{ type: "text", text: dependencies.discoveryProvider ? apiAttributionText(planAnswerText(result),result.sources) : planAnswerText(result) }], structuredContent: result };
+    const answer = planAnswerText(result, {target: input.target, includeSourceLinks: !dependencies.discoveryProvider});
+    return { content: [{ type: "text", text: dependencies.discoveryProvider ? apiAttributionText(answer,planAnswerSources(result,input.target)) : answer }], structuredContent: result };
   });
 
   server.registerTool("compare_observing_options", {

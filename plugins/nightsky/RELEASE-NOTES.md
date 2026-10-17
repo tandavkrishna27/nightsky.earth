@@ -1,5 +1,9 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.18 — clearer answers and relevant credits
+
+Keeps useful values and brief beginner explanations prominent, with mandatory linked credits beside the relevant data. Default answers omit unrelated catalogue references and duplicate bibliographies; full source and licence evidence remains in structured results. Selected and inferred meteor-shower guidance retains its relevant source. All five workflows now distinguish compact presentation from on-request evidence details. Place discovery explicitly evaluates a bounded shortlist before claiming a darkness range or nearest evaluated candidate. No new provider access, public browser admission, credits website or deployment is enabled by this change; native acceptance of the revised package remains separate from offline checks.
+
 ## V1 local revision 1.0.17 — optional light pollution comparison
 
 Adds an optional one-place or short-list light pollution MCP comparison with source, transport, dataset vintage, coordinate binding and quality preserved. The DarkSkySites latest-zenith API requires explicit admission, a server-only key and an existing dedicated persistent quota ledger. A bounded two-point pilot defaults to an offline proposal and requires separate approval. Estimates are not live measurements; missing or unverified-zero coverage is not confirmed darkness. Public browser operation remains blocked pending rights, exact visible coordinate binding, network isolation and measured capacity. Browser parsers are experimental fixtures, not validated live extractors. Playwright is optional and API operation works without it. Offline checks do not establish live accuracy or native-host acceptance; this remains a local rehearsal.

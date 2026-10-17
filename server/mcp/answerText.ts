@@ -1,8 +1,52 @@
 import type { SourceRecord } from '../../shared/nightsky/common';
 import type { PlanResult } from '../../shared/nightsky/planning';
 import { formatLocalInstant } from '../../shared/nightsky/format';
+import { resolveMeteorIdentity } from '../../shared/nightsky/meteors';
 
 const plain = (value: string) => value.replace(/[\\[\]<>`*_~\r\n]/g, ' ').replace(/\s+/g, ' ').trim();
+
+const sourceKey = (source: SourceRecord) => JSON.stringify(Object.entries(source).sort(([a], [b]) => a.localeCompare(b)));
+
+/** Select answer references without deleting the full catalogue provenance.
+ * Only event-inventory-only records are filtered; shared or distinct credits
+ * used by location, weather or other evidence remain intact. */
+export function planAnswerSources(plan: PlanResult, target?: string): SourceRecord[] {
+  const events = plan.evidence?.events;
+  if (!events) return plan.sources;
+  const inventory = new Set(events.sources.map(sourceKey));
+  const evidence = plan.evidence;
+  const used = [
+    ...plan.place.sources,
+    ...(evidence?.astronomy?.sources ?? []), ...(evidence?.target?.sources ?? []),
+    ...(evidence?.weather?.sources ?? []), ...(evidence?.weather?.forecasts.map(row => row.source) ?? []),
+    ...(evidence?.location?.sources ?? []), ...(evidence?.history?.sources ?? []),
+    ...(evidence?.aurora?.sources ?? []), ...(evidence?.candidates?.sources ?? []),
+    ...(evidence?.candidates?.candidates.flatMap(row => row.sources) ?? []),
+    ...(plan.suggestions?.flatMap(row => row.sources) ?? []),
+  ];
+  const meteorEvents = events.events.filter(event => event.eventType === 'meteor-shower');
+  // Match the planner's single-shower inference when no explicit target exists.
+  const code = plan.goal === 'meteor-shower'
+    ? target ? resolveMeteorIdentity(target) : meteorEvents.length === 1
+      ? resolveMeteorIdentity(meteorEvents[0].name) ?? resolveMeteorIdentity(meteorEvents[0].eventId.split(':').at(-1)!)
+      : undefined
+    : undefined;
+  const relevantEvents = events.events.filter(event => plan.goal !== 'meteor-shower' || event.eventType === 'meteor-shower' && (!target || code !== undefined && (resolveMeteorIdentity(event.name) === code || resolveMeteorIdentity(event.eventId.split(':').at(-1)!) === code)));
+  used.push(...relevantEvents.map(event => event.source));
+  if (code) {
+    used.push(...(events.meteorCivilGuidance?.filter(row => row.code === code).map(row => row.source) ?? []));
+    used.push(...(events.meteorCalendarGuidance?.entries.filter(row => row.code === code).map(row => row.source) ?? []));
+    used.push(...(events.meteorTypicalSeasons?.filter(row => row.code === code).map(row => row.source) ?? []));
+  }
+  const relevant = new Set(used.map(sourceKey));
+  for (const sample of evidence?.meteorRadiantSamples ?? []) {
+    if (sample.status === 'available' && (!target || code !== undefined && sample.code === code)) {
+      // Model samples retain their own source shape; match its exact public URL.
+      for (const source of plan.sources) if (source.url === sample.source.url) relevant.add(sourceKey(source));
+    }
+  }
+  return plan.sources.filter(source => !inventory.has(sourceKey(source)) || relevant.has(sourceKey(source)));
+}
 
 /** Complete HTTP(S) source links, never truncated URLs or inferred provider identities. */
 export function sourceLinkedText(text: string, sources: SourceRecord[]): string {
@@ -43,7 +87,7 @@ function twilightPhases(outer: Interval[], inner: Interval[], window: PlanResult
 }
 
 /** A bounded answer-ready view. Detailed geometry remains available without becoming setup advice. */
-export function planAnswerText(plan: PlanResult): string {
+export function planAnswerText(plan: PlanResult, options: {target?: string; includeSourceLinks?: boolean} = {}): string {
   const lines = [
     plan.summary,
     `Calculation basis: ${plan.place.catalogueRevision ? 'selected candidate representative point' : 'named city record, not a selected observing site'}. Display time zone: ${plan.requestedWindow.timeZone}${plan.place.timeZoneBasis === 'explicit-display' ? '; actual site time zone remains unverified' : ''}.`,
@@ -104,5 +148,5 @@ export function planAnswerText(plan: PlanResult): string {
     body.push(line); bytes += Buffer.byteLength(line, 'utf8') + 1;
   }
   if (body.length < lines.length) body.push('Further intervals and limitations remain in structuredContent; this view is bounded.');
-  return sourceLinkedText(body.join('\n'), plan.sources);
+  return options.includeSourceLinks === false ? body.join('\n') : sourceLinkedText(body.join('\n'), planAnswerSources(plan, options.target));
 }

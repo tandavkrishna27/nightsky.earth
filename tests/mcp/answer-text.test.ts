@@ -5,6 +5,78 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createFixtureServer} from '../../scripts/complete-model-journey-test';
 
+test('Geminids answer omits unrelated catalogue references while retaining full structured provenance',async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-topic-credits-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'meteor-shower',target:'Geminids',window:{startUtc:'2026-12-13T18:00:00Z',endUtc:'2026-12-14T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent,text=response.result.content.map((row:any)=>row.text??'').join('\n');
+  const unrelated=plan.evidence.events.meteorCivilGuidance.find((row:any)=>row.code==='LYR').source;
+  assert.ok(plan.sources.some((source:any)=>source.url===unrelated.url),'complete provenance remains in structured output');
+  assert.ok(!text.includes(unrelated.url),'answer must not dump an unrelated Lyrid reference');
+  const selected=plan.evidence.events.meteorCalendarGuidance.entries.find((row:any)=>row.code==='GEM').source;
+  assert.ok(text.includes(selected.url),'selected shower guidance stays credited');
+  assert.match(text,/https:\/\/github.com\/cosinekitty\/astronomy/);
+  assert.match(text,/https:\/\/example.test\/forecast/);
+ }finally{await server.close();}
+});
+
+test('answer source selection preserves distinct credits and shared evidence without mutating provenance',async()=>{
+ const {planAnswerSources}=await import('../../server/mcp/answerText');
+ const make=(name:string,url:string,attribution=name)=>({name,url,attribution,dataClass:'context' as const});
+ const background=make('Background Lyrids','https://example.test/lyrids');
+ const shared=make('Shared calculation','https://example.test/shared');
+ const creditA=make('Provider A','https://example.test/credit','Credit A');
+ const creditB=make('Provider B','https://example.test/credit','Credit B');
+ const selected=make('Selected Geminids','https://example.test/geminids');
+ const plan:any={goal:'meteor-shower',sources:[background,shared,creditA,creditB,selected],place:{sources:[creditA,creditB]},evidence:{astronomy:{sources:[shared]},events:{sources:[background,shared,selected],events:[],meteorCalendarGuidance:{entries:[{code:'GEM',source:selected},{code:'LYR',source:background}]}}}};
+ const before=JSON.stringify(plan);
+ const sources=planAnswerSources(plan,'Geminids');
+ assert.deepEqual(sources,[shared,creditA,creditB,selected]);
+ assert.equal(JSON.stringify(plan),before);
+ assert.ok(!planAnswerSources(plan,'Unknown shower').includes(selected),'unknown target must not acquire another shower citation');
+});
+
+test('untargeted single-shower plans retain the civil-guidance source used by inferred planning',async()=>{
+ const {planAnswerSources}=await import('../../server/mcp/answerText');
+ const make=(name:string)=>({name,url:`https://example.test/${name}`,attribution:name,dataClass:'context' as const});
+ const civil=make('lyrid-civil'),forecast=make('lyrid-forecast'),background=make('geminid-background');
+ const plan:any={goal:'meteor-shower',sources:[civil,forecast,background],place:{sources:[]},evidence:{events:{sources:[civil,forecast,background],events:[{eventId:'meteor:LYR',name:'Lyrids',eventType:'meteor-shower',source:forecast}],meteorCivilGuidance:[{code:'LYR',source:civil}],meteorCalendarGuidance:{entries:[{code:'GEM',source:background}]}}}};
+ assert.deepEqual(planAnswerSources(plan),[civil,forecast]);
+ plan.evidence.events.events.push({eventId:'meteor:GEM',name:'Geminids',eventType:'meteor-shower',source:background});
+ assert.ok(!planAnswerSources(plan).includes(civil),'multiple showers must not silently infer one civil-guidance target');
+});
+
+test('API planning text has a single relevant credit section with no duplicate bibliography',async()=>{
+ const {planAnswerText,planAnswerSources}=await import('../../server/mcp/answerText');
+ const {apiAttributionText}=await import('../../server/places/api/attribution');
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-single-credits-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'general-stargazing',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent;
+  const text=apiAttributionText(planAnswerText(plan,{includeSourceLinks:false}),planAnswerSources(plan));
+  assert.equal((text.match(/\n\nSource credits:/g)??[]).length,1);
+  assert.ok(!text.includes('\n\nSources:'));
+  assert.match(text,/https:\/\/www.geonames.org\//);
+ }finally{await server.close();}
+});
+
+test('API-mode MCP boundary keeps location credits but omits duplicate and unrelated event sources',async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-api-topic-')),{mode:'api'});
+ try{
+  const resolved=await server.rpc('tools/call',{name:'resolve_place',arguments:{placeQuery:'Fictionvale'}});
+  const place=resolved.result.structuredContent.matches[0];assert.ok(place);
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:place.placeId,sourceRevision:place.sourceRevision,activity:'meteor-shower',target:'Geminids',window:{startUtc:'2026-12-13T18:00:00Z',endUtc:'2026-12-14T06:00:00Z',timeZone:'Europe/London'}}});
+  assert.ok(!response.result.isError,JSON.stringify(response.result));
+  const plan=response.result.structuredContent,text=response.result.content.map((row:any)=>row.text??'').join('\n');
+  assert.equal((text.match(/\n\nSource credits:/g)??[]).length,1);
+  assert.ok(!text.includes('\n\nSources:'));
+  const unrelated=plan.evidence.events.meteorCivilGuidance.find((row:any)=>row.code==='LYR').source;
+  assert.ok(!text.includes(unrelated.url));assert.ok(plan.sources.some((s:any)=>s.url===unrelated.url));
+  for(const source of plan.place.sources)assert.ok(text.includes(source.url),'location and underlying-data credits remain visible');
+  assert.equal(server.externalAttempts(),0);
+ }finally{await server.close();}
+});
+
 test('planning text exposes complete source links and omits setup bearings',async()=>{
  const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-answer-text-')));
  try{
