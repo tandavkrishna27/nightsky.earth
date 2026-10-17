@@ -101,3 +101,24 @@ test("five-day payload remains forty native UTC steps across local DST", async (
     assert.equal(Date.parse(r.forecast!.samples[1].validAt) - Date.parse(r.forecast!.samples[0].validAt), 10800000);
 });
 
+test("timed-out uncooperative fetch retains ownership beyond shared backoff", async()=>{
+  let now=epoch*1000,calls=0,reservations=0;
+  let settle!:(value:Response)=>void;
+  const provider=createOpenWeatherProvider({apiKey:"private-key",now:()=>now,controls:new UpstreamControls({now:()=>now}),quota:{async reserve(){reservations++;return {allowed:true,reason:"reserved"};}},fetcher:async()=>{calls++;return new Promise<Response>(resolve=>{settle=resolve;});}});
+  assert.equal((await provider.getForecast(place,window)).status,"unavailable");
+  now+=600000;
+  const second=provider.getForecast(place,window);
+  await new Promise(resolve=>setTimeout(resolve,0));
+  const overlapped=calls;
+  settle(new Response(JSON.stringify(fixture())));
+  await second;
+  assert.equal(overlapped,1,"the pending first transport must prevent another fetch");
+  assert.equal(reservations,1,"a pending transport must also prevent a second reservation");
+});
+test("synchronous quota failure releases operation ownership",async()=>{
+  let attempts=0,calls=0;
+  const provider=createOpenWeatherProvider({apiKey:"private-key",now:()=>epoch*1000,controls:new UpstreamControls(),quota:{reserve(){attempts++;if(attempts===1)throw Error("private-key");return Promise.resolve({allowed:true,reason:"ok"});}},fetcher:async()=>{calls++;return new Response(JSON.stringify(fixture()));}});
+  assert.equal((await provider.getForecast(place,window)).status,"unavailable");
+  assert.ok((await provider.getForecast(place,window)).forecast);
+  assert.equal(calls,1);
+});

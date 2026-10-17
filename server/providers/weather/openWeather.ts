@@ -153,6 +153,8 @@ export function createOpenWeatherProvider(options: WeatherAdapterOptions): Weath
                         controller.signal.throwIfAborted();
                         return normalize(payload, window, now);
                     })();
+                // The caller deadline can win while an injected transport ignores abort.
+                // Keep admission owned until the actual operation settles, including rejection.
                 void work.then(() => { active = false; }, () => { active = false; });
                 return await Promise.race([work, deadline]);
             }
@@ -161,8 +163,8 @@ export function createOpenWeatherProvider(options: WeatherAdapterOptions): Weath
             }
             finally {
                 clearTimeout(timer!);
-                active = false;
             }
         } };
 }
+
 
