@@ -10,6 +10,7 @@ const FIXED = { hourly: "cloud_cover", models: "era5", timezone: "GMT", timeform
 export interface HistoryPartition {
   requestedPoint: HistoryPoint; startUnixSeconds: number; endUnixSeconds: number;
   expectedHours: number; url: string; historicalAdmission: false; accounting: "unverified";
+  reviewedRangeContract?: "api-history-range-v1"; rangeDays?: number;
 }
 function point(value: HistoryPoint): void {
   if (!Number.isFinite(value.latitude) || Math.abs(value.latitude) > 90 || !Number.isFinite(value.longitude) || Math.abs(value.longitude) > 180) throw Error("Invalid history point");
@@ -31,8 +32,16 @@ export function planOpenMeteoHistory(requestedPoint: HistoryPoint): HistoryParti
 }
 function validatePartition(p: HistoryPartition): void {
   point(p.requestedPoint);
+  const reviewed = p.reviewedRangeContract !== undefined || p.rangeDays !== undefined;
+  let partitionSeconds = PARTITION_SECONDS;
+  if (reviewed) {
+    if (p.reviewedRangeContract !== "api-history-range-v1" || !Number.isSafeInteger(p.rangeDays) ||
+        p.rangeDays! < 1 || p.rangeDays! > 1827 || !Number.isInteger(p.requestedPoint.latitude * 4) ||
+        !Number.isInteger(p.requestedPoint.longitude * 4) || p.requestedPoint.longitude >= 180) throw Error("Incompatible reviewed history range contract");
+    partitionSeconds = p.rangeDays! * 86400;
+  }
   if (!Number.isInteger(p.startUnixSeconds) || p.startUnixSeconds < START || p.startUnixSeconds >= END ||
-      (p.startUnixSeconds-START)%PARTITION_SECONDS !== 0 || p.endUnixSeconds !== Math.min(p.startUnixSeconds+PARTITION_SECONDS,END) ||
+      (p.startUnixSeconds-START)%partitionSeconds !== 0 || p.endUnixSeconds !== Math.min(p.startUnixSeconds+partitionSeconds,END) ||
       p.expectedHours !== (p.endUnixSeconds-p.startUnixSeconds)/3600 || p.url !== requestUrl(p.requestedPoint,p.startUnixSeconds,p.endUnixSeconds) ||
       p.historicalAdmission !== false || p.accounting !== "unverified") throw Error("Incompatible history request contract");
 }
@@ -49,6 +58,7 @@ export function decodeOpenMeteoHistory(bytes: Uint8Array, partition: HistoryPart
   const actualCell: HistoryPoint = { latitude: wire.latitude, longitude: wire.longitude };
   point(actualCell);
   if (!Number.isInteger(actualCell.latitude*4) || !Number.isInteger(actualCell.longitude*4)) throw Error("History cell is not on 0.25 degree grid");
+  if (partition.reviewedRangeContract && (actualCell.latitude !== partition.requestedPoint.latitude || actualCell.longitude !== partition.requestedPoint.longitude)) throw Error("History cell drift from canonical query");
   if (expectedCell && (actualCell.latitude !== expectedCell.latitude || actualCell.longitude !== expectedCell.longitude)) throw Error("History cell drift");
   if (wire.utc_offset_seconds !== 0 || wire.hourly_units?.time !== "unixtime" || wire.hourly_units?.cloud_cover !== "%") throw Error("History timezone or unit mismatch");
   const times = wire.hourly?.time; const clouds = wire.hourly?.cloud_cover;

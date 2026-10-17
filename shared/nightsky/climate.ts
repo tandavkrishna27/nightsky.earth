@@ -57,12 +57,21 @@ export const climateStatisticsSchema = z.strictObject({
   }
 });
 export type ClimateStatistics = z.infer<typeof climateStatisticsSchema>;
+/** Operator-reviewed acceptance of this distinct method, never native ERA5 equivalence. */
+export const hostedMethodAdmissionSchema = z.strictObject({
+  sourceId: z.literal("open-meteo-hosted-era5-cloud-percent-v1"),
+  methodVersion: z.literal("open-meteo-quantized-dark-cloud-v1"),
+  policyRevision: z.string().regex(/^[a-f0-9]{64}$/),
+  acceptsQuantizationAndUnverifiedRevision: z.literal(true),
+});
+export type HostedMethodAdmission = z.infer<typeof hostedMethodAdmissionSchema>;
 export const getClearSkyClimatologyInputSchema = z.strictObject({ placeId: placeIdSchema, month: z.number().int().min(1).max(12), sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional() }).superRefine(selectionRevisionRefinement);
 export const climateContextResultSchema = resultSchema({
   sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   schemaVersion: z.literal(2), placeId: placeIdSchema, month: z.number().int().min(1).max(12), timeZone: ianaTimeZoneSchema,
   dataClass: z.literal("reanalysis"), historicalLabel: z.literal("historical-not-a-forecast"),
   methodVersion: z.enum([CLIMATE_METHOD_VERSION, "open-meteo-quantized-dark-cloud-v1"]), sampleDefinition: z.literal("hourly-dark-time-samples"), unit: z.literal("fraction"),
+  hostedMethodAdmission: hostedMethodAdmissionSchema.optional(),
   period: climatePeriodSchema,
   grid: z.strictObject({ mapping: z.literal("nearest-supplied-cell"), cellId: z.string().min(1).max(80), spacingDegrees: z.literal(0.25),
     displacementKm: z.number().finite().nonnegative(), placeIndexVintage: z.string().min(1).max(100) }).optional(),
@@ -72,7 +81,9 @@ export const climateContextResultSchema = resultSchema({
   const fail = (message: string) => ctx.addIssue({ code: "custom", message });
   if (!result.sources.some(source => source.dataClass === "reanalysis")) fail("Historical result needs reanalysis provenance.");
   const status = result.availability.status;
-  if (result.methodVersion === "open-meteo-quantized-dark-cloud-v1" && (status === "available" || (status !== "unavailable" && result.period.kind !== "sample-only"))) fail("Hosted method is restricted to sample-only previews or unavailable baseline.");
+  if (result.methodVersion === "open-meteo-quantized-dark-cloud-v1" && status !== "unavailable" && result.period.kind === "baseline-1991-2020" && !result.hostedMethodAdmission) fail("Hosted baseline requires explicit distinct-method source policy admission.");
+  if (result.methodVersion !== "open-meteo-quantized-dark-cloud-v1" && result.hostedMethodAdmission) fail("Hosted source admission cannot qualify another method.");
+  if (result.methodVersion === "open-meteo-quantized-dark-cloud-v1" && status === "available" && (result.bins?.length !== 24 || !result.sources.some(source => source.model === "era5" && source.modified === true))) fail("Available hosted baseline requires all UTC bins and distinct modified ERA5 provenance.");
   if (!["available", "partial", "unavailable", "not-covered"].includes(status)) fail("Unsupported historical availability state.");
   if (status === "unavailable" && (result.summary || result.bins)) fail("Unavailable artifacts have no sample statistics.");
   if (status === "not-covered" && (result.summary?.expectedEligibleSamples || result.bins?.some(bin => bin.statistics.expectedEligibleSamples))) fail("Not-covered results cannot contain eligible cloud samples.");
