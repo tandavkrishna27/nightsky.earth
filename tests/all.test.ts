@@ -193,3 +193,4 @@ import "./providers/climate/annual-history-probe.test";
 import "./providers/quota-add-provider.test";
 import "./providers/climate/history-accounting-operator.test";
 import "./platforms/codex-local-fixture.test";
+import "./operations/geometry-filter-probe.test";

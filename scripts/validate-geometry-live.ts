@@ -12,7 +12,10 @@ import {checkedValidationQuota} from './validate-api-live';
 // v1's stopped allowance is consumed; these revised packets require new authority.
 export const GEOMETRY_ENVELOPE='geometry-live-v2-6-9-120-zero-retries';
 export const GEOMETRY_SELECTION_ENVELOPE='geometry-selection-v2-va-1-1-30-zero-retries';
+export const GEOMETRY_FILTER_PROBE_ENVELOPE='geometry-selection-filter-probe-va-1-1-30-zero-retries';
 export const countryQuery=(name:string,code:'va'|'sm')=>geoapifyRegionQuery({regionQuery:name,countryCode:code==='va'?'VAT':'SMR',adminLevel:0});
+// Diagnostic only: omit precisely the provider country filter; post-selection remains VA-only.
+const filterProbeQuery=()=>{const {filter,...query}=countryQuery('Vatican City','va');return query;};
 const fail=()=>Error('Geometry validation refused or stopped.');
 const hash=(v:unknown)=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 const id=(v:unknown):v is string=>typeof v==='string'&&v.length>=3&&v.length<=2048&&!/[\x00-\x1f\x7f-\x9f]/.test(v);
@@ -33,8 +36,8 @@ export function selectCountry(value:any,code:'va'|'sm'):string {
  const matches=rows.filter(f=>f?.type==='Feature'&&f?.properties?.country_code===code&&f?.properties?.result_type==='country'&&id(f?.properties?.place_id));
  if(matches.length!==1)throw new PacketStop(matches.length>1?'selection-ambiguous':'selection-no-eligible-country');return matches[0].properties.place_id;
 }
-export function createGeometryGuard(o:{key:string;fetcher:typeof fetch;persist:(r:unknown)=>Promise<void>;deadlineMs?:number;now?:()=>number;packet?:'selection'|'geometry'}) {
- const selectionOnly=o.packet==='selection',maxRequests=selectionOnly?1:6,maxCredits=selectionOnly?1:9,maxMilliseconds=selectionOnly?30000:120000;
+export function createGeometryGuard(o:{key:string;fetcher:typeof fetch;persist:(r:unknown)=>Promise<void>;deadlineMs?:number;now?:()=>number;packet?:'selection'|'filter-probe'|'geometry'}) {
+ const selectionOnly=o.packet==='selection'||o.packet==='filter-probe',maxRequests=selectionOnly?1:6,maxCredits=selectionOnly?1:9,maxMilliseconds=selectionOnly?30000:120000;
  const now=o.now??Date.now,deadlineMs=Math.min(maxMilliseconds,Math.max(1,o.deadlineMs??maxMilliseconds));
  const started=now(),abort=new AbortController();let fatal=false,total=0,sequence=0,credits=0,expected:{path:string;query:Record<string,string>}|undefined;
  const timer=setTimeout(()=>abort.abort(),deadlineMs);
@@ -64,7 +67,8 @@ export function createGeometryGuard(o:{key:string;fetcher:typeof fetch;persist:(
  return {fetcher,rows,get stopped(){return stopped();},selectCountries(vatican:string,sanMarino:string){if(sequence!==2||selectedIds.length||!id(vatican)||!id(sanMarino)||vatican===sanMarino||vatican.includes(o.key)||sanMarino.includes(o.key))throw fail();selectedIds.push(vatican,sanMarino);},expect(path:string,query:Record<string,string>){
   if(expected||stopped()||sequence>=maxRequests)throw fail();
   let required:Record<string,string>;let route:string;
-  if(sequence<2){route='/v1/geocode/search';required=countryQuery(sequence===0?'Vatican City':'San Marino',sequence===0?'va':'sm');}
+  if(o.packet==='filter-probe'){route='/v1/geocode/search';required=filterProbeQuery();}
+  else if(sequence<2){route='/v1/geocode/search';required=countryQuery(sequence===0?'Vatican City':'San Marino',sequence===0?'va':'sm');}
   else if(sequence===4){route='/v2/places';required={categories:'leisure.park',filter:'place:'+selectedIds[0],limit:'20'};}
   else {route='/v2/place-details';if(selectedIds.length!==2)throw fail();required={id:sequence===5?selectedIds[0]!:selectedIds[sequence-2]!,features:'details,details.full_geometry'};}
   if(path!==route||Object.keys(query).length!==Object.keys(required).length||Object.entries(required).some(([k,v])=>query[k]!==v))throw fail();
@@ -82,8 +86,9 @@ export function geometryFacts(value:any,selected:string){
  })};
 }
 export async function runGeometryValidation(args:string[],env:Record<string,string|undefined>,deps:{fetcher?:typeof fetch}={}) {
- if(!args.length)return {mode:'offline',envelope:GEOMETRY_ENVELOPE,maxRequests:6,maxCredits:9,maxBodyBytes:262144,maxTotalBytes:1572864,deadlineMs:120000,retries:0,selectionCheck:{envelope:GEOMETRY_SELECTION_ENVELOPE,args:['--selection-live'],path:'/v1/geocode/search',query:countryQuery('Vatican City','va'),maxRequests:1,maxCredits:1,maxBodyBytes:262144,maxTotalBytes:262144,deadlineMs:30000,retries:0}};
- const selectionOnly=args.length===1&&args[0]==='--selection-live',envelope=selectionOnly?GEOMETRY_SELECTION_ENVELOPE:GEOMETRY_ENVELOPE;
+ if(!args.length)return {mode:'offline',envelope:GEOMETRY_ENVELOPE,maxRequests:6,maxCredits:9,maxBodyBytes:262144,maxTotalBytes:1572864,deadlineMs:120000,retries:0,filterProbe:{envelope:GEOMETRY_FILTER_PROBE_ENVELOPE,args:['--selection-filter-probe-live'],path:'/v1/geocode/search',query:filterProbeQuery(),maxRequests:1,maxCredits:1,maxBodyBytes:262144,maxTotalBytes:262144,maxJournalBytes:262144,deadlineMs:30000,httpTimeoutMs:5000,retries:0},selectionCheck:{envelope:GEOMETRY_SELECTION_ENVELOPE,args:['--selection-live'],path:'/v1/geocode/search',query:countryQuery('Vatican City','va'),maxRequests:1,maxCredits:1,maxBodyBytes:262144,maxTotalBytes:262144,deadlineMs:30000,retries:0}};
+ const filterProbe=args.length===1&&args[0]==='--selection-filter-probe-live';
+ const selectionOnly=filterProbe||(args.length===1&&args[0]==='--selection-live'),envelope=filterProbe?GEOMETRY_FILTER_PROBE_ENVELOPE:selectionOnly?GEOMETRY_SELECTION_ENVELOPE:GEOMETRY_ENVELOPE;
  const key=env.NIGHTSKY_GEOAPIFY_API_KEY,path=env.NIGHTSKY_QUOTA_STATE_PATH,batch=env.NIGHTSKY_LIVE_BATCH_ID;
  if(args.length!==1||(!selectionOnly&&args[0]!=='--live')||env.NIGHTSKY_LIVE_APPROVED_ENVELOPE!==envelope||!key||!path||!batch||!/^[a-z0-9][a-z0-9-]{0,63}$/.test(batch)||env.NIGHTSKY_LIVE_GEOAPIFY_ADMITTED!=='yes'||env.NIGHTSKY_DISCOVERY_MODE!=='api'||env.NIGHTSKY_GEOMETRY_ENABLED==='yes'||env.NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED==='yes')throw fail();
  const stat=await lstat(path);if(!stat.isFile()||stat.isSymbolicLink())throw fail();
@@ -93,13 +98,13 @@ export async function runGeometryValidation(args:string[],env:Record<string,stri
   journal=await open(join(dirname(path),`geometry-live-${batch}.jsonl`),'wx',0o600);let bytes=0;
   const persist=async(value:unknown)=>{const line=JSON.stringify(value)+'\n';if(line.includes(key)||(bytes+=Buffer.byteLength(line))>262144)throw fail();await journal!.write(line);await journal!.sync();};
   await persist({envelope,batch,startedAt:new Date().toISOString(),productionEnabled:false});
-  g=createGeometryGuard({key,fetcher:deps.fetcher??fetch,persist,packet:selectionOnly?'selection':'geometry'});
+  g=createGeometryGuard({key,fetcher:deps.fetcher??fetch,persist,packet:filterProbe?'filter-probe':selectionOnly?'selection':'geometry'});
   // Dedicated validation client only; no environment or production admission mutation.
   const http=new ApiHttpClient({geoapifyApiKey:key,userAgent:env.NIGHTSKY_LOCATION_USER_AGENT??'NightSky.earth/1.0 (nightsky.earth2026@gmail.com)',geometryEnabled:true,geometrySourceAccepted:true,quota:checkedValidationQuota(quota,()=>g!.close()),fetcher:g.fetcher});
   const deadline=Date.now()+(selectionOnly?30000:120000);const request=async(path:string,query:Record<string,string>)=>{g!.expect(path,query);return http.json('geoapify',path,query,deadline);};
   const results:unknown[]=[];let status='stopped';let stopReason:StopReason|null=null;let phase='vatican-geocode';
   const country=async(text:string,code:'va'|'sm')=>{
-   const value=await request('/v1/geocode/search',countryQuery(text,code));
+   const value=await request('/v1/geocode/search',filterProbe?filterProbeQuery():countryQuery(text,code));
    await persist({selectionFacts:{expectedCountry:code,...selectionFacts(value,code)}});
    const selected=selectCountry(value,code);if(selected.includes(key))throw new PacketStop('selection-unsafe-identity');
    await persist({selection:{countryCode:code,placeId:selected}});return selected;
@@ -132,5 +137,4 @@ export async function runGeometryValidation(args:string[],env:Record<string,stri
   const report={mode:'live',envelope,status,stopReason,phase,attempts:g.rows,results,productionEnabled:false,sourceAccepted:false};await persist({report});return report;
  }finally{g?.close();await journal?.close();await quota.close();}
 }
-if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)runGeometryValidation(process.argv.slice(2),process.env).then(r=>console.log(JSON.stringify(r)),()=>{console.error(JSON.stringify({status:'refused-or-failed',envelope:process.argv.length===3&&process.argv[2]==='--selection-live'?GEOMETRY_SELECTION_ENVELOPE:GEOMETRY_ENVELOPE}));process.exitCode=1;});
-
+if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)runGeometryValidation(process.argv.slice(2),process.env).then(r=>console.log(JSON.stringify(r)),()=>{console.error(JSON.stringify({status:'refused-or-failed',envelope:process.argv.length===3&&process.argv[2]==='--selection-filter-probe-live'?GEOMETRY_FILTER_PROBE_ENVELOPE:process.argv.length===3&&process.argv[2]==='--selection-live'?GEOMETRY_SELECTION_ENVELOPE:GEOMETRY_ENVELOPE}));process.exitCode=1;});

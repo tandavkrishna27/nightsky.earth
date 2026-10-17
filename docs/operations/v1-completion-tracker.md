@@ -174,4 +174,14 @@ The [validation-readiness wave](validation-readiness-wave-20261017.md) completes
 
 Original ticket counts remain **12 Done / 9 Partial / 6 Not started**. This wave does not close live-source or host acceptance. The preceding `2b298d52f172a552ef315fe60e2b21a12f4e7812` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39024965392); current-wave CI must be verified for its own commit.
 
-Current wave local aggregate: **1,462 passed / 0 failed / 2 skipped**; types, build, packages and compiled runtimes passed. Independent review found no material findings. Exact current-commit CI remains pending at document commit time; no previous run is substituted for it.
+Current wave local aggregate: **1,462 passed / 0 failed / 2 skipped**; types, build, packages and compiled runtimes passed. Independent review found no material findings. The wave was pushed as `887cb46925b448783f45826895d36f94ceed7860`; [all six exact-commit CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39026264217).
+
+## Source and native acceptance continuation
+
+See [continuation plan](../superpowers/plans/2026-10-17-source-native-acceptance.md). The [revised geography executor](geography-filter-probe-handoff-20261017.md) is implemented and reviewed offline under a new one-request envelope. [History usage reconciliation](history-usage-readiness-20261017.md) records the prior one-credit estimate and owner confirmation of no outside use; old packet implementation prerequisites were corrected. Requests and actual ledger mutation remain pending their concrete approvals.
+
+The [supported native installation](native-acceptance-path-20261017.md) returned version **1.0.14** successfully. The current chat still has no refreshed NightSky tools, so native skills/tool/answer acceptance remains open. The prior nested-model policy block was not retried or bypassed. Original counts remain **12 Done / 9 Partial / 6 Not started**; this advances the same blocks 1 and 3.
+
+Execution update: the owner subsequently approved both specific actions and then the separate annual request. [Results](source-native-acceptance-results-20261017.md): geography again returned `selection-empty` after exactly one request; accounting import preserved every previous entry; annual history validated 8,784 hours with zero missing/null values in 111,061 bytes. Both live allowances are consumed. Native 1.0.14 installation succeeded but refreshed host answer acceptance remains open. No production source admission or deployment follows from these outcomes.
+
+Continuation local verification: **1,466 passed / 0 failed / 2 skipped** and all TypeScript checks passed. New filter-probe regressions are registered in the aggregate CI suite. Exact pushed-commit CI is observed separately.
