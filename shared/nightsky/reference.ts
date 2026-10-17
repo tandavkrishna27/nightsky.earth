@@ -1,6 +1,7 @@
 import * as z from "zod4";
 import { ianaTimeZoneSchema } from "./common";
 const text = z.string().trim().min(1).max(500);
+const evidenceNote = z.string().min(1).max(2048).refine(value => new TextEncoder().encode(value).byteLength <= 2048, "Evidence note exceeds 2KiB UTF-8");
 export const referenceDomainSchema = z.enum(["solar-system", "starter-targets", "exoplanets"]);
 export const referenceOperationSchema = z.enum([
     "search",
@@ -211,7 +212,7 @@ export const referenceMethodSchema = z.strictObject({
     erfa_version: text,
     frame: text,
     refraction: text,
-    accuracy_note: text,
+    accuracy_note: evidenceNote,
     iers: z.strictObject({
         start_utc: second,
         end_utc: second,
@@ -232,7 +233,9 @@ export const referenceMethodSchema = z.strictObject({
         sha256: hash,
         name: text.optional(),
         size_bytes: z.number().int().positive().optional(),
-        source_url:z.url().max(2048),start_tdb:text,end_tdb:text
+        source_url: z.url().max(2048),
+        start_tdb: text,
+        end_tdb: text
     }).optional()
 });
 export const referenceSnapshotSchema = z.strictObject({
@@ -255,6 +258,7 @@ export const referenceCoordinatesSchema = z.strictObject({
 });
 export const referenceCatalogueEvidenceSchema = z.strictObject({
     ...referenceSnapshotSchema.shape,
+    appearance: z.lazy(() => referenceAppearanceSchema),
     input_coordinates: referenceCoordinatesSchema,
     motion_model: text,
     proper_motion_applied: z.boolean(),
@@ -263,7 +267,7 @@ export const referenceCatalogueEvidenceSchema = z.strictObject({
     pm_dec_arcsec_per_year: z.number().finite().nullable(),
     distance_au: z.null(),
     refraction: text,
-    accuracy_note: text
+    accuracy_note: evidenceNote
 });
 const referenceCoverageSchema = z.enum(["always_satisfied", "never_satisfied", "partial", "unresolved"]);
 const evidenceInterval = z.strictObject({
@@ -290,7 +294,7 @@ export const referenceSampleSchema = z.strictObject({
     distance_au: z.number().finite().nonnegative().nullable().optional(),
     sun_altitude_deg: z.number().finite().min(-90).max(90).optional(),
     moon_altitude_deg: z.number().finite().min(-90).max(90).optional(),
-    horizon_altitude_deg: z.number().finite().optional(),
+    horizon_altitude_deg: z.number().finite().nullable().optional(),
     required_min_altitude_deg: z.number().finite().optional()
 });
 export const referenceSamplingSchema = z.strictObject({
@@ -300,6 +304,7 @@ export const referenceSamplingSchema = z.strictObject({
     sampleScope: z.literal("full-local-night")
 });
 export const referenceAppearanceSchema = z.strictObject({
+    families: z.array(z.enum(["bright_star", "double_star", "deep_sky"])).max(3),
     magnitude: z.number().finite().nullable().optional(),
     magnitude_band: text.nullable().optional(),
     magnitude_flag: text.nullable().optional(),
@@ -400,7 +405,19 @@ export const referenceDetailsResultSchema = z.strictObject({
         host: z.strictObject({
             id: text,
             name: text,
-            coordinateMetadata: referenceCoordinatesSchema.nullable(),
+            coordinateMetadata: z.strictObject({
+                input: evidenceNote,
+                heliocentric: evidenceNote,
+                unit: z.literal("pc"),
+                galactocentric: z.strictObject({
+                    galcen_distance_pc: z.number().finite().positive(),
+                    z_sun_pc: z.number().finite(),
+                    roll_deg: z.number().finite(),
+                    galcen_ra_deg: z.number().finite().min(0).lt(360),
+                    galcen_dec_deg: z.number().finite().min(-90).max(90)
+                }),
+                astropy_version: text
+            }).nullable(),
             planets: z.array(referenceRecordSchema).max(100)
         }).optional(),
         sections: z.array(z.strictObject({

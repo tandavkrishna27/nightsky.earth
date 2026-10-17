@@ -2,6 +2,7 @@ import * as z from "zod4";
 import { discoverObservingTargetsInputSchema, getCatalogueTargetWindowsInputSchema, type ReferenceDomain } from "../../../shared/nightsky/reference";
 const text = z.string().min(1).max(500);
 const numeric = z.number().finite();
+const evidenceNote = z.string().min(1).max(2048).refine(value => new TextEncoder().encode(value).byteLength <= 2048, "Evidence note exceeds 2KiB UTF-8");
 const row = z.object({
     id: z.string().min(1).max(160),
     name: text,
@@ -57,7 +58,7 @@ export const meteorResponseSchema = z.object({
 });
 export function parseMeteorResponse(value: unknown, code: string) {
     const result = meteorResponseSchema.parse(value);
-    if (result.code !== code || result.parameter_sets.some(set=>set.code!==code || set.iau_no!==result.iau_no))
+    if (result.code !== code || result.parameter_sets.some(set => set.code !== code || set.iau_no !== result.iau_no))
         throw new Error("Meteor identity mismatch");
     return {
         ...result,
@@ -221,7 +222,7 @@ export const methodSchema = z.object({
     erfa_version: text,
     frame: text,
     refraction: text,
-    accuracy_note: text,
+    accuracy_note: evidenceNote,
     iers: z.object({
         start_utc: utc,
         end_utc: utc,
@@ -238,7 +239,14 @@ export const methodSchema = z.object({
     root_tolerance_seconds: numeric.positive(),
     window_note: text,
     jplephem_version: text.optional(),
-    kernel: z.object({name:text,sha256:z.string().regex(/^[a-f0-9]{64}$/),size_bytes:z.number().int().positive(),source_url:z.url().max(2048),start_tdb:text,end_tdb:text}).optional()
+    kernel: z.object({
+        name: text,
+        sha256: z.string().regex(/^[a-f0-9]{64}$/),
+        size_bytes: z.number().int().positive(),
+        source_url: z.url().max(2048),
+        start_tdb: text,
+        end_tdb: text
+    }).optional()
 });
 const intervalSchema = z.object({
     start_utc: utc,
@@ -253,11 +261,21 @@ const sampleSchema = z.object({
     distance_au: numeric.nonnegative().nullable().optional(),
     sun_altitude_deg: numeric.min(-90).max(90).optional(),
     moon_altitude_deg: numeric.min(-90).max(90).optional(),
-    horizon_altitude_deg: numeric.optional(),
+    horizon_altitude_deg: numeric.nullable().optional(),
     required_min_altitude_deg: numeric.optional()
 });
 const coverageValueSchema = z.enum(["always_satisfied", "never_satisfied", "partial", "unresolved"]);
+export const appearanceSchema = z.object({
+    families: z.array(z.enum(["bright_star", "double_star", "deep_sky"])).max(3),
+    magnitude: numeric.nullable(),
+    magnitude_band: text.nullable(),
+    magnitude_flag: text.nullable(),
+    magnitude_code: text.nullable(),
+    major_axis_arcmin: numeric.nonnegative().nullable(),
+    minor_axis_arcmin: numeric.nonnegative().nullable()
+});
 export const catalogueMetadataSchema = starterProvenanceSchema.extend({
+    appearance: appearanceSchema,
     input_coordinates: z.object({
         ra_deg: numeric.min(0).lt(360),
         dec_deg: numeric.min(-90).max(90),
@@ -273,7 +291,7 @@ export const catalogueMetadataSchema = starterProvenanceSchema.extend({
     pm_dec_arcsec_per_year: numeric.nullable(),
     distance_au: z.null(),
     refraction: text,
-    accuracy_note: text
+    accuracy_note: evidenceNote
 });
 export const nightTargetSchema = z.object({
     id: text,
@@ -366,6 +384,15 @@ function bindConstraints(c: {
     equal(c.window_start_utc, b.window.startUtc, "Window start");
     equal(c.window_end_utc, b.window.endUtc, "Window end");
 }
+function validateChartSequence(samples: {
+    time_utc: string;
+}[], start: number, end: number) {
+    for (let i = 0; i < samples.length; i++) {
+        const at = Date.parse(samples[i].time_utc);
+        if (at < start || at > end || (i > 0 && at <= Date.parse(samples[i - 1].time_utc)))
+            throw new Error("Invalid sample sequence");
+    }
+}
 export function parseNightResponse(value: unknown, b: ObservingBinding) {
     const r = nightResponseSchema.parse(value);
     assertLocalNight(b);
@@ -382,6 +409,11 @@ export function parseNightResponse(value: unknown, b: ObservingBinding) {
     if (b.targetIds)
         equal([...r.targets.map(t => t.id)].sort(), [...b.targetIds].sort(), "Targets");
     const start = Date.parse(r.night.start_utc), end = Date.parse(r.night.end_utc);
+    validateChartSequence(r.moon.samples, start, end);
+    for (const interval of r.darkness.intervals) {
+        if (Date.parse(interval.start_utc) < Date.parse(b.window.startUtc) || Date.parse(interval.end_utc) > Date.parse(b.window.endUtc))
+            throw new Error("Darkness outside selected interval");
+    }
     equal(end - start, r.night.duration_hours * 3600000, "Night duration");
     const fmt = new Intl.DateTimeFormat("en-CA", {
         timeZone: b.displayTimeZone,
@@ -410,11 +442,7 @@ export function parseNightResponse(value: unknown, b: ObservingBinding) {
         for (const w of t.windows)
             if (Date.parse(w.start_utc) < Date.parse(b.window.startUtc) || Date.parse(w.end_utc) > Date.parse(b.window.endUtc))
                 throw new Error("Window outside selected interval");
-        for (let i = 0; i < t.samples.length; i++) {
-            const at = Date.parse(t.samples[i].time_utc);
-            if (at < start || at > end || (i && at <= Date.parse(t.samples[i - 1].time_utc)))
-                throw new Error("Invalid sample sequence");
-        }
+        validateChartSequence(t.samples, start, end);
     }
     return r;
 }
@@ -468,6 +496,7 @@ export const discoveryResponseSchema = z.object({
         id: text,
         name: text,
         aliases: z.array(text).max(30),
+        appearance: appearanceSchema.nullable(),
         preference_reasons: z.array(text).max(10),
         field_context: text,
         coarse_matching_samples: z.number().int().nonnegative(),
@@ -507,6 +536,8 @@ export function parseDiscoveryResponse(value: unknown, b: ObservingBinding) {
             if (!target || !target.windows.length)
                 throw new Error("Candidate missing refined windows");
             if (target.catalogue) {
+                if (c.appearance !== undefined && target.catalogue.appearance !== undefined)
+                    equal(c.appearance, target.catalogue.appearance, "Candidate appearance");
                 const source = r.discovery.source_snapshots.find(s => s.source === target.catalogue!.source);
                 if (!source)
                     throw new Error("Missing discovery snapshot");
@@ -608,6 +639,10 @@ export const atmosphereSchema = z.object({
     })).max(30).nullable().optional()
 });
 export const ringSchema = z.object({
+    parent_id: text.optional(),
+    width_km: optionalNumber,
+    thickness_km: optionalNumber,
+    notes: evidenceNote.nullable().optional(),
     id: z.union([text, z.number().int()]).optional(),
     object_id: text.optional(),
     name: text,
@@ -641,29 +676,50 @@ export function parseObjectDetail(value: unknown, id: string) {
     return result;
 }
 export const exoplanetSourceDataSchema = z.object({
+    disc_refname: text.nullable().optional(),
+    ra_reflink: text.nullable().optional(),
+    dec_reflink: text.nullable().optional(),
+    sy_dist_reflink: text.nullable().optional(),
     pl_rade: optionalNumber,
     pl_radeerr1: optionalNumber,
     pl_radeerr2: optionalNumber,
     pl_radelim: z.number().int().min(-1).max(1).nullable().optional(),
+    pl_rade_reflink: text.nullable().optional(),
     pl_bmasse: optionalNumber,
     pl_bmasseerr1: optionalNumber,
     pl_bmasseerr2: optionalNumber,
     pl_bmasselim: z.number().int().min(-1).max(1).nullable().optional(),
+    pl_bmasse_reflink: text.nullable().optional(),
     pl_orbper: optionalNumber,
     pl_orbpererr1: optionalNumber,
     pl_orbpererr2: optionalNumber,
     pl_orbperlim: z.number().int().min(-1).max(1).nullable().optional(),
+    pl_orbper_reflink: text.nullable().optional(),
     pl_orbsmax: optionalNumber,
     pl_orbsmaxerr1: optionalNumber,
     pl_orbsmaxerr2: optionalNumber,
     pl_orbsmaxlim: z.number().int().min(-1).max(1).nullable().optional(),
+    pl_orbsmax_reflink: text.nullable().optional(),
     pl_eqt: optionalNumber,
     pl_eqterr1: optionalNumber,
     pl_eqterr2: optionalNumber,
     pl_eqtlim: z.number().int().min(-1).max(1).nullable().optional(),
-    pl_refname: optionalText,
-    sy_refname: optionalText,
-    st_refname: optionalText
+    pl_eqt_reflink: text.nullable().optional(),
+    st_teff: optionalNumber,
+    st_tefferr1: optionalNumber,
+    st_tefferr2: optionalNumber,
+    st_tefflim: z.number().int().min(-1).max(1).nullable().optional(),
+    st_teff_reflink: text.nullable().optional(),
+    st_mass: optionalNumber,
+    st_masserr1: optionalNumber,
+    st_masserr2: optionalNumber,
+    st_masslim: z.number().int().min(-1).max(1).nullable().optional(),
+    st_mass_reflink: text.nullable().optional(),
+    st_rad: optionalNumber,
+    st_raderr1: optionalNumber,
+    st_raderr2: optionalNumber,
+    st_radlim: z.number().int().min(-1).max(1).nullable().optional(),
+    st_rad_reflink: text.nullable().optional()
 });
 export const exoplanetRecordSchema = z.object({
     id: text,
@@ -692,6 +748,19 @@ export function parseExoplanetDetail(value: unknown, id: string, hostId?: string
         equal(r.host_id, hostId, "Host identity");
     return r;
 }
+export const hostCoordinateMetadataSchema = z.object({
+    input: evidenceNote,
+    heliocentric: evidenceNote,
+    unit: z.literal("pc"),
+    galactocentric: z.object({
+        galcen_distance_pc: numeric.positive(),
+        z_sun_pc: numeric,
+        roll_deg: numeric,
+        galcen_ra_deg: numeric.min(0).lt(360),
+        galcen_dec_deg: numeric.min(-90).max(90)
+    }),
+    astropy_version: text
+});
 export const hostDetailSchema = z.object({
     id: text,
     name: text,
@@ -701,13 +770,7 @@ export const hostDetailSchema = z.object({
     distance_error_plus_pc: optionalNumber,
     distance_error_minus_pc: optionalNumber,
     coordinate_source_planet: text,
-    coordinate_metadata: z.object({
-        frame: optionalText,
-        equinox: optionalText,
-        epoch: optionalText,
-        source: optionalText,
-        reference: optionalText
-    }),
+    coordinate_metadata: hostCoordinateMetadataSchema,
     source: text,
     retrieved_at: z.string().min(10).max(40),
     planets: z.array(exoplanetRecordSchema).max(100)

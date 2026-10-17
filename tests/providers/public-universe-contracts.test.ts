@@ -341,7 +341,7 @@ test("exoplanet keeps asymmetrical errors limits reference and validates host id
             pl_radeerr1: 0.2,
             pl_radeerr2: -0.1,
             pl_radelim: 1,
-            pl_refname: "Synthetic reference",
+            pl_rade_reflink: "Synthetic reference",
             secret: {
                 blob: 1
             }
@@ -522,11 +522,306 @@ test("public observing seconds reject impossible dates and scientific measuremen
         value: 3
     }).success, false);
 });
-
-test('discovery rejects snapshot identity differing from selected target catalogue', () => {
- const catalogue={...syntheticSource,input_coordinates:{ra_deg:1,dec_deg:2,frame:'FK5',equinox:'J2000',reference_epoch_jyear:2000,observation_epoch_jyear:null},motion_model:'static_catalogue_direction',proper_motion_applied:false,frame_transform:'synthetic',pm_ra_cosdec_arcsec_per_year:null,pm_dec_arcsec_per_year:null,distance_au:null,refraction:'none',accuracy_note:'synthetic'};
- const target={id:'bsc5p:hr2491',name:'Synthetic',catalogue,status:'windows_found',windows:[{start_utc:night.window.startUtc,end_utc:'2026-10-18T19:00:00Z'}],constraint_coverage:{scope:'selected_interval',start_utc:night.window.startUtc,end_utc:night.window.endUtc,altitude:'partial',darkness:'partial'},samples:[]};
- const discovery={schema_version:1,request:{date:'2026-10-18',timezone:'UTC',lat:12.35,lon:23.46,min_altitude_deg:20,sun_altitude_deg:-12,min_moon_separation_deg:0,window_start_utc:night.window.startUtc,window_end_utc:night.window.endUtc,horizon_mask:null},discovery:{options:{equipment_mode:'binocular',preference:'stars',shortlist_limit:3,true_field_deg:null,max_catalogue_v_magnitude:null},scope:'synthetic',catalogue_records:1,solar_system_targets:8,unsupported_catalogue_records:1,coarse_step_seconds:1200,sample_count:72,incomplete_between_samples:true,coarse_matching_candidates:1,refined_candidates:1,selected_without_refined_window:0,brightness_excluded:0,unknown_or_non_v_brightness_excluded:0,ranking_policy:'synthetic',limitations:['synthetic'],source_snapshots:[syntheticSource],calculation:syntheticMethod.calculation,planner_calculation:syntheticMethod.calculation},candidates:[{id:target.id,name:target.name,aliases:[],preference_reasons:['synthetic'],field_context:'unknown_angular_extent',coarse_matching_samples:1,sampled_peak_altitude_deg:20,brightness_status:'unknown',refined_status:'windows_found'}],plan:{...syntheticNight,targets:[target]},method:syntheticMethod};
- assert.equal(parseDiscoveryResponse(discovery,binding).candidates.length,1);
- assert.throws(()=>parseDiscoveryResponse({...discovery,discovery:{...discovery.discovery,source_snapshots:[{...syntheticSource,snapshot_sha256:'f'.repeat(64)}]}},binding));
+test("discovery rejects snapshot identity differing from selected target catalogue", () => {
+    const catalogue = {
+        ...syntheticSource,
+        appearance: syntheticAppearance,
+        input_coordinates: {
+            ra_deg: 1,
+            dec_deg: 2,
+            frame: "FK5",
+            equinox: "J2000",
+            reference_epoch_jyear: 2000,
+            observation_epoch_jyear: null
+        },
+        motion_model: "static_catalogue_direction",
+        proper_motion_applied: false,
+        frame_transform: "synthetic",
+        pm_ra_cosdec_arcsec_per_year: null,
+        pm_dec_arcsec_per_year: null,
+        distance_au: null,
+        refraction: "none",
+        accuracy_note: "synthetic"
+    };
+    const target = {
+        id: "bsc5p:hr2491",
+        name: "Synthetic",
+        catalogue,
+        status: "windows_found",
+        windows: [{
+                start_utc: night.window.startUtc,
+                end_utc: "2026-10-18T19:00:00Z"
+            }],
+        constraint_coverage: {
+            scope: "selected_interval",
+            start_utc: night.window.startUtc,
+            end_utc: night.window.endUtc,
+            altitude: "partial",
+            darkness: "partial"
+        },
+        samples: []
+    };
+    const discovery = {
+        schema_version: 1,
+        request: {
+            date: "2026-10-18",
+            timezone: "UTC",
+            lat: 12.35,
+            lon: 23.46,
+            min_altitude_deg: 20,
+            sun_altitude_deg: -12,
+            min_moon_separation_deg: 0,
+            window_start_utc: night.window.startUtc,
+            window_end_utc: night.window.endUtc,
+            horizon_mask: null
+        },
+        discovery: {
+            options: {
+                equipment_mode: "binocular",
+                preference: "stars",
+                shortlist_limit: 3,
+                true_field_deg: null,
+                max_catalogue_v_magnitude: null
+            },
+            scope: "synthetic",
+            catalogue_records: 1,
+            solar_system_targets: 8,
+            unsupported_catalogue_records: 1,
+            coarse_step_seconds: 1200,
+            sample_count: 72,
+            incomplete_between_samples: true,
+            coarse_matching_candidates: 1,
+            refined_candidates: 1,
+            selected_without_refined_window: 0,
+            brightness_excluded: 0,
+            unknown_or_non_v_brightness_excluded: 0,
+            ranking_policy: "synthetic",
+            limitations: ["synthetic"],
+            source_snapshots: [syntheticSource],
+            calculation: syntheticMethod.calculation,
+            planner_calculation: syntheticMethod.calculation
+        },
+        candidates: [{
+                id: target.id,
+                name: target.name,
+                aliases: [],
+                appearance: syntheticAppearance,
+                preference_reasons: ["synthetic"],
+                field_context: "unknown_angular_extent",
+                coarse_matching_samples: 1,
+                sampled_peak_altitude_deg: 20,
+                brightness_status: "unknown",
+                refined_status: "windows_found"
+            }],
+        plan: {
+            ...syntheticNight,
+            targets: [target]
+        },
+        method: syntheticMethod
+    };
+    assert.equal(parseDiscoveryResponse(discovery, binding).candidates.length, 1);
+    assert.deepEqual(parseDiscoveryResponse(discovery, binding).candidates[0].appearance, syntheticAppearance);
+    assert.throws(() => parseDiscoveryResponse({
+        ...discovery,
+        candidates: [{
+                ...discovery.candidates[0],
+                appearance: {
+                    ...syntheticAppearance,
+                    magnitude: 2
+                }
+            }]
+    }, binding));
+    assert.throws(() => parseDiscoveryResponse({
+        ...discovery,
+        discovery: {
+            ...discovery.discovery,
+            source_snapshots: [{
+                    ...syntheticSource,
+                    snapshot_sha256: "f".repeat(64)
+                }]
+        }
+    }, binding));
+});
+import { catalogueMetadataSchema, nightTargetSchema, ringSchema, parseHostDetail } from "../../server/providers/publicUniverse/contracts";
+import { referenceCatalogueEvidenceSchema, referenceSampleSchema, referenceAppearanceSchema } from "../../shared/nightsky/reference";
+const syntheticAppearance = {
+    families: ["bright_star"],
+    magnitude: 1,
+    magnitude_band: "V",
+    magnitude_flag: null,
+    magnitude_code: null,
+    major_axis_arcmin: null,
+    minor_axis_arcmin: null
+};
+const bscAccuracyNote = "Angular-only estimate: no measured distance, annual parallax, radial velocity, perspective acceleration or binary orbit. " + "Linear angular proper motion from Julian reference epoch 2000.0; missing radial velocity is treated as zero by the propagation model. Empirical FK5/Hipparcos frame-spin correction is not applied. " + "1900\u20132100 is a calculation bound, not an accuracy guarantee; bundled Earth-orientation coverage further restricts dates. Source rounding and catalogue systematics remain; no precision, component position, extended-object visibility or telescope-pointing guarantee.";
+const reviewedCatalogue = {
+    ...syntheticSource,
+    appearance: syntheticAppearance,
+    input_coordinates: {
+        ra_deg: 1,
+        dec_deg: 2,
+        frame: "FK5",
+        equinox: "J2000",
+        reference_epoch_jyear: 2000,
+        observation_epoch_jyear: null
+    },
+    motion_model: "linear_angular_proper_motion",
+    proper_motion_applied: true,
+    frame_transform: "synthetic",
+    pm_ra_cosdec_arcsec_per_year: 0,
+    pm_dec_arcsec_per_year: 0,
+    distance_au: null,
+    refraction: "none",
+    accuracy_note: bscAccuracyNote
+};
+const noMaskSample = {
+    time_utc: "2026-10-18T18:00:00Z",
+    altitude_deg: 20,
+    azimuth_deg: 100,
+    sun_separation_deg: 60,
+    moon_separation_deg: 50,
+    distance_au: null,
+    sun_altitude_deg: -20,
+    moon_altitude_deg: 10,
+    horizon_altitude_deg: null,
+    required_min_altitude_deg: 20
+};
+test("source-shaped no-mask target samples retain explicit nullable horizon altitude", () => {
+    const target = {
+        id: "bsc5p:hr2491",
+        name: "Synthetic",
+        catalogue: {
+            ...reviewedCatalogue,
+            accuracy_note: "synthetic"
+        },
+        status: "windows_found",
+        windows: [],
+        constraint_coverage: {
+            scope: "selected_interval",
+            start_utc: night.window.startUtc,
+            end_utc: night.window.endUtc,
+            altitude: "partial",
+            darkness: "partial"
+        },
+        samples: [noMaskSample]
+    };
+    assert.equal(nightTargetSchema.parse(target).samples[0].horizon_altitude_deg, null);
+    assert.equal(referenceSampleSchema.parse(noMaskSample).horizon_altitude_deg, null);
+});
+test("catalogue accuracy limitations preserve the complete pinned proper-motion note within 2KiB", () => {
+    assert.equal(bscAccuracyNote.length, 581);
+    assert.equal(catalogueMetadataSchema.parse(reviewedCatalogue).accuracy_note, bscAccuracyNote);
+    assert.equal(referenceCatalogueEvidenceSchema.parse(reviewedCatalogue).accuracy_note, bscAccuracyNote);
+    assert.equal(catalogueMetadataSchema.safeParse({
+        ...reviewedCatalogue,
+        accuracy_note: "x".repeat(2049)
+    }).success, false);
+});
+test("appearance copies preserve finite magnitude band flags and families", () => {
+    assert.deepEqual((catalogueMetadataSchema.parse({
+        ...reviewedCatalogue,
+        accuracy_note: "synthetic"
+    }) as any).appearance, syntheticAppearance);
+    assert.deepEqual(referenceAppearanceSchema.parse(syntheticAppearance), syntheticAppearance);
+    assert.equal(catalogueMetadataSchema.safeParse({
+        ...reviewedCatalogue,
+        accuracy_note: "synthetic",
+        appearance: {
+            ...syntheticAppearance,
+            magnitude: Infinity
+        }
+    }).success, false);
+});
+test("Moon chart chronology and night bounds and selected darkness intervals are validated", () => {
+    for (const times of [["2026-10-18T11:00:00Z"], ["2026-10-18T19:00:00Z", "2026-10-18T18:00:00Z"], ["2026-10-18T18:00:00Z", "2026-10-18T18:00:00Z"]])
+        assert.throws(() => parseNightResponse({
+            ...syntheticNight,
+            moon: {
+                ...syntheticNight.moon,
+                samples: times.map(time_utc => ({
+                    ...noMaskSample,
+                    time_utc,
+                    horizon_altitude_deg: 0
+                }))
+            }
+        }, binding));
+    assert.throws(() => parseNightResponse({
+        ...syntheticNight,
+        darkness: {
+            status: "intervals_found",
+            intervals: [{
+                    start_utc: "2026-10-18T17:00:00Z",
+                    end_utc: "2026-10-18T19:00:00Z"
+                }]
+        }
+    }, binding));
+    assert.equal(parseNightResponse({
+        ...syntheticNight,
+        moon: {
+            ...syntheticNight.moon,
+            samples: [{
+                    ...noMaskSample,
+                    horizon_altitude_deg: 0
+                }]
+        }
+    }, binding).moon.samples.length, 1);
+});
+test("source-approved ring width thickness and notes and archive reflinks survive parsing", () => {
+    const ring = {
+        id: 1,
+        parent_id: "synthetic",
+        name: "Synthetic ring",
+        inner_radius_km: 1,
+        outer_radius_km: 2,
+        width_km: 1,
+        thickness_km: 0.1,
+        notes: "Synthetic bounded context"
+    };
+    assert.deepEqual(ringSchema.parse(ring), ring);
+    const exo = {
+        id: "synthetic-b",
+        name: "Synthetic",
+        host_id: "synthetic",
+        source: "synthetic",
+        source_url: "https://example.org",
+        retrieved_at: "2026-01-01",
+        source_data: {
+            disc_refname: "Synthetic discovery",
+            ra_reflink: "Synthetic RA",
+            dec_reflink: "Synthetic DEC",
+            sy_dist_reflink: "Synthetic distance",
+            pl_rade: 2,
+            pl_rade_reflink: "Synthetic radius",
+            st_teff: 3000,
+            st_tefferr1: 10,
+            st_tefferr2: -10,
+            st_tefflim: 0,
+            st_teff_reflink: "Synthetic temperature"
+        }
+    };
+    assert.deepEqual(parseExoplanetDetail(exo, exo.id).source_data, exo.source_data);
+});
+test("host coordinate metadata retains the actual upstream frame and Galactic conventions", () => {
+    const metadata = {
+        input: "ICRS; archive catalogue coordinates, no proper-motion propagation",
+        heliocentric: "Synthetic Galactic Cartesian",
+        unit: "pc",
+        galactocentric: {
+            galcen_distance_pc: 8122,
+            z_sun_pc: 20.8,
+            roll_deg: 0,
+            galcen_ra_deg: 266.4051,
+            galcen_dec_deg: -28.936175
+        },
+        astropy_version: "synthetic"
+    };
+    assert.deepEqual(parseHostDetail({
+        id: "synthetic",
+        name: "Synthetic",
+        coordinate_source_planet: "Synthetic b",
+        coordinate_metadata: metadata,
+        source: "Synthetic",
+        retrieved_at: "2026-01-01",
+        planets: []
+    }, "synthetic").coordinate_metadata, metadata);
 });
