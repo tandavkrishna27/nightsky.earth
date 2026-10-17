@@ -19,7 +19,8 @@ export function createNativeSessionTransport(journalPath:string,transport:typeof
  const fetcher=(async(input:RequestInfo|URL,init?:RequestInit)=>{
   const url=new URL(String(input)),endpoint=url.hostname+url.pathname;
   const fingerprint=createHash('sha256').update(url.href).digest('hex');
-  if(failed||closed||controller.signal.aborted||count>=NATIVE_SESSION_PLAN.maxRequests||url.protocol!=='https:'||url.port||url.username||url.password||!endpoints.has(endpoint)||(init?.method??'GET')!=='GET'||init?.body||seen.has(fingerprint))throw Error('Session request refused');
+  if(failed||closed||controller.signal.aborted||init?.signal?.aborted||url.protocol!=='https:'||url.port||url.username||url.password||!endpoints.has(endpoint)||(init?.method??'GET')!=='GET'||init?.body)throw Error('Session request refused');
+  if(count>=NATIVE_SESSION_PLAN.maxRequests||seen.has(fingerprint))throw Error('Session request refused');
   // Synchronous durable reservation prevents concurrent requests exceeding the cap.
   seen.add(fingerprint);count++;const attempt=count;record({attempt,endpoint,at:new Date().toISOString()});
   const deadline=AbortSignal.timeout(NATIVE_SESSION_PLAN.requestMs);
@@ -33,6 +34,10 @@ export function createNativeSessionTransport(journalPath:string,transport:typeof
    try{for(;;){signal.throwIfAborted();const part=await reader.read();if(part.done)break;size+=part.value.byteLength;if(size>NATIVE_SESSION_PLAN.maxBodyBytes)throw Error('Response limit');chunks.push(part.value);}signal.throwIfAborted();}
    finally{signal.removeEventListener('abort',cancel);void reader.cancel().catch(()=>{});reader.releaseLock();}
    record({response:attempt,endpoint,status:response.status,bytes:size});
+   // A later caller may request this successful endpoint again, consuming a new
+   // session attempt and normal provider quota. Failed/in-flight duplicates stay
+   // blocked. This transport never retries an attempt or retains response data.
+   if(response.ok)seen.delete(fingerprint);
    return new Response(Buffer.concat(chunks),{status:response.status,headers:response.headers});
   }catch{if(!failed&&!closed)record({endpoint,result:signal.aborted?'deadline':'unavailable'});throw Error('Bounded upstream request unavailable');}
  }) as typeof fetch;
