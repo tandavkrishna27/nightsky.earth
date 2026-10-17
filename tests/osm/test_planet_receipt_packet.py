@@ -5,6 +5,7 @@ from pathlib import Path
 import stat
 import sys
 import tempfile
+import time
 from contextlib import ExitStack
 from types import SimpleNamespace
 import unittest
@@ -204,11 +205,109 @@ class PlanetReceiptPacketTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'cache.*changed'):
                     packet.prepare()
 
+    def test_inventory_mutation_stop_names_the_changed_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root,data,cache,machine=self.fixture(folder)
+            data=packet.safe_path(data)
+            scandir=packet.os.scandir
+            class Entries:
+                def __init__(self,path):self.path=Path(path);self.handle=scandir(path)
+                def __enter__(self):return self.handle.__enter__()
+                def __exit__(self,*args):
+                    result=self.handle.__exit__(*args)
+                    if self.path==data:os.utime(data,ns=(1_000_000_000,1_000_000_000))
+                    return result
+            with patch.object(packet.os,'scandir',side_effect=Entries):
+                with self.assertRaisesRegex(ValueError,'directory changed during enumeration') as stopped:
+                    packet.inventory_roots([data])
+            self.assertIn(str(data.resolve()),str(stopped.exception))
+
+    @unittest.skipUnless(os.name=='nt','Windows native directory identity')
+    def test_windows_directory_size_change_without_native_mutation_is_accepted(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();lstat=Path.lstat;scandir=packet.os.scandir;enumerated=False
+            def observed(path,*args,**kwargs):
+                info=lstat(path,*args,**kwargs)
+                if path!=root:return info
+                return SimpleNamespace(st_mode=info.st_mode,st_dev=info.st_dev,st_ino=info.st_ino,
+                    st_size=0 if enumerated else 4096,st_mtime_ns=info.st_mtime_ns,
+                    st_file_attributes=info.st_file_attributes)
+            class Entries:
+                def __init__(self,path):self.handle=scandir(path)
+                def __enter__(self):return self.handle.__enter__()
+                def __exit__(self,*args):
+                    nonlocal enumerated
+                    result=self.handle.__exit__(*args);enumerated=True;return result
+            with patch.object(Path,'lstat',observed),patch.object(packet.os,'scandir',side_effect=Entries):
+                inventory=packet.inventory_roots([root])
+            self.assertEqual(inventory['logicalBytes'],0)
+            self.assertEqual(inventory['directories'],1)
+
+    @unittest.skipUnless(os.name=='nt','Windows native directory identity')
+    def test_windows_native_identity_detects_spaced_child_changes_with_restored_write_time_and_replacement(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);directory=root/'retained';directory.mkdir()
+            def separate_timestamp(previous):
+                # Native timestamps have filesystem/clock granularity. Exercise
+                # known distinct ticks; this is not proof against every rapid
+                # mutation within a timestamp quantum or an atomic snapshot.
+                deadline=time.monotonic()+2
+                while time.time_ns()<=previous[3]+100_000_000:
+                    if time.monotonic()>=deadline:self.fail('native timestamp separation deadline')
+                    time.sleep(0.005)
+            info=directory.lstat();initial=packet._entry_identity(directory,info,lambda:None)
+            separate_timestamp(initial)
+            child=directory/'child';child.write_bytes(b'tiny')
+            child_closed=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertNotEqual(initial,child_closed)
+            os.utime(directory,ns=(info.st_atime_ns,info.st_mtime_ns))
+            added=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertEqual(directory.lstat().st_mtime_ns,info.st_mtime_ns)
+            self.assertNotEqual(initial,added)
+            separate_timestamp(added)
+            renamed=child.rename(directory/'renamed')
+            rename_closed=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertNotEqual(added,rename_closed)
+            os.utime(directory,ns=(info.st_atime_ns,info.st_mtime_ns))
+            after_rename=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertNotEqual(added,after_rename)
+            separate_timestamp(after_rename)
+            renamed.rename(root/'retained-moved-file')
+            removal_closed=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertNotEqual(after_rename,removal_closed)
+            os.utime(directory,ns=(info.st_atime_ns,info.st_mtime_ns))
+            after_removal=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertNotEqual(after_rename,after_removal)
+            directory.rename(root/'old-directory');directory.mkdir()
+            os.utime(directory,ns=(info.st_atime_ns,info.st_mtime_ns))
+            replacement=packet._entry_identity(directory,directory.lstat(),lambda:None)
+            self.assertNotEqual(after_removal[:2],replacement[:2])
+
+    @unittest.skipUnless(os.name=='nt','Windows native directory identity')
+    def test_windows_native_directory_identity_refuses_unsafe_or_unbound_metadata_and_query_failure(self):
+        with tempfile.TemporaryDirectory() as folder:
+            directory=Path(folder);info=directory.lstat()
+            metadata=packet._windows_directory_metadata(directory,lambda:None)
+            for change in (dict(directory=False),dict(deletePending=True),dict(attributes=0x410),
+                    dict(volume=info.st_dev+1,legacyVolume=info.st_dev+1),
+                    dict(fileId=info.st_ino+1,legacyFileId=info.st_ino+1),
+                    dict(writeNs=info.st_mtime_ns+100),dict(changeNs=0)):
+                with self.subTest(change=change),patch.object(packet,'_windows_directory_metadata',return_value={**metadata,**change}):
+                    with self.assertRaises(ValueError):packet._entry_identity(directory,info,lambda:None)
+            with patch.object(packet,'_windows_directory_metadata',side_effect=OSError('native query failed')):
+                with self.assertRaisesRegex(OSError,'native query failed'):
+                    packet._entry_identity(directory,info,lambda:None)
+            regular=directory/'regular';regular.write_bytes(b'kept')
+            first=packet._entry_identity(regular,regular.lstat(),lambda:None)
+            regular.write_bytes(b'kept and enlarged')
+            self.assertNotEqual(first,packet._entry_identity(regular,regular.lstat(),lambda:None))
+
     def test_r2_preparation_retains_all_v1_evidence_once_with_distinct_outputs(self):
         captured=[]
         def inventory(roots,**kwargs):captured.extend(roots);raise RuntimeError('synthetic roots captured')
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);(root/'.cache').mkdir()
+            canonical_cache=packet.safe_path(root/'.cache')
             with patch.object(packet,'REPO',root),patch.object(receiver,'_source_evidence',return_value=dict(path=str(root/'source.json'))),patch.object(packet,'inventory_roots',side_effect=inventory):
                 with self.assertRaisesRegex(RuntimeError,'synthetic roots captured'):
                     packet.prepare()
@@ -217,8 +316,8 @@ class PlanetReceiptPacketTests(unittest.TestCase):
         self.assertTrue(all(captured.count(path)==1 for path in history))
         self.assertTrue(all('-r2.json' in str(path) for path in (packet.INVENTORY,packet.DRAFT,packet.COMPATIBILITY)))
         self.assertFalse(set(history)&{packet.INVENTORY,packet.DRAFT,packet.COMPATIBILITY})
-        self.assertEqual(captured.count(root/'.cache'),1)
-        self.assertEqual(len(captured)+2+1,15)
+        self.assertEqual(captured.count(canonical_cache),1)
+        self.assertEqual(len(captured)+2+1,18)
 
     def test_preparation_reserves_attempt_root_slot_in_combined_64_root_limit(self):
         with tempfile.TemporaryDirectory() as folder:

@@ -1,0 +1,26 @@
+{
+  "afterIdentity": null,
+  "beforeIdentity": null,
+  "bounds": {
+    "maxCombinedRoots": 64,
+    "maxDepth": 48,
+    "maxEntries": 1000000,
+    "maxSeconds": 30
+  },
+  "changedDirectory": null,
+  "cleanupReclaimBytes": 0,
+  "command": "prepare-planet-receipt-packet.py --write",
+  "compatibilityRun": false,
+  "elapsedSeconds": null,
+  "executionAllowed": false,
+  "executionTip": "c547384096a9f28adfc4511613b8ee376c55adf9",
+  "exitCode": 1,
+  "inventoryComplete": false,
+  "kind": "receipt-preparation-mutation-stop",
+  "method": "Transcribed observed tool outcome; old diagnostic did not include directory or identities, so they remain unknown",
+  "networkRequests": 0,
+  "nextStep": "Independently review diagnostic path/identity reporting, then one coordinator-authorized bounded observation without changing the guard",
+  "r2ArtifactsWritten": false,
+  "reason": "ValueError: retained directory changed during enumeration",
+  "schemaVersion": 1
+}

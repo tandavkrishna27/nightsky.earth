@@ -35,7 +35,10 @@ COMPATIBILITY = EVIDENCE/'planet-receipt-inventory-compatibility-20261017-r2.jso
 PRIOR_PREPARATION_STOPS = (
     EVIDENCE/'planet-receipt-r2-preparation-stop-20261017.json',
     EVIDENCE/'planet-receipt-r2-preparation-stop-log-20261017.json',
-    EVIDENCE/'planet-receipt-r2-preparation-stop-20261017.log')
+    EVIDENCE/'planet-receipt-r2-preparation-stop-20261017.log',
+    EVIDENCE/'receipt-layout-mutation-stop-20261017.json',
+    EVIDENCE/'receipt-directory-diagnostic-20261017.json',
+    EVIDENCE/'receipt-native-directory-metadata-20261017.json')
 MAX_ENTRIES = 1000000
 MAX_SECONDS = 30
 MAX_DEPTH = 48
@@ -52,6 +55,83 @@ def utc():
 
 def _identity(info):
     return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns
+
+
+def _windows_directory_metadata(path,check):
+    """Read attributes only; Windows directory EOF/size is not a content count."""
+    check()
+    class Basic(ctypes.Structure):
+        _fields_=[('creation',ctypes.c_int64),('access',ctypes.c_int64),
+                  ('write',ctypes.c_int64),('change',ctypes.c_int64),('attributes',ctypes.c_uint32)]
+    class Standard(ctypes.Structure):
+        _fields_=[('allocation',ctypes.c_int64),('eof',ctypes.c_int64),
+                  ('links',ctypes.c_uint32),('deletePending',ctypes.c_ubyte),('directory',ctypes.c_ubyte)]
+    class FileId(ctypes.Structure):
+        _fields_=[('volume',ctypes.c_uint64),('fileId',ctypes.c_ubyte*16)]
+    class FileTime(ctypes.Structure):
+        _fields_=[('low',ctypes.c_uint32),('high',ctypes.c_uint32)]
+    class Legacy(ctypes.Structure):
+        _fields_=[('attributes',ctypes.c_uint32),('creation',FileTime),('access',FileTime),
+                  ('write',FileTime),('volume',ctypes.c_uint32),('sizeHigh',ctypes.c_uint32),
+                  ('sizeLow',ctypes.c_uint32),('links',ctypes.c_uint32),
+                  ('indexHigh',ctypes.c_uint32),('indexLow',ctypes.c_uint32)]
+    kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+    kernel.CreateFileW.argtypes=[ctypes.c_wchar_p,ctypes.c_uint32,ctypes.c_uint32,ctypes.c_void_p,
+                                ctypes.c_uint32,ctypes.c_uint32,ctypes.c_void_p]
+    kernel.CreateFileW.restype=ctypes.c_void_p
+    kernel.GetFileInformationByHandleEx.argtypes=[ctypes.c_void_p,ctypes.c_int,ctypes.c_void_p,ctypes.c_uint32]
+    kernel.GetFileInformationByHandleEx.restype=ctypes.c_int
+    kernel.GetFileInformationByHandle.argtypes=[ctypes.c_void_p,ctypes.POINTER(Legacy)]
+    kernel.GetFileInformationByHandle.restype=ctypes.c_int
+    kernel.CloseHandle.argtypes=[ctypes.c_void_p];kernel.CloseHandle.restype=ctypes.c_int
+    check()
+    # FILE_READ_ATTRIBUTES; share read/write/delete; OPEN_EXISTING;
+    # BACKUP_SEMANTICS permits directories and OPEN_REPARSE_POINT avoids following.
+    handle=kernel.CreateFileW(str(path),0x80,7,None,3,0x02200000,None)
+    if handle in (None,ctypes.c_void_p(-1).value):raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        check();values=[]
+        for kind,structure in ((0,Basic),(1,Standard),(18,FileId)):
+            check();value=structure()
+            if not kernel.GetFileInformationByHandleEx(handle,kind,ctypes.byref(value),ctypes.sizeof(value)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            check();values.append(value)
+        basic,standard,identity=values
+        legacy=Legacy();check()
+        if not kernel.GetFileInformationByHandle(handle,ctypes.byref(legacy)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        check()
+        if legacy.attributes!=basic.attributes or (legacy.write.high<<32|legacy.write.low)!=basic.write:
+            raise ValueError(f'changed native directory attributes during observation: {path}')
+        return dict(volume=identity.volume,fileId=int.from_bytes(bytes(identity.fileId),'little'),
+                    legacyVolume=legacy.volume,legacyFileId=legacy.indexHigh<<32|legacy.indexLow,
+                    writeNs=(basic.write-116444736000000000)*100,
+                    changeNs=(basic.change-116444736000000000)*100,
+                    attributes=basic.attributes,directory=bool(standard.directory),
+                    deletePending=bool(standard.deletePending))
+    finally:
+        if not kernel.CloseHandle(handle):raise ctypes.WinError(ctypes.get_last_error())
+
+
+def _entry_identity(path,info,check):
+    # Regular-file size and every POSIX identity retain the original semantics.
+    if os.name!='nt' or not stat.S_ISDIR(info.st_mode):return _identity(info)
+    native=_windows_directory_metadata(path,check)
+    # CPython versions expose different Windows stat ID widths. Bind the pair
+    # to a full or legacy identity queried from the SAME native handle; retain
+    # full IDs in the authoritative comparison rather than truncating them.
+    bound=(info.st_dev,info.st_ino) in ((native['volume'],native['fileId']),
+                                     (native['legacyVolume'],native['legacyFileId']))
+    if (not native['directory'] or native['deletePending'] or native['attributes']&0x400
+            or not native['attributes']&0x10 or native['changeNs']<=0
+            or not bound
+            or native['writeNs']!=info.st_mtime_ns):
+        raise ValueError(f'unsafe or changed native directory identity: {path}')
+    # Reopen the pathname on every observation. An old retained handle alone
+    # could hide replacement. ChangeTime is a separate mutation witness, subject
+    # to filesystem timestamp granularity; this is not an atomic snapshot.
+    # Unsupported/query failures never fall back to omitting directory checks.
+    return native['volume'],native['fileId'],native['writeNs'],native['changeNs'],native['attributes']
 
 
 def _regular(info):
@@ -112,7 +192,7 @@ def inventory_roots(roots, *, max_entries=MAX_ENTRIES, max_seconds=MAX_SECONDS,
             raise ValueError('overlapping retained roots')
     records=[];check=budget.check
     for root in roots:
-        check();before=root.lstat();_regular(before)
+        check();before=root.lstat();_regular(before);root_identity=_entry_identity(root,before,check)
         categories={};groups={};files=directories=total=0
         digest=hashlib.sha256();started=utc()
         pending=[(root,0)] if stat.S_ISDIR(before.st_mode) else []
@@ -136,6 +216,7 @@ def inventory_roots(roots, *, max_entries=MAX_ENTRIES, max_seconds=MAX_SECONDS,
             if depth>max_depth:raise ValueError('bounded retained inventory depth')
             initial=directory.lstat();_regular(initial)
             if not stat.S_ISDIR(initial.st_mode):raise ValueError('retained directory changed type')
+            initial_identity=_entry_identity(directory,initial,check)
             directories+=1
             with os.scandir(directory) as entries:
                 for entry in entries:
@@ -145,9 +226,11 @@ def inventory_roots(roots, *, max_entries=MAX_ENTRIES, max_seconds=MAX_SECONDS,
                     if stat.S_ISDIR(info.st_mode):pending.append((path,depth+1))
                     else:record(path,info)
             final=directory.lstat();_regular(final)
-            if _identity(initial)!=_identity(final):raise ValueError('retained directory changed during enumeration')
+            final_identity=_entry_identity(directory,final,check)
+            if initial_identity!=final_identity:
+                raise ValueError(f'retained directory changed during enumeration: {directory}; before={initial_identity!r}; after={final_identity!r}')
         check();after=root.lstat();_regular(after)
-        if _identity(before)!=_identity(after):raise ValueError('retained root changed during enumeration')
+        if root_identity!=_entry_identity(root,after,check):raise ValueError('retained root changed during enumeration')
         safe_path(root)
         records.append(dict(path=str(root),logicalBytes=total,files=files,directories=directories,
             categories=categories,topLevelAllocations=sorted(groups.values(),key=lambda item:item['relativePath']),
@@ -251,6 +334,7 @@ def prepare(*,clock=time.monotonic):
     cache=safe_path(REPO/'.cache')
     budget.check();cache_before=cache.lstat();_regular(cache_before)
     if not stat.S_ISDIR(cache_before.st_mode):raise ValueError('assigned cache directory required')
+    cache_identity=_entry_identity(cache,cache_before,budget.check)
     roots.append(cache)
     roots.append(REPO/'docs/operations/natural-earth-admission')
     roots.extend((*HISTORICAL_PREPARATION,PRIOR_REVIEW,*PRIOR_PREPARATION_STOPS))
@@ -258,7 +342,7 @@ def prepare(*,clock=time.monotonic):
     inventory=inventory_roots(roots,budget=budget)
     budget.check();safe_path(cache);budget.check()
     cache_after=cache.lstat();_regular(cache_after)
-    if _identity(cache_before)!=_identity(cache_after):
+    if cache_identity!=_entry_identity(cache,cache_after,budget.check):
         raise ValueError('assigned cache root changed during preparation; refresh after other validation writes settle')
     budget.check();machine=machine_snapshot(REPO);budget.check()
     inventory['enumeratedEntries']=budget.entries

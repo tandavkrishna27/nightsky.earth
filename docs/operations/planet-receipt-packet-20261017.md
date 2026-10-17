@@ -135,8 +135,9 @@ disk/reserve/RSS checks remain sampled rather than a filesystem reservation.
 A second preparation uses fixed `-20261017-r2.json` inventory, draft and
 compatibility filenames and the nonexistent checkout
 `.planet-261012-receipt-20261017-r2` attempt path. It retains all three
-first-preparation files, the separate retained-capacity review, and the three
-failed-root-discovery stop artifacts exactly once.
+first-preparation files, the separate retained-capacity review, the three
+failed-root-discovery stop artifacts and three subsequent mutation/metadata
+diagnostic artifacts exactly once.
 The combined 64-root ceiling includes the future attempt root, so preparation
 allows at most 63 retained roots. A later real allowance must also fit and be
 counted. The coordinator has signaled storage settled and authorized local
@@ -167,6 +168,14 @@ After Git recovery and the coordinator's explicit storage-settled signal, the ex
 ### Separately authorized layout correction
 
 The coordinator authorized the finite [correction plan](../superpowers/plans/2026-10-17-receipt-root-layout.md): one complete cache root, direct external future attempt, refusal of a preexisting attempt and explicit retention of all failed-preparation evidence. Independent spec/quality review approved the final diff without actionable findings. The real 100-child regression failed at the old root ceiling and passes with exactly 139 fixture bytes retained once, including recovery and prior evidence. Cache identity is rechecked after all roots; moving traversal up a level does not increase depth48. Focused preparation: 18 run / 17 passed / one privilege skip. Full OSM suite: 246 run / 241 passed / five skips in 59.827 seconds. Source/receiver authority and every resource ceiling remain unchanged. A later section records the actual offline preparation/probe outcome; these tests alone do not establish machine fit.
+
+### Windows directory metadata follow-up
+
+The layout-corrected attempt stopped at an apparent directory mutation before producing r2 files. The [first generic stop](data-pilot-evidence/receipt-layout-mutation-stop-20261017.json) and [bounded exact-directory observation](data-pilot-evidence/receipt-directory-diagnostic-20261017.json) preserve the failure and the later finding of zero immediate children. The diagnostic-only follow-up identified `plugin-v1/.data/era5/.tiles-2025-v1.staging-8ecad926-b5ad-466d-94c7-5c54bf2a1db2`: lstat size4096 then0, with unchanged device/inode/mtime. A separate [native metadata observation](data-pilot-evidence/receipt-native-directory-metadata-20261017.json) exposed size0 then4096 across a read-attributes-only handle query, while native identity and ChangeTime stayed at October13. The mechanism behind that size representation is unproved; it is not a measured child-byte total or proof of content mutation.
+
+The independently approved correction uses a type-specific Windows directory identity: full64-bit volume plus128-bit FileId, LastWriteTime, native ChangeTime and attributes. Every observation reopens the pathname with `FILE_READ_ATTRIBUTES`, shared read/write/delete, `OPEN_EXISTING`, `BACKUP_SEMANTICS` and `OPEN_REPARSE_POINT`. Native basic/standard/id queries reject non-directory, reparse and delete-pending states; query failures stop with no fallback. Same-handle legacy identity/write/attributes bind older CPython lstat representations without truncating authoritative IDs. Inner-directory, root and final cache checks use the same comparison under the original deadline. Regular-file sizes/logical accounting and POSIX checks stay unchanged.
+
+Tiny tests prove size representation tolerance only with unchanged native identity, unsafe/unbound/query rejection, replacement and spaced child additions/renames/removals with intermediate observations and final assertions after restoring write time. They use bounded >=100ms clock separation, not production delays. Rapid mutations can share timestamps; reverted/same-tick changes are not guaranteed detectable, and these observations remain non-atomic. Both Python3.14 and3.11 pass22 preparer tests with one privilege skip; a real Windows short-alias run also passes22 with one skip. The final full OSM suite passed250 run /245 passed /five skipped in47.145seconds. The earlier CI raw-path assertion was reproduced under that alias, then corrected by resolving expected paths while the fixture exists. Independent final review approved native/legacy binding and the retained assertions. This changes neither receiver authority nor any runtime limit.
 
 Obtain the actual separate operator decision. A later actual allowance must
 contain its real reference, be independently retained and included in the

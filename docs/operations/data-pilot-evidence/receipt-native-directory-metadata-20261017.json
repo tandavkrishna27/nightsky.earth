@@ -1,0 +1,98 @@
+{
+  "access": "FILE_READ_ATTRIBUTES only, share read/write/delete, open-reparse-point and backup-semantics; native file id/basic/standard metadata; no source payload read",
+  "checkpoints": 18,
+  "cleanupReclaimBytes": 0,
+  "controlAfterChildAdded": {
+    "lstatAfter": {
+      "dev": "15014155527397492462",
+      "ino": "50102545861128038",
+      "mtimeNs": 1792208294455795500,
+      "size": 0
+    },
+    "lstatBefore": {
+      "dev": "15014155527397492462",
+      "ino": "50102545861128038",
+      "mtimeNs": 1792208294455795500,
+      "size": 0
+    },
+    "native": {
+      "allocationBytes": 0,
+      "attributes": 16,
+      "changeUnixNs": 1792208294455795500,
+      "changeUtc": "2026-10-17T03:38:14.455796+00:00",
+      "deletePending": false,
+      "directory": true,
+      "endOfFileBytes": 0,
+      "fileId": "50102545861128038",
+      "volume": "15014155527397492462",
+      "writeUnixNs": 1792208294455795500
+    },
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\.cache\\partition-implementation\\native-directory-control-20261017"
+  },
+  "controlBefore": {
+    "lstatAfter": {
+      "dev": "15014155527397492462",
+      "ino": "50102545861128038",
+      "mtimeNs": 1792208294445793200,
+      "size": 0
+    },
+    "lstatBefore": {
+      "dev": "15014155527397492462",
+      "ino": "50102545861128038",
+      "mtimeNs": 1792208294445793200,
+      "size": 0
+    },
+    "native": {
+      "allocationBytes": 0,
+      "attributes": 16,
+      "changeUnixNs": 1792208294445793200,
+      "changeUtc": "2026-10-17T03:38:14.445793+00:00",
+      "deletePending": false,
+      "directory": true,
+      "endOfFileBytes": 0,
+      "fileId": "50102545861128038",
+      "volume": "15014155527397492462",
+      "writeUnixNs": 1792208294445793200
+    },
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\.cache\\partition-implementation\\native-directory-control-20261017"
+  },
+  "controlChangeTimeChanged": true,
+  "controlWriteTimeChanged": true,
+  "elapsedSeconds": 0.002258,
+  "executionAllowed": false,
+  "kind": "receipt-native-directory-metadata-diagnostic",
+  "maxMetadataCheckpoints": 100,
+  "maxSeconds": 30,
+  "mutationGuardChanged": false,
+  "networkRequests": 0,
+  "observedUtc": "2026-10-17T03:38:14.456476+00:00",
+  "retainedTarget": {
+    "lstatAfter": {
+      "dev": "15014155527397492462",
+      "ino": "37154696928936091",
+      "mtimeNs": 1791913947048927100,
+      "size": 4096
+    },
+    "lstatBefore": {
+      "dev": "15014155527397492462",
+      "ino": "37154696928936091",
+      "mtimeNs": 1791913947048927100,
+      "size": 0
+    },
+    "native": {
+      "allocationBytes": 4096,
+      "attributes": 16,
+      "changeUnixNs": 1791913947048927100,
+      "changeUtc": "2026-10-13T17:52:27.048927+00:00",
+      "deletePending": false,
+      "directory": true,
+      "endOfFileBytes": 4096,
+      "fileId": "37154696928936091",
+      "volume": "15014155527397492462",
+      "writeUnixNs": 1791913947048927100
+    },
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\plugin-v1\\.data\\era5\\.tiles-2025-v1.staging-8ecad926-b5ad-466d-94c7-5c54bf2a1db2"
+  },
+  "schemaVersion": 1,
+  "sourceBodiesOpened": 0
+}
