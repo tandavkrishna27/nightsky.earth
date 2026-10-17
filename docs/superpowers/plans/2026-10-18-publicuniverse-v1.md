@@ -93,7 +93,7 @@ Cooldown persistence is mandatory, not an optional cast: on 429, parse bounded R
 - [x] After implementation, obtain independent whole-diff review, fix material findings with regressions and verify them. Static instruction tests are not conversational acceptance.
 - [x] Run affected tests; `npm run check`; backend/package builds; synthetic compiled runtime checks; then one final complete `npm test`. Add explicit no-network Public Universe CI checks while preserving the old jobs.
 - [x] Package1.0.21 only after reviewed code freeze. Rebuild portable/Codex/Claude artifacts; use existing marketplace identity and supported installer, verify all installed inventory hashes. Do not alter user/global configuration or activate the optional source through installation.
-- [ ] Update tracker/evidence with exact tests and remaining gates. Push existing `codex/plugin-v1`, verify exact-commit CI. No merge, deployment, downloads or public submission.
+- [x] Update tracker/evidence with exact tests and remaining gates. Push existing `codex/plugin-v1`, verify exact-commit CI. No merge, deployment, downloads or public submission.
 
 ## Task6 - Prepare separately approved source validation
 
@@ -103,4 +103,4 @@ Cooldown persistence is mandatory, not an optional cast: on 429, parse bounded R
 
 ## Review status
 
-Two independent review rounds completed. Round 1 corrected quota isolation, detail spacing, explicit operation mappings, meteor reduction and observable revision checks. Round 2 corrected discovery POST field names and the mandatory durable cooldown interface; correction verification is recorded in the review report. Owner approved implementation. Tasks 1–4 are implemented and independently reviewed. Whole-diff review findings are fixed and independently rechecked; local package/aggregate verification and same-identity installation are complete; exact-commit CI remains pending push. No source activation or live acceptance performed.
+Two independent review rounds completed. Round 1 corrected quota isolation, detail spacing, explicit operation mappings, meteor reduction and observable revision checks. Round 2 corrected discovery POST field names and the mandatory durable cooldown interface; correction verification is recorded in the review report. Owner approved implementation. Tasks 1–4 are implemented and independently reviewed. Whole-diff review findings are fixed and independently rechecked; local package/aggregate verification, same-identity installation and all six exact-release-commit CI jobs passed. Offline implementation is complete; source admission/live calls and native conversation acceptance remain external gates. No source activation or live acceptance performed.

@@ -17,7 +17,7 @@ Design and task sequence: [design](../product/publicuniverse-v1-integration-desi
 | Provider/configuration | 76 affected/existing-source tests and all three TypeScript checks passed; root independently reran 16 provider/configuration tests | Review found exoplanet revision and host provenance gaps; fixed with regressions, scoped re-review approved |
 | MCP/workflows | 101 affected tests passed, including a complete mixed-source outing and all new modules registered in the aggregate | Scoped review requested full-outing coverage; regression and five explicitly unrun authored conversation fixtures added, then approved |
 | Full assembled regression | 1,760 tests: **1,758 passed, zero failed, two skipped**, 257.7 seconds | Fresh run after all code/review/inventory corrections |
-| CI | Pending push and exact-commit check | Local results are not CI evidence |
+| Release CI | All six jobs passed for `5bcc77a495b7f4c14dbc4c6867d651ecb2abc0e1` | [Exact release run](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39072377236), Linux and Windows |
 
 Test counts overlap; do not add affected/regression counts to the eventual aggregate.
 
@@ -41,8 +41,9 @@ Public Universe is optional and off by default. Existing NightSky engines and pr
 
 ## Remaining acceptance
 
-- Push the existing branch and inspect CI for that exact commit.
 - Separately approved [bounded live proposal](publicuniverse-live-validation-proposal.md), followed by actual host conversation acceptance. No old allowance authorizes new requests. Claude testing remains deferred.
+
+The release code is pushed and its exact CI run passed. This evidence-only follow-up does not change the installed package or backend; its own CI is also checked before the handoff.
 
 ## Final local package verification
 
