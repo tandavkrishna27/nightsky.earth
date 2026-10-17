@@ -12,7 +12,7 @@ import { GeoNamesPlaceIndex } from "../places/geonames";
 import { getLearningGuidance } from "../content/learning";
 import { getPreparationChecklist } from "../content/checklists";
 import { suggestVisibleTargets } from "./suggestions";
-import { composeCandidateWindows } from "./windows";
+import { composeCandidateWindows, usableWeatherForecast } from "./windows";
 import { formatForecastValue, formatLocalInstant } from "../../shared/nightsky/format";
 import { evaluateRadiant } from "../events/meteorRadiants";
 import { meteorRadiantResultSchema, type MeteorRadiantResult } from "../../shared/nightsky/meteors";
@@ -226,11 +226,11 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (["meteor-shower", "deep-sky-imaging", "astrophotography", "aurora"].includes(input.activity) && !(astronomy && !isError(astronomy) && astronomy.moon.horizonBasis === "geometric-center-zero-degrees" && astronomy.moon.belowHorizonIntervals !== undefined)) gaps.push("Moon illumination is whole-session context; Moon-above-horizon timing is not supplied for the entire candidate window.");
   const weather = conditions && !isError(conditions) ? conditions : undefined;
   const onlyForecast = weather?.forecasts.length === 1 ? weather.forecasts[0] : undefined;
-  const cloudValues = onlyForecast?.samples.flatMap(sample => sample.values.totalCloudCover?.unit === "%" ? [sample.values.totalCloudCover.value] : []) ?? [];
+  const cloudValues = onlyForecast && weather && usableWeatherForecast(weather, onlyForecast) ? onlyForecast.samples.flatMap(sample => sample.values.totalCloudCover?.unit === "%" ? [sample.values.totalCloudCover.value] : []) : [];
   const cloudCoverMax = cloudValues.length ? Math.max(...cloudValues) : undefined;
   const checklist = getPreparationChecklist(input.activity, { experience: input.experience, equipment: input.equipment, cloudCoverMax });
   if ((weather?.forecasts.length ?? 0) > 1) checklist[2] = "Review each source's cloud forecast and valid times before departure; sources may disagree and are not combined.";
-  const sourceCloudWarnings = (weather?.forecasts ?? []).flatMap(forecast => forecast.samples.some(sample => sample.values.totalCloudCover?.unit === "%" && sample.values.totalCloudCover.value >= 70) ? [`${forecast.source.name} includes substantial cloud in its samples; check the source's exact valid times before choosing a night.`] : []);
+  const sourceCloudWarnings = (weather?.forecasts ?? []).flatMap(forecast => usableWeatherForecast(weather!, forecast) && forecast.samples.some(sample => sample.values.totalCloudCover?.unit === "%" && sample.values.totalCloudCover.value >= 70) ? [`${forecast.source.name} includes substantial cloud in its samples; check the source's exact valid times before choosing a night.`] : []);
   const prep = [...checklist, ...sourceCloudWarnings, ...(learningGuide?.guidance ?? [])].slice(0, 20);
   const summary = makeSummary(input.activity, factors, conditions && !isError(conditions) ? conditions.availability.status : "unavailable", gaps);
   const target = targetVisibility && !isError(targetVisibility) ? targetVisibility : undefined;
@@ -289,6 +289,7 @@ function weatherFactors(result: NightConditionsResult, activity: string, units: 
   const otherFields = ["windSpeed", "windGust", "temperature", "dewPoint", "relativeHumidity", "visibility"] as const;
   const factors: Factor[] = [];
   for (const forecast of result.forecasts) {
+    const usable = usableWeatherForecast(result, forecast);
     for (const group of [{ label: "cloud and precipitation", fields: skyFields }, { label: "wind, temperature, and visibility", fields: otherFields }] as const) {
       const parts: string[] = [];
       const impacts: Factor["impact"][] = [];
@@ -318,7 +319,7 @@ function weatherFactors(result: NightConditionsResult, activity: string, units: 
       const validRange = `${first === last ? `valid ${first}` : `valid ${first} to ${last}`}${periodEnd && group.label === "cloud and precipitation" ? `; aggregation through ${periodEnd}` : ""}`;
       const ratedFields = ["totalCloudCover", "lowCloudCover", "precipitationProbability"] as const;
       const ratedGroups = ratedFields.map(field => forecast.samples.flatMap(sample => sample.values[field] ? [sample.values[field]!] : [])).filter(values => values.length);
-      const hasCloudIntervals = ratedGroups.length > 0 && ratedGroups.every(values => {
+      const hasCloudIntervals = usable && ratedGroups.length > 0 && ratedGroups.every(values => {
         if (values.some(value => !value.periodStartUtc || !value.periodEndUtc)) return false;
         let through = Date.parse(result.window.startUtc);
         for (const value of [...values].sort((a,b) => Date.parse(a.periodStartUtc!) - Date.parse(b.periodStartUtc!))) {
@@ -329,8 +330,9 @@ function weatherFactors(result: NightConditionsResult, activity: string, units: 
       });
       const hasInstantValues = group.fields.some(field => forecast.samples.some(sample => sample.values[field] && (!sample.values[field]!.periodStartUtc || !sample.values[field]!.periodEndUtc)));
       const sampleNote = !hasCloudIntervals && group.label === "cloud and precipitation" ? (hasInstantValues ? " Instant samples present; not continuous coverage or a clear-night assessment." : " Whole-window cloud coverage is not established.") : "";
+      const availabilityNote = usable ? "" : " Stale or unavailable source evidence cannot support a current weather assessment; exact values are retained.";
       const cloudNote = activity === "aurora" && group.label === "cloud and precipitation" ? " Clouds can obstruct the view independently of aurora activity." : "";
-      factors.push({ name: `${forecast.source.name.slice(0, 70)} ${group.label} forecast`, assessment: `${parts.join("; ")}; ${forecast.samples.length} sample(s), ${validRange}.${sampleNote}${cloudNote}`, impact: group.label === "cloud and precipitation" && hasCloudIntervals ? aggregateImpact(impacts) : "unknown", sourceNames: [forecast.source.name] });
+      factors.push({ name: `${forecast.source.name.slice(0, 70)} ${group.label} forecast`, assessment: `${parts.join("; ")}; ${forecast.samples.length} sample(s), ${validRange}.${sampleNote}${cloudNote}${availabilityNote}`, impact: group.label === "cloud and precipitation" && hasCloudIntervals ? aggregateImpact(impacts) : "unknown", sourceNames: [forecast.source.name] });
     }
   }
   return factors;

@@ -78,3 +78,22 @@ test("claimed available source with truncated horizon remains partial", async ()
   const direct = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
   assert.equal(direct.availability.status, "partial"); assert.equal(direct.providerOutcomes[0].status, "available");
 });
+for (const state of ["stale", "unavailable", "unknown", "unsupported", "available", "partial"] as const) test(`${state} full-window cloud intervals preserve evidence and gate derived judgments`, async () => {
+  const result = fixture(`${state} interval source`, 0);
+  result.status = state === "unknown" || state === "unsupported" ? "available" : state;
+  result.forecast!.availability.status = state === "unavailable" ? "available" : state;
+  result.forecast!.samples = [{ validAt: window.startUtc, values: { totalCloudCover: { value: 0, unit: "%", periodStartUtc: window.startUtc, periodEndUtc: window.endUtc } } }];
+  const tools = handlers({ weatherCollection: collection([["met", result]]) });
+  const direct = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
+  const plan = (await tools.get("plan_observing_session")!(input)).structuredContent;
+  const factor = plan.factors.find((f: any) => /cloud and precipitation forecast/.test(f.name));
+  assert.equal(factor.impact, ["available", "partial"].includes(state) ? "favorable" : "unknown");
+  assert.deepEqual(plan.evidence.weather, direct); assert.equal(plan.evidence.weather.forecasts[0].availability.status, result.forecast!.availability.status);
+  assert.ok(plan.candidateWindows.length > 0);
+  assert.ok(plan.candidateWindows.every((w: any) => w.weatherCoverage === (["available", "partial"].includes(state) ? "available" : "unknown")));
+  assert.ok(plan.candidateWindows.some((w: any) => w.weatherIntervals.length > 0));
+  const compared = (await tools.get("compare_observing_options")!({ options: [input, { ...input, activity: "visual-stargazing" }], locale: "en", units: "metric" })).structuredContent;
+  assert.deepEqual(compared.comparisons[0].evidence.weather, direct);
+  assert.equal(compared.comparisons[0].factors.find((f: any) => /cloud and precipitation forecast/.test(f.name)).impact, ["available", "partial"].includes(state) ? "favorable" : "unknown");
+  assert.ok(compared.comparisons[0].candidateWindows.every((w: any) => w.weatherCoverage === (["available", "partial"].includes(state) ? "available" : "unknown")));
+});

@@ -14,6 +14,14 @@ export function astronomicalDarknessIntervals(astronomy: AstronomyWindowResult |
   return darkness.status === "available" ? [{ startUtc: darkness.startUtc, endUtc: darkness.endUtc, localStart: darkness.localStart, localEnd: darkness.localEnd }] : [];
 }
 
+/** Current available/partial evidence may support derived judgments; retained stale or failed evidence may not. */
+export function usableWeatherForecast(weather: NightConditionsResult, forecast: NightConditionsResult["forecasts"][number]): boolean {
+  if (!["available", "partial"].includes(forecast.availability.status)) return false;
+  if (!weather.providerOutcomes?.length) return ["available", "partial"].includes(weather.availability.status);
+  const outcomes = weather.providerOutcomes.filter(outcome => JSON.stringify(outcome.source) === JSON.stringify(forecast.source));
+  return outcomes.length > 0 && outcomes.every(outcome => ["available", "partial"].includes(outcome.status));
+}
+
 /** Intersect only proven geometry. Instant cloud samples cannot establish a clear interval. */
 export function composeCandidateWindows(activity: string, window: TimeWindow, astronomy: AstronomyWindowResult | undefined, targets: TargetVisibilityResult[], weather: NightConditionsResult | undefined, locale = "en"): PlanResult["candidateWindows"] {
   const needsDarkness = !["moon-observing", "planet-observing", "eclipse"].includes(activity);
@@ -29,7 +37,7 @@ export function composeCandidateWindows(activity: string, window: TimeWindow, as
       const start = Math.max(Date.parse(window.startUtc), Date.parse(interval.startUtc), Date.parse(visibility.startUtc));
       const end = Math.min(Date.parse(window.endUtc), Date.parse(interval.endUtc), Date.parse(visibility.endUtc));
       if (end <= start) continue;
-      const cloudPeriodsByProvider = weather?.forecasts.map(forecast => forecast.samples.flatMap(sample => {
+      const cloudPeriodsByProvider = weather?.forecasts.map(forecast => !usableWeatherForecast(weather, forecast) ? [] : forecast.samples.flatMap(sample => {
         const cloud = sample.values.totalCloudCover;
         return cloud?.periodStartUtc && cloud.periodEndUtc ? [{ start: Date.parse(cloud.periodStartUtc), end: Date.parse(cloud.periodEndUtc) }] : [];
       })) ?? [];
@@ -47,7 +55,7 @@ export function composeCandidateWindows(activity: string, window: TimeWindow, as
       }) : undefined;
       result.push({ darknessOverlapIntervals, localStart: formatLocalInstant(new Date(start).toISOString(), window.timeZone, locale), localEnd: formatLocalInstant(new Date(end).toISOString(), window.timeZone, locale), window: { startUtc: new Date(start).toISOString(), endUtc: new Date(end).toISOString(), timeZone: window.timeZone }, ...(target ? { targetId: target.target.targetId } : {}), weatherCoverage, weatherIntervals,
         moonConstraint: activity === "moon-observing" ? "target" : target?.intervals.some(item => item.moonSeparationDegrees !== undefined) ? "separation-available" : "context-only",
-        rationale: `${needsDarkness ? "Astronomical darkness interval" : "Requested session"}${target ? ` intersected with ${target.target.name} geometric visibility` : ""}. Cloud interval coverage ${weatherCoverage}; provider values remain separate. Moon timing/separation is ${activity === "moon-observing" ? "the target geometry" : "context only unless supplied in target evidence"}; no clear-night probability is inferred.` });
+        rationale: `${needsDarkness ? "Astronomical darkness interval" : "Requested session"}${target ? ` intersected with ${target.target.name} geometric visibility` : ""}. Cloud interval coverage ${weatherCoverage}; provider values remain separate.${weather?.forecasts.some(forecast => !usableWeatherForecast(weather, forecast)) ? " Stale or unavailable source intervals are retained as evidence but do not establish usable weather coverage." : ""} Moon timing/separation is ${activity === "moon-observing" ? "the target geometry" : "context only unless supplied in target evidence"}; no clear-night probability is inferred.` });
       if (result.length === 8) return result;
     }
   }
