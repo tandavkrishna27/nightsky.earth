@@ -38,6 +38,14 @@ async function lookupMany(points:LightPollutionPoint[],provider:LightPollutionPr
  },()=>finish(bad(signal?.aborted?'cancelled':'provider_error')));
  });
 }
+/** Keep single-point fan-out within the configured upstream concurrency ceiling.
+ * Each queued point still passes through lookup's cancellation check and the
+ * provider's durable reservation/rate admission; this never retries a failure. */
+async function lookupBounded(points:LightPollutionPoint[],provider:LightPollutionProvider,signal?:AbortSignal):Promise<LightPollutionResult[]> {
+ const rows:LightPollutionResult[]=[];
+ for(let offset=0;offset<points.length;offset+=4)rows.push(...await Promise.all(points.slice(offset,offset+4).map(point=>lookup(point,provider,signal))));
+ return rows;
+}
 export async function compareLightPollution(points:LightPollutionPoint[],providers:LightPollutionProvider[],signal?:AbortSignal):Promise<{results:LightPollutionResult[]}> {
  const validPoints=lightPollutionPointsSchema.parse(points);
  const unique=new Map<string,LightPollutionProvider>();
@@ -48,7 +56,7 @@ export async function compareLightPollution(points:LightPollutionPoint[],provide
  const firstPoints=distinct.map(p=>validPoints.find(v=>coordinateKey(v)===coordinateKey(p))!);
  const work=new Map<LightPollutionProvider,Promise<Map<string,LightPollutionResult>>>();
  for(const provider of Array.from(unique.values())){
- const pending=provider.lookupMany?lookupMany(firstPoints,provider,signal):Promise.all(firstPoints.map(point=>lookup(point,provider,signal)));
+ const pending=provider.lookupMany?lookupMany(firstPoints,provider,signal):lookupBounded(firstPoints,provider,signal);
  work.set(provider,pending.then(rows=>new Map(rows.map((row,i)=>[coordinateKey(firstPoints[i]),row]))));
  }
  const results=await Promise.all(validPoints.flatMap(point=>Array.from(unique.values()).map(async provider=>{

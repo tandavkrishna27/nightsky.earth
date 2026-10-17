@@ -12,6 +12,30 @@ import { createPersistentQuota } from '../../server/providers/quotaState';
 import { LIGHT_POLLUTION_QUOTA_POLICIES } from '../../server/providers/lightPollution/configuration';
 
 const point={candidateId:'a',latitude:12,longitude:34};
+test('five-point comparison completes with default configured controls and charges exactly five attempts',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'lp-five-')),path=join(dir,'quota.json');
+ const env={NIGHTSKY_LIGHT_POLLUTION_SOURCES:'darkskysites',NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED:'darkskysites',NIGHTSKY_DARKSKYSITES_API_KEY:'synthetic-key',NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH:path,NIGHTSKY_LIGHT_POLLUTION_QUOTA_VERIFIED_UNUSED_BUDGET:'yes',NIGHTSKY_LIGHT_POLLUTION_QUOTA_VERIFICATION_EVIDENCE:'Synthetic unused allowance'};
+ let configured:Awaited<ReturnType<typeof createConfiguredLightPollutionProviders>>|undefined;let calls=0,active=0,peak=0;
+ try{
+ await runLightPollutionQuotaSetup(['--initialize'],env);
+ configured=await createConfiguredLightPollutionProviders(env,{fetcher:async input=>{calls++;active++;peak=Math.max(peak,active);await new Promise(r=>setTimeout(r,10));active--;const u=new URL(String(input));return Response.json({...payload(),latitude:Number(u.searchParams.get('lat')),longitude:Number(u.searchParams.get('lng'))});}});
+ const points=Array.from({length:5},(_,i)=>({...point,candidateId:`candidate-${i}`,latitude:12+i}));
+ const output=await compareLightPollution(points,configured.providers);
+ assert.equal(calls,5);assert.ok(peak<=4);assert.equal(output.results.length,5);assert.ok(output.results.every(r=>r.status==='available'),JSON.stringify(output));assert.deepEqual(output.results.map(r=>r.candidateId),points.map(p=>p.candidateId));
+ await configured.close();configured=undefined;
+ assert.equal(Object.values(JSON.parse(await readFile(path,'utf8')).entries.darkskysites.months)[0],5);
+ }finally{await configured?.close();await rm(dir,{recursive:true,force:true});}
+});
+test('queued fifth API point is not reserved or fetched after comparison cancellation',async()=>{
+ let reservations=0,calls=0,entered!:()=>void;const started=new Promise<void>(r=>{entered=r;});
+ const quota={reserve:async()=>{reservations++;return {allowed:true,reason:'synthetic'};}};
+ const configured=createDarkSkySitesProvider({apiKey:'synthetic-key',admitted:true,quota,fetcher:async()=>{calls++;if(calls===4)entered();return new Promise<Response>(()=>{});}});
+ const controller=new AbortController();try{const pending=compareLightPollution(Array.from({length:5},(_,i)=>({...point,candidateId:`c${i}`,latitude:12+i})),[configured],controller.signal);await started;controller.abort();const output=await pending;assert.equal(calls,4);assert.equal(reservations,4);assert.ok(output.results.every(r=>r.errorCode==='cancelled'));}finally{await configured.close();}
+});
+test('queued fifth point still requires quota after the first four complete',async()=>{
+ let reservations=0,calls=0;const configured=createDarkSkySitesProvider({apiKey:'synthetic-key',admitted:true,quota:{reserve:async()=>({allowed:++reservations<=4,reason:'synthetic exhaustion'})},fetcher:async input=>{calls++;const u=new URL(String(input));return Response.json({...payload(),latitude:Number(u.searchParams.get('lat')),longitude:Number(u.searchParams.get('lng'))});}});
+ try{const output=await compareLightPollution(Array.from({length:5},(_,i)=>({...point,candidateId:`c${i}`,latitude:12+i})),[configured]);assert.equal(reservations,5);assert.equal(calls,4);assert.ok(output.results.slice(0,4).every(r=>r.status==='available'));assert.equal(output.results[4].errorCode,'quota_unavailable');}finally{await configured.close();}
+});
 test('delayed quota persistence cannot bunch more than ten actual dispatches per second across provider instances',async()=>{
  let now=0,reservations=0;
  const releases:Array<()=>void>=[],starts:number[]=[];
@@ -55,3 +79,4 @@ test('DarkSkySites has a 10/sec cap without lowering other providers',async()=>{
 test('configuration defaults off and rejects malformed selection and ledger collisions',async()=>{assert.deepEqual(parseLightPollutionConfiguration({}).selected,[]);assert.throws(()=>parseLightPollutionConfiguration({NIGHTSKY_LIGHT_POLLUTION_SOURCES:'unknown'}));assert.throws(()=>parseLightPollutionConfiguration({NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED:'darkskysites'}));const f=await createConfiguredLightPollutionProviders({NIGHTSKY_DARKSKYSITES_API_KEY:'secret-key'});assert.equal(f.providers.length,0);await f.close();for(const name of ['NIGHTSKY_QUOTA_STATE_PATH','NIGHTSKY_SKY_QUOTA_STATE_PATH']){await assert.rejects(createConfiguredLightPollutionProviders({NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH:join(tmpdir(),'same'),[name]:join(tmpdir(),'same')}));}});
 test('quota setup dry-run writes nothing; initialization never resets; restart and key rotation retain reservations and UTC rollover',async()=>{const dir=await mkdtemp(join(tmpdir(),'lp2-'));const path=join(dir,'quota.json');let now=Date.UTC(2026,9,31,23,59);const env={NIGHTSKY_LIGHT_POLLUTION_SOURCES:'darkskysites',NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED:'darkskysites',NIGHTSKY_DARKSKYSITES_API_KEY:'key1',NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH:path,NIGHTSKY_LIGHT_POLLUTION_QUOTA_VERIFIED_UNUSED_BUDGET:'yes',NIGHTSKY_LIGHT_POLLUTION_QUOTA_VERIFICATION_EVIDENCE:'Synthetic unused account evidence'};try{assert.equal((await runLightPollutionQuotaSetup([],env)).mode,'proposal');await assert.rejects(readFile(path));await runLightPollutionQuotaSetup(['--initialize'],env,{now:()=>now});await assert.rejects(runLightPollutionQuotaSetup(['--initialize'],env,{now:()=>now}));let f=await createConfiguredLightPollutionProviders(env,{now:()=>now,fetcher:async()=>Response.json(payload())});await f.providers[0].lookup(point);await f.close();const before=JSON.parse(await readFile(path,'utf8'));assert.equal(before.entries.darkskysites.months['2026-10'],1);f=await createConfiguredLightPollutionProviders({...env,NIGHTSKY_DARKSKYSITES_API_KEY:'key2'},{now:()=>now,fetcher:async()=>Response.json(payload())});await f.providers[0].lookup(point);await f.close();assert.equal(JSON.parse(await readFile(path,'utf8')).entries.darkskysites.months['2026-10'],2);now+=120000;f=await createConfiguredLightPollutionProviders(env,{now:()=>now,fetcher:async()=>Response.json(payload())});await f.providers[0].lookup(point);await f.close();assert.deepEqual(JSON.parse(await readFile(path,'utf8')).entries.darkskysites.months,{'2026-11':1});}finally{await rm(dir,{recursive:true,force:true});}});
 
+import {compareLightPollution} from '../../server/providers/lightPollution';

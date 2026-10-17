@@ -8,6 +8,7 @@
     "scripts/validate-jpl-error-live.ts",
     "scripts/initialize-sky-quota.ts",
     "scripts/initialize-light-pollution-quota.ts",
+    "scripts/validate-light-pollution.ts",
     "scripts/migrate-seventimer-quota.ts",
     "scripts/initialize-provider-quota.ts",
     "scripts/measure-api-load.ts",

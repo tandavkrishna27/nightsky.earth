@@ -36,4 +36,7 @@ Existing file: `C:\Users\TK\.nightsky\providers.env` (outside repository). Add o
 
     NIGHTSKY_DARKSKYSITES_API_KEY=YOUR_KEY_HERE
 
-Do not replace other lines or paste the secret into chat. This new variable is reserved by this design; current code does not yet consume it. Do not add it to a frontend VITE variable or GitHub secrets for offline CI. Live account credentials stay outside fixtures, logs, plugin bundles and browser contexts.
+Do not replace other lines or paste the secret into chat. The implemented server adapter consumes this variable only with explicit source selection, API admission and an existing dedicated quota ledger; see [operator setup and acceptance](light-pollution-acceptance-20261017.md). The key alone does not activate lookups. Do not add it to a frontend VITE variable or GitHub secrets for offline CI. Live account credentials stay outside fixtures, logs, plugin bundles and browser contexts.
+
+## Coordinator public-browser verification
+The API terms page was successfully read in the in-app browser on 17 October 2026: https://darkskysites.com/api-terms , API_TERMS_2026_10_V2, effective 14 October 2026. API use in applications/services and reasonable operational caching are allowed with adjacent linked attribution; bulk reconstruction, quota evasion and a general-purpose substitute redistribution API are prohibited. This resolves the documentation-reader failure for API terms, not browser-page extraction rights. NightSky remains a scoped observing planner with bounded candidate lookups, not a raw bulk data service. No terms acceptance or account change was performed.

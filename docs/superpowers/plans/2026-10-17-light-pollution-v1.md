@@ -43,7 +43,7 @@ Proposed MCP tool: `compare_light_pollution`, accepting 1..5 uniquely named cand
 Create `shared/nightsky/lightPollution.ts` with schemas/types:
 - `LightPollutionPoint`: candidateId, latitude, longitude.
 - `LightPollutionResult`: candidateId, sourceId, transport (api/browser), status (available/partial/unavailable), requestedPoint, observedPoint or null, coordinateBinding (verified/rounded/unverified), retrievedAt, dataset label/id/year/month and optional structured requestedDate/fallbackUsed/fallbackFrom/fallbackReason/datasetsChecked where supplied, sqm or null, unit fixed to mag/arcsec2, bortleClasses array of integers 1..9 or null, quality metadata (including nullable status/method/coverageVerified/flags), attribution, sourceUrl, limitations, errorCode or null.
-- `LightPollutionProvider.lookup(point, signal): Promise<LightPollutionResult>`.
+- `LightPollutionProvider.lookup(point, signal): Promise<LightPollutionResult>; optional lookupMany(points, signal): Promise<LightPollutionResult[]> for one bounded browser comparison`.
 - `compareLightPollution(points, providers, signal): Promise<{results: LightPollutionResult[]}>`.
 
 Missing fields stay null/explicit; no fabricated dataset dates or precision. Rounded browser coordinates do not independently verify an exact point. Bortle 8-9 remains [8,9]. Retain provider-specific visibility labels only as attributed assessments, not standardized forecasts; omit projections/darkness percentages from recommendations in V1.
@@ -52,21 +52,21 @@ Missing fields stay null/explicit; no fabricated dataset dates or precision. Rou
 
 Files: create `shared/nightsky/lightPollution.ts`, `server/providers/lightPollution/index.ts`, `tests/providers/light-pollution-contract.test.ts`.
 
-- [ ] Add failing tests: invalid latitude/longitude/nonfinite values, zero/six candidates, duplicate IDs, Bortle ranges, missing SQM, two transports sharing source identity, per-source failure preservation.
-- [ ] Run `node --import tsx --test tests/providers/light-pollution-contract.test.ts`; confirm expected missing-contract failures.
-- [ ] Implement the contract above; deduplicate identical coordinate/source work within a call while returning each candidate's identity. No cross-provider average or automatic overall darkness score.
-- [ ] Rerun focused tests; require zero failures. Review and commit this deliverable.
+- [x] Add failing tests: invalid latitude/longitude/nonfinite values, zero/six candidates, duplicate IDs, Bortle ranges, missing SQM, two transports sharing source identity, per-source failure preservation.
+- [x] Run `node --import tsx --test tests/providers/light-pollution-contract.test.ts`; confirm expected missing-contract failures.
+- [x] Implement the contract above; deduplicate identical coordinate/source work within a call while returning each candidate's identity. No cross-provider average or automatic overall darkness score.
+- [x] Rerun focused tests; require zero failures. Review and commit this deliverable.
 
 ## LP2 — DarkSkySites API and private configuration
 
 Files: create `server/providers/lightPollution/darkSkySites.ts`, `server/providers/lightPollution/configuration.ts`, `tests/providers/darkskysites.test.ts`; modify `server/plugin.ts` and the existing quota integration only where needed. Reuse `server/providers/quotaState.ts`, `sourceCache.ts`, and `upstreamControls.ts` rather than creating a second accounting system.
 
-- [ ] Add tests using synthetic responses for 200, 400/401/403/404/429/500/503, invalid JSON, wrong coordinates, invalid SQM/Bortle, earlier dataset fallback, missing quality and unverified_zero. Missing key/admission produces no request. Verify no key in results/errors.
-- [ ] Run `node --import tsx --test tests/providers/darkskysites.test.ts`; confirm failures before implementation.
-- [ ] Implement lookup with fixed host/path, redirects rejected, 15-second total request deadline, 256 KiB response cap, no retries. Preserve original quality fields including coverageVerified=false. Missing critical provenance means partial or unavailable, never silently verified.
-- [ ] Read `NIGHTSKY_DARKSKYSITES_API_KEY` only server-side. Proposed source selection `NIGHTSKY_LIGHT_POLLUTION_SOURCES` and separate API admission `NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED`; empty defaults. Do not mutate existing counters during startup. Conservatively reserve every dispatched attempt in local accounting; document that provider billing may release failed attempts.
-- [ ] Add optional in-memory API cache: 24-hour TTL, maximum 256 entries, coordinate/source/transport key; preserve original retrieval time and dataset. No failure caching as a successful value. No browser caching until policy established.
-- [ ] Rerun tests and `npm run check`; review and commit. Key alone does not enable service.
+- [x] Add tests using synthetic responses for 200, 400/401/403/404/429/500/503, invalid JSON, wrong coordinates, invalid SQM/Bortle, earlier dataset fallback, missing quality and unverified_zero. Missing key/admission produces no request. Verify no key in results/errors.
+- [x] Run `node --import tsx --test tests/providers/darkskysites.test.ts`; confirm failures before implementation.
+- [x] Implement lookup with fixed host/path, redirects rejected, 15-second total request deadline, 256 KiB response cap, no retries. Preserve original quality fields including coverageVerified=false. Missing critical provenance means partial or unavailable, never silently verified.
+- [x] Read `NIGHTSKY_DARKSKYSITES_API_KEY` only server-side. Proposed source selection `NIGHTSKY_LIGHT_POLLUTION_SOURCES` and separate API admission `NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED`; empty defaults. Do not mutate existing counters during startup. Conservatively reserve every dispatched attempt in local accounting; document that provider billing may release failed attempts.
+- [x] Add optional in-memory API cache: 24-hour TTL, maximum 256 entries, coordinate/source/transport key; preserve original retrieval time and dataset. No failure caching as a successful value. No browser caching until policy established.
+- [x] Rerun tests and `npm run check`; review and commit. Key alone does not enable service.
 
 ## LP3 — Optional browser boundary and Lightpollutionmap adapter
 
@@ -94,12 +94,12 @@ Files: create `server/providers/lightPollution/darkSkySitesBrowser.ts`, `tests/p
 
 Files: create `server/mcp/lightPollutionTools.ts`, `tests/mcp/light-pollution-journeys.test.ts`; modify `server/mcp/registerTools.ts`, `server/plugin.ts`, existing tool-inventory tests; update `plugins/nightsky/skills/find-observing-place/SKILL.md`, `plan-stargazing-night/SKILL.md`, `plan-sky-event/SKILL.md`, `plan-astrophotography/SKILL.md`.
 
-- [ ] Add controlled MCP tests for single place, supplied point, three candidates, revision mismatch, ambiguous place, one-source unavailable, both unavailable, differing dates/models, same-source transport identity, unknown site access, and six-candidate rejection before outbound calls.
-- [ ] Run `node --import tsx --test tests/mcp/light-pollution-journeys.test.ts`; confirm failures.
-- [ ] Register `compare_light_pollution` read-only/open-world tool using existing resolver. Existing aggregate weather/astronomy planning must keep working if light pollution fails. Keep browser requests explicit, not automatic hidden fan-out in every planner call.
-- [ ] Transport policy: DarkSkySites API by default; browser only explicitly enabled/requested under approved access basis. No automatic API-to-browser retry for 401/403/429, quota exhaustion or Pro gating. API 5xx returns unavailable; a later browser comparison requires its own ordinary admitted request.
-- [ ] Tool text includes source attribution adjacent to values, actual dataset date, modelled status and uncertainties. Skills compare only evaluated candidates and do not equate zenith darkness to unobstructed horizon/clear weather/night access. Poor cloud outlook still discourages long travel.
-- [ ] Run focused tests; review skills with writing-skills guidance and commit. Update manifests/package only with actual new tool inventory; preserve all hosts' shared backend behavior.
+- [x] Add controlled MCP tests for single place, supplied point, three candidates, revision mismatch, ambiguous place, one-source unavailable, both unavailable, differing dates/models, same-source transport identity, unknown site access, and six-candidate rejection before outbound calls.
+- [x] Run `node --import tsx --test tests/mcp/light-pollution-journeys.test.ts`; confirm failures.
+- [x] Register `compare_light_pollution` read-only/open-world tool using existing resolver. Existing aggregate weather/astronomy planning must keep working if light pollution fails. Keep browser requests explicit, not automatic hidden fan-out in every planner call.
+- [x] Transport policy: DarkSkySites API by default; browser only explicitly enabled/requested under approved access basis. No automatic API-to-browser retry for 401/403/429, quota exhaustion or Pro gating. API 5xx returns unavailable; a later browser comparison requires its own ordinary admitted request.
+- [x] Tool text includes source attribution adjacent to values, actual dataset date, modelled status and uncertainties. Skills compare only evaluated candidates and do not equate zenith darkness to unobstructed horizon/clear weather/night access. Poor cloud outlook still discourages long travel.
+- [x] Run focused tests; review skills with writing-skills guidance and commit. Update manifests/package only with actual new tool inventory; preserve all hosts' shared backend behavior.
 
 ## LP6 — Verification, measurements and handoff
 
@@ -161,3 +161,20 @@ VERDICT: Plan reviewed and ready for implementation. Feature acceptance still re
 - Full implementation scope accepted; browser public activation remains gated.
 - Browser automated-use permission and cache/rate terms remain unverified.
 - Account entitlement confirmed by owner: unused project, 30,000 requests/month. Real response validation remains pending; key alone is not activation.
+
+## Implementation reconciliation — 17 October 2026
+
+See [acceptance and operator setup](../../operations/light-pollution-acceptance-20261017.md) for current evidence. The checklists above retain unmet live/browser criteria rather than marking scaffolds complete.
+
+| Work package | Current state | Outstanding |
+| --- | --- | --- |
+| LP1 | Implemented and reviewed | Final aggregate/CI |
+| LP2 | Implemented and reviewed; final review fixed five-point concurrency | Two-point real API pilot |
+| LP3 | Optional worker boundary and synthetic parsers reviewed | Actual visible DOM integration, rights, egress, Chromium lifecycle and process-tree capacity; public worker hard blocked |
+| LP4 | Selected-card parser and injected visible-action workflow reviewed | Concrete exact-marker DOM binding and worker integration unavailable; experimental |
+| LP5 | MCP, package inventory and four workflows implemented and reviewed | Native host/owner response acceptance |
+| LP6 | Seven suites registered, offline pilot executor and compiled artifact check built | Final aggregate/CI, approved live pilot, native acceptance, browser capacity |
+
+Review found and fixed valid five-point comparisons exceeding the four-call provider concurrency ceiling. Regression cases cover all five calls, cancellation before the fifth, and quota exhaustion. Independent final reviewer rechecked the correction with no remaining blocking finding.
+
+CI runs synthetic parsers and a compiled hard-blocked child; it does **not** claim pinned real-Chromium DOM/lifecycle acceptance. The earlier LP6 real-browser CI criterion remains open, as do browser whole-process-tree/egress measurements. No Chromium or map datasets were downloaded. Account allowance is confirmed unused at 30,000/month; live approval remains separate.

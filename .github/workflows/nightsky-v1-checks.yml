@@ -54,6 +54,12 @@ jobs:
       - name: Verify sky diagnostic defaults to a no-network proposal
         run: node --import tsx scripts/validate-sky-live.ts --plan
 
+      - name: Exercise light pollution contracts, API, worker, workflows and bounded pilot offline
+        run: node --import tsx --test tests/providers/light-pollution-contract.test.ts tests/providers/darkskysites.test.ts tests/providers/light-pollution-browser.test.ts tests/providers/darkskysites-browser.test.ts tests/mcp/light-pollution-journeys.test.ts tests/skills/light-pollution-workflows.test.ts tests/operations/light-pollution-validation.test.ts
+
+      - name: Verify light pollution pilot defaults to a no-network proposal
+        run: node --import tsx scripts/validate-light-pollution.ts --plan
+
       - name: Measure API fixture runtime without live source access
         run: node --import tsx scripts/measure-api-runtime.ts
 
@@ -91,7 +97,7 @@ jobs:
         run: npm run build
 
       - name: Keep production dependencies only
-        run: npm prune --omit=dev
+        run: npm prune --omit=dev --omit=optional
 
       - name: Audit production dependencies
         run: npm audit --omit=dev
@@ -104,6 +110,9 @@ jobs:
 
       - name: Exercise compiled API mode without local geography or live providers
         run: node scripts/verify-api-runtime.mjs
+
+      - name: Exercise compiled light pollution API and blocked worker without optional Playwright
+        run: node scripts/verify-light-pollution-runtime.mjs --require-no-playwright
 
       - name: Exercise compiled regional serving and operator configuration offline
         run: node scripts/verify-plugin-regional-runtime.mjs

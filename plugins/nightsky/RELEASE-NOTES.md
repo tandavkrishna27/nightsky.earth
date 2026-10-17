@@ -1,5 +1,9 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.17 — optional light pollution comparison
+
+Adds an optional one-place or short-list light pollution MCP comparison with source, transport, dataset vintage, coordinate binding and quality preserved. The DarkSkySites latest-zenith API requires explicit admission, a server-only key and an existing dedicated persistent quota ledger. A bounded two-point pilot defaults to an offline proposal and requires separate approval. Estimates are not live measurements; missing or unverified-zero coverage is not confirmed darkness. Public browser operation remains blocked pending rights, exact visible coordinate binding, network isolation and measured capacity. Browser parsers are experimental fixtures, not validated live extractors. Playwright is optional and API operation works without it. Offline checks do not establish live accuracy or native-host acceptance; this remains a local rehearsal.
+
 Named-place observing workflows and one remote MCP connection. Forecasts, calculations, catalog events and historical samples retain separate provenance and gaps. Site access and safety are unverified. Global data coverage and public review remain gated. This rehearsal uses an example endpoint and is not a released product.
 
 ## API-mode local implementation — 17 October 2026
