@@ -21,7 +21,8 @@ from spot_paths import safe_path
 
 REPO = Path(__file__).resolve().parents[2]
 PLUGIN = REPO.parent/'plugin-v1'
-ATTEMPT = REPO/'.cache/planet-261012-receipt-20261017-r2'
+# Outside the retained cache parent; never create or resume this future root.
+ATTEMPT = REPO/'.planet-261012-receipt-20261017-r2'
 EVIDENCE = REPO/'docs/operations/data-pilot-evidence'
 HISTORICAL_PREPARATION = (
     EVIDENCE/'planet-receipt-retained-inventory-20261017.json',
@@ -31,10 +32,10 @@ PRIOR_REVIEW = EVIDENCE/'planet-capacity-retained-review-20261017.json'
 INVENTORY = EVIDENCE/'planet-receipt-retained-inventory-20261017-r2.json'
 DRAFT = EVIDENCE/'planet-receipt-preparation-draft-20261017-r2.json'
 COMPATIBILITY = EVIDENCE/'planet-receipt-inventory-compatibility-20261017-r2.json'
-# Two plugin roots, NE evidence, planet evidence, prior preparation/review,
-# two new preparation documents, and the future attempt root. Discovery stops
-# before collecting a root that the unchanged combined limit cannot represent.
-CACHE_CHILD_LIMIT = 64-(4+len(HISTORICAL_PREPARATION)+1)-2-1
+PRIOR_PREPARATION_STOPS = (
+    EVIDENCE/'planet-receipt-r2-preparation-stop-20261017.json',
+    EVIDENCE/'planet-receipt-r2-preparation-stop-log-20261017.json',
+    EVIDENCE/'planet-receipt-r2-preparation-stop-20261017.log')
 MAX_ENTRIES = 1000000
 MAX_SECONDS = 30
 MAX_DEPTH = 48
@@ -180,6 +181,7 @@ def build_documents(inventory,machine,source_evidence,attempt,inventory_path,dra
     roots=[safe_path(item['path']) for item in inventory['records']]
     if any(attempt==path or attempt.is_relative_to(path) or path.is_relative_to(attempt) for path in roots):
         raise ValueError('proposed receipt root overlaps retained accounting')
+    if attempt.exists():raise FileExistsError('proposed attempt root already exists; do not overwrite or resume')
     retained=[*map(str,roots),str(inventory_path),str(draft_path)]
     if len(retained)+1>64:raise ValueError('preparation plus attempt exceeds receiver combined 64-root ceiling')
     if any(path.exists() for path in (inventory_path,draft_path)):
@@ -207,7 +209,6 @@ def build_documents(inventory,machine,source_evidence,attempt,inventory_path,dra
                'fresh retained inventory, disk and memory plus no overlapping active jobs required at execution',
                'raw SHA-256/native observation/descriptor/trusted source reviews follow actual receipt; no hash or approval is fabricated'],
         capacity={})
-    if attempt.exists():draft['gates'].append('proposed attempt root already exists; do not overwrite or resume')
     if not attempt.parent.is_dir():draft['gates'].append('proposed attempt parent must exist before any later authorized receipt')
     # These are byte lengths, not self-hashes. The two lengths converge without
     # a circular file SHA pin; all actual payload identities remain unknown.
@@ -233,39 +234,32 @@ def build_documents(inventory,machine,source_evidence,attempt,inventory_path,dra
     return observation,draft
 
 
-def _cache_children(cache,budget,limit):
-    children=[];budget.check()
-    with os.scandir(cache) as entries:
-        for entry in entries:
-            budget.entry()
-            if len(children)>=limit:raise ValueError('receiver 64-root ceiling exhausted by assigned cache children')
-            children.append(Path(entry.path))
-    budget.check()
-    return sorted(children,key=lambda p:p.name)
-
-
 def prepare(*,clock=time.monotonic):
     # Broad plugin parents include source/boundary/failure/scratch/old editions
-    # and stat-only runtime allocations once. Assigned cache children are
-    # separate roots so the future receipt directory is never inside a retained
-    # parent. No other worktree's contents or account directories are inspected.
+    # and stat-only runtime allocations once. One assigned cache parent includes
+    # every test/recovery child without spending a retained-root slot per child.
+    # The future attempt is outside it. No account directories are inspected.
     budget=InventoryBudget(MAX_ENTRIES,MAX_SECONDS,clock)
     budget.check();repo=safe_path(REPO);budget.check()
     plugin=safe_path(PLUGIN);budget.check()
     if repo==plugin:
         raise ValueError('distinct geography checkout required; run the preparer from the intended geography-readiness checkout, not plugin-v1')
+    attempt=safe_path(ATTEMPT);budget.check()
+    if attempt.exists():raise FileExistsError('proposed attempt root already exists; do not overwrite or resume')
     roots=[PLUGIN/'.data',PLUGIN/'.cache']
     budget.check()
     cache=safe_path(REPO/'.cache')
-    budget.check()
-    children=_cache_children(cache,budget,CACHE_CHILD_LIMIT)
-    roots.extend(children)
+    budget.check();cache_before=cache.lstat();_regular(cache_before)
+    if not stat.S_ISDIR(cache_before.st_mode):raise ValueError('assigned cache directory required')
+    roots.append(cache)
     roots.append(REPO/'docs/operations/natural-earth-admission')
-    roots.extend((*HISTORICAL_PREPARATION,PRIOR_REVIEW))
+    roots.extend((*HISTORICAL_PREPARATION,PRIOR_REVIEW,*PRIOR_PREPARATION_STOPS))
     budget.check();source=receiver._source_evidence();budget.check();roots.append(Path(source['path']))
     inventory=inventory_roots(roots,budget=budget)
-    if children!=_cache_children(cache,budget,CACHE_CHILD_LIMIT):
-        raise ValueError('assigned cache inventory roots changed during preparation; refresh after other validation writes settle')
+    budget.check();safe_path(cache);budget.check()
+    cache_after=cache.lstat();_regular(cache_after)
+    if _identity(cache_before)!=_identity(cache_after):
+        raise ValueError('assigned cache root changed during preparation; refresh after other validation writes settle')
     budget.check();machine=machine_snapshot(REPO);budget.check()
     inventory['enumeratedEntries']=budget.entries
     inventory['elapsedSeconds']=round(budget.clock()-budget.began,6)
