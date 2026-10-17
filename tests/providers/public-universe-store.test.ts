@@ -1,0 +1,32 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { ReferenceStore } from '../../server/providers/publicUniverse/referenceStore';
+test('immutable identities expire, reject tampering and compare only shared lineage tokens', () => {
+    let now = 0;
+    const store = new ReferenceStore({ now: () => now, maxEntries: 1 });
+    const identity = { domain: 'starter-targets' as const, upstreamId: 'bsc5p:hr2491', upstreamSourceIdentity: { lineage: 'bsc5p', hash: 'a' } };
+    const ref = store.put(identity);
+    identity.upstreamSourceIdentity.hash = 'mutated';
+    assert.equal(store.get(ref).upstreamSourceIdentity?.hash, 'a');
+    assert.throws(() => store.get({ ...ref, revision: 'forged' }));
+    assert.equal(store.compare(ref, { upstreamId: identity.upstreamId }).association, 'unverified');
+    assert.throws(() => store.compare(ref, { upstreamId: identity.upstreamId, upstreamSourceIdentity: { lineage: 'bsc5p', hash: 'b' } }));
+    assert.throws(() => store.compare(ref, { upstreamId: 'other' }));
+    now = 3600000;
+    assert.throws(() => store.get(ref));
+    store.close();
+    assert.throws(() => store.put(identity));
+});
+test('eviction, duplicate independent references and restart never revive selections', () => {
+    const store = new ReferenceStore({ maxEntries: 2 });
+    const identity = { domain: 'exoplanets' as const, upstreamId: 'p', hostId: 'h' };
+    const a = store.put(identity), b = store.put(identity);
+    assert.equal(a.revision, b.revision);
+    assert.notEqual(a.referenceId, b.referenceId);
+    assert.throws(() => store.compare(a, { upstreamId: 'p', hostId: 'wrong' }));
+    store.put({ ...identity, upstreamId: 'other' });
+    assert.throws(() => store.get(a));
+    assert.equal(store.get(b).hostId, 'h');
+    assert.throws(() => new ReferenceStore().get(b));
+    store.close();
+});
