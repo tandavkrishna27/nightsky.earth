@@ -48,7 +48,9 @@ test('candidate plans label display timezone as unverified and radiant uses sele
  const meteorWindow={startUtc:'2026-08-12T06:00:00Z',endUtc:'2026-08-12T18:00:00Z',timeZone:'Asia/Kolkata'};
  const result=await planObservingSession({...input,window:meteorWindow,activity:'meteor-shower',target:'Perseids'},services());
  assert.ok(result.caveats.some(c=>/explicit.*display.*time zone.*unverified/i.test(c)));
- const samples=result.evidence?.meteorRadiantSamples!;assert.equal(samples.length,3);
+ const samples=result.evidence?.meteorRadiantSamples!;assert.equal(samples.length,49);
+ assert.equal(samples[0].evaluatedAt,'2026-08-12T06:00:00.000Z');
+ assert.equal(samples.at(-1)!.evaluatedAt,'2026-08-12T18:00:00.000Z');
  for(const sample of samples) assert.deepEqual(sample,evaluateRadiant('PER',Date.parse(sample.evaluatedAt),{latitude:-33.9,longitude:151.2}));
 });
 test('candidate target visibility preserves geometry across display zones',async()=>{

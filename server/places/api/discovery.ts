@@ -1,3 +1,4 @@
+import { GeometryAcquisition, UnsupportedGeometryError, type GeometrySnapshot } from './geometryAcquisition';
 import { resolvePlaceInputSchema, resolvePlaceResultSchema } from '../../../shared/nightsky/places';
 import { searchDiscoveryInputSchema, normalizeDiscoveryInput, searchDiscoveryResultSchema, getObservingLocationDetailsResultSchema, resolveObservingRegionResultSchema, type Category, type RegionRef, resolveObservingRegionInputSchema } from '../../../shared/nightsky/discovery';
 import { hasCoordinatePair } from '../../../shared/nightsky/common';
@@ -26,6 +27,7 @@ const distance = (a: {
 const caveats = ['Provider records do not verify darkness, public access, night opening, permits, safety or current closures.'];
 export class ApiDiscoveryProvider implements DiscoveryProvider {
     private http: ApiHttpClient;
+    private geometry: GeometryAcquisition;
     private cache = new Map<string, {
         json: string;
         expires: number;
@@ -34,6 +36,7 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
     private bytes = 0;
     constructor(private config: ApiConfiguration, private store: ApiSelectionStore) {
         this.http = new ApiHttpClient(config);
+        this.geometry = new GeometryAcquisition(this.http, config.now ?? Date.now);
     }
     private get now() {
         return this.config.now ?? Date.now;
@@ -201,7 +204,7 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
         });
     }
     async search(input: Parameters<DiscoveryProvider['search']>[0]) {
-        const deadline = Date.now() + 15000;
+        let deadline = Date.now() + 15000;
         const parsed = searchDiscoveryInputSchema.parse(input);
         const scope = normalizeDiscoveryInput(parsed);
         const origins = scope.origins;
@@ -217,11 +220,13 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
                 footprintStatus: 'not-covered', searchCompleteness: 'unavailable', mappedFeatureCompleteness: 'unknown', stopReason: reason
             }
         });
-        if (scope.excludeRegionIds.length || (scope.includeRegionIds.length && origins.length) || (scope.regionMode === 'all' && scope.includeRegionIds.length > 1))
+        const needsGeometry = !!(scope.excludeRegionIds.length || (scope.includeRegionIds.length && origins.length) || (scope.regionMode === 'all' && scope.includeRegionIds.length > 1));
+        if (needsGeometry && !(this.config.geometryEnabled && this.config.geometrySourceAccepted))
             return unavailable('unsupported', 'Administrative membership, exclusions and intersections require boundary evidence unavailable in this API adapter. No constraints were removed.');
         if (!this.config.geoapifyApiKey)
             return unavailable('unavailable', 'Geoapify POI discovery credentials are not configured.');
-        const regions = scope.includeRegionIds.map(regionId => {
+        const selectedRegionIds = needsGeometry ? Array.from(new Set([...scope.includeRegionIds, ...scope.excludeRegionIds])) : scope.includeRegionIds;
+        const allRegions = selectedRegionIds.map(regionId => {
             const selected = scope.regionSelections?.find(r => r.regionId === regionId);
             if (!selected)
                 throw new CalculationPlaceClarificationError('resolve-again', 'Each API region requires its selected source revision. Resolve again.');
@@ -232,6 +237,7 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
                 throw new CalculationPlaceClarificationError('resolve-again', 'The selected API region expired or lacks boundary-filter evidence. Resolve again.');
             return r;
         });
+        const regions = scope.includeRegionIds.map(id => allRegions[selectedRegionIds.indexOf(id)]!);
         const points = origins.map(o => {
             if (!o.sourceRevision || o.catalogueRevision)
                 throw new CalculationPlaceClarificationError('resolve-again', 'API discovery requires each origin source revision. Resolve again.');
@@ -242,6 +248,14 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
                 throw new CalculationPlaceClarificationError('resolve-again', 'The API origin snapshot expired. Resolve again.');
             return r;
         });
+        let geometry = new Map<string, GeometrySnapshot>();
+        if (needsGeometry) {
+            // Separate admitted 30-second stage; candidate stage retains its existing 15-second cap.
+            try { geometry = await this.geometry.acquire(allRegions.map((r, i) => ({ ref: scope.regionSelections!.find(ref => ref.regionId === selectedRegionIds[i])!, upstreamId: r.upstreamId, expiresAt: r.expiresAt })), Date.now() + 30000); }
+            catch (error) { return unavailable(error instanceof UnsupportedGeometryError ? 'unsupported' : 'unavailable', error instanceof UnsupportedGeometryError ? error.message : 'Selected geometry acquisition failed within its bounded stage. No constraints were removed.'); }
+            deadline = Date.now() + 15000;
+            base.caveats = [...caveats, 'Administrative membership is relative to fetched original geometry using snapshot-planar-v1; source vintage is unknown. Boundary ties and expired membership are withheld.'];
+        }
         const identityRecords = new Map<string, ApiSourceRecord>();
         const rejectedIds = new Set<string>();
         const candidates = new Map<string, ReturnType<ApiDiscoveryProvider['candidate']>>();
@@ -251,10 +265,10 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
             providerId: 'geoapify';
             status: ApiAttemptStatus;
         }> = [];
-        for (let i = 0; i < (origins.length && scope.originMode === 'all' ? 1 : Math.max(origins.length, regions.length)); i++) {
+        for (let i = 0; i < (origins.length && scope.originMode === 'all' ? 1 : (origins.length || regions.length)); i++) {
             const origin = origins[i];
             const point = points[i];
-            const region = regions[i];
+            const region = origins.length ? undefined : regions[i];
             const query = {
                 categories: (parsed.categories ?? (Object.keys(CATEGORY_MAP) as Category[])).flatMap(c => CATEGORY_MAP[c]).join(','), filter: region ? `place:${region.upstreamId}` : `circle:${point!.longitude},${point!.latitude},${origin!.radiusKm * 1000}`, limit: '20'
             };
@@ -316,15 +330,21 @@ export class ApiDiscoveryProvider implements DiscoveryProvider {
             };
         }).filter(c => {
             const flags = c.originDistances.map((d, i) => d.distanceKm >= origins[i]!.minimumDistanceKm && d.distanceKm <= origins[i]!.radiusKm);
+            if (needsGeometry) {
+                const included = scope.includeRegionIds.map(id => geometry.get(id)!.classify([c.longitude, c.latitude], this.now()));
+                const excluded = scope.excludeRegionIds.map(id => geometry.get(id)!.classify([c.longitude, c.latitude], this.now()));
+                if (included.includes('unknown') || excluded.includes('unknown')) { failure = true; return false; }
+                if (excluded.includes('inside') || (included.length && !(scope.regionMode === 'all' ? included.every(state => state === 'inside') : included.some(state => state === 'inside')))) return false;
+            }
             return !origins.length || (scope.originMode === 'all' ? flags.every(Boolean) : flags.some(Boolean));
         }).sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0) || a.name.localeCompare(b.name) || a.placeId.localeCompare(b.placeId));
         if (selected.length > parsed.limit)
             truncated = true;
         return searchDiscoveryResultSchema.parse({
-            ...base, sources: selected.length ? Array.from(new Map(selected.flatMap(c => c.sources).map(s => [JSON.stringify(s), s])).values()) : [GEOAPIFY_SOURCE], sourceAttempts, ...(!origins.length ? {
+            ...base, ...(needsGeometry ? { geometryEvidence: Array.from(geometry.values()).map(g => ({ ...g.region, geometryRevision: g.geometryRevision, sourceVintage: g.sourceVintage, fetchedAt: g.fetchedAt, expiresAt: g.expiresAt, policy: 'snapshot-planar-v1', source: { ...GEOAPIFY_SOURCE, url: 'https://apidocs.geoapify.com/docs/place-details/', issuedAt: g.fetchedAt } })) } : {}), sources: selected.length ? Array.from(new Map(selected.flatMap(c => c.sources).map(s => [JSON.stringify(s), s])).values()) : [GEOAPIFY_SOURCE], sourceAttempts, ...(!origins.length ? {
                 sortBasis: 'source-completeness-then-name-id'
             } : {}), candidates: selected.slice(0, parsed.limit), availability: {
-                status: failure ? 'partial' : selected.length ? 'available' : 'not-covered', reason: failure ? 'One or more bounded source searches failed; returned candidates preserve all requested distance constraints.' : 'Bounded source search completed; access and darkness are unverified.'
+                status: failure ? 'partial' : selected.length ? 'available' : 'not-covered', reason: failure ? 'A source request failed or a candidate has unknown snapshot membership; returned candidates preserve every requested constraint.' : 'Bounded source search completed; access and darkness are unverified.'
             }, truncationReason: truncated ? 'Provider page or requested candidate limit reached.' : undefined, discoveryCoverage: {
                 footprintStatus: failure ? 'partial' : 'covered', searchCompleteness: failure || truncated ? 'budget-limited' : 'complete', mappedFeatureCompleteness: 'unknown', stopReason: failure ? 'One or more source requests unavailable.' : truncated ? 'Provider page or candidate result limit reached.' : undefined
             }

@@ -1,0 +1,24 @@
+{
+  "outcome": "decoded-quarantine-only",
+  "failure": null,
+  "requestUrl": "https://archive-api.open-meteo.com/v1/archive?latitude=28.5&longitude=77.25&start_date=1990-12-30&end_date=1991-01-12&hourly=cloud_cover&models=era5&timezone=GMT&timeformat=unixtime&cell_selection=nearest&elevation=nan",
+  "status": 200,
+  "headers": {
+    "content-type": "application/json; charset=utf-8",
+    "content-encoding": "deflate",
+    "date": "Sat, 17 Oct 2026 08:23:41 GMT"
+  },
+  "elapsedMs": 808,
+  "decodedBytes": 4418,
+  "sha256": "549c19aaa033b3fe20bfaa12a826f43449cd0c6b2d3a3d6a1a3da35355d97068",
+  "requests": 1,
+  "measuredDebit": "unobserved",
+  "historicalAdmission": false,
+  "validHours": 336,
+  "missingHours": 0,
+  "codeHashes": {
+    "method": "2afa1ab288145da7acb8eb2810cabff631e888c97bb28d914d1a9dc202301074",
+    "decoder": "aa501e2453824c22974a158f93e2f69a2cb261920155f4b47d9c1f2001c2c301",
+    "executor": "2120fdfce9b1fa905e2418f50bba4bf172d0dd9573436097d3ecacf098581389"
+  }
+}

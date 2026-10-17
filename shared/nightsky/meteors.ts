@@ -13,6 +13,6 @@ export const meteorRadiantResultSchema = z.discriminatedUnion("status", [
     source: z.strictObject({ url: z.url().max(2048), licenseUrl: z.url().max(2048), attribution: z.string().min(1).max(500), vintage: z.string().min(1).max(100), modified: z.literal(true) }),
     annualExtrapolation: z.boolean(), caveat: z.string().min(1).max(600),
   }),
-  z.strictObject({ status: z.enum(["outside-model", "unsupported"]), code: z.string().min(1).max(120), reason: z.string().min(1).max(500) }),
+  z.strictObject({ status: z.enum(["outside-model", "unsupported"]), code: z.string().min(1).max(120), evaluatedAt: utcInstantSchema.optional(), reason: z.string().min(1).max(500) }),
 ]);
 export type MeteorRadiantResult = z.infer<typeof meteorRadiantResultSchema>;

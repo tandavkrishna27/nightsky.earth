@@ -121,6 +121,12 @@ export const originBasisSchema = z.strictObject({
   basis: z.enum(["named-record", "catalogue-point", "api-point"]),
 });
 export const searchDiscoveryResultSchema = resultSchema({
+  geometryEvidence: z.array(z.strictObject({
+    regionId: regionIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/),
+    geometryRevision: z.string().regex(/^[a-f0-9]{64}$/), sourceVintage: z.literal('unknown'),
+    fetchedAt: z.string().datetime(), expiresAt: z.string().datetime(), policy: z.literal('snapshot-planar-v1'),
+    source: sourceRecordSchema,
+  })).max(10).optional(),
   candidates: z.array(candidateRefSchema).max(10),
   sortBasis: z.enum([
     "distance-then-source-completeness",

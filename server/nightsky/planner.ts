@@ -145,10 +145,20 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (input.activity === "meteor-shower") {
     const matchingEvents = events && !isError(events) ? events.events.filter(event => event.eventType === "meteor-shower") : [];
     const code = input.target ? meteorCode(input.target) : matchingEvents.length === 1 ? meteorCode(matchingEvents[0]!.name) ?? meteorCode(matchingEvents[0]!.eventId.split(":").at(-1)!) : undefined;
+    const civilGuidance = events && !isError(events) ? events.meteorCivilGuidance?.find(row => row.code === code) : undefined;
+    if (civilGuidance) {
+      sourceRecords.push(civilGuidance.source);
+      caveats.add(civilGuidance.caveat);
+      const maximumApplies = new Date(input.window.startUtc).getUTCFullYear() === civilGuidance.maximumYear && new Date(input.window.endUtc).getUTCFullYear() === civilGuidance.maximumYear;
+      factors.push({ name: "Meteor civil calendar guidance", assessment: `${civilGuidance.name}: typical annual source dates ${civilGuidance.startMonthDay} to ${civilGuidance.endMonthDay}; exact activity boundaries and time zone are unspecified. ${civilGuidance.geographicQualification}.${maximumApplies ? ` Approximate ${civilGuidance.maximumYear} maximum: ${civilGuidance.maximumWording}; numerical uncertainty is not supplied.` : " The separately retained 2026 maximum does not apply to this requested year."} Requested-window activity overlap is not established.`, impact: "unknown", sourceNames: [civilGuidance.source.name] });
+    }
     if (code) {
       const start = Date.parse(input.window.startUtc), end = Date.parse(input.window.endUtc);
       try {
-        for (const instant of [start, (start + end) / 2, end]) meteorRadiantSamples.push(meteorRadiantResultSchema.parse(evaluateRadiant(code, instant, { latitude: calculation.latitude, longitude: calculation.longitude })));
+        const instants = [start];
+        for (let instant = start + 900_000; instant < end; instant += 900_000) instants.push(instant);
+        instants.push(end);
+        for (const instant of instants) meteorRadiantSamples.push(meteorRadiantResultSchema.parse({ ...evaluateRadiant(code, instant, { latitude: calculation.latitude, longitude: calculation.longitude }), evaluatedAt: new Date(instant).toISOString() }));
       } catch { meteorRadiantSamples.length = 0; gaps.push("The local radiant model could not be evaluated; retry the selected shower and time."); }
     }
     const available = meteorRadiantSamples.filter(sample => sample.status === "available");
@@ -158,8 +168,8 @@ export async function planObservingSession(inputValue: unknown, services: Planne
         caveats.add(sample.caveat);
       }
       sourceRecords.push({ name: "Astronomy Engine", url: "https://github.com/cosinekitty/astronomy", attribution: "Astronomy Engine by Don Cross, MIT License. Solar longitude, frame rotations, horizon and Moon calculations by NightSky.earth.", dataClass: "calculation", product: "Meteor radiant geometry", vintage: "astronomy-engine-2.1.19", licenseUrl: "https://github.com/cosinekitty/astronomy/blob/master/LICENSE", modified: true });
-      factors.push({ name: "Meteor radiant visibility", assessment: available.map(sample => `${sample.code} at ${sample.evaluatedAt}: altitude ${round(sample.altitudeDeg)}°, azimuth ${round(sample.azimuthDeg)}°, Moon separation ${round(sample.moonSeparationDeg)}°; ${sample.annualExtrapolation ? "annual extrapolation" : "within observation years"}`).join("; "), impact: "mixed", sourceNames: ["Global Meteor Network radiant fits", "Astronomy Engine"] });
-      caveats.add("Radiant fits use observations from 2018-12-10 to 2021-05-22; annual reuse through 2030 is extrapolation. Three point samples do not establish continuous visibility, full-season activity, meteor rates or exact peak times.");
+      factors.push({ name: "Meteor radiant visibility", assessment: `${available.length}/${meteorRadiantSamples.length} samples have supported radiant geometry. Sampled altitude range ${round(Math.min(...available.map(sample => sample.altitudeDeg)))}° to ${round(Math.max(...available.map(sample => sample.altitudeDeg)))}°; Moon separation range ${round(Math.min(...available.map(sample => sample.moonSeparationDeg)))}° to ${round(Math.max(...available.map(sample => sample.moonSeparationDeg)))}°. Inspect timestamped evidence for each point; ranges do not establish continuous visibility.`, impact: "mixed", sourceNames: ["Global Meteor Network radiant fits", "Astronomy Engine"] });
+      caveats.add("Radiant fits use observations from 2018-12-10 to 2021-05-22; annual reuse through 2030 is extrapolation. Point samples at 15-minute cadence plus the exact endpoint do not establish continuous visibility, full-season activity, meteor rates or exact peak times.");
       caveats.add("Moon separation compares a modeled geocentric mean radiant with a topocentric Moon direction in equatorial-of-date coordinates; parameter uncertainties are not propagated confidence intervals.");
     } else {
       factors.push({ name: "Meteor radiant visibility", assessment: "Unknown: select a reviewed shower whose coordinates or drift model covers this date. Radiant altitude and Moon separation remain unknown outside the licensed fit windows.", impact: "unknown", sourceNames: [] });

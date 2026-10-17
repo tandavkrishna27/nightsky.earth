@@ -68,6 +68,8 @@ export function decodeOpenMeteoHistory(bytes: Uint8Array, partition: HistoryPart
   return { schema: "open-meteo-era5-quarantine-v1" as const, historicalAdmission: false as const,
     accounting: "unverified" as const, requestedPoint: {...partition.requestedPoint}, actualCell,
     samples, missingHours:samples.filter(s=>s.cloudFraction===null).length,
+    nullHours:clouds.filter(value=>value===null).length,
+    absentHours:partition.expectedHours-times.length,
     receipt: { source: "Open-Meteo Historical Weather" as const, requestedModel: "era5" as const,
       upstreamScientificRevision: "unverified" as const, requestUrl:partition.url,
       sha256:createHash("sha256").update(rawBytes).digest("hex"),rawBytes } };

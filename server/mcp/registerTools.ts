@@ -422,6 +422,7 @@ const CONFIGURATION_SOURCE = {name:"NightSky local catalogue configuration",url:
 const integratedSearchResultSchema = searchObservingLocationsResultSchema.extend({
   candidates:z.array(candidateRefSchema.partial({catalogueRevision:true})).max(10),
   sortBasis:searchDiscoveryResultSchema.shape.sortBasis,
+  geometryEvidence:searchDiscoveryResultSchema.shape.geometryEvidence,
   discoveryCoverage:discoveryCoverageSchema.optional(),queryScope:discoveryScopeSchema.optional(),originBasis:z.array(originBasisSchema).max(5).optional(),truncationReason:z.string().max(300).optional(),
 });
 

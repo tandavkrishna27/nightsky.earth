@@ -1,0 +1,22 @@
+/** Separate proposed method contract. This is not a production artifact schema. */
+export const OPEN_METEO_HISTORY_METHOD = Object.freeze({
+  sourceId: "open-meteo-hosted-era5-cloud-percent-v1",
+  methodVersion: "open-meteo-quantized-dark-cloud-v1",
+  status: "defined-not-production-admitted",
+  nativeEra5Equivalent: false,
+  historicalAdmission: false,
+  baseline: { startNight: "1991-01-01", endNight: "2020-12-31" },
+  observingNight: "local-noon-to-next-noon",
+  darkness: "solar-centre-altitude-at-most-minus-18-degrees-at-hourly-instant",
+  sampling: "hourly-dark-time-samples",
+  thresholdsPercentInclusive: [10, 25, 50],
+  missingness: "null-and-absent-hours-remain-missing; no-local-fill-or-interpolation",
+  denominators: "independent-summary-and-local-hour-bins; expected-dark-hours-includes-missing; frequencies-use-valid-dark-hours",
+  quality: { minimumCompleteness: 0.9, minimumRepresentedYears: 27, minimumPerYearCompleteness: 0.8, maximumBadYears: 0, zeroDenominator: "omit-numeric-statistics" },
+  precision: "hosted-cloud-storage-integer-percent-quantization; divide-by-100-only; do-not-round-wire-values",
+  provenance: "retain-requested-point-returned-cell-raw-response-sha256-retrieval-time",
+  deployedRevision: "unverified",
+  upstreamInterpolation: "bounded-Hermite-configured; actual-gap-processing-unattested",
+  thresholdEquivalence: "unsupported-near-native-fraction-boundaries",
+  sourceCodeEvidenceCommit: "01ceed5b028fb6ac19794c3310aed5a4f7aa6d4a",
+} as const);

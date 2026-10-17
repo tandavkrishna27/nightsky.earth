@@ -98,6 +98,8 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
         const services = createApiServices({
             geonamesUsername: process.env.NIGHTSKY_GEONAMES_USERNAME,
             geoapifyApiKey: process.env.NIGHTSKY_GEOAPIFY_API_KEY,
+            geometryEnabled: process.env.NIGHTSKY_GEOMETRY_ENABLED === "yes",
+            geometrySourceAccepted: process.env.NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED === "yes",
             userAgent: process.env.NIGHTSKY_LOCATION_USER_AGENT ?? "NightSky.earth/1.0 (nightsky.earth2026@gmail.com)",
             fetcher: overrides.fetcher,
             quota: quota ?? { reserve: async () => ({allowed:false,reason:"quota-state-unavailable"}) },

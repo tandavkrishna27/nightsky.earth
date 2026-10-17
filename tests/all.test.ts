@@ -171,3 +171,5 @@ import "./places/api-region-membership.test.ts";
 import "./events/conjunctionWindow.test.ts";
 
 import "./places/api-geometry-snapshot.test.ts";
+import "./providers/climate/open-meteo-history-pilot.test.ts";
+import "./places/api-geometry-acquisition.test.ts";

@@ -10,6 +10,8 @@ export class ApiProviderError extends Error {
     }
 }
 export interface ApiConfiguration {
+    geometryEnabled?: boolean;
+    geometrySourceAccepted?: boolean;
     geonamesUsername?: string;
     geoapifyApiKey?: string;
     userAgent: string;
@@ -23,6 +25,7 @@ const PARAMS: Record<string, string[]> = {
     '/getJSON': ['geonameId', 'style', 'lang'],
     '/timezoneJSON': ['lat', 'lng', 'radius'],
     '/v1/geocode/search': ['text', 'type', 'filter', 'lang', 'limit', 'format'],
+    '/v2/place-details': ['id', 'features'],
     '/v2/places': ['categories', 'name', 'filter', 'bias', 'limit', 'offset', 'lang'],
 };
 /** All roles in a serving process share these queues, budgets and nonsecret keys. */
@@ -43,9 +46,10 @@ export class ApiHttpClient {
         });
     }
     async json(provider: ApiProviderId, path: string, query: Record<string, string>, deadline = Date.now() + 15000): Promise<unknown> {
-        const expected = provider === 'geonames' ? ['/searchJSON', '/getJSON', '/timezoneJSON'] : ['/v1/geocode/search', '/v2/places'];
+        const expected = provider === 'geonames' ? ['/searchJSON', '/getJSON', '/timezoneJSON'] : ['/v1/geocode/search', '/v2/places', ...(this.config.geometryEnabled && this.config.geometrySourceAccepted ? ['/v2/place-details'] : [])];
         if (!expected.includes(path) || Object.keys(query).some(k => !PARAMS[path]?.includes(k)))
             throw new ApiProviderError('unsupported-query');
+        if (path === '/v2/place-details' && (!query.id || query.id.length > 2048 || query.features !== 'details,details.full_geometry')) throw new ApiProviderError('unsupported-query');
         const credential = provider === 'geonames' ? this.config.geonamesUsername : this.config.geoapifyApiKey;
         if (!credential)
             throw new ApiProviderError('not-configured');
@@ -107,22 +111,23 @@ export class ApiHttpClient {
         return structuredClone(await operation);
     }
     private async request(provider: ApiProviderId, path: string, query: Record<string, string>, credential: string, key: string, deadline: number): Promise<unknown> {
+        const cost = path === '/v2/place-details' ? 2 : 1;
         const now = (this.config.now ?? Date.now)();
         const hourly = (this.hourly[provider] ?? []).filter(n => n > now - 3600000);
         const daily = (this.daily[provider] ?? []).filter(n => n > now - 86400000);
         if (this.disabled.has(provider))
             throw new ApiProviderError('unavailable');
-        if ((this.blockedUntil[provider] ?? 0) > now || hourly.length >= (provider === 'geonames' ? 400 : 200) || daily.length >= (provider === 'geonames' ? 2000 : 1000))
+        if ((this.blockedUntil[provider] ?? 0) > now || hourly.length + cost > (provider === 'geonames' ? 400 : 200) || daily.length + cost > (provider === 'geonames' ? 2000 : 1000))
             throw new ApiProviderError('quota-exhausted');
         if (this.config.quota) {
             let reservation;
-            try { reservation = await this.config.quota.reserve(provider, 1); }
+            try { reservation = await this.config.quota.reserve(provider, cost); }
             catch { throw new ApiProviderError('quota-exhausted'); }
             if (!reservation.allowed) throw new ApiProviderError('quota-exhausted');
         }
         this.lastStart[provider] = now;
-        this.hourly[provider] = [...hourly, now];
-        this.daily[provider] = [...daily, now];
+        this.hourly[provider] = [...hourly, ...Array<number>(cost).fill(now)];
+        this.daily[provider] = [...daily, ...Array<number>(cost).fill(now)];
         const url = new URL(path, provider === 'geonames' ? 'https://secure.geonames.org' : 'https://api.geoapify.com');
         for (const [k, v] of Object.entries(query))
             url.searchParams.set(k, v);

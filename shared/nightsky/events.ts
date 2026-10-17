@@ -67,12 +67,22 @@ export const meteorCalendarGuidanceSchema = z.strictObject({
   })).max(18).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate calendar guidance code."),
 });
 export type MeteorCalendarGuidance = z.infer<typeof meteorCalendarGuidanceSchema>;
+export const meteorCivilGuidanceSchema = z.strictObject({
+  code: z.enum(["LYR", "LEO"]), name: z.string().min(1).max(100),
+  evidenceKind: z.literal("source-civil-calendar-guidance"), recurrenceBasis: z.literal("typical-annual"), calendar: z.literal("Gregorian"),
+  startMonthDay: z.string().regex(/^(04-16|11-06)$/), endMonthDay: z.string().regex(/^(04-25|11-30)$/),
+  endpointMeaning: z.literal("source-named-calendar-days; exact activity boundaries unspecified"), timeZoneBasis: z.literal("unspecified-by-source"),
+  maximumYear: z.literal(2026), maximumWording: z.string().min(1).max(150), maximumTimeBasis: z.literal("UT-as-published"),
+  maximumUncertainty: z.literal("approximate; numerical uncertainty not supplied"), geographicQualification: z.string().min(1).max(200),
+  requestedWindowOverlap: z.literal("not-evaluated"), sourceLocator: z.string().min(1).max(200), caveat: z.string().min(1).max(500), source: sourceRecordSchema,
+}).refine(row => row.code === "LYR" ? row.startMonthDay === "04-16" && row.endMonthDay === "04-25" : row.startMonthDay === "11-06" && row.endMonthDay === "11-30", "Civil guidance dates must match the source shower.");
 export const skyEventsResultSchema = resultSchema({
   sourceRevision:z.string().regex(/^[a-f0-9]{64}$/).optional(),
   placeId: placeIdSchema,
   window: timeWindowSchema,
   events: z.array(skyEventSchema).max(MAX_EVENT_RESULTS),
   meteorCalendarGuidance: meteorCalendarGuidanceSchema.optional(),
+  meteorCivilGuidance: z.array(meteorCivilGuidanceSchema).max(2).optional(),
   planetPairCoverage: planetPairCoverageSchema.optional(),
   meteorTypicalSeasons: z.array(meteorTypicalSeasonSchema).max(2).refine(rows => new Set(rows.map(row => row.code)).size === rows.length, "Duplicate typical season code.").optional(),
   unsupportedEventTypes: z.array(z.enum(["meteor-shower", "eclipse", "occultation", "planetary-conjunction", "opposition", "greatest-elongation", "equinox-solstice", "moon-phase", "comet", "other"])).max(10),

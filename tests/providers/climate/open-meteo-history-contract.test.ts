@@ -32,6 +32,7 @@ test("synthetic percent data stays quarantined and missing hours remain missing"
   assert.equal(result.samples.length,336); assert.equal(result.samples[0].cloudFraction,null);
   assert.equal(result.samples[1].cloudFraction,.25); assert.equal(result.samples[3].cloudFraction,null);
   assert.equal(result.missingHours,2); assert.deepEqual(result.receipt.rawBytes,bytes);
+  assert.equal(result.nullHours,1); assert.equal(result.absentHours,1);
   assert.match(result.receipt.sha256,/^[a-f0-9]{64}$/);
   assert.deepEqual(result.requestedPoint,{latitude:10.24,longitude:77.49});
   assert.deepEqual(result.actualCell,{latitude:10.25,longitude:77.5});

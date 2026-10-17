@@ -49,7 +49,9 @@ test("regional source artifact composes named-place discovery, partial plans and
       const input = { placeId: place.placeId, window: { startUtc: "2026-12-14T12:30:00Z", endUtc: "2026-12-15T00:30:00Z", timeZone: "Asia/Kolkata" }, activity: "meteor-shower", target: "Geminids" };
       const plan = await call("plan_observing_session", input);
       assert.equal(plan.place.placeId, place.placeId); assert.equal(plan.availability.status, "partial");
-      assert.equal(plan.evidence.meteorRadiantSamples.length, 3);
+      assert.equal(plan.evidence.meteorRadiantSamples.length, 49);
+      assert.equal(plan.evidence.meteorRadiantSamples[0].evaluatedAt, "2026-12-14T12:30:00.000Z");
+      assert.equal(plan.evidence.meteorRadiantSamples.at(-1).evaluatedAt, "2026-12-15T00:30:00.000Z");
       assert.ok(plan.factors.some((factor: { name: string }) => factor.name === "Nearby observing places"));
       options.push(input);
     }

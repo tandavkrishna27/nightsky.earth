@@ -99,6 +99,8 @@ If a compound city query fails, retry the user's unambiguous bare city name with
 
 ## Final answer audit
 
+For meteor plans, `meteorCivilGuidance` preserves one source's annual civil dates and approximate 2026 maximum wording in UT. Do not convert these to UTC events, guarantee activity within the dates, or reuse the 2026 maximum in another year. `meteorRadiantSamples` uses 15-minute points plus the exact endpoint for one selected shower (97 points maximum). Retain unavailable timestamped points and fit-domain limits; sampled ranges do not establish continuous visibility or full-season activity.
+
 Use this compact output procedure: mandatory factual core at most 120 words before Sources; keep the whole answer within 250 words including URLs when that maximum applies.
 1. Core answer: begin with the outcome in one sentence, then at most three bullets with useful returned local times and timezone. Geometric opportunity is not best seeing. A clipped interval endpoint is not a sunset, sunrise or exclusive twilight-phase boundary.
 2. Evidence: a few lines with each weather source's issuedAt, valid time/range, value and whether an instant sample or interval; state coverage and unknowns. When giving Moon phase or illumination, include “Moon impact unknown” even for Moon viewing. Moon-free or favourable conditions cannot follow from below-horizon geometry. Omit optional unrelated events and catalogue counts, especially when not asked; NASA timing counts and GMN model counts are independent.

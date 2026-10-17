@@ -1,4 +1,5 @@
 import { meteorCalendarGuidance } from "./meteorCalendarGuidance";
+import { meteorCivilGuidance } from "./meteorCivilGuidance";
 import { calculationCoordinates, CalculationPlaceClarificationError } from "../places/calculationPlace";
 import type { CalculationPlace } from "../../shared/nightsky/discovery";
 
@@ -67,7 +68,8 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
   ];
   if (coordinates.timeZoneBasis === "explicit-display") caveats.push(`Times use the explicit display time zone ${coordinates.displayTimeZone}; the actual site time zone is unverified.`);
   if (requestedTypes.includes("meteor-shower")) {
-    caveats.push("Dated meteors include 13 NASA MEO maxima per year for 2025/2026 and 12 for 2027. Lyrids/Orionids have no retained peak; Leonids only have a 2027 maximum. SSG and AND omission in 2027 does not establish physical absence. Source 2027 UT minutes are represented as ISO UTC without subminute accuracy. Empty results do not establish no activity. Complete seasons, other years and local visibility remain unsupported; forecasts can change.");
+    caveats.push("Dated meteors include 13 NASA MEO maxima per year for 2025/2026 and 12 for 2027. Lyrids/Orionids have no retained UTC peak; Leonids only have a 2027 maximum. SSG and AND omission in 2027 does not establish physical absence. Source 2027 UT minutes are represented as ISO UTC without subminute accuracy. Empty results do not establish no activity. Complete seasons, other years and local visibility remain unsupported; forecasts can change.");
+    caveats.push("Separate IGN civil guidance supplies annual date ranges and approximate 2026 Lyrid/Leonid maxima as published in UT; it is not a UTC event or local activity guarantee.");
     caveats.push(`Approximate meteor calendar guidance preserves published verbal periods for ${calendarGuidance!.entries.map(row => row.code).join(", ")}. It is unfiltered annual context, not dated activity, an exact peak, or a local viewing recommendation. Missing guidance does not imply no activity.`);
     caveats.push("Meteor typical-season metadata is unfiltered source reference evidence for two showers. Requested-window overlap is not evaluated; J2000 solar longitude convention is unresolved, so no UTC dates are inferred. Typical intervals do not guarantee activity, peaks, rates or visibility and do not extend radiant fit domains.");
   }
@@ -80,12 +82,12 @@ export async function searchSkyEvents(inputValue: unknown, index: GeoNamesPlaceI
   if (truncated) caveats.push(`The result was limited to the first ${input.limit} events. Narrow the requested time window to reduce truncation; coverage limits still apply.`);
   const onlyOutOfRangePlanets = planetsOutOfRange && requestedTypes.every(type => type === "opposition" || type === "planetary-conjunction" || type === "greatest-elongation");
   const status = onlyOutOfRangePlanets ? "out-of-horizon" : requestedTypes.every((type) => unsupportedEventTypes.includes(type)) ? "unsupported" : (unsupportedEventTypes.length || truncated || planetsOutOfRange || requestedTypes.includes("meteor-shower") || requestedTypes.includes("planetary-conjunction") ? "partial" : "available");
-  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [...REVIEWED_METEOR_PEAK_SOURCES, METEOR_TYPICAL_SEASON_SOURCE, ...calendarGuidance!.entries.filter(row => !["ETA", "ORI"].includes(row.code)).map(row => row.source)] : [])];
+  const sources = [CALC_SOURCE, ...(requestedTypes.includes("meteor-shower") ? [...meteorCivilGuidance().map(row => row.source), ...REVIEWED_METEOR_PEAK_SOURCES, METEOR_TYPICAL_SEASON_SOURCE, ...calendarGuidance!.entries.filter(row => !["ETA", "ORI"].includes(row.code)).map(row => row.source)] : [])];
   return skyEventsResultSchema.parse({
     availability: { status, reason: onlyOutOfRangePlanets ? "Planet alignment and greatest-elongation windows are supported only within 1900–2100." : truncated ? "Supported event results were returned, but the requested result limit truncated the list." : status === "unsupported" ? "Only unsupported event classes were requested." : unsupportedEventTypes.length ? "Supported events are shown; unsupported event classes are listed explicitly." : planetsOutOfRange ? "Other supported events are shown; planet calculations are outside the supported date horizon." : requestedTypes.includes("meteor-shower") ? `Dated meteor coverage is limited to 2025–2027 forecast maxima; two typical longitude intervals and ${calendarGuidance!.entries.length} approximate verbal calendar periods are reference metadata only. Complete activity seasons and other years' maxima remain unavailable.` : pairResult ? "Solar alignments retain their heliocentric definition; pair RA-crossing coverage is partial with uncertified completeness, limited to 2025–2027. Closest approach and local visibility are not established." : wantsElongation ? "Mercury/Venus greatest geocentric elongations were calculated; local visibility is not evaluated." : "Supported events were calculated or loaded from the versioned catalog." },
     sourceRevision:coordinates.sourceRevision,sources, caveats, placeId, window: input.window, events: limited, unsupportedEventTypes,
     ...(pairResult ? {planetPairCoverage:pairResult.coverage} : {}),
-    ...(requestedTypes.includes("meteor-shower") ? { meteorTypicalSeasons: meteorTypicalSeasons(), meteorCalendarGuidance: calendarGuidance } : {}),
+    ...(requestedTypes.includes("meteor-shower") ? { meteorCivilGuidance: meteorCivilGuidance(), meteorTypicalSeasons: meteorTypicalSeasons(), meteorCalendarGuidance: calendarGuidance } : {}),
   });
 }
 
