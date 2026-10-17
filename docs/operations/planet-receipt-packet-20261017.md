@@ -29,7 +29,7 @@ source/admission digest is invented.
 | ETag | `"37619b1886c62145e6a0a6b31109b300-5686"` |
 | Provider MD5 | `c51bb08eb9fc486d010aaa1a3424cabc` |
 | Last-Modified | `2026-10-15T19:22:44Z` |
-| New attempt root | Assigned geography worktree `.cache/planet-261012-receipt-20261017-v1`; must remain nonexistent |
+| New attempt root | Historical v1 used `.cache/planet-261012-receipt-20261017-v1`; corrected r2 uses checkout `.planet-261012-receipt-20261017-r2`, outside retained `.cache`; must remain nonexistent |
 | Raw SHA-256 / native vintage | Unknown; both remain null |
 
 The draft reuses the receiver's exact source constants and complete limits:
@@ -56,8 +56,10 @@ editions and runtime allocation sizes once. Stat-only inclusion of runtime
 directories changes no environment. ERA5 and OSM child allocations are broken
 out within those parent records without adding duplicate retained roots.
 
-The assigned worktree's cache children are separate roots, which avoids placing
-the new attempt directory beneath a retained parent. The inventory also
+The corrected r2 inventory counts the assigned worktree's entire `.cache` once,
+including every test, failure, runtime and recovery child. Its future attempt
+is outside that retained parent. The historical v1 child-per-root layout is
+preserved in its original evidence. The inventory also
 includes the actual `docs/operations/natural-earth-admission` evidence,
 manifests, normalization lineage and frozen subjects, plus the fixed planet
 metadata. The two new preparation JSON files are counted separately by their
@@ -131,14 +133,16 @@ inventories still cost time, OS calls can delay cooperative stopping, and
 disk/reserve/RSS checks remain sampled rather than a filesystem reservation.
 
 A second preparation uses fixed `-20261017-r2.json` inventory, draft and
-compatibility filenames and the nonexistent
-`.cache/planet-261012-receipt-20261017-r2` attempt path. It retains all three
-first-preparation files and the separate retained-capacity review exactly once.
+compatibility filenames and the nonexistent checkout
+`.planet-261012-receipt-20261017-r2` attempt path. It retains all three
+first-preparation files, the separate retained-capacity review, and the three
+failed-root-discovery stop artifacts exactly once.
 The combined 64-root ceiling includes the future attempt root, so preparation
 allows at most 63 retained roots. A later real allowance must also fit and be
-counted. Generation and one bounded compatibility check wait until retained
-metadata and any separately authorized owner cleanup have settled; this tool
-neither deletes data nor assumes any proposed reclamation occurred.
+counted. The coordinator has signaled storage settled and authorized local
+preparation with every file retained and zero reclamation. No owner-retain
+approval is needed. A preexisting external attempt is refused before inventory
+and document construction. The tool neither deletes data nor assumes reclamation.
 
 The fresh JSON machine observation records C: total/free bytes, total/available
 physical memory and total/available page-file-backed memory. Its capacity
@@ -155,6 +159,14 @@ The `totalPageFileBytes`/`availablePageFileBytes` fields preserve the Windows
 not measured pagefile storage length.
 
 ## Work still required before a receipt
+
+### Later r2 attempt — root ceiling stop, no cleanup
+
+After Git recovery and the coordinator's explicit storage-settled signal, the existing reviewed `--write` mode ran once with all retained files and zero reclamation credit. It stopped before inventory with `receiver 64-root ceiling exhausted by assigned cache children`: 78 children now exceed the fixed 53-child allowance, requiring at least 89 combined roots against the unchanged 64-root maximum. No r2 inventory/draft was written, so `--probe-existing` was not run and compatibility remains unknown. The [retained stop report](data-pilot-evidence/planet-receipt-r2-preparation-stop-20261017.json) pins the actual log and fresh counters. The [next decision](geography-next-acquisition-capacity-decision-20261017.md#fresh-authorized-r2-preparation-result) proposes reviewing whole-cache accounting with a future attempt outside that retained parent; no path layout, cap or runtime code changed in this attempt. Unanswered cleanup approval means retain everything, not wait for permission to retain files or perform authorized read-only checks.
+
+### Separately authorized layout correction
+
+The coordinator authorized the finite [correction plan](../superpowers/plans/2026-10-17-receipt-root-layout.md): one complete cache root, direct external future attempt, refusal of a preexisting attempt and explicit retention of all failed-preparation evidence. Independent spec/quality review approved the final diff without actionable findings. The real 100-child regression failed at the old root ceiling and passes with exactly 139 fixture bytes retained once, including recovery and prior evidence. Cache identity is rechecked after all roots; moving traversal up a level does not increase depth48. Focused preparation: 18 run / 17 passed / one privilege skip. Full OSM suite: 246 run / 241 passed / five skips in 59.827 seconds. Source/receiver authority and every resource ceiling remain unchanged. A later section records the actual offline preparation/probe outcome; these tests alone do not establish machine fit.
 
 Obtain the actual separate operator decision. A later actual allowance must
 contain its real reference, be independently retained and included in the

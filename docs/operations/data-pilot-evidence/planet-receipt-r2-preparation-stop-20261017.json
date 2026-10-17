@@ -1,0 +1,78 @@
+{
+  "attemptExists": false,
+  "authorization": null,
+  "capacity": {
+    "caveat": "free-disk arithmetic only; r2 inventory/draft absent, no allowance, incomplete retained accounting; historical full-build proposal is not a v3 envelope; new preparation/allowance/stop evidence still consumes capacity",
+    "currentGlobalBuildFitEstablished": false,
+    "currentReceiptFitEstablished": false,
+    "headroomBeforeNewPreparationAndStopEvidenceBytes": 48512909331,
+    "oldFullBuildComparativeShortfallBeforeNewPreparationAndStopEvidenceBytes": 1683472365,
+    "oldFullBuildProposalBytes": 145578373101,
+    "proposedRawBytes": 95380942829,
+    "proposedReceiptEvidenceBytes": 1048576,
+    "reserveBytes": 137438953472
+  },
+  "cleanupReclaimBytes": 0,
+  "compatibility": {
+    "changedSinceObservation": null,
+    "comparisonEstablished": false,
+    "reason": "--probe-existing requires the nonexecutable saved draft, which preparation did not produce",
+    "run": false
+  },
+  "executionAllowed": false,
+  "kind": "planet-receipt-r2-preparation-stop",
+  "networkRequests": 0,
+  "nextDecision": {
+    "action": "Review a preparer root layout that counts the entire assigned .cache once and locates the nonexistent future receipt attempt outside .cache",
+    "constraints": [
+      "retain every file and recovery backup",
+      "zero cleanup or reclamation credit",
+      "unchanged 30 seconds, one million entries, depth 48 and 64 combined roots",
+      "no source/network/body/build approval",
+      "fresh inventory and one compatibility probe after reviewed layout change"
+    ]
+  },
+  "observation": {
+    "disk": {
+      "freeBytes": 281333854208,
+      "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness",
+      "totalBytes": 999109423104
+    },
+    "memory": {
+      "availablePageFileBytes": 71702859776,
+      "availablePhysicalBytes": 40188116992,
+      "totalPageFileBytes": 98306478080,
+      "totalPhysicalBytes": 66094223360
+    },
+    "observedUtc": "2026-10-17T03:28:07.649885+00:00",
+    "platform": "win32",
+    "processInventory": "not-inspected; coordinator supplies execution-status context"
+  },
+  "preparationExitCode": 1,
+  "preparationFailureLog": {
+    "bytes": 1186,
+    "path": "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\docs\\operations\\data-pilot-evidence\\planet-receipt-r2-preparation-stop-20261017.log",
+    "sha256": "309e28e46140aec465cc033d5001213b2db32f166e46ebdc1d579e5096f816d4"
+  },
+  "r2ArtifactsWritten": false,
+  "rawBodyAcquired": false,
+  "reason": "ValueError: receiver 64-root ceiling exhausted by assigned cache children",
+  "reservation": false,
+  "rootAccounting": {
+    "assignedCacheChildCount": 78,
+    "combinedRootLimit": 64,
+    "fixedCacheChildLimit": 53,
+    "inventoryComplete": false,
+    "method": "bounded immediate cache child enumeration; no recursive inventory completed",
+    "minimumCombinedRoots": 89,
+    "noAllocationsOmitted": true,
+    "recoveryCacheRoots": [
+      "C:\\Users\\TK\\OneDrive\\Desktop\\Claude Data\\nightsky.earth-main\\.worktrees\\geography-readiness\\.cache\\recovery-20261017-0857"
+    ],
+    "retainedLogicalBytes": null,
+    "rootExcess": 25
+  },
+  "schemaVersion": 1,
+  "status": "bounded-stop-before-inventory",
+  "storageSettledSignal": "coordinator; no active data builds/downloads; retain both synthetic attempts and all recovery backups"
+}

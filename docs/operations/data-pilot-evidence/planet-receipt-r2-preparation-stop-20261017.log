@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\TK\OneDrive\Desktop\Claude Data\nightsky.earth-main\.worktrees\geography-readiness\scripts\osm\prepare-planet-receipt-packet.py", line 340, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\Users\TK\OneDrive\Desktop\Claude Data\nightsky.earth-main\.worktrees\geography-readiness\scripts\osm\prepare-planet-receipt-packet.py", line 326, in main
+    observation,draft=prepare()
+                      ~~~~~~~^^
+  File "C:\Users\TK\OneDrive\Desktop\Claude Data\nightsky.earth-main\.worktrees\geography-readiness\scripts\osm\prepare-planet-receipt-packet.py", line 261, in prepare
+    children=_cache_children(cache,budget,CACHE_CHILD_LIMIT)
+  File "C:\Users\TK\OneDrive\Desktop\Claude Data\nightsky.earth-main\.worktrees\geography-readiness\scripts\osm\prepare-planet-receipt-packet.py", line 241, in _cache_children
+    if len(children)>=limit:raise ValueError('receiver 64-root ceiling exhausted by assigned cache children')
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: receiver 64-root ceiling exhausted by assigned cache children

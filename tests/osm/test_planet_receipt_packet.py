@@ -5,6 +5,7 @@ from pathlib import Path
 import stat
 import sys
 import tempfile
+from contextlib import ExitStack
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -91,11 +92,11 @@ class PlanetReceiptPacketTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'overlaps'):
                 packet.build_documents(inventory,machine,{},data/'receipt',root/'inventory.json',root/'draft.json')
             existing=cache/'receipt';existing.mkdir()
-            observation,draft=packet.build_documents(inventory,machine,{},existing,root/'inventory.json',root/'draft.json')
-            self.assertTrue(any('already exists' in gate for gate in draft['gates']))
+            with self.assertRaisesRegex(FileExistsError,'attempt.*exists'):
+                packet.build_documents(inventory,machine,{},existing,root/'inventory.json',root/'draft.json')
             (root/'draft.json').write_text('{}')
             with self.assertRaises(FileExistsError):
-                packet.build_documents(inventory,machine,{},existing,root/'inventory.json',root/'draft.json')
+                packet.build_documents(inventory,machine,{},cache/'new-receipt',root/'inventory.json',root/'draft.json')
 
     def test_symlink_is_never_followed(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -137,30 +138,78 @@ class PlanetReceiptPacketTests(unittest.TestCase):
                             packet.prepare()
             discovery.assert_not_called();inventory.assert_not_called()
 
-    def test_prepare_bounds_cache_discovery_before_consuming_all_entries(self):
-        consumed=[]
-        class Entries:
-            def __enter__(self):
-                def entries():
-                    for index in range(100):
-                        consumed.append(index)
-                        yield SimpleNamespace(path=str(cache/f'child-{index}'))
-                return entries()
-            def __exit__(self,*args):return False
+    def preparation_fixture(self,folder):
+        root=Path(folder);repo=root/'geography';plugin=root/'plugin-v1'
+        cache=repo/'.cache';cache.mkdir(parents=True)
+        for index in range(100):
+            child=cache/f'child-{index}';child.mkdir();(child/'retained').write_bytes(b'x')
+        recovery=cache/'recovery';recovery.mkdir();(recovery/'index.bak').write_bytes(b'backup!')
+        (plugin/'.data').mkdir(parents=True);(plugin/'.data'/'raw').write_bytes(b'raw')
+        (plugin/'.cache').mkdir();(plugin/'.cache'/'failure').write_bytes(b'failure')
+        boundaries=repo/'docs/operations/natural-earth-admission';boundaries.mkdir(parents=True)
+        (boundaries/'boundary').write_bytes(b'ne')
+        evidence=repo/'docs/operations/data-pilot-evidence';evidence.mkdir()
+        history=tuple(evidence/f'v1-{index}.json' for index in range(3))
+        for item in history:item.write_bytes(b'h')
+        review=evidence/'prior-review.json';review.write_bytes(b'r')
+        stops=tuple(evidence/f'stop-{index}.json' for index in range(3))
+        for item in stops:item.write_bytes(b'stop')
+        source=evidence/'source.json';source.write_bytes(b'meta')
+        machine=dict(observedUtc='2026-10-17T00:00:00Z',platform='synthetic',
+            disk=dict(path=str(repo),totalBytes=1024**4,freeBytes=receiver.RESERVE_BYTES+receiver.SOURCE['bytes']+receiver.EVIDENCE_BYTES+1024**3),memory={})
+        values=dict(REPO=repo,PLUGIN=plugin,ATTEMPT=repo/'.planet-261012-receipt-20261017-r2',
+            INVENTORY=evidence/'inventory-r2.json',DRAFT=evidence/'draft-r2.json',
+            HISTORICAL_PREPARATION=history,PRIOR_REVIEW=review,PRIOR_PREPARATION_STOPS=stops)
+        return repo,cache,source,machine,values
+
+    def test_prepare_counts_whole_cache_with_over_64_children_and_all_prior_evidence_once(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder);cache=root/'.cache';cache.mkdir()
-            with patch.object(packet,'REPO',root),patch.object(packet.os,'scandir',return_value=Entries()):
-                with patch.object(packet,'inventory_roots',side_effect=AssertionError('discovery must stop first')):
-                    with self.assertRaisesRegex(ValueError,'64-root ceiling'):
-                        packet.prepare()
-            self.assertEqual(len(consumed),packet.CACHE_CHILD_LIMIT+1)
+            repo,cache,source,machine,values=self.preparation_fixture(folder)
+            with ExitStack() as stack:
+                stack.enter_context(patch.multiple(packet,create=True,**values))
+                stack.enter_context(patch.object(packet,'machine_snapshot',return_value=machine))
+                stack.enter_context(patch.object(receiver,'_source_evidence',return_value=dict(path=str(source),sha256Lf='0'*64)))
+                stack.enter_context(patch.object(receiver.http.client,'HTTPSConnection',side_effect=AssertionError('no network')))
+                observation,draft=packet.prepare()
+            records=observation['inventory']['records'];paths=[Path(item['path']) for item in records]
+            self.assertEqual(observation['inventory']['logicalBytes'],139)
+            self.assertEqual(sum(item['logicalBytes'] for item in records if Path(item['path'])==cache.resolve()),107)
+            self.assertEqual(paths.count(cache.resolve()),1)
+            self.assertFalse(any(path!=cache.resolve() and path.is_relative_to(cache.resolve()) for path in paths))
+            for prior in (*values['HISTORICAL_PREPARATION'],values['PRIOR_REVIEW'],*values['PRIOR_PREPARATION_STOPS'],source):
+                self.assertEqual(paths.count(prior.resolve()),1)
+            attempt=Path(draft['proposedAllowance']['attemptRoot'])
+            self.assertFalse(any(attempt==path or attempt.is_relative_to(path) or path.is_relative_to(attempt) for path in paths))
+            self.assertFalse(attempt.exists());self.assertEqual(len(paths)+3,15)
+            self.assertFalse(draft['executionAllowed']);self.assertIsNone(draft['authorization'])
+
+    def test_prepare_refuses_preexisting_external_attempt_before_inventory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            repo,cache,source,machine,values=self.preparation_fixture(folder)
+            values['ATTEMPT'].mkdir();(values['ATTEMPT']/'body.partial').write_bytes(b'failed raw')
+            with patch.multiple(packet,create=True,**values),patch.object(packet,'inventory_roots',side_effect=AssertionError('must refuse before inventory')):
+                with self.assertRaisesRegex(FileExistsError,'attempt.*exists'):
+                    packet.prepare()
+
+    def test_prepare_rechecks_cache_identity_after_all_roots_are_scanned(self):
+        with tempfile.TemporaryDirectory() as folder:
+            repo,cache,source,machine,values=self.preparation_fixture(folder)
+            original=packet.inventory_roots
+            def mutate_after_scan(roots,**kwargs):
+                result=original(roots,**kwargs)
+                (cache/'late-child').mkdir()
+                os.utime(cache,ns=(1_000_000_000,1_000_000_000))
+                return result
+            with patch.multiple(packet,create=True,**values),patch.object(packet,'inventory_roots',side_effect=mutate_after_scan),patch.object(receiver,'_source_evidence',return_value=dict(path=str(source))):
+                with self.assertRaisesRegex(ValueError,'cache.*changed'):
+                    packet.prepare()
 
     def test_r2_preparation_retains_all_v1_evidence_once_with_distinct_outputs(self):
         captured=[]
         def inventory(roots,**kwargs):captured.extend(roots);raise RuntimeError('synthetic roots captured')
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);(root/'.cache').mkdir()
-            with patch.object(packet,'REPO',root),patch.object(packet,'_cache_children',return_value=[]),patch.object(receiver,'_source_evidence',return_value=dict(path=str(root/'source.json'))),patch.object(packet,'inventory_roots',side_effect=inventory):
+            with patch.object(packet,'REPO',root),patch.object(receiver,'_source_evidence',return_value=dict(path=str(root/'source.json'))),patch.object(packet,'inventory_roots',side_effect=inventory):
                 with self.assertRaisesRegex(RuntimeError,'synthetic roots captured'):
                     packet.prepare()
         history=tuple(packet.HISTORICAL_PREPARATION)
@@ -168,7 +217,8 @@ class PlanetReceiptPacketTests(unittest.TestCase):
         self.assertTrue(all(captured.count(path)==1 for path in history))
         self.assertTrue(all('-r2.json' in str(path) for path in (packet.INVENTORY,packet.DRAFT,packet.COMPATIBILITY)))
         self.assertFalse(set(history)&{packet.INVENTORY,packet.DRAFT,packet.COMPATIBILITY})
-        self.assertEqual(packet.CACHE_CHILD_LIMIT+len(captured)+2+1,64)
+        self.assertEqual(captured.count(root/'.cache'),1)
+        self.assertEqual(len(captured)+2+1,15)
 
     def test_preparation_reserves_attempt_root_slot_in_combined_64_root_limit(self):
         with tempfile.TemporaryDirectory() as folder:
