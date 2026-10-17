@@ -2,6 +2,9 @@
 
 Prepared 17 October 2026. This handoff makes no provider request and reads no private key or quota contents. All previous live allowances are consumed. Existing credentials and the existing durable ledger remain in place. No deployment, download, historical job or model launch is included.
 
+
+**Execution update:** the owner subsequently approved this exact packet and it completed with four HTTP 200 responses; see [live results](hyderabad-owner-live-results-20261017.md). This supersedes preparation-only authorization statements. The allowance is consumed; the command below is retained as the executed procedure, not permission to rerun it. Existing private quota state was preserved.
+
 ## Local configuration
 
 Use the existing Node 24 runtime and compiled standalone `dist/plugin.js`. The private environment file is `C:/Users/TK/.nightsky/providers.env`; it already contains provider credentials, the MET contact and the quota path according to retained setup evidence. Load it only into a future explicitly authorized child with Node's `--env-file`. Do not print, duplicate or commit it. The persistent ledger is `C:/Users/TK/.nightsky/provider-quota.json`; do not run the initializer again, remove its marker, reset counters or remove an active lock. One process owns this ledger.
@@ -23,9 +26,9 @@ Use `http://127.0.0.1:5000/mcp` only with a client that supports this local tran
 
 `npm run build:plugin` and `node scripts/verify-api-runtime.mjs` already provide the offline compiled-runtime rehearsal, with injected synthetic fetch responses and isolated temporary quotas. `node --import tsx scripts/validate-api-live.ts` prints its existing proposal without accessing private configuration or making requests. The general operator preflight addresses production release and host evidence; its incomplete production/history gates do not mean private keys need to be copied again.
 
-## Proposed next real-provider allowance
+## Executed real-provider allowance (retained bounds)
 
-Proposed identifier: `owner-hyderabad-v1-4-1-120-zero-retries`. The executor supports this envelope; live execution remains unauthorized. Maximum **four HTTPS GET attempts total**, one per provider below, **120 seconds overall**, zero retries, redirects, pagination, replacements or redistributed unused slots. Failed or aborted dispatches count. A new exclusive batch journal must be created beside the existing ledger before dispatch; reserve quota and persist attempts before each request. Stop on quota/persistence failure; abort active requests at the overall deadline. Retain at most 262,144 journal bytes and no raw bodies or numerical weather values.
+Proposed identifier: `owner-hyderabad-v1-4-1-120-zero-retries`. The executor supports this envelope; the owner-authorized execution is complete and its allowance consumed. Maximum **four HTTPS GET attempts total**, one per provider below, **120 seconds overall**, zero retries, redirects, pagination, replacements or redistributed unused slots. Failed or aborted dispatches count. A new exclusive batch journal must be created beside the existing ledger before dispatch; reserve quota and persist attempts before each request. Stop on quota/persistence failure; abort active requests at the overall deadline. Retain at most 262,144 journal bytes and no raw bodies or numerical weather values.
 
 | Provider | Exact endpoint and request | Attempts | Body cap / timeout |
 | --- | --- | --- | --- |
@@ -48,9 +51,9 @@ The existing `scripts/validate-api-live.ts` executor now supports this fixed pac
 node --import tsx scripts/validate-api-live.ts --hyderabad-proposal
 ```
 
-After fresh authorization, a child process must set `NIGHTSKY_LIVE_APPROVED_ENVELOPE=owner-hyderabad-v1-4-1-120-zero-retries`, a new `NIGHTSKY_LIVE_BATCH_ID`, `NIGHTSKY_LIVE_GEOAPIFY_ADMITTED=yes`, and the API/weather settings above. Its invocation is `node --env-file=C:/Users/TK/.nightsky/providers.env --import tsx scripts/validate-api-live.ts --hyderabad-live`. Do not execute it now. No standalone server is needed for this bounded adapter packet; native-client testing is a separate stage. Inherited environment values take precedence over Node env-file values, so start with a controlled child environment and do not override private credentials or quota path.
+For the approved execution, the child process was required to set `NIGHTSKY_LIVE_APPROVED_ENVELOPE=owner-hyderabad-v1-4-1-120-zero-retries`, a new `NIGHTSKY_LIVE_BATCH_ID`, `NIGHTSKY_LIVE_GEOAPIFY_ADMITTED=yes`, and the API/weather settings above. Its invocation is `node --env-file=C:/Users/TK/.nightsky/providers.env --import tsx scripts/validate-api-live.ts --hyderabad-live`. Do not replay it under the consumed allowance. No standalone server is needed for this bounded adapter packet; native-client testing is a separate stage. Inherited environment values take precedence over Node env-file values, so start with a controlled child environment and do not override private credentials or quota path.
 
-Fresh owner authorization must name the new envelope after that offline guard validation. At execution, use the existing private environment and ledger, a new unique batch ID, and current admission/budget evidence. Do not infer post-trial WeatherAPI Free success from the earlier trial response. Any current quota denial stops without resetting state. The invocation above is prepared for that future authorized run; it was not run here.
+The completed run received owner authorization naming this envelope after offline guard validation. Any future packet must receive its own applicable authorization and use the existing private environment and ledger, a new unique batch ID, and current admission/budget evidence. Do not infer post-trial WeatherAPI Free success from the earlier trial response. Any current quota denial stops without resetting state. The invocation above was used for the subsequently authorized run documented in the results; any repeat needs fresh bounded authority.
 
 ## Evidence required from the owner experience
 
@@ -60,4 +63,4 @@ A synthetic MCP transcript proves local transport/tool behavior. An actual host 
 
 ## Readiness
 
-Local runtime, provider configuration contracts, durable quota tooling and offline rehearsals already exist. The retained account setup and first connectivity batch are evidence of prior setup, not fresh checks performed here. The Hyderabad executor is implemented and needs fresh authorization before a real run. Full north-of-Hyderabad Geminids site guidance still needs point/access evidence, appropriate event evidence and in-horizon weather; history, geometry acceptance, deployment and native-client acceptance remain separate gates.
+Local runtime, provider configuration contracts, durable quota tooling and offline rehearsals already exist. The retained account setup and first connectivity batch are evidence of prior setup, not fresh checks performed here. The Hyderabad executor completed its approved four-request run; further execution needs fresh bounded authority. Full north-of-Hyderabad Geminids site guidance still needs point/access evidence, appropriate event evidence and in-horizon weather; history, geometry acceptance, deployment and native-client acceptance remain separate gates.

@@ -1,6 +1,6 @@
 # Local experience completion — 17 October 2026
 
-Three parallel lanes completed against baseline `b10f054`. Independent source review approved all lanes after correcting one document-encoding issue. No live provider requests, private credential reads, downloads, deployment or publication occurred.
+Three parallel lanes completed against baseline `b10f054`. Independent source review approved all lanes after correcting one document-encoding issue. The implementation lanes made no live provider requests, private credential reads, downloads, deployment or publication. Subsequently, the owner approved the exact Hyderabad packet and it completed with four HTTP 200 responses; [live results](hyderabad-owner-live-results-20261017.md) record the consumed allowance and remaining limits.
 
 ## Delivered
 
@@ -19,10 +19,11 @@ Three parallel lanes completed against baseline `b10f054`. Independent source re
 - Fixture preparation verified fourteen tools, five skills, explicit simulated-clock metadata and zero external attempts, then closed the listener.
 - New Hyderabad regressions are registered in the existing aggregate CI suite.
 - Local aggregate: **1,478 passed, zero failed, two skipped** (238.9 seconds). This run loaded before the six new Hyderabad tests were registered; those tests passed in the separately rerun 21-test affected suite. These overlapping counts are not added together. The final CI aggregate includes the new registration.
-- Exact-commit CI is checked after push; a prior commit's green run does not verify these changes.
+- The coordinator verified all six jobs passed at `cf265c6b217fe9992f4d519871d7c225873b2368` in [CI run 39031080277](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39031080277). This results follow-up is a later documentation change.
+- Exact implementation CI aggregate: Linux **1,486 total / 1,473 passed / 0 failed / 13 skipped**; Windows **1,486 total / 1,480 passed / 0 failed / 6 skipped**. Platform skips differ; total discovered cases are not all executed cases. These counts are not added to the earlier local aggregate or overlapping affected suite.
 
 ## Next boundary
 
-The [Hyderabad setup and request proposal](hyderabad-owner-real-api-setup.md) is executable but not yet authorized for live requests. It tests current city-point forecast integration, not December weather, outdoor site suitability or full native model behavior. A normal client session must not be started against live providers under this four-request packet without equivalent request enforcement. Complete native skills/answer review and final source acceptance remain required.
+The [Hyderabad setup and request proposal](hyderabad-owner-real-api-setup.md) was explicitly authorized and executed successfully; its four-request allowance is now consumed. It tests current city-point forecast integration, not December weather, outdoor site suitability or full native model behavior. A normal client session must not be started against live providers under this four-request packet without equivalent request enforcement. Complete native skills/answer review and final source acceptance remain required.
 
 Internal plugin revision remains 1.0.15: this wave changes test/operator scripts and evidence, not packaged workflow bytes. No reinstall or native retry was performed in this wave.
