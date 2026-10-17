@@ -18,6 +18,12 @@ native vintage, trusted approval or serving-size evidence. Their two own file
 lengths converge as byte counters without self-hash pins. No self-referential
 source/admission digest is invented.
 
+## Latest r2 observation — local preparation and compatibility pass
+
+At reviewed code tip `810a9b21ede2bcef5f39bfa7abdc1723509a35f4`, the [r2 inventory](data-pilot-evidence/planet-receipt-retained-inventory-20261017-r2.json) and [draft](data-pilot-evidence/planet-receipt-preparation-draft-20261017-r2.json) were exclusively saved. Inventory took 17.133841 seconds: 597,908 entries /590,385 files /7,527 directories across 15 existing roots, retaining 19,918,252,238 logical bytes with zero cleanup credit. New packet files total 52,003 bytes. At 2026-10-17T03:47:19.116085Z, free 279,243,046,912 bytes minus those files, body 95,380,942,829, evidence 1,048,576 and reserve 137,438,953,472 leaves **46,422,050,032 bytes**. The old full-build proposal is **3,774,331,664 bytes short** at this snapshot after the packet files and is not a v3 envelope.
+
+The single [compatibility probe](data-pilot-evidence/planet-receipt-inventory-compatibility-20261017-r2.json) completed in 1.797328 seconds and matched 19,918,304,241 expected/actual bytes across 17 retained paths. Comparison is established and changed=false for that observation. All original ceilings remain, the external future attempt is absent, authorization=null and execution=false, and receiver validation still rejects the absent operator reference. No receipt, worker, source request, cleanup or build occurred. Subsequent evidence (including the 893-byte probe report) and any real allowance need separate retained accounting/fresh preflight; this is not a disk reservation or build-fit proof. See the [remaining decision](geography-next-acquisition-capacity-decision-20261017.md#latest-r2-result-and-one-next-decision).
+
 ## Exact proposed receipt
 
 | Field | Prepared value |
