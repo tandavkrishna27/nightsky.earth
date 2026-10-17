@@ -139,3 +139,20 @@ test('UNC and device path variants are rejected before filesystem access', async
   await assert.rejects(createPersistentQuota({ path, now: Date.now, policies }), /Unsafe quota path/, path);
  }
 });
+test('Windows short directory aliases use the same durable quota and exclusive lock', { skip: process.platform !== 'win32' }, async t => {
+ const { execFile } = await import('node:child_process'); const { promisify } = await import('node:util');
+ const { realpath } = await import('node:fs/promises'); const f = await fixture(t);
+ const script = join(f.dir, 'short-path.ps1');
+ await writeFile(script, 'param([string]$Folder)\n(New-Object -ComObject Scripting.FileSystemObject).GetFolder($Folder).ShortPath\n');
+ const shell = join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe');
+ const result = await promisify(execFile)(shell, ['-NoProfile', '-NonInteractive', '-File', script, '-Folder', f.dir], { timeout: 30000 });
+ const alias = result.stdout.trim(); const canonical = await realpath(f.dir);
+ if (alias.toLowerCase() === canonical.toLowerCase()) { t.skip('8.3 aliases are disabled on the fixture volume'); return; }
+ assert.equal((await realpath(alias)).toLowerCase(), canonical.toLowerCase());
+ const options = { path: join(alias, 'quota.json'), now: () => Date.UTC(2026,9,31,23,59,30), policies };
+ let q = await createPersistentQuota(options); await q.initializeVerifiedBudget({ verifiedUnusedBudget: true, evidence: 'Synthetic unused allowance for alias regression' });
+ await q.reserve('weatherapi', 2);
+ await assert.rejects(createPersistentQuota({ ...options, path: join(canonical, 'quota.json') }));
+ await q.close(); q = await createPersistentQuota({ ...options, path: join(canonical, 'quota.json') });
+ assert.equal((await q.reserve('weatherapi', 1)).allowed, false); await q.close();
+});

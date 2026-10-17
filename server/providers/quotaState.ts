@@ -1,6 +1,6 @@
 import { constants } from 'node:fs';
 import { lstat, open, readFile, realpath, rename, unlink } from 'node:fs/promises';
-import { dirname, isAbsolute, parse, resolve } from 'node:path';
+import { dirname, isAbsolute, parse } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { ProviderQuota } from './quotaTypes';
 
@@ -40,7 +40,13 @@ async function safePath(path: string) {
         const parent = dirname(cursor); if (parent === cursor) break; cursor = parent;
     }
     const actual = await realpath(dirname(path));
-    if (resolve(actual).toLowerCase() !== resolve(dirname(path)).toLowerCase()) throw new Error('Unsafe quota directory.');
+    // Windows 8.3 spellings expand through realpath without traversing a link.
+    // Ancestor lstat checks above reject links; compare identities rather than names.
+    const requestedDirectory = await lstat(dirname(path), { bigint: true });
+    const canonicalDirectory = await lstat(actual, { bigint: true });
+    if (requestedDirectory.isSymbolicLink() || canonicalDirectory.isSymbolicLink() ||
+        !requestedDirectory.isDirectory() || !canonicalDirectory.isDirectory() ||
+        requestedDirectory.dev !== canonicalDirectory.dev || requestedDirectory.ino !== canonicalDirectory.ino) throw new Error('Unsafe quota directory.');
     for (const target of [path, path + '.lock', path + '.initialized', path + '.tmp']) {
         if (await exists(target)) { const stat = await lstat(target); if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink > 1) throw new Error('Unsafe quota target.'); }
     }
