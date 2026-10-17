@@ -15,6 +15,10 @@ Original executable headings: **12 Done / 9 Partial / 6 Not started = 27**. Orig
 
 The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom-20261017.md) preserves engineering evidence and failed attempts. Synthetic/retained tests do not establish live API suitability or actual release acceptance.
 
+## Source research update — 17 October 2026
+
+[Consolidated free API research and cleanup plan](api-provider-research-and-cleanup-plan.md): three official-source investigations completed. GeoNames + Geoapify are the recommended location shortlist; MET/NOAA/local astronomy retained; CDS point history remains a feasibility gate. No provider adapter implemented or ticket closed by this research. Cleanup is planned, not executed; original counts are unchanged.
+
 ## Stable stages
 
 | Stage | Status | Remaining acceptance |
@@ -71,6 +75,6 @@ See the [implementation plan](../superpowers/plans/2026-10-17-api-first-v1-regro
 
 ## Verification and cleanup status
 
-Latest verified pushed baseline: `0dd434e0c1b5ee5edb751e7e1e684fd54c4a4e68`, [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39000662214). This includes the reviewed Windows directory/path corrections and API scope decision. Local preparer verification ran 22 tests: 21 passed, one privilege skip. The current regroom changes documentation and acceptance sequencing, not runtime implementation; its own exact-tip CI must be checked after push.
+Latest verified pushed baseline: `e0916cee3a1c7656a12cfd1319ea4ecd7158a2ea`, [all six CI jobs passed](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39001214466). This includes the reviewed Windows directory/path corrections and API scope decision. Local preparer verification ran 22 tests: 21 passed, one privilege skip. That baseline includes the original-ticket regroom. The current source-research update changes documentation, not runtime implementation; its own exact-tip CI must be checked after push.
 
 Owner authorized downloaded-data cleanup. Automatic execution policy rejected deletion before execution. [48-file manifest/report](dataset-cleanup-api-v1-20261017.md) and [manual folder guide](manual-dataset-cleanup-20261017.md) identify about 1.86 GB, still retained at last verification. Preserve the required GeoNames gzip until replacement exists. No 95 GB planet body was downloaded. No new dataset/provider job, deployment or publication is authorized by this regroom.

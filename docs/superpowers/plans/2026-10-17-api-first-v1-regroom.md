@@ -20,6 +20,12 @@
 - This plan grants no download, provider job, live request, deployment, submission or publication authority. This regroom itself changes documents only and supplies no implementation evidence.
 - A changed acceptance path does not close a ticket. Preserve the existing 27 original headings; the tasks below are implementation slices within them.
 
+## Research addendum — 17 October 2026
+
+See the [consolidated API and cleanup plan](../../operations/api-provider-research-and-cleanup-plan.md) and its three primary-source reports. Recommended location shortlist: GeoNames + Geoapify Free; public Overpass/Nominatim are not default production backends. Retain MET Norway, NOAA and local astronomy. Evaluate CDS point time-series for exact history; Open-Meteo/7Timer hosting eligibility is conditional. Optional sources do not automatically expand V1. Source research is complete for this pass; admission contracts, account configuration, live checks and implementation remain open.
+
+Cleanup follows the consolidated plan: exact raw-file manual list first; preserve required GeoNames reference until API runtime replacement passes; keep optional builders/tests and metadata. No deletion is performed by this addendum.
+
 ## Review Focus
 
 - No local GeoNames/OSM files: the configured API journey must work through selected-place planning (tasks B, D, F).
@@ -51,8 +57,8 @@ Start A (source admission) and H (history feasibility) independently. B defines 
 
 **Interfaces:** Produces an admission table consumed by B/C/F: role (`geocode`, `region`, `poi`, `timezone`), source ID, fixed endpoint, identity fields, coverage, attribution/terms, contact/account requirements, caching permission, numeric quota/concurrency/timeout/response/cache limits, supported query semantics and fallback order. These are required review fields, not presently selected values.
 
-- [ ] Compare a bounded shortlist from the existing decision: Photon, GeoNames web services and only a separately policy-suitable POI service. Do not assume public Overpass is a sustainable application backend or Nominatim permits POI extraction.
-- [ ] Resolve each role separately. Record whether one source meets multiple roles and where supported worldwide queries still have missing coverage. Verify policy from primary documentation during the future research task; no live service calls are necessary for this design decision.
+- [ ] Complete admission for the researched GeoNames web-service and Geoapify Free shortlist; Photon remains an optional demo experiment. See the research addendum for exact policy evidence. Do not assume public Overpass is a sustainable application backend or Nominatim permits POI extraction.
+- [ ] Resolve each role separately. Record whether one source meets multiple roles and where supported worldwide queries still have missing coverage. Verify policy from primary documentation during provider admission; no live service calls are necessary for this design decision.
 - [ ] Choose the primary and any fallback only after filling every admission field. Pin per-provider error behavior: quota/timeout may use an admitted fallback; a semantically unsupported region query must not be changed to radius search. Record source conflicts without averaging or merging unrelated identities.
 - [ ] Review the actual free-service feasibility and authentication burden. If no suitable provider exists for a required role, leave the ticket open with the exact gap and a concrete scope/source decision; do not fabricate approval or default to bulk acquisition.
 - [ ] Publish exact adapter module names and upstream provider IDs as an addendum before task C starts. This is a bounded design gate, deliberately preceding exact service-specific implementation.
