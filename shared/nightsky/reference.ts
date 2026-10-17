@@ -382,6 +382,7 @@ export const referenceSearchResultSchema = z.strictObject({
         matches: z.array(referenceRecordSchema).max(10),
         selectionRequired: z.boolean(),
         total: z.number().int().nonnegative().nullable()
+        ,catalogueSnapshot: z.strictObject({schema_version:z.literal(1),association:z.literal('same-read-transaction'),status:text,reason:text.nullable(),catalogue_id:text.nullable(),build_identifier:text.nullable(),hash_policy:text.nullable()}).optional()
     }).nullable()
 });
 export const referenceDetailsResultSchema = z.strictObject({
