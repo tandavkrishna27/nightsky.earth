@@ -134,3 +134,5 @@ import "./places/reviewedNaturalEarthAuthority.test";
 import './places/partitionedCandidates.test';
 
 import './places/partitionedLargeContract.test';
+
+import './places/partitionedResources.test';
