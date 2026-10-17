@@ -1,3 +1,4 @@
+import { isAbsolute, parse } from 'node:path';
 import { UpstreamControls } from '../upstreamControls';
 import type { QuotaPolicy } from '../quotaState';
 import type { ProviderQuota } from '../quotaTypes';
@@ -29,7 +30,7 @@ export function parseWeatherConfiguration(environment:Environment) {
   if(value!==undefined&&(!value.trim()||value.length>256||/[\x00-\x20\x7f]/.test(value))) throw Error('Invalid weather provider credentials.');
  }
  const path=environment.NIGHTSKY_QUOTA_STATE_PATH;
- if(path!==undefined&&(!path.trim()||path.length>4096||/[\x00-\x1f\x7f]/.test(path))) throw Error('Invalid weather quota configuration.');
+ if(path!==undefined&&(!path.trim()||path.length>4096||/[\x00-\x1f\x7f]/.test(path)||!isAbsolute(path)||path.replace(/\\/g,'/').startsWith('//')||path.slice(parse(path).root.length).includes(':')||(process.platform==='win32'&&!/^[a-zA-Z]:[\\/]$/.test(parse(path).root)))) throw Error('Invalid weather quota configuration.');
  return {providers,admitted,quotaPath:path};
 }
 export function createConfiguredWeatherCollection(environment:Environment,options:{quota?:ProviderQuota;fetcher?:typeof fetch;now?:()=>number}={}):WeatherCollectionService|undefined {

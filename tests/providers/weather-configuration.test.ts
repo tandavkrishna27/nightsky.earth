@@ -69,3 +69,46 @@ test('listener startup failure releases durable quota ownership',async()=>{
   const quota=await createPersistentQuota({path:process.env.NIGHTSKY_QUOTA_STATE_PATH!,now:Date.now,policies:PROVIDER_QUOTA_POLICIES});await quota.close();
  }finally {process.env=saved;await new Promise<void>(done=>occupied.close(()=>done()));await rm(dir,{recursive:true,force:true});}
 });
+
+test('quota configuration rejects relative network and alternate stream paths',()=>{
+ for(const path of ['private/quota.json','../quota','//server/share/quota','\\\\server\\share\\quota','C:/private/quota:secret','C:quota']) assert.throws(()=>parseWeatherConfiguration({NIGHTSKY_QUOTA_STATE_PATH:path}),/Invalid weather quota/);
+ assert.equal(parseWeatherConfiguration({NIGHTSKY_QUOTA_STATE_PATH:join(tmpdir(),'quota.json')}).quotaPath,join(tmpdir(),'quota.json'));
+});
+import { fork } from 'node:child_process';
+import { writeFile, access } from 'node:fs/promises';
+import { once } from 'node:events';
+import { pathToFileURL } from 'node:url';
+test('standalone graceful SIGTERM and SIGINT release quota for immediate restart',async(t)=>{
+ const dir=await mkdtemp(join(tmpdir(),'quota-signals-'));
+ const probe=createServer();await new Promise<void>(done=>probe.listen(0,'127.0.0.1',done));const address=probe.address();assert.ok(address&&typeof address!=='string');const port=address.port;await new Promise<void>(done=>probe.close(()=>done()));
+ const script=join(dir,'child.mjs');const quotaPath=join(dir,'quota.json');
+ await writeFile(script,`import {startNightSkyPlugin} from ${JSON.stringify(pathToFileURL(join(process.cwd(),'server/plugin.ts')).href)};\nawait startNightSkyPlugin({gracefulSignals:true,shutdownTimeoutMs:2000});\nprocess.on('message', signal => {process.disconnect();process.emit(signal);});\nprocess.send('ready');`);
+ try {
+ for(const signal of ['SIGTERM','SIGINT'] as const) {
+  const child=fork(script,[],{execArgv:['--import','tsx'],env:{...process.env,HOST:'127.0.0.1',PORT:String(port),NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_MCP_TOOL_MODE:'resolver-only',NIGHTSKY_QUOTA_STATE_PATH:quotaPath},silent:true});
+  let stderr='';child.stderr?.on('data',data=>stderr+=data);
+  try {
+   await Promise.race([once(child,'message'),new Promise((_,reject)=>setTimeout(()=>reject(Error('child startup timed out: '+stderr)),4000).unref())]);
+   const exited=once(child,'exit');
+   // Windows kill() terminates forcibly and cannot deliver Unix signals. Emit the
+   // same process signal event through IPC there; POSIX exercises real delivery.
+   if(process.platform==='win32'){t.diagnostic('Windows exercises Node signal handler via IPC event; OS kill is forceful.');child.send(signal);}else{child.disconnect();child.kill(signal);}
+   const result=await Promise.race([exited,new Promise<never>((_,reject)=>setTimeout(()=>reject(Error('child shutdown timed out')),4000).unref())]);
+   assert.equal(result[0],0,stderr);
+   const quota=await createPersistentQuota({path:quotaPath,now:Date.now,policies:PROVIDER_QUOTA_POLICIES});await quota.close();
+  }finally {if(child.exitCode===null)child.kill();}
+ }
+ }finally {await rm(dir,{recursive:true,force:true});}
+});
+import { connect } from 'node:net';
+test('bounded shutdown with an undrained connection retains the quota crash lock',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'quota-drain-'));const probe=createServer();await new Promise<void>(done=>probe.listen(0,'127.0.0.1',done));const address=probe.address();assert.ok(address&&typeof address!=='string');const port=address.port;await new Promise<void>(done=>probe.close(()=>done()));
+ const script=join(dir,'child.mjs');const quotaPath=join(dir,'quota.json');await writeFile(script,`import {startNightSkyPlugin} from ${JSON.stringify(pathToFileURL(join(process.cwd(),'server/plugin.ts')).href)};await startNightSkyPlugin({gracefulSignals:true,shutdownTimeoutMs:150});process.on('message',()=>{process.disconnect();process.emit('SIGTERM');});process.send('ready');`);
+ const child=fork(script,[],{execArgv:['--import','tsx'],env:{...process.env,HOST:'127.0.0.1',PORT:String(port),NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_MCP_TOOL_MODE:'resolver-only',NIGHTSKY_QUOTA_STATE_PATH:quotaPath},silent:true});let socket:ReturnType<typeof connect>|undefined;
+ try {
+  await Promise.race([once(child,'message'),new Promise((_,reject)=>setTimeout(()=>reject(Error('startup timeout')),4000).unref())]);
+  socket=connect(port,'127.0.0.1');socket.on('error',()=>{});await once(socket,'connect');socket.write('GET /mcp HTTP/1.1\r\nHost: localhost\r\n');
+  const exited=once(child,'exit');child.send('shutdown');const result=await Promise.race([exited,new Promise<never>((_,reject)=>setTimeout(()=>reject(Error('shutdown timeout')),4000).unref())]);assert.equal(result[0],1);
+  await access(quotaPath+'.lock');await assert.rejects(createPersistentQuota({path:quotaPath,now:Date.now,policies:PROVIDER_QUOTA_POLICIES}));
+ }finally {socket?.destroy();if(child.exitCode===null){child.kill();await once(child,'exit');}await rm(dir,{recursive:true,force:true});}
+});

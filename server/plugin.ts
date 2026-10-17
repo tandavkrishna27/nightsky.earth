@@ -115,16 +115,32 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     return finish(createNightSkyPluginApp({ weatherCollection, catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
     } catch (error) { await quota?.close(); throw error; }
 }
-export async function startNightSkyPlugin() {
+export async function startNightSkyPlugin(options: { gracefulSignals?: boolean; shutdownTimeoutMs?: number } = {}) {
     const { host, port } = pluginListenerConfiguration({ HOST: process.env.HOST, PORT: process.env.PORT });
     const app = await createConfiguredNightSkyPluginApp();
     const server = createServer(app);
     server.once("close", () => { void closeConfiguredNightSkyPluginApp(app); });
     try { await new Promise<void>((done, reject) => { server.once("error", reject); server.listen(port, host, () => { server.off("error", reject); done(); }); }); }
     catch (error) { await closeConfiguredNightSkyPluginApp(app); throw error; }
+    if (options.gracefulSignals) {
+        let shuttingDown = false;
+        const remove = () => { process.off("SIGTERM", shutdown); process.off("SIGINT", shutdown); };
+        const shutdown = () => {
+            if (shuttingDown) return;
+            shuttingDown = true;
+            // If draining cannot finish, leave ownership for conservative crash recovery.
+            const timer = setTimeout(() => { console.error("NightSky plugin shutdown did not finish; retain quota state for recovery."); process.exit(1); }, options.shutdownTimeoutMs ?? 10_000);
+            server.close(() => {
+                void closeConfiguredNightSkyPluginApp(app).then(() => { clearTimeout(timer); remove(); }, () => { console.error("NightSky plugin quota cleanup failed; retain quota state for recovery."); process.exit(1); });
+            });
+        };
+        process.on("SIGTERM", shutdown);
+        process.on("SIGINT", shutdown);
+        server.once("close", remove);
+    }
     console.log("NightSky plugin listener ready.");
     return server;
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-    startNightSkyPlugin().catch(() => { console.error("NightSky plugin startup failed. Check the configured listener, source mode and provider configuration."); process.exitCode = 1; });
+    startNightSkyPlugin({gracefulSignals:true}).catch(() => { console.error("NightSky plugin startup failed. Check the configured listener, source mode and provider configuration."); process.exitCode = 1; });
 }

@@ -191,6 +191,7 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
         const mode = r === current ? currentMode : r.discovery?.mode ?? 'legacy';
         const assigned = c.artifacts.filter(a => r.artifactIds.includes(a.id));
         if (mode === 'api') {
+            if (!e.NIGHTSKY_QUOTA_STATE_PATH) missing('API_QUOTA_CONFIGURATION_MISSING');
             const d = r.discovery;
             if (!d || d.providers.length < 1 || new Set(d.providers).size !== d.providers.length || !d.configurationEvidence || !d.policyEvidence || !d.budgetEvidence) missing('API_PROVIDER_EVIDENCE_MISSING');
             if (c.budget?.processes !== 1) fail('API_SINGLE_PROCESS_REQUIRED');
