@@ -106,7 +106,7 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
             let timer: ReturnType<typeof setTimeout>;
             const deadline = new Promise<never>((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(Error("Deadline")); }, 5000); });
             try {
-                const result = await Promise.race([(async () => {
+                const work = (async () => {
                         const reservation = await options.quota.reserve("weatherapi", 1);
                         controller.signal.throwIfAborted();
                         if (!reservation.allowed)
@@ -200,15 +200,18 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
                             }
                         }
                         return forecast;
-                    })(), deadline]);
-                return result;
+                    })();
+                // Caller deadlines cannot release admission while an injected transport
+                // ignores cancellation and still has an actual request outstanding.
+                const releaseAdmission = () => { active = false; };
+                void work.then(releaseAdmission, releaseAdmission);
+                return await Promise.race([work, deadline]);
             }
             catch {
                 return unavailable(controller.signal.aborted ? "WeatherAPI.com request or response body timed out." : "WeatherAPI.com request failed or returned an invalid response.");
             }
             finally {
                 clearTimeout(timer!);
-                active = false;
             }
         } };
 }

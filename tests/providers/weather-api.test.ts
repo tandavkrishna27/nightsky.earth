@@ -36,6 +36,22 @@ for (const body of ["{", JSON.stringify({ error: { code: 2006, message: "synthet
 test("WeatherAPI labels horizon gaps and caps samples without current observations", async () => { const { provider } = setup(async () => Response.json(fixture([0, 2]))); const r = await provider.getForecast(place, window); assert.equal(r.status, "partial"); assert.match(r.reason, /gap|coverage/i); const outside = await provider.getForecast(place, { ...window, startUtc: "2027-01-01T00:00:00Z", endUtc: "2027-01-01T02:00:00Z" }); assert.equal(outside.status, "out-of-horizon"); });
 test("WeatherAPI rejects concurrent distinct requests and starts less than a second apart", async () => { let release!: () => void; const wait = new Promise<void>(r => { release = r; }); let calls = 0; const { provider } = setup(async () => { calls++; await wait; return Response.json(fixture()); }); const first = provider.getForecast(place, window); await new Promise(r => setImmediate(r)); const other = await provider.getForecast({ ...place, longitude: 1 }, window); assert.equal(other.status, "unavailable"); release(); await first; assert.equal((await provider.getForecast({ ...place, longitude: 2 }, window)).status, "unavailable"); assert.equal(calls, 1); });
 test("WeatherAPI total deadline bounds stalled response body", async () => { let aborted = false; const { provider } = setup(async (_url, init) => { init?.signal?.addEventListener("abort", () => { aborted = true; }); return new Response(new ReadableStream({ start() { } })); }); const started = Date.now(); const r = await provider.getForecast(place, window); assert.equal(r.status, "unavailable"); assert.ok(aborted); assert.ok(Date.now() - started < 6500); });
+test("WeatherAPI retains concurrency admission until abort-ignoring transport settles", async () => {
+    let calls=0,reservations=0,release!:()=>void;
+    const pending=new Promise<void>(resolve=>{release=resolve;});
+    const {provider,advance}=setup(async()=>{calls++;if(calls===1)await pending;return Response.json(fixture());},async()=>{reservations++;return {allowed:true,reason:"ok"};});
+    const first=await provider.getForecast(place,window);
+    assert.equal(first.status,"unavailable");assert.match(first.reason,/timed out/);
+    advance(10000); // shared abort backoff and one-second start spacing have both expired
+    try {
+        assert.equal((await provider.getForecast({...place,longitude:1},window)).status,"unavailable");
+        assert.equal(calls,1);assert.equal(reservations,1);
+    } finally { release(); }
+    await new Promise(resolve=>setImmediate(resolve));
+    advance(10000);
+    assert.ok((await provider.getForecast({...place,longitude:2},window)).forecast);
+    assert.equal(calls,2);assert.equal(reservations,2);
+});
 test("WeatherAPI thrown transport errors are redacted", async () => { const { provider } = setup(async () => { throw Error("https://api.weatherapi.com/?key=synthetic-secret"); }); const r = await provider.getForecast(place, window); assert.equal(r.status, "unavailable"); assert.doesNotMatch(JSON.stringify(r), /synthetic-secret|key=/); });
 test("WeatherAPI rejects trial-shaped extra days", async () => { const payload = fixture(); payload.forecast.forecastday = Array.from({ length: 4 }, () => fixture().forecast.forecastday[0]); const { provider } = setup(async () => Response.json(payload)); assert.equal((await provider.getForecast(place, window)).status, "unavailable"); });
 test("WeatherAPI never accepts an HTTP-200 error alongside forecast data", async () => { const { provider } = setup(async () => Response.json({ ...fixture(), error: { code: 2006, message: "synthetic-secret" } })); assert.equal((await provider.getForecast(place, window)).status, "unavailable"); });
