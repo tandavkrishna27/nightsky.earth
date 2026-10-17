@@ -161,3 +161,9 @@ import "./providers/weather-configuration.test.ts";
 
 import "./skills/multi-weather-workflows.test.ts";
 import "./operations/api-live-validation.test.ts";
+
+import "./providers/climate/open-meteo-history-contract.test.ts";
+
+import "./events/meteorCoverage.test.ts";
+
+import "./places/api-region-membership.test.ts";

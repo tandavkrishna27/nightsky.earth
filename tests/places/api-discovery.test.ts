@@ -414,3 +414,108 @@ test('API text preserves separate same-URL credits and license links', async () 
     assert.match(text, /Required second credit/);
     assert.match(text, /https:\/\/example.com\/license/);
 });
+
+// Dropping guards or loosening union identity checks would violate these fixture cases.
+test('each unsupported administrative combination preserves scope and makes zero calls', async () => {
+    const scopes = [
+        { origins: [], includeRegionIds: ['region:v1:a', 'region:v1:b'], excludeRegionIds: [], originMode: 'any' as const, regionMode: 'all' as const },
+        { origins: [{ placeId: 'place:v1:town', radiusKm: 50, minimumDistanceKm: 2 }], includeRegionIds: ['region:v1:a'], excludeRegionIds: [], originMode: 'all' as const, regionMode: 'any' as const },
+        { origins: [], includeRegionIds: ['region:v1:a'], excludeRegionIds: ['region:v1:a'], originMode: 'any' as const, regionMode: 'any' as const }
+    ];
+    for (const scope of scopes) {
+        let calls = 0;
+        const s = createApiServices({ ...config, fetcher: async () => { calls++; throw Error('unexpected'); } });
+        const result = await s.discoveryProvider.search({ scope, limit: 5 });
+        assert.equal(result.availability.status, 'unsupported');
+        assert.deepEqual(result.queryScope, scope);
+        assert.deepEqual(result.candidates, []);
+        assert.equal(calls, 0);
+    }
+});
+
+const fixtureFeature = (id: string, category = 'leisure.park', longitude = 77) => ({
+    properties: { place_id: id, name: id, categories: [category] },
+    geometry: { type: 'Point', coordinates: [longitude, 12] }
+});
+async function regionFixture(pages: (filter: string) => Response) {
+    const urls: URL[] = [];
+    const s = createApiServices({ ...config, fetcher: async (url) => {
+        const parsed = new URL(String(url)); urls.push(parsed);
+        return parsed.pathname.includes('/geocode/') ? new Response(JSON.stringify({ features: ['a', 'b'].map(id => ({
+            ...fixtureFeature(id), properties: { place_id: id, name: id, result_type: 'state', country_code: 'in' }
+        })) })) : pages(parsed.searchParams.get('filter')!);
+    } });
+    const resolved = await s.discoveryProvider.resolveRegion({ regionQuery: 'States', countryCode: 'IND', adminLevel: 1 });
+    assert.equal(resolved.matches.length, 2);
+    return { s, urls, regions: resolved.matches };
+}
+test('state filter and single-region all use the exact selected boundary identity', async () => {
+    const { s, urls, regions } = await regionFixture(() => new Response(JSON.stringify({ features: [fixtureFeature('site')] })));
+    const region = regions[0]!;
+    const scope = { origins: [], originMode: 'any' as const, includeRegionIds: [region.regionId], excludeRegionIds: [], regionSelections: [{ regionId: region.regionId, sourceRevision: region.sourceRevision! }], regionMode: 'all' as const };
+    const result = await s.discoveryProvider.search({ scope, limit: 5 });
+    assert.equal(urls[0]!.searchParams.get('type'), 'state');
+    assert.equal(urls[1]!.searchParams.get('filter'), 'place:a');
+    assert.deepEqual(result.queryScope, scope);
+    assert.equal(result.candidates.length, 1);
+    assert.equal(result.candidates[0]!.distanceKm, undefined);
+});
+test('region union deduplicates matching identities and rejects conflicting identities across pages', async () => {
+    for (const conflict of [false, true]) {
+        const { s, regions } = await regionFixture(filter => new Response(JSON.stringify({ features: [fixtureFeature('shared', 'leisure.park', conflict && filter === 'place:b' ? 78 : 77), fixtureFeature(filter)] })));
+        const result = await s.discoveryProvider.search({ scope: { includeRegionIds: regions.map(r => r.regionId), regionSelections: regions.map(r => ({ regionId: r.regionId, sourceRevision: r.sourceRevision! })) }, limit: 10 });
+        assert.equal(result.candidates.length, conflict ? 2 : 3);
+        assert.equal(result.candidates.filter(c => c.name === 'shared').length, conflict ? 0 : 1);
+        assert.equal(result.availability.status, conflict ? 'partial' : 'available');
+    }
+});
+test('region union preserves successful candidates when another page fails or fills its budget', async () => {
+    for (const failure of [false, true]) {
+        const { s, regions } = await regionFixture(filter => filter === 'place:b' && failure ? new Response('{}', { status: 503 }) : new Response(JSON.stringify({ features: filter === 'place:a' ? Array.from({ length: 20 }, (_, i) => fixtureFeature(`shop-${i}`, 'commercial.supermarket')) : [fixtureFeature('site')] })));
+        const result = await s.discoveryProvider.search({ scope: { includeRegionIds: regions.map(r => r.regionId), regionSelections: regions.map(r => ({ regionId: r.regionId, sourceRevision: r.sourceRevision! })) }, limit: 10 });
+        assert.equal(result.candidates.length, failure ? 0 : 1);
+        assert.equal(result.discoveryCoverage.searchCompleteness, 'budget-limited');
+        assert.equal(result.availability.status, failure ? 'partial' : 'available');
+        assert.equal(result.sourceAttempts!.length, 2);
+    }
+});
+test('each of six category complements applies the full precedence and excludes unknown tags', async () => {
+    const { CATEGORY_MAP } = await import('../../server/places/api/geoapify');
+    const categories = Object.keys(CATEGORY_MAP) as Array<keyof typeof CATEGORY_MAP>;
+    for (const excluded of categories) {
+        const s = createApiServices({ ...config, fetcher: async url => new Response(JSON.stringify(String(url).includes('geonames') ? { geonames: [{ geonameId: 1, name: 'Town', lat: '12', lng: '77' }] } : { features: [...categories.map(c => fixtureFeature(c, CATEGORY_MAP[c][0]!)), fixtureFeature('unknown', 'unknown'), { ...fixtureFeature('overlap'), properties: { place_id: 'overlap', name: 'overlap', categories: ['leisure.park', 'natural.protected_area'] } }] })) });
+        const ref = (await s.discoveryProvider.resolvePlace({ placeQuery: 'Town' })).matches[0]!;
+        const result = await s.discoveryProvider.search({ placeId: ref.placeId, sourceRevision: ref.sourceRevision, categories: categories.filter(c => c !== excluded), limit: 10 });
+        assert.deepEqual(result.candidates.filter(c => c.name !== 'overlap').map(c => c.category).sort(), categories.filter(c => c !== excluded).sort());
+        assert.equal(result.candidates.some(c => c.name === 'overlap'), excluded !== 'protected-area');
+        assert.ok(result.candidates.filter(c => c.name === 'overlap').every(c => c.category === 'protected-area'));
+    }
+});
+test('five origins issue five bounded circles and six origins fail before fetching', async () => {
+    let calls = 0;
+    const s = createApiServices({ ...config, fetcher: async url => { calls++; return new Response(JSON.stringify(String(url).includes('geonames') ? { geonames: Array.from({ length: 5 }, (_, i) => ({ geonameId: i + 1, name: `Town ${i}`, lat: '12', lng: String(77 + i / 100) })) } : { features: [fixtureFeature('same-site')] })); } });
+    const matches = (await s.discoveryProvider.resolvePlace({ placeQuery: 'Towns' })).matches;
+    const origins = matches.map(m => ({ placeId: m.placeId, sourceRevision: m.sourceRevision, radiusKm: 10, minimumDistanceKm: 0 }));
+    const result = await s.discoveryProvider.search({ scope: { origins }, limit: 10 });
+    // Identical circles are coalesced by the bounded response cache.
+    assert.equal(calls, 6);
+    assert.equal(result.sourceAttempts!.length, 5);
+    assert.equal(result.candidates[0]!.originDistances!.length, 5);
+    await assert.rejects(s.discoveryProvider.search({ scope: { origins: [...origins, origins[0]!] }, limit: 10 }));
+    assert.equal(calls, 6);
+});
+
+
+test('missing and invalid source zones require explicit display choice at the exact site', async () => {
+    for (const zone of [undefined, 'Invalid/Zone']) {
+        const s = createApiServices({ ...config, geonamesUsername: undefined, fetcher: async () => new Response(JSON.stringify({ features: [{ ...fixtureFeature('site'), properties: { place_id: 'site', name: 'Site', ...(zone ? { timezone: { name: zone } } : {}) } }] })) });
+        const ref = (await s.discoveryProvider.resolvePlace({ placeQuery: 'Site' })).matches[0]!;
+        assert.equal(ref.timeZoneEvidence?.status, 'unknown');
+        await assert.rejects(s.selectedPlaceResolver.resolve({ placeId: ref.placeId, sourceRevision: ref.sourceRevision }), /display time zone/i);
+        const point = await s.selectedPlaceResolver.resolve({ placeId: ref.placeId, sourceRevision: ref.sourceRevision, displayTimeZone: 'America/Chicago' });
+        assert.equal(point.timeZoneBasis, 'explicit-display');
+        assert.equal(point.timeZoneEvidence?.status, 'unknown');
+        assert.equal(point.latitude, 12);
+        assert.equal(point.longitude, 77);
+    }
+});

@@ -2,6 +2,23 @@
 
 Updated: 17 October 2026. **Current plan: API-first, multiple suitable sources, no exhaustive owned global catalogue prerequisite.** This tracker supersedes earlier acquisition-wave sequencing. See the [owner decision](api-search-discovery-v1-decision.md), [regroomed execution plan](../superpowers/plans/2026-10-17-api-first-v1-regroom.md) and [27-ticket acceptance matrix](v1-remaining-ticket-release-matrix.md).
 
+## Remaining sequence — one checklist
+
+These six blocks group the original tickets; they are not new tickets or a guarantee of one coding session each. Keep open work inside its block instead of resetting the wave count. Three local completion blocks precede three release stages. Website Task 18 remains separate.
+
+| Order | Completion block | Status | Exit evidence / original tickets |
+| --- | --- | --- | --- |
+| 1 | Capability gaps: history, geography, events in parallel | **In progress — current wave** | Source-qualified implemented behavior, explicit unresolved gates; 0/6/8/9 |
+| 2 | Assemble and measure | Pending block 1's required capability decisions | Integrated tools/skills/package, attribution/privacy flows, measured bounded memory/cache/concurrency/failures; 12A/13/14 |
+| 3 | Full local experience and final audit | Pending assembled package | Existing journeys, Codex/owner questions, material fixes, criterion reconciliation; 12B/15. Claude deferred |
+| 4 | Hosting and actual client checks | Later; no deployment authorized | Hetzner/HTTPS, actual connection/location checks, rollback, publisher/URL evidence; 0F/3B/3C/4B/12A/14 |
+| 5 | Submission and publication | Later; explicit authorization required | Official validation/review and authorized publication; 15/16 |
+| 6 | Pilot and feedback | Later | Real invited-user evidence; 17 |
+
+Latest completed milestone: API location/multiple-weather implementation, private quota setup and one bounded live batch (12/12 HTTP200). Commit `291fc0a35ac5a220469725987fcd77b70acdf4b0` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39012079230). Local suite: 1,265 pass, zero fail, two skip. This proves that milestone, not all capabilities or release readiness.
+
+Current block 1 deliverables: offline historical request/decoder contract; geographic scope/timezone regression and bounded membership preparation; event evidence inventory without activating unapproved scope. See the [current wave evidence](capability-closure-wave-20261017.md). Provider/scientific admission and missing event references are explicit gates within block 1, not automatically complete when offline code passes. No new live allowance is granted.
+
 ## Where we stand
 
 Original executable headings: **12 Done / 9 Partial / 6 Not started = 27**. Original numbered groups: **6 Done / 10 Partial / 3 Not started = 19**. A scope change is not implementation evidence and adds no completion credit. Done means the original local deliverable, not production readiness or immunity from regression checks.
@@ -17,7 +34,7 @@ The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom
 
 ## Source research and implementation update — 17 October 2026
 
-[Consolidated free API research and cleanup plan](api-provider-research-and-cleanup-plan.md): three official-source investigations completed. GeoNames + Geoapify are the recommended location shortlist; MET/NOAA/local astronomy retained; CDS point history remains a feasibility gate. The subsequent implementation wave adds adapters, runtime and workflow changes; offline review/tests are recorded separately and do not close live-source gates. Cleanup is planned, not executed; original counts are unchanged.
+[Consolidated free API research and cleanup plan](api-provider-research-and-cleanup-plan.md): three official-source investigations completed. GeoNames + Geoapify are the recommended location shortlist; MET/NOAA/local astronomy retained; The later history route decision selects Open-Meteo ERA5 as the conditional integration candidate; CDS is not the active implementation route. The subsequent implementation wave adds adapters, runtime and workflow changes; offline review/tests are recorded separately and do not close live-source gates. Cleanup is planned, not executed; original counts are unchanged.
 
 ## Stable stages
 
@@ -33,12 +50,12 @@ The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom
 | ID | Original tickets | Status / concrete next result |
 | --- | --- | --- |
 | S2-G1 | 0, 4, 8 | Bounded GeoNames/Geoapify design recorded; API identity/selection and adapters locally verified. Private accounts, persistent quota initialization and the first bounded live batch are verified; public policy/attribution and broader acceptance remain open |
-| S2-G2 | 4, 8 | Historical boundary preparation completed within its scope; exhaustive boundary/membership build deferred. API-based region filtering and exact-site timezone validation remain to implement/test |
+| S2-G2 | 4, 8 | Historical boundary preparation completed within its scope; exhaustive boundary/membership build deferred. Expanded API scope/timezone fixtures and inactive membership composition are implemented; actual membership source and live site/region acceptance remain open |
 | S2-G3 | 0, 8 | Opt-in API discovery, snapshot details and planning locally verified; optional host-search guidance updated. Unsupported complex administrative combinations retain explicit gaps; no mandatory global catalogue |
-| S2-H1 | 0, 9 | Existing history preparation/decoder software retained; evaluate API-first history source, free-use limits and scientific/statistical equivalence |
+| S2-H1 | 0, 9 | Existing history tooling retained; conditional Open-Meteo ERA5 offline partition/decoder contract implemented. Free-use eligibility, scientific provenance and measured accounting remain open |
 | S2-H2 | 9 | Retained sample acceptance is historical evidence only; no complete baseline or live API claim. Cleanup must not trigger automatic reacquisition |
 | S2-H3 | 0, 9 | Select practical history route and implement/validate it, or present a concrete unmet capability decision to owner. Do not silently drop history or restart bulk jobs |
-| S2-E1 | 6 | Existing calculated astronomy/events and small reviewed content retained; finish supported event coverage and regression checks |
+| S2-E1 | 6 | Existing calculated astronomy/events retained; all nineteen meteor identities now have a validated offline evidence inventory. Full supported seasons, source gaps and local event acceptance remain open |
 | S2-E2 | 0, 6 | Resolve remaining season/radiant/year/source rights gaps; use an API where suitable, otherwise explicit supported content/limitations. No invented universal event API |
 | S2-R1 | 3, 8, 12A, 14 | API-mode bootstrap/preflight and five skills updated; no-local-geography compiled smoke added to CI. Full historical and hosted release gates remain independent |
 | S3-M1 | 0, 8, 9, 14 | Measure actual configured-service storage/cache/startup/peak memory and update/refresh cost; bulk planet build not required |
@@ -49,7 +66,7 @@ The [previous tracker snapshot](archive/v1-completion-tracker-before-api-regroom
 
 ## Ordered execution and parallel work
 
-1. **Regroom and source admission (current):** original-ticket reconciliation, provider/data matrix, code migration plan and independent review. History and event audits may run beside discovery design.
+1. **Regroom and source admission (completed groundwork; remaining admission gates stay open):** original-ticket reconciliation, provider/data matrix, code migration plan and independent review. History and event audits may run beside discovery design.
 2. **Implementation lanes:** A location/discovery adapters; B independent history/events source work; C runtime/package/skills/test updates after A's shared interface is frozen. Assign shared registry/schema files to one integration owner.
 3. **Integrate:** targeted tests per change, combined suite/types/build/package/runtime checks at milestone; update evidence, push and observe CI for that exact commit.
 4. **Measure S3:** actual API-mode configuration and remaining required content. Separately authorize bounded live calls; fixtures alone do not prove live availability or useful search quality.
@@ -105,4 +122,8 @@ Counts remain **12 Done / 9 Partial / 6 Not started**. S2 remains in progress; S
 
 S3 now has a bounded initial latency/RSS observation from the first live batch, not completed concurrency, peak-resource or small-host acceptance. The original derived report is retained; no repeated live requests are authorized by the reporting fixes.
 
-Post-live reporting correction independently approved. Final local suite: 1,265 passed, zero failures, two skipped; TypeScript checks passed. Exact-commit CI follows the branch push; the original live evidence remains unchanged.
+Post-live reporting correction independently approved. Final local suite: 1,265 passed, zero failures, two skipped; TypeScript checks passed. Exact-commit CI passed all six jobs at `291fc0a` (linked above); the original live evidence remains unchanged.
+
+## Capability wave evidence — 17 October 2026
+
+[History, geography and event offline work](capability-closure-wave-20261017.md) passed lane reviews and final combined review. Integrated verification: **1,294 passed, zero failed, two skipped**, TypeScript/plugin build/package generation passed. New tests are included in CI. No live requests, downloads, deployment or runtime source admission occurred. Block 1 remains in progress with the explicit source and scope gates above; original counts remain **12/9/6**, not a measure of this wave’s engineering output.

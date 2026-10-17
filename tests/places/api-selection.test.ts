@@ -74,3 +74,31 @@ test('mixed revision kinds and malformed API namespaces cannot calculate', () =>
         ...ref, placeId: 'place:v1:api:geonames:unhashed', displayTimeZone: 'UTC'
     }, store));
 });
+
+test('source zone and explicit display choice remain distinct across a DST boundary', () => {
+    const store = new ApiSelectionStore({ now: () => Date.parse(record.fetchedAt) });
+    const source = { name: 'Fixture', url: 'https://example.org/', attribution: 'Offline fixture', dataClass: 'context' as const };
+    const verified = store.put({ ...record, timeZoneEvidence: { status: 'verified', timeZone: 'America/New_York', source } });
+    const point = resolveApiCalculationPlace(verified, store);
+    assert.equal(point.displayTimeZone, 'America/New_York');
+    assert.equal(point.timeZoneBasis, 'api-source');
+    assert.equal(new Intl.DateTimeFormat('en', { timeZone: point.displayTimeZone, hour: 'numeric', hourCycle: 'h23' }).format(new Date('2026-11-01T05:30:00Z')), '01');
+    assert.equal(new Intl.DateTimeFormat('en', { timeZone: point.displayTimeZone, hour: 'numeric', hourCycle: 'h23' }).format(new Date('2026-11-01T06:30:00Z')), '01');
+    const unknown = store.put(record);
+    const explicit = resolveApiCalculationPlace({ ...unknown, displayTimeZone: 'Asia/Kolkata' }, store);
+    assert.equal(explicit.timeZoneBasis, 'explicit-display');
+    assert.equal(explicit.timeZoneEvidence?.status, 'unknown');
+    assert.equal(explicit.latitude, record.latitude);
+    assert.equal(explicit.longitude, record.longitude);
+    assert.throws(() => resolveApiCalculationPlace({ ...verified, displayTimeZone: 'Asia/Kolkata' }, store), /time zone/i);
+});
+test('same identity timezone change creates a new immutable revision', () => {
+    const store = new ApiSelectionStore({ now: () => Date.parse(record.fetchedAt) });
+    const source = { name: 'Fixture', url: 'https://example.org/', attribution: 'Offline fixture', dataClass: 'context' as const };
+    const old = store.put({ ...record, timeZoneEvidence: { status: 'verified', timeZone: 'America/New_York', source } });
+    const changed = store.put({ ...record, timeZoneEvidence: { status: 'verified', timeZone: 'America/Chicago', source } });
+    assert.equal(old.placeId, changed.placeId);
+    assert.notEqual(old.sourceRevision, changed.sourceRevision);
+    assert.equal(resolveApiCalculationPlace(old, store).displayTimeZone, 'America/New_York');
+    assert.equal(resolveApiCalculationPlace(changed, store).displayTimeZone, 'America/Chicago');
+});

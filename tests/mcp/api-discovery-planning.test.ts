@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import type { McpServer } from '@modelcontextprotocol/server';
 import { registerNightSkyTools } from '../../server/mcp/registerTools';
 import { createApiServices } from '../../server/places/api/configuration';
+import { getAstronomyWindow } from '../../server/nightsky/astronomy';
 const window = {
     startUtc: '2026-10-18T14:00:00Z', endUtc: '2026-10-18T22:00:00Z', timeZone: 'Asia/Kolkata'
 };
@@ -15,7 +16,7 @@ test('API resolve search details plan compare uses actual selected point without
     const api = createApiServices({
         geonamesUsername: 'fixture', geoapifyApiKey: 'fixture', userAgent: 'NightSky fixture (contact@example.com)', now: () => now, fetcher: async (url) => new Response(JSON.stringify(String(url).includes('geonames') ? {
             geonames: [{
-                    geonameId: 1, name: 'Town', lat: '18', lng: '73'
+                    geonameId: 1, name: 'Town', lat: '18', lng: '73', timezone: { timeZoneId: 'Europe/London' }
                 }, {
                     geonameId: 2, name: 'Other town', lat: '20', lng: '74'
                 }]
@@ -103,6 +104,15 @@ test('API resolve search details plan compare uses actual selected point without
         ...ref, displayTimeZone: 'Asia/Kolkata', window
     });
     assert.equal(astronomy.sourceRevision, ref.sourceRevision);
+    const exactPoint = await api.selectedPlaceResolver.resolve({ ...ref, displayTimeZone: 'Asia/Kolkata' });
+    const expectedAstronomy = await getAstronomyWindow({ placeId: ref.placeId, timeZone: 'Asia/Kolkata', calculationPlace: exactPoint }, window, undefined);
+    assert.deepEqual(astronomy.moon, expectedAstronomy.moon);
+    assert.equal(exactPoint.timeZoneBasis, 'explicit-display');
+    assert.equal(exactPoint.timeZoneEvidence?.status, 'unknown');
+    assert.ok(astronomy.caveats.some((c: string) => /actual site time zone is unverified/i.test(c)));
+    const originPoint = await api.selectedPlaceResolver.resolve({ placeId: origin.placeId, sourceRevision: origin.sourceRevision, displayTimeZone: 'Asia/Kolkata' });
+    const nearbyAstronomy = await getAstronomyWindow({ placeId: origin.placeId, timeZone: 'Asia/Kolkata', calculationPlace: originPoint }, window, undefined);
+    assert.notEqual(astronomy.moon.maximumAltitudeDegrees, nearbyAstronomy.moon.maximumAltitudeDegrees);
     const target = await invoke('get_target_visibility', {
         ...ref, displayTimeZone: 'Asia/Kolkata', window, targetQuery: 'unsupported fixture object'
     });

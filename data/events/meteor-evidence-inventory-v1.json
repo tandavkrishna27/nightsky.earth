@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "selectionStatus": "pending-owner-decision",
+  "maintainedSelection": null,
+  "maintenanceOwner": null,
+  "nextReviewDate": null,
+  "reviewedPeakYears": [2025, 2026, 2027],
+  "retainedCodes": ["QUA", "LYR", "ETA", "ZPE", "ARI", "SSG", "SDA", "CAP", "PER", "DSX", "ORI", "DRA", "NTA", "STA", "LEO", "AND", "GEM", "URS", "HYD"],
+  "completeActivityEvidence": [],
+  "caveat": "Offline inventory of retained artifacts only. No maintained selection or annual ownership is adopted. Missing evidence is not meteor inactivity. Radiant fit domains and typical/calendar context do not establish complete year-specific seasons."
+}
