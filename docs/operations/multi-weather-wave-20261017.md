@@ -43,3 +43,7 @@ Decisions: keep OpenWeather cache empty pending permission; add explicit admitte
 
 Contract literals are repeated across TypeScript/schema definitions; one over-cap contract fixture also violates uniqueness; cache byte-cap test isolation can be strengthened. Review classified these as nonblocking coverage/maintenance issues, not verified runtime failures.
 
+
+### CI portability correction
+
+The first exact-tip CI run (`39009140223`, commit `613b4fc`) found a Linux-only shutdown-fixture failure: the test signalled after TCP connect with incomplete HTTP headers, without proving an active server request. Test-only fix `e0f462f` sends complete POST headers with an unfinished body and waits for the server request-event acknowledgement before shutdown. It preserves timeout and retained-lock assertions. All 39 affected local tests and TypeScript checks passed; production shutdown code was unchanged. Replacement exact-tip CI is reported separately.
