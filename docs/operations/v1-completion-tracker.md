@@ -2,6 +2,8 @@
 
 Updated: 17 October 2026. **Current plan: API-first, multiple suitable sources, no exhaustive owned global catalogue prerequisite.** This tracker supersedes earlier acquisition-wave sequencing. See the [owner decision](api-search-discovery-v1-decision.md), [regroomed execution plan](../superpowers/plans/2026-10-17-api-first-v1-regroom.md) and [27-ticket acceptance matrix](v1-remaining-ticket-release-matrix.md).
 
+Latest update: [validation-readiness wave](validation-readiness-wave-20261017.md) — geography diagnosis, preserving history accounting, and complete local package preparation. See the final section below for current readiness; earlier milestones are retained evidence.
+
 ## Remaining sequence — one checklist
 
 These six blocks group the original tickets; they are not new tickets or a guarantee of one coding session each. Keep open work inside its block instead of resetting the wave count. Three local completion blocks precede three release stages. Website Task 18 remains separate.
@@ -161,3 +163,15 @@ Source-resolution continuation verification: independent lane/final reviews appr
 See [current wave outcomes](planning-flows-wave-20261017.md). History sample-only aggregation/provider crosses MCP and planner without network access; five skills now reflect current event and geometry evidence. The authorized geography check stopped after one HTTP 200 response, 136 bytes and one reserved credit because country selection did not pass; no geometry was requested and no retry occurred. Improved diagnostics are tested offline, not retroactively applied to the original response. Production flags remain disabled. Full baseline and actual geometry acceptance remain open; original counts remain **12 Done / 9 Partial / 6 Not started**. Final combined verification and exact-commit CI are recorded after completion.
 
 Planning-flow local verification completed: **1,341 tests passed, zero failed, two skipped**; TypeScript, plugin build and packaging passed, with independent final review. The engineering increment is complete; unresolved history/geometry/event acceptance above remains open. Exact-commit CI is observed after push.
+
+## Validation readiness — 17 October 2026
+
+The [validation-readiness wave](validation-readiness-wave-20261017.md) completes three offline preparations within the same six blocks:
+
+- Geography: official query review found no confirmed adapter defect. The retained empty country selection remains unresolved; a filter-free diagnostic is proposed but unexecuted. Ordinary point/radius discovery does not depend on this country case.
+- History: a reviewed atomic provider-admission path preserves existing quota counters, imports verified usage conservatively, and connects the annual probe to durable accounting. Actual private-ledger migration and annual request remain separately pending.
+- Experience: the complete 1.0.14 fixture package was built with 14 tools and five skills and its loopback connection checked. Native installation, skill activation and model-answer acceptance remain pending; Claude remains deferred.
+
+Original ticket counts remain **12 Done / 9 Partial / 6 Not started**. This wave does not close live-source or host acceptance. The preceding `2b298d52f172a552ef315fe60e2b21a12f4e7812` passed all six [CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39024965392); current-wave CI must be verified for its own commit.
+
+Current wave local aggregate: **1,462 passed / 0 failed / 2 skipped**; types, build, packages and compiled runtimes passed. Independent review found no material findings. Exact current-commit CI remains pending at document commit time; no previous run is substituted for it.

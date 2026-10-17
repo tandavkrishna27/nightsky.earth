@@ -24,6 +24,7 @@
     "scripts/osm/build-global-catalogue.ts",
     "scripts/osm/build-streamed-catalogue.ts",
     "scripts/complete-model-journey-test.ts",
+    "scripts/prepare-codex-local-fixture.ts",
     "scripts/osm/build-source-catalogue.ts",
     "scripts/plugin-operator-preflight.ts",
     "scripts/osm/boundary-metadata.ts",

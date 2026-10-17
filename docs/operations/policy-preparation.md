@@ -57,3 +57,9 @@ After integration of the local history implementation (`c61165a`), the draft als
 - Raw response bodies are bounded transient acquisition inputs. Summary/journal storage has finite capacity and no automatic eviction or deletion; a full store stops acquisition. Operator retention/maintenance and actual backup/hosting settings remain unresolved release facts. No immediate deletion, automatic expiry or full-baseline availability is promised.
 
 The added rendered-privacy regression first failed against the previous draft; after correction the focused policy suite passed **6/6**, zero failures/skips. Existing root edits and all identity, support-retention and legal-review gates were retained. No live calls or commits were made by this correction.
+
+## Accounting and diagnostic retention clarification — 17 October 2026
+
+The draft now discloses bounded operator verification notes and imported usage in the quota checkpoint. Operators must exclude secrets and personal location data from those notes. Automated quota entries still exclude queries, coordinates, response bodies and credentials.
+
+Baseline acquisition bodies remain transient. Separately authorized diagnostic probes can retain bounded raw responses and receipts in quarantine until reviewed maintenance; no automatic deletion is promised. The rendered-copy regression failed before this clarification and the focused policy suite then passed 7/7. This is a local draft correction, not hosted policy verification or authority for a live probe.

@@ -189,3 +189,7 @@ import "./providers/climate/api-history-jobs.test";
 import "./providers/climate/api-history-provider.test";
 import "./operations/api-history-runtime.test";
 import "./providers/climate/annual-history-probe.test";
+
+import "./providers/quota-add-provider.test";
+import "./providers/climate/history-accounting-operator.test";
+import "./platforms/codex-local-fixture.test";

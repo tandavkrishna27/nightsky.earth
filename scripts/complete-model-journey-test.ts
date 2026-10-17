@@ -88,7 +88,7 @@ export function selectFixtureMode(args:string[]):FixtureMode { return args.inclu
 export function validateFixtureResume(records:Array<{fixtureMode?:string;id?:string}>, mode:FixtureMode){
  if(records.some(record=>(record.fixtureMode??'catalogue')!==mode)) throw Error('Cannot mix fixture modes in resumed evidence');
 }
-export async function createFixtureServer(root:string, options:{mode?:FixtureMode} = {}){
+export async function createFixtureServer(root:string, options:{mode?:FixtureMode;port?:number} = {}){
  const fixtureMode = options.mode ?? 'catalogue';
  if (!['catalogue','api'].includes(fixtureMode)) throw Error('Unknown fixture mode');
  let fixtureAttempts = 0;
@@ -135,7 +135,7 @@ export async function createFixtureServer(root:string, options:{mode?:FixtureMod
  plannerServices:{getClimatology:async()=>{throw Error('Synthetic historical context unavailable');}},
  weatherProvider:{getForecast:async(_place,window)=>window.startUtc.startsWith('2027')?{status:'out-of-horizon',reason:'Synthetic future forecast unavailable',source:{name:'Synthetic forecast',url:'https://example.test/forecast',attribution:'Invented local fixture; no actual provider request',dataClass:'forecast'}}:{status:'available',reason:'Synthetic fixture only',forecast:{availability:{status:'available',reason:'Synthetic fixture only'},source:{name:'Synthetic forecast',url:'https://example.test/forecast',attribution:'Invented local fixture; no visibility accuracy claim',dataClass:'forecast',issuedAt:revision?'2026-10-15T15:00:00Z':'2026-10-15T12:00:00Z'},forecastHorizonHours:48,samples:[{validAt:'2026-10-15T22:00:00Z',values:{totalCloudCover:{value:revision?85:12,unit:'%'}}}],missingFields:[{field:'visibility',reason:'Not supplied'}]}}},
  auroraProvider:async()=>{throw Error('Synthetic aurora unavailable');}});
- const server=createServer(app).listen(0,'127.0.0.1');await once(server,'listening');const address=server.address();if(!address||typeof address==='string')throw Error('Loopback unavailable');const endpoint=`http://127.0.0.1:${address.port}/mcp`;
+ const server=createServer(app).listen(options.port ?? 0,'127.0.0.1');await once(server,'listening');const address=server.address();if(!address||typeof address==='string')throw Error('Loopback unavailable');const endpoint=`http://127.0.0.1:${address.port}/mcp`;
  return {endpoint,fixtureMode,get budget(){return budget;},fixtureAttempts:()=>fixtureAttempts,advanceFixtureTime:(milliseconds:number)=>{if(!Number.isSafeInteger(milliseconds)||milliseconds<0||milliseconds>86400000)throw Error('Invalid fixture clock advance');logicalTime+=milliseconds;},externalAttempts:()=>external,beginCase:(name:string)=>{budget=new EvidenceBudget();revision=name==='replan'?1:0;},rpc:async(method:string,params:unknown)=>{const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params})});const raw=await response.text();const line=raw.split('\n').find(l=>l.startsWith('data: '));return JSON.parse(line?line.slice(6):raw);},close:async()=>{server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));}};
 }
 export function materializePackages(root:string,endpoint:string){

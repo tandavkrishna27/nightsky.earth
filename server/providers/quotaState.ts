@@ -12,9 +12,21 @@ export interface QuotaPolicy {
     dailyLimit: number;
     monthlyLimit?: number;
 }
-interface Entry { accountLabel: string; buckets: Record<string, number>; months: Record<string, number>; disabled: boolean; blockedUntil: number }
+export interface VerifiedProviderUsage {
+    verifiedAllowance: true;
+    verifiedAllAccountUsage: true;
+    allConsumersQuiesced: true;
+    /** Evidence must establish the configured allowance as well as all shared-account usage. */
+    evidence: string;
+    observedAt: number;
+    usedLast24Hours: number;
+    usedCurrentMonth: number;
+}
+interface Entry { accountLabel: string; buckets: Record<string, number>; months: Record<string, number>; disabled: boolean; blockedUntil: number; imported?: { policy: QuotaPolicy; usage: VerifiedProviderUsage } }
 interface Checkpoint { version: 1; lastNow: number; entries: Record<string, Entry> }
 export interface PersistentQuota extends ProviderQuota {
+    /** Add only to an existing checkpoint while holding its exclusive lock; never resets an entry. */
+    addVerifiedProvider(policy: QuotaPolicy, usage: VerifiedProviderUsage): Promise<void>;
     /** Operator must verify the entire configured budget is unused before creating a fresh checkpoint. */
     initializeVerifiedBudget(attestation: { verifiedUnusedBudget: true; evidence: string }): Promise<void>;
     setProviderState(providerId: string, state: { disabled?: boolean; blockedUntil?: number }): Promise<void>;
@@ -27,6 +39,16 @@ const safeName = (s: unknown): s is string => typeof s === 'string' && /^[a-zA-Z
 const positive = (n: unknown): n is number => Number.isSafeInteger(n) && (n as number) > 0;
 const validTime = (n: unknown): n is number => Number.isSafeInteger(n) && (n as number) >= 0 && (n as number) <= 8_640_000_000_000_000;
 const record = (x: unknown): x is Record<string, unknown> => !!x && typeof x === 'object' && !Array.isArray(x);
+const nonnegative = (v: unknown): v is number => Number.isSafeInteger(v) && (v as number) >= 0;
+const exactKeys = (v: Record<string, unknown>, keys: string[]) => Object.keys(v).length === keys.length && keys.every(k => Object.hasOwn(v,k));
+function validImport(value: unknown): value is NonNullable<Entry['imported']> {
+    if (!record(value) || !exactKeys(value,['policy','usage']) || !record(value.policy) || !record(value.usage)) return false;
+    const p=value.policy, u=value.usage;
+    return exactKeys(p,['providerId','accountLabel','hourlyLimit','dailyLimit','monthlyLimit']) && safeName(p.providerId) && safeName(p.accountLabel) && positive(p.hourlyLimit) && positive(p.dailyLimit) && positive(p.monthlyLimit) &&
+        exactKeys(u,['verifiedAllowance','verifiedAllAccountUsage','allConsumersQuiesced','evidence','observedAt','usedLast24Hours','usedCurrentMonth']) &&
+        u.verifiedAllowance===true && u.verifiedAllAccountUsage===true && u.allConsumersQuiesced===true && typeof u.evidence==='string' && u.evidence.trim().length>=8 && u.evidence.length<=500 && validTime(u.observedAt) && nonnegative(u.usedLast24Hours) && nonnegative(u.usedCurrentMonth);
+}
+const samePolicy = (a: QuotaPolicy,b: QuotaPolicy) => a.providerId===b.providerId && a.accountLabel===b.accountLabel && a.hourlyLimit===b.hourlyLimit && a.dailyLimit===b.dailyLimit && a.monthlyLimit===b.monthlyLimit;
 async function exists(path: string) { try { await lstat(path); return true; } catch (e) { if ((e as NodeJS.ErrnoException).code === 'ENOENT') return false; throw e; } }
 /** Check every ancestor and target: no symlink/junction traversal, network paths or alternate streams. */
 async function safePath(path: string) {
@@ -58,8 +80,9 @@ function validate(raw: unknown, policies: QuotaPolicy[]): Checkpoint {
         if (Object.keys(value.buckets).length > 1500 || Object.keys(value.months).length > 2) throw new Error('Oversized quota history.');
         for (const [minute, count] of Object.entries(value.buckets)) if (!/^\d{1,12}$/.test(minute) || !positive(count) || Number(minute) * MINUTE > raw.lastNow) throw new Error('Invalid quota bucket.');
         for (const [month, count] of Object.entries(value.months)) if (!/^\d{4}-\d{2}$/.test(month) || !positive(count)) throw new Error('Invalid quota month.');
+        if (Object.hasOwn(value,'imported') && (!validImport(value.imported) || value.imported.policy.providerId!==id || value.imported.policy.accountLabel!==value.accountLabel || value.imported.usage.observedAt > raw.lastNow)) throw Error('Invalid imported quota accounting.');
     }
-    for (const p of policies) { const entry = raw.entries[p.providerId] as unknown as Entry | undefined; if (!entry || entry.accountLabel !== p.accountLabel) throw new Error('Quota account configuration changed.'); }
+    for (const p of policies) { const entry = raw.entries[p.providerId] as unknown as Entry | undefined; if (!entry || entry.accountLabel !== p.accountLabel || (entry.imported && !samePolicy(entry.imported.policy,p))) throw new Error('Quota account configuration changed.'); }
     return raw as unknown as Checkpoint;
 }
 
@@ -107,6 +130,24 @@ export async function createPersistentQuota(options: { path: string; now: () => 
         } else mayInitialize = !(await exists(path + '.initialized'));
     } catch { failed = true; }
     return {
+        addVerifiedProvider(policyInput, usageInput) { return serialize(async () => {
+            const p = structuredClone(policyInput), u = structuredClone(usageInput);
+            const now = options.now();
+            if (!checkpoint || failed || closed || policies.length >= 16 || Object.hasOwn(checkpoint.entries, p.providerId) ||
+                !validImport({policy:p,usage:u}) ||
+                !safeName(p.providerId) || !safeName(p.accountLabel) || !positive(p.hourlyLimit) || !positive(p.dailyLimit) || !positive(p.monthlyLimit) ||
+                u?.verifiedAllowance !== true || u.verifiedAllAccountUsage !== true || u.allConsumersQuiesced !== true || typeof u.evidence !== 'string' || u.evidence.trim().length < 8 || u.evidence.length > 500 ||
+                !validTime(now) || now < checkpoint.lastNow || !validTime(u.observedAt) || u.observedAt > now || now-u.observedAt > 300000 ||
+                new Date(u.observedAt).toISOString().slice(0,7) !== new Date(now).toISOString().slice(0,7) ||
+                !nonnegative(u.usedLast24Hours) || !nonnegative(u.usedCurrentMonth) ||
+                // On the first UTC day the rolling window can include the prior month.
+                (new Date(now).getUTCDate() > 1 && u.usedCurrentMonth < u.usedLast24Hours)) throw Error('Verified provider allowance and complete usage required; existing entries cannot be replaced.');
+            const next = structuredClone(checkpoint); next.lastNow = now;
+            // Conservatively age all imported rolling usage from import time, including its hourly charge.
+            next.entries[p.providerId] = {accountLabel:p.accountLabel, buckets:u.usedLast24Hours ? {[String(Math.floor(now/MINUTE))]:u.usedLast24Hours} : {},
+                months:u.usedCurrentMonth ? {[new Date(now).toISOString().slice(0,7)]:u.usedCurrentMonth} : {}, disabled:false, blockedUntil:0, imported:{policy:p,usage:u}};
+            try { await persist(next); policies.push(p); } catch { failed=true; throw Error('Quota provider import persistence failed.'); }
+        }); },
         reserve(providerId, cost) { return serialize(async () => {
             if (!checkpoint || failed || closed || !positive(cost)) return { allowed: false, reason: 'quota-state-unavailable' };
             const policy = policies.find(p => p.providerId === providerId);

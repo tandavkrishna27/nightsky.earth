@@ -49,7 +49,7 @@ test("rendered privacy distinguishes operator history acquisition and durable lo
   assert.match(html, /original requested destination coordinates/);
   assert.match(html, /request URLs containing grid-cell coordinates and dates/);
   assert.match(html, /no automatic eviction or deletion/);
-  assert.match(html, /Raw response bodies are transient/);
+  assert.match(html, /For baseline preparation, raw response bodies are transient/);
   assert.match(html, /retention and maintenance require operator review/);
 });
 
@@ -68,4 +68,10 @@ test("support provides real mail link without a pretend message form", async () 
   const page = await readFile(new URL("../../client/src/pages/Support.tsx", import.meta.url), "utf8");
   assert.match(page, /mailto:/);
   assert.doesNotMatch(page, /<form|Message Sent|handleSubmit/);
+});
+
+test("operator accounting and diagnostic history retention are disclosed separately", () => {
+  const text = JSON.stringify(POLICY_PAGES.privacy);
+  assert.match(text, /operator verification notes/);
+  assert.match(text, /diagnostic probes can retain bounded raw responses/);
 });
