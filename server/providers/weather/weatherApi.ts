@@ -45,7 +45,7 @@ function normalize(payload: Payload, window: {
     }).filter(s => Object.keys(s.values).length);
     if (!samples.length)
         throw Error("No supported fields");
-    const gaps = first > start || last < end || selected.length > 48 || selected.some((h, i) => i > 0 && h.time_epoch - selected[i - 1].time_epoch !== 3600);
+    const gaps = first > start || last < end || selected.length > 48 || samples.length < selected.length || samples.some((sample, i) => i > 0 && Date.parse(sample.validAt) - Date.parse(samples[i - 1].validAt) !== 3600000);
     const reason = gaps ? "WeatherAPI.com coverage has horizon or hourly gaps; unsupported fields remain unknown." : "WeatherAPI.com hourly forecast; unsupported cloud layers and precipitation period semantics remain unknown.";
     const forecast = weatherForecastSchema.parse({ availability: { status: "partial", reason }, source: { ...SOURCE, validStartUtc: new Date(first).toISOString(), validEndUtc: new Date(last).toISOString() }, forecastHorizonHours: Math.max(0, (last - fetchedAt) / 3600000), samples, missingFields: fields.filter(f => !seen.has(f)).map(field => ({ field, reason: field.startsWith("precipitation") ? "Hourly precipitation interval boundaries and combined rain/snow probability semantics are not documented; no interval or probability was inferred." : "Not provided by this hourly forecast; no value was inferred." })) });
     return { status: "partial", reason, forecast };
@@ -95,8 +95,10 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
                     cacheBytes -= entry.bytes;
                 }
             const cached = cache.get(key);
-            if (cached)
-                return normalize(cached.payload, window, cached.at);
+            if (cached) {
+                try { return normalize(cached.payload, window, cached.at); }
+                catch { return unavailable("WeatherAPI.com returned no usable forecast fields for the requested window."); }
+            }
             if (active || now - lastStart < 1000)
                 return unavailable("WeatherAPI.com request admission limit reached.");
             active = true;
@@ -119,17 +121,22 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
                             controller.signal.throwIfAborted();
                             lastStart = options.now();
                             const incoming = await options.fetcher(url, { method: "GET", redirect: "error", signal: controller.signal, headers: { Accept: "application/json" } });
-                            if (incoming.redirected || !incoming.ok) {
+                            if (incoming.redirected) {
                                 void incoming.body?.cancel().catch(() => { });
-                                await persistFailure(incoming.status, incoming.headers.get("Retry-After"));
-                                return new Response(null, { status: incoming.status >= 300 ? incoming.status : 502 });
+                                throw Error("Redirect rejected");
                             }
+                            // A 403 can mean exhausted monthly quota. Persist a temporary block
+                            // before reading its body, then distinguish quota from authentication.
+                            if ([401, 403, 429].includes(incoming.status))
+                                await persistFailure(incoming.status === 403 ? 429 : incoming.status, incoming.headers.get("Retry-After"));
                             const declared = Number(incoming.headers.get("Content-Length"));
                             if (declared > 524288) {
                                 void incoming.body?.cancel().catch(() => { });
                                 throw Error("Size");
                             }
                             const reader = incoming.body?.getReader();
+                            if (!reader && !incoming.ok)
+                                return new Response(null, { status: incoming.status, headers: incoming.headers });
                             if (!reader)
                                 throw Error("No body");
                             const cancel = () => { void reader.cancel().catch(() => { }); };
@@ -159,20 +166,26 @@ export function createWeatherApiProvider(options: WeatherAdapterOptions): Weathe
                                 bytes.set(part, offset);
                                 offset += part.length;
                             }
-                            return new Response(bytes, { headers: { "Content-Type": "application/json" } });
+                            return new Response(bytes, { status: incoming.status, headers: incoming.headers });
                         }, controller.signal);
                         controller.signal.throwIfAborted();
-                        if (!response.ok)
-                            return unavailable(`WeatherAPI.com returned HTTP ${response.status}; no forecast is available.`);
-                        const raw: unknown = await response.json();
+                        let raw: unknown;
+                        try { raw = await response.json(); }
+                        catch { if (response.ok) throw Error("Invalid JSON"); }
+                        controller.signal.throwIfAborted();
+                        let errorCode: number | undefined;
                         if (typeof raw === "object" && raw !== null && "error" in raw) {
                             const error = raw.error;
-                            if (typeof error === "object" && error !== null && "code" in error) {
-                                if ([2006, 2008, 2009].includes(Number(error.code))) await persistFailure(401);
-                                if (Number(error.code) === 2007) await persistFailure(429);
-                            }
+                            if (typeof error === "object" && error !== null && "code" in error && typeof error.code === "number")
+                                errorCode = error.code;
+                            if ([2006, 2008, 2009].includes(errorCode ?? -1)) await persistFailure(401);
+                            else if (errorCode === 2007 && response.status !== 429 && response.status !== 403) await persistFailure(429);
+                            else if (response.status === 403 && errorCode !== 2007) await persistFailure(401);
                             throw Error("Provider error");
                         }
+                        if (response.status === 403) await persistFailure(401);
+                        if (!response.ok)
+                            return unavailable(`WeatherAPI.com returned HTTP ${response.status}; no forecast is available.`);
                         const payload = payloadSchema.parse(raw);
                         controller.signal.throwIfAborted();
                         const forecast = normalize(payload, window, now);

@@ -44,8 +44,35 @@ test("WeatherAPI persists auth disable and bounded Retry-After when quota suppor
         const states: Array<{disabled?:boolean;blockedUntil?:number}> = [];
         const provider=createWeatherApiProvider({apiKey:"synthetic-secret",now:()=>epoch*1000,controls:new UpstreamControls(),fetcher:async()=>new Response(null,{status,headers:{"Retry-After":"120"}}),quota:{reserve:async()=>({allowed:true,reason:"ok"}),setProviderState:async(_id:string,state:{disabled?:boolean;blockedUntil?:number})=>{states.push(state);}} as import("../../server/providers/quotaTypes").ProviderQuota});
         await provider.getForecast(place,window);
-        assert.deepEqual(states,status===429?[{blockedUntil:epoch*1000+120000}]:[{disabled:true}]);
+        assert.deepEqual(states,status===429?[{blockedUntil:epoch*1000+120000}]:status===403?[{blockedUntil:epoch*1000+120000},{disabled:true}]:[{disabled:true}]);
     }
+});
+test("WeatherAPI cached window with no usable fields returns unavailable", async()=>{
+    const payload={forecast:{forecastday:[{hour:[{time_epoch:epoch,cloud:10},{time_epoch:epoch+3600}]}]}};
+    const {provider}=setup(async()=>Response.json(payload));
+    assert.equal((await provider.getForecast(place,window)).status,"partial");
+    const result=await provider.getForecast(place,{...window,startUtc:new Date((epoch+3600)*1000).toISOString(),endUtc:new Date((epoch+5400)*1000).toISOString()});
+    assert.equal(result.status,"unavailable");
+});
+test("WeatherAPI HTTP403 quota code persists backoff without permanent disable",async()=>{
+    const states:Array<{disabled?:boolean;blockedUntil?:number}>=[];
+    const provider=createWeatherApiProvider({apiKey:"synthetic-secret",now:()=>epoch*1000,controls:new UpstreamControls(),fetcher:async()=>Response.json({error:{code:2007,message:"synthetic-secret"}},{status:403,headers:{"Retry-After":"120"}}),quota:{reserve:async()=>({allowed:true,reason:"ok"}),setProviderState:async(_id:string,state:{disabled?:boolean;blockedUntil?:number})=>{states.push(state);}} as import("../../server/providers/quotaTypes").ProviderQuota});
+    const result=await provider.getForecast(place,window);
+    assert.equal(result.status,"unavailable");assert.ok(states.length>0);assert.ok(states.every(state=>state.disabled===undefined));assert.equal(states.at(-1)?.blockedUntil,epoch*1000+120000);assert.doesNotMatch(JSON.stringify(result),/synthetic-secret/);
+});
+test("WeatherAPI blocks a pending HTTP403 body then refines an auth code to durable disable",async()=>{
+    const states:Array<{disabled?:boolean;blockedUntil?:number}>=[];
+    let body!:ReadableStreamDefaultController<Uint8Array>;
+    const provider=createWeatherApiProvider({apiKey:"synthetic-secret",now:()=>epoch*1000,controls:new UpstreamControls(),fetcher:async()=>new Response(new ReadableStream<Uint8Array>({start(controller){body=controller;}}),{status:403}),quota:{reserve:async()=>({allowed:true,reason:"ok"}),setProviderState:async(_id:string,state:{disabled?:boolean;blockedUntil?:number})=>{states.push(state);}} as import("../../server/providers/quotaTypes").ProviderQuota});
+    const pending=provider.getForecast(place,window);await new Promise(resolve=>setImmediate(resolve));
+    assert.deepEqual(states,[{blockedUntil:epoch*1000+60000}]);
+    body.enqueue(new TextEncoder().encode(JSON.stringify({error:{code:2006,message:"synthetic-secret"}})));body.close();
+    assert.equal((await pending).status,"unavailable");assert.deepEqual(states.at(-1),{disabled:true});
+});
+test("WeatherAPI reports an unusable middle hour as a coverage gap",async()=>{
+    const payload={forecast:{forecastday:[{hour:[{time_epoch:epoch,cloud:10},{time_epoch:epoch+3600},{time_epoch:epoch+7200,cloud:10}]}]}};
+    const {provider}=setup(async()=>Response.json(payload));const result=await provider.getForecast(place,window);
+    assert.equal(result.forecast?.samples.length,2);assert.match(result.reason,/coverage.*gap/i);
 });
 test("WeatherAPI cache expires at fifteen minutes and evicts oldest after 128 entries", async () => { let calls = 0; const { provider, advance } = setup(async () => { calls++; return Response.json(fixture()); }); for (let i = 0; i < 129; i++) {
     await provider.getForecast({ ...place, longitude: i }, window);
