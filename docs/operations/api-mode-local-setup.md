@@ -30,7 +30,7 @@ History remains governed by [history feasibility](history-api-feasibility.md); d
 
 Use the [cleanup plan](api-provider-research-and-cleanup-plan.md). This migration does not delete downloaded files, optional builders, credentials, virtual environments or evidence. Confirm API-mode behavior before removing a legacy dependency. Website work and any website database dependencies are separate.
 
-## Account verification — 2026-10-17
+## Account verification — 2026-10-17 (before implementation)
 
 Read-only checks of the owner's signed-in dashboards confirmed:
 
@@ -39,13 +39,13 @@ Read-only checks of the owner's signed-in dashboards confirmed:
 - GeoNames: owner reports signup failure; remains unconfigured. Geoapify fallback is available in code, but account creation alone is not runtime activation.
 - CDS: previously configured; no new historical job authorized by this account check.
 
-No credentials are recorded here. This check did not copy credentials into local configuration, call data APIs, change subscriptions, or deploy. WeatherAPI needs a new reviewed adapter and free-tier request/response contract; its account is not evidence that it is integrated. Remaining activation work includes private credential configuration, restart-safe quotas, bounded live verification, and independent provider-labelled forecasts. Preserve MET Norway as the existing forecast source.
+No credentials are recorded here. This check did not copy credentials into local configuration, call data APIs, change subscriptions, or deploy. At that check, WeatherAPI still needed an adapter. The adapter and restart-safe quotas are now implemented as described below; private configuration and bounded live verification remain pending. Preserve MET Norway as the existing forecast source.
 
-## Multiple weather providers — agreed extension
+## Multiple weather providers — agreed requirements
 
 Owner requested easy addition of services and created OpenWeather as well (2026-10-17). Signed-in OpenWeather home shows an email-confirmation notice; endpoint entitlement and key activation are not yet verified. No subscription was changed.
 
-Current implementation already has WeatherProvider/getForecast and a public forecasts array (maximum four). Runtime injection currently selects a single provider; multi-provider orchestration is remaining work, not already implemented.
+The original single-provider WeatherProvider/getForecast interface is preserved. The new collection and runtime configuration support multiple providers and the existing public forecasts array (maximum four); offline verification does not establish live availability.
 
 Implementation requirements:
 
@@ -56,7 +56,7 @@ Implementation requirements:
 5. Each new adapter needs documented free-plan endpoints, rights/attribution, private configuration, quota cost, fixtures and failure cases before bounded live validation. Trial access must not establish free entitlement. OpenWeather One Call is a separate pay-per-call product; do not enable it automatically.
 6. Required tests: one/two/three sources; partial failure; missing key; quota exhaustion; restart; mixed cadence/horizon; stale/empty/malformed results; secret redaction; attribution; all sources unavailable; identical exact requested coordinates across adapters.
 
-Initial roster: MET Norway (existing), WeatherAPI (adapter pending; Free limits), OpenWeather (adapter and free entitlement review pending). Geoapify is for location discovery, not a weather forecast provider. Other domains should use their own capability-specific adapters rather than forcing all APIs into one weather-shaped interface.
+Implemented roster: MET Norway, WeatherAPI (Free-shaped requests), and OpenWeather (Free five-day/three-hour endpoint). OpenWeather Free entitlement was subsequently confirmed in Services; email/key activation and actual live behavior remain unverified. Geoapify is for location discovery, not a weather forecast provider. Other domains should use their own capability-specific adapters rather than forcing all APIs into one weather-shaped interface.
 
 Reference: https://openweathermap.org/price (checked 2026-10-17). No data request, key export or deployment occurred during this architecture check.
 
