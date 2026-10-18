@@ -5,13 +5,41 @@ import {
   releaseBlockers,
 } from "../../client/src/content/releaseFacts";
 test("missing factual approvals block publication", () => {
-  const blockers = releaseBlockers(releaseFacts, {
+  const incomplete = {
+    ...releaseFacts,
+    operator: null,
+    hosting: null,
+    recipients: null,
+    loggedFields: null,
+    retention: null,
+    deletionProcess: null,
+    analytics: null,
+    sources: [],
+    sourcesApprovedAt: null,
+    hostingVerifiedAt: null,
+    contentRightsApprovedAt: null,
+    policiesApprovedAt: null,
+  };
+  const blockers = releaseBlockers(incomplete, {
     published: false,
     url: null,
   });
   assert.ok(blockers.includes("Operator identity"));
   assert.ok(blockers.includes("Source inventory"));
   assert.ok(blockers.includes("Content rights approval"));
+});
+
+test("confirmed operating facts clear data-handling blockers but not approvals", () => {
+  assert.deepEqual(
+    releaseBlockers(releaseFacts, { published: false, url: null }),
+    [
+      "Source inventory approval",
+      "Hosting verification",
+      "Content rights approval",
+      "Policy approval",
+      "Source inventory",
+    ],
+  );
 });
 
 import { loadEnv } from "vite";
