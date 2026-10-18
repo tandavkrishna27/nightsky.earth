@@ -191,3 +191,29 @@ test('weather private keys are excluded from operator JSON and reports',async()=
 test('API discovery requires quota declaration for current and rollback independently of weather',async()=>{
  for(const selection of ['current','rollback'] as const){const c=config();delete c.runtimeEnvironment.NIGHTSKY_QUOTA_STATE_PATH;if(selection==='current')c.runtimeEnvironment.NIGHTSKY_DISCOVERY_MODE='api';c.releases[selection].discovery=apiEvidence();const r=await operatorPreflight(c,'.');assert.ok(r.findings.includes('API_QUOTA_CONFIGURATION_MISSING'));assert.notEqual(r.status,'offline-pass');}
 });
+
+function apiOnlyConfig() {
+ const c=config();Object.assign(c.runtimeEnvironment,{NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_MCP_TOOL_MODE:'full',MET_NORWAY_USER_AGENT:'NightSky.earth nightsky.earth2026@gmail.com'});
+ for(const r of [c.releases.current,c.releases.rollback]){r.profile='api-only-v1';r.discovery={...apiEvidence(),providers:['geoapify']};}
+ return c;
+}
+test('explicit API-only V1 full releases pass offline without geography or history',async()=>{
+ const r=await operatorPreflight(apiOnlyConfig(),'.');assert.equal(r.status,'offline-pass',r.findings.join(','));assert.equal(r.deploymentReady,false);assert.equal(r.officialAccepted,false);
+});
+test('API-only profile preserves quota, MET contact, owner and rollback gates',async()=>{
+ for(const [change,code] of [
+ [(c:any)=>delete c.runtimeEnvironment.NIGHTSKY_QUOTA_STATE_PATH,'API_QUOTA_CONFIGURATION_MISSING'],
+ [(c:any)=>delete c.runtimeEnvironment.MET_NORWAY_USER_AGENT,'FULL_MODE_INPUTS_MISSING'],
+ [(c:any)=>c.budget.processes=2,'API_SINGLE_PROCESS_REQUIRED'],
+ [(c:any)=>c.ownerEvidence.host=null,'OWNER_EVIDENCE_MISSING'],
+ [(c:any)=>delete c.releases.rollback.profile,'API_HISTORY_ROUTE_NOT_ADMITTED'],
+ ] as const){const c=apiOnlyConfig();change(c);const r=await operatorPreflight(c,'.');assert.notEqual(r.status,'offline-pass');assert.ok(r.findings.includes(code),r.findings.join(','));}
+});
+test('API-only profile rejects conflicting modes, local artifacts and history activation',async()=>{
+ for(const change of [
+ (c:any)=>{c.runtimeEnvironment.NIGHTSKY_DISCOVERY_MODE='legacy';c.releases.current.discovery.mode='legacy';},
+ (c:any)=>c.runtimeEnvironment.NIGHTSKY_API_HISTORY_CACHE_DIRECTORY='history-cache',
+ (c:any)=>c.runtimeEnvironment.NIGHTSKY_CLIMATE_ARTIFACT='history',
+ (c:any)=>{c.artifacts=[{id:'history',kind:'climate-legacy',path:'history',sha256:hash,bytes:4,version:'v1'}];c.releases.rollback.artifactIds=['history'];},
+ ]){const c=apiOnlyConfig();change(c);const r=await operatorPreflight(c,'.');assert.ok(r.findings.includes('API_ONLY_PROFILE_CONFLICT'),r.findings.join(','));assert.equal(r.status,'invalid');}
+});

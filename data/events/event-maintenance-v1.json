@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-10-18",
+  "maintenanceOwner": "NightSky.earth",
+  "selection": "all-existing-supported-evidence",
+  "authority": "Owner confirmed NightSky.earth and retention of all available supported event evidence in v1-api-only-scope-20261018.md; annual review date is an operational default.",
+  "review": {
+    "cadence": "annual",
+    "nextReviewDate": "2027-10-18",
+    "overdueAfter": "2027-10-18",
+    "automaticEvidenceExtension": false,
+    "acquisitionAuthorized": false,
+    "additionalTriggers": [
+      "Before answering beyond a finite evidence horizon",
+      "Source correction or rights change",
+      "Runtime engine, numerical method or model-domain change"
+    ],
+    "overdueAction": "Mark maintenance review overdue; preserve dated evidence and original horizons; do not imply a fresh review."
+  },
+  "families": [
+    {
+      "type": "moon-phase",
+      "domain": "Astronomy Engine 2.1.19; no separately admitted scientific year range; geometric Moon altitude at phase instant only."
+    },
+    {
+      "type": "equinox-solstice",
+      "domain": "Four seasonal instants per year; no separately admitted scientific year range; local visibility not evaluated."
+    },
+    {
+      "type": "eclipse",
+      "domain": "Astronomy Engine 2.1.19 local solar/lunar paths; no separately admitted scientific year range; bounded interval visibility; unresolved grazing cases not evaluated."
+    },
+    {
+      "type": "meteor-shower",
+      "domain": "Finite separately typed peak, radiant and reference evidence; see meteors."
+    },
+    {
+      "type": "opposition",
+      "domain": "Mars, Jupiter, Saturn, Uranus, Neptune; 1900-01-01 through 2100-12-31; local visibility not evaluated."
+    },
+    {
+      "type": "planetary-conjunction",
+      "domain": "Solar alignments 1900–2100; 21 Mercury–Neptune planet pairs 2025-01-01T00:00:00Z through 2027-12-31T23:59:59.999Z; RA crossings, not closest approach; pair completeness not certified."
+    },
+    {
+      "type": "greatest-elongation",
+      "domain": "Mercury and Venus; 1900–2100; geocentric 3D Sun separation; morning/evening geometry is not visibility."
+    }
+  ],
+  "unsupportedEventTypes": [
+    "occultation",
+    "comet",
+    "other"
+  ],
+  "meteors": {
+    "retainedCodes": [
+      "QUA",
+      "LYR",
+      "ETA",
+      "ZPE",
+      "ARI",
+      "SSG",
+      "SDA",
+      "CAP",
+      "PER",
+      "DSX",
+      "ORI",
+      "DRA",
+      "NTA",
+      "STA",
+      "LEO",
+      "AND",
+      "GEM",
+      "URS",
+      "HYD"
+    ],
+    "peakYears": [
+      2025,
+      2026,
+      2027
+    ],
+    "peakCoverage": [
+      {
+        "year": 2025,
+        "supportedCodes": [
+          "QUA",
+          "ETA",
+          "ZPE",
+          "ARI",
+          "SSG",
+          "SDA",
+          "CAP",
+          "PER",
+          "DSX",
+          "DRA",
+          "AND",
+          "GEM",
+          "URS"
+        ],
+        "missingCodes": [
+          "LYR",
+          "ORI",
+          "NTA",
+          "STA",
+          "LEO",
+          "HYD"
+        ]
+      },
+      {
+        "year": 2026,
+        "supportedCodes": [
+          "QUA",
+          "ETA",
+          "ZPE",
+          "ARI",
+          "SSG",
+          "SDA",
+          "CAP",
+          "PER",
+          "DSX",
+          "DRA",
+          "AND",
+          "GEM",
+          "URS"
+        ],
+        "missingCodes": [
+          "LYR",
+          "ORI",
+          "NTA",
+          "STA",
+          "LEO",
+          "HYD"
+        ]
+      },
+      {
+        "year": 2027,
+        "supportedCodes": [
+          "QUA",
+          "ETA",
+          "ZPE",
+          "ARI",
+          "SDA",
+          "CAP",
+          "PER",
+          "DSX",
+          "DRA",
+          "LEO",
+          "GEM",
+          "URS"
+        ],
+        "missingCodes": [
+          "LYR",
+          "SSG",
+          "ORI",
+          "NTA",
+          "STA",
+          "AND",
+          "HYD"
+        ]
+      }
+    ],
+    "completeActivitySeasons": 0,
+    "radiantModels": 12,
+    "radiantYears": {
+      "first": 2018,
+      "last": 2030
+    },
+    "radiantDomain": "Year gate plus individual nominal solar-longitude fit widths; extrapolation outside 2018-12-10 through 2021-05-22 observations must remain explicit.",
+    "verbalGuidanceIdentities": 18,
+    "civilGuidanceIdentities": 5,
+    "typicalSolarLongitudeIdentities": 2,
+    "referenceLimit": "Source-qualified guidance only; no complete UTC seasons, no annual reuse of year-specific maxima, no inactive/absence inference from gaps."
+  },
+  "inventoryPolicy": "meteor-evidence-inventory-v1.json and meteorCoverage selection pending-owner-decision are frozen audit fields predating this operational profile. They are not current launch selection authority and this profile does not change or bypass their scientific evidence validation.",
+  "scientificLimit": "Maintenance selection is not universal event accuracy, complete worldwide visibility, complete shower seasons or absence certification."
+}

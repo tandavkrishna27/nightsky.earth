@@ -166,6 +166,7 @@ import "./operations/api-live-validation.test.ts";
 import "./providers/climate/open-meteo-history-contract.test.ts";
 
 import "./events/meteorCoverage.test.ts";
+import "./events/eventMaintenance.test.ts";
 
 import "./places/api-region-membership.test.ts";
 

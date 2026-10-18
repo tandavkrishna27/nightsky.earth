@@ -2,7 +2,11 @@
 
 **Audit date: 18 October 2026.** This is an evidence reconciliation and two conversation fixes, not a deployment or publication approval. Runtime discovery is API/search based; no owned global catalogue, SQL database or bulk planet is required. Website work remains separate.
 
-## Results of this wave
+## Current API-only release-readiness amendment
+
+The owner scope decision defers numerical historical preparation and keeps website work separate. Current authoritative evidence is the [release-profile contract](v1-api-release-profile-20261018.md), [finite event maintenance](v1-event-maintenance-20261018.md), [independent release audit](v1-release-audit-20261018.md), and [current ticket matrix](v1-remaining-ticket-release-matrix.md). Historical acquisition demands and older categories below are dated findings. No source activation or public host approval follows from offline acceptance.
+
+## Earlier results of this audit
 
 - Named-city planning reuses its resolved identity, revision and timezone without candidate-detail prerequisites. Genuine candidate details use mode-specific identity/revision (API requires placeId/sourceRevision; named queries are catalogue/legacy only); invalid arguments are not repeated blindly.
 - Requested darkness cutoffs are labelled as such; a clipped interval does not establish actual dusk/dawn.

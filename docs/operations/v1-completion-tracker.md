@@ -4,6 +4,10 @@
 
 [All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 5 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
+## Current local release-readiness wave — explicit API-only profile
+
+[API-only release contract](v1-api-release-profile-20261018.md) removes mandatory historical artifacts only for explicitly profiled current/rollback releases, preserving legacy/security/quota gates. [Event maintenance](v1-event-maintenance-20261018.md) records all19 identities, actual finite evidence/gaps and NightSky.earth annual responsibility. [Independent audit](v1-release-audit-20261018.md) found no new demonstrated material defect; exact source activation/credits and real hosting/publication remain open. Original categories stay12/5/8/2: event ownership closure alone does not complete compound Task6. No new package version is needed for these operations-only changes; installed plugin remains1.0.34. Coordinator44/44 affected tests, types/package checks and final1,831passed/0failed/2skipped full suite pass; [wave receipt](v1-api-release-wave-20261018.md) records limits and remaining gates.
+
 ## Current owner scope amendment — API/search-only V1
 
 The [explicit owner decision](v1-api-only-scope-20261018.md) removes numerical historical-cloud preparation and baseline admission as V1 launch requirements. Ticket9 is **deferred by scope, not done**; ticket18 remains the separate website. The current27-heading categories are12done/5local/8release/2separate-deferred. Prior6-local/1-separate figures below are dated snapshots, not current requirements. No bulk datasets, raw ERA5 work, direct OSM extraction, owned global catalogue or database is required. APIs may use OSM internally; required credits remain.

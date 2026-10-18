@@ -26,9 +26,11 @@ Local conjunction geometry is separate from the crossing: `sampleConjunctionWind
 
 The generic local target tool separately recognizes Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto and a fixed J2000 Milky Way core direction (`server/nightsky/astronomy.ts`). This finite list does not imply a complete star/deep-sky catalogue. Optional Public Universe reference/target tools remain a separate selected/admitted capability, not proof that core event or historical gaps are filled.
 
-## Meteor inventory: identities are not a launch selection
+## Meteor inventory: dated audit and current maintenance selection
 
-`shared/nightsky/meteors.ts` retains **19 identities**. `data/events/meteor-evidence-inventory-v1.json` still has `selectionStatus:pending-owner-decision`, null maintained selection/maintenance owner/next review date, and an empty `completeActivityEvidence` array. `server/events/meteorCoverage.ts` independently preserves those limits. The union is an audit inventory; it does not mandate all nineteen for launch or authorize silently choosing a smaller set.
+**Current maintenance amendment:** [V1 event maintenance](v1-event-maintenance-20261018.md) adopts all existing supported evidence and all 19 identities under confirmed maintainer NightSky.earth, with annual review next due 2027-10-18. The null/pending fields below are frozen earlier audit fields, not current operational selection authority; scientific evidence limits remain unchanged.
+
+`shared/nightsky/meteors.ts` retains **19 identities**. `data/events/meteor-evidence-inventory-v1.json` still has `selectionStatus:pending-owner-decision`, null maintained selection/maintenance owner/next review date, and an empty `completeActivityEvidence` array. `server/events/meteorCoverage.ts` independently preserves those limits. The union remains an audit inventory; the current operational profile separately retains all nineteen, without converting identity retention into complete scientific support.
 
 | Evidence | Exact retained set/count | Meaning |
 | --- | --- | --- |
@@ -109,7 +111,7 @@ Retained Open-Meteo review records separate **data attribution/CC BY conditions*
 
 ## Finite owner decisions and next evidence
 
-1. **Meteor launch profile and maintenance:** choose the intended visual-shower set, supported years, maintenance owner and review date. Retain all nineteen inventory identities with explicit missing states; do not silently promote the twelve radiants/eighteen verbal facts into the launch selection. Define whether supported activity windows are source-qualified civil guidance or a stronger modeled claim, and require matching domain/precision/rights evidence. Exact complete-season acceptance remains unclosed.
+1. **Meteor launch profile and maintenance (operational decision now recorded):** retain all existing supported evidence under NightSky.earth; next annual review 2027-10-18. See the maintenance amendment above. No new scientific season or model admission follows. Retain all nineteen inventory identities with explicit missing states. Existing activity context remains source-qualified civil/verbal/longitude guidance; a stronger modeled season claim requires separate domain/precision/rights evidence. Exact complete-season acceptance remains unclosed.
 2. **Existing planetary acceptance:** retain the already implemented finite definitions; finish representative independent references/event states and composed local observing evidence. The known Venus-morning maximum-angle independent case and partial planet-pair local-window acceptance remain in `api-event-gaps-20261017.md`. Do not require exhaustive pair-year absence certification or build a new adapter to repeat existing code.
 3. **Historical scientific claim:** either review/admit the explicit distinct hosted quantized method with its stated limitations, followed by a separately authorized bounded baseline validation, or make an explicit owner decision about unavailable historical coverage and the months-ahead promise. This document neither grants admission nor drops the promised journey. Reopening native-threshold equivalence requires provider-backed evidence, not a configuration flag.
 4. **Any future history acquisition:** approve an exact plan/point/zone, quotas/credit ceiling, bounded raw-evidence retention and maintenance, then measure source completeness, timings/RSS/storage and runtime serving. Prior allowances are consumed; no fetch/retry/provider switch is authorized here. No worldwide bulk programme or paid request is required by this profile.

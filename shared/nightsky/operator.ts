@@ -19,7 +19,7 @@ const runtimeSchema = z.object(Object.fromEntries(envKeys.map(k => [k, text.opti
 const discoveryEvidence = z.object({ mode: z.enum(['api', 'catalogue', 'regional', 'legacy']), providers: z.array(z.enum(['geonames', 'geoapify'])).max(2), configurationEvidence: evidence, policyEvidence: evidence, budgetEvidence: evidence }).strict();
 const weatherIds = z.array(z.enum(['met','weatherapi','openweather'])).min(1).max(4).refine(v=>new Set(v).size===v.length);
 const weatherEvidence = z.object({providers:weatherIds,admittedProviders:z.array(z.enum(['met','weatherapi','openweather'])).max(4).refine(v=>new Set(v).size===v.length),liveVerifiedProviders:z.array(z.enum(['met','weatherapi','openweather'])).max(4).refine(v=>new Set(v).size===v.length),configurationEvidence:evidence,policyEvidence:evidence,budgetEvidence:evidence}).strict().refine(v=>[...v.admittedProviders,...v.liveVerifiedProviders].every(id=>v.providers.includes(id)));
-const release = z.object({ id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000), discovery: discoveryEvidence.optional(), weather: weatherEvidence.optional() }).strict();
+const release = z.object({ profile: z.literal('api-only-v1').optional(), id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000), discovery: discoveryEvidence.optional(), weather: weatherEvidence.optional() }).strict();
 const lineageValidation=z.object({scratchDirectory:text,budgets:z.object({maxInputBytes:bytes.positive().max(64*1024**3),maxMemoryBytes:bytes.min(16*1024**2).max(2*1024**3),maxScratchBytes:bytes.positive().max(32*1024**3),maxOutputBytes:bytes.positive().max(32*1024**3),maxDurationMs:bytes.positive().max(60*60*1000)}).strict()}).strict();
 export const operatorConfigSchema = z.object({ schemaVersion: z.literal(1), lineageValidation:lineageValidation.optional(), status: z.enum(['template', 'selected']), endpoints: z.object({ production: evidence, staging: evidence, privacy: evidence, terms: evidence, support: evidence }).strict(), topology: z.object({ kind: z.enum(['direct', 'single-rewriting-proxy']), headerRewriteEvidence: evidence, restrictedBackendEvidence: evidence }).strict(), runtimeEnvironment: runtimeSchema, releases: z.object({ current: release.nullable(), rollback: release.nullable() }).strict(), artifacts: z.array(z.object({ id: text, kind: z.enum(['geonames', 'osm-single', 'osm-regional', 'global-catalogue', 'climate-legacy', 'era5-release', 'component']), path: text, sha256: hash, bytes: bytes, version: text }).strict()).max(10000), budget: z.object({ processes: z.number().int().min(1).max(64), memoryBytes: bytes, diskAvailableBytes: bytes, currentBytes: bytes, rollbackBytes: bytes, scratchBytes: bytes, reserveBytes: bytes, maxArtifactBytes: bytes.max(16 * 1024 ** 3), capacityEvidence: evidence, rollbackEvidence: evidence }).strict().nullable(), ownerEvidence: z.object({ identity: evidence, policies: evidence, retention: evidence, host: evidence, providerBudget: evidence }).strict() }).strict();
 export type OperatorConfig = z.infer<typeof operatorConfigSchema>;
@@ -192,6 +192,11 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
     for (const r of [current, rollback]) if (r) {
         const mode = r === current ? currentMode : r.discovery?.mode ?? 'legacy';
         const assigned = c.artifacts.filter(a => r.artifactIds.includes(a.id));
+        if (r.profile === 'api-only-v1') {
+            const localKinds = [...geographyKinds, 'climate-legacy', 'era5-release'];
+            const localSettings = ['NIGHTSKY_GEONAMES_INDEX', ...pairs.flatMap(([path, digest]) => [path, digest]), 'NIGHTSKY_API_HISTORY_CACHE_DIRECTORY', 'NIGHTSKY_API_HISTORY_ADMISSION'] as const;
+            if (mode !== 'api' || assigned.some(a => localKinds.includes(a.kind)) || (r === current && localSettings.some(key => e[key] !== undefined))) fail('API_ONLY_PROFILE_CONFLICT');
+        }
         if (mode === 'api') {
             if (!e.NIGHTSKY_QUOTA_STATE_PATH) missing('API_QUOTA_CONFIGURATION_MISSING');
             const d = r.discovery;
@@ -202,12 +207,12 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
             const expected = mode === 'catalogue' ? ['global-catalogue'] : mode === 'regional' ? ['osm-regional'] : ['osm-single', 'osm-regional', 'global-catalogue'];
             if (!assigned.some(a => a.kind === 'geonames') || !assigned.some(a => expected.includes(a.kind))) missing('ROLLBACK_PRODUCT_INVENTORY_MISSING');
         }
-        if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full' && r === rollback && !assigned.some(a => ['climate-legacy', 'era5-release'].includes(a.kind))) missing('ROLLBACK_PRODUCT_INVENTORY_MISSING');
+        if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full' && r === rollback && r.profile !== 'api-only-v1' && !assigned.some(a => ['climate-legacy', 'era5-release'].includes(a.kind))) missing('ROLLBACK_PRODUCT_INVENTORY_MISSING');
     }
     if ((e.NIGHTSKY_MCP_TOOL_MODE ?? 'full') === 'full') {
-        if (currentMode === 'api' || rollback?.discovery?.mode === 'api') missing('API_HISTORY_ROUTE_NOT_ADMITTED');
+        if ((currentMode === 'api' && current?.profile !== 'api-only-v1') || (rollback?.discovery?.mode === 'api' && rollback.profile !== 'api-only-v1')) missing('API_HISTORY_ROUTE_NOT_ADMITTED');
         const geographyMissing = currentMode !== 'api' && (!e.NIGHTSKY_GEONAMES_INDEX || !pairs.slice(0, 3).some(([k]) => e[k]));
-        if (!e.MET_NORWAY_USER_AGENT || !e.MET_NORWAY_USER_AGENT.includes('nightsky.earth2026@gmail.com') || geographyMissing || !pairs.slice(3).some(([k]) => e[k])) missing('FULL_MODE_INPUTS_MISSING');
+        if (!e.MET_NORWAY_USER_AGENT || !e.MET_NORWAY_USER_AGENT.includes('nightsky.earth2026@gmail.com') || geographyMissing || (current?.profile !== 'api-only-v1' && !pairs.slice(3).some(([k]) => e[k]))) missing('FULL_MODE_INPUTS_MISSING');
     }
     const b = c.budget;
     if (!b)
