@@ -24,7 +24,7 @@ const content = {
       ],
       [
         "Website storage, analytics and hosting",
-        "The Sky Events calendar saves your selected time zone and calendar view in local storage on your device. The website remembers that you entered the welcome screen for the current browser session. These preferences stay in your browser and are not sent to a NightSky account. The website code does not include third-party analytics or advertising trackers. The website also loads fonts from Google Fonts, which connects your browser to Google to retrieve font files. Netlify hosts this website and its news function; as part of delivering and securing the service, Netlify may process technical information such as network and request details and function logs. The Netlify dashboard makes function logs available for up to seven days depending on plan; this is not a confirmed deletion period for all hosting records. The owner selected Hetzner Cloud in Helsinki for the MCP service. Before it launches, the operator will configure service logs to contain route, status and elapsed time only, exclude request bodies, queries, exact coordinates and client IP addresses, and rotate them within a maximum of seven days. No analytics product is planned for the MCP service. These controls are the adopted deployment policy and have not yet been applied or verified on a live Hetzner host. This hosting activity is separate from NightSky’s request-history storage.",
+        "The Sky Events calendar saves your selected time zone and calendar view in local storage on your device, and the website remembers that you entered the welcome screen for the current browser session. These preferences stay in your browser and are not sent to a NightSky account. Optional Google Analytics 4 loads only after you choose Allow analytics. NightSky sends manual page views with a fixed site title and a sanitized page path; it removes query strings and fragments, sends an empty referrer, and does not track clicks, forms or scrolling. Google Analytics also creates standard events such as first_visit, session_start and user_engagement and may process pseudonymous identifiers, browser/device details and approximate location based on network information. Enhanced Measurement, Google Signals and advertising personalization are disabled, and query parameter redaction is enabled. Rejecting analytics prevents the Google tag from loading. You can change your choice with Privacy choices in the footer. The choice is stored in this browser; if storage is unavailable, it applies only until you leave the page. Analytics cookies expire after 30 days, and the GA property retains user-level and event-level data for two months. Revoking consent stops future measurement and removes GA cookies in this browser; it does not automatically delete data already received by Google. Google Analytics is separate from Google Fonts, which connects your browser to retrieve font files. Processing may occur outside India under Google's terms and privacy policy. Netlify hosts this website and its news function; as part of delivery and security, Netlify may process technical information such as network and request details and function logs. The Netlify dashboard makes function logs available for up to seven days depending on plan; this is not a confirmed deletion period for all hosting records. The owner selected Hetzner Cloud in Helsinki for the MCP service. Before it launches, the operator will configure service logs to contain route, status and elapsed time only, exclude request bodies, queries, exact coordinates and client IP addresses, and rotate them within a maximum of seven days. No analytics product is planned for the MCP service. These controls are the adopted deployment policy and have not yet been applied or verified on a live Hetzner host. This hosting activity is separate from NightSky’s request-history storage.",
       ],
       [
         "Email and privacy requests",
@@ -128,6 +128,14 @@ export default function SupportingPage({
                   rel="noreferrer"
                 >
                   Google Privacy Policy
+                </a>
+                {" · "}
+                <a
+                  href="https://support.google.com/analytics/answer/12002338"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Google Analytics setup and data practices
                 </a>
               </p>
             )}

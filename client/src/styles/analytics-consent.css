@@ -1,0 +1,95 @@
+.analytics-consent {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 24px;
+  width: min(920px, calc(100% - 36px));
+  padding: 22px 24px;
+  border: 1px solid #c2a97766;
+  border-radius: 18px;
+  background: #10151bf5;
+  box-shadow: 0 18px 60px #0009;
+  color: #f2eee5;
+  backdrop-filter: blur(18px);
+}
+.analytics-consent-copy { min-width: 0; }
+.analytics-consent-eyebrow {
+  margin: 0 0 5px;
+  color: #d9c18e;
+  font-size: 10px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.analytics-consent h2 {
+  margin: 0 0 7px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.analytics-consent-copy > p:not(.analytics-consent-eyebrow) {
+  margin: 0;
+  color: #bdc5ce;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.analytics-consent a {
+  display: inline-block;
+  margin-top: 7px;
+  color: #d9c18e;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.analytics-consent-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  min-width: 260px;
+}
+.analytics-consent-actions button {
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid #ffffff2b;
+  border-radius: 999px;
+  color: #e8e4da;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.analytics-consent-actions .analytics-consent-accept {
+  border-color: #c7ad75;
+  background: #c7ad75;
+  color: #171715;
+  font-weight: 600;
+}
+.analytics-consent-actions button:hover { filter: brightness(1.12); }
+.analytics-consent :is(a, button):focus-visible,
+.footer-analytics-preferences:focus-visible {
+  outline: 2px solid #dfc58c;
+  outline-offset: 4px;
+}
+@media (max-width: 650px) {
+  .analytics-consent {
+    bottom: max(10px, env(safe-area-inset-bottom));
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    width: calc(100% - 20px);
+    max-height: min(78dvh, 600px);
+    overflow-y: auto;
+    padding: 18px 18px max(18px, env(safe-area-inset-bottom));
+    border-radius: 16px;
+  }
+  .analytics-consent h2 { font-size: 19px; }
+  .analytics-consent-copy > p:not(.analytics-consent-eyebrow) { font-size: 13px; }
+  .analytics-consent-actions { min-width: 0; }
+  .analytics-consent-actions button { padding-inline: 10px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .analytics-consent * { scroll-behavior: auto; }
+}

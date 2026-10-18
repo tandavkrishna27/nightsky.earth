@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useReplayWelcome } from "./ExperienceShell";
+import { useAnalyticsPreferences } from "./AnalyticsConsent";
 import nightskyLogo from "@assets/nightsky-logo-dark.svg";
 const groups: { title: string; links: string[][] }[] = [
   {
@@ -31,6 +32,7 @@ const groups: { title: string; links: string[][] }[] = [
 ];
 export default function Footer() {
   const replayWelcome = useReplayWelcome();
+  const { openAnalyticsPreferences } = useAnalyticsPreferences();
   return (
     <footer className="site-footer">
       <div className="footer-main">
@@ -65,6 +67,15 @@ export default function Footer() {
             {group.title === "Help" && (
               <button className="footer-replay" type="button" onClick={event => replayWelcome(event.currentTarget)}>
                 Replay welcome
+              </button>
+            )}
+            {group.title === "The details" && (
+              <button
+                className="footer-replay footer-analytics-preferences"
+                type="button"
+                onClick={openAnalyticsPreferences}
+              >
+                Privacy choices
               </button>
             )}
           </div>

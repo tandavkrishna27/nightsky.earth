@@ -21,48 +21,51 @@ import NotFound from "./pages/not-found";
 import BackgroundMusic from "./components/BackgroundMusic";
 import ExperienceShell from "./components/ExperienceShell";
 import CalendarPreferences from "./components/sky-events/CalendarPreferences";
+import AnalyticsConsent from "./components/AnalyticsConsent";
 export default function App() {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <BackgroundMusic audioUrl="/cosmic-music.mp3">
-          <CalendarPreferences>
-            <ExperienceShell>
-              <PageShell>
-                <Switch>
-                  <Route path="/" component={Home} />
-                  <Route path="/sky-events" component={SkyEvents} />
-                  <Route path="/sky-events/:id" component={SkyEventDetail} />
-                  <Route path="/resources" component={Resources} />
-                  <Route path="/community" component={Community} />
-                  <Route path="/about" component={About} />
-                  <Route path="/contact" component={Contact} />
-                  <Route path="/get-started" component={GetStarted} />
-                  <Route path="/news" component={News} />
-                  <Route path="/news/:id" component={NewsArticle} />
-                  <Route path="/meteor-showers">
-                    <Redirect to="/sky-events?category=meteor-showers" />
-                  </Route>
-                  <Route path="/meteor-nights">
-                    <Redirect to="/sky-events?category=meteor-showers" />
-                  </Route>
-                  <Route
-                    path="/meteor-shower/:id"
-                    component={MeteorShowerDetail}
-                  />
-                  <Route path="/sources" component={Sources} />
-                  <Route path="/privacy">
-                    <SupportingPage kind="privacy" />
-                  </Route>
-                  <Route path="/terms">
-                    <SupportingPage kind="terms" />
-                  </Route>
-                  <Route component={NotFound} />
-                </Switch>
-              </PageShell>
-            </ExperienceShell>
-          </CalendarPreferences>
-        </BackgroundMusic>
+        <AnalyticsConsent>
+          <BackgroundMusic audioUrl="/cosmic-music.mp3">
+            <CalendarPreferences>
+              <ExperienceShell>
+                <PageShell>
+                  <Switch>
+                    <Route path="/" component={Home} />
+                    <Route path="/sky-events" component={SkyEvents} />
+                    <Route path="/sky-events/:id" component={SkyEventDetail} />
+                    <Route path="/resources" component={Resources} />
+                    <Route path="/community" component={Community} />
+                    <Route path="/about" component={About} />
+                    <Route path="/contact" component={Contact} />
+                    <Route path="/get-started" component={GetStarted} />
+                    <Route path="/news" component={News} />
+                    <Route path="/news/:id" component={NewsArticle} />
+                    <Route path="/meteor-showers">
+                      <Redirect to="/sky-events?category=meteor-showers" />
+                    </Route>
+                    <Route path="/meteor-nights">
+                      <Redirect to="/sky-events?category=meteor-showers" />
+                    </Route>
+                    <Route
+                      path="/meteor-shower/:id"
+                      component={MeteorShowerDetail}
+                    />
+                    <Route path="/sources" component={Sources} />
+                    <Route path="/privacy">
+                      <SupportingPage kind="privacy" />
+                    </Route>
+                    <Route path="/terms">
+                      <SupportingPage kind="terms" />
+                    </Route>
+                    <Route component={NotFound} />
+                  </Switch>
+                </PageShell>
+              </ExperienceShell>
+            </CalendarPreferences>
+          </BackgroundMusic>
+        </AnalyticsConsent>
       </QueryClientProvider>
     </HelmetProvider>
   );
