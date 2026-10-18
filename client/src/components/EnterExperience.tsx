@@ -43,16 +43,12 @@ export default function EnterExperience({
           ref={enter}
           className="entrance-button"
           data-testid="button-enter-night"
-          aria-describedby="entrance-sound-hint"
           onClick={() => onEnter(true)}
         >
           <Sparkles size={18} aria-hidden="true" />
           Enter the Night
           <Sparkles size={18} aria-hidden="true" />
         </button>
-        <p className="entrance-hint" id="entrance-sound-hint">
-          Enter with ambient sound
-        </p>
         <button className="entrance-quiet" onClick={() => onEnter(false)}>
           Enter without sound
         </button>
