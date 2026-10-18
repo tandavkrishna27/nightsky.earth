@@ -32,7 +32,9 @@ export function resolvePluginAction(config: ListingConfig) {
 }
 export function canonicalUrl(path: string) {
   try {
-    return SITE_ORIGIN + new URL(path, SITE_ORIGIN).pathname;
+    const pathname = new URL(path, SITE_ORIGIN).pathname;
+    const canonicalPath = pathname === "/" ? pathname : pathname.replace(/\/+$/, "");
+    return SITE_ORIGIN + canonicalPath;
   } catch {
     return SITE_ORIGIN + "/";
   }
