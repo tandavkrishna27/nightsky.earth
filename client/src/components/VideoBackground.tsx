@@ -103,7 +103,7 @@ export default function VideoBackground({
           <video
             ref={ref}
             className={ready ? "is-ready" : ""}
-            preload="metadata"
+            preload="none"
             loop
             muted
             playsInline

@@ -234,7 +234,8 @@
   background: #0b0e12;
 }
 .outside-month time {
-  opacity: 0.4;
+  color: #a7a297;
+  opacity: 1;
 }
 .calendar-event {
   display: block;

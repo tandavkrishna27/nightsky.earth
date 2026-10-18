@@ -14,8 +14,8 @@ import {
   collectivePurposes,
   contributionSubject,
 } from "@/content/collective";
-import person from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
-import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
+import person from "@assets/stock_images/person_silhouette_st_c7feb986.webp";
+import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
 import "@/styles/collective.css";
 
 const audienceIcons = [Telescope, Orbit, Camera, BookOpen, Users, Leaf];

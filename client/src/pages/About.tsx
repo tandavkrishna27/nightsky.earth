@@ -2,9 +2,9 @@ import { Link } from "wouter";
 import SEO from "@/components/SEO";
 import PluginAction from "@/components/PluginAction";
 import { aboutCopy } from "@/content/aboutCopy";
-import sky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
-import person from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
-import desert from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
+import sky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
+import person from "@assets/stock_images/person_silhouette_st_c7feb986.webp";
+import desert from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.webp";
 import "@/styles/about.css";
 export default function About() {
   return (

@@ -8,7 +8,7 @@ import { timingText, timingPhase } from "@shared/skyEventQueries";
 import { resolveZone, dateKeyAt } from "@shared/skyEventTime";
 import { calendarHref, parseCalendarState } from "@shared/skyEventRoutes";
 import { useCalendarPreferences } from "@/components/sky-events/CalendarPreferences";
-import image from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
+import image from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
 import "@/styles/sky-events.css";
 export default function SkyEventDetail() {
   const { id } = useParams();

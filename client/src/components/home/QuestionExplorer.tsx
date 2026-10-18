@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 import AssistantIcon, { assistants } from "@/components/AssistantIdentity";
 import { journeyExamples } from "@/content/homepage";
-import person from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
-import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
-import aurora from "@assets/stock_images/aurora_borealis_nort_b91defe5.jpg";
-import cabin from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
+import person from "@assets/stock_images/person_silhouette_st_c7feb986.webp";
+import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
+import aurora from "@assets/stock_images/aurora_borealis_nort_b91defe5.webp";
+import cabin from "@assets/stock_images/long_exposure_stars__411203e7.webp";
 
 const scenes = [
   [person, "A person looking up beneath a sky filled with stars"],

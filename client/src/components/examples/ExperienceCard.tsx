@@ -1,5 +1,5 @@
 import ExperienceCard from '../ExperienceCard';
-import desertImage from '@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg';
+import desertImage from '@assets/stock_images/desert_dunes_night_s_ee2f17ac.webp';
 
 export default function ExperienceCardExample() {
   return (

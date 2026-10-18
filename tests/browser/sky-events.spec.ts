@@ -6,6 +6,23 @@ test.beforeEach(async ({ page }) => {
   );
   await page.clock.setFixedTime(new Date("2026-10-16T12:00:00Z"));
 });
+test("outside-month calendar dates meet normal-text contrast", async ({ page }) => {
+  await page.goto("/sky-events?month=2026-10&tz=UTC&view=month");
+  const contrast = await page.locator(".month-calendar .outside-month time").first().evaluate((element) => {
+    const channels = (color: string) => color.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [0, 0, 0];
+    const foreground = channels(getComputedStyle(element).color);
+    const opacity = Number(getComputedStyle(element).opacity);
+    const background = channels(getComputedStyle(element.parentElement!).backgroundColor);
+    const blended = foreground.map((channel, index) => channel * opacity + background[index] * (1 - opacity));
+    const luminance = (rgb: number[]) => rgb.map(value => {
+      const channel = value / 255;
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const [lighter, darker] = [luminance(blended), luminance(background)].sort((a, b) => b - a);
+    return (lighter + 0.05) / (darker + 0.05);
+  });
+  expect(contrast).toBeGreaterThanOrEqual(4.5);
+});
 test("calendar filters, URL history, timezone and empty research state", async ({
   page,
 }) => {

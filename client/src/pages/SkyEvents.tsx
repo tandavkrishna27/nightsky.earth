@@ -16,7 +16,7 @@ import CalendarControls from "@/components/sky-events/CalendarControls";
 import MonthCalendar from "@/components/sky-events/MonthCalendar";
 import EventList from "@/components/sky-events/EventList";
 import UpcomingEvents from "@/components/sky-events/UpcomingEvents";
-import image from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
+import image from "@assets/stock_images/starry_night_sky_met_675ba820.webp";
 import "@/styles/sky-events.css";
 export default function SkyEvents() {
   const prefs = useCalendarPreferences();

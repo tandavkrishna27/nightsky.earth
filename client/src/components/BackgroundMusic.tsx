@@ -31,6 +31,7 @@ export default function BackgroundMusic({
   const startMusic = () => {
     const audio = audioRef.current;
     if (!audio) return;
+    if (!audio.hasAttribute("src")) audio.src = audioUrl;
     const request = ++requestId.current;
     setIsPending(true);
     audio.volume = volume;
@@ -78,9 +79,8 @@ export default function BackgroundMusic({
     >
       <audio
         ref={audioRef}
-        src={audioUrl}
         loop
-        preload="metadata"
+        preload="none"
         onError={() => {
           requestId.current++;
           if (audioRef.current) audioRef.current.muted = true;

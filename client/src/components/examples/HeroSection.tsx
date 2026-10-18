@@ -1,5 +1,5 @@
 import HeroSection from '../HeroSection';
-import heroImage from '@assets/stock_images/starry_night_sky_met_675ba820.jpg';
+import heroImage from '@assets/stock_images/starry_night_sky_met_675ba820.webp';
 
 export default function HeroSectionExample() {
   return (
