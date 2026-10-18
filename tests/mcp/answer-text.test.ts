@@ -5,6 +5,34 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createFixtureServer} from '../../scripts/complete-model-journey-test';
 
+test('legacy plan answer retains the returned GeoNames attribution licence and modification notice',async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-location-notices-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'meteor-shower',target:'Geminids',window:{startUtc:'2026-12-13T18:00:00Z',endUtc:'2026-12-14T06:00:00Z',timeZone:'Europe/London'}}});
+  const plan=response.result.structuredContent,text=response.result.content.map((row:any)=>row.text??'').join('\n');
+  const source=plan.place.sources.find((row:any)=>row.name==='GeoNames');
+  assert.ok(source);
+  assert.ok(text.includes(source.attribution),'answer-ready text must carry actual returned attribution');
+  assert.ok(text.includes(source.licenseUrl),'answer-ready text must carry actual returned licence URL');
+  assert.equal(source.modified,true);
+  assert.match(text,/Modified and indexed by NightSky\.earth/);
+  assert.equal(server.externalAttempts(),0);
+ }finally{await server.close();}
+});
+
+test('source credits retain distinct notices at a shared URL and safely render licence and modification fields',async()=>{
+ const {sourceLinkedText}=await import('../../server/mcp/answerText');
+ const base={name:'A [title]',url:'https://example.test/source',attribution:'Credit A <tag>\nnotice',licenseUrl:'https://example.test/license/(v1)',modified:true,dataClass:'context' as const};
+ const text=sourceLinkedText('Facts',[base,{...base},{...base,attribution:'Credit B'},{...base,url:'https://example.test/other',licenseUrl:'https://user:secret@example.test/private'},{...base,url:'https://example.test/third',licenseUrl:'javascript:alert(1)'}]);
+ assert.equal((text.match(/Credit A/g)??[]).length,3,'duplicate credit removed, other source identities retained');
+ assert.match(text,/Credit B/);
+ assert.match(text,/https:\/\/example.test\/license\/\(v1\)/);
+ assert.match(text,/data modified/);
+ assert.doesNotMatch(text,/user:secret|javascript:|<tag>|\[title\]/);
+ const unknown=sourceLinkedText('Facts',[{name:'Unknown',url:'https://example.test/unknown',attribution:'Returned notice only',dataClass:'context'}]);
+ assert.doesNotMatch(unknown,/License|data modified/,'missing licence/modification metadata must not be invented');
+});
+
 test('Geminids answer omits unrelated catalogue references while retaining full structured provenance',async()=>{
  const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-topic-credits-')));
  try{
@@ -107,10 +135,10 @@ test('candidate display timezone schema explicitly requires a user choice rather
  try{const result=await server.rpc('tools/list',{});const plan=result.result.tools.find((tool:any)=>tool.name==='plan_observing_session');assert.match(plan.inputSchema.properties.displayTimeZone.description,/user.*explicit/i);assert.match(plan.description,/user.*chosen/i);}finally{await server.close();}
 });
 
-test('source text keeps complete safe links, deduplicates URLs and never renders credentials or unsafe schemes',async()=>{
+test('source text keeps complete safe links, deduplicates identical records and never renders credentials or unsafe schemes',async()=>{
  const {sourceLinkedText}=await import('../../server/mcp/answerText');
  const make=(name:string,url:string)=>({name,url,attribution:'fixture',dataClass:'context' as const});
- const text=sourceLinkedText('Facts',[make('A [title] <tag>','https://example.test/path/(a)'),make('duplicate','https://example.test/path/(a)'),make('unsafe','javascript:alert(1)'),make('secret','https://username:password@example.test/private')]);
+ const text=sourceLinkedText('Facts',[make('A [title] <tag>','https://example.test/path/(a)'),make('A [title] <tag>','https://example.test/path/(a)'),make('unsafe','javascript:alert(1)'),make('secret','https://username:password@example.test/private')]);
  assert.equal((text.match(/https:\/\/example.test\/path/g)??[]).length,1);
  assert.match(text,/https:\/\/example.test\/path\/\(a\)/);
  assert.doesNotMatch(text,/javascript:|username|password|<tag>|\[title\]/);
@@ -122,7 +150,7 @@ test('source link text bounds UTF-8 bytes without emitting partial URL lines',as
  const text=sourceLinkedText('Facts',sources);
  assert.ok(Buffer.byteLength(text,'utf8')<7600);
  assert.match(text,/Additional source records/);
- for(const line of text.split('\n').filter(line=>line.startsWith('- [')))assert.match(line,/>\)$/);
+ for(const line of text.split('\n').filter(line=>line.startsWith('- [')))assert.match(line,/>\): fixture$/);
 });
 
 test('empty dark-session suggestions do not deny targets above the geometric horizon',async()=>{

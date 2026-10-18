@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-19",
+  "runtimeSourceBaseCommit": "8f0036d206b18b64bb22f307acc346eca21f2298",
+  "pluginVersion": "1.0.36",
+  "endpointBasis": "Fixed local rehearsal loopback; not public hosting",
+  "deploymentReady": false,
+  "publicSourceAdmissionGranted": false,
+  "claudeNativeAccepted": false,
+  "installedCodexFilesMatchAtReview": true,
+  "packages": [
+    {
+      "host": "codex",
+      "sha256": "efbcb521fbd3992b272e5ab5787bd7324aacd6f5f8732d21aab62cd3cfb439ad",
+      "inventory": [
+        {
+          "path": "RELEASE-NOTES.md",
+          "bytes": 12535,
+          "sha256": "892eff66e2a84da64447d6614f5df06c4d63543c2d932883c46d1b51ed0fcd1d"
+        },
+        {
+          "path": "assets/composer.svg",
+          "bytes": 282,
+          "sha256": "fbcd87ba42387ed0e42f762841fbcd0c9997d20a38cceb4401b94d932351fc3c"
+        },
+        {
+          "path": "assets/logo.svg",
+          "bytes": 282,
+          "sha256": "fbcd87ba42387ed0e42f762841fbcd0c9997d20a38cceb4401b94d932351fc3c"
+        },
+        {
+          "path": "mcp.json",
+          "bytes": 196,
+          "sha256": "63ef836e68a1d17a0fe024e37c86d7536789e251bbfa41e60b50878ead49d546"
+        },
+        {
+          "path": "plugin.json",
+          "bytes": 5160,
+          "sha256": "f0ecb5d8d8a6249f202592d469aee0dcc7838a1ff4db6507dab91db43d22dfe2"
+        },
+        {
+          "path": "skills/find-observing-place/SKILL.md",
+          "bytes": 65849,
+          "sha256": "e24f67c82cf2cca2d3f28fd1839978e7f6b7360dfa0c15a27c1fa187b1bf1807"
+        },
+        {
+          "path": "skills/find-observing-place/references/workflow.md",
+          "bytes": 73560,
+          "sha256": "7a868e520623377c4e3a38ee4e88d88af2cfcd83130c0f1fe876ca1d4aba5e3a"
+        },
+        {
+          "path": "skills/plan-astrophotography/SKILL.md",
+          "bytes": 64570,
+          "sha256": "6d627a936b8b1ea29d14c49dc1cd1e675cf333649914192f028f18120502acab"
+        },
+        {
+          "path": "skills/plan-astrophotography/references/workflow.md",
+          "bytes": 71832,
+          "sha256": "2289f26f6e84835b423a9097b8907bb42d20d4a36194f84d5ff6b82a830f25d5"
+        },
+        {
+          "path": "skills/plan-sky-event/SKILL.md",
+          "bytes": 66526,
+          "sha256": "f11cd2875e59eafc8fe06b39b67d2997c6f60b1779d03315e6e77d75019007ce"
+        },
+        {
+          "path": "skills/plan-sky-event/references/workflow.md",
+          "bytes": 77860,
+          "sha256": "3bf7afa9e43d2fa479639308e3164d16d5f942558afeb59e164f2e8d17d115fd"
+        },
+        {
+          "path": "skills/plan-stargazing-night/SKILL.md",
+          "bytes": 64499,
+          "sha256": "10245a7713a346752e2228f0c8b66859f14040158b46c78a1df148a3d41e0061"
+        },
+        {
+          "path": "skills/plan-stargazing-night/references/workflow.md",
+          "bytes": 73539,
+          "sha256": "5b1f2f542f1a37d6595a4faeb8cebc36b03fa5cadfc12e8fde605075f93e2e85"
+        },
+        {
+          "path": "skills/prepare-outing/SKILL.md",
+          "bytes": 60707,
+          "sha256": "c062b87159fdcfa9be0d97947c5b4ff4147ef3a9eedf916a5a14281262a022bf"
+        },
+        {
+          "path": "skills/prepare-outing/references/workflow.md",
+          "bytes": 68208,
+          "sha256": "3a5077070f6038dbe0f779b298d5824e4cc693055d97485ca101c8d1d07b7ec7"
+        }
+      ]
+    },
+    {
+      "host": "claude",
+      "sha256": "18bb404326ba50d9dd605c9a20755498b57e0b9839531a8fc2a24760595f0c07",
+      "inventory": [
+        {
+          "path": ".claude-plugin/plugin.json",
+          "bytes": 232,
+          "sha256": "d4fa340df0470cb545160ee0b0e9d7e8629d007b0e6a82c9469135978e978b99"
+        },
+        {
+          "path": ".mcp.json",
+          "bytes": 113,
+          "sha256": "735ec51589ac4be92319a1e130048bc6ea728734eac85812f235b7dde69550d7"
+        },
+        {
+          "path": "RELEASE-NOTES.md",
+          "bytes": 12535,
+          "sha256": "892eff66e2a84da64447d6614f5df06c4d63543c2d932883c46d1b51ed0fcd1d"
+        },
+        {
+          "path": "assets/composer.svg",
+          "bytes": 282,
+          "sha256": "fbcd87ba42387ed0e42f762841fbcd0c9997d20a38cceb4401b94d932351fc3c"
+        },
+        {
+          "path": "assets/logo.svg",
+          "bytes": 282,
+          "sha256": "fbcd87ba42387ed0e42f762841fbcd0c9997d20a38cceb4401b94d932351fc3c"
+        },
+        {
+          "path": "skills/find-observing-place/SKILL.md",
+          "bytes": 65849,
+          "sha256": "e24f67c82cf2cca2d3f28fd1839978e7f6b7360dfa0c15a27c1fa187b1bf1807"
+        },
+        {
+          "path": "skills/find-observing-place/references/workflow.md",
+          "bytes": 73560,
+          "sha256": "7a868e520623377c4e3a38ee4e88d88af2cfcd83130c0f1fe876ca1d4aba5e3a"
+        },
+        {
+          "path": "skills/plan-astrophotography/SKILL.md",
+          "bytes": 64570,
+          "sha256": "6d627a936b8b1ea29d14c49dc1cd1e675cf333649914192f028f18120502acab"
+        },
+        {
+          "path": "skills/plan-astrophotography/references/workflow.md",
+          "bytes": 71832,
+          "sha256": "2289f26f6e84835b423a9097b8907bb42d20d4a36194f84d5ff6b82a830f25d5"
+        },
+        {
+          "path": "skills/plan-sky-event/SKILL.md",
+          "bytes": 66526,
+          "sha256": "f11cd2875e59eafc8fe06b39b67d2997c6f60b1779d03315e6e77d75019007ce"
+        },
+        {
+          "path": "skills/plan-sky-event/references/workflow.md",
+          "bytes": 77860,
+          "sha256": "3bf7afa9e43d2fa479639308e3164d16d5f942558afeb59e164f2e8d17d115fd"
+        },
+        {
+          "path": "skills/plan-stargazing-night/SKILL.md",
+          "bytes": 64499,
+          "sha256": "10245a7713a346752e2228f0c8b66859f14040158b46c78a1df148a3d41e0061"
+        },
+        {
+          "path": "skills/plan-stargazing-night/references/workflow.md",
+          "bytes": 73539,
+          "sha256": "5b1f2f542f1a37d6595a4faeb8cebc36b03fa5cadfc12e8fde605075f93e2e85"
+        },
+        {
+          "path": "skills/prepare-outing/SKILL.md",
+          "bytes": 60707,
+          "sha256": "c062b87159fdcfa9be0d97947c5b4ff4147ef3a9eedf916a5a14281262a022bf"
+        },
+        {
+          "path": "skills/prepare-outing/references/workflow.md",
+          "bytes": 68208,
+          "sha256": "3a5077070f6038dbe0f779b298d5824e4cc693055d97485ca101c8d1d07b7ec7"
+        }
+      ]
+    }
+  ],
+  "compiledBundle": {
+    "sha256": "81caacbda8db257d6e44a016703324438f2c60ab9458947628ca70935127b28b",
+    "bytes": 807992,
+    "scope": "Bundle only; external dependencies are not included"
+  },
+  "productionDependencyAudit": {
+    "advisoryCount": 0,
+    "scope": "npm audit --omit=dev at review; no perpetual vulnerability guarantee"
+  },
+  "externalDataRequests": 0,
+  "reviewedRuntimeChanges": [
+    "server/mcp/answerText.ts: retain returned source notices and distinct same-URL credits"
+  ]
+}

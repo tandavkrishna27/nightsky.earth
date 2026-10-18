@@ -50,7 +50,7 @@ export function planAnswerSources(plan: PlanResult, target?: string): SourceReco
   return plan.sources.filter(source => !inventory.has(sourceKey(source)) || relevant.has(sourceKey(source)));
 }
 
-/** Complete HTTP(S) source links, never truncated URLs or inferred provider identities. */
+/** Complete HTTP(S) source links and returned notices; never infer provider rights. */
 export function sourceLinkedText(text: string, sources: SourceRecord[]): string {
   const lines: string[] = [];
   const seen = new Set<string>();
@@ -61,9 +61,20 @@ export function sourceLinkedText(text: string, sources: SourceRecord[]): string 
     try { url = new URL(source.url); } catch { omitted = true; continue; }
     if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password) { omitted = true; continue; }
     const href = url.href.replace(/[<>]/g, char => encodeURIComponent(char));
-    if (seen.has(href)) continue;
-    seen.add(href);
-    const line = `- [${plain(source.name)}](<${href}>)`;
+    const identity = sourceKey(source);
+    if (seen.has(identity)) continue;
+    seen.add(identity);
+    let license: string | undefined;
+    if (source.licenseUrl) {
+      try {
+        const parsed = new URL(source.licenseUrl);
+        if (['https:', 'http:'].includes(parsed.protocol) && !parsed.username && !parsed.password)
+          license = parsed.href.replace(/[<>]/g, char => encodeURIComponent(char));
+        else omitted = true;
+      } catch { omitted = true; }
+    }
+    const modification = source.modified === true ? ' Source record marks data modified.' : '';
+    const line = `- [${plain(source.name)}](<${href}>): ${plain(source.attribution)}${modification}${license ? ` [License](<${license}>)` : ''}`;
     if (bytes + Buffer.byteLength(line, 'utf8') > 7_000) { omitted = true; continue; }
     lines.push(line); bytes += Buffer.byteLength(line, 'utf8') + 1;
   }

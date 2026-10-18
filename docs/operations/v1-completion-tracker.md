@@ -2,11 +2,15 @@
 
 ## Current readiness summary — 19 October 2026
 
-[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **13 local deliverables accepted under current scope; 4 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
+[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **15 local deliverables accepted under current scope; 2 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
-## Current decision — supported event calculations with explicit gaps
+## Current local wave — source/discovery freeze and final model findings
 
-[Owner-approved scope](v1-bounded-event-scope-20261019.md) accepts missing scientific coverage as explicitly labelled V1 limitations while retaining all19 identities. Known incorrect results, hidden/widened model claims and source-rights failures remain blockers. Task6 is locally accepted under this amended scope; original wider scientific completeness criteria are deferred enhancements, not passed tests. Current categories13/4/8/2 total27; Tasks0/8/12B/15 and actual source/account/host/release gates remain open. Runtime scientific validators, workflows and plugin1.0.34 are unchanged. Policy regression red/green,73affected checks, types/packages and full offline1,847passed/0failed/2skipped are verified; independent review found no material defect.
+[Final reviewed wave](v1-final-local-wave-20261019.md) accepts Task0 local source intent and Task8 default API discovery. Optional geometry is implemented but conditional/off pending actual source acceptance. Exact1.0.36packages and compiled runtime are checked. A deterministic source-link formatter defect is fixed, but final model answers still omit required credits and one meteor lookup repeats. Tasks12B/15 therefore remain open; no all-client/product release pass is claimed. Current categories15/2/8/2 total27. Final stable suite1,854passed/0failed/2skipped,34integrated affected checks,26answer-text checks, types/packages/compiled probes and0production audit advisories are recorded. Model acceptance remains partial. All original scope amendments remain.
+
+## Previous decision — supported event calculations with explicit gaps
+
+[Owner-approved scope](v1-bounded-event-scope-20261019.md) accepts missing scientific coverage as explicitly labelled V1 limitations while retaining all19 identities. Known incorrect results, hidden/widened model claims and source-rights failures remain blockers. Task6 is locally accepted under this amended scope; original wider scientific completeness criteria are deferred enhancements, not passed tests. At that decision checkpoint categories13/4/8/2 totaled27; the current wave summary supersedes it; Tasks0/8/12B/15 and actual source/account/host/release gates remain open. Runtime scientific validators, workflows and plugin1.0.34 are unchanged. Policy regression red/green,73affected checks, types/packages and full offline1,847passed/0failed/2skipped are verified; independent review found no material defect.
 
 ## Previous local science/source follow-up — 18 October
 

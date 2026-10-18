@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "current": {
+    "environment": {
+      "NIGHTSKY_QUOTA_STATE_PATH": "C:/nightsky-declaration-fixture/general-existing.json",
+      "NIGHTSKY_SKY_PROVIDERS": "",
+      "NIGHTSKY_SKY_ADMITTED_PROVIDERS": "",
+      "NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED": "false",
+      "NIGHTSKY_GEOMETRY_ENABLED": "no",
+      "NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED": "no",
+      "NIGHTSKY_WEATHER_PROVIDERS": "met,weatherapi,openweather",
+      "NIGHTSKY_WEATHER_ADMITTED_PROVIDERS": "weatherapi,openweather",
+      "NIGHTSKY_LIGHT_POLLUTION_SOURCES": "darkskysites",
+      "NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED": "darkskysites",
+      "NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH": "C:/nightsky-declaration-fixture/darkskysites-existing.json"
+    },
+    "discoveryProviders": [
+      "geoapify"
+    ],
+    "evidence": {
+      "geoapify": [
+        "docs/operations/api-provider-admission.md",
+        "docs/operations/v1-freeze-decisions-20261018.md"
+      ],
+      "met": [
+        "docs/operations/provider-controls-wave.md"
+      ],
+      "noaa-swpc": [
+        "docs/operations/events-weather-coverage-wave.md"
+      ],
+      "astronomy-engine": [
+        "docs/operations/v1-bounded-event-scope-20261019.md"
+      ],
+      "weatherapi": [
+        "docs/operations/weather-provider-admission.md",
+        "docs/operations/v1-api-readiness-20261018.md"
+      ],
+      "openweather": [
+        "docs/operations/openweather-public-delivery-20261018.md",
+        "docs/operations/v1-api-readiness-20261018.md"
+      ],
+      "darkskysites": [
+        "docs/operations/light-pollution-acceptance-20261017.md",
+        "docs/operations/v1-api-readiness-20261018.md"
+      ]
+    }
+  },
+  "rollback": {
+    "environment": {
+      "NIGHTSKY_QUOTA_STATE_PATH": "C:/nightsky-declaration-fixture/general-existing.json",
+      "NIGHTSKY_SKY_PROVIDERS": "",
+      "NIGHTSKY_SKY_ADMITTED_PROVIDERS": "",
+      "NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED": "false",
+      "NIGHTSKY_GEOMETRY_ENABLED": "no",
+      "NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED": "no",
+      "NIGHTSKY_WEATHER_PROVIDERS": "met",
+      "NIGHTSKY_WEATHER_ADMITTED_PROVIDERS": "",
+      "NIGHTSKY_LIGHT_POLLUTION_SOURCES": "",
+      "NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED": ""
+    },
+    "discoveryProviders": [
+      "geoapify"
+    ],
+    "evidence": {
+      "geoapify": [
+        "docs/operations/api-provider-admission.md",
+        "docs/operations/v1-freeze-decisions-20261018.md"
+      ],
+      "met": [
+        "docs/operations/provider-controls-wave.md"
+      ],
+      "noaa-swpc": [
+        "docs/operations/events-weather-coverage-wave.md"
+      ],
+      "astronomy-engine": [
+        "docs/operations/v1-bounded-event-scope-20261019.md"
+      ]
+    }
+  }
+}

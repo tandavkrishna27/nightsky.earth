@@ -25,6 +25,21 @@ const skillNames = ["find-observing-place", "plan-stargazing-night", "plan-astro
 
 function read(path: string): string { return readFileSync(join(root, path), "utf8"); }
 
+test("early answer rules reconcile every used source including location credit and modification notices", () => {
+  for (const skill of skillNames) {
+    const packaged = read(`plugins/nightsky/skills/${skill}/SKILL.md`);
+    const canonical = read(`docs/product/workflows/${skill}.md`);
+    for (const [kind, content] of [["packaged", packaged], ["canonical", canonical]]) {
+      const early = content.slice(0, 2500);
+      assert.match(early, /Before finalizing, reconcile every returned source used, including the resolved-location source:/, `${skill} ${kind}`);
+      assert.match(early, /attribution and modification statements, and licence links/, `${skill} ${kind}`);
+      assert.match(early, /provider\/datasource contributor, copyright and licence names/, `${skill} ${kind}`);
+      assert.match(early, /selection-reporting clarifications; keep full provenance structured/, `${skill} ${kind}`);
+      assert.match(early, /stop and ask one display-time-zone question/, `${skill} ${kind}`);
+    }
+  }
+});
+
 test("workflowSkillsReferenceOnlyRegisteredMcpTools", () => {
   for (const skill of skillNames) {
     const content = read(`plugins/nightsky/skills/${skill}/SKILL.md`);

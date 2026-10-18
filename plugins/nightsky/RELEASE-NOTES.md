@@ -1,3 +1,11 @@
+## V1 local revision 1.0.36 - complete answer-ready source notices
+
+Corrects the legacy source-link formatter so answer-ready text retains returned attribution, safe licence links, modification indicators and distinct same-URL notices within its existing bound. Structured scientific evidence, numeric calculations, provider admission and quotas remain unchanged. Earlier1.0.34/1.0.35native credit failures are preserved; offline transport correction is not a universal final-answer compliance guarantee.
+
+## V1 local revision 1.0.35 - final returned-source reconciliation
+
+Clarifies the existing compact-credit requirement: final answers reconcile every returned source used, including the location resolver, and preserve its licence and modification notices/links. Required provenance is not limited to astronomy/event sources. No numerical calculation, API contract, provider admission, quota or source activation changes. Initial native credit failures are retained; subsequent bounded confirmation is scoped acceptance, not universal model/client compliance.
+
 ## V1 local revision 1.0.34 - API-only scope and compact evidence credits
 
 Existing answer guidance now preserves downstream OpenStreetMap credit through source compression and describes lower-cloud samples by their actual timestamps rather than implying unsupported hours/windows. API-mode historical-tool wording states optional unavailability without an installation/acquisition prerequisite. Numerical-history preparation is explicitly outside V1 launch scope. Structured contracts, source activation, quota and workflow priority remain unchanged. Offline and synthetic native checks are scoped evidence, not universal model or public-host acceptance. No dataset acquisition or deployment.

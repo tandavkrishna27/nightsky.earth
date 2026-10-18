@@ -249,3 +249,6 @@ import "./events/eventConventionValidation.test.ts";
 import "./planning/eventValidation.test.ts";
 import "./operations/openweather-offer.test.ts";
 import "./operations/api-source-manifest.test.ts";
+
+import "./operations/v1-source-freeze.test.ts";
+import "./operations/local-artifact-freeze.test.ts";

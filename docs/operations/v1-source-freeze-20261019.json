@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "snapshotDate": "2026-10-19",
+  "baseline": "8f0036d",
+  "profile": "api-only-v1",
+  "appliedToRuntime": false,
+  "accountOrHostEntitlementVerified": false,
+  "providerRequestsMade": 0,
+  "intendedCore": [
+    "geoapify",
+    "met",
+    "weatherapi",
+    "openweather",
+    "darkskysites",
+    "noaa-swpc",
+    "astronomy-engine"
+  ],
+  "retainedProposedEnrichment": [
+    "publicuniverse"
+  ],
+  "optionalUnadmitted": [
+    "geonames",
+    "seventimer",
+    "darkskyplanner",
+    "astronomyapi",
+    "nasa-donki",
+    "jpl",
+    "publicuniverse"
+  ],
+  "history": "unavailable",
+  "geometry": "disabled-pending-selected-source-acceptance",
+  "events": "supported-with-explicit-coverage-gaps-all-19-identities",
+  "sources": [
+    {
+      "id": "geonames",
+      "operatorQuota": {
+        "providerId": "geonames",
+        "accountLabel": "operator-geonames",
+        "hourlyLimit": 400,
+        "dailyLimit": 2000
+      },
+      "creditContract": "Retain GeoNames source/required attribution; API timezone is unknown.",
+      "externalAcceptance": [
+        "Owner account signup/access remains unresolved; configure only after its own allowance and secure endpoint validation."
+      ]
+    },
+    {
+      "id": "geoapify",
+      "operatorQuota": {
+        "providerId": "geoapify",
+        "accountLabel": "operator-geoapify",
+        "hourlyLimit": 200,
+        "dailyLimit": 1000
+      },
+      "creditContract": "Visible linked Geoapify and OpenStreetMap credits; transient POI results; geometry disabled until exact response acceptance.",
+      "externalAcceptance": [
+        "Preserve existing account ledger; confirm selected features, transient POI use, OSM credit and actual release setup.",
+        "Administrative full geometry needs both separate opt-in flags and exact source/size acceptance."
+      ]
+    },
+    {
+      "id": "met",
+      "operatorQuota": null,
+      "creditContract": "MET Norway CC BY 4.0 linked attribution/change notice, identifying contact, bounded precision and expiry/conditional-cache controls.",
+      "externalAcceptance": [
+        "Identifying app/contact User-Agent, provider expiry/cache/traffic conditions and CC BY credit must remain in release configuration."
+      ]
+    },
+    {
+      "id": "weatherapi",
+      "operatorQuota": {
+        "providerId": "weatherapi",
+        "accountLabel": "operator-weatherapi",
+        "hourlyLimit": 60,
+        "dailyLimit": 1000,
+        "monthlyLimit": 20000
+      },
+      "creditContract": "WeatherAPI.com attribution and existing probabilistic forecast/safety warning; Free three-day endpoint; cache at most 15 minutes.",
+      "externalAcceptance": [
+        "Free three-day product only, never Business-trial capability; preserve existing quota and reviewed attribution/cache rules.",
+        "Verify actual post-trial account state before release."
+      ]
+    },
+    {
+      "id": "openweather",
+      "operatorQuota": {
+        "providerId": "openweather",
+        "accountLabel": "operator-openweather",
+        "hourlyLimit": 30,
+        "dailyLimit": 300,
+        "monthlyLimit": 5000
+      },
+      "creditContract": "Weather data provided by OpenWeather; linked provider and ODbL 1.0 notice; NightSky field selection/normalization notice; official logo; public machine-readable alteration-method offer; no response cache.",
+      "externalAcceptance": [
+        "Existing Free five-day/three-hour entitlement evidence; release account/key state, rights and persistent quota remain separate.",
+        "Publish the machine-readable ODbL alteration-method offer at a stable public HTTPS URL, link it adjacent to shared OpenWeather samples, and verify it matches the released implementation. Local file presence is not public accessibility.",
+        "Accept the official OpenWeather logo, linked provider credit and ODbL notice in each actual hosted/client surface. Text metadata alone does not prove logo delivery."
+      ]
+    },
+    {
+      "id": "seventimer",
+      "operatorQuota": {
+        "providerId": "seventimer",
+        "accountLabel": "operator-seventimer",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "creditContract": "Retain 7Timer product/source and categorical-band interpretation; reviewed wiki permits free or paid software.",
+      "externalAcceptance": [
+        "Retained official wiki review permits data use in free or paid software; earlier noncommercial-only screening is superseded.",
+        "Explicit selected/admitted controls and preserving ledger migration must include prior usage; do not reset weather counters."
+      ]
+    },
+    {
+      "id": "darkskyplanner",
+      "operatorQuota": {
+        "providerId": "darkskyplanner",
+        "accountLabel": "operator-darkskyplanner",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "creditContract": "Retain service attribution; use/redistribution terms unresolved; no admission from operator ceilings.",
+      "externalAcceptance": [
+        "Verify intended service/free-use terms and actual activation/usage; operator ceilings are not provider entitlement.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ]
+    },
+    {
+      "id": "astronomyapi",
+      "operatorQuota": {
+        "providerId": "astronomyapi",
+        "accountLabel": "operator-astronomyapi",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "creditContract": "Retain source attribution; actual allowance, billing and redistribution unresolved.",
+      "externalAcceptance": [
+        "Numeric free allowance, billing behavior and intended redistribution/use remain unverified despite successful Moon diagnostic.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ]
+    },
+    {
+      "id": "nasa-donki",
+      "operatorQuota": {
+        "providerId": "nasa-donki",
+        "accountLabel": "operator-nasa-donki",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "creditContract": "Retain NASA DONKI event source/validity; research context is not local aurora visibility.",
+      "externalAcceptance": [
+        "Successful live response acceptance remains absent after retained 503; reconcile key-wide usage and intended data attribution.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ]
+    },
+    {
+      "id": "jpl",
+      "operatorQuota": {
+        "providerId": "jpl",
+        "accountLabel": "operator-jpl",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "creditContract": "Retain returned JPL/SBDB/Horizons source, version/schema and serialized fair-use limits; identity and observer acceptance distinct.",
+      "externalAcceptance": [
+        "SBDB identity diagnostic succeeded; Horizons returned an application error without accepted table. Keep observer capability unaccepted.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ]
+    },
+    {
+      "id": "publicuniverse",
+      "operatorQuota": {
+        "providerId": "publicuniverse",
+        "accountLabel": "operator-publicuniverse",
+        "hourlyLimit": 20,
+        "dailyLimit": 100
+      },
+      "creditContract": "Retain exact per-record source/licence/modifications: BSC5P Hoffleit & Warren and NASA/GSFC HEASARC; OpenNGC Mattia Verga CC BY-SA 4.0; composed Public Universe credit. Other exposed feature rights unresolved; provider remains unadmitted.",
+      "externalAcceptance": [
+        "Preserve dedicated quota, reviewed endpoint contracts, per-record rights and credits; exact release selection/admission remains explicit.",
+        "Keep provider-wide admission disabled until rights and composed credits for every exposed feature resolve, or implement explicit reviewed starter-only restriction before admitting that subset. BSC5P/OpenNGC rights do not admit the whole provider."
+      ]
+    },
+    {
+      "id": "darkskysites",
+      "operatorQuota": {
+        "providerId": "darkskysites",
+        "accountLabel": "operator-darkskysites-project",
+        "hourlyLimit": 30000,
+        "dailyLimit": 30000,
+        "monthlyLimit": 30000
+      },
+      "creditContract": "Adjacent linked darkskysites.com credit plus returned attribution; point binding, dataset date/model and uncertainty; latest zenith estimates only.",
+      "externalAcceptance": [
+        "Retain dedicated project-wide ledger and adjacent linked credit; final reuse terms still require release confirmation.",
+        "Latest zenith route only; historical/directional Pro features are not enabled."
+      ]
+    },
+    {
+      "id": "noaa-swpc",
+      "operatorQuota": null,
+      "creditContract": "NOAA SWPC source credit and issue/valid time; probability grid is not local naked-eye visibility.",
+      "externalAcceptance": [
+        "Retain source credits, bounded public-product request controls, issue/valid time and source availability."
+      ]
+    },
+    {
+      "id": "openmeteo-history",
+      "operatorQuota": null,
+      "creditContract": "No V1 history execution/admission; future approved use retains Open-Meteo and underlying dataset/method attribution.",
+      "externalAcceptance": [
+        "Free noncommercial eligibility, complete usage and source/method admission remain separate.",
+        "No historical acquisition in this wave. API-serving route reads only explicitly admitted completed summaries."
+      ]
+    },
+    {
+      "id": "lightpollutionmap-browser",
+      "operatorQuota": null,
+      "creditContract": "Experimental browser source not admitted; no API-failure scraper fallback.",
+      "externalAcceptance": [
+        "Hard browser_not_admitted gate remains; rights, concrete DOM binding, egress and process-tree capacity unaccepted."
+      ]
+    }
+  ]
+}
