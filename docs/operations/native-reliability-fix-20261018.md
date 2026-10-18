@@ -2,7 +2,7 @@
 
 ## Scope and status
 
-Local correction to the [native timeout investigation](native-timeout-investigation-20261018.md), internal package **1.0.23**. No deployment, scraping, historical downloads, new external API requests, credential changes or quota resets. The failed owner conversation remains **not accepted**; this correction does not prove the cause of the full five-minute host wait. Original ticket counts remain **12 Done / 9 Partial / 6 Not started**.
+Local correction to the [native timeout investigation](native-timeout-investigation-20261018.md), internal package **1.0.23**. Implementation and offline verification made no external API requests. The separately approved native preflight below used two. No deployment, scraping, historical downloads, credential changes or quota resets. The failed owner conversation remains **not accepted**; this correction does not prove the cause of the full five-minute host wait. Original ticket counts remain **12 Done / 9 Partial / 6 Not started**.
 
 ## Implemented changes
 
