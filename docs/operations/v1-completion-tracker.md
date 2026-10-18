@@ -1,5 +1,7 @@
 # V1 completion tracker
 
+Latest discovery checkpoint: [1.0.27 reviewed correction](native-discovery-correction-20261018.md). Owner native discovery and Milky Way conversations are **partial**, with missing origin comparison, incomplete qualified shortlist, overstrong unknown-coverage ranking, incomplete route investigation and lost travel preference. Guidance correction reviewed; 76 workflow tests, types and both host packages pass; 1.0.27 installed and all15 files verified. Targeted native retest pending. Geminids remains not exercised. Original **12 Done / 9 Partial / 6 Not started** unchanged.
+
 Latest follow-up correction: [1.0.25 forecast evidence preservation](native-forecast-followup-fix-20261018.md). Root cause confirmed from existing logs: the local OpenWeather allowance was consumed, not an observed provider outage. Five workflow skills preserve previous conversation samples separately from failed refreshes, with precise sample and neighbour wording. Targeted owner native follow-up passed at 13:48 IST: exact rows and prior OpenWeather evidence retained, both MET neighbours considered, no clear-window claim. Minor edition wording is tightened in 1.0.26; broader acceptance remains open. No new API calls or deployment. Original ticket totals unchanged.
 
 Next acceptance sequence: [three native V1 journeys and one proposed batch](../superpowers/plans/2026-10-18-native-v1-journey-acceptance.md). Batch approval and execution pending.

@@ -1,3 +1,7 @@
+# 1.0.27
+
+Require comparison evidence and honest candidate counts for darker-place discovery; distinguish broad area leads, numerical estimates and confirmed winners. Investigate available route evidence, retain removed travel limits, and qualify Milky Way date recommendations with supported core/darkness/Moon evidence.
+
 # 1.0.26
 
 Keep retrieval time separate from forecast issue/version and valid time; a later response does not prove a newer forecast edition.
