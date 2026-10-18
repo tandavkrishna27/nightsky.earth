@@ -189,7 +189,12 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const text = !names.length && input.useApproximateHostLocation ? "Approximate host location is unavailable. Ask the user for a named town or city." : names.length
       ? `GeoNames (CC BY 4.0; ${index?.vintageLabel ?? "index unavailable"}). ${structuredContent.availability.reason} ${names.join("; ")}`
       : `GeoNames (CC BY 4.0). ${structuredContent.availability.reason}`;
-    return { content: [{ type: "text", text: sourceLinkedText(text, structuredContent.sources) }], structuredContent };
+    const selections = structuredContent.matches.map(match => `${JSON.stringify(match.displayName)}; placeId: ${match.placeId}; timeZone: ${match.timeZone}; indexVintage: ${'indexVintage' in match ? match.indexVintage : 'unknown'}.`);
+    const action = names.length ? [
+      structuredContent.selectionRequired ? "Ask the user to choose among these matches before proceeding." : "Use the returned match for the requested destination.",
+      "Reuse this successful resolution and the selected exact placeId/timeZone for follow-up tools. Resolve again for a changed destination, an unavailable selected record, or an explicit user request to refresh the location lookup. A changed observing date alone does not require resolving the same city again.",
+    ].join(" ") : "";
+    return { content: [{ type: "text", text: sourceLinkedText([text, ...selections, action].filter(Boolean).join('\n'), structuredContent.sources) }], structuredContent };
   });
 
   if (toolMode === "resolver-only") return;

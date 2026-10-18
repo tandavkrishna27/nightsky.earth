@@ -3,6 +3,35 @@ import assert from 'node:assert/strict';
 import type { McpServer } from '@modelcontextprotocol/server';
 import { registerNightSkyTools } from '../../server/mcp/registerTools';
 import { createApiServices } from '../../server/places/api/configuration';
+import { GeoNamesPlaceIndex } from '../../server/places/geonames';
+
+test('local resolver exposes exact selections and reuse guidance without coordinates or implicit ambiguity choice', async () => {
+  const index = new GeoNamesPlaceIndex([
+    [990001,'Hyderabad','Hyderabad','',17.385,78.4867,'IN','India',100,'Asia/Kolkata'],
+    [990002,'Hyderabad','Hyderabad','',25.3,68.3,'PK','Pakistan',100,'Asia/Karachi'],
+  ],'reuse-fixture');
+  let resolver:any;
+  registerNightSkyTools({registerTool(name:string,config:unknown,handler:unknown){if(name==='resolve_place')resolver={config,handler};}} as unknown as McpServer,{placeIndex:index,toolMode:'resolver-only'});
+  const invoke=async(placeQuery:string)=>{
+    const reply=await resolver.handler({placeQuery},{mcpReq:{_meta:{}}});
+    resolver.config.outputSchema.parse(reply.structuredContent);
+    return {result:reply.structuredContent,text:reply.content[0].text as string};
+  };
+  const city=await invoke('Hyderabad, India');
+  assert.equal(city.result.matches.length,1);
+  assert.match(city.text,/placeId: place:v1:geonames:990001/);
+  assert.match(city.text,/timeZone: Asia\/Kolkata/);
+  assert.match(city.text,/Reuse this successful resolution/);
+  assert.doesNotMatch(city.text,/17\.385|78\.4867|expiresAt|sourceRevision/);
+  const ambiguous=await invoke('Hyderabad');
+  assert.equal(ambiguous.result.selectionRequired,true);
+  assert.match(ambiguous.text,/Ask the user to choose among these matches/);
+  for(const match of ambiguous.result.matches)assert.ok(ambiguous.text.includes(match.placeId));
+  assert.doesNotMatch(ambiguous.text,/Use the returned match for the requested destination/);
+  const missing=await invoke('Fictionvale');
+  assert.equal(missing.result.matches.length,0);
+  assert.doesNotMatch(missing.text,/Reuse this successful resolution|placeId:/);
+});
 
 test('API resolver text carries exact selection and next action for unknown-zone site, known-zone city, ambiguity and no matches', async () => {
   let features: unknown[] = [];

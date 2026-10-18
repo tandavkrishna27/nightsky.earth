@@ -6,6 +6,8 @@
 
 ## Current local wave — source/discovery freeze and final model findings
 
+Follow-up: [resolver reuse and credit delivery](v1-resolver-credit-followup-20261019.md) fixes the local resolver's missing exact-selection/reuse text and adds conservative offline final-answer credit checks. Both retained native answers remain incomplete; no new model run or installed-package update is claimed. Required host-rendered credits remain a presentation/visual-acceptance gate. Tasks12B/15 and category totals stay unchanged.
+
 [Final reviewed wave](v1-final-local-wave-20261019.md) accepts Task0 local source intent and Task8 default API discovery. Optional geometry is implemented but conditional/off pending actual source acceptance. Exact1.0.36packages and compiled runtime are checked. A deterministic source-link formatter defect is fixed, but final model answers still omit required credits and one meteor lookup repeats. Tasks12B/15 therefore remain open; no all-client/product release pass is claimed. Current categories15/2/8/2 total27. Final stable suite1,854passed/0failed/2skipped,34integrated affected checks,26answer-text checks, types/packages/compiled probes and0production audit advisories are recorded. Model acceptance remains partial. All original scope amendments remain.
 
 ## Previous decision — supported event calculations with explicit gaps
