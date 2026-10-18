@@ -41,7 +41,9 @@ Public Universe is optional and off by default. Existing NightSky engines and pr
 
 ## Remaining acceptance
 
-- Separately approved [bounded live proposal](publicuniverse-live-validation-proposal.md), followed by actual host conversation acceptance. No old allowance authorizes new requests. Claude testing remains deferred.
+The subsequent [bounded live validation](publicuniverse-live-results-20261018.md) was approved and completed: eight reference operations available, two validation failures, two dependency skips. Normal plugin admission remains off. Diagnose the rejected starter/discovery responses before claiming observing-source acceptance.
+
+- Resolve the live validation failures through a separately bounded diagnostic and reviewed offline regressions, then perform actual host conversation acceptance. No old allowance authorizes new requests. Claude testing remains deferred.
 
 The release code is pushed and its exact CI run passed. This evidence-only follow-up does not change the installed package or backend; its own CI is also checked before the handoff.
 

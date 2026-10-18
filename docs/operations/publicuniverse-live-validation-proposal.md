@@ -1,6 +1,6 @@
 # Public Universe bounded validation proposal
 
-**Preparation only. Not an executed test or permission to call the service.**
+**Historical approved packet. Executed once on 18 October 2026; see [partial results](publicuniverse-live-results-20261018.md). This document does not authorize a repeat or diagnostic calls.**
 
 Public Universe needs no API key. Installation does not admit this optional source. Existing live allowances are expired or consumed. After offline implementation and review, request a separate decision covering a dedicated NightSky application budget and this exact batch. Do not change existing provider ledgers.
 
