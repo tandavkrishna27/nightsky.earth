@@ -1,3 +1,7 @@
+## V1 local revision 1.0.34 - API-only scope and compact evidence credits
+
+Existing answer guidance now preserves downstream OpenStreetMap credit through source compression and describes lower-cloud samples by their actual timestamps rather than implying unsupported hours/windows. API-mode historical-tool wording states optional unavailability without an installation/acquisition prerequisite. Numerical-history preparation is explicitly outside V1 launch scope. Structured contracts, source activation, quota and workflow priority remain unchanged. Offline and synthetic native checks are scoped evidence, not universal model or public-host acceptance. No dataset acquisition or deployment.
+
 ## V1 local revision 1.0.33 - explicit snapshot actions and response-scoped forecast absence
 
 API resolver text promotes bounded exact identities, revisions and expiry with mode-aware next actions and evidence-qualified timezone labels. Empty forecast text scopes missing data to the current response and conditionally preserves earlier timestamped evidence without claiming its current freshness. Structured contracts, caches, quotas, provider admission and workflow priority remain unchanged. Targeted synthetic native replays are evidence for those cases only, not universal model compliance or live-source acceptance. No deployment or publication.

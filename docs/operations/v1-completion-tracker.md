@@ -2,9 +2,19 @@
 
 ## Current readiness summary — 18 October 2026
 
-[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 6 with local acceptance remaining; 8 release dependent; 1 separate website workstream**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
+[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 5 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
-## Latest local wave — result-boundary recovery and source decisions (1.0.33)
+## Current owner scope amendment — API/search-only V1
+
+The [explicit owner decision](v1-api-only-scope-20261018.md) removes numerical historical-cloud preparation and baseline admission as V1 launch requirements. Ticket9 is **deferred by scope, not done**; ticket18 remains the separate website. The current27-heading categories are12done/5local/8release/2separate-deferred. Prior6-local/1-separate figures below are dated snapshots, not current requirements. No bulk datasets, raw ERA5 work, direct OSM extraction, owned global catalogue or database is required. APIs may use OSM internally; required credits remain.
+
+[API-only acceptance](v1-api-only-acceptance-20261018.md) verifies no-artifact startup, honest unavailable history, source failure isolation and finite event boundaries. [API readiness](v1-api-readiness-20261018.md) records selected data reuse/credit mapping and remaining exact feature/account/branding conditions. Whole V1/public hosting acceptance is not inferred from this scope change.
+
+## Current local wave — API-only scope and answer acceptance (1.0.34)
+
+[Reviewed wave evidence](v1-api-only-wave-20261018.md): scoped four-turn synthetic native replay passes required credits, explicit timezone handling and retained sparse-sample evidence. All15 installed files match. Final offline suite1,826passed/0failed/2skipped (1,828total); types, packages and compiled checks pass. No data requests or deployment. API/source readiness is documented; production profile and final release gates remain open. Historical preparation is deferred by scope, not completed.
+
+## Previous local wave — result-boundary recovery and source decisions (1.0.33)
 
 [Result-boundary recovery](v1-result-boundary-recovery-20261018.md) clarifies existing API snapshot identities/revisions/expiry and conditional next actions in text. Empty forecast text now describes only this response and conditionally preserves earlier timestamped evidence without inventing current freshness. No structured schema, workflow priority, provider, quota, cache or source-admission changes were made.
 

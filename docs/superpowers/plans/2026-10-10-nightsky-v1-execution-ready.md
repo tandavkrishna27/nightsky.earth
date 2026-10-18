@@ -1,5 +1,7 @@
 # NightSky.earth V1 Execution Plan
 
+> **Current scope override (18 October 2026):** The [API-only owner decision](../../operations/v1-api-only-scope-20261018.md) and [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) supersede bulk geography/OSM/raw ERA5 and mandatory numerical-history launch prerequisites below. Ticket9 is explicitly deferred, not completed. Preserve existing source/event limits and actual release gates; older tasks are historical where superseded.
+
 **Current execution authority (17 October 2026):** The owner approved API/search-based discovery with multiple suitable free sources. Use [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) and [tracker](../../operations/v1-completion-tracker.md) for changed acceptance/dependencies. Preserve original ticket IDs and evidence below. Mandatory bulk planet/catalogue launch prerequisites are superseded; historical-weather and event capabilities are not automatically removed.
 
 15 October discovery extension: [global design and combinations](../../product/global-discovery-design.md) and [implementation tasks/dependencies](2026-10-15-nightsky-global-discovery.md). Documentation only; existing ticket counts and checkboxes unchanged. Actual global acquisition, installed-model validation and deployment remain separate gates.

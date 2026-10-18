@@ -1,5 +1,7 @@
 # V1 source and coverage decisions — 18 October 2026
 
+> **Current V1 scope amendment — 18 October 2026:** [API/search-only owner decision](v1-api-only-scope-20261018.md) supersedes earlier requirements for numerical-history acquisition, baseline/method admission or OSM extraction before launch. Historical data is optional/unavailable when no suitable approved evidence exists. Dormant implementations and older research below remain dated evidence, not V1 blockers or acquisition authority. See [API readiness](v1-api-readiness-20261018.md) for later exact source-use/credit evidence.
+
 This offline reconciliation records decisions still needed; it grants no production admission and changes no scope, environment, source rights or allowance. The [API profile](v1-api-source-profile-20261018.md) and [event/history profile](v1-event-history-profile-20261018.md) hold the detailed roster and domains. No private configuration, credentials or ledgers were read and no provider requests, downloads or deployment were performed.
 
 ## Implemented selection versus release intent

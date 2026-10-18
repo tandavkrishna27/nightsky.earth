@@ -1,5 +1,7 @@
 # API history completion — local implementation handoff, 2026-10-17
 
+> **Current V1 scope amendment — 18 October 2026:** [API/search-only owner decision](v1-api-only-scope-20261018.md) supersedes earlier requirements for numerical-history acquisition, baseline/method admission or OSM extraction before launch. Historical data is optional/unavailable when no suitable approved evidence exists. Dormant implementations and older research below remain dated evidence, not V1 blockers or acquisition authority. See [API readiness](v1-api-readiness-20261018.md) for later exact source-use/credit evidence.
+
 Coordinator integration update: the optional provider is now wired into API-mode standalone startup, with strict paired configuration, legacy-mode conflict rejection and a pending operator admission/resource gate. Four lane suites and the runtime suite are registered. The original handoff below records the lane delivery; see [assembled verification](parallel-completion-run-20261017.md). No acquisition has been enabled.
 
 Branch: `codex/api-history-completion`, based on

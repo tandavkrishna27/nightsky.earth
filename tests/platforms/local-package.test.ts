@@ -165,7 +165,8 @@ test('packaged aggregate citation procedure keeps relevant credits and full stru
   assert.match(audit, /Negative or empty-event claims use sources/);
   assert.match(audit, /Omit incidental empty-event sentences from non-event plans/);
   assert.match(audit, /focused tool answers.*relevant sources only/);
-  assert.match(audit, /URLs without long labels.*mandatory safety/);
+  assert.match(audit, /Copy required provider\/datasource attribution text and licence links.*mandatory safety/);
+  assert.doesNotMatch(audit, /URLs without long labels/);
  }
 });
 
@@ -190,5 +191,29 @@ test('packaged guides distinguish absent dark targets from impossible photograph
   assert.match(text, /No astronomical darkness or no selected targets does not make photography impossible/);
   assert.match(text, /Preserve any returned predawn or twilight interval/);
   assert.match(text, /Twilight Moon or landscape photography is only a general possibility/);
+ }
+});
+
+test('packaged final answer audit preserves downstream credits and sparse sample scope', () => {
+ const files = unzipSync(buildLocalPluginPackage({host:'codex',endpoint:'http://localhost:4010/mcp'}).zip);
+ for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+  const text = strFromU8(files[path]);
+  const audit = text.split('## Final answer audit')[1];
+  assert.match(text, /© OpenStreetMap contributors \(ODbL\).*https:\/\/www\.openstreetmap\.org\/copyright/, path);
+  assert.match(audit, /required source names.*downstream credits.*survive compression/, path);
+  assert.match(audit, /lowest-cloud returned sample.*timestamp and value/, path);
+  assert.match(audit, /earlier hours look more promising.*continuous weather coverage/, path);
+ }
+});
+
+
+test('packaged credits retain exact returned notices even in selection clarifications', () => {
+ const files = unzipSync(buildLocalPluginPackage({host:'codex',endpoint:'http://localhost:4010/mcp'}).zip);
+ for (const name of names) for (const path of [`skills/${name}/SKILL.md`,`skills/${name}/references/workflow.md`]) {
+  const text = strFromU8(files[path]);
+  assert.match(path.endsWith('/SKILL.md') ? text.slice(0, 2500) : text, /complete source links.*provider\/datasource contributor, copyright and licence names.*selection-reporting clarifications/, path);
+  assert.ok(text.includes('Powered by [Geoapify](https://www.geoapify.com/); map data [© OpenStreetMap contributors (ODbL)](https://www.openstreetmap.org/copyright).'), path);
+  assert.match(text, /Use this credit only when the returned source identifies Geoapify\/OSM/, path);
+  assert.match(text.split('## Final answer audit')[1], /selection-reporting clarifications/, path);
  }
 });

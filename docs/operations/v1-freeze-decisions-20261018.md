@@ -1,5 +1,7 @@
 # Concrete V1 freeze decisions — 18 October 2026
 
+> **Current V1 scope amendment — 18 October 2026:** [API/search-only owner decision](v1-api-only-scope-20261018.md) supersedes earlier requirements for numerical-history acquisition, baseline/method admission or OSM extraction before launch. Historical data is optional/unavailable when no suitable approved evidence exists. Dormant implementations and older research below remain dated evidence, not V1 blockers or acquisition authority. See [API readiness](v1-api-readiness-20261018.md) for later exact source-use/credit evidence.
+
 Recommendation at baseline `3b72bd4`: retain the requested global API/search product, the available event evidence and the months-ahead historical journey. Freeze the implementation boundaries now; freeze public capability claims only after the three specific evidence/decision packets below are resolved. More adapters, a database or a worldwide acquisition programme will not resolve these gates.
 
 This is a recommendation, not an admission or applied configuration. It changes no production setting, inventory, tracker or version and authorizes no provider data call, acquisition, ledger operation or deployment. Sources are the current [API profile](v1-api-source-profile-20261018.md), [event/history profile](v1-event-history-profile-20261018.md), [runtime reconciliation](v1-source-decisions-20261018.md), runtime configuration, retained meteor inventory and the primary public documentation reviewed below on 18 October 2026. Existing free/ad-free/no-affiliate facts stand.

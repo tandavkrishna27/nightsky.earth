@@ -7,6 +7,20 @@ const place = { placeId: "selected", latitude: 12.345678, longitude: 76.54321 };
 const window = { startUtc: new Date(epoch * 1000).toISOString(), endUtc: new Date((epoch + 10800) * 1000).toISOString(), timeZone: "Asia/Kolkata" };
 const fixture = () => ({ cod: "200", city: { coord: { lat: 0, lon: 0 }, timezone: 0 }, list: [0, 10800].map(offset => ({ dt: epoch + offset, main: { temp: 12, humidity: 80 }, clouds: { all: 0 }, wind: { speed: 2, gust: 4, deg: 90 }, visibility: 10000, pop: 0.5, rain: { "3h": 2 }, snow: { "3h": 1 } })) });
 function setup(body: unknown = fixture(), status = 200) { let calls = 0, reservations = 0; let request: URL | undefined; const provider = createOpenWeatherProvider({ apiKey: "private-key", now: () => epoch * 1000, controls: new UpstreamControls(), quota: { async reserve() { reservations++; return { allowed: true, reason: "reserved" }; } }, fetcher: async (input, init) => { calls++; request = new URL(String(input)); assert.equal(init?.redirect, "error"); return new Response(JSON.stringify(body), { status }); } }); return { provider, get calls() { return calls; }, get reservations() { return reservations; }, get request() { return request; } }; }
+
+test("OpenWeather source preserves data licence and normalization credit on forecasts and unavailable results", async () => {
+    const available = await setup().provider.getForecast(place, window);
+    const unavailable = await setup({}, 500).provider.getForecast(place, window);
+    for (const source of [available.forecast?.source, unavailable.source]) {
+        assert.ok(source);
+        assert.equal(source.licenseUrl, "https://opendatacommons.org/licenses/odbl/1-0/");
+        assert.match(source.attribution, /Weather data provided by OpenWeather/);
+        assert.match(source.attribution, /https:\/\/openweathermap\.org\//);
+        assert.match(source.attribution, /ODbL 1\.0/);
+        assert.match(source.attribution, /NightSky selects and normalizes forecast fields/);
+        assert.match(source.attribution, /model estimates/);
+    }
+});
 test("fixed metric endpoint preserves selected coordinates and native three-hour amounts", async () => { const s = setup(); const r = await s.provider.getForecast(place, window); assert.ok(r.forecast); assert.equal(s.request?.origin + s.request?.pathname, "https://api.openweathermap.org/data/2.5/forecast"); assert.equal(s.request?.searchParams.get("lat"), String(place.latitude)); assert.equal(s.request?.searchParams.get("lon"), String(place.longitude)); assert.equal(s.request?.searchParams.get("units"), "metric"); assert.equal(s.request?.searchParams.get("cnt"), "40"); assert.equal(r.forecast.samples.length, 2); const v = r.forecast.samples[0].values; assert.equal(v.totalCloudCover?.value, 0); assert.equal(v.windSpeed?.value, 2); assert.equal(v.temperature?.value, 12); assert.equal(v.precipitationAmount?.value, 3); assert.equal(v.precipitationAmount?.periodStartUtc, new Date((epoch - 10800) * 1000).toISOString()); assert.equal(v.precipitationAmount?.periodEndUtc, window.startUtc); assert.equal(r.forecast.source.issuedAt, undefined); });
 test("absent optional fields remain unknown", async () => { const s = setup({ cod: 200, list: [{ dt: epoch, main: { temp: 10 } }] }); const r = await s.provider.getForecast(place, window); assert.ok(r.forecast); assert.equal(r.forecast.samples[0].values.totalCloudCover, undefined); assert.equal(r.forecast.samples[0].values.precipitationAmount, undefined); assert.ok(r.forecast.missingFields.some(f => f.field === "precipitationAmount")); });
 test("out of horizon returns no invented samples", async () => { const s = setup(); const r = await s.provider.getForecast(place, { ...window, startUtc: new Date((epoch + 6 * 86400) * 1000).toISOString(), endUtc: new Date((epoch + 7 * 86400) * 1000).toISOString() }); assert.equal(r.status, "out-of-horizon"); assert.equal(r.forecast, undefined); });

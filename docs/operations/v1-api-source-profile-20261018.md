@@ -1,5 +1,7 @@
 # V1 API source profile — 18 October 2026
 
+> **Current V1 scope amendment — 18 October 2026:** [API/search-only owner decision](v1-api-only-scope-20261018.md) supersedes earlier requirements for numerical-history acquisition, baseline/method admission or OSM extraction before launch. Historical data is optional/unavailable when no suitable approved evidence exists. Dormant implementations and older research below remain dated evidence, not V1 blockers or acquisition authority. See [API readiness](v1-api-readiness-20261018.md) for later exact source-use/credit evidence.
+
 This is the current **proposed release profile and evidence ledger**, not an applied production configuration. No private environment/key/ledger was inspected, source activated, request made or allowance reset. The [JSON companion](v1-api-source-profile-20261018.json) pins the complete roster and actual exported operator quota ceilings (inventory role IDs are not a runnable environment configuration); an offline regression checks it against code. Existing documents remain dated evidence, with later results taking precedence over earlier setup states. In particular, API setup's later 7Timer wiki review supersedes the old noncommercial-only screening; this profile does not revive that gate.
 
 ## Intended profile
