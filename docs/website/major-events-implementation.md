@@ -12,7 +12,7 @@ Include every eclipse and four principal lunar phases in the primary almanacs; e
 4. Run source-row parity, timezone matrix, unit/browser/build/host checks; one independent code/content review; reproduce/fix material findings, inspect desktop/mobile preview.
 
 ## Source decisions
-AMS calendar is the primary observing-night source; NASA crosschecks support Orionids, Leonids, Geminids, Quadrantids and Eta Aquariids. Lyrids 2027 source disagreement: AMS Apr21–22 vs NASA Apr22–23 and almanac Apr23; conservatively display Apr21–23 with disagreement explained. AMS activity headline/narrative differ for Alpha Capricornids; no unqualified activity endpoints. IMO Draconids 2026 date Oct9 is supported by indexed primary PDF extract (not a downloaded PDF). No claim full IMO document was retrieved.
+The meteor calendar uses only eight night-capable maxima from the year-specific NASA MEO reports for 2026–2027. Each UT value is shown as a local-time projection of a minute-precision report value, without implying subminute accuracy, a complete activity season, or local visibility. AMS-derived dates were removed because reuse permission was not documented. The Draconids use the 2026 NASA MEO Table 3 maximum; no IMO date is reproduced.
 
 ## Verification and review
 

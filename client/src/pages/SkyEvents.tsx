@@ -125,19 +125,19 @@ export default function SkyEvents() {
           <p>
             Timing research:{" "}
             <a
-              href="https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html"
+              href="https://ntrs.nasa.gov/citations/20250009524"
               target="_blank"
               rel="noopener noreferrer"
             >
-              Fred Espenak’s almanacs
+              NASA MEO 2026 meteor forecast
             </a>{" "}
             ·{" "}
             <a
-              href="https://www.amsmeteors.org/calendar/"
+              href="https://ntrs.nasa.gov/citations/20260009360"
               target="_blank"
               rel="noopener noreferrer"
             >
-              American Meteor Society
+              NASA MEO 2027 meteor forecast
             </a>{" "}
             ·{" "}
             <a
@@ -148,6 +148,9 @@ export default function SkyEvents() {
               NASA eclipse overview
             </a>
             .
+          </p>
+          <p className="small-note">
+            Sky Event Almanac Courtesy of Fred Espenak www.AstroPixels.com
           </p>
         </details>
         <CalendarControls

@@ -20,9 +20,21 @@ test("homepage badges use the selected time zone for exact instants", () => {
 });
 
 test("approximate dates retain their source calendar and visible approximation", () => {
-  const event = skyEvents.find(
-    (e) => e.id === "orionid-meteor-shower-2026-10-21",
+  const base = skyEvents.find(
+    (e) => e.id === "geminid-meteor-shower-2026-12-14",
   )!;
+  const event = {
+    ...base,
+    timing: {
+      kind: "approximate" as const,
+      startDate: "2026-10-21",
+      endDateInclusive: "2026-10-22",
+      basis: "source-calendar" as const,
+      basisLabel: "Source calendar",
+      label: "Reference dates",
+      sourceId: "nasa-meo-2026",
+    },
+  };
   const item = nextSkyEvents(
     [event],
     "Pacific/Honolulu",
@@ -37,10 +49,16 @@ test("approximate dates retain their source calendar and visible approximation",
 
 test("ongoing activity shows its activity range and flags the passed peak", () => {
   const base = skyEvents.find(
-    (e) => e.id === "orionid-meteor-shower-2026-10-21",
+    (e) => e.id === "geminid-meteor-shower-2026-12-14",
   )!;
   const event = {
     ...base,
+    timing: {
+      kind: "instant" as const,
+      atUtc: "2026-10-09T02:10:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2026",
+    },
     activity: {
       kind: "approximate" as const,
       startDate: "2026-10-02",
@@ -48,7 +66,7 @@ test("ongoing activity shows its activity range and flags the passed peak", () =
       basis: "source-calendar" as const,
       basisLabel: "Source calendar",
       label: "Activity dates",
-      sourceId: "ams",
+      sourceId: "nasa-meo-2026",
     },
   };
   const item = nextSkyEvents(
@@ -65,7 +83,7 @@ test("ongoing activity shows its activity range and flags the passed peak", () =
 
 test("date ranges crossing months or years remain unambiguous", () => {
   const base = skyEvents.find(
-    (e) => e.id === "orionid-meteor-shower-2026-10-21",
+    (e) => e.id === "geminid-meteor-shower-2026-12-14",
   )!;
   const event = {
     ...base,

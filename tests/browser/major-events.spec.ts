@@ -22,23 +22,21 @@ test("coverage is visible and seasons convert dates correctly", async ({
   await expect(page.getByRole("main")).toContainText("Southern Hemisphere");
   await expect(page.getByRole("main")).toContainText("Northern Hemisphere");
 });
-test("specialist meteor dates and detailed guidance remain source dates across timezones", async ({
+test("meteor peak uses the NASA report instant and converts across timezones", async ({
   page,
 }) => {
   await page.goto(
-    "/sky-events/leonid-meteor-shower-2026-11-18?tz=Pacific%2FKiritimati",
+    "/sky-events/geminid-meteor-shower-2026-12-14?tz=Pacific%2FKiritimati",
   );
   await expect(page.locator(".event-detail-timing")).toContainText(
-    "16 Nov 2026",
-  );
-  await expect(page.locator(".event-detail-timing")).toContainText(
-    "17 Nov 2026",
+    "15 Dec 2026",
   );
   await expect(
-    page.getByRole("heading", { name: "Activity beyond the peak" }),
+    page.getByRole("heading", { name: "How to read this forecast" }),
   ).toBeVisible();
+  await expect(page.locator(".event-detail-timing")).toContainText("03:00");
   await expect(
-    page.getByRole("heading", { name: "The Moon for this return" }),
-  ).toBeVisible();
-  await expect(page.getByRole("main")).toContainText("55P/Tempel-Tuttle");
+    page.getByRole("link", { name: /NASA MEO — 2026 meteor shower activity forecast/ }),
+  ).toHaveAttribute("href", /ntrs\.nasa\.gov\/citations\/20250009524/);
+  await expect(page.getByRole("main")).toContainText("3200 Phaethon");
 });

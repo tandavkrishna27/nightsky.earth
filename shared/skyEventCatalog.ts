@@ -275,13 +275,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "Slow-moving meteors and a northerly radiant distinguish the October Draconids.",
     timing: {
-      kind: "approximate",
-      startDate: "2026-10-09",
-      endDateInclusive: "2026-10-09",
-      basis: "source-calendar",
-      basisLabel: "IMO predicted date (UT source; approximate)",
-      label: "Reference peak around",
-      sourceId: "imo",
+      kind: "instant",
+      atUtc: "2026-10-09T02:10:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2026",
     },
     visibility:
       "Northern observers are favored. A high northern radiant can make evening observing relevant, unlike a blanket rule that every shower needs a pre-dawn watch.",
@@ -294,11 +291,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Understand the peak reference",
-        body: "The IMO 2026 calendar’s indexed primary extract predicts October 9 around 01h UT. This guide preserves October 9 as an approximate reference rather than treating an hour-level prediction as a precise UTC observing appointment.",
+        body: "NASA MEO Table 3 gives a modelled maximum at 02:10 UT on 2026-10-09. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity reference",
-        body: "The indexed IMO 2026 calendar extract gives October 6–10 as the activity reference and October 9 as the predicted maximum date. These are predicted reference dates; an outburst or a particular meteor count is not guaranteed.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
         heading: "Moon and sky conditions",
@@ -310,13 +307,14 @@ export const skyEvents: readonly SkyEvent[] = [
       },
     ],
     question:
-      "Help me explore October Draconid meteor shower near 2026-10-09 for my chosen location.",
+      "Help me plan to observe the October Draconid meteor shower near its NASA MEO predicted maximum on 2026-10-09 for my chosen location.",
     sources: [
       {
-        id: "imo",
-        title: "IMO — 2026 Meteor Shower Calendar, Draconids section",
-        url: "https://imo.net/files/meteor-shower/cal2026.pdf",
-        sourceTimeScale: "UT; approximate date retained",
+        id: "nasa-meo-2026",
+        title: "NASA MEO — 2026 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "background",
@@ -538,83 +536,6 @@ export const skyEvents: readonly SkyEvent[] = [
         title: "NASA — Moon phases",
         url: "https://science.nasa.gov/moon/moon-phases/",
         sourceTimeScale: "Not applicable; explanatory guidance",
-      },
-    ],
-    lastReviewedAt: "2026-10-16",
-    reviewStatus: "reviewed",
-  },
-  {
-    id: "orionid-meteor-shower-2026-10-21",
-    title: "Orionid meteor shower",
-    category: "meteor-showers",
-    synopsis:
-      "Halley’s comet supplies the debris that produces this shower; the apparent radiant lies in Orion.",
-    timing: {
-      kind: "approximate",
-      startDate: "2026-10-21",
-      endDateInclusive: "2026-10-22",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
-    },
-    visibility:
-      "Both hemispheres can observe the shower when Orion is suitably placed, generally after midnight.",
-    equipment:
-      "Unaided eyes, a broad unobstructed view, warm layers and a comfortable seat. Use a tripod and a wide field if making a photographic record.",
-    sections: [
-      {
-        heading: "The story behind this shower",
-        body: "Halley’s comet supplies the debris that produces this shower; the apparent radiant lies in Orion. Fast meteors can leave persistent trains.",
-      },
-      {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
-      },
-      {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Oct 2–Nov 7, 2026. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
-      },
-      {
-        heading: "The Moon for this return",
-        body: "The peak falls between first quarter on October 18 and full Moon on October 26. Moonlight can obscure faint meteors; check local moonset before choosing a darker interval.",
-      },
-      {
-        heading: "Where and when to look",
-        body: "Both hemispheres can observe the shower when Orion is suitably placed, generally after midnight.",
-      },
-      {
-        heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
-      },
-    ],
-    question:
-      "Help me explore Orionid meteor shower around 2026-10-21 to 2026-10-22 for my destination, including darkness, moonrise/moonset and preparation.",
-    sources: [
-      {
-        id: "almanac",
-        title: "2026 Sky Event Almanac — Fred Espenak",
-        url: "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-        sourceTimeScale: "UTC",
-      },
-      {
-        id: "background",
-        title: "NASA — Meteors and meteorites",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/",
-        sourceTimeScale: "Not applicable; background guidance",
-      },
-      {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
-      },
-      {
-        id: "shower-background",
-        title: "NASA — Orionid meteor shower",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/orionids/",
-        sourceTimeScale: "Not applicable; shower explanation",
       },
     ],
     lastReviewedAt: "2026-10-16",
@@ -1051,77 +972,6 @@ export const skyEvents: readonly SkyEvent[] = [
     reviewStatus: "reviewed",
   },
   {
-    id: "southern-taurid-meteor-shower-2026-11-05",
-    title: "Southern Taurid meteor shower",
-    category: "meteor-showers",
-    synopsis:
-      "This long, broad shower is notable for occasional bright meteors rather than a dense, brief burst.",
-    timing: {
-      kind: "approximate",
-      startDate: "2026-11-04",
-      endDateInclusive: "2026-11-05",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
-    },
-    visibility:
-      "Check Taurus and your dark-sky horizon rather than treating this broad maximum as a single timed event.",
-    equipment:
-      "Unaided eyes, a broad unobstructed view, warm layers and a comfortable seat. Use a tripod and a wide field if making a photographic record.",
-    sections: [
-      {
-        heading: "The story behind this shower",
-        body: "This long, broad shower is notable for occasional bright meteors rather than a dense, brief burst. The southern and northern Taurid branches overlap during part of the season.",
-      },
-      {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
-      },
-      {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Sep 20–Nov 20, 2026. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
-      },
-      {
-        heading: "The Moon for this return",
-        body: "The reference peak approaches new Moon on November 9. Check the waning Moon’s local rise time when choosing a darker period.",
-      },
-      {
-        heading: "Where and when to look",
-        body: "Check Taurus and your dark-sky horizon rather than treating this broad maximum as a single timed event.",
-      },
-      {
-        heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
-      },
-    ],
-    question:
-      "Help me explore Southern Taurid meteor shower around 2026-11-04 to 2026-11-05 for my destination, including darkness, moonrise/moonset and preparation.",
-    sources: [
-      {
-        id: "almanac",
-        title: "2026 Sky Event Almanac — Fred Espenak",
-        url: "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-        sourceTimeScale: "UTC",
-      },
-      {
-        id: "background",
-        title: "NASA — Meteors and meteorites",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/",
-        sourceTimeScale: "Not applicable; background guidance",
-      },
-      {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
-      },
-    ],
-    lastReviewedAt: "2026-10-16",
-    reviewStatus: "reviewed",
-  },
-  {
     id: "venus-and-the-moon-occultation-opportunity-2026-11-07",
     title: "Venus and the Moon — occultation opportunity",
     category: "pairings",
@@ -1281,76 +1131,6 @@ export const skyEvents: readonly SkyEvent[] = [
     reviewStatus: "reviewed",
   },
   {
-    id: "northern-taurid-meteor-shower-2026-11-12",
-    title: "Northern Taurid meteor shower",
-    category: "meteor-showers",
-    synopsis: "The northern branch overlaps the southern Taurids.",
-    timing: {
-      kind: "approximate",
-      startDate: "2026-11-11",
-      endDateInclusive: "2026-11-12",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
-    },
-    visibility:
-      "A broad view of the night sky and a suitable radiant altitude matter more than staring directly at Taurus.",
-    equipment:
-      "Unaided eyes, a broad unobstructed view, warm layers and a comfortable seat. Use a tripod and a wide field if making a photographic record.",
-    sections: [
-      {
-        heading: "The story behind this shower",
-        body: "The northern branch overlaps the southern Taurids. Distinguish the branch names when checking predictions and do not infer that a fireball is guaranteed.",
-      },
-      {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
-      },
-      {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Oct 20–Dec 10, 2026. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
-      },
-      {
-        heading: "The Moon for this return",
-        body: "New Moon occurs on November 9, before this reference peak. A young evening crescent may set relatively early; verify local moonset.",
-      },
-      {
-        heading: "Where and when to look",
-        body: "A broad view of the night sky and a suitable radiant altitude matter more than staring directly at Taurus.",
-      },
-      {
-        heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
-      },
-    ],
-    question:
-      "Help me explore Northern Taurid meteor shower around 2026-11-11 to 2026-11-12 for my destination, including darkness, moonrise/moonset and preparation.",
-    sources: [
-      {
-        id: "almanac",
-        title: "2026 Sky Event Almanac — Fred Espenak",
-        url: "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-        sourceTimeScale: "UTC",
-      },
-      {
-        id: "background",
-        title: "NASA — Meteors and meteorites",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/",
-        sourceTimeScale: "Not applicable; background guidance",
-      },
-      {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
-      },
-    ],
-    lastReviewedAt: "2026-10-16",
-    reviewStatus: "reviewed",
-  },
-  {
     id: "antares-and-the-moon-2026-11-11",
     title: "Antares and the Moon",
     category: "pairings",
@@ -1398,83 +1178,6 @@ export const skyEvents: readonly SkyEvent[] = [
         title: "NASA — Skywatching",
         url: "https://science.nasa.gov/skywatching/",
         sourceTimeScale: "Not applicable; explanatory guidance",
-      },
-    ],
-    lastReviewedAt: "2026-10-16",
-    reviewStatus: "reviewed",
-  },
-  {
-    id: "leonid-meteor-shower-2026-11-18",
-    title: "Leonid meteor shower",
-    category: "meteor-showers",
-    synopsis:
-      "The Leonids arise from material associated with comet 55P/Tempel-Tuttle and appear to radiate from Leo.",
-    timing: {
-      kind: "approximate",
-      startDate: "2026-11-16",
-      endDateInclusive: "2026-11-17",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
-    },
-    visibility:
-      "Look for a suitable radiant altitude after midnight. A wide dark view is more useful than aiming only at Leo.",
-    equipment:
-      "Unaided eyes, a broad unobstructed view, warm layers and a comfortable seat. Use a tripod and a wide field if making a photographic record.",
-    sections: [
-      {
-        heading: "The story behind this shower",
-        body: "The Leonids arise from material associated with comet 55P/Tempel-Tuttle and appear to radiate from Leo. Their historical storms do not imply a storm for this return.",
-      },
-      {
-        heading: "Peak nights and source precision",
-        body: "AMS and NASA list November 16–17 for observing, while the coarse annual almanac lists November 18. The specialist observing-night range takes precedence here; no precise UTC maximum is asserted.",
-      },
-      {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Nov 6–30, 2026. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
-      },
-      {
-        heading: "The Moon for this return",
-        body: "First quarter occurs on November 17. Check whether the Moon has set by your intended pre-dawn observing period.",
-      },
-      {
-        heading: "Where and when to look",
-        body: "Look for a suitable radiant altitude after midnight. A wide dark view is more useful than aiming only at Leo.",
-      },
-      {
-        heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
-      },
-    ],
-    question:
-      "Help me explore Leonid meteor shower around 2026-11-16 to 2026-11-17 for my destination, including darkness, moonrise/moonset and preparation.",
-    sources: [
-      {
-        id: "almanac",
-        title: "2026 Sky Event Almanac — Fred Espenak",
-        url: "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-        sourceTimeScale: "UTC",
-      },
-      {
-        id: "background",
-        title: "NASA — Meteors and meteorites",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/",
-        sourceTimeScale: "Not applicable; background guidance",
-      },
-      {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
-      },
-      {
-        id: "shower-background",
-        title: "NASA — Leonid meteor shower",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/leonids/",
-        sourceTimeScale: "Not applicable; shower explanation",
       },
     ],
     lastReviewedAt: "2026-10-16",
@@ -2079,13 +1782,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "The Geminids are associated with asteroid 3200 Phaethon rather than a conventional active comet.",
     timing: {
-      kind: "approximate",
-      startDate: "2026-12-13",
-      endDateInclusive: "2026-12-14",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2026-12-14T13:00:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2026",
     },
     visibility:
       "The radiant can be well placed before midnight at northern latitudes; southern observers should check their later-night altitude.",
@@ -2097,16 +1797,16 @@ export const skyEvents: readonly SkyEvent[] = [
         body: "The Geminids are associated with asteroid 3200 Phaethon rather than a conventional active comet. The radiant is in Gemini, and bright meteors can make the shower rewarding.",
       },
       {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
+        heading: "Understand the peak reference",
+        body: "NASA MEO Table 3 gives a modelled maximum at 13:00 UT on 2026-12-14. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Dec 4–17, 2026. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
-        heading: "The Moon for this return",
-        body: "The reference nights fall after new Moon on December 9 and before first quarter on December 17. Check when the waxing Moon leaves your local sky.",
+        heading: "Moonlight near the predicted maximum",
+        body: "The predicted maximum falls after new Moon on December 9 and before first quarter on December 17. Check when the waxing Moon leaves your local sky.",
       },
       {
         heading: "Where and when to look",
@@ -2114,11 +1814,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
+        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. No meteor count or observing outcome is guaranteed. For photographs or video, begin with your field of view, battery plan and exposure tests.",
       },
     ],
     question:
-      "Help me explore Geminid meteor shower around 2026-12-13 to 2026-12-14 for my destination, including darkness, moonrise/moonset and preparation.",
+      "Help me plan to observe the Geminid meteor shower near its NASA MEO predicted maximum on 2026-12-14 for my chosen location.",
     sources: [
       {
         id: "almanac",
@@ -2133,11 +1833,11 @@ export const skyEvents: readonly SkyEvent[] = [
         sourceTimeScale: "Not applicable; background guidance",
       },
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2026",
+        title: "NASA MEO — 2026 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "shower-background",
@@ -2209,13 +1909,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "The Ursids are a northern-sky shower associated with comet 8P/Tuttle.",
     timing: {
-      kind: "approximate",
-      startDate: "2026-12-21",
-      endDateInclusive: "2026-12-22",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2026-12-22T15:54:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2026",
     },
     visibility:
       "The high northern radiant makes this principally a Northern Hemisphere opportunity. Southern locations may not have a useful radiant altitude.",
@@ -2227,16 +1924,16 @@ export const skyEvents: readonly SkyEvent[] = [
         body: "The Ursids are a northern-sky shower associated with comet 8P/Tuttle. Their modest usual activity makes darkness and patience especially relevant.",
       },
       {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
+        heading: "Understand the peak reference",
+        body: "NASA MEO Table 3 gives a modelled maximum at 15:54 UT on 2026-12-22. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Dec 17–26, 2026. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
-        heading: "The Moon for this return",
-        body: "Full Moon falls on December 24, close to the peak nights. Bright moonlight may limit faint-meteor viewing.",
+        heading: "Moonlight near the predicted maximum",
+        body: "Full Moon follows the predicted maximum on December 24. Bright moonlight may limit faint-meteor viewing.",
       },
       {
         heading: "Where and when to look",
@@ -2244,11 +1941,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
+        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. No meteor count or observing outcome is guaranteed. For photographs or video, begin with your field of view, battery plan and exposure tests.",
       },
     ],
     question:
-      "Help me explore Ursid meteor shower around 2026-12-21 to 2026-12-22 for my destination, including darkness, moonrise/moonset and preparation.",
+      "Help me plan to observe the Ursid meteor shower near its NASA MEO predicted maximum on 2026-12-22 for my chosen location.",
     sources: [
       {
         id: "almanac",
@@ -2263,11 +1960,11 @@ export const skyEvents: readonly SkyEvent[] = [
         sourceTimeScale: "Not applicable; background guidance",
       },
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2026",
+        title: "NASA MEO — 2026 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
     ],
     lastReviewedAt: "2026-10-16",
@@ -2603,13 +2300,10 @@ export const skyEvents: readonly SkyEvent[] = [
     category: "meteor-showers",
     synopsis: "A comparatively narrow maximum distinguishes the Quadrantids.",
     timing: {
-      kind: "approximate",
-      startDate: "2027-01-03",
-      endDateInclusive: "2027-01-04",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2027-01-04T00:48:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2027",
     },
     visibility:
       "Northern latitudes are favored; timing and radiant altitude matter because the peak can be brief.",
@@ -2621,16 +2315,16 @@ export const skyEvents: readonly SkyEvent[] = [
         body: "A comparatively narrow maximum distinguishes the Quadrantids. The radiant lies in the area once called Quadrans Muralis, and the shower is linked with object 2003 EH1.",
       },
       {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
+        heading: "Understand the peak reference",
+        body: "NASA MEO Table 3 gives a modelled maximum at 00:48 UT on 2027-01-04. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Dec 28, 2026–Jan 12, 2027. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
-        heading: "The Moon for this return",
-        body: "New Moon is on January 7, after the reference nights. The waning crescent generally offers less interference than a full Moon, but check its local rise time.",
+        heading: "Moonlight near the predicted maximum",
+        body: "New Moon arrives on January 7, three days after the predicted maximum. Check local moonrise and morning twilight.",
       },
       {
         heading: "Where and when to look",
@@ -2638,11 +2332,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
+        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. No meteor count or observing outcome is guaranteed. For photographs or video, begin with your field of view, battery plan and exposure tests.",
       },
     ],
     question:
-      "Help me explore Quadrantid meteor shower around 2027-01-03 to 2027-01-04 for my destination, including darkness, moonrise/moonset and preparation.",
+      "Help me plan to observe the Quadrantid meteor shower near its NASA MEO predicted maximum on 2027-01-04 for my chosen location.",
     sources: [
       {
         id: "almanac",
@@ -2657,11 +2351,11 @@ export const skyEvents: readonly SkyEvent[] = [
         sourceTimeScale: "Not applicable; background guidance",
       },
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2027",
+        title: "NASA MEO — 2027 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "shower-background",
@@ -4581,82 +4275,6 @@ export const skyEvents: readonly SkyEvent[] = [
     reviewStatus: "reviewed",
   },
   {
-    id: "lyrid-meteor-shower-2027-04-23",
-    title: "Lyrid meteor shower",
-    category: "meteor-showers",
-    synopsis: "The Lyrids are associated with comet C/1861 G1 Thatcher.",
-    timing: {
-      kind: "approximate",
-      startDate: "2027-04-21",
-      endDateInclusive: "2027-04-23",
-      basis: "source-calendar",
-      basisLabel: "Published observing-night estimates (sources differ)",
-      label: "Published peak estimates",
-      sourceId: "ams",
-    },
-    visibility:
-      "Northern pre-dawn skies generally offer a higher radiant; southern viewers should check their lower radiant altitude.",
-    equipment:
-      "Unaided eyes, a broad unobstructed view, warm layers and a comfortable seat. Use a tripod and a wide field if making a photographic record.",
-    sections: [
-      {
-        heading: "The story behind this shower",
-        body: "The Lyrids are associated with comet C/1861 G1 Thatcher. Their radiant lies near Lyra and Vega; they are a long-recorded spring shower for northern observers.",
-      },
-      {
-        heading: "Peak nights and source precision",
-        body: "AMS lists April 21–22, NASA lists April 22–23, and the annual almanac gives April 23. These sources differ; this guide deliberately brackets April 21–23 rather than asserting a single precise maximum.",
-      },
-      {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Apr 14–30, 2027. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
-      },
-      {
-        heading: "The Moon for this return",
-        body: "Full Moon occurs on April 20, close to the published peak estimates. Bright waning moonlight can interfere, especially with fainter meteors.",
-      },
-      {
-        heading: "Where and when to look",
-        body: "Northern pre-dawn skies generally offer a higher radiant; southern viewers should check their lower radiant altitude.",
-      },
-      {
-        heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
-      },
-    ],
-    question:
-      "Help me explore Lyrid meteor shower around 2027-04-21 to 2027-04-23 for my destination, including darkness, moonrise/moonset and preparation.",
-    sources: [
-      {
-        id: "almanac",
-        title: "2027 Sky Event Almanac — Fred Espenak",
-        url: "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html",
-        sourceTimeScale: "UTC",
-      },
-      {
-        id: "background",
-        title: "NASA — Meteors and meteorites",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/",
-        sourceTimeScale: "Not applicable; background guidance",
-      },
-      {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
-      },
-      {
-        id: "shower-background",
-        title: "NASA — Lyrid meteor shower",
-        url: "https://science.nasa.gov/solar-system/meteors-meteorites/lyrids/",
-        sourceTimeScale: "Not applicable; shower explanation",
-      },
-    ],
-    lastReviewedAt: "2026-10-16",
-    reviewStatus: "reviewed",
-  },
-  {
     id: "antares-and-the-moon-2027-04-23",
     title: "Antares and the Moon",
     category: "pairings",
@@ -4825,13 +4443,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "Like the Orionids, this shower is supplied by debris from Halley’s comet.",
     timing: {
-      kind: "approximate",
-      startDate: "2027-05-05",
-      endDateInclusive: "2027-05-06",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2027-05-06T22:28:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2027",
     },
     visibility:
       "The Southern Hemisphere and southern tropics are favored; northern observers generally have a shorter pre-dawn opportunity.",
@@ -4843,16 +4458,16 @@ export const skyEvents: readonly SkyEvent[] = [
         body: "Like the Orionids, this shower is supplied by debris from Halley’s comet. The radiant is in Aquarius and its fast meteors can leave trains.",
       },
       {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
+        heading: "Understand the peak reference",
+        body: "NASA MEO Table 3 gives a modelled maximum at 22:28 UT on 2027-05-06. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Apr 19–May 28, 2027. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
-        heading: "The Moon for this return",
-        body: "New Moon falls on May 6, close to the peak nights. Lunar interference should be limited, but darkness and weather still need local checks.",
+        heading: "Moonlight near the predicted maximum",
+        body: "New Moon occurs on May 6, the same civil date as the predicted maximum. Local twilight and weather still matter.",
       },
       {
         heading: "Where and when to look",
@@ -4860,11 +4475,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
+        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. No meteor count or observing outcome is guaranteed. For photographs or video, begin with your field of view, battery plan and exposure tests.",
       },
     ],
     question:
-      "Help me explore Eta Aquariid meteor shower around 2027-05-05 to 2027-05-06 for my destination, including darkness, moonrise/moonset and preparation.",
+      "Help me plan to observe the Eta Aquariid meteor shower near its NASA MEO predicted maximum on 2027-05-06 for my chosen location.",
     sources: [
       {
         id: "almanac",
@@ -4879,11 +4494,11 @@ export const skyEvents: readonly SkyEvent[] = [
         sourceTimeScale: "Not applicable; background guidance",
       },
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2027",
+        title: "NASA MEO — 2027 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "shower-background",
@@ -6365,13 +5980,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "A relatively low-rate shower that can nevertheless produce bright fireballs.",
     timing: {
-      kind: "approximate",
-      startDate: "2027-07-30",
-      endDateInclusive: "2027-07-31",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak around",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2027-07-31T10:41:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2027",
     },
     visibility:
       "Both sides of the equator can have useful opportunities when the radiant is sufficiently high.",
@@ -6384,15 +5996,15 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Understand the peak reference",
-        body: "The published observing-night labels are retained as a source-date range. They are not local-midnight appointments and do not move when the time-zone selector changes.",
+        body: "NASA MEO Table 3 gives a modelled maximum at 10:41 UT on 2027-07-31. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity reference",
-        body: "AMS gives July 3–August 15, 2027 in its activity heading, while its narrative describes July 12–August 12. Because those endpoints differ, this guide does not assert a single exact activity interval; it uses July 30–31 for the peak-night reference.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
         heading: "Moon and sky conditions",
-        body: "New Moon on August 2 follows these reference nights. Check the waning crescent and twilight for your own observing site.",
+        body: "New Moon on August 2 follows the predicted maximum. Check the waning crescent and twilight for your own observing site.",
       },
       {
         heading: "Prepare to observe",
@@ -6400,14 +6012,14 @@ export const skyEvents: readonly SkyEvent[] = [
       },
     ],
     question:
-      "Help me explore Alpha Capricornid meteor shower near 2027-07-30 for my chosen location.",
+      "Help me plan to observe the Alpha Capricornid meteor shower near its NASA MEO predicted maximum on 2027-07-31 for my chosen location.",
     sources: [
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2027",
+        title: "NASA MEO — 2027 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "background",
@@ -6426,13 +6038,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "The Southern Delta Aquariids can provide a broad period of faint-meteor activity.",
     timing: {
-      kind: "approximate",
-      startDate: "2027-07-30",
-      endDateInclusive: "2027-07-31",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2027-07-30T06:52:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2027",
     },
     visibility:
       "Southern tropics are favored. Northern observers should check the lower southern radiant and use the darkest practical sky.",
@@ -6444,16 +6053,16 @@ export const skyEvents: readonly SkyEvent[] = [
         body: "The Southern Delta Aquariids can provide a broad period of faint-meteor activity. Their southerly radiant makes this a different opportunity from the northern Perseids.",
       },
       {
-        heading: "Peak nights and source precision",
-        body: "AMS lists July 30–31, whereas the coarse annual almanac gives July 28. This guide uses the specialist observing-night reference, not an invented conversion of the almanac hour.",
+        heading: "Understand the peak reference",
+        body: "NASA MEO Table 3 gives a modelled maximum at 06:52 UT on 2027-07-30. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Jul 12–Aug 23, 2027. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
-        heading: "The Moon for this return",
-        body: "New Moon is on August 2, soon after the reference peak. Check the waning crescent’s local rise time and the approach of morning twilight.",
+        heading: "Moonlight near the predicted maximum",
+        body: "New Moon on August 2 follows the predicted maximum. Check the waning crescent’s local rise time and morning twilight.",
       },
       {
         heading: "Where and when to look",
@@ -6461,11 +6070,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
+        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. No meteor count or observing outcome is guaranteed. For photographs or video, begin with your field of view, battery plan and exposure tests.",
       },
     ],
     question:
-      "Help me explore Southern Delta Aquariid meteor shower around 2027-07-30 to 2027-07-31 for my destination, including darkness, moonrise/moonset and preparation.",
+      "Help me plan to observe the Southern Delta Aquariid meteor shower near its NASA MEO predicted maximum on 2027-07-30 for my chosen location.",
     sources: [
       {
         id: "almanac",
@@ -6480,11 +6089,11 @@ export const skyEvents: readonly SkyEvent[] = [
         sourceTimeScale: "Not applicable; background guidance",
       },
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2027",
+        title: "NASA MEO — 2027 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "shower-background",
@@ -6785,13 +6394,10 @@ export const skyEvents: readonly SkyEvent[] = [
     synopsis:
       "Comet 109P/Swift-Tuttle supplies the Perseid debris, with an apparent radiant in Perseus.",
     timing: {
-      kind: "approximate",
-      startDate: "2027-08-12",
-      endDateInclusive: "2027-08-13",
-      basis: "source-calendar",
-      basisLabel: "AMS observing-night dates; location dependent",
-      label: "Reference peak nights",
-      sourceId: "ams",
+      kind: "instant",
+      atUtc: "2027-08-13T20:20:00Z",
+      label: "NASA MEO predicted maximum",
+      sourceId: "nasa-meo-2027",
     },
     visibility:
       "Northern observers are favored, particularly before dawn. Southern observers should check whether Perseus reaches a useful altitude.",
@@ -6803,16 +6409,16 @@ export const skyEvents: readonly SkyEvent[] = [
         body: "Comet 109P/Swift-Tuttle supplies the Perseid debris, with an apparent radiant in Perseus. The shower is known for bright meteors and occasional fireballs.",
       },
       {
-        heading: "Peak nights and source precision",
-        body: "The AMS observing-night range is the planning reference here. It is not a UTC interval: changing the display time zone does not shift these date labels. Choose your local observing night after checking darkness and radiant altitude.",
+        heading: "Understand the peak reference",
+        body: "NASA MEO Table 3 gives a modelled maximum at 20:20 UT on 2027-08-13. The report gives minute precision; this is not a subminute claim or a location-specific best viewing time.",
       },
       {
-        heading: "Activity beyond the peak",
-        body: "Published AMS activity reference: Jul 17–Aug 24, 2027. These are broad seasonal dates, not a promise of constant activity. The calendar marks the peak reference; this longer period is context for planning.",
+        heading: "How to read this forecast",
+        body: "The report provides a modelled peak time, not the shower's full activity period, a personal meteor count or a guarantee of local visibility. Check local darkness and radiant position before planning.",
       },
       {
-        heading: "The Moon for this return",
-        body: "The peak falls between first quarter on August 9 and full Moon on August 17. Check for a darker pre-dawn interval after local moonset rather than assuming a moonless peak.",
+        heading: "Moonlight near the predicted maximum",
+        body: "The predicted maximum falls between first quarter on August 9 and full Moon on August 17. Check local moonset for a darker pre-dawn interval.",
       },
       {
         heading: "Where and when to look",
@@ -6820,11 +6426,11 @@ export const skyEvents: readonly SkyEvent[] = [
       },
       {
         heading: "Prepare for the experience",
-        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. A published ideal rate is not a personal forecast. For photographs or video, begin with your field of view, battery plan and exposure tests.",
+        body: "Confirm night access and forecast, give your eyes time to adapt, and watch a broad area rather than only the radiant. No meteor count or observing outcome is guaranteed. For photographs or video, begin with your field of view, battery plan and exposure tests.",
       },
     ],
     question:
-      "Help me explore Perseid meteor shower around 2027-08-12 to 2027-08-13 for my destination, including darkness, moonrise/moonset and preparation.",
+      "Help me plan to observe the Perseid meteor shower near its NASA MEO predicted maximum on 2027-08-13 for my chosen location.",
     sources: [
       {
         id: "almanac",
@@ -6839,11 +6445,11 @@ export const skyEvents: readonly SkyEvent[] = [
         sourceTimeScale: "Not applicable; background guidance",
       },
       {
-        id: "ams",
-        title: "American Meteor Society — 2026/2027 observing-night calendar",
-        url: "https://www.amsmeteors.org/calendar/",
-        sourceTimeScale:
-          "Source observing-night dates; no UTC instant asserted",
+        id: "nasa-meo-2027",
+        title: "NASA MEO — 2027 meteor shower activity forecast",
+        url: "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf",
+        sourceTimeScale: "UT; Table 3 predicted maximum; minute precision",
+        conversionNote: "UT normalized to an ISO UTC instant. No subminute accuracy is implied.",
       },
       {
         id: "shower-background",

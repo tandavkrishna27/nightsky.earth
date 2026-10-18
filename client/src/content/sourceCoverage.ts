@@ -17,7 +17,7 @@ export const coverageCards = [
     coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. An aurora model is not a personal sighting probability.",
     details: [
       "MET Norway is the baseline weather integration. It preserves the forecast’s native sampling and accumulation periods. NOAA’s OVATION product is a short-term aurora outlook, typically 30–90 minutes, rather than a full-night forecast.",
-      "Additional integrations are conditional on provider access and the service’s enabled sources. WeatherAPI uses hourly samples; OpenWeather’s five-day product uses three-hour samples. Optional 7Timer! ASTRO seeing and transparency values are categories or ranges, not precise measurements.",
+      "Additional integrations are conditional on provider access and the service’s enabled sources. WeatherAPI uses hourly samples; OpenWeather’s five-day product uses three-hour samples. Optional 7Timer! ASTRO seeing and transparency values are categories or ranges, not precise measurements. 7Timer!’s current terms limit use or redistribution of its weather data to noncommercial purposes; commercial use needs permission before enabling it.",
       "Your answer identifies the source and returned time window. Fetch time is retrieval time; a model issue time is shown only when supplied. Independent forecasts retain their disagreements and are not averaged into one score.",
     ],
     sources: [

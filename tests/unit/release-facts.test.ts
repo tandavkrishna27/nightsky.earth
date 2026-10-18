@@ -37,7 +37,6 @@ test("confirmed operating facts clear data-handling blockers but not approvals",
       "Hosting verification",
       "Content rights approval",
       "Policy approval",
-      "Source inventory",
     ],
   );
 });

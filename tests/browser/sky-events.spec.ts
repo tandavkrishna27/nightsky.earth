@@ -15,7 +15,7 @@ test("calendar filters, URL history, timezone and empty research state", async (
   );
   await expect(page.getByRole("table")).toBeVisible();
   await page.getByLabel("Event category").selectOption("meteor-showers");
-  await expect(page.locator(".month-calendar")).toContainText("Orionid");
+  await expect(page.locator(".month-calendar")).toContainText("Draconid");
   await page.getByRole("button", { name: "Next month", exact: true }).click();
   await expect(page.getByLabel("Calendar month")).toHaveValue("2026-11");
   await page.goBack();
@@ -168,16 +168,20 @@ test("top event guide returns to the selected calendar state", async ({
     page.getByRole("button", { name: "List", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
 });
-test("ongoing peak date is labelled rather than called an unqualified next peak", async ({
+test("meteor calendar shows NASA predicted maximum and the guide links its report", async ({
   page,
 }) => {
-  await page.clock.setFixedTime(new Date("2026-10-21T12:00:00Z"));
-  await page.goto("/sky-events?tz=UTC");
+  await page.clock.setFixedTime(new Date("2026-10-08T12:00:00Z"));
+  await page.goto("/sky-events?month=2026-10&category=meteor-showers&view=list&tz=UTC");
+  const draconids = page.locator(
+    '.event-list [data-event-id="october-draconid-meteor-shower-2026-10-09"]',
+  );
+  await expect(draconids).toContainText("NASA MEO predicted maximum");
+  await draconids.getByRole("link", { name: /Explore event/ }).click();
+  await expect(page.locator(".event-detail-timing")).toContainText("09 Oct 2026");
   await expect(
-    page.locator(
-      '.upcoming-grid [data-event-id="orionid-meteor-shower-2026-10-21"]',
-    ),
-  ).toContainText("Ongoing");
+    page.getByRole("link", { name: /NASA MEO — 2026 meteor shower activity forecast/ }),
+  ).toHaveAttribute("href", /ntrs\.nasa\.gov\/citations\/20250009524/);
 });
 test("dense calendar days expand and restore keyboard focus on close", async ({
   page,

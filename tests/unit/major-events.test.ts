@@ -35,26 +35,31 @@ test("major coverage includes quarter phases, seasons, close pairings and missin
   );
   assert.equal(skyEvents.filter((e) => e.category === "eclipses").length, 5);
 });
-test("meteor night ranges use specialist evidence without fake UTC appointments", () => {
-  const leonid = find("Leonid")!;
-  assert.equal(leonid.timing.kind, "approximate");
-  if (leonid.timing.kind === "approximate") {
-    assert.equal(leonid.timing.startDate, "2026-11-16");
-    assert.equal(leonid.timing.endDateInclusive, "2026-11-17");
-    assert.equal(leonid.timing.basis, "source-calendar");
+test("meteor calendar uses only admitted NASA MEO peak instants", () => {
+  const expected = new Map([
+    ["october-draconid-meteor-shower-2026-10-09", "2026-10-09T02:10:00Z"],
+    ["geminid-meteor-shower-2026-12-14", "2026-12-14T13:00:00Z"],
+    ["ursid-meteor-shower-2026-12-22", "2026-12-22T15:54:00Z"],
+    ["quadrantid-meteor-shower-2027-01-04", "2027-01-04T00:48:00Z"],
+    ["eta-aquariid-meteor-shower-2027-05-05", "2027-05-06T22:28:00Z"],
+    ["delta-aquariid-meteor-shower-2027-07-28", "2027-07-30T06:52:00Z"],
+    ["alpha-capricornid-meteor-shower-2027-07-30", "2027-07-31T10:41:00Z"],
+    ["perseid-meteor-shower-2027-08-13", "2027-08-13T20:20:00Z"],
+  ]);
+  const meteorEvents = skyEvents.filter((e) => e.category === "meteor-showers");
+  assert.equal(meteorEvents.length, expected.size);
+  for (const [id, atUtc] of expected) {
+    const event = meteorEvents.find((e) => e.id === id);
+    assert.ok(event, id);
+    assert.equal(event.timing.kind, "instant");
+    if (event.timing.kind === "instant") assert.equal(event.timing.atUtc, atUtc);
+    assert.ok(event.sources.some((source) => source.url.includes("ntrs.nasa.gov")));
+    assert.ok(!event.sources.some((source) => source.url.includes("amsmeteors.org")));
+    assert.ok(event.sections.length >= 4);
   }
-  const delta = find("Delta Aquariid")!;
-  if (delta.timing.kind === "approximate")
-    assert.equal(delta.timing.startDate, "2027-07-30");
-  const lyrid = find("Lyrid")!;
-  assert.ok(
-    lyrid.sections.some((s) => /disagree|different|differ/i.test(s.body)),
-  );
-  for (const name of ["Orionid", "Geminid", "Perseid"]) {
-    const e = find(name)!;
-    assert.ok(e.sections.length >= 5);
-    assert.ok(e.sources.some((s) => /amsmeteors|nasa/.test(s.url)));
-  }
+  for (const name of ["Orionid", "Taurid", "Leonid", "Lyrid"])
+    assert.ok(!meteorEvents.some((event) => event.title.includes(name)), name);
+  assert.ok(!skyEvents.some((event) => event.sources.some((source) => source.url.includes("amsmeteors.org"))));
 });
 test("season UTC reference crosses civil date correctly and aliases agree", () => {
   const e = find("December solstice")!;

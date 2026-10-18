@@ -63,19 +63,6 @@
     "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html"
   },
   {
-    "id": "orionid-meteor-shower-2026-10-21",
-    "date": "2026-10-21",
-    "time": "18",
-    "statement": "Orionid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-    "specialist": {
-      "start": "2026-10-21",
-      "end": "2026-10-22",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Oct 2–Nov 7, 2026"
-    }
-  },
-  {
     "id": "venus-at-inferior-conjunction-2026-10-24",
     "date": "2026-10-24",
     "time": "03",
@@ -132,19 +119,6 @@
     "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html"
   },
   {
-    "id": "southern-taurid-meteor-shower-2026-11-05",
-    "date": "2026-11-05",
-    "time": "19",
-    "statement": "S Taurid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-    "specialist": {
-      "start": "2026-11-04",
-      "end": "2026-11-05",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Sep 20–Nov 20, 2026"
-    }
-  },
-  {
     "id": "venus-and-the-moon-occultation-opportunity-2026-11-07",
     "date": "2026-11-07",
     "time": "11:31",
@@ -173,19 +147,6 @@
     "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html"
   },
   {
-    "id": "northern-taurid-meteor-shower-2026-11-12",
-    "date": "2026-11-12",
-    "time": "18",
-    "statement": "N Taurid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-    "specialist": {
-      "start": "2026-11-11",
-      "end": "2026-11-12",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Oct 20–Dec 10, 2026"
-    }
-  },
-  {
     "id": "mars-and-jupiter-2026-11-16",
     "date": "2026-11-16",
     "time": "04",
@@ -198,19 +159,6 @@
     "time": "11:48",
     "statement": "FIRST QUARTER MOON",
     "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html"
-  },
-  {
-    "id": "leonid-meteor-shower-2026-11-18",
-    "date": "2026-11-18",
-    "time": "00",
-    "statement": "Leonid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-    "specialist": {
-      "start": "2026-11-16",
-      "end": "2026-11-17",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Nov 6–30, 2026"
-    }
   },
   {
     "id": "mercury-at-greatest-elongation-2026-11-20",
@@ -278,15 +226,9 @@
   {
     "id": "geminid-meteor-shower-2026-12-14",
     "date": "2026-12-14",
-    "time": "13",
+    "time": "13:00",
     "statement": "Geminid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-    "specialist": {
-      "start": "2026-12-13",
-      "end": "2026-12-14",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Dec 4–17, 2026"
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf"
   },
   {
     "id": "first-quarter-moon-2026-12-17",
@@ -312,15 +254,9 @@
   {
     "id": "ursid-meteor-shower-2026-12-22",
     "date": "2026-12-22",
-    "time": "22",
+    "time": "15:54",
     "statement": "Ursid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2026gmt.html",
-    "specialist": {
-      "start": "2026-12-21",
-      "end": "2026-12-22",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Dec 17–26, 2026"
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf"
   },
   {
     "id": "full-moon-2026-12-24",
@@ -360,15 +296,9 @@
   {
     "id": "quadrantid-meteor-shower-2027-01-04",
     "date": "2027-01-04",
-    "time": "04",
+    "time": "00:48",
     "statement": "Quadrantid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html",
-    "specialist": {
-      "start": "2027-01-03",
-      "end": "2027-01-04",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Dec 28, 2026–Jan 12, 2027"
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf"
   },
   {
     "id": "antares-and-the-moon-2027-01-04",
@@ -609,19 +539,6 @@
     "url": "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html"
   },
   {
-    "id": "lyrid-meteor-shower-2027-04-23",
-    "date": "2027-04-23",
-    "time": "01",
-    "statement": "Lyrid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html",
-    "specialist": {
-      "start": "2027-04-21",
-      "end": "2027-04-23",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Apr 14–30, 2027"
-    }
-  },
-  {
     "id": "antares-and-the-moon-2027-04-23",
     "date": "2027-04-23",
     "time": "23:16",
@@ -644,16 +561,10 @@
   },
   {
     "id": "eta-aquariid-meteor-shower-2027-05-05",
-    "date": "2027-05-05",
-    "time": "14",
+    "date": "2027-05-06",
+    "time": "22:28",
     "statement": "Eta-Aquarid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html",
-    "specialist": {
-      "start": "2027-05-05",
-      "end": "2027-05-06",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Apr 19–May 28, 2027"
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf"
   },
   {
     "id": "new-moon-2027-05-06",
@@ -839,16 +750,10 @@
   },
   {
     "id": "delta-aquariid-meteor-shower-2027-07-28",
-    "date": "2027-07-28",
-    "time": "16",
+    "date": "2027-07-30",
+    "time": "06:52",
     "statement": "Delta-Aquarid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html",
-    "specialist": {
-      "start": "2027-07-30",
-      "end": "2027-07-31",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Jul 12–Aug 23, 2027"
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf"
   },
   {
     "id": "pleiades-and-the-moon-2027-07-28",
@@ -902,15 +807,9 @@
   {
     "id": "perseid-meteor-shower-2027-08-13",
     "date": "2027-08-13",
-    "time": "08",
+    "time": "20:20",
     "statement": "Perseid Meteor Shower",
-    "url": "https://www.astropixels.com/almanac/almanac21/almanac2027gmt.html",
-    "specialist": {
-      "start": "2027-08-12",
-      "end": "2027-08-13",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "Jul 17–Aug 24, 2027"
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf"
   },
   {
     "id": "penumbral-lunar-eclipse-2027-08-17",
@@ -1033,28 +932,16 @@
   },
   {
     "id": "alpha-capricornid-meteor-shower-2027-07-30",
-    "date": "2027-07-30",
-    "time": null,
+    "date": "2027-07-31",
+    "time": "10:41",
     "statement": "Alpha Capricornid meteor shower",
-    "url": "https://www.amsmeteors.org/calendar/",
-    "specialist": {
-      "start": "2027-07-30",
-      "end": "2027-07-31",
-      "source": "https://www.amsmeteors.org/calendar/",
-      "activity": "AMS gives July 3–August 15, 2027 in its activity heading, while its narrative describes July 12–August 12. Because those endpoints differ, this guide does not assert a single exact activity interval; it uses July 30–31 for the peak-night reference."
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20260009360/downloads/LEO_Forecast_2027.pdf"
   },
   {
     "id": "october-draconid-meteor-shower-2026-10-09",
     "date": "2026-10-09",
-    "time": null,
+    "time": "02:10",
     "statement": "October Draconid meteor shower",
-    "url": "https://imo.net/files/meteor-shower/cal2026.pdf",
-    "specialist": {
-      "start": "2026-10-09",
-      "end": "2026-10-09",
-      "source": "https://imo.net/files/meteor-shower/cal2026.pdf",
-      "activity": "The indexed IMO 2026 calendar extract gives October 6–10 as the activity reference and October 9 as the predicted maximum date. The PDF was not fully downloadable in this environment; only that primary extract is claimed as reviewed."
-    }
+    "url": "https://ntrs.nasa.gov/api/citations/20250009524/downloads/LEO_Forecast_2026.pdf"
   }
 ]

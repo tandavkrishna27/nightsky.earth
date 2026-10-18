@@ -1,6 +1,6 @@
 # Website content audit
 
-Reviewed 16 October 2026. Local preview only. No plugin files accessed.
+Reviewed 18 October 2026. Website local preview only. Companion MCP source and rights research is recorded in the source register; no plugin runtime code or configuration was changed.
 
 ## Retained resource references
 
@@ -96,7 +96,7 @@ Every named old entry was considered; only independently checked records were re
 
 ## Meteor information
 
-Existing annual dates and Moon/visibility labels have not been verified. No dated prediction or rate is published in the new interface. Recognized legacy IDs render noindex archive notices; general preparation links to NASA and Resources. The approved evergreen fallback is used on Home/index until reviewed dated evidence is supplied.
+The reviewed calendar includes eight year-specific NASA MEO predicted meteor maxima for October 2026–September 2027. Each is an approximate forecast maximum reported to the minute and shown in local time from its UT source; it does not assert an activity season, local visibility, or a personal meteor rate. AMS calendar dates without documented reuse permission were removed. Recognized legacy IDs render noindex archive notices; general preparation links to NASA and Resources.
 
 ## News
 
@@ -104,7 +104,7 @@ The read-only Spaceflight News API is normalized by the website. Local API smoke
 
 ## Images and fonts
 
-Existing stock photography and hero video are reused within this local preview; ownership/licensing confirmation is still a release dependency. Existing Google Fonts stylesheet retained (Playfair Display and Inter): these request font resources from Google. No new analytics or forms added. Hero video is about 21.4 MB; optimize for public delivery before launch, without replacing the approved sky composition.
+The owner confirmed on 18 October 2026 that existing images and video are generated or owner-created. Record that provenance with the release evidence. Existing Google Fonts stylesheet retained (Playfair Display and Inter): these request font resources from Google. No new analytics or forms added. Hero video is about 21.4 MB; optimize for public delivery before launch, without replacing the approved sky composition.
 
 ## Editorial identity
 
