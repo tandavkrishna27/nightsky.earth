@@ -12,6 +12,14 @@
   [build.environment]
     NODE_VERSION = "20"
 
+# Review and branch previews use the no-index preview build. Production keeps
+# the release build above, which stops until required factual approvals exist.
+[context.deploy-preview]
+  command = "npm run build"
+
+[context.branch-deploy]
+  command = "npm run build"
+
 # Redirect rules for Single Page Application
 [functions]
   directory = "netlify/functions"
