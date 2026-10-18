@@ -1,4 +1,5 @@
 import { registerLightPollutionTools } from './lightPollutionTools';
+import {attachPlanningCard,RESULT_CARD_TOOL_META} from './resultCard';
 import type { LightPollutionProvider } from '../../shared/nightsky/lightPollution';
 import { registerOptionalSkyTools } from './optionalSkyTools';
 import type { OptionalSkyProviders } from '../providers/skyConfiguration';
@@ -46,6 +47,8 @@ export interface NightSkyCache {
 
 /** Runtime dependencies are shared by every stateless MCP request. */
 export interface NightSkyDependencies {
+  /** Local presentation rehearsal only; no environment-based source activation. */
+  resultCardPrototype?: boolean;
   skyProviders?: OptionalSkyProviders;
   lightPollutionProviders?: LightPollutionProvider[];
   /** Operator-selected rehearsal scope; never controlled by request metadata. */
@@ -96,6 +99,7 @@ export const V1_TOOL_ANNOTATIONS = {
 
 /** No domain tools are registered until their real handler and schema are ready. */
 export function registerNightSkyTools(server: McpServer, dependencies: NightSkyDependencies): void {
+  if(dependencies.resultCardPrototype!==undefined&&typeof dependencies.resultCardPrototype!=='boolean')throw new TypeError('Invalid result-card prototype switch.');
   if (dependencies.weatherCollection && dependencies.weatherProvider) throw new TypeError("Configure weatherCollection or weatherProvider, not both.");
   const toolMode = dependencies.toolMode ?? "full";
   if (toolMode !== "full" && toolMode !== "resolver-only") throw new TypeError("Invalid MCP tool mode.");
@@ -370,13 +374,15 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     inputSchema: planObservingSessionInputSchema,
     outputSchema: planResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.plan_observing_session,
+    ...(dependencies.resultCardPrototype?{_meta:RESULT_CARD_TOOL_META}:{}),
   }, async (input) => {
     const index = dependencies.discoveryProvider ? undefined : dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
     if (!index && !dependencies.selectedPlaceResolver) throw new Error("The local GeoNames place index is unavailable.");
     const services = plannerServicesFor(index);
     const result = await planObservingSession(input, services);
     const answer = planAnswerText(result, {target: input.target, includeSourceLinks: !dependencies.discoveryProvider});
-    return { content: [{ type: "text", text: dependencies.discoveryProvider ? apiAttributionText(answer,planAnswerSources(result,input.target)) : answer }], structuredContent: result };
+    const reply={content:[{type:'text' as const,text:dependencies.discoveryProvider?apiAttributionText(answer,planAnswerSources(result,input.target)):answer}],structuredContent:result};
+    return dependencies.resultCardPrototype?attachPlanningCard(reply,result,input.target):reply;
   });
 
   server.registerTool("compare_observing_options", {
