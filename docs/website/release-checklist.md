@@ -1,22 +1,20 @@
 # Publication checklist
 
-This is a local preview, not a published release. The release command refuses incomplete approvals.
+The website release build is gated by documented facts and approvals. Build approval does not activate the MCP service or certify account-level hosting settings.
 
-- As of 18 October 2026, the operator has confirmed that NightSky does not persist user request content or conversation history. The website policy describes browser preferences, Google Fonts, Gmail, Netlify function logs and the news-search provider separately, and notes that Hetzner is the intended MCP host while its live settings remain unverified.
-- [ ] Public NightSky listing URL and tested setup supplied (not required for a truthful unavailable-listing site).
-- [x] Operator identity and current website data recipients recorded in the policy and release facts.
-- [x] Owner confirmed an 18+ audience and Hetzner as the intended MCP host. The plugin draft's 13+ statement is a known mismatch and remains for the plugin release workstream; the MCP service is not yet deployed or host-verified.
-- [x] Source and rights register drafted for website and MCP source inventory in `source-and-rights-register.md`; per-source approvals remain outstanding where indicated.
-- [ ] Confirm production Netlify plan/log settings and support-mailbox retention; policy currently explains what remains unknown.
-- [x] Review website source for analytics tags and request-body/query logging; no third-party analytics tag or request-body/query logger was found.
-- [ ] Released source inventory, coverage and forecast horizons approved.
-- [x] Removed AMS-derived meteor dates without documented reuse permission. The calendar now uses eight year-specific NASA MEO nighttime-capable peak maxima only, with report/table attribution, minute-precision limits and no season-width claim.
+- [x] Operator identity and website data recipients recorded in the Privacy Policy and release facts.
+- [x] Owner confirmed an 18+ audience, free plans only, and Hetzner Cloud in Helsinki for the future MCP host.
+- [x] Owner dropped the retained regional OpenStreetMap candidate index from launch. If Geoapify Free is enabled, show both required Geoapify credit and OpenStreetMap attribution.
+- [x] Source inventory corrected: 7Timer's current usage guidance permits free or paid software; WeatherAPI remains conditional on actual Free-plan confirmation; OpenWeather remains disabled pending exact product-license review; ERA5 is local historical context, not a live Open-Meteo request.
+- [x] Reviewed website source for analytics tags and request-body/query logging; no third-party analytics tag or request-body/query logger was found.
+- [x] Removed AMS-derived meteor dates without documented reuse permission. Calendar uses eight year-specific NASA MEO night-capable maxima with source/table attribution and minute-precision limits.
 - [x] Owner confirmed existing website photos and video are generated or owner-created.
-- [ ] Confirm Spaceflight News API/publisher reuse terms before adding article summaries or images; current page omits them.
-- [ ] Treat the transformed OSM candidate index conservatively as ODbL-derived; preserve source IDs, vintage, attribution and modification marker, and prepare the exact machine-readable database or alteration/build file offer before any public distribution. Public index release remains gated until the artifact exists and is checked.
-- [ ] Owner approves the updated Privacy/Terms copy for publication (effective date set to 18 October 2026).
-- [ ] Verify actual Hetzner MCP deployment, host/edge logs and retention, DNS/TLS, proxy/firewall and provider configuration; verify Netlify production plan and custom-domain routing separately.
+- [x] News page shows limited article metadata and links only; no article text, summaries or publisher images are republished.
+- [x] Privacy Policy and Terms updated with 18+ eligibility, current no-fee wording, effective date 18 October 2026, provider disclosures and the adopted future Hetzner log policy.
+- [x] Owner approved source inventory, selected hosting facts, content-rights screening and policy draft for the website release build on 18 October 2026. Hosting approval identifies the planned provider/region and disclosed deployment status; it is not live-server verification.
+- [ ] Before enabling MCP: apply and verify Hetzner product/region, DNS/TLS, firewall, proxy, seven-day content-free log rotation, backup scope/restore, access controls, provider switches and attribution. Reconcile the plugin draft's 13+ age line to 18+ in its separate release workstream.
+- [ ] Confirm Netlify production plan, custom-domain routing and account-level logging/retention; the current policy accurately marks these as unverified.
 - [ ] Hero video public-delivery optimization evaluated.
-- [ ] Owner reviews local preview and authorizes any publication separately.
+- [ ] Review local preview and authorize publication separately.
 
-Runtime provider switches and hosting settings were not changed. Do not publish a local noindex preview build.
+The runtime provider switches and hosting settings were not changed. Do not publish a local noindex preview build. Netlify's production command remains `npm run build:release`; preview and branch deploys use `npm run build`.

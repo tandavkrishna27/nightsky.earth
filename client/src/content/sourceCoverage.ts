@@ -17,15 +17,15 @@ export const coverageCards = [
     coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. An aurora model is not a personal sighting probability.",
     details: [
       "MET Norway is the baseline weather integration. It preserves the forecast’s native sampling and accumulation periods. NOAA’s OVATION product is a short-term aurora outlook, typically 30–90 minutes, rather than a full-night forecast.",
-      "Additional integrations are conditional on provider access and the service’s enabled sources. WeatherAPI uses hourly samples; OpenWeather’s five-day product uses three-hour samples. Optional 7Timer! ASTRO seeing and transparency values are categories or ranges, not precise measurements. 7Timer!’s current terms limit use or redistribution of its weather data to noncommercial purposes; commercial use needs permission before enabling it.",
+      "Additional integrations are conditional on provider access and the service’s enabled sources. WeatherAPI uses hourly samples and is shown only after the account is confirmed on its Free plan with required credit and disclaimer. OpenWeather’s five-day product uses three-hour samples, but remains disabled until its exact Free-product license and attribution obligations are approved. 7Timer! ASTRO may be used in free or paid software under its current published guidance; its seeing and transparency values are categories or ranges, not precise measurements.",
       "Your answer identifies the source and returned time window. Fetch time is retrieval time; a model issue time is shown only when supplied. Independent forecasts retain their disagreements and are not averaged into one score.",
     ],
     sources: [
       { name: "MET Norway", url: "https://api.met.no/" },
       { name: "NOAA Space Weather Prediction Center", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
-      { name: "WeatherAPI — optional", url: "https://www.weatherapi.com/docs/" },
-      { name: "OpenWeather — optional", url: "https://openweathermap.org/forecast5" },
-      { name: "7Timer! ASTRO — optional", url: "https://www.7timer.info/doc.php?lang=en" },
+      { name: "WeatherAPI — conditional on Free-plan confirmation", url: "https://www.weatherapi.com/terms.aspx" },
+      { name: "OpenWeather — disabled pending license review", url: "https://openweathermap.org/storage/app/media/documents/License_explainer_25%20Feb_25.pdf" },
+      { name: "7Timer! ASTRO — optional", url: "https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage" },
     ],
   },
   {
@@ -52,14 +52,13 @@ export const coverageCards = [
     description: "Named-place resolution and source-labelled candidate searches help explore an area and select a point for a plan.",
     coverage: "A resolved town and a candidate observing site have different coverage. A map point does not establish night access, parking, facilities, accessibility or safety.",
     details: [
-      "GeoNames supports named-city resolution. Depending on the enabled source, observing candidates come from retained regional OpenStreetMap data or bounded Geoapify searches. A worldwide place-name index does not imply a complete worldwide observing-site catalogue.",
-      "Retained candidate data includes parts of South India and Bhutan. API searches are bounded samples with their own category and geographic limits. Source identity and date remain attached to each result.",
+      "GeoNames supports named-city resolution. NightSky does not include or distribute a retained OpenStreetMap observing-place index. Where configured, observing candidates may come from bounded Geoapify API searches; Geoapify Free use requires visible Geoapify credit and OpenStreetMap attribution.",
+      "API searches are bounded samples with their own category and geographic limits. A worldwide place-name index does not imply a complete worldwide observing-site catalogue. Source identity and date remain attached to each result.",
       "A named city’s time zone is separate from an exact site’s time zone. Where site evidence is unavailable, NightSky asks for an explicit display time zone. Access and current restrictions need official local information.",
     ],
     sources: [
       { name: "GeoNames", url: "https://www.geonames.org/" },
-      { name: "OpenStreetMap contributors", url: "https://www.openstreetmap.org/copyright" },
-      { name: "Geoapify — where enabled", url: "https://www.geoapify.com/" },
+      { name: "Geoapify terms and attribution", url: "https://www.geoapify.com/terms-and-conditions/" },
     ],
   },
   {

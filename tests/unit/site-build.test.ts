@@ -23,9 +23,8 @@ test("preview output is isolated from news and publication", () => {
   assert.equal(classifyPath("/meteor-shower/not-a-record").status, 404);
   assert.equal(classifyPath("/experiences").status, 410);
 });
-test("release rejects incomplete factual approvals", () => {
-  assert.throws(() =>
-    buildWebsiteOutputs({
+test("release builds with owner-approved website release facts", () => {
+  const output = buildWebsiteOutputs({
       release: true,
       facts: releaseFacts,
       listing: { published: false, url: null },
@@ -34,8 +33,9 @@ test("release rejects incomplete factual approvals", () => {
       coverageMonths,
       now: new Date("2026-10-16"),
       legacyMeteorIds: [],
-    }),
-  );
+    });
+  assert.ok(output.robots.includes("User-agent: *\nAllow: /"));
+  assert.ok(output.sitemap.includes("https://nightsky.earth/resources"));
 });
 
 test("a complete synthetic release has an indexable sitemap without preview headers", () => {

@@ -29,16 +29,8 @@ test("missing factual approvals block publication", () => {
   assert.ok(blockers.includes("Content rights approval"));
 });
 
-test("confirmed operating facts clear data-handling blockers but not approvals", () => {
-  assert.deepEqual(
-    releaseBlockers(releaseFacts, { published: false, url: null }),
-    [
-      "Source inventory approval",
-      "Hosting verification",
-      "Content rights approval",
-      "Policy approval",
-    ],
-  );
+test("owner-approved website facts clear the website release gate", () => {
+  assert.deepEqual(releaseBlockers(releaseFacts, { published: false, url: null }), []);
 });
 
 import { loadEnv } from "vite";
