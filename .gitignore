@@ -70,3 +70,6 @@ migrations/
 
 # Netlify
 .netlify/
+# Website test artifacts
+test-results/
+playwright-report/

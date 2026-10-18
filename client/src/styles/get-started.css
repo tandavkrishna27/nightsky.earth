@@ -1,0 +1,25 @@
+.get-started-page .setup-assistants { margin-top: 47px; }
+.get-started-page .setup-assistants > h2 { font-family: Inter, sans-serif; font-size: 16px; line-height: 1.7; color: #d4d6d7; text-align: center; font-weight: 400; margin-bottom: 22px; }
+.get-started-page .setup-assistant-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; padding: 0; margin: 0; gap: 17px; }
+.get-started-page .setup-assistant-card { display: flex; flex-direction: column; align-items: center; min-width: 0; border: 1px solid #ffffff20; border-radius: 20px; padding: 29px 17px 23px; background: radial-gradient(ellipse at top, #c2a9770a, transparent), #11161dde; }
+.get-started-page .setup-choice-icon { width: 31px; height: 31px; object-fit: contain; color: #e5dfd2; flex-shrink: 0; }
+.get-started-page .setup-assistant-card h3 { font-family: Inter, sans-serif; font-size: 21px; line-height: 1.5; margin: 18px 0 24px; }
+.get-started-page .setup-choice-action { width: 100%; min-height: 48px; padding: 13px 10px; font-size: 13px; line-height: 1.65; gap: 8px; text-align: center; border-radius: 999px; }
+.get-started-page .setup-choice-action svg { flex-shrink: 0; }
+.get-started-page .setup-choice-action:disabled { cursor: default; opacity: .72; }
+.get-started-page .setup-choice-action:disabled:hover { transform: none; }
+.get-started-page .setup-plan-note { color: #aeb7c2; font-size: 12px; line-height: 1.8; text-align: center; margin: 21px auto 0; }
+.get-started-page .setup-help-line { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 30px; border-top: 1px solid #ffffff18; padding-top: 30px; color: #bdc5ce; font-size: 14px; }
+.get-started-page .setup-help-line a { min-height: 44px; gap: 10px; }
+.get-started-page .starter-question { border-radius: 18px; }
+@media (max-width: 1000px) {
+  .get-started-page .setup-assistant-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .get-started-page .setup-choice-action { max-width: 260px; }
+}
+@media (max-width: 520px) {
+  .get-started-page .setup-assistants { margin-top: 31px; }
+  .get-started-page .setup-assistant-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .get-started-page .setup-assistant-card { padding: 25px 24px; }
+  .get-started-page .setup-assistant-card h3 { margin: 13px 0 18px; }
+  .get-started-page .setup-help-line { align-items: flex-start; flex-direction: column; gap: 8px; }
+}

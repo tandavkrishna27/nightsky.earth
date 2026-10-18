@@ -180,79 +180,11 @@ npm run check
 npm run db:push
 ```
 
-## 🌐 Deployment
+## Deployment
 
-### Deploy to Netlify
+The configured deployment host is Netlify. Its publication build is `npm run build:release`, which stops until the required operator, hosting, privacy, source, content-rights and policy facts are confirmed. See [`docs/website/release-checklist.md`](docs/website/release-checklist.md) before publishing.
 
-#### Option 1: Deploy via Netlify CLI
-
-1. **Install Netlify CLI**
-   ```bash
-   npm install -g netlify-cli
-   ```
-
-2. **Login to Netlify**
-   ```bash
-   netlify login
-   ```
-
-3. **Initialize Netlify**
-   ```bash
-   netlify init
-   ```
-
-4. **Deploy**
-   ```bash
-   netlify deploy --prod
-   ```
-
-#### Option 2: Deploy via Git Integration
-
-1. **Push your code to GitHub/GitLab/Bitbucket**
-
-2. **Import to Netlify**
-   - Go to [Netlify](https://app.netlify.com)
-   - Click "Add new site" → "Import an existing project"
-   - Connect your repository
-   - Netlify will auto-detect settings from `netlify.toml`
-
-3. **Configure build settings** (if needed)
-   - Build command: `npm run build`
-   - Publish directory: `dist/public`
-   - Node version: 20
-
-4. **Deploy**
-   - Netlify will automatically build and deploy
-   - Every push to main branch triggers a new deployment
-
-#### Option 3: Drag & Drop
-
-1. **Build locally**
-   ```bash
-   npm run build
-   ```
-
-2. **Deploy**
-   - Go to [Netlify Drop](https://app.netlify.com/drop)
-   - Drag the `dist/public` folder
-   - Your site is live!
-
-### Environment Variables on Netlify
-
-Set environment variables in Netlify dashboard:
-1. Go to Site settings → Environment variables
-2. Add variables:
-   - `NODE_VERSION`: `20`
-   - Add any other required variables
-
-### Custom Domain
-
-1. **Add custom domain in Netlify**
-   - Site settings → Domain management → Add custom domain
-   - Follow DNS configuration instructions
-
-2. **Enable HTTPS**
-   - Netlify provides free SSL certificates automatically
+`npm run build` creates a local preview with `noindex` metadata and a blocked `robots.txt`. Do not publish that preview build. Netlify uses the gated release build so it cannot accidentally publish that preview.
 
 ## 📊 Meteor Shower Data
 

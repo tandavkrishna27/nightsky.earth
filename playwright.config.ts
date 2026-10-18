@@ -1,0 +1,2 @@
+import { defineConfig, devices } from '@playwright/test';
+export default defineConfig({testDir:'./tests/browser',testIgnore:'host-routing.spec.ts',fullyParallel:false,workers:1,use:{baseURL:'http://127.0.0.1:5178',...devices['Desktop Chrome'],reducedMotion:'reduce',screenshot:'only-on-failure'},webServer:{command:'npm run dev:website',url:'http://127.0.0.1:5178',reuseExistingServer:false,timeout:30000}});

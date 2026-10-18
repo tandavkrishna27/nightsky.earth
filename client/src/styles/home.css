@@ -1,0 +1,1027 @@
+/* The approved homepage composition; all rules stay within homepage sections. */
+.home-hero .sky-media video {
+  opacity: 0;
+  transition: opacity 1.3s ease;
+}
+.home-hero .sky-media video.is-ready {
+  opacity: 1;
+}
+.home-hero .hero-copy h1 span {
+  color: #ddc693;
+}
+.home-hero .hero-copy .hero-description {
+  max-width: 500px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.home-hero .action-group > .text-link {
+  font-size: 12px;
+  gap: 18px;
+}
+.home-hero .hero-platform-current {
+  flex-basis: auto;
+}
+.home-hero .hero-platforms {
+  gap: 22px;
+}
+.home-hero .hero-platform {
+  font-size: 11px;
+}
+.home-hero .hero-platform svg {
+  width: 15px;
+  height: 15px;
+}
+.home-hero .platform-status {
+  display: none;
+}
+.home-journey,
+.home-events,
+.home-collective-layout,
+.home-faq {
+  width: min(1180px, calc(100% - 112px));
+  overflow-wrap: anywhere;
+}
+.home-journey {
+  padding-block: 100px 92px;
+  scroll-margin-top: 90px;
+}
+.home-journey .section-heading {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+.home-journey h2,
+.home-events h2,
+.home-collective h2,
+.home-faq h2 {
+  font-size: clamp(34px, 3.8vw, 54px);
+  font-weight: 400;
+  line-height: 1.14;
+  letter-spacing: -0.028em;
+}
+.home-journey .section-heading > p {
+  font-size: 15px;
+  max-width: 670px;
+  line-height: 1.8;
+}
+#how-it-works {
+  scroll-margin-top: 110px;
+}
+.home-journey .question-explorer {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.journey-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+  margin-bottom: 27px;
+}
+.journey-choices button {
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 1px solid #ffffff28;
+  border-radius: 30px;
+  color: #aeb7bc;
+  font-size: 12px;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.journey-choices button:hover {
+  border-color: #c2a97788;
+  color: #e8d5af;
+}
+.journey-choices button[aria-pressed="true"] {
+  color: #ead7ae;
+  border-color: #c2a97799;
+  background: #c2a97712;
+}
+.journey-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.04fr;
+  gap: 23px;
+  align-items: stretch;
+}
+.journey-scene {
+  position: relative;
+  margin: 0;
+  border-radius: 9px;
+  overflow: hidden;
+  min-height: 650px;
+  background: #111d26;
+}
+.journey-scene:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #070b10ed, transparent 65%);
+}
+.journey-scene > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: journey-image-in 0.5s ease-out;
+}
+.journey-scene figcaption {
+  position: absolute;
+  left: 33px;
+  right: 33px;
+  bottom: 31px;
+  z-index: 1;
+}
+.journey-scene h3 {
+  font-size: 35px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+.journey-scene p {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.8;
+  max-width: 340px;
+  color: #c5cace;
+}
+.journey-chat {
+  border: 1px solid #c2a97738;
+  border-radius: 9px;
+  background: #11191f;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 650px;
+  display: flex;
+  flex-direction: column;
+}
+.home-journey .question-platform {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 13px;
+  flex-wrap: wrap;
+  background: #141e25;
+}
+.assistant-brands {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #b4c0c5;
+  font-size: 10px;
+}
+.assistant-brands > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.assistant-brands svg {
+  height: 14px;
+  width: 14px;
+  flex-shrink: 0;
+}
+.plugin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  color: #d8c092;
+  background: #c2a9770b;
+  border: 1px solid #c2a9772e;
+  border-radius: 20px;
+  padding: 5px 10px;
+}
+.plugin-brand svg {
+  flex-shrink: 0;
+}
+.home-journey .demo-panel {
+  position: relative;
+  padding: 24px 23px;
+  flex: 1;
+}
+.home-journey .demo-messages {
+  gap: 18px;
+}
+.home-journey .demo-message.is-user {
+  background: #263139;
+  padding: 12px 16px;
+  max-width: 90%;
+}
+.home-journey .demo-message p {
+  font-size: 11px;
+  line-height: 1.85;
+}
+.home-journey .demo-speaker {
+  font-size: 9px;
+  color: #85959e;
+  margin-bottom: 4px;
+  letter-spacing: 0;
+}
+.home-journey [data-message="answer"] > .demo-speaker {
+  font-size: 10px;
+  color: #d8c092;
+  margin-bottom: 8px;
+}
+.home-journey .demo-activity {
+  font-size: 9px;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.home-journey .demo-visible-text {
+  display: block;
+}
+.home-journey .demo-visible-text p + p {
+  margin-top: 10px;
+}
+.home-journey .demo-visible-text .demo-followup {
+  margin-top: 15px;
+  padding: 10px 13px;
+  background: #c2a9770b;
+  border-left: 2px solid #c2a9776b;
+  font-size: 10px;
+  line-height: 1.8;
+  color: #d4c5a8;
+}
+.demo-stage {
+  transition:
+    opacity 0.48s ease,
+    transform 0.48s cubic-bezier(0.2, 0.6, 0.3, 1);
+}
+.demo-word {
+  transition: opacity 0.15s ease-out;
+}
+.thinking-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.thinking-dots i {
+  height: 3px;
+  width: 3px;
+  border-radius: 50%;
+  background: #c2a977;
+}
+.demo-activity:not(.is-thinking) .thinking-dots {
+  visibility: hidden;
+}
+.is-thinking .thinking-dots i {
+  animation: journey-thinking 1.1s ease-in-out infinite;
+}
+.is-thinking .thinking-dots i:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.is-thinking .thinking-dots i:nth-child(3) {
+  animation-delay: 0.32s;
+}
+.question-explorer:not([data-playback-state="playing"]) .thinking-dots i {
+  animation-play-state: paused;
+}
+.home-journey .demo-composer {
+  min-height: 43px;
+  margin: 0 20px 14px;
+  padding: 10px 13px;
+  border-radius: 24px;
+  font-size: 9px;
+  background: #0b13194d;
+}
+.home-journey .demo-controls {
+  padding: 6px 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 9px;
+}
+.demo-control-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.home-journey .demo-controls button {
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 3px;
+  font-size: 10px;
+  color: #c1ab80;
+}
+.home-journey .demo-controls button:hover {
+  color: #e8d4ad;
+}
+.journey-disclaimer {
+  margin-top: 18px;
+  font-size: 10px;
+  color: #7b8991;
+  line-height: 1.8;
+}
+.home-events {
+  border-top: 1px solid var(--line);
+  padding-block: 105px 110px;
+}
+.home-events-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+.home-events-heading .text-link {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #d7c19b;
+  gap: 17px;
+}
+.home-event-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.home-event-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid #ffffff18;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #10161b;
+  transition:
+    transform 0.25s,
+    border-color 0.25s;
+}
+.home-event-card:hover {
+  transform: translateY(-5px);
+  border-color: #c2a97777;
+}
+.home-event-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.home-event-art {
+  height: 205px;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 110%, #283b50, #0a111c 70%);
+}
+.home-event-art:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 11% 22%, #fff9, transparent),
+    radial-gradient(1px 1px at 63% 29%, #fff8, transparent),
+    radial-gradient(1px 1px at 79% 64%, #fff9, transparent),
+    radial-gradient(1px 1px at 32% 78%, #fff8, transparent);
+  background-size: 151px 117px;
+  opacity: 0.65;
+}
+.home-event-date {
+  position: absolute;
+  z-index: 2;
+  left: 20px;
+  top: 20px;
+  min-width: 92px;
+  min-height: 113px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: #0d171ded;
+  border: 1px solid #c2a97777;
+  border-radius: 6px;
+  box-shadow: 0 7px 20px #0005;
+  padding: 10px 12px;
+  max-width: calc(100% - 40px);
+}
+.home-event-date > span:first-child {
+  font-size: 9px;
+  color: #d1bd95;
+  letter-spacing: 0.12em;
+}
+.home-event-date strong {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 35px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #f0e3c9;
+  overflow-wrap: anywhere;
+}
+.home-event-date.date-wide strong {
+  font-size: 24px;
+}
+.home-event-date > span:last-child {
+  font-size: 9px;
+  color: #c9c1b1;
+  letter-spacing: 0.08em;
+}
+.event-celestial-art {
+  position: absolute;
+  inset: 0;
+}
+.event-celestial-art i {
+  position: absolute;
+  left: 67%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: #f6e4be;
+  border-radius: 50%;
+  box-shadow:
+    0 0 19px 5px #e0c49344,
+    0 0 65px #e0c49333;
+}
+.event-celestial-art b {
+  position: absolute;
+  width: 210px;
+  height: 95px;
+  border: 1px solid #d1bc882e;
+  border-radius: 50%;
+  transform: rotate(-30deg);
+  left: 44%;
+  top: 28%;
+}
+.category-moon .event-celestial-art i {
+  left: 60%;
+  top: 29%;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(90deg, #161c23 50%, #dedbcf 51%);
+  box-shadow: 0 0 65px #ced6da13;
+  transform: rotate(-15deg);
+}
+.category-moon .event-celestial-art i:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 67% 23%, #0002 0 5px, transparent 6px),
+    radial-gradient(circle at 75% 66%, #0003 0 9px, transparent 10px),
+    radial-gradient(circle at 58% 50%, #0002 0 14px, transparent 15px);
+}
+.category-moon .event-celestial-art b {
+  display: none;
+}
+.category-meteor-showers .event-celestial-art i,
+.category-meteor-showers .event-celestial-art b {
+  left: 36%;
+  top: 35%;
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #fff);
+  transform: rotate(-35deg);
+  box-shadow: 3px 0 4px #fff8;
+  border: 0;
+  border-radius: 0;
+}
+.category-meteor-showers .event-celestial-art b {
+  left: 60%;
+  top: 65%;
+  width: 100px;
+  opacity: 0.5;
+}
+.category-eclipses .event-celestial-art i {
+  width: 68px;
+  height: 68px;
+  top: 34%;
+  left: 60%;
+  background: #101723;
+  box-shadow:
+    0 0 0 2px #d8bc88,
+    0 0 25px #d8bc8855;
+}
+.category-seasons .event-celestial-art i {
+  width: 45px;
+  height: 45px;
+  top: 38%;
+}
+.home-event-content {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.home-event-category {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #c1aa80;
+  margin-bottom: 13px;
+}
+.home-event-content h3 {
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 1.2;
+  min-height: 65px;
+}
+.home-event-context {
+  color: #b8b0a0;
+  font-size: 10px;
+  line-height: 1.8;
+  margin-top: 10px;
+}
+.home-event-synopsis {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 14px;
+  margin-bottom: 25px;
+}
+.home-event-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: #c6b38e;
+  font-size: 10px;
+}
+.home-event-navigation {
+  display: none;
+}
+.home-event-footnote {
+  font-size: 10px;
+  margin-top: 21px;
+  color: #77858b;
+  line-height: 1.8;
+}
+.home-event-empty {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.home-collective {
+  background: #0e1418;
+  border-block: 1px solid var(--line);
+  padding-block: 110px;
+}
+.home-collective-layout {
+  display: grid;
+  grid-template-columns: 1.06fr 1fr;
+  gap: 75px;
+  align-items: center;
+}
+.home-collective h2 {
+  max-width: 500px;
+}
+.collective-description {
+  max-width: 490px;
+  margin-top: 24px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.collective-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 23px 35px;
+  margin-top: 30px;
+}
+.collective-values > div {
+  border-top: 1px solid #c2a9773d;
+  padding-top: 14px;
+}
+.collective-values h3 {
+  font-size: 25px;
+  font-weight: 400;
+  color: #d8c297;
+}
+.collective-values p {
+  font-size: 11px;
+  margin-top: 8px;
+  color: #a1acb2;
+  line-height: 1.8;
+}
+.home-collective .text-link {
+  margin-top: 31px;
+  font-size: 12px;
+}
+.home-collective-photo {
+  position: relative;
+  margin: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 540px;
+  height: 100%;
+}
+.home-collective-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 55% center;
+}
+.home-collective-photo:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, #071017e3, transparent 65%);
+}
+.home-collective-photo figcaption {
+  position: absolute;
+  left: 30px;
+  bottom: 28px;
+  z-index: 1;
+  color: #e1d8c8;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 25px;
+  line-height: 1.4;
+}
+.home-faq {
+  display: grid;
+  align-items: start;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 95px;
+  padding-block: 110px;
+}
+.faq-intro p {
+  max-width: 330px;
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.home-faq-list {
+  position: relative;
+  border-top: 1px solid var(--line);
+}
+.home-faq details {
+  border-bottom: 1px solid var(--line);
+}
+.home-faq summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 22px;
+  font-size: 13px;
+  gap: 25px;
+}
+.home-faq summary::-webkit-details-marker {
+  display: none;
+}
+.home-faq summary:after {
+  content: "+";
+  font-size: 22px;
+  color: #a79470;
+}
+.home-faq details[open] summary:after {
+  content: "−";
+}
+.home-faq .faq-answer {
+  padding: 0 29px 24px 0;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.home-faq summary:focus-visible,
+.journey-choices button:focus-visible,
+.home-event-navigation button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+.home-closing {
+  padding-block: 105px 110px;
+  background-position: center 46%;
+}
+.home-closing h2 {
+  font-size: clamp(42px, 5vw, 66px);
+  font-weight: 400;
+}
+.home-closing > p:not(.eyebrow) {
+  font-size: 15px;
+  max-width: 470px;
+}
+.closing-section.home-closing > .pricing-note {
+  margin: 24px auto 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #b9b6ad;
+  letter-spacing: 0.04em;
+}
+@keyframes journey-image-in {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes journey-thinking {
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+@media (max-width: 1050px) {
+  .home-journey,
+  .home-events,
+  .home-collective-layout,
+  .home-faq {
+    width: calc(100% - 64px);
+  }
+  .journey-layout {
+    gap: 19px;
+  }
+  .home-journey .question-platform {
+    padding: 14px 17px;
+  }
+  .assistant-brands {
+    gap: 10px;
+  }
+  .plugin-brand {
+    font-size: 9px;
+  }
+  .home-journey .demo-panel {
+    padding: 22px 18px;
+  }
+  .home-collective-layout {
+    gap: 40px;
+  }
+  .home-faq {
+    gap: 45px;
+  }
+}
+@media (max-width: 760px) {
+  .home-journey,
+  .home-events,
+  .home-collective-layout,
+  .home-faq {
+    width: calc(100% - 42px);
+  }
+  .home-hero {
+    min-height: 770px;
+    padding-inline: 21px;
+  }
+  .home-hero .hero-copy h1 {
+    font-size: 60px;
+    letter-spacing: -0.043em;
+  }
+  .home-hero .hero-copy .hero-description {
+    max-width: 335px;
+    font-size: 13px;
+  }
+  .home-hero .action-group {
+    flex-direction: column;
+    gap: 21px;
+  }
+  .home-hero .hero-platforms {
+    gap: 18px;
+  }
+  .home-hero .hero-platform {
+    font-size: 10px;
+  }
+  .home-journey {
+    padding-block: 72px;
+  }
+  .home-journey h2,
+  .home-events h2,
+  .home-collective h2,
+  .home-faq h2 {
+    font-size: 37px;
+    letter-spacing: -0.027em;
+  }
+  .home-journey .section-heading > p {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .journey-choices {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 9px;
+    margin-bottom: 23px;
+  }
+  .journey-choices button {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  .journey-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+  }
+  .journey-scene {
+    min-height: 180px;
+    display: grid;
+    align-items: end;
+  }
+  .journey-scene > img {
+    object-position: center 38%;
+  }
+  .journey-scene figcaption {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    right: auto;
+    padding: 22px 21px 18px;
+  }
+  .journey-scene h3 {
+    font-size: 27px;
+  }
+  .journey-scene p {
+    font-size: 10px;
+    max-width: 290px;
+    margin-top: 8px;
+  }
+  .journey-chat {
+    min-height: 685px;
+  }
+  .home-journey .question-platform {
+    padding: 13px 16px;
+    gap: 10px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .assistant-brands {
+    font-size: 10px;
+    gap: 18px;
+  }
+  .plugin-brand {
+    font-size: 9px;
+    padding: 3px 9px;
+    max-width: 100%;
+  }
+  .home-journey .demo-panel {
+    padding: 23px 17px;
+  }
+  .home-journey .demo-message.is-user {
+    max-width: 93%;
+  }
+  .home-journey .demo-composer {
+    margin: 0 15px 12px;
+  }
+  .home-journey .demo-controls {
+    padding: 6px 15px;
+    gap: 5px;
+  }
+  .home-journey .demo-controls > span {
+    max-width: none;
+  }
+  .journey-disclaimer {
+    font-size: 9px;
+    margin-top: 15px;
+  }
+  .home-events {
+    padding-block: 72px;
+  }
+  .home-events-heading {
+    display: block;
+    margin-bottom: 24px;
+  }
+  .home-events-heading .text-link {
+    margin-top: 23px;
+  }
+  .home-event-grid {
+    grid-auto-flow: column;
+    grid-auto-columns: 86%;
+    grid-template-columns: none;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    padding: 5px 0 12px;
+    scroll-behavior: smooth;
+  }
+  .home-event-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .home-event-card {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .home-event-card:hover {
+    transform: none;
+  }
+  .home-event-content {
+    padding: 23px;
+  }
+  .home-event-content h3 {
+    font-size: 26px;
+    min-height: 64px;
+  }
+  .home-event-date {
+    left: 15px;
+    top: 18px;
+    min-width: 84px;
+  }
+  .home-event-date strong {
+    font-size: 34px;
+  }
+  .home-event-date.date-wide strong {
+    font-size: 23px;
+  }
+  .category-moon .event-celestial-art i {
+    width: 78px;
+    height: 78px;
+  }
+  .home-event-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #a4b0b7;
+  }
+  .home-event-navigation > div {
+    display: flex;
+    gap: 9px;
+  }
+  .home-event-navigation button {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #c2a97766;
+    border-radius: 4px;
+    background: #c2a9770b;
+    color: #d5c096;
+  }
+  .home-event-navigation button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .home-event-footnote {
+    font-size: 9px;
+    margin-top: 15px;
+  }
+  .home-collective {
+    padding-block: 72px;
+  }
+  .home-collective-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 31px;
+  }
+  .collective-description {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .collective-values {
+    gap: 21px 22px;
+    margin-top: 26px;
+  }
+  .home-collective-photo {
+    min-height: 350px;
+  }
+  .home-collective-photo figcaption {
+    font-size: 25px;
+    left: 25px;
+    bottom: 25px;
+  }
+  .home-faq {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+    padding-block: 72px;
+  }
+  .faq-intro p {
+    font-size: 13px;
+  }
+  .home-faq summary {
+    font-size: 12px;
+    padding-block: 21px;
+  }
+  .home-faq .faq-answer {
+    font-size: 11px;
+  }
+  .home-closing {
+    padding-block: 77px 81px;
+  }
+  .home-closing > p:not(.eyebrow) {
+    font-size: 13px;
+  }
+}
+@media (max-width: 360px) {
+  .home-hero .hero-copy h1 {
+    font-size: 51px;
+  }
+  .home-hero {
+    min-height: 750px;
+  }
+  .journey-scene {
+    min-height: 165px;
+  }
+  .journey-scene h3 {
+    font-size: 24px;
+  }
+  .journey-scene p {
+    max-width: 230px;
+  }
+  .assistant-brands {
+    gap: 11px;
+    font-size: 9px;
+  }
+  .journey-chat {
+    min-height: 755px;
+  }
+  .home-event-grid {
+    grid-auto-columns: 90%;
+  }
+  .home-event-content h3 {
+    font-size: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-journey *,
+  .home-event-card {
+    animation: none !important;
+    transition: none !important;
+  }
+  .home-event-grid {
+    scroll-behavior: auto;
+  }
+}

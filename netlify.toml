@@ -2,7 +2,8 @@
 
 [build]
   # Build command
-  command = "npm run build"
+  # Publication build: fails closed until required factual approvals are recorded.
+  command = "npm run build:release"
   
   # Directory to publish (output of Vite build)
   publish = "dist/public"
@@ -11,12 +12,17 @@
   [build.environment]
     NODE_VERSION = "20"
 
+# Review and branch previews use the no-index preview build. Production keeps
+# the release build above, which stops until required factual approvals exist.
+[context.deploy-preview]
+  command = "npm run build"
+
+[context.branch-deploy]
+  command = "npm run build"
+
 # Redirect rules for Single Page Application
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+[functions]
+  directory = "netlify/functions"
 
 # Headers for security and caching
 [[headers]]

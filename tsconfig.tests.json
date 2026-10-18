@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "client/src/**/*",
+    "shared/**/*",
+    "server/**/*",
+    "scripts/**/*.ts",
+    "netlify/**/*.ts",
+    "tests/**/*",
+    "playwright*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "build"],
+  "compilerOptions": {
+    "target": "ES2022"
+  }
+}
