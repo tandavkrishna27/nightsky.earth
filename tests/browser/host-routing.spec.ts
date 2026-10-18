@@ -22,6 +22,14 @@ test("production-shaped routes, metadata and independent sitemap", async ({
     const response = await request.get(path);
     expect(response.status(), path).toBe(200);
     expect(response.headers()["x-robots-tag"]).toContain("noindex");
+    if (path === "/resources") {
+      const html = await response.text();
+      expect(html).toContain('<title data-rh="true">Find what helps you look up. | NightSky.earth</title>');
+      expect(html).toContain('property="og:url" content="https://nightsky.earth/resources"');
+      expect(html).toContain('name="twitter:card" content="summary_large_image"');
+      expect(html).toContain("<noscript><main><h1>Find what helps you look up.</h1>");
+      expect(html).toContain('name="robots" content="noindex, nofollow"');
+    }
   }
   const redirect = await request.get("/meteor-nights", { maxRedirects: 0 });
   expect(redirect.status()).toBe(301);
