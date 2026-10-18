@@ -28,7 +28,7 @@ Independent admission and workflow reviews completed; a whole-change review iden
 - All three TypeScript projects passed. Plugin build, canonical ZIP, Codex/Claude local package verification and three compiled synthetic runtime checks passed; external provider attempts in those checks were zero.
 - Full-suite final rerun: **1,778 passed / 0 failed / 2 skipped** (1,780 total). The first full run caught five stale host-aware skill phrase assertions for the previous question-count wording; those assertions now match the reviewed one-or-two-question guidance. The focused 13-case skill rerun and complete final rerun pass.
 - CI explicitly repeats native admission/proxy/body regressions on both supported operating systems.
-- Owner approved the next 30-minute/twelve-request native session after checks and CI; it is prepared, not started at this checkpoint. Its bounded diagnostic journal aborts the session on write failure; a synthetic failure check confirms zero dispatch after journal failure.
+- Owner approved the next 30-minute/twelve-request native session after checks and CI; it was prepared at the implementation checkpoint and subsequently executed as recorded below. Its bounded diagnostic journal aborts the session on write failure; a synthetic failure check confirms zero dispatch after journal failure.
 
 ## Local package identity
 
@@ -41,6 +41,22 @@ Same plugin identity: `nightsky@nightsky-native-acceptance-20261017`; same loopb
 | Local Claude ZIP | `7d449d343e7ea3e7524a09839c39db207894b63f8e91bcd2ebe283097eb434f5` |
 | Canonical placeholder-endpoint ZIP | `30a34826c06882b6c7322625c9b6acd180490f491f4337a76199b77799047bd2` |
 
+## Executed native preflight (same day, after implementation CI)
+
+Implementation commit `433fb9bc50f1eb650dc38956f563edc0a87436bb` passed all six [exact-commit CI jobs](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39104721900). The owner then-approved session started at 06:46:47.853 UTC, expires 07:16:47.853 UTC (12:46:47 IST), and preserves existing ledgers. Its allowance is twelve attempts with independent caps: Geoapify 3, Public Universe 4, DarkSkySites 2, and each forecast provider 1. Maximum one MiB per body/twelve MiB total, no retries, raw bodies, history, scraping or deployment.
+
+| Native call | Observed tool latency | Outcome |
+| --- | --- | --- |
+| Resolve Hyderabad, India | 555 ms | Available; source-verified Asia/Kolkata snapshot |
+| Calculate astronomy, 20:30–23:30 IST on 18 October | 36 ms | Available; full requested interval astronomically dark; local engine returned dated Moon evidence |
+| Optional catalogue discovery, same place/night/window, naked eye, shortlist 2 | 13,690 ms | Available; Moon and HR 617 with bounded geometric windows/samples, not guaranteed sightings |
+
+All three generated MCP identities have matching ingress/completion evidence, HTTP 200 and `completed`, with the source attempt and phases correlated to discovery. Two provider requests were used: Geoapify 2,605 bytes and Public Universe 289,862 bytes (292,467 total accepted); weather and light-pollution allowances remain unused at this checkpoint. No raw response files were retained.
+
+The optional source returned HTTP headers about 13.5 seconds after dispatch; parsing/normalization then completed before the unchanged fifteen-second deadline. This is latency before headers at the guarded transport boundary, not proof that provider computation alone caused it. The acceptance guard buffers its bounded body before returning a Response, so source `headers` is the configured-fetch boundary; the additional `session.headers` event marks actual network header receipt. One success this close to the deadline does not establish dependable latency.
+
+These coordinator calls used the native integration from an existing chat. They do not establish fresh-startup storm behavior, automatic skill selection or a complete beginner conversation. There was no five-minute wait or rate-limit rejection in these three calls. The original five-minute incident is not retrospectively proved resolved. The owner was asked to refresh/select the same installed plugin in a fresh normal chat and paste its full planning answer. No uninstall is needed.
+
 ## Remaining acceptance
 
-A fresh bounded real-data/native session must use the new diagnostic sink, preserve existing counters and compare transport/source phases with the host result. Previous allowances are not extended. The original session's no-op logger must not be reused as proof of diagnostic coverage. Refreshing a package alone does not start the backend. Source latency, exact original rejection gate, owner answer quality and native-host acceptance remain open. Claude testing remains deferred. Hosting/publication gates are unchanged.
+The active bounded session uses the new diagnostic sink and preserves existing counters. Previous allowances are not extended. Refreshing a package alone does not start a backend; this session stops at its recorded expiry. Source latency, the exact original rejection gate, owner answer quality and complete native-host acceptance remain open. Claude testing remains deferred. Hosting/publication gates are unchanged.
