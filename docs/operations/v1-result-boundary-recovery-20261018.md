@@ -35,7 +35,7 @@ All three turns exited0 without timeout: **four completed MCP calls (2+1+1)**, o
 
 The [freeze decision record](v1-freeze-decisions-20261018.md) adds primary public-document evidence for Geoapify storage/Places reuse/Free geometry and DarkSkySites app use/cache/credit conditions, with retrieval limitations and feature boundaries. Public Universe per-record reuse mapping remains engineering work; public API availability is not a blanket dataset licence. The current target README now replaces obsolete capability lists while retaining all nineteen meteor identities. No source admission or optional activation was applied.
 
-Two narrow user questions are pending: identify event maintenance under NightSky.earth, and whether to continue evaluating the distinctly labelled historical-cloud method. Neither authorizes acquisition or certifies a baseline. Actual account exceptions/WeatherAPI transition, missing scientific evidence, broader final acceptance and release-dependent gates remain explicit.
+The owner confirmed NightSky.earth as the event-maintenance identity and requested historical alternatives before choosing a method. The freeze record preserves that confirmation and the explanation. Maintained set/years/review schedule and historical-method choice remain unadopted; neither response authorizes acquisition or certifies a baseline. Actual account exceptions/WeatherAPI transition, missing scientific evidence, broader final acceptance and release-dependent gates remain explicit.
 
 ## Verification boundary
 

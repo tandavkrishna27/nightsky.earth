@@ -83,6 +83,21 @@ These are owner facts and material product/scientific choices. Exact flag spelli
 
 There is no missing history startup integration and no need for another adapter merely to settle source selection. Local work can still close narrower acceptance items using retained material: exercise composed local planetary darkness/horizon/Moon/weather behavior; audit preserved partial/unavailable claims and credits against the final requested profile; and finish representative independent convention/event-state checks **where retained reference material actually supplies the case**. The remaining Venus-morning maximum-angle independent case cannot be certified with a second call to the same calculation; if no retained independent reference covers it, that evidence gate remains.
 
-These tasks can improve/close their own documented local acceptance cases. They cannot close source-use rights, create missing meteor seasons/radiants, assign a real maintenance person, admit a scientific method, establish a full numerical baseline or certify an actual public host. Under the current no-new-data/API/deployment constraint, tickets 0/6/9 cannot honestly be declared fully closed.
+These tasks can improve/close their own documented local acceptance cases. They cannot close source-use rights, create missing meteor seasons/radiants, infer a maintenance commitment without owner confirmation, admit a scientific method, establish a full numerical baseline or certify an actual public host. The subsequent owner confirmation below settles the maintenance identity only. Under the current no-new-data/API/deployment constraint, tickets 0/6/9 cannot honestly be declared fully closed.
 
 Review method: read-only inspection of the profiles, configuration functions, meteor inventory and retained event/history evidence, followed by primary public-document research limited to the URLs above. Relevant engineering-review/planning skill guidance was read for minimum-change and explicit-decision checks; no full interactive review or implementation-plan execution is claimed. No tests were added or run for this decision document.
+
+
+## Owner response and historical alternatives
+
+On18October2026, the owner explicitly confirmed: **record the owner as event/meteor maintainer under NightSky.earth**. This settles the maintenance identity question, not a legal publisher identity, adopted maintained year/set/review schedule or evidence admission. The runtime inventory deliberately remains pending while those other fields and scientific claims are unresolved. Do not ask for this same maintenance identity again.
+
+The owner requested historical alternatives before choosing a method; **no historical-method acceptance or acquisition authority was supplied**. The choices explained are:
+
+| Approach | V1 experience | Cost/validation boundary |
+| --- | --- | --- |
+| Location-specific hosted historical API summaries (recommended evaluation) | Request past clouds for a chosen point, compute labelled climatological summaries and serve bounded cached files. No global bulk catalogue or SQL database. | Free-service eligibility, quotas, integer-percent model differences, first-summary preparation and retention must be validated. Not an instant on-demand thirty-year forecast or future-night probability. No acquisition starts without exact separate limits. |
+| Native/raw ERA5 preparation | Greater control over original fractional data and calculations. | More preprocessing/storage/maintenance and source-policy review; not the requested low-preparation API route. A point/region approach is possible, but no worldwide build is implied. |
+| Near-term forecasts plus astronomy, without numerical history | Useful current planning while leaving historical values explicitly unavailable. | Would explicitly defer part of the long-range numerical-cloud promise; not silently adopted. Qualitative seasonal context must keep its own sources/uncertainties. |
+
+Recommendation remains to evaluate one exact point using the first approach, preserving its distinct method and scientific limits. The owner has not yet chosen it; no policy digest/admission flag is fabricated. Missing historical data remains unavailable. Public source terms and per-record rights work remain engineering-owned.
