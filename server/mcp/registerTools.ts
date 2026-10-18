@@ -164,7 +164,24 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     annotations: {...V1_TOOL_ANNOTATIONS.resolve_place,openWorldHint:Boolean(dependencies.discoveryProvider)},
   }, async (input, context) => {
     const index = dependencies.discoveryProvider ? undefined : dependencies.placeIndex ?? await (placeIndexPromise ??= (dependencies.placeIndexLoader ?? loadGeoNamesPlaceIndex)());
-    if (dependencies.discoveryProvider) { const result = await dependencies.discoveryProvider.resolvePlace(input); return {content:[{type:"text",text:apiAttributionText(result.availability.reason,result.sources)}],structuredContent:result}; }
+    if (dependencies.discoveryProvider) {
+      const result = await dependencies.discoveryProvider.resolvePlace(input);
+      // Promote the bounded resolver selection into text as well as structuredContent.
+      // A host may otherwise display only the generic availability reason.
+      const matches = result.matches.slice(0, 5).map(match => {
+        const verifiedZone = "timeZoneEvidence" in match && match.timeZoneEvidence?.status === "verified" && match.timeZoneEvidence.timeZone === match.timeZone;
+        const zone = verifiedZone ? `Actual site time zone: ${match.timeZone}.` : "Actual site time zone: unknown; ask the user to choose an explicit display time zone before calculations. A display choice does not verify the site zone.";
+        return `${JSON.stringify(match.displayName)} ; placeId: ${match.placeId}; sourceRevision: ${match.sourceRevision}; fetchedAt: ${match.fetchedAt ?? "not supplied"}; expiresAt: ${match.expiresAt ?? "not supplied"}. ${zone}`;
+      });
+      const omitted = result.matches.length - matches.length;
+      const action = result.matches.length ? [
+        result.selectionRequired ? "Ask the user to choose among these matches before proceeding." : "Use the returned match for the requested destination.",
+        "Reuse this successful resolution and its exact placeId/sourceRevision for follow-up tools; resolve again for a changed destination, an expired/missing snapshot, or an explicit user request to refresh the location lookup.",
+        "For a city plan, proceed to planning once the display time zone is settled. For site geometry/access evidence when needed, call get_observing_location_details with that exact placeId/sourceRevision. Unknown time zone calls for a display-zone choice, not another identical resolution.",
+      ].join(" ") : "";
+      const text = [result.availability.reason, ...matches, ...(omitted ? [`${omitted} additional matches are in structuredContent.matches.`] : []), action].filter(Boolean).join("\n");
+      return {content:[{type:"text",text:apiAttributionText(text,result.sources)}],structuredContent:result};
+    }
     const hostLocationHint = consentedHostLocation(context.mcpReq._meta, input.useApproximateHostLocation === true);
     const result = await resolvePlace(input, { index, hostLocationHint });
     const structuredContent = resolvePlaceResultSchema.parse(result);

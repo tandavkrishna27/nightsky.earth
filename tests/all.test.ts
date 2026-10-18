@@ -235,6 +235,7 @@ import './providers/public-universe-starter-evidence.test';
 import './mcp/native-admission.test';
 
 import './mcp/forecast-answer-text.test';
+import './mcp/resolver-action-text.test';
 
 import "./operations/v1-source-profile.test.ts";
 

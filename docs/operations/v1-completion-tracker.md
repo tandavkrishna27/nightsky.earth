@@ -4,7 +4,15 @@
 
 [All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 6 with local acceptance remaining; 8 release dependent; 1 separate website workstream**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
-## Latest local wave — source decisions, site guidance and audit (1.0.32)
+## Latest local wave — result-boundary recovery and source decisions (1.0.33)
+
+[Result-boundary recovery](v1-result-boundary-recovery-20261018.md) clarifies existing API snapshot identities/revisions/expiry and conditional next actions in text. Empty forecast text now describes only this response and conditionally preserves earlier timestamped evidence without inventing current freshness. No structured schema, workflow priority, provider, quota, cache or source-admission changes were made.
+
+The final installed1.0.33 controlled native conversation passed both targeted failures: one resolution plus details, one aggregate after explicit display-zone choice, one explicit forecast refresh. All three turns exit0, four MCP calls total, one synthetic geocode/two synthetic weather dispatches, zero external-provider attempts. The answer preserves18/25/40% at20:30/21:30/22:30 when the refresh is unavailable. This is a scoped pass, not universal model or all-client acceptance; wider final-credit and sparse-sample phrasing findings remain under12B/15. Earlier failed1.0.32 receipts are retained.
+
+The [freeze decision record](v1-freeze-decisions-20261018.md) now includes dated primary public documentation for Geoapify storage/Places reuse/Free geometry and DarkSkySites application/cache/credit conditions. Public Universe selected-record rights mapping remains engineering work. [Target/event boundaries](../../data/targets/README.md) are current rather than a stale historical capability list. All nineteen meteor identities and current available evidence remain; no scope reduction or method/source activation occurred. Maintenance and historical-method questions remain pending user input; account-specific/WeatherAPI transition and actual baseline evidence stay explicit. Original ticket categories are unchanged.
+
+## Previous local wave — source decisions, site guidance and audit (1.0.32)
 
 All three parallel lanes are reconciled: [source decision record](v1-source-decisions-20261018.md), [site-guidance regression evidence](v1-site-guidance-lane-a-20261018.md), and [independent local audit](v1-local-audit-20261018.md). All five packaged workflows and the canonical outdoor contract now reuse selected snapshots through display-zone clarification, explicitly preserve the city-no-details route, and qualify opening site-suitability claims. The audit's logging-disclosure mismatch is corrected in the draft policy and both operational documents; generated per-request correlation is distinguished from user/session identifiers.
 
@@ -276,3 +284,8 @@ Local revision 1.0.19 strengthens all five skills and canonical workflows: outdo
 ## 1.0.32 final local verification
 
 Final suite after the package-priority fix: **1,815 passed / 0 failed / 2 skipped (1,817 total)**, exit0; log `.superpowers/sdd/2026-10-18-publicuniverse-v1/source-conversation32-final-full.log`. The earlier full run had1priority-guard failure; it is retained, and the guard was preserved rather than weakened. All three TypeScript projects, both local host packages, portable package build, compiled API/Public Universe/light-pollution runtime checks and final installed15-file byte comparison pass. The bounded final native replay remains partial as detailed above; deterministic tests do not cancel the duplicate lookup or loss of earlier weather evidence. Three independent lanes and cross-reviews completed; corrected diagnostic disclosure, city-details conditional wording and priority position were reviewed. Exact-commit CI is watched after push. No data-provider request, new download, private accounting mutation, scraping or deployment occurred.
+
+
+## 1.0.33 final local verification
+
+Final suite: **1,819 passed / 0 failed / 2 skipped (1,821 total)**; all TypeScript projects, portable/both local packages,15-file installed equality, compiled API/Public Universe/light-pollution checks and the existing bounded capacity probe pass. The final three-turn controlled native case passes both targeted failures with four completed tool calls; wider final-credit/sparse-sample phrasing and release gates remain explicitly open. New result-text regressions observed failing baselines, and independent cross-reviews found no implementation blocker. CI is watched against the exact pushed commit. No dataset/API acquisition, source activation, credential/quota mutation, scraping or deployment occurred; source research inspected public documentation only.

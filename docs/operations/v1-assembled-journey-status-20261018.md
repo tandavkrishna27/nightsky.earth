@@ -49,3 +49,10 @@ The [follow-up record](v1-followup-acceptance-20261018.md#installed-1032-unknown
 
 
 The final priority-order1.0.32 artifact has a separate replay receipt: nine MCP calls, one synthetic geocode, two synthetic weather dispatches and zero external-provider attempts. Both turns exit0. Its provisional opener and display-zone boundaries pass, but initial resolution repeats and the final answer omits the aggregate's earlier18/25/40% cloud rows after a later focused failure. Final response acceptance is therefore partial on both efficiency and evidence preservation. The six-call pre-layout sample above is retained as earlier evidence; it is not substituted for the final result. See the final-artifact subsection of the follow-up record.
+
+
+## 1.0.33 result-boundary recovery
+
+The [recovery record](v1-result-boundary-recovery-20261018.md) retains red/green tests and a final installed three-turn CLI replay. Four completed MCP calls (2+1+1), all turns exit0, one synthetic geocode/two synthetic weather dispatches/zero external attempts: exact field/revision and explicit display timezone are retained, no duplicate resolution occurs, and the failed explicit refresh preserves18/25/40% at20:30/21:30/22:30 with original available status and freshness unknown. Earlier1.0.32 failures remain historical evidence, not current uncorrected targeted cases. This single scoped pass does not establish universal/all-client/source acceptance. The chosen-zone final omits explicitOSM credit despite raw source credits and qualitatively ranks sparse earlier samples; wider answer-credit/phrasing review remains open.
+
+Source/claim progression is recorded in the [freeze decisions](v1-freeze-decisions-20261018.md), including primary public-use evidence, engineering-owned original-record rights mapping, user maintenance/history questions and unchanged missing scientific/host evidence. No source admission, dataset acquisition or deployment occurred.

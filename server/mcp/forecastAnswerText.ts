@@ -32,6 +32,6 @@ export function forecastAnswerText(result:NightConditionsResult):string[]{
  const lines=[...headers];let bytes=Buffer.byteLength(lines.join('\n')+'\n');
  for(let slot=0;slot<MAX_ROWS;slot++)for(const g of groups){const row=g.selected[slot];if(!row)continue;const size=Buffer.byteLength(row.text+'\n');if(bytes+size+reserved<=MAX_BYTES){lines.push(row.text);bytes+=size;g.shown++;}}
  for(const g of groups)if(g.shown<g.rows.length)lines.push(omitted(g,g.rows.length-g.shown));
- if(!groups.length)lines.push('Cloud unknown: no forecast samples returned.');
+ if(!groups.length)lines.push('Cloud unknown in this response: no forecast samples returned. This response does not invalidate earlier timestamped evidence, if any; retain its original times and status, with current freshness unverified.');
  return lines;
 }

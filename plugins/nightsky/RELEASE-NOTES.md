@@ -1,3 +1,7 @@
+## V1 local revision 1.0.33 - explicit snapshot actions and response-scoped forecast absence
+
+API resolver text promotes bounded exact identities, revisions and expiry with mode-aware next actions and evidence-qualified timezone labels. Empty forecast text scopes missing data to the current response and conditionally preserves earlier timestamped evidence without claiming its current freshness. Structured contracts, caches, quotas, provider admission and workflow priority remain unchanged. Targeted synthetic native replays are evidence for those cases only, not universal model compliance or live-source acceptance. No deployment or publication.
+
 ## V1 local revision 1.0.32 - retained selections and provisional site verdicts
 
 Guidance reuses a successful selected location through details and display-timezone clarification, while retaining re-resolution for changed, explicitly refreshed or expired identities. Opening verdicts distinguish calculated observing opportunities from unverified site suitability. Corrects the privacy draft to describe generated per-request diagnostics and bounded labels. API contracts, source admission, quotas and default providers remain unchanged. Offline checks and bounded synthetic native replay are separate from live-source, all-client or public release acceptance. No deployment or publication.

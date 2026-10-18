@@ -36,6 +36,29 @@ test('failed providers, stale rows, and unknown cloud remain distinct from omitt
  assert.match(text,/Old.*stale/);assert.match(text,/Old.*stale.*totalCloudCover/);assert.match(text,/Failed.*unavailable/);assert.match(text,/Unknown.*cloud unknown/);assert.doesNotMatch(text,/Unknown.*omitted/);
 });
 
+test('an empty response scopes missing cloud and freshness to this request without erasing earlier evidence',()=>{
+ const earlier=result([forecast('Offline fixture',[['2026-10-18T15:00:00.000Z',18],['2026-10-18T16:00:00.000Z',25],['2026-10-18T17:00:00.000Z',40]])]);
+ const empty=result([],{providerOutcomes:[{providerId:'met',status:'unavailable',reason:'No new forecast available',source:source('Offline fixture')}]});
+ const priorText=forecastAnswerText(earlier).join('\n'),text=forecastAnswerText(empty).join('\n');
+ assert.match(priorText,/20:30.*totalCloudCover 18 %/);
+ assert.match(text,/this response/i);
+ assert.match(text,/does not invalidate earlier timestamped evidence/i);
+ assert.match(text,/freshness.*unverified/i);
+ assert.match(text,/if any; retain its original times and status/);
+ assert.doesNotMatch(text,/totalCloudCover (18|25|40) %/);
+ assert.match(forecastAnswerText(earlier).join('\n'),/22:30.*totalCloudCover 40 %/);
+});
+
+test('available forecasts without relevant cloud entries do not become an empty forecast response',()=>{
+ const outside:any=forecast('Outside',[['2026-10-18T14:00:00.000Z',90]]);outside.availability.status='available';
+ const temperature:any=forecast('Temperature',[]);temperature.availability.status='available';temperature.samples=[{validAt:window.startUtc,values:{temperature:{value:20,unit:'celsius'}}}];
+ for(const f of [outside,temperature]){
+  const text=forecastAnswerText(result([f])).join('\n');
+  assert.match(text,/status available.*cloud unknown \(no relevant cloud entries\)/);
+  assert.doesNotMatch(text,/no forecast samples returned|totalCloudCover 90/);
+ }
+});
+
 test('long multi-provider output reserves all statuses and exact omissions without partial rows',()=>{
  const fs=Array.from({length:4},(_,i)=>forecast(`Provider ${i} ${'星'.repeat(100)}`,Array.from({length:48},(_,n)=>[new Date(Date.parse(window.startUtc)+n*60000).toISOString(),n] as [string,number])));
  const lines=forecastAnswerText(result(fs,{providerOutcomes:fs.map((f,i)=>({providerId:['met','weatherapi','openweather','seventimer'][i],source:f.source,status:'unavailable',reason:'Synthetic failure'}))})),text=lines.join('\n');assert.ok(Buffer.byteLength(text)<=3200);

@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "liveEvidenceEligible": false,
+  "runtime": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "architecture": "x64"
+  },
+  "compiledBundle": {
+    "sha256": "70098d5e49f763fa0d440c33ea7db148e6afd4207c5dc6e9be621ccc8656c3a9",
+    "bytes": 806276
+  },
+  "configuration": {
+    "discoveryMode": "api",
+    "weatherProviders": [
+      "met",
+      "weatherapi",
+      "openweather"
+    ],
+    "localGeographyFiles": false
+  },
+  "initialization": {
+    "moduleImportMs": 337.1633,
+    "appInitializationMs": 10.010499999999979,
+    "moduleAndAppInitializationMs": 347.1942,
+    "listenerReadyMs": 12.65440000000001
+  },
+  "requests": [
+    {
+      "operation": "initialize",
+      "status": 200,
+      "elapsedMs": 42.26580000000001,
+      "responseUtf8Bytes": 765
+    },
+    {
+      "operation": "resolve_place",
+      "status": 200,
+      "elapsedMs": 21.509500000000003,
+      "responseUtf8Bytes": 2646
+    },
+    {
+      "operation": "get_astronomy_window",
+      "status": 200,
+      "elapsedMs": 43.04730000000001,
+      "responseUtf8Bytes": 3200
+    },
+    {
+      "operation": "get_night_conditions",
+      "status": 200,
+      "elapsedMs": 42.49680000000001,
+      "responseUtf8Bytes": 12780
+    },
+    {
+      "operation": "get_astronomy_window",
+      "status": 200,
+      "elapsedMs": 9.417700000000082,
+      "responseUtf8Bytes": 3200
+    },
+    {
+      "operation": "get_night_conditions",
+      "status": 200,
+      "elapsedMs": 10.119800000000055,
+      "responseUtf8Bytes": 12768
+    },
+    {
+      "operation": "plan_observing_session",
+      "status": 200,
+      "elapsedMs": 501.0268,
+      "responseUtf8Bytes": 44285
+    },
+    {
+      "operation": "get_astronomy_window",
+      "status": 200,
+      "elapsedMs": 6.719699999999875,
+      "responseUtf8Bytes": 3200
+    },
+    {
+      "operation": "get_astronomy_window",
+      "status": 200,
+      "elapsedMs": 9.279100000000199,
+      "responseUtf8Bytes": 3200
+    },
+    {
+      "operation": "get_night_conditions",
+      "status": 200,
+      "elapsedMs": 48.62559999999985,
+      "responseUtf8Bytes": 12769
+    },
+    {
+      "operation": "plan_observing_session",
+      "status": 200,
+      "elapsedMs": 50.27779999999984,
+      "responseUtf8Bytes": 44286
+    },
+    {
+      "operation": "get_astronomy_window",
+      "status": 200,
+      "elapsedMs": 50.62779999999998,
+      "responseUtf8Bytes": 3201
+    }
+  ],
+  "fakeProviderCalls": 5,
+  "fakeProviderCallLimit": 6,
+  "fakeProviderRoutes": {
+    "secure.geonames.org/searchJSON": 1,
+    "api.met.no/weatherapi/locationforecast/2.0/complete": 1,
+    "api.weatherapi.com/v1/forecast.json": 1,
+    "api.openweathermap.org/data/2.5/forecast": 1,
+    "api.geoapify.com/v2/places": 1
+  },
+  "sampledPeakRssBytes": 329723904,
+  "fixtureQuotaFile": {
+    "initialBytes": 487,
+    "finalBytes": 579
+  },
+  "capacity": {
+    "schemaVersion": 1,
+    "synthetic": true,
+    "liveEvidenceEligible": false,
+    "measuredRequests": 8,
+    "acceptedBodyUtf8Bytes": 126909,
+    "phases": [
+      {
+        "name": "sequential",
+        "concurrency": 1,
+        "observedClientConcurrency": 1,
+        "requests": [
+          {
+            "operation": "get_astronomy_window",
+            "status": 200,
+            "elapsedMs": 9.417700000000082,
+            "responseUtf8Bytes": 3200
+          },
+          {
+            "operation": "get_night_conditions",
+            "status": 200,
+            "elapsedMs": 10.119800000000055,
+            "responseUtf8Bytes": 12768
+          },
+          {
+            "operation": "plan_observing_session",
+            "status": 200,
+            "elapsedMs": 501.0268,
+            "responseUtf8Bytes": 44285
+          },
+          {
+            "operation": "get_astronomy_window",
+            "status": 200,
+            "elapsedMs": 6.719699999999875,
+            "responseUtf8Bytes": 3200
+          }
+        ],
+        "requestCount": 4,
+        "p50Ms": 9.417700000000082,
+        "p95Ms": 501.0268
+      },
+      {
+        "name": "concurrent",
+        "concurrency": 4,
+        "observedClientConcurrency": 4,
+        "requests": [
+          {
+            "operation": "get_astronomy_window",
+            "status": 200,
+            "elapsedMs": 9.279100000000199,
+            "responseUtf8Bytes": 3200
+          },
+          {
+            "operation": "get_night_conditions",
+            "status": 200,
+            "elapsedMs": 48.62559999999985,
+            "responseUtf8Bytes": 12769
+          },
+          {
+            "operation": "plan_observing_session",
+            "status": 200,
+            "elapsedMs": 50.27779999999984,
+            "responseUtf8Bytes": 44286
+          },
+          {
+            "operation": "get_astronomy_window",
+            "status": 200,
+            "elapsedMs": 50.62779999999998,
+            "responseUtf8Bytes": 3201
+          }
+        ],
+        "requestCount": 4,
+        "p50Ms": 48.62559999999985,
+        "p95Ms": 50.62779999999998
+      }
+    ],
+    "elapsedMs": 579.2676,
+    "dispatchBudgetMs": 30000,
+    "unmeasured": {
+      "cacheOccupancy": "Combined live normalized-cache occupancy is not exposed by this compiled probe.",
+      "completeDeploymentStorage": "Quota JSON bytes exclude dependencies, logs, backups and caches.",
+      "targetHostCapacity": "Local synthetic loopback only; actual host, provider latency, optional-source mix and sustained capacity remain unmeasured."
+    }
+  },
+  "limitations": [
+    "Module import plus app cold initialization in this script, not process-spawn startup; Node startup, script imports, scratch setup and bundle hashing are excluded from initialization timings.",
+    "Bundle SHA-256 identifies dist/plugin.js only; external dependencies and a complete deployment artifact are not attested.",
+    "Loopback HTTP/MCP requests with fixed fake provider responses; optional capacity phase compares four sequential with four concurrent client requests. No live provider latency, throughput, coverage or hosting acceptance.",
+    "Capacity phases are ordered after initial resolution/astronomy/weather checks; the serial phase also warms planner and candidate caches. Their latency differences cannot be attributed solely to concurrency. Client overlap is not parallel server CPU execution.",
+    "The 30-second capacity dispatch/client-timeout budget does not preempt synchronous JavaScript work or include initialization and cleanup.",
+    "Request latency ends after reading the response body, before JSON parsing and assertions; UTF-8 bytes include the decoded SSE envelope where present, not network headers or wire compression.",
+    "RSS is process-wide, sampled at phase/request/provider boundaries and every 10 ms when the event loop runs; it is not OS peak memory or per-request allocation.",
+    "Quota bytes describe only the synthetic quota JSON file, excluding lock/marker files, backups, caches, rollback and deployment storage; scratch files are removed in finally."
+  ]
+}
