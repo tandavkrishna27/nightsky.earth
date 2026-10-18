@@ -3,6 +3,7 @@ import { skyEvents, coverageMonths } from "../shared/skyEventCatalog";
 import { build as viteBuild, resolveConfig, loadEnv } from "vite";
 import { build as esbuild } from "esbuild";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import {
   buildWebsiteOutputs,
   resolveBuildListing,
@@ -10,6 +11,7 @@ import {
 import { siteRoutes } from "../shared/website";
 import { legacyMeteorIds } from "../shared/meteorContent";
 import { releaseFacts } from "../client/src/content/releaseFacts";
+import { renderRouteHtml } from "../shared/seoHtml";
 process.env.NODE_ENV = "production";
 const release = process.argv.includes("--release");
 const viteConfig = await resolveConfig({}, "build", "production", "production");
@@ -40,6 +42,15 @@ await esbuild({
   outdir: "dist",
 });
 await mkdir("dist/public", { recursive: true });
+const htmlTemplate = await readFile("dist/public/index.html", "utf8");
+for (const page of output.pages) {
+  const relativePath = page.path === "/"
+    ? "index.html"
+    : join(page.path.replace(/^\/+|\/+$/g, ""), "index.html");
+  const targetPath = join("dist/public", relativePath);
+  await mkdir(dirname(targetPath), { recursive: true });
+  await writeFile(targetPath, renderRouteHtml(htmlTemplate, page, release));
+}
 for (const [file, value] of Object.entries({
   "sitemap.xml": output.sitemap,
   "robots.txt": output.robots,
@@ -47,13 +58,6 @@ for (const [file, value] of Object.entries({
   _headers: output.headers,
 }))
   await writeFile("dist/public/" + file, value);
-if (release) {
-  const html = await readFile("dist/public/index.html", "utf8");
-  await writeFile(
-    "dist/public/index.html",
-    html.replace(/<meta[^>]*data-preview-robots[^>]*>/g, ""),
-  );
-}
 await writeFile("dist/website-build.json", JSON.stringify({ release }));
 console.log(
   release ? "Release build ready" : "Local preview build ready (noindex)",

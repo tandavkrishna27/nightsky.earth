@@ -18,6 +18,8 @@ test("preview output is isolated from news and publication", () => {
   assert.ok(output.robots.includes("Disallow: /"));
   assert.ok(!output.sitemap.includes("<loc>"));
   assert.ok(output.headers.includes("noindex"));
+  assert.ok(output.pages.some((page) => page.path === "/resources"));
+  assert.ok(output.pages.every((page) => page.noindex !== true || page.path.startsWith("/meteor-shower/")));
   assert.ok(output.redirects.includes("/meteor-nights"));
   assert.equal(classifyPath("/meteor-shower/perseids").status, 200);
   assert.equal(classifyPath("/meteor-shower/not-a-record").status, 404);
@@ -76,11 +78,15 @@ test("a complete synthetic release has an indexable sitemap without preview head
     legacyMeteorIds: ["perseids"],
   });
   assert.ok(output.sitemap.includes("https://nightsky.earth/resources"));
-  assert.ok(!output.headers.includes("/*\n  X-Robots-Tag"));
+  assert.ok(!output.headers.startsWith("/*\n  X-Robots-Tag"));
   assert.ok(!output.sitemap.includes("/meteor-nights"));
   assert.ok(output.sitemap.includes("/sky-events/" + skyEvents[0].id));
   assert.ok(!output.sitemap.includes("draft-2026"));
   assert.ok(!output.sitemap.includes("withdrawn-2026"));
+  assert.ok(output.pages.some((page) => page.path === "/sky-events/" + skyEvents[0].id && !page.noindex));
+  assert.ok(output.pages.some((page) => page.path === "/sky-events/withdrawn-2026" && page.noindex));
+  assert.ok(!output.pages.some((page) => page.path === "/sky-events/draft-2026"));
+  assert.ok(output.headers.includes("/news/*\n  X-Robots-Tag: noindex, follow"));
   for (const agent of [
     "Googlebot",
     "Bingbot",

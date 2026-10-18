@@ -17,6 +17,7 @@ import {
   type CoverageMonth,
 } from "./skyEvents";
 import { legacyCalendarDestination } from "./skyEventRoutes";
+import type { RouteSeo } from "./seoHtml";
 export function classifyPath(path: string) {
   if (path === "/meteor-nights" || path === "/meteor-showers")
     return { status: 301, location: legacyCalendarDestination };
@@ -81,7 +82,36 @@ export function buildWebsiteOutputs({
           .map((x) => "/sky-events/" + x.id),
       ]
     : [];
+  const pages: RouteSeo[] = [
+    ...routes.map(({ path, title, description }) => ({
+      path,
+      title,
+      description,
+    })),
+    ...validated
+      .filter((event) => event.reviewStatus !== "draft")
+      .map((event) => ({
+        path: "/sky-events/" + event.id,
+        title: event.reviewStatus === "withdrawn" ? "Sky event under review" : event.title,
+        description:
+          event.reviewStatus === "withdrawn"
+            ? "This event has been withdrawn from the reviewed calendar while its information is checked."
+            : event.synopsis,
+        summary:
+          event.reviewStatus === "withdrawn"
+            ? "This entry is under review. Visit the Sky Events calendar for reviewed events."
+            : event.synopsis,
+        noindex: event.reviewStatus !== "reviewed",
+      })),
+    ...ids.map((id) => ({
+      path: "/meteor-shower/" + id,
+      title: "Meteor shower record",
+      description: "This legacy meteor-shower record is no longer part of the reviewed Sky Events calendar.",
+      noindex: true,
+    })),
+  ];
   return {
+    pages,
     sitemap:
       '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
       paths
@@ -121,7 +151,9 @@ export function buildWebsiteOutputs({
           "",
         ].join("\n")
       : "User-agent: *\nDisallow: /\n",
-    headers: release ? "" : "/*\n  X-Robots-Tag: noindex, nofollow\n",
+    headers: release
+      ? "/news/*\n  X-Robots-Tag: noindex, follow\n"
+      : "/*\n  X-Robots-Tag: noindex, nofollow\n/news/*\n  X-Robots-Tag: noindex, follow\n",
     redirects:
       "/api/news /.netlify/functions/news 200\n/api/news/* /.netlify/functions/news?article=:splat 200\n/meteor-nights /sky-events?category=meteor-showers 301\n/meteor-showers /sky-events?category=meteor-showers 301\n/experiences /.netlify/functions/retired 200\n/experiences/* /.netlify/functions/retired 200\n" +
       routes.map((x) => `${x.path} /index.html 200`).join("\n") +
