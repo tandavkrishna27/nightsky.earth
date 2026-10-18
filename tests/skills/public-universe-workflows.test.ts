@@ -81,3 +81,11 @@ test('all workflows pin timestamp identity and reuse matching positions on follo
   for(const phrase of ['server-formatted local time and original UTC timestamp','never move a value to another row','endUtc must be after startUtc','matching place, date and requested instant','get_night_conditions for focused forecast samples'])assert.ok(text.includes(phrase),`${path}: ${phrase}`);
  }
 });
+
+
+test('all workflows retain prior forecast evidence after failed refresh without inventing cache or windows', () => {
+ for (const name of readdirSync('plugins/nightsky/skills')) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+  const text = readFileSync(path, 'utf8');
+  for (const phrase of ['conversation evidence, not a server cache', 'original retrieval time when known', 'refresh failed or was allowance-blocked', 'both equally close neighbouring samples', 'A sample is not a window', 'Never request again solely to rebuild a table']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
+ }
+});

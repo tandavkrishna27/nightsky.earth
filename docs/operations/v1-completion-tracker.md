@@ -1,5 +1,7 @@
 # V1 completion tracker
 
+Latest follow-up correction: [1.0.25 forecast evidence preservation](native-forecast-followup-fix-20261018.md). Root cause confirmed from existing logs: the local OpenWeather allowance was consumed, not an observed provider outage. Five workflow skills preserve previous conversation samples separately from failed refreshes, with precise sample and neighbour wording. Native retest remains open; no new API calls or deployment. Original ticket totals unchanged.
+
 ## Current implementation checkpoint - 18 October 2026
 
 Latest local correction: [timestamp-bound evidence 1.0.24](native-timestamp-evidence-fix-20261018.md), following the owner's accurate-transport but inaccurate forecast-table follow-up. Source-bound local/UTC rows, visible existing Moon/planet positions and five workflow updates are implemented and reviewed. **56 affected tests pass**, as do types, rebuilt packages and compiled isolation checks; the final full suite passed **1,786 / 0 failed / 2 skipped** (1,788 total). A controlled offline agent replay preserved all nine values, seven local times and both 22:00 positions without extra calls. Same installed identity, all 15 files verified. **Fresh native conversation acceptance remains open**; no new provider requests or deployment. Original **12 Done / 9 Partial / 6 Not started** unchanged.

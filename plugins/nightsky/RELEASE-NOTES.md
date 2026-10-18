@@ -1,3 +1,7 @@
+# 1.0.25
+
+Preserve previous forecast samples in conversation when a refresh fails or is allowance-blocked; reuse exact evidence before requesting again. Distinguish samples from windows and compare both equally close neighbours. No response cache or provider policy changes.
+
 # 1.0.0 local rehearsal
 
 ## V1 local revision 1.0.24 - timestamp-bound forecast and position evidence
