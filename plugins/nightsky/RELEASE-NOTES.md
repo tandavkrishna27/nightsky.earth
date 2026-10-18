@@ -1,3 +1,7 @@
+# 1.0.26
+
+Keep retrieval time separate from forecast issue/version and valid time; a later response does not prove a newer forecast edition.
+
 # 1.0.25
 
 Preserve previous forecast samples in conversation when a refresh fails or is allowance-blocked; reuse exact evidence before requesting again. Distinguish samples from windows and compare both equally close neighbours. No response cache or provider policy changes.

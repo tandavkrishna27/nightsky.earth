@@ -15,3 +15,10 @@ An instant is described as a sample, not a window. Both equally close neighbouri
 ## Verification
 
 The supplied native conversation is the observed failure baseline. A new authored guidance regression failed before the edit and passed afterwards. Type checks and canonical packaging passed. All 75 skill tests passed; both local host packages verified. Independent read-only review found no material issue, and one controlled synthetic replay preserved prior values, original retrieval time, separate allowance failure and both equally close neighbours. Version 1.0.25 was installed under the existing identity and all 15 installed files matched the prepared package. These checks are not a fresh native-host acceptance. CI is watched on the final pushed commit. No new provider calls, historical downloads, scraping or deployment.
+
+
+## Owner native follow-up acceptance — 18 October, 13:48 IST
+
+The owner supplied the two-answer 1.0.25 follow-up. It loaded the updated skill, preserved all nine forecast values at their seven original local times, retained previous OpenWeather 87%/77% separately from the unavailable refresh, named both equidistant MET neighbours, and denied a continuous clear window. Retrieval timestamps absent from the visible result remained unknown. This targeted flow passed; broader V1 journeys are not accepted by this result.
+
+Minor remaining wording: the response called MET/WeatherAPI rows newer without edition evidence. Version 1.0.26 tightens all five skills to distinguish retrieval, issue and valid times. It does not imply the underlying forecast changed. This wording amendment has offline checks; fresh native verification remains pending.

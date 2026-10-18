@@ -86,6 +86,6 @@ test('all workflows pin timestamp identity and reuse matching positions on follo
 test('all workflows retain prior forecast evidence after failed refresh without inventing cache or windows', () => {
  for (const name of readdirSync('plugins/nightsky/skills')) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
   const text = readFileSync(path, 'utf8');
-  for (const phrase of ['conversation evidence, not a server cache', 'original retrieval time when known', 'refresh failed or was allowance-blocked', 'both equally close neighbouring samples', 'A sample is not a window', 'Never request again solely to rebuild a table']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
+  for (const phrase of ['conversation evidence, not a server cache', 'original retrieval time when known', 'refresh failed or was allowance-blocked', 'both equally close neighbouring samples', 'A sample is not a window', 'Never request again solely to rebuild a table', 'A later retrieval does not establish a newer forecast edition']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
  }
 });
