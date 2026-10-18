@@ -34,6 +34,7 @@ export const releaseFacts: ReleaseFacts = {
     "Google Analytics for optional website analytics, only after the visitor allows analytics",
     "Google Gmail for messages sent to the support address",
     "Spaceflight News API for website news searches",
+    "Stellarium Web, including its IP-based location service and optional browser device-location request, for the interactive sky map; OpenStreetMap Nominatim may receive detected or selected coordinates for reverse geocoding",
     "Place, weather and climate providers listed in the Privacy Policy when the connected feature uses them",
   ],
   loggedFields: [
@@ -62,11 +63,13 @@ export const releaseFacts: ReleaseFacts = {
     { name: "Copernicus ERA5", url: "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels", coverage: "Historical context may use operator-prepared, locally stored ERA5-derived summaries. This is not a live Copernicus/Open-Meteo query or a forecast; preserve CC BY attribution and artifact provenance when enabled.", reviewedAt: "2026-10-18" },
     { name: "Google Fonts", url: "https://fonts.google.com/knowledge/glossary/self_hosting", coverage: "Playfair Display and Inter font delivery; website requests Google-hosted font files, subject to Google service terms and privacy notice.", reviewedAt: "2026-10-18" },
     { name: "Google Analytics 4", url: "https://support.google.com/analytics/answer/12002338", coverage: "Optional consent-gated website analytics. NightSky sends sanitized manual page views with a fixed title and empty referrer; query strings and fragments are removed. GA4 also creates first_visit, session_start and user_engagement events and processes baseline technical metadata. Enhanced Measurement, Google Signals and ad personalization are disabled; query redaction is enabled. GA user/event retention is two months and analytics cookies expire after 30 days.", reviewedAt: "2026-10-18" },
+    { name: "Stellarium Web", url: "https://stellarium-web.org/", coverage: "Third-party hosted interactive sky map. Its current web frontend uses its own IP-based location service and can request browser device location when the visitor chooses the opt-in mode; it may use OpenStreetMap Nominatim to reverse geocode detected or selected coordinates. Browser requests go directly to the providers. NightSky embeds the hosted service and does not bundle or modify engine code. Device-location behavior and provider policies should be rechecked before release.", reviewedAt: "2026-10-19" },
+    { name: "OpenStreetMap Nominatim", url: "https://nominatim.org/", coverage: "May receive coordinates from Stellarium Web for reverse geocoding when its interactive map loads. Stellarium controls this integration; the NightSky app does not call Nominatim for the sky map. Check OSMF's current Nominatim usage and privacy policies before release.", reviewedAt: "2026-10-19" },
   ],
-  sourcesApprovedAt: "2026-10-18",
+  sourcesApprovedAt: null,
   hostingVerifiedAt: "2026-10-18",
-  contentRightsApprovedAt: "2026-10-18",
-  policiesApprovedAt: "2026-10-18",
+  contentRightsApprovedAt: null,
+  policiesApprovedAt: null,
   setupVerifiedAt: null,
 };
 export function releaseBlockers(facts: ReleaseFacts, listing: ListingConfig) {

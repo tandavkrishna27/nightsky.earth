@@ -19,14 +19,15 @@ test("preview output is isolated from news and publication", () => {
   assert.ok(!output.sitemap.includes("<loc>"));
   assert.ok(output.headers.includes("noindex"));
   assert.ok(output.pages.some((page) => page.path === "/resources"));
+  assert.ok(output.pages.some((page) => page.path === "/sky-map"));
   assert.ok(output.pages.every((page) => page.noindex !== true || page.path.startsWith("/meteor-shower/")));
   assert.ok(output.redirects.includes("/meteor-nights"));
   assert.equal(classifyPath("/meteor-shower/perseids").status, 200);
   assert.equal(classifyPath("/meteor-shower/not-a-record").status, 404);
   assert.equal(classifyPath("/experiences").status, 410);
 });
-test("release builds with owner-approved website release facts", () => {
-  const output = buildWebsiteOutputs({
+test("sky-map provider addition keeps release approval gates pending", () => {
+  assert.throws(() => buildWebsiteOutputs({
       release: true,
       facts: releaseFacts,
       listing: { published: false, url: null },
@@ -35,9 +36,7 @@ test("release builds with owner-approved website release facts", () => {
       coverageMonths,
       now: new Date("2026-10-16"),
       legacyMeteorIds: [],
-    });
-  assert.ok(output.robots.includes("User-agent: *\nAllow: /"));
-  assert.ok(output.sitemap.includes("https://nightsky.earth/resources"));
+    }), /Source inventory approval, Content rights approval, Policy approval/);
 });
 
 test("a complete synthetic release has an indexable sitemap without preview headers", () => {
@@ -78,6 +77,7 @@ test("a complete synthetic release has an indexable sitemap without preview head
     legacyMeteorIds: ["perseids"],
   });
   assert.ok(output.sitemap.includes("https://nightsky.earth/resources"));
+  assert.ok(output.sitemap.includes("https://nightsky.earth/sky-map"));
   assert.ok(!output.headers.startsWith("/*\n  X-Robots-Tag"));
   assert.ok(!output.sitemap.includes("/meteor-nights"));
   assert.ok(output.sitemap.includes("/sky-events/" + skyEvents[0].id));

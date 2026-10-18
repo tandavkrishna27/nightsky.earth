@@ -1,0 +1,55 @@
+.sky-map-page {
+  min-height: 75vh;
+  padding: 154px 0 90px;
+  background:
+    radial-gradient(ellipse 65% 390px at 83% 12%, #2636518c, transparent 75%),
+    radial-gradient(ellipse 45% 280px at 13% 28%, #8a704019, transparent 78%);
+}
+.sky-map-intro { max-width: 1120px; margin-bottom: 40px; }
+.sky-map-intro .eyebrow { display: flex; align-items: center; gap: 9px; color: #d1b879; margin-bottom: 16px; }
+.sky-map-intro h1 { font-family: var(--font-serif); font-size: clamp(44px, 6vw, 72px); line-height: 1.08; letter-spacing: -.035em; margin: 0 0 18px; }
+.sky-map-lede { max-width: 680px; margin: 0; color: #c0c9d5; font-size: 17px; line-height: 1.8; }
+.sky-map-shell { max-width: 1120px; }
+.sky-map-frame { position: relative; min-height: 540px; overflow: hidden; border: 1px solid #d5bc7b45; border-radius: 24px; background: #080d18; box-shadow: 0 24px 80px #0005; }
+.sky-map-frame:not(.is-loaded) { background-image: radial-gradient(1px 1px at 8% 18%, #fff 99%, transparent), radial-gradient(1px 1px at 20% 72%, #e8d9ac 99%, transparent), radial-gradient(1px 1px at 33% 31%, #fff 99%, transparent), radial-gradient(1px 1px at 45% 83%, #fff 99%, transparent), radial-gradient(1px 1px at 58% 13%, #ded8c6 99%, transparent), radial-gradient(1px 1px at 66% 61%, #fff 99%, transparent), radial-gradient(1px 1px at 79% 27%, #e8d9ac 99%, transparent), radial-gradient(1px 1px at 91% 76%, #fff 99%, transparent), radial-gradient(ellipse at center, #17243b 0, #0b1220 48%, #070a11 100%); background-size: auto, auto, auto, auto, auto, auto, auto, auto, 100% 100%; }
+.sky-map-prompt { min-height: 540px; padding: 50px 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.sky-map-orbit { width: 104px; height: 104px; position: relative; display: grid; place-items: center; margin-bottom: 24px; border: 1px solid #d7bf7c52; border-radius: 50%; color: #dec98e; box-shadow: 0 0 50px #c8a85c1b, inset 0 0 35px #c8a85c12; }
+.sky-map-orbit::before, .sky-map-orbit::after { content: ""; position: absolute; inset: 12px -12px; border: 1px solid #d7bf7c23; border-radius: 50%; transform: rotate(-32deg); }
+.sky-map-orbit::after { inset: -12px 16px; transform: rotate(45deg); }
+.sky-map-star { position: absolute; z-index: 1; width: 4px; height: 4px; border-radius: 50%; background: #f4e4b7; box-shadow: 0 0 10px #f4e4b7; }
+.sky-map-star-one { top: 10px; left: 27px; }.sky-map-star-two { right: 4px; top: 58px; }.sky-map-star-three { bottom: 12px; left: 20px; }
+.sky-map-prompt h2 { margin: 0 0 10px; font-family: var(--font-serif); font-size: clamp(29px, 4vw, 40px); font-weight: 500; color: #f2eee5; }
+.sky-map-prompt > p { max-width: 520px; margin: 0; color: #b5c0ce; font-size: 15px; line-height: 1.75; }
+.sky-map-load-button, .sky-map-location-button { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; margin-top: 20px; padding: 0 21px; border: 1px solid #e3cb8b; border-radius: 999px; background: #d3b875; color: #171716; font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; transition: transform .18s ease, background .18s ease, box-shadow .18s ease; }
+.sky-map-location-button { margin-top: 10px; border-color: #d5bc7b60; background: #0c1422bd; color: #e5d4a4; }
+.sky-map-load-button:hover { transform: translateY(-2px); background: #e4ce91; box-shadow: 0 8px 28px #d0b67536; }
+.sky-map-location-button:hover { transform: translateY(-2px); background: #18243a; }
+.sky-map-load-button:focus-visible, .sky-map-location-button:focus-visible, .sky-map-caption a:focus-visible, .sky-map-privacy a:focus-visible { outline: 2px solid #f3dda6; outline-offset: 4px; }
+.sky-map-connection-note { margin-top: 14px !important; color: #9eaabb !important; font-size: 12px !important; }
+.sky-map-iframe { display: block; width: 100%; height: clamp(540px, 72vh, 780px); border: 0; background: #080d18; }
+.sky-map-fullscreen-button { position: absolute; z-index: 2; top: 14px; right: 14px; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid #e0d2ae70; border-radius: 13px; background: #0b1220e8; color: #f3e7c6; box-shadow: 0 5px 22px #0007; cursor: pointer; transition: background .18s ease, transform .18s ease; }
+.sky-map-fullscreen-button:hover { background: #24334b; transform: translateY(-1px); }
+.sky-map-fullscreen-button:focus-visible { outline: 2px solid #f3dda6; outline-offset: 3px; }
+.sky-map-frame:fullscreen { width: 100vw; height: 100vh; min-height: 0; border: 0; border-radius: 0; background: #080d18; box-shadow: none; }
+.sky-map-frame:fullscreen .sky-map-iframe { width: 100%; height: 100%; min-height: 0; }
+.sky-map-frame.is-expanded { position: fixed; z-index: 10000; inset: 0; width: 100vw; height: 100vh; height: 100dvh; min-height: 0; border: 0; border-radius: 0; background: #080d18; box-shadow: none; }
+.sky-map-frame.is-expanded .sky-map-iframe { width: 100%; height: 100%; min-height: 0; }
+.sky-map-caption { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; padding: 16px 4px 0; color: #aeb8c5; font-size: 13px; line-height: 1.7; }
+.sky-map-caption p { margin: 0; }
+.sky-map-caption a, .sky-map-privacy a { color: #dfc98f; text-underline-offset: 3px; }
+.sky-map-direct-link { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; }
+.sky-map-privacy { max-width: 1120px; margin: 28px auto 0; color: #9faab8; font-size: 12px; line-height: 1.85; }
+@media (max-width: 700px) {
+  .sky-map-page { padding: 126px 0 64px; }
+  .sky-map-intro { margin-bottom: 27px; }
+  .sky-map-lede { font-size: 15px; }
+  .sky-map-frame, .sky-map-prompt { min-height: 470px; }
+  .sky-map-frame { border-radius: 18px; }
+  .sky-map-iframe { height: 68vh; min-height: 470px; }
+  .sky-map-caption { align-items: flex-start; flex-direction: column; gap: 4px; padding-top: 12px; }
+  .sky-map-privacy { margin-top: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sky-map-load-button, .sky-map-location-button { transition: none; }
+  .sky-map-load-button:hover, .sky-map-location-button:hover { transform: none; }
+}

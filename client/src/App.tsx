@@ -20,6 +20,7 @@ const News = lazy(() => import("./pages/News"));
 const NewsArticle = lazy(() => import("./pages/NewsArticle"));
 const MeteorShowerDetail = lazy(() => import("./pages/MeteorShowerDetail"));
 const Sources = lazy(() => import("./pages/Sources"));
+const SkyMap = lazy(() => import("./pages/SkyMap"));
 const SupportingPage = lazy(() => import("./pages/SupportingPages"));
 const NotFound = lazy(() => import("./pages/not-found"));
 export default function App() {
@@ -60,6 +61,7 @@ export default function App() {
                         component={MeteorShowerDetail}
                       />
                       <Route path="/sources" component={Sources} />
+                      <Route path="/sky-map" component={SkyMap} />
                       <Route path="/privacy">
                         <SupportingPage kind="privacy" />
                       </Route>

@@ -7,6 +7,7 @@ const links = [
   ["/community", "The Collective"],
   ["/resources", "Resources"],
   ["/news", "News"],
+  ["/sky-map", "Sky Map"],
 ];
 export default function Navigation() {
   const [open, setOpen] = useState(false);

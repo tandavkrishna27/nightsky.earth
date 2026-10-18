@@ -118,6 +118,7 @@ test("platform story, navigation and creative scope", async ({ page }) => {
     "The Collective",
     "Resources",
     "News",
+    "Sky Map",
   ]);
   await expect(page.locator(".hero-copy")).toContainText(
     "plugin for your AI assistant",
