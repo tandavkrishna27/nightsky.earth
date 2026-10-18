@@ -1,5 +1,8 @@
 # V1 event validation — 18 October 2026
 
+
+> **19October owner scope amendment:** [Supported V1 calculations with explicit gaps](v1-bounded-event-scope-20261019.md) resolves the earlier pending decision. Wider missing scientific coverage is deferred enhancement; it is not newly supplied evidence. Known incorrect results, scientific domains, source rights and actual release gates remain mandatory. The historical findings below are retained.
+
 This bounded validation supplements original Task 6 in `docs/superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md`, the retained event gap inventory, and the 18 October maintenance decision. NightSky.earth retains all nineteen meteor identities and every existing event family. No source data, horizon, selected identity, model coefficient or scientific admission changed. There were no provider/data API calls, downloaded datasets, credentials, activation or deployment.
 
 ## Evidence added

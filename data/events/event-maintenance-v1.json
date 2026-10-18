@@ -1,5 +1,17 @@
 {
   "schemaVersion": 1,
+  "releasePolicy": {
+    "decisionDate": "2026-10-19",
+    "authority": "docs/operations/v1-bounded-event-scope-20261019.md",
+    "coverage": "supported-with-explicit-gaps",
+    "missingCoverageBlocksV1": false,
+    "knownIncorrectResultsBlockRelease": true,
+    "scientificCompletenessClaimed": false,
+    "unsupportedMustRemainExplicit": true,
+    "sourceActivationGranted": false,
+    "deploymentGranted": false,
+    "qualification": "Missing coverage alone does not block V1. Correctness, truthful domains, source rights and applicable release gates remain mandatory; no data, model domain or scientific admission is extended."
+  },
   "reviewedOn": "2026-10-18",
   "maintenanceOwner": "NightSky.earth",
   "selection": "all-existing-supported-evidence",

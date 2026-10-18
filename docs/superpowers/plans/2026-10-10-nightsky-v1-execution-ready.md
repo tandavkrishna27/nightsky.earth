@@ -1,5 +1,7 @@
 # NightSky.earth V1 Execution Plan
 
+> **19October Task6 scope amendment:** See docs/operations/v1-bounded-event-scope-20261019.md. Supported calculations with explicit coverage gaps are accepted locally; wider scientific criteria below remain deferred, not scientifically passed. No deployment or source activation follows.
+
 > **Current scope override (18 October 2026):** The [API-only owner decision](../../operations/v1-api-only-scope-20261018.md) and [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) supersede bulk geography/OSM/raw ERA5 and mandatory numerical-history launch prerequisites below. Ticket9 is explicitly deferred, not completed. Preserve existing source/event limits and actual release gates; older tasks are historical where superseded.
 
 **Current execution authority (17 October 2026):** The owner approved API/search-based discovery with multiple suitable free sources. Use [API-first regroom](2026-10-17-api-first-v1-regroom.md), the [current ticket matrix](../../operations/v1-remaining-ticket-release-matrix.md) and [tracker](../../operations/v1-completion-tracker.md) for changed acceptance/dependencies. Preserve original ticket IDs and evidence below. Mandatory bulk planet/catalogue launch prerequisites are superseded; historical-weather and event capabilities are not automatically removed.

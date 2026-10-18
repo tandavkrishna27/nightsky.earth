@@ -1,5 +1,8 @@
 # Final local science/source wave — 18 October 2026
 
+
+> **19October owner scope amendment:** [Supported V1 calculations with explicit gaps](v1-bounded-event-scope-20261019.md) resolves the earlier pending decision. Wider missing scientific coverage is deferred enhancement; it is not newly supplied evidence. Known incorrect results, scientific domains, source rights and actual release gates remain mandatory. The historical findings below are retained.
+
 ## Implemented and reviewed
 
 - Seven additional event/planner regressions cover independently written horizontal/convention geometry and real production-code composition with fixture location/weather. Cases include valid, unsupported, outside-year, outside-fit and a requested window crossing a fit boundary. Shared planetary ephemeris is disclosed; no independent physical-accuracy or full-season claim follows.

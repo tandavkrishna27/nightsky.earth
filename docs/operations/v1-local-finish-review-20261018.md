@@ -1,5 +1,8 @@
 # Local finish acceptance review — 18 October 2026
 
+
+> **19October owner scope amendment:** [Supported calculations with explicit gaps](v1-bounded-event-scope-20261019.md) supersedes earlier Task6 missing-coverage launch requirements. Task6 is accepted locally under the amended scope; broader scientific coverage is deferred, not passed. Current categories are13/4/8/2 in the current ticket matrix. All actual source/host/correctness gates remain.
+
 Independent read-only criterion review of baseline `ec6b556` and the current API-only scope, release wave, original execution-ready Tasks 0/6/8/12B/15, operator preflight and runtime configuration. This review made no provider calls, data downloads, private configuration/ledger reads, activation, deployment or full-suite run. Only this review document is authored by this lane.
 
 ## Actionable findings

@@ -30,3 +30,21 @@ test("maintenance names the confirmed owner and an annual review without automat
  assert.equal(profile.families.length, 7);
  assert.deepEqual(profile.unsupportedEventTypes, ["occultation", "comet", "other"]);
 });
+
+test("V1 accepts labelled coverage gaps without accepting incorrect results or source activation", () => {
+ const profile=readProfile();
+ assert.equal(profile.releasePolicy.decisionDate,"2026-10-19");
+ assert.equal(profile.releasePolicy.coverage,"supported-with-explicit-gaps");
+ assert.equal(profile.releasePolicy.missingCoverageBlocksV1,false);
+ assert.equal(profile.releasePolicy.knownIncorrectResultsBlockRelease,true);
+ assert.equal(profile.releasePolicy.scientificCompletenessClaimed,false);
+ assert.equal(profile.releasePolicy.unsupportedMustRemainExplicit,true);
+ assert.equal(profile.releasePolicy.sourceActivationGranted,false);
+ assert.equal(profile.releasePolicy.deploymentGranted,false);
+ assert.deepEqual(profile.meteors.retainedCodes,[...METEOR_CODES]);
+ assert.equal(profile.meteors.completeActivitySeasons,0);
+ for(const row of meteorCoverage(2026)){
+  if(row.peak.status==='missing')assert.ok(profile.meteors.peakCoverage.find((entry:{year:number})=>entry.year===2026).missingCodes.includes(row.code));
+ }
+ assert.ok(meteorCoverage(2028).every(row=>row.peak.status==='out-of-horizon'));
+});

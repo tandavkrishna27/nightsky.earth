@@ -1,5 +1,8 @@
 # API-only release-readiness wave — 18 October 2026
 
+
+> **19October owner scope amendment:** [Supported calculations with explicit gaps](v1-bounded-event-scope-20261019.md) supersedes earlier Task6 missing-coverage launch requirements. Task6 is accepted locally under the amended scope; broader scientific coverage is deferred, not passed. Current categories are13/4/8/2 in the current ticket matrix. All actual source/host/correctness gates remain.
+
 ## Delivered
 
 - Explicit per-release `api-only-v1` operator profile permits full API tools without local geography/history artifacts. It rejects conflicting modes/artifacts/history activation; omitted profiles retain old behavior, and legacy rollback remains independently gated. No host acceptance follows from an offline pass.

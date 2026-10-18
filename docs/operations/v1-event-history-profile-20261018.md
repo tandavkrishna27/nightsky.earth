@@ -1,5 +1,8 @@
 # V1 event and historical-context profile — 18 October 2026
 
+
+> **19October owner scope amendment:** [Supported V1 calculations with explicit gaps](v1-bounded-event-scope-20261019.md) resolves the earlier pending decision. Wider missing scientific coverage is deferred enhancement; it is not newly supplied evidence. Known incorrect results, scientific domains, source rights and actual release gates remain mandatory. The historical findings below are retained.
+
 > **Current V1 scope amendment — 18 October 2026:** [API/search-only owner decision](v1-api-only-scope-20261018.md) supersedes earlier requirements for numerical-history acquisition, baseline/method admission or OSM extraction before launch. Historical data is optional/unavailable when no suitable approved evidence exists. Dormant implementations and older research below remain dated evidence, not V1 blockers or acquisition authority. See [API readiness](v1-api-readiness-20261018.md) for later exact source-use/credit evidence.
 
 Offline audit against base commit `1dad837` and the current runtime sources. This document records implemented boundaries and retained evidence, not source activation, ticket closure or release approval. No provider requests, browsing, downloads, credentials, deployment or scientific-policy changes were performed. API/search discovery does not require an owned global catalogue or database. It does not automatically remove the historical-context or selected-event journey.

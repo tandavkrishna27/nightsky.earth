@@ -1,5 +1,8 @@
 # V1 event maintenance — 18 October 2026
 
+
+> **19October owner scope amendment:** [Supported V1 calculations with explicit gaps](v1-bounded-event-scope-20261019.md) resolves the earlier pending decision. Wider missing scientific coverage is deferred enhancement; it is not newly supplied evidence. Known incorrect results, scientific domains, source rights and actual release gates remain mandatory. The historical findings below are retained.
+
 The confirmed maintainer is **NightSky.earth**. The owner's API-only V1 decision retains **all existing supported evidence**. The operational selection is recorded in `data/events/event-maintenance-v1.json`, including all **19 meteor identities**, their explicit gaps and the seven implemented event families. Selection does not certify scientific completeness or turn every retained identity into a dated visual event.
 
 `meteor-evidence-inventory-v1.json` and the runtime `meteorCoverage` selection fields remain frozen audit evidence. Their `pending-owner-decision` / null maintenance fields describe the earlier audit state, not current launch selection authority. This operational manifest supersedes those fields for maintenance responsibility and selection only; their scientific validators and finite evidence states remain authoritative. Nothing here widens a runtime scientific admission.

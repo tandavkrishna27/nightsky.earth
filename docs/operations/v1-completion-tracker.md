@@ -1,12 +1,16 @@
 # V1 completion tracker
 
-## Current readiness summary — 18 October 2026
+## Current readiness summary — 19 October 2026
 
-[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 5 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
+[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **13 local deliverables accepted under current scope; 4 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
-## Current local science/source follow-up
+## Current decision — supported event calculations with explicit gaps
 
-[Reviewed follow-up](v1-local-science-source-wave-20261018.md) adds seven bounded event/convention/composed tests, strict current/rollback nonsecret source-manifest validation and the prepared OpenWeather method offer. Missing-manifest and rollback-weather mismatch failures are fixed. Actual scientific reference gaps and source/account/host acceptance remain explicit; owner scope answer is pending for labelled event gaps. Final full suite1,846passed/0failed/2skipped;47focused checks, types and host packages pass. No package/runtime-provider activation or deployment follows.
+[Owner-approved scope](v1-bounded-event-scope-20261019.md) accepts missing scientific coverage as explicitly labelled V1 limitations while retaining all19 identities. Known incorrect results, hidden/widened model claims and source-rights failures remain blockers. Task6 is locally accepted under this amended scope; original wider scientific completeness criteria are deferred enhancements, not passed tests. Current categories13/4/8/2 total27; Tasks0/8/12B/15 and actual source/account/host/release gates remain open. Runtime scientific validators, workflows and plugin1.0.34 are unchanged. Policy regression red/green,73affected checks, types/packages and full offline1,847passed/0failed/2skipped are verified; independent review found no material defect.
+
+## Previous local science/source follow-up — 18 October
+
+[Reviewed follow-up](v1-local-science-source-wave-20261018.md) adds seven bounded event/convention/composed tests, strict current/rollback nonsecret source-manifest validation and the prepared OpenWeather method offer. Missing-manifest and rollback-weather mismatch failures are fixed. Actual scientific reference gaps and source/account/host acceptance remain explicit; the pending scope answer at that checkpoint was subsequently resolved by the19October bounded-event decision above. Final full suite1,846passed/0failed/2skipped;47focused checks, types and host packages pass. No package/runtime-provider activation or deployment follows.
 
 ## Previous local release-readiness wave — explicit API-only profile
 
@@ -14,7 +18,7 @@
 
 ## Current owner scope amendment — API/search-only V1
 
-The [explicit owner decision](v1-api-only-scope-20261018.md) removes numerical historical-cloud preparation and baseline admission as V1 launch requirements. Ticket9 is **deferred by scope, not done**; ticket18 remains the separate website. The current27-heading categories are12done/5local/8release/2separate-deferred. Prior6-local/1-separate figures below are dated snapshots, not current requirements. No bulk datasets, raw ERA5 work, direct OSM extraction, owned global catalogue or database is required. APIs may use OSM internally; required credits remain.
+The [explicit owner decision](v1-api-only-scope-20261018.md) removes numerical historical-cloud preparation and baseline admission as V1 launch requirements. Ticket9 is **deferred by scope, not done**; ticket18 remains the separate website. The18October checkpoint categories were12done/5local/8release/2separate-deferred; the19October summary above supersedes this dated snapshot. Prior6-local/1-separate figures below are dated snapshots, not current requirements. No bulk datasets, raw ERA5 work, direct OSM extraction, owned global catalogue or database is required. APIs may use OSM internally; required credits remain.
 
 [API-only acceptance](v1-api-only-acceptance-20261018.md) verifies no-artifact startup, honest unavailable history, source failure isolation and finite event boundaries. [API readiness](v1-api-readiness-20261018.md) records selected data reuse/credit mapping and remaining exact feature/account/branding conditions. Whole V1/public hosting acceptance is not inferred from this scope change.
 
