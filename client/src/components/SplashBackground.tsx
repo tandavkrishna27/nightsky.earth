@@ -73,12 +73,12 @@ export default function SplashBackground({ exiting, onControlRemoved }: { exitin
 
   return <>
     <div className="splash-background" aria-hidden="true">
-      <img className="splash-poster" src="/splash-night-sky.jpg" alt="" fetchPriority="high" />
+      <img className="splash-poster" src="/splash-night-sky.webp" alt="" fetchPriority="high" />
       {eligible && <video
         ref={video}
         className={`splash-video${ready ? " is-ready" : ""}`}
         src="/splash-night-sky.mp4"
-        poster="/splash-night-sky.jpg"
+        poster="/splash-night-sky.webp"
         preload="metadata"
         loop muted playsInline tabIndex={-1}
         onError={failVideo}

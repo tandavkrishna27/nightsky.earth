@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import StarField from "@/components/StarField";
 
-import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
+import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.webp";
 
 export default function Science() {
   const [isLoading, setIsLoading] = useState(true);

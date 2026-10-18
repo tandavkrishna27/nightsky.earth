@@ -8,8 +8,8 @@ import QuestionExplorer from "@/components/home/QuestionExplorer";
 import PlatformAvailability from "@/components/home/PlatformAvailability";
 import UpcomingEvents from "@/components/sky-events/UpcomingEvents";
 import SEO from "@/components/SEO";
-import stars from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
-import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
+import stars from "@assets/stock_images/starry_night_sky_met_675ba820.webp";
+import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
 import "@/styles/home.css";
 
 export default function Home() {

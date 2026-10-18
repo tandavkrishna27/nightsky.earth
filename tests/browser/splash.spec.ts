@@ -30,14 +30,32 @@ test("reduced motion uses the matching still without requesting splash video", a
 });
 
 test("sound entry starts real music and the floating control can mute it", async ({ page }) => {
+  const musicRequests: string[] = [];
+  page.on("request", request => { if (request.url().includes("cosmic-music.mp3")) musicRequests.push(request.url()); });
   await page.goto("/");
+  await page.waitForTimeout(500);
+  expect(musicRequests).toEqual([]);
+  await expect(page.locator("audio")).not.toHaveAttribute("src", /cosmic-music/);
   await expect(page.locator("audio")).toHaveJSProperty("paused", true);
   await page.getByRole("button", { name: "Enter the Night", exact: true }).click();
   await expect(page.getByRole("button", { name: "Mute music", exact: true })).toBeVisible();
   await expect(page.locator("audio")).toHaveJSProperty("paused", false);
+  await expect.poll(() => musicRequests.length).toBe(1);
   await page.getByRole("button", { name: "Mute music", exact: true }).click();
   await expect(page.locator("audio")).toHaveJSProperty("paused", true);
   await expect(page.getByRole("button", { name: "Unmute music", exact: true })).toBeVisible();
+});
+
+test("home hero video waits until the visitor enters the experience", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const heroRequests: string[] = [];
+  page.on("request", request => { if (request.url().includes("Nightskyearth.mp4")) heroRequests.push(request.url()); });
+  await page.goto("/");
+  await page.waitForTimeout(500);
+  expect(heroRequests).toEqual([]);
+  await page.getByRole("button", { name: "Enter without sound", exact: true }).click();
+  await expect.poll(() => heroRequests.length).toBeGreaterThan(0);
+  await expect.poll(() => page.locator(".home-hero video").evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThan(0.1);
 });
 
 test("footer replay preserves the page, restores focus, and works repeatedly without changing refresh behavior", async ({ page }) => {

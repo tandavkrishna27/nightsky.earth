@@ -8,11 +8,11 @@ import ExperienceCard from "@/components/ExperienceCard";
 import LoadingPage from "@/components/LoadingPage";
 import SEO from "@/components/SEO";
 
-import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
-import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
-import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
-import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.jpg";
-import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
+import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.webp";
+import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.webp";
+import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
+import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.webp";
+import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.webp";
 
 export default function Experiences() {
   const [, setLocation] = useLocation();

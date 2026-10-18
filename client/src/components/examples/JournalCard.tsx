@@ -1,5 +1,5 @@
 import JournalCard from '../JournalCard';
-import auroraImage from '@assets/stock_images/aurora_borealis_nort_b91defe5.jpg';
+import auroraImage from '@assets/stock_images/aurora_borealis_nort_b91defe5.webp';
 
 export default function JournalCardExample() {
   return (

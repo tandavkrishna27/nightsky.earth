@@ -13,7 +13,7 @@ import SEO from "@/components/SEO";
 import { listingConfig } from "@/components/PluginAction";
 import { getStartedCopy, starterQuestions } from "@/content/getStartedCopy";
 import { pricingCopy } from "@/content/websiteCopy";
-import stars from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
+import stars from "@assets/stock_images/starry_night_sky_met_675ba820.webp";
 import "@/styles/get-started.css";
 
 type CopyState = {

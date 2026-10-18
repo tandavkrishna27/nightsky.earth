@@ -8,12 +8,12 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
-import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
-import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
-import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
-import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.jpg";
-import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
-import heroImage from "@assets/stock_images/starry_night_sky_met_675ba820.jpg";
+import starTrailsImage from "@assets/stock_images/long_exposure_stars__411203e7.webp";
+import desertImage from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.webp";
+import milkyWayImage from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.webp";
+import auroraImage from "@assets/stock_images/aurora_borealis_nort_b91defe5.webp";
+import stargazingImage from "@assets/stock_images/person_silhouette_st_c7feb986.webp";
+import heroImage from "@assets/stock_images/starry_night_sky_met_675ba820.webp";
 
 interface JournalEntry {
   title: string;
