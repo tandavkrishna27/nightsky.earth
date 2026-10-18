@@ -88,6 +88,83 @@
           "bytes": 68208,
           "sha256": "3a5077070f6038dbe0f779b298d5824e4cc693055d97485ca101c8d1d07b7ec7"
         }
+      ],
+      "canonicalTextInventory": [
+        {
+          "path": "RELEASE-NOTES.md",
+          "bytes": 12447,
+          "sha256": "677704921c73a3998e2da41b339ddaeb912f3cf42f707c8eb0c85292e6e9c566"
+        },
+        {
+          "path": "assets/composer.svg",
+          "bytes": 281,
+          "sha256": "8707ac306ad76cb8ee14286fa91a8151042383f1f5995ea07537c076fd3f5a9d"
+        },
+        {
+          "path": "assets/logo.svg",
+          "bytes": 281,
+          "sha256": "8707ac306ad76cb8ee14286fa91a8151042383f1f5995ea07537c076fd3f5a9d"
+        },
+        {
+          "path": "mcp.json",
+          "bytes": 196,
+          "sha256": "63ef836e68a1d17a0fe024e37c86d7536789e251bbfa41e60b50878ead49d546"
+        },
+        {
+          "path": "plugin.json",
+          "bytes": 5071,
+          "sha256": "b6a13c790f7c7c370992d80dcd2ec9bed1b4f69d0f4828b2640b1018e848a07c"
+        },
+        {
+          "path": "skills/find-observing-place/SKILL.md",
+          "bytes": 65549,
+          "sha256": "cea9054a2560b454f8275df4814d8c2921bf8006f487797761069f51cec260f0"
+        },
+        {
+          "path": "skills/find-observing-place/references/workflow.md",
+          "bytes": 73217,
+          "sha256": "039f08597b1e2cc5433908359791e65a446d33767b3ca8110d69d1a6536eec1f"
+        },
+        {
+          "path": "skills/plan-astrophotography/SKILL.md",
+          "bytes": 64274,
+          "sha256": "9b106b57890b17ed81e340233ecaa5a85b75522527ee10a62167a14c8a986ae1"
+        },
+        {
+          "path": "skills/plan-astrophotography/references/workflow.md",
+          "bytes": 71493,
+          "sha256": "81ba8af38c92a71420027d5d91c52cc83b3f63ca3485746a4d61785749a13533"
+        },
+        {
+          "path": "skills/plan-sky-event/SKILL.md",
+          "bytes": 66229,
+          "sha256": "91426c810a9b82fb319a355da65a00891ebb9e5bd24d199110fa79503bac32a1"
+        },
+        {
+          "path": "skills/plan-sky-event/references/workflow.md",
+          "bytes": 77514,
+          "sha256": "681815e4cd8f6c86c5863b6e90f4a219fc6c4f7e9888dc2f49c1922edc322211"
+        },
+        {
+          "path": "skills/plan-stargazing-night/SKILL.md",
+          "bytes": 64203,
+          "sha256": "ae5f83ae7ba18d4b2afb09c05fc66f94a2f316984cb734438968397b2b508bc7"
+        },
+        {
+          "path": "skills/plan-stargazing-night/references/workflow.md",
+          "bytes": 73193,
+          "sha256": "5101e8dcfe20c4ebd6a227664a2a08ec7efa534ea12008a7630616b7366949a6"
+        },
+        {
+          "path": "skills/prepare-outing/SKILL.md",
+          "bytes": 60427,
+          "sha256": "d832a5f594471c1ce839a941b8665ee9accca30184b290a5e0a8aed9630d0609"
+        },
+        {
+          "path": "skills/prepare-outing/references/workflow.md",
+          "bytes": 67885,
+          "sha256": "e6534835fc5db60e1549f77d9be42aab20c20172c65c4ad25e00986fdd6fe93f"
+        }
       ]
     },
     {
@@ -169,6 +246,83 @@
           "bytes": 68208,
           "sha256": "3a5077070f6038dbe0f779b298d5824e4cc693055d97485ca101c8d1d07b7ec7"
         }
+      ],
+      "canonicalTextInventory": [
+        {
+          "path": ".claude-plugin/plugin.json",
+          "bytes": 232,
+          "sha256": "d4fa340df0470cb545160ee0b0e9d7e8629d007b0e6a82c9469135978e978b99"
+        },
+        {
+          "path": ".mcp.json",
+          "bytes": 113,
+          "sha256": "735ec51589ac4be92319a1e130048bc6ea728734eac85812f235b7dde69550d7"
+        },
+        {
+          "path": "RELEASE-NOTES.md",
+          "bytes": 12447,
+          "sha256": "677704921c73a3998e2da41b339ddaeb912f3cf42f707c8eb0c85292e6e9c566"
+        },
+        {
+          "path": "assets/composer.svg",
+          "bytes": 281,
+          "sha256": "8707ac306ad76cb8ee14286fa91a8151042383f1f5995ea07537c076fd3f5a9d"
+        },
+        {
+          "path": "assets/logo.svg",
+          "bytes": 281,
+          "sha256": "8707ac306ad76cb8ee14286fa91a8151042383f1f5995ea07537c076fd3f5a9d"
+        },
+        {
+          "path": "skills/find-observing-place/SKILL.md",
+          "bytes": 65549,
+          "sha256": "cea9054a2560b454f8275df4814d8c2921bf8006f487797761069f51cec260f0"
+        },
+        {
+          "path": "skills/find-observing-place/references/workflow.md",
+          "bytes": 73217,
+          "sha256": "039f08597b1e2cc5433908359791e65a446d33767b3ca8110d69d1a6536eec1f"
+        },
+        {
+          "path": "skills/plan-astrophotography/SKILL.md",
+          "bytes": 64274,
+          "sha256": "9b106b57890b17ed81e340233ecaa5a85b75522527ee10a62167a14c8a986ae1"
+        },
+        {
+          "path": "skills/plan-astrophotography/references/workflow.md",
+          "bytes": 71493,
+          "sha256": "81ba8af38c92a71420027d5d91c52cc83b3f63ca3485746a4d61785749a13533"
+        },
+        {
+          "path": "skills/plan-sky-event/SKILL.md",
+          "bytes": 66229,
+          "sha256": "91426c810a9b82fb319a355da65a00891ebb9e5bd24d199110fa79503bac32a1"
+        },
+        {
+          "path": "skills/plan-sky-event/references/workflow.md",
+          "bytes": 77514,
+          "sha256": "681815e4cd8f6c86c5863b6e90f4a219fc6c4f7e9888dc2f49c1922edc322211"
+        },
+        {
+          "path": "skills/plan-stargazing-night/SKILL.md",
+          "bytes": 64203,
+          "sha256": "ae5f83ae7ba18d4b2afb09c05fc66f94a2f316984cb734438968397b2b508bc7"
+        },
+        {
+          "path": "skills/plan-stargazing-night/references/workflow.md",
+          "bytes": 73193,
+          "sha256": "5101e8dcfe20c4ebd6a227664a2a08ec7efa534ea12008a7630616b7366949a6"
+        },
+        {
+          "path": "skills/prepare-outing/SKILL.md",
+          "bytes": 60427,
+          "sha256": "d832a5f594471c1ce839a941b8665ee9accca30184b290a5e0a8aed9630d0609"
+        },
+        {
+          "path": "skills/prepare-outing/references/workflow.md",
+          "bytes": 67885,
+          "sha256": "e6534835fc5db60e1549f77d9be42aab20c20172c65c4ad25e00986fdd6fe93f"
+        }
       ]
     }
   ],
@@ -184,5 +338,7 @@
   "externalDataRequests": 0,
   "reviewedRuntimeChanges": [
     "server/mcp/answerText.ts: retain returned source notices and distinct same-URL credits"
-  ]
+  ],
+  "rawArtifactScope": "Exact packages/installed files at local review; raw text line endings can differ in another checkout.",
+  "canonicalTextRule": "Decode UTF-8 strictly; normalize only CRLF to LF; retain a leading BOM and every other byte/content distinction. Compare all paths, normalized lengths and SHA-256 hashes across checkouts."
 }

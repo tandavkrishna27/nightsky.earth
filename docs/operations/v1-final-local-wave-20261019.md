@@ -32,3 +32,7 @@ No provider/data API call, dataset download, private credential/ledger change, s
 - v1-final-local-discovery-20261019.md:45offline cases and unexecuted3GET/4credit/30second geometry proposal
 - v1-final-local-journeys-20261019.md: initial failures, final partial verdict and finite-case trace references
 - v1-local-artifact-freeze-20261019.json: exact package inventories/hashes and review boundaries
+
+## Artifact-check portability follow-up
+
+Raw package hashes/inventories above identify the actual reviewed Windows working-tree artifacts and installed bytes. Git line-ending normalization can produce different raw ZIP hashes in another checkout. The receipt therefore additionally records every path, normalized UTF-8 byte length and SHA256 with only CRLF-to-LF normalization. Leading BOM and all other content distinctions are preserved; invalid UTF-8 is rejected. Exact raw hashes remain unchanged and no remote installed-file proof is inferred. The new canonical receipt regression failed before its fields existed, then24affected package/freeze checks passed. The additional BOM/content/invalid-UTF8 guard passes. This test-only portability correction changes no package, provider or runtime behavior; final exact-head CI verifies the amended suite.
