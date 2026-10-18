@@ -33,3 +33,11 @@ The two targeted reuse cases pass in this configuration. Exact API-mode candidat
 ## Integration verification
 
 Independent cross-lane reviews found no remaining material blocker after correcting two source-profile claims (7Timer free/paid permission and GeoNames API timezone unknown). The coordinator verified the final installed bytes, all TypeScript projects, both package builds and three compiled offline runtime checks. Full offline suite: **1,799 passed, 0 failed, 2 skipped / 1,801 total**. Source-profile tests compare all eleven exported quota policies, exact fifteen-role roster and optional empty/key-only activation behavior using synthetic environments; no private configuration is read. The source profile, event/history evidence and journey outcomes advance the existing tasks but do not automatically close all source/scientific/release gates. Exact-commit CI is watched after push; its receipt is reported with that commit.
+
+
+## Geography/resource/follow-up wave
+
+The [follow-up matrix and native1.0.31 conversation](v1-followup-acceptance-20261018.md) add changed preferences with zero unnecessary calls, explicit refresh with previous sample preservation, and controlled API snapshot expiry/re-resolution. The [geographic matrix](v1-geographic-acceptance-20261018.md) adds untested opt-in region combinations and the corrected ten-reference contract. The [bounded core measurement](v1-api-resource-measurement-20261018.md) adds serial/concurrent loopback evidence with warm-cache and host-capacity limitations. These are additions to this evidence matrix, not deletion of earlier failures or blanket acceptance of every journey/client/source.
+
+
+The final additional unknown-site timezone case is **partial overall**: the consent/zone boundary and corrected API-point tool label pass, but a repeated lookup and unsupported suitability opener remain explicit model-quality findings. See the follow-up evidence; these are not silently merged into earlier scoped native passes.

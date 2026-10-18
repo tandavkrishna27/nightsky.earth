@@ -56,3 +56,8 @@ Both new conversation guidance checks failed before the edits and passed afterwa
 ## Follow-up source/coverage wave
 
 Current [API profile](v1-api-source-profile-20261018.md), [event/history profile](v1-event-history-profile-20261018.md) and [assembled journey status](v1-assembled-journey-status-20261018.md) reconcile the next ordered step. The profile is a nonsecret release proposal/evidence record, not an applied active configuration. Existing 7Timer free-or-paid permission supersedes old noncommercial screening; GeoNames API timezone remains unknown. Event selection/maintenance and historical admission remain finite recorded decisions, not silently waived. No new provider requests, downloads or deployment were performed.
+
+
+## Geography/resource/follow-up acceptance checkpoint
+
+Local1.0.31 adds the [current geography matrix](v1-geographic-acceptance-20261018.md), [bounded core resource receipt](v1-api-resource-measurement-20261018.md) and [follow-up acceptance](v1-followup-acceptance-20261018.md). It fixes two observed deterministic mismatches: ten references for the existing5include/5exclude contract, and API-point wording that incorrectly said named city. Final suite1,811pass/0fail/2skip; types/packages/compiled checks and installed bytes pass. The city multi-turn refresh/expiry case passes its scoped checks; final unknown-site case respects timezone choice but remains partial due duplicate lookup and unsupported suitability opening. Real source/geometry/profile, scientific and release gates remain. No blanket ticket closure or deployment is inferred from this checkpoint.

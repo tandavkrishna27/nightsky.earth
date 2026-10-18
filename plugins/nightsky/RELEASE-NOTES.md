@@ -1,3 +1,7 @@
+# 1.0.31
+
+Allow up to ten selected region references for the existing five-included/five-excluded discovery contract, without expanding geometry or quota limits. Add offline geographic/follow-up regressions and a bounded serial/concurrent compiled API measurement in CI. Label API-selected calculation points separately from legacy city records. No source activation or new provider calls.
+
 # 1.0.30
 
 Reuse useful completed partial planning results, resolved city identities and matching geometry. Use focused tools only for distinct missing evidence; preserve legitimate refresh and expired-selection handling. Reconcile API activation, event/history coverage and assembled journey evidence without activating providers.

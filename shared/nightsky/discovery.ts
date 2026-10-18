@@ -53,7 +53,7 @@ export const discoveryOriginSchema = z.strictObject({
 export const discoveryScopeSchema = z.strictObject({
   origins: z.array(discoveryOriginSchema).max(5).default([]),
   originMode: z.enum(["any", "all"]).default("any"),
-  regionSelections: z.array(z.strictObject({regionId:regionIdSchema,sourceRevision:z.string().regex(/^[a-f0-9]{64}$/)})).max(5).optional(),
+  regionSelections: z.array(z.strictObject({regionId:regionIdSchema,sourceRevision:z.string().regex(/^[a-f0-9]{64}$/)})).max(10).optional(),
   includeRegionIds: z.array(regionIdSchema).max(5).default([]),
   excludeRegionIds: z.array(regionIdSchema).max(5).default([]),
   regionMode: z.enum(["any", "all"]).default("any"),

@@ -31,6 +31,17 @@ test("maximum admitted scope and inclusive radius/limit boundaries are accepted"
   assert.equal(s.safeParse({scope:{origins:Array(5).fill({placeId:"place:v1:city",radiusKm:300,minimumDistanceKm:300}),includeRegionIds:Array(5).fill("region:v1:IND"),excludeRegionIds:Array(5).fill("region:v1:IND")},categories:["park","viewpoint","protected-area","campground","beach","other"],limit:10}).success,true);
   assert.equal(s.safeParse({placeId:"place:v1:city",radiusKm:1,limit:1}).success,true);
 });
+
+test("five included and five excluded API regions retain all ten selected references", async () => {
+  const { discoveryScopeSchema: schema } = await contracts();
+  const refs = Array.from({ length: 11 }, (_, index) => ({ regionId: `region:v1:scope:${index}`, sourceRevision: index.toString(16).padStart(64, '0') }));
+  const scope = { includeRegionIds: refs.slice(0, 5).map(r => r.regionId), excludeRegionIds: refs.slice(5, 10).map(r => r.regionId), regionSelections: refs.slice(0, 10) };
+  assert.equal(schema.safeParse(scope).success, true);
+  assert.equal(schema.parse(scope).regionSelections?.length, 10);
+  assert.equal(schema.safeParse({ ...scope, regionSelections: refs }).success, false);
+  assert.equal(schema.safeParse({ ...scope, includeRegionIds: refs.slice(0, 6).map(r => r.regionId) }).success, false);
+  assert.equal(schema.safeParse({ ...scope, excludeRegionIds: refs.slice(5, 11).map(r => r.regionId) }).success, false);
+});
 test("region and details inputs enforce versioned selection and bounded names", async () => {
   const d=await contracts();
   for(const value of [{},{placeId:"place:v1:site"},{placeQuery:"site",placeId:"place:v1:site",catalogueRevision:"edition"},{placeQuery:"site",catalogueRevision:"edition"},{placeQuery:"site",displayTimeZone:"UTC"},{placeId:"place:v1:site",catalogueRevision:"edition",countryCode:"IND"},{placeQuery:" "},{placeQuery:"x".repeat(161)},{placeQuery:"site",countryCode:"IN"},{placeQuery:"site",extra:true}]) assert.equal(d.getObservingLocationDetailsInputSchema.safeParse(value).success,false);

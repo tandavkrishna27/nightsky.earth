@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve, dirname } from 'node:path';
 import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
+import { buildCapacityReport } from './api-capacity-report.mjs';
 
 const saved = { ...process.env };
 let server, app, fixtureDirectory, closeConfiguredNightSkyPluginApp, rssTimer;
@@ -42,11 +43,15 @@ try {
   closeConfiguredNightSkyPluginApp = runtime.closeConfiguredNightSkyPluginApp;
   sampleRss();
   let calls = 0;
+  const fakeProviderCallLimit=process.argv.includes('--capacity')?6:5;
+  const fakeProviderRoutes={};
   const appStarted = performance.now();
   app = await runtime.createConfiguredNightSkyPluginApp({ log: () => {}, fetcher: async input => {
     calls++;
+    assert.ok(calls<=fakeProviderCallLimit,'Synthetic source dispatch budget exceeded');
     sampleRss();
     const url = new URL(String(input));
+    const route=url.hostname+url.pathname;fakeProviderRoutes[route]=(fakeProviderRoutes[route]??0)+1;
     const times = ['2026-10-17T15:00:00Z', '2026-10-17T16:00:00Z', '2026-10-17T17:00:00Z', '2026-10-17T18:00:00Z'];
     if (url.hostname === 'api.met.no') {
       assert.equal(url.pathname, '/weatherapi/locationforecast/2.0/complete');
@@ -62,6 +67,10 @@ try {
       assert.equal(url.pathname, '/data/2.5/forecast');
       assert.equal(Number(url.searchParams.get('lat')), 18.52); assert.equal(Number(url.searchParams.get('lon')), 73.85);
       return Response.json({ cod: '503', message: 'Synthetic partial outage' }, { status: 503 });
+    }
+    if(url.hostname==='api.geoapify.com'){
+      assert.equal(url.pathname,'/v2/places');
+      return Response.json({type:'FeatureCollection',features:[]});
     }
     assert.equal(url.hostname, 'secure.geonames.org', 'Unexpected synthetic upstream');
     if (url.pathname === '/searchJSON') return Response.json({ geonames: [{ geonameId: 9999991, name: 'Fixture Sky Town', lat: '18.52', lng: '73.85', countryCode: 'IN', countryName: 'India', fcl: 'P', fcode: 'PPL', timezone: { timeZoneId: 'Asia/Kolkata' } }] });
@@ -79,9 +88,9 @@ try {
   const base = `http://127.0.0.1:${server.address().port}`;
   let id = 0;
   const requests = [];
-  const rpc = async (method, params) => {
+  const rpc = async (method, params, timeoutMs=10000) => {
     const started = performance.now();
-    const response = await fetch(`${base}/mcp`, {method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params}),signal:AbortSignal.timeout(10000)});
+    const response = await fetch(`${base}/mcp`, {method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params}),signal:AbortSignal.timeout(timeoutMs)});
     assert.equal(response.status,200);
     const raw=await response.text(), event=raw.split('\n').find(line=>line.startsWith('data: '));
     const elapsedMs = performance.now() - started;
@@ -107,7 +116,29 @@ try {
   assert.equal(weather.providerOutcomes[2].status, 'unavailable');
   assert.equal(weather.forecasts.length, 2, JSON.stringify(weather.providerOutcomes));
   assert.deepEqual(weather.forecasts.map(f => f.samples[0].values.totalCloudCover.value), [0, 100]);
-  assert.ok(calls >= 4 && calls <= 5);
+  let capacity;
+  if(process.argv.includes('--capacity')){
+    const capacityStarted=performance.now(),phases=[];
+    const args={placeId:point.placeId,sourceRevision:point.sourceRevision,displayTimeZone:'Asia/Kolkata',window:{startUtc:'2026-10-17T14:30:00Z',endUtc:'2026-10-17T18:30:00Z',timeZone:'Asia/Kolkata'}};
+    const workload=[{name:'get_astronomy_window',arguments:args},{name:'get_night_conditions',arguments:{...args,includeHourly:true}},
+      {name:'plan_observing_session',arguments:{...args,activity:'general-stargazing',experience:'beginner',equipment:['naked eye'],units:'metric'}},
+      {name:'get_astronomy_window',arguments:args}];
+    for(const concurrency of [1,4]){
+      const phaseStart=requests.length;let active=0,observedClientConcurrency=0;
+      const run=async operation=>{
+        const remaining=Math.floor(30000-(performance.now()-capacityStarted));assert.ok(remaining>0,'Capacity dispatch budget exhausted');
+        active++;observedClientConcurrency=Math.max(observedClientConcurrency,active);
+        try {const result=await rpc('tools/call',operation,Math.min(10000,remaining));assert.ok(result.structuredContent?.availability);}
+        finally{active--;}
+      };
+      if(concurrency===1)for(const operation of workload)await run(operation);
+      else await Promise.all(workload.map(run));
+      phases.push({name:concurrency===1?'sequential':'concurrent',concurrency,observedClientConcurrency,requests:requests.slice(phaseStart)});
+    }
+    capacity={...buildCapacityReport(phases),elapsedMs:performance.now()-capacityStarted,dispatchBudgetMs:30000,
+      unmeasured:{cacheOccupancy:'Combined live normalized-cache occupancy is not exposed by this compiled probe.',completeDeploymentStorage:'Quota JSON bytes exclude dependencies, logs, backups and caches.',targetHostCapacity:'Local synthetic loopback only; actual host, provider latency, optional-source mix and sustained capacity remain unmeasured.'}};
+  }
+  assert.ok(calls >= 4 && calls <= fakeProviderCallLimit);
   const quotaFinalBytes = (await stat(quotaPath)).size;
   sampleRss();
   const report = {
@@ -116,18 +147,21 @@ try {
     compiledBundle,
     configuration: { discoveryMode: 'api', weatherProviders: ['met', 'weatherapi', 'openweather'], localGeographyFiles: false },
     initialization: { moduleImportMs, appInitializationMs, moduleAndAppInitializationMs, listenerReadyMs },
-    requests, fakeProviderCalls: calls, sampledPeakRssBytes,
+    requests, fakeProviderCalls: calls, fakeProviderCallLimit, fakeProviderRoutes, sampledPeakRssBytes,
     fixtureQuotaFile: { initialBytes: quotaInitialBytes, finalBytes: quotaFinalBytes },
+    ...(capacity?{capacity}:{}),
     limitations: [
       'Module import plus app cold initialization in this script, not process-spawn startup; Node startup, script imports, scratch setup and bundle hashing are excluded from initialization timings.',
       'Bundle SHA-256 identifies dist/plugin.js only; external dependencies and a complete deployment artifact are not attested.',
-      'Sequential loopback HTTP/MCP requests with fixed fake provider responses; no live provider latency, throughput, coverage or hosting acceptance.',
+      'Loopback HTTP/MCP requests with fixed fake provider responses; optional capacity phase compares four sequential with four concurrent client requests. No live provider latency, throughput, coverage or hosting acceptance.',
+      'Capacity phases are ordered after initial resolution/astronomy/weather checks; the serial phase also warms planner and candidate caches. Their latency differences cannot be attributed solely to concurrency. Client overlap is not parallel server CPU execution.',
+      'The 30-second capacity dispatch/client-timeout budget does not preempt synchronous JavaScript work or include initialization and cleanup.',
       'Request latency ends after reading the response body, before JSON parsing and assertions; UTF-8 bytes include the decoded SSE envelope where present, not network headers or wire compression.',
       'RSS is process-wide, sampled at phase/request/provider boundaries and every 10 ms when the event loop runs; it is not OS peak memory or per-request allocation.',
       'Quota bytes describe only the synthetic quota JSON file, excluding lock/marker files, backups, caches, rollback and deployment storage; scratch files are removed in finally.',
     ],
   };
-  assert.equal(requests.length, 4);
+  assert.equal(requests.length, capacity?12:4);
   assert.ok(requests.every(r => Number.isFinite(r.elapsedMs) && r.elapsedMs >= 0 && r.responseUtf8Bytes > 0));
   console.log(JSON.stringify(report));
   console.log('SYNTHETIC: built API-mode resolution, astronomy and three-source weather partial outage verified without local geography files or external requests. Not live-source acceptance.');

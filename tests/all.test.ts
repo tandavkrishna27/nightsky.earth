@@ -237,3 +237,7 @@ import './mcp/native-admission.test';
 import './mcp/forecast-answer-text.test';
 
 import "./operations/v1-source-profile.test.ts";
+
+import "./places/api-geographic-acceptance-matrix.test.ts";
+import "./mcp/v1-followup-acceptance.test.ts";
+import "./operations/api-capacity-report.test.ts";

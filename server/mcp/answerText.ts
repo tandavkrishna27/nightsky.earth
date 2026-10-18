@@ -126,7 +126,7 @@ export function meteorTimingAnswerText(plan: PlanResult, target?: string): strin
 export function planAnswerText(plan: PlanResult, options: {target?: string; includeSourceLinks?: boolean} = {}): string {
   const lines = [
     Array.from(plain(plan.summary)).slice(0,120).join('')+(plan.summary.length>120?' (full summary in structuredContent)':''),
-    `Calculation basis: ${plan.place.catalogueRevision ? 'selected candidate representative point' : 'named city record, not a selected observing site'}. Display time zone: ${plan.requestedWindow.timeZone}${plan.place.timeZoneBasis === 'explicit-display' ? '; actual site time zone remains unverified' : ''}.`,
+    `Calculation basis: ${plan.place.sourceRevision ? 'selected API source point; representative coordinates, site suitability unverified' : plan.place.catalogueRevision ? 'selected candidate representative point' : 'named city record, not a selected observing site'}. Display time zone: ${plan.requestedWindow.timeZone}${plan.place.timeZoneBasis === 'explicit-display' ? '; actual site time zone remains unverified' : ''}.`,
     `Requested session: ${formatLocalInstant(plan.requestedWindow.startUtc, plan.requestedWindow.timeZone, 'en')} to ${formatLocalInstant(plan.requestedWindow.endUtc, plan.requestedWindow.timeZone, 'en')}.`,
   ];
   const weather=plan.evidence?.weather;

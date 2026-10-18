@@ -334,3 +334,15 @@ test('meteor timing brief preserves exact versus calendar precision and dated ra
  assert.match(text,/GEM.*fixture/);
  assert.ok(Buffer.byteLength(text)<=1800);
 });
+
+
+test('plan basis distinguishes an API-selected source point from legacy city and catalogue records',async()=>{
+ const {planAnswerText}=await import('../../server/mcp/answerText');
+ const make=(place:any)=>({summary:'Fixture plan',goal:'general-stargazing',place,requestedWindow:{startUtc:'2026-10-18T15:00:00Z',endUtc:'2026-10-18T18:00:00Z',timeZone:'Asia/Kolkata'},evidence:{},gaps:[],candidateWindows:[],sources:[]}) as any;
+ const api=planAnswerText(make({sourceRevision:'a'.repeat(64),timeZoneBasis:'explicit-display'}),{includeSourceLinks:false});
+ assert.match(api,/Calculation basis: selected API source point/);
+ assert.match(api,/actual site time zone remains unverified/);
+ assert.ok(!api.includes('named city record'));
+ assert.match(planAnswerText(make({catalogueRevision:'b'.repeat(64),timeZoneBasis:'explicit-display'}),{includeSourceLinks:false}),/Calculation basis: selected candidate representative point/);
+ assert.match(planAnswerText(make({timeZoneBasis:'named-record'}),{includeSourceLinks:false}),/Calculation basis: named city record/);
+});
