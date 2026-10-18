@@ -231,3 +231,5 @@ import './mcp/public-universe-tools.test';
 import './skills/public-universe-workflows.test';
 import './providers/public-universe-meteor-evidence.test';
 import './providers/public-universe-starter-evidence.test';
+
+import './mcp/native-admission.test';

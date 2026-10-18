@@ -26,6 +26,46 @@ const idleTurn = () => new Promise<void>(resolve => setImmediate(resolve));
 const query = { kind: 'search', domain: 'solar-system', q: 'Mars', limit: 1 } as const;
 const quota = () => ({ reserve: async () => ({ allowed: true, reason: 'synthetic' }), setProviderState: async () => {} });
 
+test('source diagnostics expose bounded phase timings and random identity without request or response values', async () => {
+  const clock = fakeClock(), events: any[] = [];
+  const transport = new PublicUniverseTransport({ ...clock, quota: quota(), quotaOwner: 'private-owner', admitted: true,
+    onDiagnostic: event => events.push(event), fetch: async () => { clock.advance(7); return new Response('{"private-response-value":"private-body"}', {headers:{'x-private':'private-header'}}); },
+  });
+  try {
+    await transport.request({...query,q:'private-query'});
+    assert.deepEqual(events.map(e=>e.phase),['start','quota-reserved','headers','body-read','parsed','settled']);
+    assert.equal(new Set(events.map(e=>e.requestId)).size,1);
+    assert.match(events[0].requestId,/^[a-f0-9-]{36}$/);
+    assert.ok(events.every(e=>e.event==='publicuniverse.request'&&e.category==='catalogue'&&Number.isFinite(e.elapsedMs)));
+    assert.equal(events.find(e=>e.phase==='headers').status,200);
+    assert.equal(events.find(e=>e.phase==='body-read').responseBytes,Buffer.byteLength('{"private-response-value":"private-body"}'));
+    for(const marker of ['private-owner','private-query','private-response-value','private-body','private-header'])assert.equal(JSON.stringify(events).includes(marker),false);
+  } finally { await transport.close(); }
+});
+
+test('source diagnostics identify timeout before uncooperative fetch settles without releasing ownership', async()=>{
+  const clock=fakeClock(),events:any[]=[];let finish!:(r:Response)=>void;
+  const transport=new PublicUniverseTransport({...clock,quota:quota(),quotaOwner:'test',admitted:true,onDiagnostic:event=>events.push(event),fetch:async()=>new Promise(resolve=>{finish=resolve;})});
+  const result=assert.rejects(transport.request(query),/timeout/);await idleTurn();clock.advance(15000);await result;
+  assert.deepEqual(events.map(e=>e.phase),['start','quota-reserved','timeout']);
+  assert.equal(events.at(-1).errorCode,'timeout');
+  await assert.rejects(transport.request({...query,q:'Venus'}),/busy/);
+  finish(new Response('{}'));await transport.close();
+  assert.equal(events.filter(e=>e.phase==='timeout').length,1);
+  assert.equal(events.at(-1).phase,'settled');
+});
+
+test('a throwing optional diagnostic sink cannot alter provider success or settlement',async()=>{
+  let calls=0;
+  const transport=new PublicUniverseTransport({quota:quota(),quotaOwner:'test',admitted:true,onDiagnostic:()=>{throw Error('private-sink-error');},fetch:async()=>{calls++;return new Response('{}');}});
+  try{assert.deepEqual((await transport.request(query)).value,{});assert.equal(calls,1);}finally{await transport.close();}
+});
+
+test('a rejecting asynchronous diagnostic sink remains isolated after request settlement',async()=>{
+  const transport=new PublicUniverseTransport({quota:quota(),quotaOwner:'test',admitted:true,onDiagnostic:async()=>{throw Error('private-async-sink');},fetch:async()=>new Response('{}')});
+  try{assert.deepEqual((await transport.request(query)).value,{});await idleTurn();}finally{await transport.close();}
+});
+
 test('an uncooperative quota reservation times out without dispatch or releasing its slot early', async () => {
   const clock = fakeClock();
   let finish!: (value: { allowed: boolean; reason: string }) => void;

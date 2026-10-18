@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { mountHealthRoute, type HealthDependencies } from "./health";
 import { mountMcpRoute, type McpRouteDependencies } from "./mcp/route";
 import { requestLogging } from "./requestLogging";
+import { currentMcpRequestId } from './mcp/requestDiagnostics';
 import { configureMcpProxyTrust } from "./mcp/proxyTrust";
 import { loadRegionalOsmProvider } from "./places/regionalOsm";
 import { loadCatalogueFiles } from "./places/catalogueFiles";
@@ -55,7 +56,7 @@ export function createNightSkyPluginApp(dependencies: PluginAppDependencies = {}
     app.use(requestLogging(dependencies.log ?? (line => console.log(line))));
     app.use(express.json({ limit: "32kb" }));
     mountHealthRoute(app, dependencies.health);
-    mountMcpRoute(app, dependencies);
+    mountMcpRoute(app, { ...dependencies, onMcpDiagnostic: dependencies.onMcpDiagnostic ?? (event => (dependencies.log ?? console.log)(JSON.stringify({event:'mcp.request',...event}))) });
     app.use((_req, res) => res.status(404).json({ message: "Not found." }));
     const errors: ErrorRequestHandler = (error, _req, res, _next) => {
         const requested = error?.status ?? error?.statusCode;
@@ -128,7 +129,10 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     lightPollution = await createConfiguredLightPollutionProviders(process.env,{fetcher:overrides.fetcher});
     browserLightPollution = createLightPollutionBrowserProviders(process.env);
     const lightPollutionProviders = lightPollution.selected.length || process.env.NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED === 'true' ? [...lightPollution.providers,...browserLightPollution.providers] : undefined;
-    skyProviders = createConfiguredSkyProviders(process.env,{quota:skyQuota,publicUniverseQuota,fetcher:overrides.fetcher});
+    skyProviders = createConfiguredSkyProviders(process.env,{quota:skyQuota,publicUniverseQuota,fetcher:overrides.fetcher,publicUniverseDiagnostics:event=>{
+      const mcpRequestId=currentMcpRequestId();
+      return (overrides.log??console.log)(JSON.stringify({...event,...(mcpRequestId?{mcpRequestId}:{})}));
+    }});
     const weatherCollection = createConfiguredWeatherCollection(process.env,{quota,fetcher:overrides.fetcher});
     const finish = (app: express.Express) => { let closing: Promise<void> | undefined; runtimeCleanup.set(app, () => closing ??= cleanup()); return app; };
     const allowedHosts = process.env.NIGHTSKY_MCP_ALLOWED_HOSTS?.split(",").map(value => value.trim()).filter(Boolean);

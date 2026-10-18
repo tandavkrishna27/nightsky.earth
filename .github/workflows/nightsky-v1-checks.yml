@@ -63,6 +63,9 @@ jobs:
       - name: Exercise optional Public Universe contracts and default isolation offline
         run: node --import tsx --test tests/providers/public-universe-contracts.test.ts tests/providers/public-universe-transport.test.ts tests/providers/public-universe-store.test.ts tests/providers/public-universe-deadlines.test.ts tests/providers/public-universe-date-query.test.ts tests/providers/public-universe-meteor-evidence.test.ts tests/providers/public-universe-starter-evidence.test.ts tests/providers/public-universe-provider.test.ts tests/providers/public-universe-configuration.test.ts tests/mcp/public-universe-tools.test.ts tests/skills/public-universe-workflows.test.ts
 
+      - name: Exercise native protocol budgets and redacted request diagnostics offline
+        run: node --import tsx --test tests/mcp/native-admission.test.ts tests/mcp/local-proxy.test.ts tests/mcp/route-body.test.ts
+
       - name: Verify Public Universe allocation preparation makes no requests or writes
         run: node --import tsx scripts/initialize-public-universe-quota.ts --plan
 

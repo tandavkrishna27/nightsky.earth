@@ -43,7 +43,7 @@ test("MCP route bounds bodies, handles malformed requests safely, and rejects un
 test("rate-limited requests do not consume active-request capacity", async () => {
   const app = express();
   app.use(express.json({ limit: "32kb" }));
-  mountMcpRoute(app, { allowedHosts: ["127.0.0.1"], maxRequestsPerWindow: 1, maxConcurrentRequests: 1 });
+  mountMcpRoute(app, { allowedHosts: ["127.0.0.1"], maxRequestsPerWindow: 1, maxProtocolRequestsPerWindow: 1, maxConcurrentRequests: 1 });
   const server = createHttpServer(app);
   server.listen(0, "127.0.0.1");
   await once(server, "listening");

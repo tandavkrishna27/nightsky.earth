@@ -1,5 +1,9 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.23 - native request reliability
+
+Separates bounded protocol/startup traffic from tool-call rate budgets while retaining global, concurrency and identity protections. Adds generated request correlation and redacted admission/completion and optional-source phase diagnostics. Workflow recipes now show valid catalogue windows and bounded shortlists, use exact reference queries, and preserve core planning results when optional sources fail. Source deadlines, quotas and activation defaults are unchanged. Offline regression checks do not establish native-host acceptance or resolve the historical five-minute wait by themselves. No deployment or new source requests.
+
 ## V1 local revision 1.0.22 - named upstream source hashes
 
 Corrects optional Public Universe provenance validation to retain bounded filename-to-SHA-256 maps alongside the prepared subset digest. Canonical comparison ignores key order while detecting changed, added or removed file identity. Malformed hashes remain rejected. Existing providers and admission defaults are unchanged. Offline regression verification does not establish live-source or native-host acceptance.

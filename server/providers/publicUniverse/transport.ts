@@ -1,9 +1,20 @@
 import type { PersistentQuota } from '../quotaState';
+import { randomUUID } from 'node:crypto';
 import type { ReferenceDomain } from '../../../shared/nightsky/reference';
 import { canonicalJson } from './referenceStore';
 import { assertLocalNight, isSupportedStarterId } from './contracts';
 export const PUBLIC_UNIVERSE_ORIGIN = 'https://api.sol.wickedsick.com';
 export type TransportErrorCode = 'not-admitted' | 'quota' | 'rate-limit' | 'timeout' | 'size' | 'http' | 'invalid-response' | 'stale-selection' | 'busy' | 'closed' | 'cancelled';
+export interface PublicUniverseDiagnostic {
+    event: 'publicuniverse.request';
+    requestId: string;
+    category: 'catalogue' | 'discover' | 'night';
+    phase: 'start' | 'quota-reserved' | 'headers' | 'body-read' | 'parsed' | 'timeout' | 'failure' | 'settled';
+    elapsedMs: number;
+    status?: number;
+    responseBytes?: number;
+    errorCode?: TransportErrorCode;
+}
 export class PublicUniverseTransportError extends Error {
     constructor(public readonly code: TransportErrorCode, public readonly status?: number) { super(code); }
 }
@@ -178,6 +189,8 @@ interface Options {
     now?: () => number;
     setTimer?: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
     clearTimer?: (timer: ReturnType<typeof setTimeout>) => void;
+    /** Fixed metadata only; never request URLs, inputs, headers or response values. */
+    onDiagnostic?: (event: PublicUniverseDiagnostic) => void | Promise<void>;
 }
 export interface TransportResult {
     value: unknown;
@@ -263,8 +276,20 @@ export class PublicUniverseTransport {
     }
     private async dispatch(route: ReturnType<typeof buildRoute>, deadline: number): Promise<TransportResult> {
         const controller = new AbortController();
+        const started = this.now(), requestId = randomUUID();
         let expired = false;
-        const timer = (this.options.setTimer ?? setTimeout)(() => { expired = true; controller.abort(); }, Math.max(0, deadline - this.now()));
+        let timeoutReported = false;
+        const emit = (phase: PublicUniverseDiagnostic['phase'], extra: Pick<PublicUniverseDiagnostic, 'status' | 'responseBytes' | 'errorCode'> = {}) => {
+            const elapsed = this.now() - started;
+            const event: PublicUniverseDiagnostic = { event: 'publicuniverse.request', requestId, category: route.category, phase, elapsedMs: Number.isFinite(elapsed) ? Math.min(86400000, Math.max(0, Math.round(elapsed))) : 0, ...extra };
+            try {
+                const pending = this.options.onDiagnostic?.(event);
+                if (pending) void Promise.resolve(pending).catch(() => undefined);
+            } catch { /* Optional logging must not change request ownership or results. */ }
+        };
+        const timeout = () => { if (!timeoutReported) { timeoutReported = true; emit('timeout', { errorCode: 'timeout' }); } };
+        emit('start');
+        const timer = (this.options.setTimer ?? setTimeout)(() => { expired = true; timeout(); controller.abort(); }, Math.max(0, deadline - this.now()));
         const check = () => {
             if (expired || this.now() >= deadline)
                 throw new PublicUniverseTransportError('timeout');
@@ -280,9 +305,11 @@ export class PublicUniverseTransport {
             check();
             if (!reservation.allowed)
                 throw new PublicUniverseTransportError('quota');
+            emit('quota-reserved');
             this.starts.push({ at: this.now(), category: route.category });
             const response = await (this.options.fetch ?? fetch)(PUBLIC_UNIVERSE_ORIGIN + route.path + (route.query.size ? '?' + route.query : ''), { method: route.method, body: route.body, redirect: 'error', credentials: 'omit', headers: { Accept: 'application/json', ...(route.body ? { 'Content-Type': 'application/json' } : {}) }, signal: controller.signal });
             check();
+            emit('headers', { status: response.status });
             if (response.redirected || (response.url && new URL(response.url).origin !== PUBLIC_UNIVERSE_ORIGIN))
                 throw new PublicUniverseTransportError('http');
             if (response.status === 429) {
@@ -332,6 +359,7 @@ export class PublicUniverseTransport {
                 reader?.releaseLock();
             }
             check();
+            emit('body-read', { responseBytes: bytes });
             let value: unknown;
             try {
                 value = JSON.parse(Buffer.concat(chunks).toString('utf8'));
@@ -339,17 +367,24 @@ export class PublicUniverseTransport {
             catch {
                 throw new PublicUniverseTransportError('invalid-response');
             }
+            emit('parsed');
             return { value, retrievedAt: new Date(this.now()).toISOString(), cacheControl: response.headers.get('Cache-Control') };
         }
         catch (error) {
-            if (expired || this.now() >= deadline)
+            if (expired || this.now() >= deadline) {
+                timeout();
                 throw new PublicUniverseTransportError('timeout');
-            if (error instanceof PublicUniverseTransportError)
+            }
+            if (error instanceof PublicUniverseTransportError) {
+                emit('failure', { errorCode: error.code });
                 throw error;
+            }
+            emit('failure', { errorCode: 'http' });
             throw new PublicUniverseTransportError('http');
         }
         finally {
             (this.options.clearTimer ?? clearTimeout)(timer);
+            emit('settled');
         }
     }
     async close() { this.closed = true; await this.flight?.promise.catch(() => { }); }

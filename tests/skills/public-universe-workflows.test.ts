@@ -33,3 +33,42 @@ test('authored Public Universe conversation cases retain five workflow routes an
     for (const boundary of ['annual-meteor-separation', 'exoplanet-learning', 'unsupported-local-target', 'source-disagreement', 'weather-event-preservation', 'host-capability-preservation'])
         assert.ok(covered.has(boundary), boundary);
 });
+
+// These are authored guidance checks, not live service or native-host acceptance.
+test('catalogue guidance recipes validate against the actual strict tool schemas', async () => {
+    const { discoverObservingTargetsInputSchema, getCatalogueTargetWindowsInputSchema } = await import('../../shared/nightsky/reference');
+    const { calculationPlaceInputSchema } = await import('../../shared/nightsky/discovery');
+    const toolSchema = calculationPlaceInputSchema.safeExtend(discoverObservingTargetsInputSchema.omit({ placeId: true, sourceRevision: true, catalogueRevision: true }).shape);
+    for (const name of readdirSync('plugins/nightsky/skills')) {
+        for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+            const text = readFileSync(path, 'utf8');
+            const match = text.match(/<!-- catalogue-discovery-recipe -->\s*```json\s*([\s\S]*?)```/);
+            assert.ok(match, `${path}: executable catalogue recipe`);
+            const recipe = JSON.parse(match[1]);
+            assert.ok(toolSchema.safeParse(recipe).success, `${path}: valid public tool recipe`);
+            assert.ok([2, 3].includes(recipe.shortlistLimit));
+            const { equipment, preference, shortlistLimit, ...session } = recipe;
+            const targetRecipe = { ...session, targets: [{ referenceId: 'authored-example-only', revision: 'a'.repeat(64) }] };
+            const windowsSchema = calculationPlaceInputSchema.safeExtend(getCatalogueTargetWindowsInputSchema.omit({ placeId: true, sourceRevision: true, catalogueRevision: true }).shape);
+            assert.ok(windowsSchema.safeParse(targetRecipe).success);
+            assert.equal(windowsSchema.safeParse({ ...targetRecipe, window: { ...recipe.window, timeZone: recipe.displayTimeZone } }).success, false);
+            assert.equal(windowsSchema.safeParse({ ...targetRecipe, targets: [] }).success, false);
+            assert.equal(windowsSchema.safeParse({ ...targetRecipe, targets: Array.from({ length: 7 }, (_, i) => ({ referenceId: `authored-${i}`, revision: 'a'.repeat(64) })) }).success, false);
+            for (const shortlistLimit of [0, 7, 10])
+                assert.equal(toolSchema.safeParse({ ...recipe, shortlistLimit }).success, false);
+            assert.equal(toolSchema.safeParse({ ...recipe, window: { ...recipe.window, timeZone: recipe.displayTimeZone } }).success, false);
+        }
+    }
+});
+
+test('all workflows preserve staged useful evidence and exact reference search', () => {
+    const descriptions = readFileSync('server/mcp/publicUniverseTools.ts', 'utf8');
+    assert.ok(descriptions.includes('For complete session planning, optional enrichment follows useful main-planner astronomy/weather evidence.'));
+    assert.ok(descriptions.includes('For a focused catalogue shortlist, call directly once place and session time are known; forecasts are not a prerequisite.'));
+    for (const name of readdirSync('plugins/nightsky/skills'))
+        for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+            const text = readFileSync(path, 'utf8');
+            for (const token of ['one exact object name or catalogue ID per query', 'lexical lookup', 'core astronomy and weather', 'tonight-only', 'native-client timeout', 'one or two relevant questions', 'window contains only startUtc and endUtc'])
+                assert.ok(text.includes(token), `${path}: ${token}`);
+        }
+});

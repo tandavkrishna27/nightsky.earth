@@ -40,7 +40,7 @@ async function listen(server: Server) {
 async function close(server: Server) { server.closeAllConnections(); await bounded(new Promise<void>(resolve=>server.close(()=>resolve())),"listener cleanup"); }
 async function topology(trust: string | undefined, run:(port:number,backend:number,logs:string[])=>Promise<void>, dependencies: import("../../server/plugin").PluginAppDependencies = {}, timeoutMs?:number) {
  const logs:string[]=[];
- const app=createNightSkyPluginApp({toolMode:"resolver-only",maxRequestsPerWindow:1,log:line=>logs.push(line),...dependencies});
+ const app=createNightSkyPluginApp({toolMode:"resolver-only",maxRequestsPerWindow:1,maxProtocolRequestsPerWindow:1,log:line=>logs.push(line),...dependencies});
  configureMcpProxyTrust(app,trust);
  const backend=createServer(app); let proxy: Server | undefined;
  try {
@@ -115,7 +115,7 @@ test("proxy timeout retains admission until abort-ignoring index read settles",{
   for(let attempt=0;attempt<20;attempt++){await new Promise(resolve=>setTimeout(resolve,10));const response=await call(port,"198.51.100.3");await response.text();if(response.status===200){recovered=true;break;} assert.equal(response.status,503);}
   assert.equal(recovered,true);
   } finally {release(); await pending.catch(()=>undefined);}
- },{maxConcurrentRequests:1,maxRequestsPerWindow:100,placeIndexLoader:async()=>{entered();await gate;return undefined;}},50); } finally {release();}
+ },{maxConcurrentRequests:1,maxRequestsPerWindow:100,maxProtocolRequestsPerWindow:100,placeIndexLoader:async()=>{entered();await gate;return undefined;}},50); } finally {release();}
 });
 
 
@@ -136,5 +136,5 @@ test("client cancellation retains arbitrary abort-ignoring climate callback work
    for(let attempt=0;attempt<20;attempt++){await new Promise(resolve=>setTimeout(resolve,10));const response=await call(port,"198.51.100.3");await response.text();if(response.status===200){recovered=true;break;} assert.equal(response.status,503);}
    assert.equal(recovered,true);
   } finally {release();controller.abort();}
- },{toolMode:"full",placeIndex:index,maxConcurrentRequests:1,maxRequestsPerWindow:100,climateProvider:{getClimatology:async()=> {entered();await gate;throw Error("fixture failure");}}});
+ },{toolMode:"full",placeIndex:index,maxConcurrentRequests:1,maxRequestsPerWindow:100,maxProtocolRequestsPerWindow:100,climateProvider:{getClimatology:async()=> {entered();await gate;throw Error("fixture failure");}}});
 });

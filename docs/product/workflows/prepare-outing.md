@@ -18,7 +18,7 @@ A missing travel limit must not stall discovery or cause repeated distance quest
 
 ## Host-aware complete outing
 
-Activity, experience, facilities, mobility, equipment and willingness to scout are independent preferences; never infer one from another. Give an initial useful answer, then ask at most two or three relevant questions. Retain answers and corrections rather than repeating questions. Ask about facilities versus independent scouting and car access versus walking when it changes the decision; do not label the person adventurous. A casual user can want the Milky Way and an experienced user can prefer facilities.
+Activity, experience, facilities, mobility, equipment and willingness to scout are independent preferences; never infer one from another. Give an initial useful answer, then ask at most one or two relevant questions. Retain answers and corrections rather than repeating questions. Ask about facilities versus independent scouting and car access versus walking when it changes the decision; do not label the person adventurous. A casual user can want the Milky Way and an experienced user can prefer facilities.
 
 Offer a supported mix of practical destinations and promising scouting points until preferences narrow it. An evaluated coordinate can be supplied with access unknown: label it a scouting point, not a confirmed stopping place. Investigate roads, terrain, walking approach and restrictions with exposed maps/search before delegating that research to the user; map imagery and elevation alone do not prove drivability, a safe trail or permission. Known restrictions remain visible. Keep the same candidate through discovery, coordinates, darkness and planning; city conditions or representative region points cannot silently replace exact-site evidence.
 
@@ -199,3 +199,32 @@ Use `search_reference_objects` for one relevant domain and let the user select a
 Meteor reference parameters are background context, not annual peak forecasts or radiant models. Close approaches do not establish brightness or local visibility. Treat exoplanet and host facts as learning context, never observing ephemerides or transit predictions. Keep annual peak and forecast evidence on existing event routes. If sources disagree, explain their source and model differences; do not average results or silently replace the default engine.
 
 Give a compact useful answer with source links, attribution, licence links and modification statements supplied by the tool. Keep full provenance in structured results, preserve partial/unavailable reasons, and never claim an optional call succeeded without evidence. Static workflow and offline fixture checks do not establish live service or native-host acceptance.
+
+
+## Staged calls and valid catalogue requests
+
+Resolve the named place once and retain its identity, revision and timezone snapshot. For a session request, obtain useful core astronomy and weather with `plan_observing_session` first; reuse its returned evidence. For a focused question use the relevant focused tool. Optional catalogue discovery enriches that answer. Preserve successful core results when optional evidence is absent, partial or times out. A native-client timeout without a returned result does not establish an upstream provider failure; never claim all providers failed from that timeout. Do not automatically retry network calls after failure or invent fallback data.
+
+Choose the next small stage from the user's actual need. Avoid speculative batches of redundant searches or every available tool. Independent relevant calls may run together when the host permits; parallel execution itself is supported. Historical cloud context is not mandatory for a tonight-only request: retrieve it for seasonal, historical or comparison decisions that need it. Keep legitimate host-native search, maps and browser use available under their existing permissions. Give the minimal useful supported answer, then ask one or two relevant questions; do not ask users to troubleshoot code.
+
+Use `search_reference_objects` with one exact object name or catalogue ID per query, in one relevant domain. It is a lexical lookup, not semantic free-text search or an all-object OR search. Do not query phrases such as “beginner naked eye stars nebula cluster galaxy” or combine “Jupiter Saturn Venus Mars” into one query. For “what can I see?”, use `discover_observing_targets`; named supported planets can use the main planner. Select ambiguous references before requesting details.
+
+Catalogue discovery requires `shortlistLimit` from 1 through 6; start with 2 or 3 relevant targets. Send a valid value explicitly, never assume the server silently clamps 10. Use the retained place selection and actual requested local night, with `displayTimeZone` at the top level. Its strict window contains only startUtc and endUtc in UTC. The common astronomy window may accept a timezone; that shape must not be copied into optional catalogue requests. The following authored schema example is illustrative, not a resolved place or live result: replace its place ID with the retained actual selection and revision fields, and its date, timezone and UTC instants with the requested session.
+
+<!-- catalogue-discovery-recipe -->
+```json
+{
+  "placeId": "place:v1:example",
+  "displayTimeZone": "Asia/Kolkata",
+  "localNightDate": "2026-10-18",
+  "window": {
+    "startUtc": "2026-10-18T13:30:00Z",
+    "endUtc": "2026-10-18T17:30:00Z"
+  },
+  "equipment": "naked_eye",
+  "preference": "balanced",
+  "shortlistLimit": 3
+}
+```
+
+For `get_catalogue_target_windows`, retain the same top-level place/time fields and strict UTC window, replace discovery preference/equipment/shortlist fields with `targets` containing one to six exact returned referenceId/revision pairs. Never fabricate those pairs or pass catalogue references to the main local target engine. These authored checks do not establish native acceptance or live provider success.

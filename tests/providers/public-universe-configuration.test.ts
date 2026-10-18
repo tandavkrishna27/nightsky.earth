@@ -8,6 +8,8 @@ import { mkdtemp, readFile, rm, access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {publicUniverseAllocationPlan} from '../../scripts/initialize-public-universe-quota';
+import { createServer } from 'node:http';
+import { once } from 'node:events';
 async function environment<T>(values: Record<string, string | undefined>, work: () => Promise<T>) { const saved = { ...process.env }; try {
     for (const key of Object.keys(process.env))
         if (key.startsWith('NIGHTSKY_'))
@@ -18,6 +20,32 @@ async function environment<T>(values: Record<string, string | undefined>, work: 
 finally {
     process.env = saved;
 } }
+
+for(const rejectingSourceLogger of [false,true])test(`configured source timing events correlate without leaking caller values (rejecting sink: ${rejectingSourceLogger})`,async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'nightsky-native-diagnostic-')),path=join(dir,'pub.json');
+ try{
+  const q=await createPersistentQuota({path,now:Date.now,policies:[PUBLIC_UNIVERSE_QUOTA_POLICY]});
+  await q.initializeVerifiedBudget({verifiedUnusedBudget:true,evidence:'Synthetic temporary offline diagnostic budget'});await q.close();
+  await environment({NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_SKY_PROVIDERS:'publicuniverse',NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse',NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH:path},async()=>{
+   const logs:string[]=[];let calls=0;
+   const app=await createConfiguredNightSkyPluginApp({log:line=>{logs.push(line);if(rejectingSourceLogger&&line.startsWith('{"event":"publicuniverse.request"'))return Promise.reject(new Error('private-async-config-sink'));},fetcher:async()=>{calls++;return new Response('{"query":"private-query-value","results":[]}');}});
+   const server=createServer(app);server.listen(0,'127.0.0.1');await once(server,'listening');const address=server.address();assert.ok(address&&typeof address!=='string');
+   try{
+    const response=await fetch(`http://127.0.0.1:${address.port}/mcp?private-query-param=private-value`,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream',authorization:'Bearer private-header-value','x-request-id':'private-header-id','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:'private-client-id',method:'tools/call',params:{name:'search_reference_objects',arguments:{domain:'solar-system',query:'private-query-value',limit:1},_meta:{'openai/subject':'private-subject','openai/userLocation':{latitude:17.123456,longitude:78.654321}}}})});
+    const text=await response.text();assert.equal(response.status,200);const resultLine=text.split('\n').find(line=>line.startsWith('data: '));assert.ok(resultLine);assert.equal(JSON.parse(resultLine.slice(6)).result.structuredContent.status,'available');await new Promise<void>(resolve=>setImmediate(resolve));
+    const id=response.headers.get('x-nightsky-request-id');assert.match(id!,/^[a-f0-9-]{36}$/);
+    const events=logs.filter(line=>line.startsWith('{')).map(line=>JSON.parse(line));
+    const phases=events.filter(e=>e.event==='publicuniverse.request');
+    assert.deepEqual(phases.map(e=>e.phase),['start','quota-reserved','headers','body-read','parsed','settled']);
+    assert.ok(phases.every(e=>e.mcpRequestId===id));
+    assert.equal(events.filter(e=>e.event==='mcp.request'&&e.kind==='ingress'&&e.requestId===id).length,1);
+    assert.equal(events.filter(e=>e.event==='mcp.request'&&e.kind==='completion'&&e.requestId===id).length,1);
+    assert.equal(calls,1);
+    for(const marker of ['private-query-param','private-value','private-header-value','private-header-id','private-client-id','private-query-value','private-subject','17.123456','78.654321'])assert.equal(logs.join('\n').includes(marker),false,marker);
+   }finally{server.closeAllConnections();await new Promise<void>(done=>server.close(()=>done()));await closeConfiguredNightSkyPluginApp(app);}
+  });
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
 test('Public Universe selection is separate from legacy policies and defaults off', async () => {
     assert.deepEqual(parseSkyConfiguration({}).selected, []);
     assert.equal(SKY_QUOTA_POLICIES.some(p => p.providerId === 'publicuniverse'), false);
