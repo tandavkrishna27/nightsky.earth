@@ -37,6 +37,9 @@ test("meteor peak uses the NASA report instant and converts across timezones", a
   await expect(page.locator(".event-detail-timing")).toContainText("03:00");
   await expect(
     page.getByRole("link", { name: /NASA MEO — 2026 meteor shower activity forecast/ }),
-  ).toHaveAttribute("href", /ntrs\.nasa\.gov\/citations\/20250009524/);
+  ).toHaveAttribute(
+    "href",
+    /ntrs\.nasa\.gov\/(?:api\/)?citations\/20250009524/,
+  );
   await expect(page.getByRole("main")).toContainText("3200 Phaethon");
 });

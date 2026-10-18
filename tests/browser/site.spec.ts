@@ -369,8 +369,9 @@ test("route metadata is singular and archive copy is clean UTF-8", async ({
   );
   const websiteSchema = page.locator('script[type="application/ld+json"]');
   await expect(websiteSchema).toHaveCount(1);
-  await expect(websiteSchema).toContainText('"@type":"WebSite"');
-  await expect(websiteSchema).toContainText('"name":"NightSky.earth"');
+  const websiteSchemaText = await websiteSchema.textContent();
+  expect(websiteSchemaText).toContain('"@type":"WebSite"');
+  expect(websiteSchemaText).toContain('"name":"NightSky.earth"');
   await page.goto("/resources");
   await expect(page.locator('meta[name="description"]')).toHaveCount(1);
   await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
