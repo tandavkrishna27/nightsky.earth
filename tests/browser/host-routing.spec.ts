@@ -52,6 +52,11 @@ test("production-shaped routes, metadata and independent sitemap", async ({
     "href",
     "https://nightsky.earth/resources",
   );
+  await page.goto("/resources/");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://nightsky.earth/resources",
+  );
   await page.goto("/meteor-shower/perseids");
   await expect(
     page.getByText("This archived record is awaiting factual review.", {
