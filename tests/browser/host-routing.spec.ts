@@ -51,3 +51,24 @@ test("production-shaped routes, metadata and independent sitemap", async ({
     }),
   ).toBeVisible();
 });
+
+test("production route modules load separately and render on direct URLs", async ({
+  page,
+}) => {
+  const scripts = new Set<string>();
+  page.on("request", (request) => {
+    if (request.resourceType() === "script" && request.url().includes("/assets/"))
+      scripts.add(request.url());
+  });
+
+  await page.goto("/sky-events?month=2026-10&category=all&view=month&tz=UTC");
+  await expect(
+    page.getByRole("heading", { name: /Something worth looking up for/ }),
+  ).toBeVisible();
+  const initialScriptCount = scripts.size;
+  expect(initialScriptCount).toBeGreaterThan(1);
+
+  await page.goto("/get-started");
+  await expect(page.getByRole("heading", { name: "Get NightSky." })).toBeVisible();
+  expect(scripts.size).toBeGreaterThan(initialScriptCount);
+});

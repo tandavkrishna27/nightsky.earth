@@ -1,35 +1,68 @@
 export function isSupportedZone(zone: string): boolean {
+  if (!zone) return false;
+  const cached = supportedZoneCache.get(zone);
+  if (cached !== undefined) return cached;
+  let supported: boolean;
   try {
     new Intl.DateTimeFormat("en", { timeZone: zone }).format();
-    return !!zone;
+    supported = true;
   } catch {
-    return false;
+    supported = false;
   }
+  cacheValue(supportedZoneCache, zone, supported);
+  return supported;
+}
+const supportedZoneCache = new Map<string, boolean>();
+const dateKeyFormatters = new Map<string, Intl.DateTimeFormat>();
+const instantFormatters = new Map<string, Intl.DateTimeFormat>();
+function cacheValue<T>(cache: Map<string, T>, key: string, value: T): T {
+  if (cache.size >= 32 && !cache.has(key)) {
+    const oldest = cache.keys().next().value;
+    if (oldest) cache.delete(oldest);
+  }
+  cache.set(key, value);
+  return value;
 }
 export function resolveZone(...zones: (string | null | undefined)[]): string {
   return zones.find((z) => z && isSupportedZone(z)) || "UTC";
 }
 export function dateKeyAt(utc: string, zone: string): string {
-  const parts = new Intl.DateTimeFormat("en-GB-u-ca-gregory-nu-latn", {
-    timeZone: resolveZone(zone),
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(new Date(utc));
+  const resolvedZone = resolveZone(zone);
+  const formatter =
+    dateKeyFormatters.get(resolvedZone) ||
+    cacheValue(
+      dateKeyFormatters,
+      resolvedZone,
+      new Intl.DateTimeFormat("en-GB-u-ca-gregory-nu-latn", {
+        timeZone: resolvedZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }),
+    );
+  const parts = formatter.formatToParts(new Date(utc));
   const get = (type: string) => parts.find((p) => p.type === type)!.value;
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
 export function formatInstant(utc: string, zone: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: resolveZone(zone),
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-    timeZoneName: "shortOffset",
-  }).format(new Date(utc));
+  const resolvedZone = resolveZone(zone);
+  const formatter =
+    instantFormatters.get(resolvedZone) ||
+    cacheValue(
+      instantFormatters,
+      resolvedZone,
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: resolvedZone,
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZoneName: "shortOffset",
+      }),
+    );
+  return formatter.format(new Date(utc));
 }
 export function addDays(day: string, n: number): string {
   const d = new Date(day + "T12:00:00Z");

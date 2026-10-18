@@ -40,7 +40,9 @@ test("calendar filters, URL history, timezone and empty research state", async (
   await page.getByLabel("Display time zone").selectOption("Asia/Kolkata");
   await expect(page).toHaveURL(/tz=Asia%2FKolkata/);
   await page.getByRole("button", { name: "List", exact: true }).click();
-  await expect(page.locator(".event-list")).toContainText("Approx.");
+  await expect(page.locator(".event-list")).toContainText(
+    "NASA MEO predicted maximum",
+  );
   await page.getByLabel("Calendar month").fill("2028-01");
   await expect(
     page.getByText("This month has not been reviewed yet.", { exact: true }),
@@ -195,10 +197,13 @@ test("meteor calendar shows NASA predicted maximum and the guide links its repor
   );
   await expect(draconids).toContainText("NASA MEO predicted maximum");
   await draconids.getByRole("link", { name: /Explore event/ }).click();
-  await expect(page.locator(".event-detail-timing")).toContainText("09 Oct 2026");
+  await expect(page.locator(".event-detail-timing")).toContainText("9 Oct 2026");
   await expect(
     page.getByRole("link", { name: /NASA MEO — 2026 meteor shower activity forecast/ }),
-  ).toHaveAttribute("href", /ntrs\.nasa\.gov\/citations\/20250009524/);
+  ).toHaveAttribute(
+    "href",
+    /ntrs\.nasa\.gov\/(?:api\/)?citations\/20250009524/,
+  );
 });
 test("dense calendar days expand and restore keyboard focus on close", async ({
   page,

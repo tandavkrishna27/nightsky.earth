@@ -440,6 +440,12 @@ button:disabled {
 main {
   min-height: 60vh;
 }
+.route-loading {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  color: var(--gold);
+}
 main:focus {
   outline: none;
 }

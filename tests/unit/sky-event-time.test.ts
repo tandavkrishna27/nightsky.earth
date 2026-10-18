@@ -129,6 +129,40 @@ test("upcoming moments rank ahead of peak-passed activity, drafts stay out", () 
     0,
   );
 });
+test("repeated event projections reuse cached timezone formatters", () => {
+  const original = Intl.DateTimeFormat;
+  let constructions = 0;
+  Object.defineProperty(Intl, "DateTimeFormat", {
+    configurable: true,
+    value: new Proxy(original, {
+      construct(target, args, newTarget) {
+        constructions++;
+        return Reflect.construct(target, args, newTarget);
+      },
+    }),
+  });
+  try {
+    const now = new Date("2026-10-01T00:00:00Z");
+    nextSkyEvents(
+      [
+        event(instant("2026-11-10T20:00:00Z"), { id: "cached-a" }),
+        event(instant("2026-11-11T20:00:00Z"), { id: "cached-b" }),
+      ],
+      "Antarctica/Troll",
+      now,
+      2,
+    );
+    assert.ok(
+      constructions <= 3,
+      `expected at most three formatter constructions, got ${constructions}`,
+    );
+  } finally {
+    Object.defineProperty(Intl, "DateTimeFormat", {
+      configurable: true,
+      value: original,
+    });
+  }
+});
 test("validation rejects malformed source/timing and duplicate IDs", () => {
   const good = event(instant("2026-11-10T20:00:00Z"));
   assert.equal(validateSkyEvents([good]).length, 1);
