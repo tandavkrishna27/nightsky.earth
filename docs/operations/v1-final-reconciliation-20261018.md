@@ -61,3 +61,10 @@ Current [API profile](v1-api-source-profile-20261018.md), [event/history profile
 ## Geography/resource/follow-up acceptance checkpoint
 
 Local1.0.31 adds the [current geography matrix](v1-geographic-acceptance-20261018.md), [bounded core resource receipt](v1-api-resource-measurement-20261018.md) and [follow-up acceptance](v1-followup-acceptance-20261018.md). It fixes two observed deterministic mismatches: ten references for the existing5include/5exclude contract, and API-point wording that incorrectly said named city. Final suite1,811pass/0fail/2skip; types/packages/compiled checks and installed bytes pass. The city multi-turn refresh/expiry case passes its scoped checks; final unknown-site case respects timezone choice but remains partial due duplicate lookup and unsupported suitability opening. Real source/geometry/profile, scientific and release gates remain. No blanket ticket closure or deployment is inferred from this checkpoint.
+
+
+## 1.0.32 source/conversation/audit update
+
+The [independent audit](v1-local-audit-20261018.md) identified a diagnostic-disclosure mismatch, corrected in the shared draft policy and operational logging documents with a failing-before/passing-after regression. Generated request UUIDs and bounded labels are now disclosed without describing them as user/session identifiers. Hosted output retention is still unverified.
+
+The [source decision record](v1-source-decisions-20261018.md) reconciles explicit API mode, optional admission, the existing history wiring and obsolete handoff steps. No release configuration or scientific admission was applied. The [follow-up replay](v1-followup-acceptance-20261018.md#installed-1032-unknown-site-correction-replay) fixes the unsupported suitability opener in a scoped two-turn synthetic native case while retaining duplicate resolution as an efficiency finding. Original ticket categories and actual release-dependent gates are unchanged. No owner key/ledger mutation, provider request, historical download, scraping or deployment occurred.

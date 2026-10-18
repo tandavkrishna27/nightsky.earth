@@ -1,3 +1,7 @@
+## V1 local revision 1.0.32 - retained selections and provisional site verdicts
+
+Guidance reuses a successful selected location through details and display-timezone clarification, while retaining re-resolution for changed, explicitly refreshed or expired identities. Opening verdicts distinguish calculated observing opportunities from unverified site suitability. Corrects the privacy draft to describe generated per-request diagnostics and bounded labels. API contracts, source admission, quotas and default providers remain unchanged. Offline checks and bounded synthetic native replay are separate from live-source, all-client or public release acceptance. No deployment or publication.
+
 # 1.0.31
 
 Allow up to ten selected region references for the existing five-included/five-excluded discovery contract, without expanding geometry or quota limits. Add offline geographic/follow-up regressions and a bounded serial/concurrent compiled API measurement in CI. Label API-selected calculation points separately from legacy city records. No source activation or new provider calls.

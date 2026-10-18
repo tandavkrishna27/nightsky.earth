@@ -82,3 +82,10 @@ test('privacy describes optional configured API sharing without activating provi
  for(const provider of ['7Timer','DarkSkySites','Dark Sky Planner','AstronomyAPI','Public Universe','NASA DONKI','JPL'])assert.ok(text.includes(provider),provider);
  for(const phrase of ['only when selected and admitted','equipment filters','rounded to two decimals','not observing coordinates','does not enable any source'])assert.ok(text.includes(phrase),phrase);
 });
+
+test('privacy discloses generated per-request diagnostic correlation without user tracking claims',()=>{
+ const text=JSON.stringify(POLICY_PAGES.privacy);
+ for(const phrase of ['generated per-request correlation ID','allowlisted protocol method and tool name','ingress/completion','not a user or session identifier','host retention'])assert.ok(text.includes(phrase),phrase);
+ assert.match(text,/exclude request or response bodies/);
+ assert.match(text,/raw subjects/);
+});

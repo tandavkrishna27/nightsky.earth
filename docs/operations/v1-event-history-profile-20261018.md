@@ -135,3 +135,7 @@ Get-FileHash .data/era5/pilot-2025/full-year-sample.json -Algorithm SHA256
 ```
 
 No new script, tests or runtime changes were necessary for this documentation profile. Retained historical test/live/native results are cited as prior evidence, not rerun or expanded acceptance.
+
+## Reconciliation with historical handoff text
+
+The [source and coverage decision record](v1-source-decisions-20261018.md) enumerates the remaining owner decisions without adopting a smaller meteor scope or a different historical claim. `API-HISTORY-COMPLETION.md` retains an original lane body beneath its later coordinator update: the body’s unwired-provider/test-import TODOs and proposed annual 1992 probe are historical. Current `server/plugin.ts` already wires the optional provider and `source-native-acceptance-results-20261017.md` records the completed annual shape diagnostic. That diagnostic consumed its allowance and did not admit the hosted method or validate a full baseline. The next historical gate is the explicit scientific/source-policy decision and separately authorized full-point validation, not repeating an obsolete integration or annual-probe step.

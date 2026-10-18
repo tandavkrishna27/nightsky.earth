@@ -57,3 +57,7 @@ Evidence is from the repository's dated reviews and bounded sessions, particular
 ## Verification
 
 `node --import tsx --test tests/operations/v1-source-profile.test.ts` checks exact roster, existing evidence paths, exported quota policy equality, no applied-runtime claim, and empty/key-only configuration behavior. It uses synthetic environment objects, not `process.env`, private files or providers. The profile test first failed while the profile was absent, then passed after the reviewed roster was created. It is registered in the full offline suite; it does not prove active account access or source accuracy.
+
+## Current selection and coverage decision reconciliation
+
+The [source and coverage decision record](v1-source-decisions-20261018.md) separates proposed roles from actual runtime selection. API discovery is explicit: `pluginDiscoveryMode` defaults to `legacy`, despite this profile proposing API mode. Optional keys alone select no services. An absent weather collection preserves the existing MET fallback, and NOAA remains an existing default MCP path; neither has an identical admitted-list gate to optional providers. No deployed environment was inspected here. Exact release selection/admission remains unrecorded by this profile.

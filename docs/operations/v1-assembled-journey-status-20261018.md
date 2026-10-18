@@ -41,3 +41,11 @@ The [follow-up matrix and native1.0.31 conversation](v1-followup-acceptance-2026
 
 
 The final additional unknown-site timezone case is **partial overall**: the consent/zone boundary and corrected API-point tool label pass, but a repeated lookup and unsupported suitability opener remain explicit model-quality findings. See the follow-up evidence; these are not silently merged into earlier scoped native passes.
+
+
+## 1.0.32 targeted site-verdict correction
+
+The [follow-up record](v1-followup-acceptance-20261018.md#installed-1032-unknown-site-correction-replay) records a fresh two-turn installed CLI replay with synthetic location/weather and actual local astronomy. The provisional opening and explicit display-zone boundary pass; exact field identity/revision is preserved. One duplicate initial resolver call remains, so response efficiency is partial. Six MCP calls, one synthetic geocode, two synthetic weather dispatches, zero external-provider attempts and both turns exit0 are scoped evidence, not live/full-client or production acceptance. See [local audit](v1-local-audit-20261018.md) and [source decisions](v1-source-decisions-20261018.md) for unchanged remaining gates.
+
+
+The final priority-order1.0.32 artifact has a separate replay receipt: nine MCP calls, one synthetic geocode, two synthetic weather dispatches and zero external-provider attempts. Both turns exit0. Its provisional opener and display-zone boundaries pass, but initial resolution repeats and the final answer omits the aggregate's earlier18/25/40% cloud rows after a later focused failure. Final response acceptance is therefore partial on both efficiency and evidence preservation. The six-call pre-layout sample above is retained as earlier evidence; it is not substituted for the final result. See the final-artifact subsection of the follow-up record.

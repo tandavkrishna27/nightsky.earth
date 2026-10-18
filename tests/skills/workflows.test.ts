@@ -72,3 +72,31 @@ test("usesPartialResultWhenSourceUnavailable", () => {
   assert.match(guidance, /unavailable/i);
   assert.match(guidance, /never.*invent|do not invent|don't invent/i);
 });
+
+test("all skills retain successful site resolution before details and timezone clarification", () => {
+  for (const skill of skillNames) {
+    const content = read(`plugins/nightsky/skills/${skill}/SKILL.md`);
+    assert.match(content, /After a successful city or site resolution, retain the returned matches and their exact placeId and sourceRevision or catalogueRevision/);
+    assert.match(content, /An unknown site timezone is a details\/display-choice gap, not a reason to repeat the same successful resolve_place arguments/);
+    assert.match(content, /An ambiguous result needs selection or a more specific query/);
+    assert.match(content, /When observing-site details are needed, select the matching returned identity/);
+    assert.match(content, /A resolved named-city plan needs no candidate-details prerequisite/);
+  }
+});
+
+test("all skills constrain opening suitability claims to actual site evidence", () => {
+  for (const skill of skillNames) {
+    const content = read(`plugins/nightsky/skills/${skill}/SKILL.md`);
+    assert.match(content, /Opening verdict: state the supported astronomy opportunity and the site's verification status together/);
+    assert.match(content, /If access, safety, lighting or local horizon is unverified, describe a provisional observing opportunity/);
+    assert.match(content, /Later caveats do not repair an unsupported opening suitability claim/);
+  }
+});
+
+test("canonical outdoor contract carries retained selection and provisional opening rules", () => {
+  const content = read("docs/product/outdoor-conversation-contract.md");
+  assert.match(content, /After a successful city or site resolution, retain the returned matches/);
+  assert.match(content, /reuse that selection across a display-timezone clarification/);
+  assert.match(content, /Opening verdict: state the supported astronomy opportunity and the site's verification status together/);
+  assert.match(content, /Calculated darkness, target geometry and a chosen display timezone do not verify site suitability/);
+});
