@@ -1,3 +1,7 @@
+# 1.0.30
+
+Reuse useful completed partial planning results, resolved city identities and matching geometry. Use focused tools only for distinct missing evidence; preserve legitimate refresh and expired-selection handling. Reconcile API activation, event/history coverage and assembled journey evidence without activating providers.
+
 # 1.0.29
 
 Distinguish named-city planning from candidate-detail prerequisites, validate genuine detail-request recipes, and label darkness-window cutoffs. Draft privacy now describes optional API request sharing conditionally. Final original-ticket/readiness reconciliation records local versus release-dependent work without claiming launch completion.

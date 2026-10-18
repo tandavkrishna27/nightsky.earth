@@ -20,7 +20,7 @@ Evidence names below refer to docs/operations unless prefixed server/, shared/ o
 
 | ID | Original deliverable | Current category | Exact remaining boundary | Evidence |
 | --- | --- | --- | --- | --- |
-| 0 | Source, scale and hosting gates | Local acceptance remains | Freeze the enabled API/source profile, rights and scientific claims; actual host gate remains later. Bulk geography is superseded. | api-mode-local-setup.md; API-HISTORY-COMPLETION.md |
+| 0 | Source, scale and hosting gates | Local acceptance remains | Freeze the enabled API/source profile, rights and scientific claims; actual host gate remains later. Bulk geography is superseded. | v1-api-source-profile-20261018.md; v1-event-history-profile-20261018.md; API-HISTORY-COMPLETION.md |
 | 1 | SDK/runtime/HTTP compatibility | Original local done | Pinned runtime, transport and offline compatibility retained. | mcp-sdk-compatibility.md; ci-verification.md |
 | 2 | Structured contracts/offline harness | Original local done | Existing schemas and offline harness retained; changes continue to be regression-tested. | three-data-lanes-wave.md; local-ticket-closure.md |
 | 3 | Read-only MCP registry/endpoint | Original local done | Local endpoint, API branches and bounded registry implemented; public connection is3B. | local-ticket-closure.md; server/mcp/registerTools.ts |
@@ -29,7 +29,7 @@ Evidence names below refer to docs/operations unless prefixed server/, shared/ o
 | 4 | Named-place/timezone resolution | Original local done | Named-place timezone boundary accepted; source snapshots do not prove arbitrary-point site timezone. | timezone-acceptance-wave.md |
 | 4B | Official draft location scan | Release dependent | Resolver preparation exists; real branded remote draft/challenge/scan acceptance does not. | local-ticket-closure.md |
 | 5 | Deterministic astronomy/targets | Original local done | Calculated local geometry validated; timing semantic refinements do not reopen calculation closure. | astronomy-validation-wave.md; activity-viewing-window-correction-20261018.md |
-| 6 | Supported events/targets | Local acceptance remains | Peak/radiant evidence works within bounded domains; maintained event selection, activity/season gaps and review ownership remain explicit in code. | meteor-coverage-matrix.md; server/events/meteorCoverage.ts |
+| 6 | Supported events/targets | Local acceptance remains | Peak/radiant evidence works within bounded domains; maintained event selection, activity/season gaps and review ownership remain explicit in code. | v1-event-history-profile-20261018.md; server/events/meteorCoverage.ts |
 | 7A | Short-range weather | Original local done | MET baseline and targeted multi-source follow-up evidence retained; activation/entitlement separate. | provider-controls-wave.md; native-forecast-followup-fix-20261018.md |
 | 7B | Short-horizon aurora | Original local done | Bounded NOAA adapter and local checks retained; no long-range visibility guarantee. | events-weather-coverage-wave.md |
 | 8 | Candidate-place discovery | Local acceptance remains | API/search path and owner scenario pass; close remaining agreed scope/quality/geometry/resource acceptance without an owned global catalogue. | native-discovery-correction-20261018.md; activity-viewing-window-correction-20261018.md; tests/places/api-discovery.test.ts |
@@ -40,7 +40,7 @@ Evidence names below refer to docs/operations unless prefixed server/, shared/ o
 | 11B | Preparation/specialist apps | Original local done | Adaptive preparation implemented; changing app/store facts need release freshness checks. | local-completion-checklist.md |
 | 11C | Five packaged workflows | Original local done | Skills/references installed and verified; native model behavior is separately assessed. | local-package-readiness.md |
 | 12A | Public plugin packaging/draft | Release dependent | Local Codex/Claude packages verified; exact real public draft, URLs, identity and official checks remain. | local-plugin-package.md |
-| 12B | Native model/client acceptance | Local acceptance remains | Scoped owner/CLI passes exist. Two observed followups fixed this wave; complete applicable journey evidence still needs reconciliation. Claude explicitly deferred; Gemini conditional. | native-timing-selftest-20261018.md; complete-model-journey-validation.md |
+| 12B | Native model/client acceptance | Local acceptance remains | Scoped owner/CLI passes exist. Two observed followups fixed this wave; complete applicable journey evidence still needs reconciliation. Claude explicitly deferred; Gemini conditional. | v1-assembled-journey-status-20261018.md; native-timing-selftest-20261018.md; complete-model-journey-validation.md |
 | 13 | Privacy/terms/support | Release dependent | Draft routes and optional-source disclosure prepared; final legal identity, support/host retention, review and hosted URLs remain. | privacy-and-telemetry.md; shared/nightsky/policies.ts |
 | 14 | Hosting/operations | Release dependent | API/no-catalogue runtime, probes and rollback preparation exist; actual host/TLS/proxy/log/capacity/rollback evidence remains. | v1-host-policy-handoff.md |
 | 15 | Assembled acceptance/final audit | Local acceptance remains | Aggregate tests and scoped native passes are evidence, not all-client/full-release acceptance. Final source/security/requirements and exact release-artifact review remains. | native-timing-selftest-20261018.md; v1-completion-tracker.md |
@@ -50,8 +50,8 @@ Evidence names below refer to docs/operations unless prefixed server/, shared/ o
 
 ## One ordered remaining-work list
 
-1. **Finish the two observed conversation followups (12B/15):** named-city plans bypass the candidate-details prerequisite; genuine site details use the retained identity/revision appropriate to runtime mode (named-query details are catalogue/legacy only). Label a requested darkness cutoff instead of claiming dusk/dawn. This wave implements/tests them; native verification is recorded separately.
-2. **Freeze the actual source/coverage profile (0/6/9):** list selected/admitted providers, free endpoints, rights/credits, event years/models/season limitations and history availability. A disabled optional capability is not a release requirement, but a promised active capability needs evidence or an explicit owner scope decision. Do not silently drop historical context or event requirements. Full seasons and a complete numerical history baseline cannot be claimed from samples.
+1. **Observed route/cutoff fixes verified (12B/15):** 1.0.29 controlled native replay exercised the city bypass and requested darkness cutoffs. Current 1.0.30 guidance adds useful-result reuse for repeated successful aggregate/resolver calls; its specific replay is recorded in the assembled journey status. Broader acceptance remains in step 4.
+2. **Source/coverage profiles documented; close their remaining decisions (0/6/9):** the API JSON/Markdown and event/history profile now list implemented endpoints, operator ceilings, retained source rights and coverage, proposed core versus optional roles and explicit gaps. They do not apply production admission. Complete exact source-use/account confirmation, maintained event selection/review ownership and historical scientific-claim/admission decisions. A disabled optional capability is not a release requirement, but a promised active capability needs evidence or an explicit owner scope decision. Do not silently drop historical context or event requirements. Full seasons and a complete numerical history baseline cannot be claimed from samples.
 3. **Close API discovery and resource acceptance (0/8/14 dependencies):** reconcile supported/unsupported region combinations, retained representative live evidence, freshness and quota behavior. Measure the assembled enabled configuration locally against storage/RSS/latency/concurrency limits. Do not require a test of every place or acquire a planet.
 4. **Close the applicable assembled journey matrix and final local audit (12B/15):** combine current native passes with remaining failure cases using the exact installed package/configuration. Respect deferred Claude testing. Review security/privacy/source claims and decide any material findings before a release freeze; deterministic fixtures are not a complete real-client matrix.
 5. **Then prepare the actual release environment (3B/3C/4B/12A/13/14):** owner host choices, verified legal publisher/account, public endpoint, policy/support URLs, TLS/proxy/streaming/log/retention/capacity and rollback. Run official host checks against that environment. No deployment is authorized by this audit.
@@ -61,6 +61,8 @@ Evidence names below refer to docs/operations unless prefixed server/, shared/ o
 
 - [Current completion tracker](v1-completion-tracker.md)
 - [Final audit and release-readiness record](v1-final-reconciliation-20261018.md)
+- [Current API profile](v1-api-source-profile-20261018.md) / [event and history profile](v1-event-history-profile-20261018.md)
+- [Assembled journey status](v1-assembled-journey-status-20261018.md)
 - [Native timing evidence and limits](native-timing-selftest-20261018.md)
 - [Owner API/search scope decision](api-search-discovery-v1-decision.md)
 - [Original execution-ready plan](../superpowers/plans/2026-10-10-nightsky-v1-execution-ready.md)

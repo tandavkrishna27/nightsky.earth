@@ -1,5 +1,7 @@
 # V1 event and target catalog boundaries
 
+> **Historical description:** the counts and unsupported lists below predate later V1 implementations. For the current seven event families, 38 dated meteor maxima across 2025–2027, 12 bounded radiant models, sample limits and optional catalogue boundaries, use [the 18 October event/history profile](../../docs/operations/v1-event-history-profile-20261018.md) and its runtime references. This older text is retained as history and is not the current capability contract.
+
 ## Astronomy targets
 
 The MCP target-visibility tool uses Astronomy Engine 2.1.19 for the Sun, Moon, and solar-system bodies. The Milky Way core is a fixed J2000 direction near Sagittarius, explicitly described as an approximation. There is no deep-sky object, comet, asteroid, satellite, or star catalog in V1. Do not add a third-party catalog without recording its license, source vintage, coordinates/epoch, update process, and validation cases.

@@ -143,3 +143,10 @@ test('details guidance distinguishes API runtime requirements from the shared sc
   assert.ok(text.indexOf('In API mode, details require') < text.indexOf('Before a candidate-site plan'), `${path}: mode distinction precedes candidate gate`);
  }
 });
+
+test('all workflows reuse successful matching results before requesting distinct missing evidence', () => {
+ for (const name of readdirSync('plugins/nightsky/skills')) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+  const text = readFileSync(path, 'utf8');
+  for (const phrase of ['## Successful-result reuse', 'same place identity/revision, timezone, window, activity and target', 'An absent optional field is not a reason to repeat an identical aggregate request', 'name the distinct missing evidence', 'explicit user refresh', 'expired or rejected selection', 'not a server cache or invented cooldown', 'A useful partial result remains useful']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
+ }
+});

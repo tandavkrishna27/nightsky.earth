@@ -1,0 +1,365 @@
+{
+  "schemaVersion": 1,
+  "snapshotDate": "2026-10-18",
+  "discoveryMode": "api",
+  "appliedToRuntime": false,
+  "privateConfigurationInspected": false,
+  "providerRequestsMade": 0,
+  "sources": [
+    {
+      "id": "geonames",
+      "role": "optional named-place lookup (API timezone unknown)",
+      "disposition": "optional-gated",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://secure.geonames.org/searchJSON",
+      "operatorQuota": {
+        "providerId": "geonames",
+        "accountLabel": "operator-geonames",
+        "hourlyLimit": 400,
+        "dailyLimit": 2000
+      },
+      "evidence": [
+        "docs/operations/api-mode-local-setup.md",
+        "docs/operations/api-provider-admission.md"
+      ],
+      "activationGates": [
+        "Owner account signup/access remains unresolved; configure only after its own allowance and secure endpoint validation."
+      ],
+      "limitations": [
+        "This API search adapter always returns unknown timezone; explicit display-zone choice is required unless separately accepted evidence supplies it. Local indexed GeoNames timezone support is a different mode.",
+        "No demo username."
+      ],
+      "apiTimeZoneEvidence": "unknown"
+    },
+    {
+      "id": "geoapify",
+      "role": "named places, bounded candidate and administrative searches",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.geoapify.com/v1/geocode/search; /v2/places; separately gated /v2/place-details",
+      "operatorQuota": {
+        "providerId": "geoapify",
+        "accountLabel": "operator-geoapify",
+        "hourlyLimit": 200,
+        "dailyLimit": 1000
+      },
+      "evidence": [
+        "docs/operations/api-mode-local-setup.md",
+        "docs/operations/api-provider-admission.md",
+        "docs/operations/v1-final-reconciliation-20261018.md"
+      ],
+      "activationGates": [
+        "Preserve existing account ledger; confirm selected features, transient POI use, OSM credit and actual release setup.",
+        "Administrative full geometry needs both separate opt-in flags and exact source/size acceptance."
+      ],
+      "limitations": [
+        "Finite categories and capped requests do not prove closest/global completeness.",
+        "Unsupported administrative combinations remain explicit; named resolution is not site access or darkness."
+      ]
+    },
+    {
+      "id": "met",
+      "role": "forecast",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.met.no/weatherapi/locationforecast/2.0/complete",
+      "operatorQuota": null,
+      "evidence": [
+        "docs/operations/v1-final-reconciliation-20261018.md",
+        "docs/operations/provider-controls-wave.md"
+      ],
+      "activationGates": [
+        "Identifying app/contact User-Agent, provider expiry/cache/traffic conditions and CC BY credit must remain in release configuration."
+      ],
+      "limitations": [
+        "Global service availability is not local forecast accuracy; no numerical seeing/transparency inferred."
+      ]
+    },
+    {
+      "id": "weatherapi",
+      "role": "forecast",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.weatherapi.com/v1/forecast.json",
+      "operatorQuota": {
+        "providerId": "weatherapi",
+        "accountLabel": "operator-weatherapi",
+        "hourlyLimit": 60,
+        "dailyLimit": 1000,
+        "monthlyLimit": 20000
+      },
+      "evidence": [
+        "docs/operations/api-mode-local-setup.md",
+        "docs/operations/weather-provider-admission.md",
+        "docs/operations/v1-final-reconciliation-20261018.md"
+      ],
+      "activationGates": [
+        "Free three-day product only, never Business-trial capability; preserve existing quota and reviewed attribution/cache rules.",
+        "Verify actual post-trial account state before release."
+      ],
+      "limitations": [
+        "Hourly returned samples and missing issue/precipitation metadata stay distinct; no exact long-range night forecast."
+      ]
+    },
+    {
+      "id": "openweather",
+      "role": "forecast",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.openweathermap.org/data/2.5/forecast",
+      "operatorQuota": {
+        "providerId": "openweather",
+        "accountLabel": "operator-openweather",
+        "hourlyLimit": 30,
+        "dailyLimit": 300,
+        "monthlyLimit": 5000
+      },
+      "evidence": [
+        "docs/operations/api-mode-local-setup.md",
+        "docs/operations/weather-provider-admission.md",
+        "docs/operations/v1-final-reconciliation-20261018.md"
+      ],
+      "activationGates": [
+        "Existing Free five-day/three-hour entitlement evidence; release account/key state, rights and persistent quota remain separate."
+      ],
+      "limitations": [
+        "No One Call or paid endpoint; response cache disabled pending permission.",
+        "Native three-hour samples are not interpolated to hourly."
+      ]
+    },
+    {
+      "id": "seventimer",
+      "role": "categorical observing forecast",
+      "disposition": "optional-gated",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://www.7timer.info/bin/api.pl?product=astro",
+      "operatorQuota": {
+        "providerId": "seventimer",
+        "accountLabel": "operator-seventimer",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "evidence": [
+        "docs/operations/additional-sky-providers-20261017.md",
+        "docs/operations/sky-activation-followup-20261017.md",
+        "docs/operations/api-mode-local-setup.md"
+      ],
+      "activationGates": [
+        "Retained official wiki review permits data use in free or paid software; earlier noncommercial-only screening is superseded.",
+        "Explicit selected/admitted controls and preserving ledger migration must include prior usage; do not reset weather counters."
+      ],
+      "limitations": [
+        "Category bands are not exact percentages or independent new physical models."
+      ]
+    },
+    {
+      "id": "darkskyplanner",
+      "role": "optional Moon-aware date/window aid",
+      "disposition": "optional-gated",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://darkskyplanner.com/plan?format=json",
+      "operatorQuota": {
+        "providerId": "darkskyplanner",
+        "accountLabel": "operator-darkskyplanner",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "evidence": [
+        "docs/operations/api-sky-source-research-20261017.md",
+        "docs/operations/sky-continuation-results-20261017.md",
+        "docs/operations/sky-activation-followup-20261017.md"
+      ],
+      "activationGates": [
+        "Verify intended service/free-use terms and actual activation/usage; operator ceilings are not provider entitlement.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ],
+      "limitations": [
+        "Complements local Moon calculations; does not measure light pollution, weather or site access."
+      ]
+    },
+    {
+      "id": "astronomyapi",
+      "role": "optional object search/body positions",
+      "disposition": "optional-gated",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.astronomyapi.com/api/v2/search; /bodies/positions",
+      "operatorQuota": {
+        "providerId": "astronomyapi",
+        "accountLabel": "operator-astronomyapi",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "evidence": [
+        "docs/operations/api-sky-source-research-20261017.md",
+        "docs/operations/sky-continuation-results-20261017.md",
+        "docs/operations/sky-activation-followup-20261017.md"
+      ],
+      "activationGates": [
+        "Numeric free allowance, billing behavior and intended redistribution/use remain unverified despite successful Moon diagnostic.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ],
+      "limitations": [
+        "Local deterministic astronomy remains primary; key presence and an HTTP 200 do not grant admission."
+      ]
+    },
+    {
+      "id": "nasa-donki",
+      "role": "space-weather event context",
+      "disposition": "optional-gated",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.nasa.gov/DONKI/{eventType}",
+      "operatorQuota": {
+        "providerId": "nasa-donki",
+        "accountLabel": "operator-nasa-donki",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "evidence": [
+        "docs/operations/api-sky-source-research-20261017.md",
+        "docs/operations/sky-continuation-results-20261017.md",
+        "docs/operations/sky-activation-followup-20261017.md"
+      ],
+      "activationGates": [
+        "Successful live response acceptance remains absent after retained 503; reconcile key-wide usage and intended data attribution.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ],
+      "limitations": [
+        "Research event context is not a local aurora forecast or visibility guarantee."
+      ]
+    },
+    {
+      "id": "jpl",
+      "role": "small-body identity and observer ephemeris",
+      "disposition": "optional-gated",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://ssd-api.jpl.nasa.gov/sbdb.api; https://ssd.jpl.nasa.gov/api/horizons.api",
+      "operatorQuota": {
+        "providerId": "jpl",
+        "accountLabel": "operator-jpl",
+        "hourlyLimit": 20,
+        "dailyLimit": 100,
+        "monthlyLimit": 1000
+      },
+      "evidence": [
+        "docs/operations/api-sky-source-research-20261017.md",
+        "docs/operations/sky-continuation-results-20261017.md",
+        "docs/operations/sky-activation-followup-20261017.md"
+      ],
+      "activationGates": [
+        "SBDB identity diagnostic succeeded; Horizons returned an application error without accepted table. Keep observer capability unaccepted.",
+        "Separate selection, admission and usage-preserving dedicated sky quota are required before live use."
+      ],
+      "limitations": [
+        "Single queued request, version/schema checks and fair-use rules; NASA key quota is not JPL entitlement."
+      ]
+    },
+    {
+      "id": "publicuniverse",
+      "role": "optional catalogue enrichment",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://api.sol.wickedsick.com (fixed route builders in server/providers/publicUniverse/transport.ts)",
+      "operatorQuota": {
+        "providerId": "publicuniverse",
+        "accountLabel": "operator-publicuniverse",
+        "hourlyLimit": 20,
+        "dailyLimit": 100
+      },
+      "evidence": [
+        "docs/operations/publicuniverse-implementation-20261018.md",
+        "docs/operations/publicuniverse-hashmap-fix-20261018.md",
+        "docs/operations/publicuniverse-live-results-20261018.md"
+      ],
+      "activationGates": [
+        "Preserve dedicated quota, reviewed endpoint contracts, per-record rights and credits; exact release selection/admission remains explicit."
+      ],
+      "limitations": [
+        "Catalogue visibility is optional evidence, not guaranteed seeing; model directions need timestamped observer calculations."
+      ]
+    },
+    {
+      "id": "darkskysites",
+      "role": "modelled zenith light pollution",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://darkskysites.com/api/sqm",
+      "operatorQuota": {
+        "providerId": "darkskysites",
+        "accountLabel": "operator-darkskysites-project",
+        "hourlyLimit": 30000,
+        "dailyLimit": 30000,
+        "monthlyLimit": 30000
+      },
+      "evidence": [
+        "docs/operations/light-pollution-acceptance-20261017.md",
+        "docs/operations/v1-final-reconciliation-20261018.md"
+      ],
+      "activationGates": [
+        "Retain dedicated project-wide ledger and adjacent linked credit; final reuse terms still require release confirmation.",
+        "Latest zenith route only; historical/directional Pro features are not enabled."
+      ],
+      "limitations": [
+        "SQM/Bortle are provider estimates, not live readings; retain dataset date, model, binding and unknown coverage.",
+        "Current requests send lat/lng only; do not claim requested dataset selection."
+      ]
+    },
+    {
+      "id": "noaa-swpc",
+      "role": "short-horizon aurora context",
+      "disposition": "proposed-core",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://services.swpc.noaa.gov/json/ovation_aurora_latest.json",
+      "operatorQuota": null,
+      "evidence": [
+        "docs/operations/events-weather-coverage-wave.md"
+      ],
+      "activationGates": [
+        "Retain source credits, bounded public-product request controls, issue/valid time and source availability."
+      ],
+      "limitations": [
+        "Global grid fetched without user point; short-horizon auroral model is not naked-eye local visibility."
+      ]
+    },
+    {
+      "id": "openmeteo-history",
+      "role": "operator historical acquisition, not request-time fetch",
+      "disposition": "operator-preparation",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+      "operatorQuota": null,
+      "evidence": [
+        "docs/operations/API-HISTORY-COMPLETION.md",
+        "docs/operations/v1-final-reconciliation-20261018.md"
+      ],
+      "activationGates": [
+        "Free noncommercial eligibility, complete usage and source/method admission remain separate.",
+        "No historical acquisition in this wave. API-serving route reads only explicitly admitted completed summaries."
+      ],
+      "limitations": [
+        "Annual pilot is not a global long-term baseline; coverage is not inferred from installed code."
+      ]
+    },
+    {
+      "id": "lightpollutionmap-browser",
+      "role": "experimental browser extraction",
+      "disposition": "blocked-experimental",
+      "productionAdmission": "not-granted-by-profile",
+      "endpoint": "https://www.lightpollutionmap.info/",
+      "operatorQuota": null,
+      "evidence": [
+        "docs/operations/light-pollution-browser-admission-20261017.md",
+        "docs/operations/light-pollution-acceptance-20261017.md"
+      ],
+      "activationGates": [
+        "Hard browser_not_admitted gate remains; rights, concrete DOM binding, egress and process-tree capacity unaccepted."
+      ],
+      "limitations": [
+        "No automatic scraper fallback after API outage/quota; native host browser actions are separate from backend source admission."
+      ]
+    }
+  ]
+}
