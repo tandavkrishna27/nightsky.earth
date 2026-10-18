@@ -67,6 +67,8 @@ export const targetVisibilityResultSchema = resultSchema({
   target: z.strictObject({ targetId: z.string().trim().min(1).max(120), name: z.string().trim().min(1).max(160), targetType: z.enum(["sun", "moon", "planet", "star", "deep-sky-object", "comet", "asteroid"]) }),
   intervals: z.array(z.strictObject({
     ...localIntervalSchema.shape,
+    startBoundary: z.enum(["requested-window", "horizon-crossing"]).optional().describe("Requested cutoff or calculated geometric crossing; absent means unknown."),
+    endBoundary: z.enum(["requested-window", "horizon-crossing"]).optional(),
     maximumAltitudeDegrees: z.number().finite().min(-90).max(90),
     azimuthDegrees: z.number().finite().min(0).max(360),
     azimuthBasis: z.literal("maximum-altitude-sample").optional(),

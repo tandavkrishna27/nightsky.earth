@@ -312,3 +312,25 @@ test('plan byte cap includes omission notice and newline separators',async()=>{
   assert.match(text,/Further intervals/);
  }
 });
+
+
+test('target answer labels cutoffs and unknown legacy boundaries without claiming rise or set',async()=>{
+ const {orientationAnswerText}=await import('../../server/mcp/answerText');
+ const target:any={target:{name:'Milky Way core'},intervals:[{localStart:'21:00',localEnd:'05:00',startBoundary:'horizon-crossing',endBoundary:'requested-window'}]};
+ const text=orientationAnswerText(target);
+ assert.match(text,/requested-window cutoff/);assert.match(text,/calculated geometric horizon crossing/);assert.match(text,/not a useful-altitude/);
+ delete target.intervals[0].startBoundary;delete target.intervals[0].endBoundary;
+ assert.match(orientationAnswerText(target),/boundary unknown/);
+});
+
+
+test('meteor timing brief preserves exact versus calendar precision and dated radiant samples',async()=>{
+ const {meteorTimingAnswerText}=await import('../../server/mcp/answerText');
+ const plan:any={goal:'meteor-shower',requestedWindow:{timeZone:'Asia/Kolkata'},evidence:{events:{events:[{name:'Geminids',eventType:'meteor-shower',peakUtc:'2026-12-14T06:00:00Z',source:{name:'Exact source'}},{name:'Geminids',eventType:'meteor-shower',peakCalendarDateWindow:{startDate:'2026-12-13',endDate:'2026-12-14'},source:{name:'Calendar source'}}]},meteorRadiantSamples:[{status:'available',code:'GEM',evaluatedAt:'2026-12-13T18:00:00Z',altitudeDeg:12,moonAltitudeDeg:5,source:{vintage:'fixture'},annualExtrapolation:true}]}};
+ const text=meteorTimingAnswerText(plan,'Geminids').join('\n');
+ assert.match(text,/2026-12-14T06:00:00Z/);assert.match(text,/2026-12-13 to 2026-12-14/);assert.match(text,/date-only; timezone basis not established/);assert.match(text,/12.0 degrees/);assert.match(text,/annual extrapolation/);assert.match(text,/not a local observing window/);
+ assert.doesNotMatch(text,/meteors per hour|best window/);
+ assert.doesNotMatch(meteorTimingAnswerText(plan,'Unknown shower').join('\n'),/Radiant sample|Radiant GEM/);
+ assert.match(text,/GEM.*fixture/);
+ assert.ok(Buffer.byteLength(text)<=1800);
+});

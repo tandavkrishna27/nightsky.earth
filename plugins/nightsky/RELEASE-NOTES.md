@@ -1,3 +1,7 @@
+# 1.0.28
+
+Label geometric target crossings versus requested cutoffs; foreground bounded published meteor peak/date and radiant samples. Separate activity geometry, practical sessions and forecast evidence in all workflows. No universal altitude thresholds or guaranteed meteor rates.
+
 # 1.0.27
 
 Require comparison evidence and honest candidate counts for darker-place discovery; distinguish broad area leads, numerical estimates and confirmed winners. Investigate available route evidence, retain removed travel limits, and qualify Milky Way date recommendations with supported core/darkness/Moon evidence.

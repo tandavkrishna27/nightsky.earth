@@ -98,3 +98,11 @@ test('all workflows require discovery comparison evidence and retain practical p
   assert.ok(text.indexOf('## Discovery evidence before recommendations')<10000, `${path}: guidance visible early`);
  }
 });
+
+
+test('all workflows separate event peaks, geometry, practical sessions and forecast support',()=>{
+ for(const name of readdirSync('plugins/nightsky/skills'))for(const path of [`plugins/nightsky/skills/${name}/SKILL.md`,`docs/product/workflows/${name}.md`]){
+  const text=readFileSync(path,'utf8');
+  for(const phrase of ['published peak is not the local viewing window','calendar-only guidance cannot supply an exact peak','peak occurs in local daylight','practical suggested session','geometric rise is not a useful photographic start','requested-window is a calculation cutoff, not rise or set','do not turn all-night darkness into an all-night beginner itinerary'])assert.ok(text.includes(phrase),`${path}: ${phrase}`);
+ }
+});

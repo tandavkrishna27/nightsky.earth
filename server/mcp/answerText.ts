@@ -90,12 +90,36 @@ function twilightPhases(outer: Interval[], inner: Interval[], window: PlanResult
 
 /** Quote positions at their actual instants; no interpolation or terrain claims. */
 export function orientationAnswerText(target: TargetVisibilityResult): string {
+  const boundary = (value: string | undefined) => value === 'requested-window' ? 'requested-window cutoff (not rise/set)' : value === 'horizon-crossing' ? 'calculated geometric horizon crossing (not apparent rise/set)' : 'boundary unknown';
+  const intervalLines = (target.intervals ?? []).slice(0,1).map(row => `${plain(target.target.name)} geometric opportunity: ${plain(row.localStart)} (${boundary(row.startBoundary)}) to ${plain(row.localEnd)} (${boundary(row.endBoundary)}); not a useful-altitude or recommended-session window.`);
   const samples = target.orientationSamples ?? [];
-  if (!samples.length) return 'Time-specific orientation samples unavailable; use an on-site sky app without inferring a bearing.';
-  const lines = ['Orientation: returned instants only; azimuth is clockwise from true north, altitude is height above the geometric horizon. No refraction; observer elevation assumed zero; terrain and obstructions are not modelled.'];
+  if (!samples.length) return [...intervalLines,'Time-specific orientation samples unavailable; use an on-site sky app without inferring a bearing.'].join('\n');
+  const lines = [...intervalLines,'Orientation: returned instants only; azimuth is clockwise from true north, altitude is height above the geometric horizon. No refraction; observer elevation assumed zero; terrain and obstructions are not modelled.'];
   for (const sample of samples) lines.push(`${plain(target.target.name)} at ${plain(sample.localTime)} [UTC ${sample.atUtc}]: altitude ${sample.altitudeDegrees.toFixed(1)} degrees; ${sample.altitudeDegrees >= 89 ? 'near zenith: compass direction is unhelpful' : `azimuth ${sample.azimuthDegrees.toFixed(1)} degrees`}${sample.altitudeDegrees <= 0 ? '; at or below the geometric horizon' : '; geometric position, not guaranteed visibility'}.`);
   lines.push('Use your sky app to identify the target; request a new calculation for another time, not an interpolated track.');
   return lines.join('\n');
+}
+
+/** Published maxima and sampled geometry are distinct from an observing itinerary. */
+export function meteorTimingAnswerText(plan: PlanResult, target?: string): string[] {
+  if (plan.goal !== 'meteor-shower') return [];
+  const lines=['Meteor timing: a published peak is not a local observing window or a practical itinerary. Calendar guidance and radiant samples do not establish exact activity boundaries or meteor rates.'];
+  const code=target?resolveMeteorIdentity(target):undefined;
+  const events=(plan.evidence?.events?.events??[]).filter(event=>event.eventType==='meteor-shower' && (!target || code!==undefined && (resolveMeteorIdentity(event.name)===code || resolveMeteorIdentity(event.eventId?.split(':').at(-1)??'')===code))).slice(0,2);
+  for(const event of events){
+    const label=Array.from(plain(event.name)).slice(0,40).join('');
+    const source=Array.from(plain(event.source.name)).slice(0,40).join('');
+    if(event.peakUtc)lines.push(`${label}: source-published peak instant ${event.peakUtc} (${formatLocalInstant(event.peakUtc,plan.requestedWindow.timeZone,'en')}); source ${source}; numerical uncertainty not established here. Local darkness/radiant visibility must be checked separately.`);
+    else if(event.peakCalendarDateWindow)lines.push(`${label}: published peak calendar range ${event.peakCalendarDateWindow.startDate} to ${event.peakCalendarDateWindow.endDate} (date-only; timezone basis not established); source ${source}; no exact local peak hour inferred.`);
+  }
+  if(!events.some(event=>event.peakUtc||event.peakCalendarDateWindow))lines.push('Year-specific peak instant/calendar range unavailable in selected event evidence; recurring calendar guidance is not an exact maximum.');
+  const samples=(plan.evidence?.meteorRadiantSamples??[]).filter(row=>row.status==='available' && (!target || code!==undefined && resolveMeteorIdentity(row.code)===code));
+  const selected=Array.from(new Set([0,Math.floor((samples.length-1)/2),samples.length-1])).map(i=>samples[i]).filter(row=>row!==undefined);
+  for(const row of selected){if(row.status!=='available')continue;lines.push(`Radiant ${plain(row.code)} sample; model ${Array.from(plain(row.source.vintage)).slice(0,30).join('')}; ${row.evaluatedAt} (${formatLocalInstant(row.evaluatedAt,plan.requestedWindow.timeZone,'en')}): altitude ${row.altitudeDeg.toFixed(1)} degrees; Moon altitude ${row.moonAltitudeDeg.toFixed(1)} degrees; ${row.annualExtrapolation?'annual extrapolation':'source model'}; point geometry only, not continuous visibility or a viewing-rate forecast.`);}
+  if(!samples.length)lines.push('Supported dated radiant samples unavailable; local radiant visibility remains unknown.');
+  const kept:string[]=[];let bytes=0;const notice='Further meteor evidence remains in structuredContent; no omitted peak or sample is inferred.';
+  for(const line of lines){const size=Buffer.byteLength(line)+(kept.length?1:0);if(bytes+size+Buffer.byteLength(notice)+1>1800){kept.push(notice);break;}kept.push(line);bytes+=size;}
+  return kept;
 }
 
 /** A bounded answer-ready view. Detailed geometry remains available without becoming setup advice. */
@@ -112,6 +136,7 @@ export function planAnswerText(plan: PlanResult, options: {target?: string; incl
   if (moon) lines.push(`Moon illumination ${moon.illuminationPercent.toFixed(1)}%; observing impact remains unknown. Geometric below-horizon timing does not establish minimal moonlight.`);
   if (moon) lines.push(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees ${moon.maximumAltitudeAtUtc ? `at ${formatLocalInstant(moon.maximumAltitudeAtUtc, plan.requestedWindow.timeZone, 'en')}` : 'at time unknown'}; sampled maximum within this session, not a continuous optimum.`);
   lines.push(...plan.gaps.slice(0,2).map(gap=>`Unknown or limitation: ${plain(gap)}`));
+  lines.push(...meteorTimingAnswerText(plan,options.target));
   // Reuse existing selected/suggested geometry before optional long context.
   const targets=[...(plan.evidence?.target?[plan.evidence.target]:[]),...(plan.suggestions??[])];
   const seenTargets=new Set<string>();
@@ -134,7 +159,7 @@ export function planAnswerText(plan: PlanResult, options: {target?: string; incl
   for (const row of plan.candidateWindows) {
     const start = row.localStart ?? formatLocalInstant(row.window.startUtc, row.window.timeZone, 'en');
     const end = row.localEnd ?? formatLocalInstant(row.window.endUtc, row.window.timeZone, 'en');
-    lines.push(`${plain(names.get(row.targetId ?? '') ?? 'Geometric opportunity')}: ${start} to ${end}. This is not a best-conditions rating.`);
+    lines.push(`${plain(names.get(row.targetId ?? '') ?? 'Geometric opportunity')}: ${start} to ${end}. Geometric overlap only, not useful altitude, rise/set, a practical itinerary or a best-conditions rating.`);
     for (const overlap of row.darknessOverlapIntervals ?? []) lines.push(`Astronomical-darkness overlap: ${overlap.localStart} to ${overlap.localEnd}.`);
   }
   if (moon) {

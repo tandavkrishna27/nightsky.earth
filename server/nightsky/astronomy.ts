@@ -115,7 +115,7 @@ export async function getTargetVisibility(targetQuery: string, place: Calculatio
       const atUtc = new Date(instant).toISOString();
       return { atUtc, localTime: formatLocalInstant(atUtc, checkedWindow.timeZone, "en"), altitudeDegrees: clamp(position.altitude, -90, 90), azimuthDegrees: normalizeDegrees(position.azimuth), horizonBasis: "geometric-center" as const, refraction: "none" as const, azimuthReference: "true-north-clockwise" as const };
     }),
-    intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth), azimuthBasis: "maximum-altitude-sample", maximumAltitudeAtUtc: new Date(row.maximumAt).toISOString(), maximumAltitudeLocal: formatLocalInstant(new Date(row.maximumAt).toISOString(), checkedWindow.timeZone, "en") })),
+    intervals: groups.map((row) => ({ ...makeInterval(row.start, row.end, checkedWindow.timeZone), startBoundary: row.start === start ? "requested-window" : "horizon-crossing", endBoundary: row.end === end ? "requested-window" : "horizon-crossing", maximumAltitudeDegrees: clamp(row.maxAltitude, -90, 90), azimuthDegrees: normalizeDegrees(row.azimuth), azimuthBasis: "maximum-altitude-sample", maximumAltitudeAtUtc: new Date(row.maximumAt).toISOString(), maximumAltitudeLocal: formatLocalInstant(new Date(row.maximumAt).toISOString(), checkedWindow.timeZone, "en") })),
   });
 }
 

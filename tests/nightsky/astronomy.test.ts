@@ -233,3 +233,20 @@ test("orientation schema rejects out-of-range and reordered samples without wrap
  const wrap=[{...row,azimuthDegrees:359},{...r.orientationSamples![1]!,azimuthDegrees:1}];
  assert.equal(targetVisibilityResultSchema.safeParse({...r,orientationSamples:wrap}).success,true);
 });
+
+
+test('target intervals distinguish requested cutoffs from geometric horizon crossings', async () => {
+ const short=await getTargetVisibility('Milky Way core',place(7),window('2027-05-06T18:00:00Z','2027-05-06T19:00:00Z','Asia/Kolkata'),index);
+ assert.equal(short.intervals.length,1);
+ assert.equal(short.intervals[0]!.startBoundary,'requested-window');
+ assert.equal(short.intervals[0]!.endBoundary,'requested-window');
+ const day=await getTargetVisibility('Milky Way core',place(7),window('2027-05-06T12:00:00Z','2027-05-07T12:00:00Z','Asia/Kolkata'),index);
+ assert.ok(day.intervals.some(row=>row.startBoundary==='horizon-crossing'));
+ assert.ok(day.intervals.some(row=>row.endBoundary==='horizon-crossing'));
+ const rise=await getTargetVisibility('Milky Way core',place(7),window('2027-05-06T12:00:00Z','2027-05-06T19:00:00Z','Asia/Kolkata'),index);
+ assert.ok(rise.intervals.some(row=>row.startBoundary==='horizon-crossing'&&row.endBoundary==='requested-window'));
+ const set=await getTargetVisibility('Milky Way core',place(7),window('2027-05-06T18:00:00Z','2027-05-07T12:00:00Z','Asia/Kolkata'),index);
+ assert.ok(set.intervals.some(row=>row.startBoundary==='requested-window'&&row.endBoundary==='horizon-crossing'));
+ const legacy=structuredClone(short); for(const row of legacy.intervals){delete row.startBoundary;delete row.endBoundary;}
+ assert.equal(targetVisibilityResultSchema.safeParse(legacy).success,true);
+});
