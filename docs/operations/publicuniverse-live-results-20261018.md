@@ -2,6 +2,8 @@
 
 ## Result: partial; source remains disabled by default
 
+Follow-up: [diagnosis and 1.0.22 correction](publicuniverse-hashmap-fix-20261018.md) resolves the parser mismatch with independent review, offline regressions and two successful live recheck operations. The original results below remain historical evidence; native/selected-starter acceptance remains separate.
+
 Owner approved proceeding with the prepared batch. A separate reviewer checked the plan-scoped runner before execution and found no blocking bounds or dependency defects. Production code and installed package remain 1.0.21; normal plugin configuration was not activated.
 
 Execution: **2026-10-18T04:40:42.769Z–04:40:59.756Z**. Ten sequential HTTP requests, **335,445 accepted response bytes**, zero retries. All ten returned HTTP 200. Eight normalized operations were available; two failed validation as `invalid-response`. Two dependent starter operations were skipped. No replacement or diagnostic calls used the unspent allowance.

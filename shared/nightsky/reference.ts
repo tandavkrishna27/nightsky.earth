@@ -249,10 +249,21 @@ export const referenceMethodSchema = z.strictObject({
         end_tdb: text
     }).optional()
 });
+// Preserve the legacy scalar contract; live catalogues retain named source-file hashes.
+const upstreamFileNameSchema = z.string().min(1).max(80)
+    .regex(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)
+    .refine(name => !name.includes('..') && !['__proto__', 'prototype', 'constructor'].includes(name));
+export const referenceUpstreamHashesSchema = z.union([
+    hash,
+    z.record(upstreamFileNameSchema, hash).refine(files => {
+        const count = Object.keys(files).length;
+        return count >= 1 && count <= 8 && JSON.stringify(files).length < 2048;
+    }, 'Expected 1 to 8 bounded source-file hashes'),
+]);
 export const referenceSnapshotSchema = z.strictObject({
     source: text,
     snapshot_sha256: hash,
-    upstream_sha256: hash,
+    upstream_sha256: referenceUpstreamHashesSchema,
     source_url: z.url().max(2048),
     retrieved_at: z.string().min(10).max(40),
     license: text,

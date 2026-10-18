@@ -1,5 +1,6 @@
 import * as z from "zod4";
-import { discoverObservingTargetsInputSchema, getCatalogueTargetWindowsInputSchema, type ReferenceDomain } from "../../../shared/nightsky/reference";
+import { canonicalJson } from "./referenceStore";
+import { referenceUpstreamHashesSchema, discoverObservingTargetsInputSchema, getCatalogueTargetWindowsInputSchema, type ReferenceDomain } from "../../../shared/nightsky/reference";
 const text = z.string().min(1).max(500);
 const numeric = z.number().finite();
 const evidenceNote = z.string().min(1).max(2048).refine(value => new TextEncoder().encode(value).byteLength <= 2048, "Evidence note exceeds 2KiB UTF-8");
@@ -157,7 +158,7 @@ export function assertEffectiveCoordinates(requested: {
 export const starterProvenanceSchema = z.object({
     source: text,
     snapshot_sha256: z.string().regex(/^[a-f0-9]{64}$/),
-    upstream_sha256: z.string().regex(/^[a-f0-9]{64}$/),
+    upstream_sha256: referenceUpstreamHashesSchema,
     source_url: z.url().max(2048),
     retrieved_at: z.string().min(10).max(40).refine(v => Number.isFinite(Date.parse(v))),
     license: text,
@@ -541,7 +542,7 @@ export function parseDiscoveryResponse(value: unknown, b: ObservingBinding) {
                 const source = r.discovery.source_snapshots.find(s => s.source === target.catalogue!.source);
                 if (!source)
                     throw new Error("Missing discovery snapshot");
-                equal(starterProvenanceSchema.parse(target.catalogue), source, "Nested source snapshot");
+                equal(canonicalJson(starterProvenanceSchema.parse(target.catalogue)), canonicalJson(source), "Nested source snapshot");
             }
         }
     }

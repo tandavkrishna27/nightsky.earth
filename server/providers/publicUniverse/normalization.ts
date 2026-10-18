@@ -1,5 +1,5 @@
 import type { ReferenceRecord, ReferenceSource } from '../../../shared/nightsky/reference';
-import type { IdentitySnapshot } from './referenceStore';
+import { canonicalJson, type IdentitySnapshot } from './referenceStore';
 import { isSupportedStarterId, type StarterRecord, type StarterProvenance, type ObjectDetail, type ExoplanetRecord } from './contracts';
 type Measurement = ReferenceRecord['measurements'][number];
 export const unknownRights = { version: null, hash: null, licence: null, licenceUrl: null, attribution: null, modifications: null };
@@ -7,11 +7,11 @@ export const timestamp = (value: string) => new Date(value).toISOString();
 export function starterSource(p: StarterProvenance): ReferenceSource { return { id: p.source, url: p.source_url, retrievedAt: timestamp(p.retrieved_at), version: null, hash: p.snapshot_sha256, licence: p.license, licenceUrl: p.license_url, attribution: p.attribution, modifications: 'Upstream starter selection and coordinate/unit normalization; NightSky field selection and renaming.' }; }
 export function starterIdentity(row: StarterRecord, p: StarterProvenance): IdentitySnapshot {
     const a = row.astrometry;
-    return { domain: 'starter-targets', upstreamId: row.id, upstreamSourceIdentity: { lineage: 'starter:' + p.source, source: p.source, snapshot_sha256: p.snapshot_sha256, upstream_sha256: p.upstream_sha256, equinox: a.equinox ?? null, reference_epoch_jyear: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), observation_epoch_jyear: a.observation_epoch_jyear == null ? null : String(a.observation_epoch_jyear) }, coordinateFrame: a.frame ?? null, coordinateEpoch: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), motionModel: a.motion_model ?? null };
+    return { domain: 'starter-targets', upstreamId: row.id, upstreamSourceIdentity: { lineage: 'starter:' + p.source, source: p.source, snapshot_sha256: p.snapshot_sha256, upstream_sha256: typeof p.upstream_sha256 === 'string' ? p.upstream_sha256 : canonicalJson(p.upstream_sha256), equinox: a.equinox ?? null, reference_epoch_jyear: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), observation_epoch_jyear: a.observation_epoch_jyear == null ? null : String(a.observation_epoch_jyear) }, coordinateFrame: a.frame ?? null, coordinateEpoch: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), motionModel: a.motion_model ?? null };
 }
 export function observingIdentity(id: string, c: any): IdentitySnapshot {
     const a = c.input_coordinates;
-    return { domain: 'starter-targets', upstreamId: id, upstreamSourceIdentity: { lineage: 'starter:' + c.source, source: c.source, snapshot_sha256: c.snapshot_sha256, upstream_sha256: c.upstream_sha256, equinox: a.equinox, reference_epoch_jyear: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), observation_epoch_jyear: a.observation_epoch_jyear == null ? null : String(a.observation_epoch_jyear) }, coordinateFrame: a.frame, coordinateEpoch: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), motionModel: c.motion_model };
+    return { domain: 'starter-targets', upstreamId: id, upstreamSourceIdentity: { lineage: 'starter:' + c.source, source: c.source, snapshot_sha256: c.snapshot_sha256, upstream_sha256: typeof c.upstream_sha256 === 'string' ? c.upstream_sha256 : canonicalJson(c.upstream_sha256), equinox: a.equinox, reference_epoch_jyear: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), observation_epoch_jyear: a.observation_epoch_jyear == null ? null : String(a.observation_epoch_jyear) }, coordinateFrame: a.frame, coordinateEpoch: a.reference_epoch_jyear == null ? null : String(a.reference_epoch_jyear), motionModel: c.motion_model };
 }
 export function starterRecord(row: StarterRecord, p: StarterProvenance): ReferenceRecord {
     const measurements: Measurement[] = [{ name: 'right-ascension', value: row.ra_deg, unit: 'deg' }, { name: 'declination', value: row.dec_deg, unit: 'deg' }];

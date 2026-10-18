@@ -106,10 +106,10 @@ test('null discovery plan remains available incomplete screening and request bin
     assert.equal(result.data!.night, null);
     assert.equal(result.data!.discovery!.incomplete_between_samples, true);
     await p.close();
-    const nonempty = {...payload,discovery:{...payload.discovery,coarse_matching_candidates:1,refined_candidates:1,source_snapshots:[syntheticSource]},candidates:[{id:starter.id,name:starter.name,aliases:[],appearance:catalogue.appearance,preference_reasons:['Synthetic preference'],field_context:'Synthetic field',coarse_matching_samples:1,sampled_peak_altitude_deg:30,brightness_status:'Synthetic V',refined_status:'windows_found'}],plan:{...syntheticNight,targets:[target]}};
+    const nonempty = {...payload,discovery:{...payload.discovery,coarse_matching_candidates:1,refined_candidates:1,source_snapshots:[{...syntheticSource,upstream_sha256:upstreamFiles}]},candidates:[{id:starter.id,name:starter.name,aliases:[],appearance:catalogue.appearance,preference_reasons:['Synthetic preference'],field_context:'Synthetic field',coarse_matching_samples:1,sampled_peak_altitude_deg:30,brightness_status:'Synthetic V',refined_status:'windows_found'}],plan:{...syntheticNight,targets:[{...target,catalogue:{...catalogue,upstream_sha256:{'addendum.csv':'c'.repeat(64),'NGC.csv':'b'.repeat(64)}}}]}};
     const p2=createPublicUniverseProvider({quota,quotaOwner:'test2',admitted:true,fetcher:async()=>new Response(JSON.stringify(nonempty))});
     const full=await p2.discoverObservingTargets({...base,equipment:'binocular',preference:'stars',shortlistLimit:3},coordinates);
-    assert.equal(full.status,'available',JSON.stringify(full));assert.equal(full.data!.targets[0].preferenceReasons![0],'Synthetic preference');assert.equal(full.data!.targets[0].catalogue!.source,'bsc5p');assert.ok(full.data!.targets[0].record.selection);await p2.close();
+    assert.equal(full.status,'available',JSON.stringify(full));assert.equal(full.data!.targets[0].preferenceReasons![0],'Synthetic preference');assert.equal(full.data!.targets[0].catalogue!.source,'bsc5p');assert.ok(full.data!.targets[0].record.selection);assert.deepEqual(full.data!.targets[0].catalogue!.upstream_sha256,upstreamFiles);assert.deepEqual(full.data!.discovery!.source_snapshots[0].upstream_sha256,upstreamFiles);assert.equal(referenceObservingResultSchema.safeParse(full).success,true);await p2.close();
 });
 test('default unadmitted provider and invalid/forged selections never dispatch', async () => {
     let calls = 0;
@@ -204,4 +204,45 @@ test('detail sections share one deadline and retain successful base after deadli
     assert.equal(calls, 3);
     assert.equal(r.data!.sections.every(s => s.status === 'unavailable'), true);
     await p.close();
+});
+
+import { starterProvenanceSchema } from '../../server/providers/publicUniverse/contracts';
+import { referenceSnapshotSchema, referenceObservingResultSchema } from '../../shared/nightsky/reference';
+const upstreamFiles = { 'NGC.csv': 'b'.repeat(64), 'addendum.csv': 'c'.repeat(64) };
+test('filename hashes remain bounded validated provenance in provider and public output', () => {
+    for (const schema of [starterProvenanceSchema, referenceSnapshotSchema]) {
+        assert.deepEqual(schema.parse({ ...syntheticSource, upstream_sha256: upstreamFiles }).upstream_sha256, upstreamFiles);
+        assert.equal(schema.safeParse(syntheticSource).success, true);
+        for (const invalid of [{}, { 'NGC.csv': 'B'.repeat(64) }, { '../NGC.csv': 'b'.repeat(64) }, { 'dir/NGC.csv': 'b'.repeat(64) }, { constructor: 'b'.repeat(64) }, JSON.parse('{"__proto__":"' + 'b'.repeat(64) + '"}'), { ['x'.repeat(81)]: 'b'.repeat(64) }, Object.fromEntries(Array.from({length:9}, (_,i) => [`file${i}.csv`, 'b'.repeat(64)]))]) {
+            assert.equal(schema.safeParse({ ...syntheticSource, upstream_sha256: invalid }).success, false, JSON.stringify(invalid));
+        }
+    }
+});
+
+test('file hash maps survive search detail night and compare every filename independent of insertion order', async () => {
+    const source = { ...syntheticSource, upstream_sha256: upstreamFiles };
+    let remoteFiles: Record<string,string> = { 'addendum.csv': 'c'.repeat(64), 'NGC.csv': 'b'.repeat(64) };
+    let time = 0;
+    const p = createPublicUniverseProvider({ quota, quotaOwner:'map-test', admitted:true, now:()=>time, fetcher: async url => {
+        const path = new URL(String(url)).pathname;
+        const provenance = { ...source, upstream_sha256: remoteFiles };
+        return new Response(JSON.stringify(path.includes('/observing/night') ? { ...syntheticNight, targets:[{ ...target, catalogue:{ ...catalogue, ...provenance } }] } : new URL(String(url)).searchParams.has('q') ? {...search,sources:{bsc5p:source}} : {...starter,provenance}));
+    }});
+    try {
+        const found = await p.searchReferenceObjects({domain:'starter-targets',query:'Synthetic'});
+        assert.equal(found.status,'available',JSON.stringify(found));
+        const selection = found.data!.matches[0].selection!;
+        const detail = {kind:'selected-object',...selection,sections:[]};
+        assert.equal((await p.getReferenceDetails(detail)).status,'available');
+        const input = {...base,targets:[selection]};
+        const night = await p.getCatalogueTargetWindows(input,coordinates);
+        assert.equal(night.status,'available',JSON.stringify(night));
+        assert.deepEqual(night.data!.targets[0].catalogue!.upstream_sha256,upstreamFiles);
+        assert.equal(referenceObservingResultSchema.safeParse(night).success,true);
+        for (const changed of [{...upstreamFiles,'NGC.csv':'d'.repeat(64)}, {'NGC.csv':'b'.repeat(64)}, {...upstreamFiles,'extra.csv':'e'.repeat(64)}, {'ngc.csv':'b'.repeat(64),'addendum.csv':'c'.repeat(64)}]) {
+            remoteFiles = changed; time += 8000;
+            assert.equal((await p.getCatalogueTargetWindows(input,coordinates)).status,'stale');
+            assert.equal((await p.getReferenceDetails(detail)).status,'stale');
+        }
+    } finally { await p.close(); }
 });

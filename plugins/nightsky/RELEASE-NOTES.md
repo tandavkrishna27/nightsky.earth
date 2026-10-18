@@ -1,5 +1,9 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.22 - named upstream source hashes
+
+Corrects optional Public Universe provenance validation to retain bounded filename-to-SHA-256 maps alongside the prepared subset digest. Canonical comparison ignores key order while detecting changed, added or removed file identity. Malformed hashes remain rejected. Existing providers and admission defaults are unchanged. Offline regression verification does not establish live-source or native-host acceptance.
+
 ## V1 local revision 1.0.21 - optional reference and target discovery
 
 Adds four optional Public Universe tools for bounded object reference search/details, equipment-aware target discovery and selected starter-catalogue windows. Existing local calculations and source defaults remain unchanged. The source is off by default and requires separate selection, admission and dedicated accounting; no API key is required. Results preserve source rights, coordinate frames, epochs, model limits and partial failures. These source calculations do not expand the local engine's supported targets. Offline verification is separate from live source and native-host acceptance. No deployment or publication.
