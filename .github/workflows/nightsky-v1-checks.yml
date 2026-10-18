@@ -58,7 +58,7 @@ jobs:
         run: node --import tsx --test tests/providers/light-pollution-contract.test.ts tests/providers/darkskysites.test.ts tests/providers/light-pollution-browser.test.ts tests/providers/darkskysites-browser.test.ts tests/mcp/light-pollution-journeys.test.ts tests/skills/light-pollution-workflows.test.ts tests/operations/light-pollution-validation.test.ts
 
       - name: Exercise host-aware outings and timestamped orientation offline
-        run: node --import tsx --test tests/skills/host-aware-outing.test.ts tests/skills/conversation-acceptance.test.ts tests/nightsky/astronomy.test.ts tests/mcp/answer-text.test.ts
+        run: node --import tsx --test tests/skills/host-aware-outing.test.ts tests/skills/conversation-acceptance.test.ts tests/nightsky/astronomy.test.ts tests/mcp/answer-text.test.ts tests/mcp/forecast-answer-text.test.ts
 
       - name: Exercise optional Public Universe contracts and default isolation offline
         run: node --import tsx --test tests/providers/public-universe-contracts.test.ts tests/providers/public-universe-transport.test.ts tests/providers/public-universe-store.test.ts tests/providers/public-universe-deadlines.test.ts tests/providers/public-universe-date-query.test.ts tests/providers/public-universe-meteor-evidence.test.ts tests/providers/public-universe-starter-evidence.test.ts tests/providers/public-universe-provider.test.ts tests/providers/public-universe-configuration.test.ts tests/mcp/public-universe-tools.test.ts tests/skills/public-universe-workflows.test.ts

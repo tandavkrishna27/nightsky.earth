@@ -233,3 +233,5 @@ import './providers/public-universe-meteor-evidence.test';
 import './providers/public-universe-starter-evidence.test';
 
 import './mcp/native-admission.test';
+
+import './mcp/forecast-answer-text.test';

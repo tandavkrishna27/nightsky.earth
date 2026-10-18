@@ -4,6 +4,7 @@ import { registerOptionalSkyTools } from './optionalSkyTools';
 import type { OptionalSkyProviders } from '../providers/skyConfiguration';
 import { apiAttributionText } from "../places/api/attribution";
 import type { DiscoveryProvider, SelectedPlaceResolver } from "../places/api/types";
+import {forecastAnswerText} from './forecastAnswerText';
 import { planAnswerText, planAnswerSources, sourceLinkedText, orientationAnswerText } from "./answerText";
 import * as z from "zod4";
 import { CatalogueRevisionError } from "../places/globalCatalogue";
@@ -202,7 +203,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_target_visibility", {
     title: "Check when a sky target is above the horizon",
-    description: "Calculate geometric above-horizon intervals and up to three timestamped orientation samples for the Sun, Moon, planets, or the Milky Way core at a resolved named place or revision-pinned candidate with explicit display time zone. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
+    description: "Reuse an already-returned orientation sample at the matching place/date/instant before recalculating. A window must have endUtc after startUtc, never identical endpoints. Verify the returned IANA local label matches the requested hour. Calculate geometric above-horizon intervals and up to three timestamped orientation samples for the Sun, Moon, planets, or the Milky Way core at a resolved named place or revision-pinned candidate with explicit display time zone. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
     inputSchema: getTargetVisibilityInputSchema,
     outputSchema: targetVisibilityResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_target_visibility,
@@ -216,7 +217,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_night_conditions", {
     title: "Check forecast conditions during astronomical darkness",
-    description: "Fetch the MET Norway point forecast at the actual selected named-place or revision-pinned candidate point. Candidate planning requires an explicit display time zone. The result keeps source fields and units separate, identifies missing variables, and adds the forecast steps overlapping calculated astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
+    description: "Read separate configured forecasts with server-formatted local/UTC cloud rows; use for focused sample inspection instead of repeating the aggregate planner. Reuse already-returned timestamped evidence when available. Fetch point forecasts at the actual selected named-place or revision-pinned candidate point. Candidate planning requires an explicit display time zone. The result keeps source fields and units separate, identifies missing variables, and adds the forecast steps overlapping calculated astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
     inputSchema: getNightConditionsInputSchema,
     outputSchema: nightConditionsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_night_conditions,
@@ -226,7 +227,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     const coordinates = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
     const result = await getNightConditionsForPlan(input.placeId, input.window, index, dependencies, coordinates, input.includeHourly);
-    return { content: [{ type: "text", text: `${result.sources[0].name}: ${result.availability.reason}` }], structuredContent: result };
+    return { content: [{ type: "text", text: dependencies.discoveryProvider ? apiAttributionText(forecastAnswerText(result).join('\n'),result.sources) : sourceLinkedText(forecastAnswerText(result).join('\n'),result.sources) }], structuredContent: result };
   });
 
   server.registerTool("get_aurora_outlook", {

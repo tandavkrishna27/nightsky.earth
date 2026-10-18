@@ -1,0 +1,37 @@
+import type {NightConditionsResult} from '../../shared/nightsky/weather';
+import {formatLocalInstant} from '../../shared/nightsky/format';
+
+const MAX_BYTES=3200,MAX_ROWS=6;
+const plain=(s:string)=>s.replace(/[\\[\]<>`*_~|\r\n]/g,' ').replace(/\s+/g,' ').trim();
+const name=(s:string)=>{const chars=Array.from(plain(s));return chars.slice(0,24).join('')+(chars.length>24?'...':'');};
+
+/** Pure display projection: never interpolate, rank, re-time or mutate provider evidence. */
+export function forecastAnswerText(result:NightConditionsResult):string[]{
+ const zone=result.window.timeZone,start=Date.parse(result.window.startUtc),end=Date.parse(result.window.endUtc);
+ const local=(utc:string)=>`${formatLocalInstant(utc,zone,'en')} [UTC ${utc}]`;
+ const groups=result.forecasts.map((forecast,index)=>{
+  const issued=forecast.source.issuedAt,issueLabel=issued&&issued.length>48?'see structuredContent (timestamp omitted)':issued??'unknown';
+  const label=`F${index+1} ${name(forecast.source.name)}`,status=forecast.availability.status,rows:{at:number;text:string}[]=[];
+  for(const sample of forecast.samples){
+   const at=Date.parse(sample.validAt),inside=at>=start&&at<=end,value=sample.values.totalCloudCover,band=sample.bands?.totalCloudCover;
+   if(value){
+    const a=value.periodStartUtc,b=value.periodEndUtc;
+    if(a&&b){if(Date.parse(b)>start&&Date.parse(a)<end)rows.push({at:Date.parse(a),text:`${label} [${status}] | aggregate ${local(a)} to ${local(b)} | totalCloudCover ${value.value} ${plain(value.unit)} (native anchor UTC ${sample.validAt})`});}
+    else if(inside)rows.push({at,text:`${label} [${status}] | ${local(sample.validAt)} | totalCloudCover ${value.value} ${plain(value.unit)} (instant)`});
+   }
+   if(band&&inside)rows.push({at,text:`${label} [${status}] | ${local(sample.validAt)} | totalCloudCover category ${band.code}: ${plain(band.range)} ${plain(band.unit)} (instant category, not numeric cloud percentage)`});
+  }
+  rows.sort((a,b)=>a.at-b.at);
+  const selected=rows.length<=MAX_ROWS?rows:[...rows.slice(0,3),...rows.slice(-3)];
+  return {label,rows,selected,shown:0,header:`Forecast ${index+1}: ${label}; status ${status}; issued ${issueLabel}; ${rows.length?`${rows.length} relevant cloud entries`:'cloud unknown (no relevant cloud entries)'}; ${forecast.missingFields.slice(0,3).map(f=>`${f.field} unknown`).join('; ')}.`};
+ });
+ const headers=['Cloud evidence: exact native instants/periods only; not continuous coverage. Do not move values between times, interpolate, average providers or infer a best window from ranges.',...groups.map(g=>g.header),...(result.providerOutcomes??[]).map(o=>`Provider outcome: ${o.providerId} (${name(o.source.name)}); status ${o.status}.`)];
+ const omitted=(g:typeof groups[number],count:number)=>`${g.label}: omitted ${count} cloud entries from this text; full timestamped evidence remains in structuredContent.`;
+ // Reserve complete metadata and worst-case omission notes before any data row.
+ const reserved=groups.filter(g=>g.rows.length).reduce((n,g)=>n+Buffer.byteLength(omitted(g,g.rows.length)+'\n'),0);
+ const lines=[...headers];let bytes=Buffer.byteLength(lines.join('\n')+'\n');
+ for(let slot=0;slot<MAX_ROWS;slot++)for(const g of groups){const row=g.selected[slot];if(!row)continue;const size=Buffer.byteLength(row.text+'\n');if(bytes+size+reserved<=MAX_BYTES){lines.push(row.text);bytes+=size;g.shown++;}}
+ for(const g of groups)if(g.shown<g.rows.length)lines.push(omitted(g,g.rows.length-g.shown));
+ if(!groups.length)lines.push('Cloud unknown: no forecast samples returned.');
+ return lines;
+}

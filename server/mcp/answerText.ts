@@ -2,6 +2,7 @@ import type { TargetVisibilityResult } from '../../shared/nightsky/astronomy';
 import type { SourceRecord } from '../../shared/nightsky/common';
 import type { PlanResult } from '../../shared/nightsky/planning';
 import { formatLocalInstant } from '../../shared/nightsky/format';
+import {forecastAnswerText} from './forecastAnswerText';
 import { resolveMeteorIdentity } from '../../shared/nightsky/meteors';
 
 const plain = (value: string) => value.replace(/[\\[\]<>`*_~\r\n]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -92,7 +93,7 @@ export function orientationAnswerText(target: TargetVisibilityResult): string {
   const samples = target.orientationSamples ?? [];
   if (!samples.length) return 'Time-specific orientation samples unavailable; use an on-site sky app without inferring a bearing.';
   const lines = ['Orientation: returned instants only; azimuth is clockwise from true north, altitude is height above the geometric horizon. No refraction; observer elevation assumed zero; terrain and obstructions are not modelled.'];
-  for (const sample of samples) lines.push(`${plain(target.target.name)} at ${plain(sample.localTime)}: altitude ${sample.altitudeDegrees.toFixed(1)} degrees; ${sample.altitudeDegrees >= 89 ? 'near zenith: compass direction is unhelpful' : `azimuth ${sample.azimuthDegrees.toFixed(1)} degrees`}${sample.altitudeDegrees <= 0 ? '; at or below the geometric horizon' : '; geometric position, not guaranteed visibility'}.`);
+  for (const sample of samples) lines.push(`${plain(target.target.name)} at ${plain(sample.localTime)} [UTC ${sample.atUtc}]: altitude ${sample.altitudeDegrees.toFixed(1)} degrees; ${sample.altitudeDegrees >= 89 ? 'near zenith: compass direction is unhelpful' : `azimuth ${sample.azimuthDegrees.toFixed(1)} degrees`}${sample.altitudeDegrees <= 0 ? '; at or below the geometric horizon' : '; geometric position, not guaranteed visibility'}.`);
   lines.push('Use your sky app to identify the target; request a new calculation for another time, not an interpolated track.');
   return lines.join('\n');
 }
@@ -100,29 +101,21 @@ export function orientationAnswerText(target: TargetVisibilityResult): string {
 /** A bounded answer-ready view. Detailed geometry remains available without becoming setup advice. */
 export function planAnswerText(plan: PlanResult, options: {target?: string; includeSourceLinks?: boolean} = {}): string {
   const lines = [
-    plan.summary,
+    Array.from(plain(plan.summary)).slice(0,120).join('')+(plan.summary.length>120?' (full summary in structuredContent)':''),
     `Calculation basis: ${plan.place.catalogueRevision ? 'selected candidate representative point' : 'named city record, not a selected observing site'}. Display time zone: ${plan.requestedWindow.timeZone}${plan.place.timeZoneBasis === 'explicit-display' ? '; actual site time zone remains unverified' : ''}.`,
     `Requested session: ${formatLocalInstant(plan.requestedWindow.startUtc, plan.requestedWindow.timeZone, 'en')} to ${formatLocalInstant(plan.requestedWindow.endUtc, plan.requestedWindow.timeZone, 'en')}.`,
   ];
-  // Put provider facts and exclusive phases ahead of potentially lengthy geometry.
-  const forecasts = plan.evidence?.weather?.forecasts ?? [];
-  if (!forecasts.length) lines.push('Weather forecast values and issue times unknown; no continuous coverage is established.');
-  for (let forecastIndex = 0; forecastIndex < forecasts.length; forecastIndex++) {
-    const forecast = forecasts[forecastIndex];
-    const name = Array.from(plain(forecast.source.name));
-    const times = forecast.samples.map(sample => sample.validAt).sort((a, b) => Date.parse(a) - Date.parse(b));
-    lines.push(`Forecast ${forecastIndex + 1}: ${name.slice(0, 40).join('')}${name.length > 40 ? '...' : ''} issued ${forecast.source.issuedAt ?? 'at an unavailable time'}; ${times.length} samples, ${times.length ? `valid sample range ${times[0]} to ${times[times.length - 1]}` : 'valid times unknown; values unknown'}; availability ${forecast.availability.status}.`);
-    // Deterministic examples, never the clearest sample or an inferred coverage period.
-    const sample = forecast.samples[0];
-    if (sample) {
-      const values = Object.entries(sample.values).filter(([, value]) => value !== undefined).slice(0, 1).map(([field, value]) => `${field} ${value!.value} ${plain(value!.unit)} (${value!.periodStartUtc && value!.periodEndUtc ? `period ${value!.periodStartUtc} to ${value!.periodEndUtc}` : 'instant sample'})`);
-      for (const [field, band] of Object.entries(sample.bands ?? {})) { if (band) values.push(`${field} category ${band.code}: ${plain(band.range)} ${plain(band.unit)}`); }
-      lines.push(`First sample example, valid ${sample.validAt}: ${values.join('; ')}.`);
-    }
-    if (forecast.missingFields.length) lines.push(forecast.missingFields.slice(0, 3).map(field => `${field.field} unknown`).join('; ') + '.');
-  }
-  if (forecasts.length) lines.push('Examples are first samples, not continuous coverage or a clear-night assessment; remaining samples, values and missing-field reasons remain in structuredContent.');
+  const weather=plan.evidence?.weather;
+  lines.push(...(weather?forecastAnswerText(weather):['Weather forecast values and issue times unknown; no continuous coverage is established.']));
   const astronomy = plan.evidence?.astronomy;
+  const moon = astronomy?.moon;
+  if (moon) lines.push(`Moon illumination ${moon.illuminationPercent.toFixed(1)}%; observing impact remains unknown. Geometric below-horizon timing does not establish minimal moonlight.`);
+  if (moon) lines.push(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees ${moon.maximumAltitudeAtUtc ? `at ${formatLocalInstant(moon.maximumAltitudeAtUtc, plan.requestedWindow.timeZone, 'en')}` : 'at time unknown'}; sampled maximum within this session, not a continuous optimum.`);
+  lines.push(...plan.gaps.slice(0,2).map(gap=>`Unknown or limitation: ${plain(gap)}`));
+  // Reuse existing selected/suggested geometry before optional long context.
+  const targets=[...(plan.evidence?.target?[plan.evidence.target]:[]),...(plan.suggestions??[])];
+  const seenTargets=new Set<string>();
+  for(const target of targets){if(seenTargets.has(target.target.targetId))continue;seenTargets.add(target.target.targetId);lines.push(...orientationAnswerText(target).split('\n'));}
   if (astronomy?.availability.status === 'available' && astronomy.sunBelowGeometricHorizonIntervals !== undefined && astronomy.solarThresholdIntervals !== undefined) {
     const below6 = astronomy.solarThresholdIntervals.filter(row => row.sunAltitudeThresholdDegrees === -6);
     const below12 = astronomy.solarThresholdIntervals.filter(row => row.sunAltitudeThresholdDegrees === -12);
@@ -137,9 +130,6 @@ export function planAnswerText(plan: PlanResult, options: {target?: string; incl
     }
     lines.push('Twilight uses geometric Sun-centre altitude bands 0 to -6, -6 to -12, and -12 to -18 degrees. Intervals are clipped to this session; a clipped boundary is not a sunrise or sunset event.');
   } else lines.push('Twilight phases unknown: required geometric threshold evidence unavailable.');
-  const moon = astronomy?.moon;
-  if (moon) lines.push(`Moon illumination ${moon.illuminationPercent.toFixed(1)}%; observing impact remains unknown. Geometric below-horizon timing does not establish minimal moonlight.`);
-  if (moon) lines.push(`Moon maximum sampled altitude ${moon.maximumAltitudeDegrees.toFixed(1)} degrees ${moon.maximumAltitudeAtUtc ? `at ${formatLocalInstant(moon.maximumAltitudeAtUtc, plan.requestedWindow.timeZone, 'en')}` : 'at time unknown'}; sampled maximum within this session, not a continuous optimum.`);
   const names = new Map([...(plan.evidence?.target ? [plan.evidence.target] : []), ...(plan.suggestions ?? [])].map(target => [target.target.targetId, target.target.name]));
   for (const row of plan.candidateWindows) {
     const start = row.localStart ?? formatLocalInstant(row.window.startUtc, row.window.timeZone, 'en');
@@ -150,14 +140,17 @@ export function planAnswerText(plan: PlanResult, options: {target?: string; incl
   if (moon) {
     for (const row of moon.belowHorizonIntervals ?? []) lines.push(`Moon centre below geometric horizon: ${row.localStart} to ${row.localEnd}, clipped to this session; not apparent limb moonset.`);
   }
-  lines.push(...plan.gaps.map(gap => `Unknown or limitation: ${plain(gap)}`));
-  lines.push(...(plan.evidence?.target ? orientationAnswerText(plan.evidence.target).split('\n') : ['Time-specific orientation samples unavailable; use an on-site sky chart without invented bearings.']));
+  lines.push(...plan.gaps.slice(2).map(gap => `Unknown or limitation: ${plain(gap)}`));
+  if(!targets.length)lines.push('Time-specific orientation samples unavailable; use an on-site sky chart without invented bearings.');
   const body: string[] = [];
+  const notice='Further intervals and limitations remain in structuredContent; this view is bounded.';
+  const reserved=Buffer.byteLength('\n'+notice,'utf8');
   let bytes = 0;
   for (const line of lines) {
-    if (bytes + Buffer.byteLength(line, 'utf8') > 4_000) break;
-    body.push(line); bytes += Buffer.byteLength(line, 'utf8') + 1;
+    const size=Buffer.byteLength(line,'utf8')+(body.length?1:0);
+    if (bytes+size+reserved>8_000) break;
+    body.push(line);bytes+=size;
   }
-  if (body.length < lines.length) body.push('Further intervals and limitations remain in structuredContent; this view is bounded.');
+  if (body.length<lines.length)body.push(notice);
   return options.includeSourceLinks === false ? body.join('\n') : sourceLinkedText(body.join('\n'), planAnswerSources(plan, options.target));
 }

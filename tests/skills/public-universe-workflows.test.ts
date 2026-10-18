@@ -72,3 +72,12 @@ test('all workflows preserve staged useful evidence and exact reference search',
                 assert.ok(text.includes(token), `${path}: ${token}`);
         }
 });
+
+
+test('all workflows pin timestamp identity and reuse matching positions on follow-up',()=>{
+ for(const name of readdirSync('plugins/nightsky/skills'))for(const path of [`plugins/nightsky/skills/${name}/SKILL.md`,`docs/product/workflows/${name}.md`]){
+  const text=readFileSync(path,'utf8');
+  assert.ok(text.indexOf('## Timestamp-bound evidence')<8000,`${path}: early evidence rules`);
+  for(const phrase of ['server-formatted local time and original UTC timestamp','never move a value to another row','endUtc must be after startUtc','matching place, date and requested instant','get_night_conditions for focused forecast samples'])assert.ok(text.includes(phrase),`${path}: ${phrase}`);
+ }
+});

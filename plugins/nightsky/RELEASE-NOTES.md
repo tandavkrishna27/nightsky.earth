@@ -1,5 +1,9 @@
 # 1.0.0 local rehearsal
 
+## V1 local revision 1.0.24 - timestamp-bound forecast and position evidence
+
+Adds bounded provider-specific cloud rows with server-formatted local times paired to original UTC instants, explicit stale/unavailable outcomes, distinct aggregate/category semantics and omission counts. Main plans expose existing target orientation samples, including suggested Moon/planet positions. Workflow guidance preserves timestamp/value identity, reuses matching evidence on follow-up and requires positive-duration calculation windows. Full structured evidence, tool schemas, source defaults, quotas and deadlines remain unchanged. Offline verification is separate from native conversation acceptance; no deployment or new provider requests.
+
 ## V1 local revision 1.0.23 - native request reliability
 
 Separates bounded protocol/startup traffic from tool-call rate budgets while retaining global, concurrency and identity protections. Adds generated request correlation and redacted admission/completion and optional-source phase diagnostics. Workflow recipes now show valid catalogue windows and bounded shortlists, use exact reference queries, and preserve core planning results when optional sources fail. Source deadlines, quotas and activation defaults are unchanged. Offline regression checks do not establish native-host acceptance or resolve the historical five-minute wait by themselves. No deployment or new source requests.
