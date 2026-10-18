@@ -13,9 +13,14 @@ Default to outdoor observing; explicit hosted or accommodation requests override
 
 ## First decision and answer rules
 
+A resolved named-city plan needs no candidate-details prerequisite: reuse its returned place identity, revision and timezone after `resolve_place`. If the user asks for observing-site details, follow the exposed mode. In API mode, details require the retained placeId and sourceRevision. Named-query details are catalogue/legacy mode only; see recipes below. Keep revisions matched; placeId alone is invalid; do not retry the same invalid arguments. The shared schema accepts multiple shapes: schema-valid does not mean supported in every runtime mode.
+
 Before a candidate-site plan: obtain get_observing_location_details. If its actual timezone is unverified and the user has not explicitly named a display timezone, stop and ask one display-time-zone question. Wait for the reply; do not calculate a candidate or substitute city plan in this turn. A nearby city's timezone, the requested UTC window, or “use its timezone” is not a user choice of an unknown site timezone. Offer the base-city timezone as a question, never silently select it. If details are unavailable, explain that gap and ask whether the user wants a separately labelled named-city plan.
 
 Give on-site directions only from timestamped returned orientation evidence, with a sky app for identification; a maximum-altitude sample is not a rising or session-wide bearing. Use the tool's answer-ready planning text for exact intervals and unknowns. Use complete source links for relevant claims and required credits under the compact-credit rules below; preserve full evidence in structured results rather than copying the full reference inventory. Moon below the geometric horizon does not establish minimal moonlight; leave its observing impact unknown. Do not assert an uncalculated alternative night's visibility.
+
+Darkness intervals are clipped to the requested calculation window. Preserve each returned boundary's meaning: full-window means darkness throughout the requested window, not the whole night. If an interval starts or ends at a requested limit, label that limit as a calculation cutoff; true dusk or dawn remains unknown unless separately established by returned evidence. For a 21:00–05:00 request returning darkness 21:00–04:30, say “astronomical darkness is reported from 21:00 to 04:30 within your requested 21:00–05:00 window; 21:00 is the requested start cutoff, not established astronomical dusk.” Describe 04:30 as astronomical dawn only if the returned evidence establishes that boundary; otherwise preserve its returned meaning or uncertainty. Do not infer dusk/dawn from darknessState alone.
+
 
 ## Timestamp-bound evidence and follow-ups
 
@@ -265,3 +270,17 @@ Catalogue discovery requires `shortlistLimit` from 1 through 6; start with 2 or 
 ```
 
 For `get_catalogue_target_windows`, retain the same top-level place/time fields and strict UTC window, replace discovery preference/equipment/shortlist fields with `targets` containing one to six exact returned referenceId/revision pairs. Never fabricate those pairs or pass catalogue references to the main local target engine. These authored checks do not establish native acceptance or live provider success.
+
+
+## Valid location-details arguments
+
+These authored details recipes illustrate mode-specific argument shapes: the first two are catalogue/legacy only; the third is API mode. Replace example identities/revisions with the actual returned selection. In API mode resolve/search the named site first and retain its placeId and sourceRevision; never send the named-query recipe to that handler. They do not establish a resolved city, candidate or live result.
+
+<!-- location-details-recipes -->
+```json
+[
+  { "placeQuery": "Hyderabad", "countryCode": "IND" },
+  { "placeId": "place:v1:example", "catalogueRevision": "example-catalogue-revision" },
+  { "placeId": "place:v1:example", "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "displayTimeZone": "Asia/Kolkata" }
+]
+```

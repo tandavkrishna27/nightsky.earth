@@ -106,3 +106,40 @@ test('all workflows separate event peaks, geometry, practical sessions and forec
   for(const phrase of ['published peak is not the local viewing window','calendar-only guidance cannot supply an exact peak','peak occurs in local daylight','practical suggested session','geometric rise is not a useful photographic start','requested-window is a calculation cutoff, not rise or set','do not turn all-night darkness into an all-night beginner itinerary'])assert.ok(text.includes(phrase),`${path}: ${phrase}`);
  }
 });
+
+test('all workflows route resolved cities separately from candidate details with valid recipes', async () => {
+ const { getObservingLocationDetailsInputSchema: schema } = await import('../../shared/nightsky/discovery');
+ for (const name of readdirSync('plugins/nightsky/skills')) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+  const text = readFileSync(path, 'utf8');
+  for (const phrase of ['A resolved named-city plan needs no candidate-details prerequisite', 'reuse its returned place identity, revision and timezone', 'If the user asks for observing-site details', 'placeId alone is invalid', 'do not retry the same invalid arguments']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
+  assert.ok(text.indexOf('A resolved named-city plan') < text.indexOf('Before a candidate-site plan'), `${path}: route before candidate gate`);
+  const match = text.match(/<!-- location-details-recipes -->\s*```json\s*([\s\S]*?)```/);
+  assert.ok(match, `${path}: details recipes`);
+  const recipes = JSON.parse(match[1]);
+  assert.equal(recipes.length, 3);
+  for (const recipe of recipes) assert.ok(schema.safeParse(recipe).success, `${path}: schema-valid details recipe`);
+  assert.equal(schema.safeParse({ placeId: 'place:v1:geonames:990001' }).success, false);
+  assert.equal(schema.safeParse({ ...recipes[0], sourceRevision: 'a'.repeat(64) }).success, false);
+ }
+});
+
+test('all workflows label clipped darkness boundaries without inventing dusk or dawn', () => {
+ for (const name of readdirSync('plugins/nightsky/skills')) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+  const text = readFileSync(path, 'utf8');
+  for (const phrase of ['Darkness intervals are clipped to the requested calculation window', '21:00 is the requested start cutoff, not established astronomical dusk', 'full-window means darkness throughout the requested window', 'true dusk or dawn remains unknown', 'within your requested 21:00–05:00 window']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
+  assert.ok(text.indexOf('Darkness intervals are clipped') < 8000, `${path}: early darkness boundary rule`);
+ }
+});
+
+test('details guidance distinguishes API runtime requirements from the shared schema', () => {
+ const runtime = readFileSync('server/mcp/registerTools.ts', 'utf8');
+ const handler = runtime.slice(runtime.indexOf('server.registerTool("get_observing_location_details"'), runtime.indexOf('server.registerTool("get_location_context"'));
+ assert.ok(handler.includes('if(!input.placeId||!input.sourceRevision)'));
+ assert.ok(handler.includes('dependencies.discoveryProvider.details({placeId:input.placeId,sourceRevision:input.sourceRevision})'));
+ assert.ok(handler.includes('dependencies.catalogue.findNames({placeQuery:input.placeQuery,countryCode:input.countryCode})'));
+ for (const name of readdirSync('plugins/nightsky/skills')) for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
+  const text = readFileSync(path, 'utf8');
+  for (const phrase of ['In API mode, details require the retained placeId and sourceRevision', 'Named-query details are catalogue/legacy mode only', 'schema-valid does not mean supported in every runtime mode']) assert.ok(text.includes(phrase), `${path}: ${phrase}`);
+  assert.ok(text.indexOf('In API mode, details require') < text.indexOf('Before a candidate-site plan'), `${path}: mode distinction precedes candidate gate`);
+ }
+});

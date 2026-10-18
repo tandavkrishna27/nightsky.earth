@@ -4,14 +4,28 @@
 
 ## First decision and answer rules
 
+A resolved named-city plan needs no candidate-details prerequisite: reuse its returned place identity, revision and timezone after `resolve_place`. If the user asks for observing-site details, follow the exposed mode. In API mode, details require the retained placeId and sourceRevision. Named-query details are catalogue/legacy mode only; see recipes below. Keep revisions matched; placeId alone is invalid; do not retry the same invalid arguments. The shared schema accepts multiple shapes: schema-valid does not mean supported in every runtime mode.
+
 Before a candidate-site plan: obtain get_observing_location_details. If its actual timezone is unverified and the user has not explicitly named a display timezone, stop and ask one display-time-zone question. Wait for the reply; do not calculate a candidate or substitute city plan in this turn. A nearby city's timezone, the requested UTC window, or “use its timezone” is not a user choice of an unknown site timezone. Offer the base-city timezone as a question, never silently select it. If details are unavailable, explain that gap and ask whether the user wants a separately labelled named-city plan.
 
 Give on-site directions only from timestamped returned orientation evidence, with a sky app for identification; a maximum-altitude sample is not a rising or session-wide bearing. Use the tool's answer-ready planning text for exact intervals and unknowns. Use complete source links for relevant claims and required credits under the compact-credit rules below; preserve full evidence in structured results rather than copying the full reference inventory. Moon below the geometric horizon does not establish minimal moonlight; leave its observing impact unknown. Do not assert an uncalculated alternative night's visibility.
+
+Darkness intervals are clipped to the requested calculation window. Preserve each returned boundary's meaning: full-window means darkness throughout the requested window, not the whole night. If an interval starts or ends at a requested limit, label that limit as a calculation cutoff; true dusk or dawn remains unknown unless separately established by returned evidence. For a 21:00–05:00 request returning darkness 21:00–04:30, say “astronomical darkness is reported from 21:00 to 04:30 within your requested 21:00–05:00 window; 21:00 is the requested start cutoff, not established astronomical dusk.” Describe 04:30 as astronomical dawn only if the returned evidence establishes that boundary; otherwise preserve its returned meaning or uncertainty. Do not infer dusk/dawn from darknessState alone.
+
 
 
 For forecast follow-ups, inspect already-returned exact source/time/value rows before calling any tool. Never request again solely to rebuild a table. If a later refresh failed or was allowance-blocked, preserve earlier successful samples as conversation evidence, not a server cache. Label them previous results, retain their original valid times and original retrieval time when known (otherwise explicitly unknown), and show the latest refresh outcome separately. Do not call earlier results fresh or silently replace them with blanks. If prior rows are absent or truncated, say they cannot be reconstructed; do not guess. Do not automatically retry or claim provider outage from a local allowance refusal. A later retrieval does not establish a newer forecast edition: say later tool response unless provider issue/version evidence confirms an updated edition. Keep retrieval time, issue time and valid time distinct.
 
 A sample is not a window: describe a promising instant as a sample, not a sampled window or guaranteed clear patch. When comparing nearby times, mention both equally close neighbouring samples with their actual times; do not select only the more favourable neighbour. For example, a 23:00 sample has equally close 22:30 and 23:30 neighbours. Keep cross-provider disagreement explicit without interpolation.
+
+## Timestamp-bound evidence and follow-ups
+
+Keep each forecast value attached to its provider, server-formatted local time and original UTC timestamp. Copy exact returned rows: never move a value to another row, fill a missing slot from a later sample, invent values, interpolate sparse samples, or average providers. A note below a table does not repair a wrongly placed cell. Numeric instant values, aggregate periods and category bands are distinct. Preserve original bounds, dates, units, source status and issue time; omitted rows are not unknown observations. Keep required compact credits and licence links.
+
+Use get_night_conditions for focused forecast samples when the earlier answer lacks the needed rows; prefer already-returned evidence over refreshing. If a large result was truncated, recover focused timestamped evidence rather than reconstructing values from ranges. Do not repeat the aggregate planner merely to inspect samples. Label reused earlier evidence with its original timestamp/status if a later source is unavailable. Recommendations must follow actual sample times and remain provisional; ranges cannot establish a continuous clear window or best part of the evening.
+
+For directions, reuse a returned orientation sample with matching place, date and requested instant, including Moon samples returned by the planner or optional catalogue tool. A new turn does not invalidate a calculated position. Do not claim an existing matching sample is missing. If none exists, request a valid positive-duration target window: endUtc must be after startUtc, never identical endpoints. Use IANA timezone conversion and check the returned local label against the requested hour; 22:00 Asia/Kolkata is 16:30 UTC, not 15:30 UTC. Do not generalize that offset to other places/dates. Quote actual timestamped samples, not maxima, interpolated tracks or nearby times. Clarify ambiguous repeated local times at DST transitions.
+
 
 ## Discovery evidence before recommendations
 
@@ -31,13 +45,6 @@ Discover candidates yourself using exposed host search and location tools, resol
 
 A missing travel limit must not stall discovery or cause repeated distance questions. Proceed with an explicitly stated bounded search area around the known origin, offer a short provisional shortlist, and let the user refine it. Preserve the latest direction and constraints, including removal of a driving limit. Keep access unknown where necessary; unknown access does not require replacing outdoor candidates with a paid or hosted venue. Give one concise access check rather than repeated generic warnings.
 
-## Timestamp-bound evidence and follow-ups
-
-Keep each forecast value attached to its provider, server-formatted local time and original UTC timestamp. Copy exact returned rows: never move a value to another row, fill a missing slot from a later sample, invent values, interpolate sparse samples, or average providers. A note below a table does not repair a wrongly placed cell. Numeric instant values, aggregate periods and category bands are distinct. Preserve original bounds, dates, units, source status and issue time; omitted rows are not unknown observations. Keep required compact credits and licence links.
-
-Use get_night_conditions for focused forecast samples when the earlier answer lacks the needed rows; prefer already-returned evidence over refreshing. If a large result was truncated, recover focused timestamped evidence rather than reconstructing values from ranges. Do not repeat the aggregate planner merely to inspect samples. Label reused earlier evidence with its original timestamp/status if a later source is unavailable. Recommendations must follow actual sample times and remain provisional; ranges cannot establish a continuous clear window or best part of the evening.
-
-For directions, reuse a returned orientation sample with matching place, date and requested instant, including Moon samples returned by the planner or optional catalogue tool. A new turn does not invalidate a calculated position. Do not claim an existing matching sample is missing. If none exists, request a valid positive-duration target window: endUtc must be after startUtc, never identical endpoints. Use IANA timezone conversion and check the returned local label against the requested hour; 22:00 Asia/Kolkata is 16:30 UTC, not 15:30 UTC. Do not generalize that offset to other places/dates. Quote actual timestamped samples, not maxima, interpolated tracks or nearby times. Clarify ambiguous repeated local times at DST transitions.
 
 ## Activity-aware viewing times
 
@@ -275,3 +282,17 @@ Catalogue discovery requires `shortlistLimit` from 1 through 6; start with 2 or 
 ```
 
 For `get_catalogue_target_windows`, retain the same top-level place/time fields and strict UTC window, replace discovery preference/equipment/shortlist fields with `targets` containing one to six exact returned referenceId/revision pairs. Never fabricate those pairs or pass catalogue references to the main local target engine. These authored checks do not establish native acceptance or live provider success.
+
+
+## Valid location-details arguments
+
+These authored details recipes illustrate mode-specific argument shapes: the first two are catalogue/legacy only; the third is API mode. Replace example identities/revisions with the actual returned selection. In API mode resolve/search the named site first and retain its placeId and sourceRevision; never send the named-query recipe to that handler. They do not establish a resolved city, candidate or live result.
+
+<!-- location-details-recipes -->
+```json
+[
+  { "placeQuery": "Hyderabad", "countryCode": "IND" },
+  { "placeId": "place:v1:example", "catalogueRevision": "example-catalogue-revision" },
+  { "placeId": "place:v1:example", "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "displayTimeZone": "Asia/Kolkata" }
+]
+```

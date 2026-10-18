@@ -1,5 +1,13 @@
 # V1 completion tracker
 
+## Current readiness summary — 18 October 2026
+
+[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 6 with local acceptance remaining; 8 release dependent; 1 separate website workstream**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
+
+The two observed named-city/candidate-detail and darkness-cutoff issues are corrected in local package **1.0.29**, with affected offline tests and a controlled native replay: both cases exited successfully, 14 tool calls, no invalid candidate-details calls or data-provider attempts; Milky Way darkness cutoff wording corrected. Repeated successful meteor calls remain an efficiency gap under 12B/15. Final full suite: **1,796 passed / 0 failed / 2 skipped**; types, compiled checks and both package builds pass. Independent review findings resolved; exact-commit CI follows after push. Draft privacy now includes optional API request sharing. Source/coverage admission, complete applicable journey/resource acceptance and real release-environment gates remain as listed in the matrix. No bulk planet build, database, deployment or new data-provider request is required by this audit.
+
+## Earlier implementation and evidence checkpoints
+
 Native timing self-test: [two Codex CLI cases](native-timing-selftest-20261018.md) completed against1.0.28 with14native calls and0data-provider attempts. Main meteor/target timing distinctions pass; end-to-end acceptance remains partial because of4recovered candidate-detail validation errors and unqualified clipped-darkness start wording. Fixed coordinates/real astronomy, not live source or desktop acceptance. Next step is ticket/release reconciliation including these findings; original counts unchanged.
 
 Latest timing correction: [1.0.28 activity-aware viewing windows](activity-viewing-window-correction-20261018.md), [reviewed plan](../superpowers/plans/2026-10-18-activity-viewing-windows.md). Native1.0.27 discovery scenario passed; Milky Way/Geminids timing remains partial pending focused retest. Optional geometric boundary metadata, bounded meteor peak/radiant text and five workflow updates implemented;129affected tests, types and compiled/package checks pass;1.0.28 installed with all15 files verified. Final full suite:1,792passed/0failed/2skipped (1,794total); installed files verified. Exact-commit CI follows. Original ticket counts unchanged; wholeV1 is not declared done.

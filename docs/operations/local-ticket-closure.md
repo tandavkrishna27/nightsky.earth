@@ -1,5 +1,7 @@
 # Remaining local ticket audit — 14 October 2026
 
+Current readiness is maintained in [the 18 October original-ticket reconciliation](v1-remaining-ticket-release-matrix.md) and [completion tracker](v1-completion-tracker.md). The records below retain their dated original-scope evidence; they do not certify current public/source/client readiness.
+
 This audits every original heading against its actual acceptance criteria. User direction: finish locally, test/review, push and observe CI; no deployment or historical downloads. A local implementation result does not establish a hosted connection, official approval, public source offer, legal identity or observed pilot.
 
 ## Original tickets

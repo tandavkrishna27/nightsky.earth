@@ -1,3 +1,7 @@
+# 1.0.29
+
+Distinguish named-city planning from candidate-detail prerequisites, validate genuine detail-request recipes, and label darkness-window cutoffs. Draft privacy now describes optional API request sharing conditionally. Final original-ticket/readiness reconciliation records local versus release-dependent work without claiming launch completion.
+
 # 1.0.28
 
 Label geometric target crossings versus requested cutoffs; foreground bounded published meteor peak/date and radiant samples. Separate activity geometry, practical sessions and forecast evidence in all workflows. No universal altitude thresholds or guaranteed meteor rates.

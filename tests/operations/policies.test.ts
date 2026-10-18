@@ -75,3 +75,10 @@ test("operator accounting and diagnostic history retention are disclosed separat
   assert.match(text, /operator verification notes/);
   assert.match(text, /diagnostic probes can retain bounded raw responses/);
 });
+
+
+test('privacy describes optional configured API sharing without activating providers',()=>{
+ const text=JSON.stringify(POLICY_PAGES.privacy);
+ for(const provider of ['7Timer','DarkSkySites','Dark Sky Planner','AstronomyAPI','Public Universe','NASA DONKI','JPL'])assert.ok(text.includes(provider),provider);
+ for(const phrase of ['only when selected and admitted','equipment filters','rounded to two decimals','not observing coordinates','does not enable any source'])assert.ok(text.includes(phrase),phrase);
+});
