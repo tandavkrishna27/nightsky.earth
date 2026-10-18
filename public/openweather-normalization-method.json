@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "methodVersion": "2026-10-18",
+  "title": "NightSky OpenWeather alteration method offer",
+  "license": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "notice": "OpenWeather data and the adapted OpenWeather sample component are offered under ODbL 1.0. This machine-readable method describes all alterations used to produce that component; unrelated providers and application code are outside this component.",
+  "publiclyHosted": false,
+  "source": {
+    "endpoint": "https://api.openweathermap.org/data/2.5/forecast",
+    "parameters": {
+      "units": "metric",
+      "cnt": 40
+    },
+    "credentials": "Not included. lat/lon select the requested point.",
+    "documentation": "https://openweathermap.org/api/forecast5"
+  },
+  "implementation": "server/providers/weather/openWeather.ts",
+  "algorithm": [
+    "Validate cod 200 and list of 1 through 40 finite bounded steps against the implementation schema. Ignore unselected upstream properties.",
+    "Sort by integer Unix dt ascending. Duplicate dt values reject the response.",
+    "Select dt inclusively between requested startUtc and endUtc. Convert dt seconds to ISO UTC validAt. No interpolation, blending or extrapolation.",
+    "Copy supplied supported fields using the mappings below; missing values remain absent. Omit samples with no supported fields; reject if none remain.",
+    "Report missing fields across retained samples, upstream first/last validity, nonnegative hours from fetch time to last sample, partial status and native three-hour horizon/coverage gaps. No supported weather value is imputed.",
+    "For precipitation only, absent rain or snow contributes zero when the other is supplied. Period is dt minus 10800 seconds through dt."
+  ],
+  "fields": {
+    "totalCloudCover": {
+      "input": "clouds.all",
+      "unit": "%"
+    },
+    "temperature": {
+      "input": "main.temp",
+      "unit": "°C"
+    },
+    "relativeHumidity": {
+      "input": "main.humidity",
+      "unit": "%"
+    },
+    "windSpeed": {
+      "input": "wind.speed",
+      "unit": "m/s"
+    },
+    "windGust": {
+      "input": "wind.gust",
+      "unit": "m/s"
+    },
+    "windDirection": {
+      "input": "wind.deg",
+      "unit": "degrees"
+    },
+    "visibility": {
+      "input": "visibility",
+      "unit": "m"
+    },
+    "precipitationAmount": {
+      "expression": "(rain[\"3h\"] ?? 0) + (snow[\"3h\"] ?? 0)",
+      "onlyWhen": "rain[\"3h\"] or snow[\"3h\"] is supplied",
+      "unit": "mm",
+      "periodSeconds": 10800,
+      "period": "preceding three hours ending at dt"
+    }
+  },
+  "omitted": [
+    "pop",
+    "lowCloudCover",
+    "mediumCloudCover",
+    "highCloudCover",
+    "dewPoint"
+  ],
+  "omissionReason": "pop interval bounds are unestablished for this JSON endpoint; other fields are unavailable.",
+  "sourceMetadata": "Retain OpenWeather provider/product/documentation, ODbL link, credit, normalization notice and forecast uncertainty warning separately from other providers. No response cache retained.",
+  "credit": {
+    "text": "Weather data provided by OpenWeather",
+    "providerUrl": "https://openweathermap.org/",
+    "logoAcceptanceRequired": true,
+    "logoSource": "https://openweathermap.org/faq#license",
+    "status": "Official logo asset/use terms and legible linked actual-host rendering require release evidence; no logo is fabricated or bundled here."
+  },
+  "validation": {
+    "cod": [
+      "200",
+      200
+    ],
+    "listLength": {
+      "min": 1,
+      "max": 40
+    },
+    "dt": {
+      "integer": true,
+      "min": 10800,
+      "max": 253402300799
+    },
+    "optionalFiniteBounds": {
+      "main.temp": [
+        -150,
+        100
+      ],
+      "main.humidity": [
+        0,
+        100
+      ],
+      "clouds.all": [
+        0,
+        100
+      ],
+      "wind.speed": [
+        0,
+        500
+      ],
+      "wind.gust": [
+        0,
+        500
+      ],
+      "wind.deg": [
+        0,
+        360
+      ],
+      "visibility": [
+        0,
+        1000000
+      ],
+      "pop": [
+        0,
+        1
+      ],
+      "rain.3h": [
+        0,
+        10000
+      ],
+      "snow.3h": [
+        0,
+        10000
+      ]
+    },
+    "invalidResponse": "Reject; never promote invalid input or stale samples to a successful forecast.",
+    "window": "Finite schema-valid UTC start/end and IANA timezone; point latitude/longitude schema validation precedes request."
+  },
+  "coverage": "No selected samples: out-of-horizon if window wholly before first or after last upstream dt, otherwise not-covered. Gap flag if first dt > requested start, last dt < requested end, any consecutive upstream dt differ from 10800 seconds, or any selected sample is empty and omitted. Successful forecast always partial."
+}

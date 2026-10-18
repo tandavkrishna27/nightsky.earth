@@ -4,7 +4,11 @@
 
 [All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **12 original local deliverables done; 5 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
-## Current local release-readiness wave — explicit API-only profile
+## Current local science/source follow-up
+
+[Reviewed follow-up](v1-local-science-source-wave-20261018.md) adds seven bounded event/convention/composed tests, strict current/rollback nonsecret source-manifest validation and the prepared OpenWeather method offer. Missing-manifest and rollback-weather mismatch failures are fixed. Actual scientific reference gaps and source/account/host acceptance remain explicit; owner scope answer is pending for labelled event gaps. Final full suite1,846passed/0failed/2skipped;47focused checks, types and host packages pass. No package/runtime-provider activation or deployment follows.
+
+## Previous local release-readiness wave — explicit API-only profile
 
 [API-only release contract](v1-api-release-profile-20261018.md) removes mandatory historical artifacts only for explicitly profiled current/rollback releases, preserving legacy/security/quota gates. [Event maintenance](v1-event-maintenance-20261018.md) records all19 identities, actual finite evidence/gaps and NightSky.earth annual responsibility. [Independent audit](v1-release-audit-20261018.md) found no new demonstrated material defect; exact source activation/credits and real hosting/publication remain open. Original categories stay12/5/8/2: event ownership closure alone does not complete compound Task6. No new package version is needed for these operations-only changes; installed plugin remains1.0.34. Coordinator44/44 affected tests, types/package checks and final1,831passed/0failed/2skipped full suite pass; [wave receipt](v1-api-release-wave-20261018.md) records limits and remaining gates.
 

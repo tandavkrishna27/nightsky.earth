@@ -44,3 +44,7 @@ The focused operator tests build a real paged catalogue and publish a fictional 
 
 
 Offline fixture measurement from the 2026-10-15 focused operator run: the resumed fictional history release inventory contained **7 files / 79,313 bytes**, including its checkpoint and publication receipt; exhaustive preflight took **15.50 ms** on that run. The nested wrong-tree rejection fixture contained **8 files / 1,615 bytes**, and rejection took **10.28 ms**. Tests emit the current measurements on every run; elapsed time varies with the machine and load. These figures measure fixture files and local execution only, and provide no host RSS or production capacity acceptance.
+
+## API-only exact source declarations — 18 October 2026
+
+Explicit api-only-v1 releases now require a top-level sourceManifest with schemaVersion1 and current/rollback objects. Each contains environment (only API_SOURCE_ENV_KEYS), discoveryProviders and source evidence. Both halves are validated independently with existing configuration parsers; current source flags must match runtimeEnvironment exactly. Discovery and weather receipts must agree with each corresponding release. Browser and unresolved optional-sky admission remain blocked by this bounded profile. Credential values are forbidden; actual credential-presence/account and hosted-rights acceptance remain separate. See server/operations/apiSourceManifest.ts and v1-local-science-source-wave-20261018.md for constraints and verification. No admission or deployment occurs from an offline pass.

@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+test('OpenWeather public alteration offer describes actual normalized fields and release boundary',()=>{
+ const offer=JSON.parse(readFileSync('public/openweather-normalization-method.json','utf8'));
+ assert.equal(offer.license,'https://opendatacommons.org/licenses/odbl/1-0/');
+ assert.equal(offer.publiclyHosted,false);
+ assert.equal(offer.source.endpoint,'https://api.openweathermap.org/data/2.5/forecast');
+ assert.deepEqual(offer.source.parameters,{units:'metric',cnt:40});
+ assert.equal(offer.fields.precipitationAmount.expression,'(rain["3h"] ?? 0) + (snow["3h"] ?? 0)');
+ assert.equal(offer.fields.precipitationAmount.periodSeconds,10800);
+ assert.equal(offer.fields.temperature.input,'main.temp');
+ assert.ok(offer.omitted.includes('pop'));
+ assert.ok(offer.algorithm.some((s:string)=>s.includes('Duplicate')));
+ assert.ok(offer.credit.logoAcceptanceRequired);
+ const profile=JSON.parse(readFileSync('docs/operations/v1-api-source-profile-20261018.json','utf8'));
+ const row=profile.sources.find((s:{id:string})=>s.id==='openweather');
+ assert.equal(row.alterationMethodArtifact,'public/openweather-normalization-method.json');
+ assert.ok(row.activationGates.some((s:string)=>s.includes('logo')));
+ const pu=profile.sources.find((s:{id:string})=>s.id==='publicuniverse');
+ assert.ok(pu.activationGates.some((s:string)=>s.includes('provider-wide')));
+});

@@ -1,3 +1,4 @@
+import { API_SOURCE_ENV_KEYS, apiSourceManifestSchema, validateApiSourceManifest } from '../../server/operations/apiSourceManifest';
 import { validateOperatorReleaseClosure } from './operatorClosure';
 /** Offline operator admission only. Never mutates runtime, reads environment or contacts hosts. */
 import { z } from 'zod';
@@ -14,14 +15,14 @@ const text = z.string().min(1).max(4096).refine(v => !/[\x00-\x1f\x7f]/.test(v))
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const bytes = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const evidence = text.nullable();
-const envKeys = ['NIGHTSKY_API_HISTORY_CACHE_DIRECTORY', 'NIGHTSKY_API_HISTORY_ADMISSION', 'NIGHTSKY_WEATHER_PROVIDERS', 'NIGHTSKY_WEATHER_ADMITTED_PROVIDERS', 'NIGHTSKY_QUOTA_STATE_PATH', 'NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
+const envKeys = [...API_SOURCE_ENV_KEYS, 'NIGHTSKY_API_HISTORY_CACHE_DIRECTORY', 'NIGHTSKY_API_HISTORY_ADMISSION', 'NIGHTSKY_WEATHER_PROVIDERS', 'NIGHTSKY_WEATHER_ADMITTED_PROVIDERS', 'NIGHTSKY_QUOTA_STATE_PATH', 'NIGHTSKY_DISCOVERY_MODE', 'NODE_ENV', 'HOST', 'PORT', 'NIGHTSKY_MCP_TOOL_MODE', 'NIGHTSKY_MCP_ALLOWED_HOSTS', 'NIGHTSKY_MCP_TRUSTED_PROXIES', 'MET_NORWAY_USER_AGENT', 'NIGHTSKY_GEONAMES_INDEX', 'NIGHTSKY_OSM_CANDIDATE_INDEX', 'NIGHTSKY_OSM_CANDIDATE_SHA256', 'NIGHTSKY_OSM_CANDIDATE_MAX_BYTES', 'NIGHTSKY_OSM_REGIONAL_MANIFEST', 'NIGHTSKY_OSM_REGIONAL_SHA256', 'NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST', 'NIGHTSKY_GLOBAL_CATALOGUE_SHA256', 'NIGHTSKY_CLIMATE_ARTIFACT', 'NIGHTSKY_CLIMATE_SHA256', 'NIGHTSKY_ERA5_RELEASE_MANIFEST', 'NIGHTSKY_ERA5_RELEASE_SHA256'] as const;
 const runtimeSchema = z.object(Object.fromEntries(envKeys.map(k => [k, text.optional()]))).strict();
 const discoveryEvidence = z.object({ mode: z.enum(['api', 'catalogue', 'regional', 'legacy']), providers: z.array(z.enum(['geonames', 'geoapify'])).max(2), configurationEvidence: evidence, policyEvidence: evidence, budgetEvidence: evidence }).strict();
 const weatherIds = z.array(z.enum(['met','weatherapi','openweather'])).min(1).max(4).refine(v=>new Set(v).size===v.length);
 const weatherEvidence = z.object({providers:weatherIds,admittedProviders:z.array(z.enum(['met','weatherapi','openweather'])).max(4).refine(v=>new Set(v).size===v.length),liveVerifiedProviders:z.array(z.enum(['met','weatherapi','openweather'])).max(4).refine(v=>new Set(v).size===v.length),configurationEvidence:evidence,policyEvidence:evidence,budgetEvidence:evidence}).strict().refine(v=>[...v.admittedProviders,...v.liveVerifiedProviders].every(id=>v.providers.includes(id)));
 const release = z.object({ profile: z.literal('api-only-v1').optional(), id: text, sourceCommit: z.string().regex(/^[a-f0-9]{40}$/), imageDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/), architecture: z.enum(['amd64', 'arm64']), packageVersion: z.string().regex(/^\d+\.\d+\.\d+$/), artifactIds: z.array(text).max(10000), discovery: discoveryEvidence.optional(), weather: weatherEvidence.optional() }).strict();
 const lineageValidation=z.object({scratchDirectory:text,budgets:z.object({maxInputBytes:bytes.positive().max(64*1024**3),maxMemoryBytes:bytes.min(16*1024**2).max(2*1024**3),maxScratchBytes:bytes.positive().max(32*1024**3),maxOutputBytes:bytes.positive().max(32*1024**3),maxDurationMs:bytes.positive().max(60*60*1000)}).strict()}).strict();
-export const operatorConfigSchema = z.object({ schemaVersion: z.literal(1), lineageValidation:lineageValidation.optional(), status: z.enum(['template', 'selected']), endpoints: z.object({ production: evidence, staging: evidence, privacy: evidence, terms: evidence, support: evidence }).strict(), topology: z.object({ kind: z.enum(['direct', 'single-rewriting-proxy']), headerRewriteEvidence: evidence, restrictedBackendEvidence: evidence }).strict(), runtimeEnvironment: runtimeSchema, releases: z.object({ current: release.nullable(), rollback: release.nullable() }).strict(), artifacts: z.array(z.object({ id: text, kind: z.enum(['geonames', 'osm-single', 'osm-regional', 'global-catalogue', 'climate-legacy', 'era5-release', 'component']), path: text, sha256: hash, bytes: bytes, version: text }).strict()).max(10000), budget: z.object({ processes: z.number().int().min(1).max(64), memoryBytes: bytes, diskAvailableBytes: bytes, currentBytes: bytes, rollbackBytes: bytes, scratchBytes: bytes, reserveBytes: bytes, maxArtifactBytes: bytes.max(16 * 1024 ** 3), capacityEvidence: evidence, rollbackEvidence: evidence }).strict().nullable(), ownerEvidence: z.object({ identity: evidence, policies: evidence, retention: evidence, host: evidence, providerBudget: evidence }).strict() }).strict();
+export const operatorConfigSchema = z.object({ schemaVersion: z.literal(1), sourceManifest: apiSourceManifestSchema.optional(), lineageValidation:lineageValidation.optional(), status: z.enum(['template', 'selected']), endpoints: z.object({ production: evidence, staging: evidence, privacy: evidence, terms: evidence, support: evidence }).strict(), topology: z.object({ kind: z.enum(['direct', 'single-rewriting-proxy']), headerRewriteEvidence: evidence, restrictedBackendEvidence: evidence }).strict(), runtimeEnvironment: runtimeSchema, releases: z.object({ current: release.nullable(), rollback: release.nullable() }).strict(), artifacts: z.array(z.object({ id: text, kind: z.enum(['geonames', 'osm-single', 'osm-regional', 'global-catalogue', 'climate-legacy', 'era5-release', 'component']), path: text, sha256: hash, bytes: bytes, version: text }).strict()).max(10000), budget: z.object({ processes: z.number().int().min(1).max(64), memoryBytes: bytes, diskAvailableBytes: bytes, currentBytes: bytes, rollbackBytes: bytes, scratchBytes: bytes, reserveBytes: bytes, maxArtifactBytes: bytes.max(16 * 1024 ** 3), capacityEvidence: evidence, rollbackEvidence: evidence }).strict().nullable(), ownerEvidence: z.object({ identity: evidence, policies: evidence, retention: evidence, host: evidence, providerBudget: evidence }).strict() }).strict();
 export type OperatorConfig = z.infer<typeof operatorConfigSchema>;
 export type OperatorArtifact = OperatorConfig['artifacts'][number];
 export type OperatorResult = {
@@ -80,6 +81,25 @@ export async function operatorPreflight(input: unknown, artifactRoot: string): P
         return output();
     }
     const c = parsed.data, e = c.runtimeEnvironment as Partial<Record<typeof envKeys[number], string>>;
+    const needsSourceManifest = [c.releases.current,c.releases.rollback].some(r=>r?.profile==='api-only-v1');
+    if(needsSourceManifest && !c.sourceManifest) missing('API_SOURCE_MANIFEST_MISSING');
+    if(c.sourceManifest){
+        try {
+            const manifest=validateApiSourceManifest(c.sourceManifest);
+            if(API_SOURCE_ENV_KEYS.some(key=>manifest.current.environment[key]!==e[key])) fail('API_SOURCE_RUNTIME_MISMATCH');
+            for(const selection of ['current','rollback'] as const){
+                const selected=c.releases[selection];
+                if(selected?.profile==='api-only-v1'){
+                    if(!selected.discovery || selected.discovery.providers.slice().sort().join(',')!==manifest[selection].discoveryProviders.slice().sort().join(',')) fail('API_SOURCE_DISCOVERY_MISMATCH');
+                    const weather=parseWeatherConfiguration(manifest[selection].environment);
+                    const providers=weather.providers??['met'],admitted=weather.admitted;
+                    const receipt=selected.weather;
+                    const same=(a:string[],b:string[])=>a.slice().sort().join(',')===b.slice().sort().join(',');
+                    if(receipt ? !same(receipt.providers,providers)||!same(receipt.admittedProviders,admitted) : !same(providers,['met'])||admitted.length>0) fail('API_SOURCE_WEATHER_MISMATCH');
+                }
+            }
+        } catch { fail('API_SOURCE_MANIFEST_INVALID'); }
+    }
     if (c.status === 'template')
         missing('TEMPLATE_NOT_DEPLOYABLE');
     for (const v of Object.values(c.ownerEvidence))

@@ -244,3 +244,8 @@ import "./operations/v1-source-profile.test.ts";
 import "./places/api-geographic-acceptance-matrix.test.ts";
 import "./mcp/v1-followup-acceptance.test.ts";
 import "./operations/api-capacity-report.test.ts";
+
+import "./events/eventConventionValidation.test.ts";
+import "./planning/eventValidation.test.ts";
+import "./operations/openweather-offer.test.ts";
+import "./operations/api-source-manifest.test.ts";

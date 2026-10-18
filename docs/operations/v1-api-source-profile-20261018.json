@@ -117,15 +117,20 @@
       "evidence": [
         "docs/operations/api-mode-local-setup.md",
         "docs/operations/weather-provider-admission.md",
-        "docs/operations/v1-final-reconciliation-20261018.md"
+        "docs/operations/v1-final-reconciliation-20261018.md",
+        "docs/operations/v1-api-readiness-20261018.md",
+        "docs/operations/openweather-public-delivery-20261018.md"
       ],
       "activationGates": [
-        "Existing Free five-day/three-hour entitlement evidence; release account/key state, rights and persistent quota remain separate."
+        "Existing Free five-day/three-hour entitlement evidence; release account/key state, rights and persistent quota remain separate.",
+        "Publish the machine-readable ODbL alteration-method offer at a stable public HTTPS URL, link it adjacent to shared OpenWeather samples, and verify it matches the released implementation. Local file presence is not public accessibility.",
+        "Accept the official OpenWeather logo, linked provider credit and ODbL notice in each actual hosted/client surface. Text metadata alone does not prove logo delivery."
       ],
       "limitations": [
         "No One Call or paid endpoint; response cache disabled pending permission.",
         "Native three-hour samples are not interpolated to hourly."
-      ]
+      ],
+      "alterationMethodArtifact": "public/openweather-normalization-method.json"
     },
     {
       "id": "seventimer",
@@ -275,7 +280,8 @@
         "docs/operations/publicuniverse-live-results-20261018.md"
       ],
       "activationGates": [
-        "Preserve dedicated quota, reviewed endpoint contracts, per-record rights and credits; exact release selection/admission remains explicit."
+        "Preserve dedicated quota, reviewed endpoint contracts, per-record rights and credits; exact release selection/admission remains explicit.",
+        "Keep provider-wide admission disabled until rights and composed credits for every exposed feature resolve, or implement explicit reviewed starter-only restriction before admitting that subset. BSC5P/OpenNGC rights do not admit the whole provider."
       ],
       "limitations": [
         "Catalogue visibility is optional evidence, not guaranteed seeing; model directions need timestamped observer calculations."
@@ -361,5 +367,29 @@
         "No automatic scraper fallback after API outage/quota; native host browser actions are separate from backend source admission."
       ]
     }
-  ]
+  ],
+  "releaseSelectionTemplate": {
+    "profile": "api-only-v1",
+    "appliedToRuntime": false,
+    "proposedCore": [
+      "geoapify",
+      "met",
+      "weatherapi",
+      "openweather",
+      "darkskysites",
+      "noaa-swpc"
+    ],
+    "admittedByThisArtifact": [],
+    "unadmittedOptional": "All optional sources remain gated; Public Universe is not blanket admitted.",
+    "history": "unavailable",
+    "astronomy": "local Astronomy Engine within supported calculation domains",
+    "ledgerScope": "Reuse existing consumed shared operator account labels and dedicated Public Universe/DarkSkySites project scopes; never initialize a fresh ledger as release proof.",
+    "evidenceRequired": [
+      "actual release commit/package identity",
+      "exact selected/admitted source features",
+      "retained entitlement/rights and rendered credit evidence",
+      "existing ledger scope reference without balances, keys or private path",
+      "actual host acceptance"
+    ]
+  }
 }

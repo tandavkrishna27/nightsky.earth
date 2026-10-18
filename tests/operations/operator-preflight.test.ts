@@ -195,6 +195,7 @@ test('API discovery requires quota declaration for current and rollback independ
 function apiOnlyConfig() {
  const c=config();Object.assign(c.runtimeEnvironment,{NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_MCP_TOOL_MODE:'full',MET_NORWAY_USER_AGENT:'NightSky.earth nightsky.earth2026@gmail.com'});
  for(const r of [c.releases.current,c.releases.rollback]){r.profile='api-only-v1';r.discovery={...apiEvidence(),providers:['geoapify']};}
+ c.sourceManifest={schemaVersion:1,current:{environment:{NIGHTSKY_QUOTA_STATE_PATH:c.runtimeEnvironment.NIGHTSKY_QUOTA_STATE_PATH},discoveryProviders:['geoapify'],evidence:{geoapify:['reviewed-record'],met:['reviewed-record'],'noaa-swpc':['reviewed-record'],'astronomy-engine':['reviewed-record']}},rollback:{environment:{NIGHTSKY_QUOTA_STATE_PATH:c.runtimeEnvironment.NIGHTSKY_QUOTA_STATE_PATH},discoveryProviders:['geoapify'],evidence:{geoapify:['reviewed-record'],met:['reviewed-record'],'noaa-swpc':['reviewed-record'],'astronomy-engine':['reviewed-record']}}};
  return c;
 }
 test('explicit API-only V1 full releases pass offline without geography or history',async()=>{
@@ -216,4 +217,21 @@ test('API-only profile rejects conflicting modes, local artifacts and history ac
  (c:any)=>c.runtimeEnvironment.NIGHTSKY_CLIMATE_ARTIFACT='history',
  (c:any)=>{c.artifacts=[{id:'history',kind:'climate-legacy',path:'history',sha256:hash,bytes:4,version:'v1'}];c.releases.rollback.artifactIds=['history'];},
  ]){const c=apiOnlyConfig();change(c);const r=await operatorPreflight(c,'.');assert.ok(r.findings.includes('API_ONLY_PROFILE_CONFLICT'),r.findings.join(','));assert.equal(r.status,'invalid');}
+});
+
+test('API-only release requires the exact source manifest rather than only a scope label',async()=>{
+ const c=apiOnlyConfig();delete c.sourceManifest;const r=await operatorPreflight(c,'.');assert.ok(r.findings.includes('API_SOURCE_MANIFEST_MISSING'),r.findings.join(','));assert.notEqual(r.status,'offline-pass');
+});
+
+test('exact source manifest rejects hidden current flags and independent rollback admission',async()=>{
+ for(const change of [
+ (c:any)=>c.runtimeEnvironment.NIGHTSKY_GEOMETRY_ENABLED='yes',
+ (c:any)=>c.sourceManifest.rollback.environment.NIGHTSKY_SKY_ADMITTED_PROVIDERS='publicuniverse',
+ (c:any)=>c.sourceManifest.current.discoveryProviders=['geonames'],
+ ]){const c=apiOnlyConfig();change(c);const r=await operatorPreflight(c,'.');assert.equal(r.status,'invalid');assert.ok(r.findings.some(code=>code.startsWith('API_SOURCE_')),r.findings.join(','));}
+});
+
+test('API-only rollback source manifest must agree with its weather release receipt',async()=>{
+ const c=apiOnlyConfig();c.releases.rollback.weather=weatherEvidence(['openweather'],['openweather']);
+ const r=await operatorPreflight(c,'.');assert.equal(r.status,'invalid');assert.ok(r.findings.includes('API_SOURCE_WEATHER_MISMATCH'),r.findings.join(','));
 });
