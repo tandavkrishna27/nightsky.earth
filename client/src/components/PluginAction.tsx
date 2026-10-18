@@ -1,26 +1,22 @@
-import { resolvePluginAction, type ListingConfig } from "@shared/website";
+import type { ListingConfig } from "@shared/website";
+import { Sparkles } from "lucide-react";
 export const listingConfig: ListingConfig = {
   published: import.meta.env.VITE_NIGHTSKY_LISTING_PUBLISHED === "true",
   url: import.meta.env.VITE_NIGHTSKY_LISTING_URL || null,
 };
 export default function PluginAction({
   className = "",
-  config = listingConfig,
+  compact = false,
 }: {
   className?: string;
-  config?: ListingConfig;
+  compact?: boolean;
 }) {
-  const action = resolvePluginAction(config);
   return (
     <a
-      className={`action action-primary ${className}`}
-      href={action.href}
-      {...(action.external
-        ? { target: "_blank", rel: "noopener noreferrer" }
-        : {})}
+      className={`action action-primary${compact ? " action-compact" : ""} ${className}`}
+      href="/get-started"
     >
-      {action.label}
-      <span aria-hidden="true">↗</span>
+      Get NightSky Plugin <Sparkles size={16} aria-hidden="true" />
     </a>
   );
 }

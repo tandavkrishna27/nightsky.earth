@@ -1,8 +1,14 @@
+export const pricingCopy = {
+  badge: "Free to use",
+  closing: "Start exploring for free.",
+  answer: "NightSky is currently free to use. Your AI assistant’s own plans, access requirements and usage limits still apply.",
+};
+
 export const homeCopy = {
   hero: {
-    eyebrow: "Your night-sky companion, through AI",
+    eyebrow: pricingCopy.badge,
     headline: "Where Earth meets the stars.",
-    body: "Bring the night sky into the conversation. NightSky is a plugin for your AI assistant, helping you explore the universe, prepare for nights outside, and develop what you want to create beneath the stars.",
+    body: "NightSky is an astronomy plugin for your AI assistant. Plan a night under the stars, explore the universe, and follow your curiosity.",
   },
   journeys: {
     title: "Journeys Under the Infinite.",
@@ -10,15 +16,16 @@ export const homeCopy = {
   },
   universe: {
     title: "The Universe, Explained Beautifully.",
-    body: "Follow a question a little further. Understand a condition, explore an idea, compare your options, or prepare for something new.",
+    body: "A question about the Moon. An idea for a time-lapse. A night you want to understand. Let one discovery lead to another.",
   },
   moments: {
     title: "Moments Beneath the Infinite.",
     body: "A little understanding can change the way you spend a night outside.",
   },
   ready: {
+    pricingNote: pricingCopy.closing,
     title: "Ready to look up?",
-    body: "Bring a question, a place, or an idea. Explore your next step with NightSky in ChatGPT.",
+    body: "Bring a question, a place, or an idea. Explore your next step with NightSky in your AI assistant.",
   },
 };
 export const activities = [
@@ -52,32 +59,61 @@ export const questionExamples = [
     id: "understand",
     label: "Understand",
     question: "Why does the Moon matter when watching meteors?",
-    explanation:
-      "Explore how moonlight, darkness, and your observing goal relate, and ask for an explanation at your level.",
+    response:
+      "A bright Moon washes out fainter meteors. The shower’s peak is only part of the picture: when the Moon rises or sets can help you find a darker observing window. Your location helps put those timings into context.",
   },
   {
     id: "explore",
     label: "Explore",
-    question:
-      "What could a beginner look for from my destination on my chosen night?",
-    explanation:
-      "Start with a named place and date, then explore supported observing possibilities and the evidence available.",
+    question: "Help me explore a night under the stars.",
+    response:
+      "Tell me where you’ll be, when you’d like to go, and what draws you outside. We can explore what the night might offer, from learning the constellations to watching a meteor shower, and look at the conditions that matter.",
   },
   {
-    id: "compare",
-    label: "Compare",
-    question: "How do these two nights differ for observing?",
-    explanation:
-      "Compare the supported astronomy and weather evidence for the alternatives you choose, with sources and gaps kept visible.",
+    id: "create",
+    label: "Create",
+    question: "I want to make my first night-sky time-lapse. Where do I begin?",
+    response:
+      "Start with the scene you imagine and the camera you have. We can work through framing, exposure, and the interval between frames, then shape a short sequence to test. A steady setup and a little experimentation are a useful beginning.",
   },
   {
     id: "prepare",
     label: "Prepare",
-    question: "What should I consider for my first night-sky photograph?",
-    explanation:
-      "Talk through your subject, camera, and lens, then work towards an appropriate starting approach.",
+    question: "What should I take for my first evening of stargazing?",
+    response:
+      "Begin with warm layers, water, a comfortable seat, and a light you can keep dim. Then consider where you’re going, how long you’ll stay, and your journey home. Share your plans, and we can work through the details together.",
   },
 ] as const;
+type ConversationDemo = {
+  id: (typeof questionExamples)[number]["id"];
+  activityLabel: string;
+  response?: string;
+} & ({ clarification: string; reply: string } | { clarification?: never; reply?: never });
+
+export const conversationDemos: readonly ConversationDemo[] = [
+  { id: "understand", activityLabel: "Preparing an explanation" },
+  {
+    id: "explore",
+    clarification: "Where will you be, and when would you like to go?",
+    reply: "Near Bengaluru this Saturday. It’s my first time.",
+    activityLabel: "Preparing your next steps",
+    response: "For a first outing, keep the plan simple: a short session with an open view of the sky. Moonlight, darkness and weather will shape the choice. Bring a dim light and something comfortable to sit on. Would you like to explore possible places?",
+  },
+  {
+    id: "create",
+    clarification: "What camera and lens will you use?",
+    reply: "A mirrorless camera and the kit lens.",
+    activityLabel: "Shaping a first test",
+    response: "With your camera and kit lens, begin with a sturdy tripod and a short test sequence. We can work through exposure and the interval between frames, then adjust after reviewing the result. What scene would you like to capture?",
+  },
+  {
+    id: "prepare",
+    clarification: "How long will you be out, and will you bring a telescope?",
+    reply: "A short evening near home, with no telescope.",
+    activityLabel: "Preparing an outing checklist",
+    response: "For a short evening near home, bring warm layers, water, a comfortable seat and a dim light. You can begin with your eyes alone; a telescope is not essential. Check access and your route home before setting out.",
+  },
+];
 export const aboutSections = [
   [
     "The wish to look up.",

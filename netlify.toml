@@ -2,7 +2,8 @@
 
 [build]
   # Build command
-  command = "npm run build"
+  # Publication build: fails closed until required factual approvals are recorded.
+  command = "npm run build:release"
   
   # Directory to publish (output of Vite build)
   publish = "dist/public"

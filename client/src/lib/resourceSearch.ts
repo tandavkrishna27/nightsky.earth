@@ -41,7 +41,7 @@ export function filterResources(
       (state.topic === "all" || x.topics.includes(state.topic)) &&
       (state.format === "all" || x.format === state.format) &&
       words.every((w) =>
-        `${x.name} ${x.description} ${x.topics.join(" ")}`
+        `${x.name} ${x.provider} ${x.description} ${formats[x.format]} ${x.topics.map(topic => topics[topic]).join(" ")}`
           .toLowerCase()
           .includes(w),
       ),

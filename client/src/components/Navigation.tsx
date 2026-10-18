@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import PluginAction from "./PluginAction";
+import nightskyLogo from "@assets/nightsky-logo-dark.svg";
 const links = [
   ["/about", "About"],
   ["/community", "The Collective"],
@@ -9,9 +10,16 @@ const links = [
 ];
 export default function Navigation() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const trigger = useRef<HTMLButtonElement>(null);
   useEffect(() => setOpen(false), [location]);
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 64);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
   useEffect(() => {
     const close = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
@@ -23,11 +31,10 @@ export default function Navigation() {
     return () => document.removeEventListener("keydown", close);
   }, [open]);
   return (
-    <header className="site-header">
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
       <div className="nav-inner">
-        <Link href="/" className="brand" aria-label="NightSky.earth home">
-          NightSky<span>.earth</span>
-          <i aria-hidden="true">✧</i>
+        <Link href="/" className="brand nav-brand" aria-label="NightSky.earth home">
+          <img src={nightskyLogo} alt="" width={1397} height={205} />
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
           {links.map(([href, label]) => (
@@ -41,17 +48,19 @@ export default function Navigation() {
           ))}
         </nav>
         <div className="nav-actions">
-          <PluginAction />
+          <PluginAction compact />
           <button
             ref={trigger}
             className="menu-trigger"
-            aria-label="Open navigation"
+            aria-label={open ? "Close navigation" : "Open navigation"}
             aria-expanded={open}
             aria-controls="mobile-navigation"
             onClick={() => setOpen(!open)}
           >
-            {open ? "Close" : "Menu"}{" "}
-            <span aria-hidden="true">{open ? "−" : "+"}</span>
+            <span className="menu-icon" aria-hidden="true">
+              <span />
+              <span />
+            </span>
           </button>
         </div>
       </div>
@@ -71,7 +80,7 @@ export default function Navigation() {
               {label}
             </Link>
           ))}
-          <PluginAction />
+          <PluginAction compact />
         </nav>
       )}
     </header>

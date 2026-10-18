@@ -1,5 +1,19 @@
 import { test, expect } from "@playwright/test";
 
+test("sound control is icon-only and keeps an accessible touch target", async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem("nightsky-entered", "true"));
+  await page.goto("/");
+  const button = page.getByRole("button", { name: "Unmute music", exact: true });
+  await expect(button).toHaveText("");
+  await expect(button).toHaveAttribute("aria-pressed", "false");
+  for (const width of [390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const box = await button.boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(46);
+    expect(box!.height).toBe(box!.width);
+  }
+});
+
 test("pending music can be cancelled before playback resolves", async ({
   page,
 }) => {
@@ -105,24 +119,36 @@ test("platform story, navigation and creative scope", async ({ page }) => {
     "Resources",
     "News",
   ]);
-  await expect(page.locator(".hero-description")).toContainText(
+  await expect(page.locator(".hero-copy")).toContainText(
     "plugin for your AI assistant",
   );
-  await expect(page.locator(".platform-availability")).toContainText(
-    "Not available yet",
+  await expect(page.locator(".platform-availability")).not.toContainText(
+    /Coming soon|Planned/,
   );
+  await expect(page.locator(".home-hero .platform-availability")).toHaveCount(
+    1,
+  );
+  await expect(page.locator(".platform-availability .hero-platform")).toHaveCount(4);
   await expect(page.locator(".platform-availability")).toContainText("Claude");
   await expect(page.locator(".platform-availability")).toContainText("Gemini");
-  await expect(page.locator(".activity-grid")).toContainText("time-lapses");
-  await expect(page.locator(".activity-grid")).toContainText("video");
+  await expect(page.locator(".platform-availability")).toContainText("Grok");
+  await page.getByRole("button", { name: "Capture the sky", exact: true }).click();
+  await expect(page.getByTestId("example-question")).toContainText("time-lapse");
+  await expect(page.locator("#faq")).toContainText("photograph, time-lapse or video");
+  await expect(page.locator(".brand i")).toHaveCount(0);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("button", { name: "Open navigation" }),
+  ).toHaveText("");
+  await page.setViewportSize({ width: 1280, height: 900 });
   await expect(
     page
       .getByRole("banner")
-      .getByRole("link", { name: /Get NightSky for ChatGPT/ }),
+      .getByRole("link", { name: "Get NightSky Plugin", exact: true }),
   ).toHaveAttribute("href", "/get-started");
 });
 
-test("Collective is an invitation with honest future status and mobile reflow", async ({
+test("Collective is a coming-soon invitation with email contributions and mobile reflow", async ({
   page,
 }) => {
   await page.addInitScript(() =>
@@ -132,9 +158,9 @@ test("Collective is an invitation with honest future status and mobile reflow", 
   await expect(page.locator(".collective-hero")).toContainText(
     "For the dreamers",
   );
-  await expect(page.locator(".collective-people")).toContainText("Filmmakers");
-  await expect(page.locator(".collective-future")).toContainText(
-    "taking shape",
+  await expect(page.locator(".collective-audience")).toContainText("Astrophotographers & filmmakers");
+  await expect(page.locator(".collective-contribute")).toContainText(
+    "coming soon",
   );
   await expect(page.locator("form")).toHaveCount(0);
   await expect(
@@ -198,9 +224,48 @@ test("blocked session storage does not prevent keyboard entry", async ({
       throw new Error("blocked");
     };
   });
-  await page.goto("/resources?topic=photography");
+  await page.goto("/");
   await page.getByRole("button", { name: "Enter without sound" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(page.getByLabel("Topic")).toHaveValue("photography");
+  await page.goto("/resources?topic=photography");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Photography", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("navigation compacts on scroll and mobile icon opens and closes accessibly", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem("nightsky-entered", "true"),
+  );
+  await page.goto("/");
+  const header = page.getByRole("banner");
+  const initial = await header.boundingBox();
+  await page.evaluate(() => window.scrollTo(0, 800));
+  await expect(header).toHaveClass(/is-scrolled/);
+  const compact = await header.boundingBox();
+  expect(compact!.y).toBe(initial!.y);
+  expect(compact!.width).toBe(initial!.width);
+  expect(compact!.height).toBeLessThan(initial!.height);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await expect(header).not.toHaveClass(/is-scrolled/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const trigger = page.locator(".menu-trigger");
+  await expect(trigger).toHaveText("");
+  await expect(trigger.locator(".menu-icon")).toHaveCount(1);
+  await trigger.click();
+  await expect(trigger).toHaveAccessibleName("Close navigation");
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toHaveAccessibleName("Open navigation");
+  await trigger.click();
+  await page
+    .getByRole("navigation", { name: "Mobile navigation" })
+    .getByRole("link", { name: "About", exact: true })
+    .click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await expect(
+    page.getByRole("navigation", { name: "Mobile navigation" }),
+  ).toHaveCount(0);
 });

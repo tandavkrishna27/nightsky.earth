@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { SUPPORT_EMAIL } from "@shared/website";
+import { useReplayWelcome } from "./ExperienceShell";
+import nightskyLogo from "@assets/nightsky-logo-dark.svg";
 const groups: { title: string; links: string[][] }[] = [
   {
     title: "Explore",
@@ -15,7 +16,7 @@ const groups: { title: string; links: string[][] }[] = [
     title: "Help",
     links: [
       ["/#how-it-works", "How it works"],
-      ["/get-started", "Get NightSky for ChatGPT"],
+      ["/get-started", "Get started"],
       ["/contact", "Contact"],
       ["/sources", "Sources & coverage"],
     ],
@@ -29,17 +30,15 @@ const groups: { title: string; links: string[][] }[] = [
   },
 ];
 export default function Footer() {
+  const replayWelcome = useReplayWelcome();
   return (
     <footer className="site-footer">
       <div className="footer-main">
         <div>
-          <Link href="/" className="brand">
-            NightSky<span>.earth</span>
+          <Link href="/" className="footer-brand" aria-label="NightSky.earth">
+            <img src={nightskyLogo} alt="" width={1397} height={205} />
           </Link>
           <p>Where Earth meets the stars.</p>
-          <a className="email-link" href={`mailto:${SUPPORT_EMAIL}`}>
-            {SUPPORT_EMAIL}
-          </a>
         </div>
         {groups.map((group) => (
           <div className="footer-column" key={group.title}>
@@ -63,6 +62,11 @@ export default function Footer() {
                 {label}
               </Link>
             ))}
+            {group.title === "Help" && (
+              <button className="footer-replay" type="button" onClick={event => replayWelcome(event.currentTarget)}>
+                Replay welcome
+              </button>
+            )}
           </div>
         ))}
       </div>

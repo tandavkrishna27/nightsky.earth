@@ -88,7 +88,7 @@ test("blocked preference storage, invalid URL and timezone reset do not break ca
     };
   });
   await page.goto("/sky-events?month=bad&tz=bad&view=bad");
-  await page.getByRole("button", { name: "Enter without sound" }).click();
+  await expect(page.getByRole("dialog", { name: "Enter NightSky" })).toHaveCount(0);
   await expect(page.getByLabel("Calendar month")).toHaveValue("2026-10");
   await page.getByRole("button", { name: "Use browser time zone" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

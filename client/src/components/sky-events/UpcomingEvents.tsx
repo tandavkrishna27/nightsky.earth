@@ -4,6 +4,7 @@ import { nextSkyEvents } from "@shared/skyEventQueries";
 import type { SkyEvent } from "@shared/skyEvents";
 import { useCalendarPreferences } from "./CalendarPreferences";
 import EventCard from "./EventCard";
+import HomeEvents from "@/components/home/HomeEvents";
 import "@/styles/sky-events.css";
 export default function UpcomingEvents({
   home = false,
@@ -16,12 +17,11 @@ export default function UpcomingEvents({
 }) {
   const { tz, now } = useCalendarPreferences();
   const items = nextSkyEvents(events, tz, now, 3);
+  if (home) return <HomeEvents items={items} zone={tz} search={search || "?tz=" + encodeURIComponent(tz)} />;
   return (
     <section className="upcoming-section page-width">
       <div className="section-heading">
-        <p className="eyebrow">
-          {home ? "A reason to look up" : "Coming up next · All categories"}
-        </p>
+        {!home && <p className="eyebrow">Coming up next · All categories</p>}
         <h2>
           {home ? "Next in the night sky" : "The next moments to explore."}
         </h2>

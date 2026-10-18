@@ -1,147 +1,144 @@
+import {
+  BookOpen,
+  Camera,
+  Leaf,
+  Mail,
+  Orbit,
+  Telescope,
+  Users,
+} from "lucide-react";
 import SEO from "@/components/SEO";
+import { SUPPORT_EMAIL } from "@shared/website";
+import {
+  collectiveAudiences,
+  collectivePurposes,
+  contributionSubject,
+} from "@/content/collective";
 import person from "@assets/stock_images/person_silhouette_st_c7feb986.jpg";
-import trails from "@assets/stock_images/long_exposure_stars__411203e7.jpg";
 import milky from "@assets/stock_images/milky_way_galaxy_nig_0e96a3f6.jpg";
-import desert from "@assets/stock_images/desert_dunes_night_s_ee2f17ac.jpg";
-const pursuits = [
-  {
-    number: "01",
-    label: "Share the night",
-    title: "Some things are better looked at together.",
-    body: "The first constellation you recognise. A meteor someone else almost missed. A quiet stretch of darkness, far from the city. Looking up can be a personal moment, and a reason to connect.",
-    image: desert,
-    alt: "Desert dunes beneath a star-filled night sky",
-  },
-  {
-    number: "02",
-    label: "Make something of it",
-    title: "A sky full of stories. A thousand ways to tell them.",
-    body: "A photograph, a film, a time-lapse, a few words in a notebook. The night gives us something to work with. We want the Collective to become a place for the ideas, experiments, and lessons that follow.",
-    image: trails,
-    alt: "A warmly lit cabin beneath a starry winter sky",
-  },
-  {
-    number: "03",
-    label: "Keep learning",
-    title: "Curiosity travels further when it is shared.",
-    body: "There is always another question to ask, whether you are finding your first planet or helping someone understand what they see. Different experience brings different perspectives. That is where learning begins.",
-    image: milky,
-    alt: "The Milky Way stretching across a dark sky",
-  },
-];
+import "@/styles/collective.css";
+
+const audienceIcons = [Telescope, Orbit, Camera, BookOpen, Users, Leaf];
+
 export default function Community() {
   return (
-    <>
+    <div className="collective-page">
       <SEO
         title="The Collective"
-        description="For the dreamers, the teachers, the ones who never stopped looking up. Discover the community taking shape around NightSky."
+        description="The Collective is coming soon. An invitation to stargazers, astronomers, creators, educators and everyone who cares for the night sky. Email NightSky to contribute."
       />
       <section
         className="collective-hero"
         style={{
-          backgroundImage:
-            "linear-gradient(180deg,rgba(8,12,20,.25),rgba(8,12,20,.35) 45%,#0c0c0e),url(" +
-            person +
-            ")",
+          backgroundImage: `linear-gradient(180deg,rgba(8,12,20,.3),rgba(8,12,20,.4) 45%,#0c0c0e),url(${person})`,
         }}
       >
         <div>
-          <p className="eyebrow">Many beginnings. One shared sky.</p>
+          <span className="collective-status">Coming soon</span>
           <h1>The Collective</h1>
           <p>
             For the dreamers, the teachers,
             <br />
             the ones who never stopped looking up.
           </p>
+          <p className="collective-definition">
+            A community around the night sky: observing, creating, learning and
+            conserving dark skies.
+          </p>
           <a className="collective-scroll" href="#shared-sky">
-            Find your place beneath the stars <span aria-hidden="true">↓</span>
+            Discover the Collective <span aria-hidden="true">↓</span>
           </a>
         </div>
       </section>
-      <section id="shared-sky" className="collective-intro page-width">
-        <p className="eyebrow">The sky belongs to all of us</p>
-        <h2>
-          Different places.
-          <br />
-          The same wonder.
-        </h2>
-        <p>
-          Some of us come for the quiet. Some come with a camera, a question, or
-          a story to tell. The Collective is the community we want to grow
-          around those beginnings—a place to learn from one another and stay
-          curious about the world above.
-        </p>
-      </section>
-      <div className="collective-pursuits page-width">
-        {pursuits.map((p) => (
-          <section className="collective-pursuit" key={p.number}>
-            <div className="collective-image">
-              <img src={p.image} alt={p.alt} loading="lazy" />
-              <span>{p.number} / Beneath the infinite</span>
-            </div>
-            <div className="collective-pursuit-copy">
-              <p className="eyebrow">{p.label}</p>
-              <h2>{p.title}</h2>
-              <p>{p.body}</p>
-            </div>
-          </section>
-        ))}
-      </div>
-      <section className="collective-people page-width">
-        <div>
-          <p className="eyebrow">You belong in the picture</p>
-          <h2>
-            No single way
-            <br />
-            to be a sky person.
-          </h2>
-        </div>
-        <div className="collective-people-grid">
-          {[
-            [
-              "Observers & wanderers",
-              "For the joy of being outside, noticing more, and finding a little darkness.",
-            ],
-            [
-              "Photographers & Filmmakers",
-              "For the images, moving moments, and stories waiting to be made.",
-            ],
-            [
-              "Educators & storytellers",
-              "For making a complicated universe feel closer, one explanation at a time.",
-            ],
-            [
-              "The simply curious",
-              "For everyone starting with a question. No equipment or experience required.",
-            ],
-          ].map(([title, body]) => (
-            <div key={title}>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+
       <section
-        className="collective-future"
+        id="shared-sky"
+        className="collective-audience page-width"
+        aria-labelledby="collective-audience-heading"
+      >
+        <div className="collective-audience-intro">
+          <h2 id="collective-audience-heading">
+            Different places.
+            <br /> The same wonder.
+          </h2>
+          <p>
+            From a first constellation to a lifetime of research, there are many
+            ways to connect with the night. The Collective is an invitation to
+            bring your perspective.
+          </p>
+          <p className="collective-welcome-note">
+            No title, equipment or experience required.
+          </p>
+        </div>
+        <ul className="collective-audience-grid">
+          {collectiveAudiences.map(([title, body], index) => {
+            const Icon = audienceIcons[index];
+            return (
+              <li key={title}>
+                <Icon
+                  className="collective-audience-icon"
+                  size={28}
+                  aria-hidden="true"
+                />
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section
+        className="collective-purpose"
+        aria-labelledby="collective-purpose-heading"
+      >
+        <div className="collective-purpose-layout page-width">
+          <figure className="collective-purpose-photo">
+            <img
+              src={milky}
+              alt="The Milky Way above dark desert dunes"
+              loading="lazy"
+            />
+          </figure>
+          <div className="collective-purpose-copy">
+            <h2 id="collective-purpose-heading">
+              Curiosity travels further when it is shared.
+            </h2>
+            <p>
+              A connection to the sky can begin in many ways. These four ideas
+              guide the Collective.
+            </p>
+            <div className="collective-purpose-grid">
+              {collectivePurposes.map(([title, body]) => (
+                <div key={title}>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="collective-contribute"
+        aria-labelledby="collective-contribute-heading"
         style={{
-          backgroundImage:
-            "linear-gradient(#0c0c0eaa,#0c0c0ee8),url(" + milky + ")",
+          backgroundImage: `linear-gradient(#0c0c0eaa,#0c0c0ee8),url(${milky})`,
         }}
       >
-        <p className="eyebrow">A community, taking shape</p>
-        <h2>
-          A shared sky.
-          <br />
-          An unfolding story.
-        </h2>
+        <h2 id="collective-contribute-heading">Bring your perspective.</h2>
         <p>
-          Shared learning, observing stories, and ways to connect are the next
-          part of NightSky. The Collective is still taking shape. As it grows,
-          this is where you will find what comes next.
+          The Collective is coming soon. Have an idea, a story, or experience
+          you’d like to contribute? Email us and tell us what you have in mind.
         </p>
-        <span>For now, keep looking up.</span>
+        <a
+          className="action action-primary"
+          href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(contributionSubject)}`}
+        >
+          Email to contribute <Mail size={17} aria-hidden="true" />
+        </a>
       </section>
-    </>
+    </div>
   );
 }

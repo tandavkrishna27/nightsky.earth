@@ -1,0 +1,38 @@
+.sources-page .support-intro { margin-bottom: 27px; }
+.coverage-introduction { max-width: 790px; color: #abb7c7; font-size: 15px; line-height: 1.9; margin-bottom: 38px; }
+.coverage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 23px; align-items: start; }
+.coverage-card { min-width: 0; border: 1px solid #ffffff1c; border-radius: 20px; background: linear-gradient(145deg, #18202bb5, #11161bd9); padding: 31px 29px 9px; }
+.coverage-card:last-child { grid-column: 1/-1; }
+.coverage-card-title { display: flex; align-items: center; gap: 14px; margin-bottom: 19px; }
+.coverage-card-title > svg { color: #cdb584; flex-shrink: 0; }
+.coverage-card h2 { font-size: 29px; line-height: 1.3; letter-spacing: -.02em; }
+.coverage-description { color: #d0d5dd; font-size: 15px; line-height: 1.9; margin-bottom: 16px; }
+.coverage-limit { color: #aeb9c8; font-size: 13px; line-height: 1.9; margin-bottom: 23px; }
+.coverage-card details { border-top: 1px solid #ffffff16; }
+.coverage-card summary { display: flex; justify-content: space-between; align-items: center; gap: 15px; min-height: 55px; padding-block: 14px; list-style: none; color: #d9c292; font-size: 12px; line-height: 1.8; cursor: pointer; }
+.coverage-card summary::-webkit-details-marker { display: none; }
+.coverage-card summary svg { flex-shrink: 0; }
+.coverage-card details[open] summary svg { transform: rotate(180deg); }
+.coverage-detail { padding: 3px 0 17px; }
+.coverage-detail p { color: #bbc5d1; font-size: 13px; line-height: 1.9; margin-bottom: 15px; }
+.coverage-source-links { list-style: none; padding: 6px 0 0; margin: 0; }
+.coverage-source-links a { display: inline-block; color: #ddc89f; font-size: 12px; line-height: 1.9; min-height: 44px; padding-block: 10px; text-decoration: underline; text-underline-offset: 4px; }
+.coverage-reading { border-top: 1px solid #ffffff18; padding-top: 44px; margin-top: 52px; }
+.coverage-reading > h2 { font-size: 36px; line-height: 1.3; margin-bottom: 29px; }
+.coverage-reading-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 29px 50px; }
+.coverage-reading h3 { font-family: Inter, sans-serif; font-size: 15px; line-height: 1.7; margin-bottom: 10px; color: #e0d9ca; }
+.coverage-reading p { color: #aeb9c8; font-size: 14px; line-height: 1.9; }
+.coverage-closing { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px 30px; margin-top: 38px; padding-top: 27px; border-top: 1px solid #ffffff15; }
+.coverage-closing p { max-width: 650px; font-size: 12px; line-height: 1.8; color: #a5b0c0; }
+.coverage-closing a { gap: 12px; min-height: 44px; font-size: 13px; }
+@media (max-width: 760px) {
+  .coverage-grid, .coverage-reading-grid { grid-template-columns: minmax(0, 1fr); }
+  .coverage-card:last-child { grid-column: auto; }
+}
+@media (max-width: 600px) {
+  .coverage-card { padding: 25px 23px 7px; }
+  .coverage-card h2 { font-size: 27px; }
+  .coverage-introduction, .coverage-description { font-size: 14px; }
+  .coverage-reading > h2 { font-size: 31px; }
+  .coverage-reading { margin-top: 38px; padding-top: 33px; }
+}

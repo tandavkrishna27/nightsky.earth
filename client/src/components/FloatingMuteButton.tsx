@@ -15,6 +15,7 @@ export default function FloatingMuteButton() {
             : "Mute music"
       }
       aria-pressed={!isMuted}
+      aria-busy={isPending}
       title={
         isPending
           ? "Cancel music playback"
@@ -28,9 +29,7 @@ export default function FloatingMuteButton() {
       ) : (
         <Volume2 size={19} aria-hidden="true" />
       )}
-      <span>
-        {isPending ? "Loading sound…" : `Sound ${isMuted ? "off" : "on"}`}
-      </span>
+      {isPending && <i className="music-pending" aria-hidden="true" />}
     </button>
   );
 }

@@ -11,6 +11,7 @@ import Community from "./pages/Community";
 import Resources from "./pages/Resources";
 import Contact from "./pages/Contact";
 import GetStarted from "./pages/GetStarted";
+import Sources from "./pages/Sources";
 
 import MeteorShowerDetail from "./pages/MeteorShowerDetail";
 import News from "./pages/News";
@@ -49,9 +50,7 @@ export default function App() {
                     path="/meteor-shower/:id"
                     component={MeteorShowerDetail}
                   />
-                  <Route path="/sources">
-                    <SupportingPage kind="sources" />
-                  </Route>
+                  <Route path="/sources" component={Sources} />
                   <Route path="/privacy">
                     <SupportingPage kind="privacy" />
                   </Route>

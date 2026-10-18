@@ -10,6 +10,7 @@ const items: Resource[] = [
   {
     id: "moon",
     name: "Moon photography",
+    provider: "Photography team",
     description: "A field guide",
     topics: ["photography"],
     format: "guides",
@@ -19,6 +20,7 @@ const items: Resource[] = [
   {
     id: "map",
     name: "Sky map",
+    provider: "Map team",
     description: "Stargazing",
     topics: ["stargazing"],
     format: "tools",
@@ -75,4 +77,10 @@ test("the word all is a real search query, not a filter sentinel", () => {
     "all",
   );
   assert.deepEqual(parseResourceState(serializeResourceState(value)), value);
+});
+
+test("search finds provider names and human-readable topic labels", () => {
+  const sample: Resource[] = [{ ...items[0], provider: "Open Observatory", topics: ["conservation"] }];
+  assert.deepEqual(filterResources(sample, { q: "Open Observatory", topic: "all", format: "all" }).map(item => item.id), ["moon"]);
+  assert.deepEqual(filterResources(sample, { q: "dark-sky", topic: "all", format: "all" }).map(item => item.id), ["moon"]);
 });

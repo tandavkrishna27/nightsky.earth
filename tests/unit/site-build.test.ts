@@ -81,6 +81,27 @@ test("a complete synthetic release has an indexable sitemap without preview head
   assert.ok(output.sitemap.includes("/sky-events/" + skyEvents[0].id));
   assert.ok(!output.sitemap.includes("draft-2026"));
   assert.ok(!output.sitemap.includes("withdrawn-2026"));
+  for (const agent of [
+    "Googlebot",
+    "Bingbot",
+    "OAI-SearchBot",
+    "ChatGPT-User",
+    "Claude-SearchBot",
+    "Claude-User",
+    "GPTBot",
+    "ClaudeBot",
+    "CCBot",
+    "Google-Extended",
+  ]) {
+    const group = output.robots.split("User-agent: " + agent)[1]?.split("\n\n")[0];
+    assert.ok(group, `${agent} has an explicit robots group`);
+    assert.ok(group.includes("Allow: /"), `${agent} can crawl public pages`);
+    assert.ok(group.includes("Disallow: /api/"), `${agent} cannot crawl APIs`);
+    assert.ok(group.includes("Disallow: /admin/"), `${agent} cannot crawl admin pages`);
+    assert.ok(group.includes("Disallow: /*.json$"), `${agent} cannot crawl JSON endpoints`);
+  }
+  assert.ok(output.robots.includes("User-agent: *\nAllow: /"));
+  assert.ok(output.robots.includes("Sitemap: https://nightsky.earth/sitemap.xml"));
   assert.ok(!output.redirects.includes("/sky-events/draft-2026"));
   assert.ok(output.redirects.includes("/sky-events/withdrawn-2026"));
   assert.throws(

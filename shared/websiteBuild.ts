@@ -89,7 +89,37 @@ export function buildWebsiteOutputs({
         .join("") +
       "</urlset>",
     robots: release
-      ? "User-agent: *\nAllow: /\nSitemap: " + SITE_ORIGIN + "/sitemap.xml\n"
+      ? [
+          "# All crawlers, including search, answer retrieval, and model-training crawlers, may access public pages.",
+          "# Google-Extended is included for Gemini Apps grounding; Google's control also permits model training.",
+          "Sitemap: " + SITE_ORIGIN + "/sitemap.xml",
+          ...[
+            "Googlebot",
+            "Bingbot",
+            "OAI-SearchBot",
+            "ChatGPT-User",
+            "Claude-SearchBot",
+            "Claude-User",
+            "GPTBot",
+            "ClaudeBot",
+            "CCBot",
+            "Google-Extended",
+          ].flatMap((agent) => [
+            "",
+            "User-agent: " + agent,
+            "Allow: /",
+            "Disallow: /api/",
+            "Disallow: /admin/",
+            "Disallow: /*.json$",
+          ]),
+          "",
+          "User-agent: *",
+          "Allow: /",
+          "Disallow: /api/",
+          "Disallow: /admin/",
+          "Disallow: /*.json$",
+          "",
+        ].join("\n")
       : "User-agent: *\nDisallow: /\n",
     headers: release ? "" : "/*\n  X-Robots-Tag: noindex, nofollow\n",
     redirects:

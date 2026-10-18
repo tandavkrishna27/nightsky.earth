@@ -1,0 +1,386 @@
+.get-started-page .setup-account-note {
+  text-align: center;
+  color: #d2c8b1;
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 22px;
+}
+.get-started-page .setup-plan-note {
+  margin-top: 6px;
+}
+.get-started-page .setup-card-guide {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #d2bc91;
+  font-size: 12px;
+  min-height: 44px;
+  margin-top: 8px;
+}
+.installation-guide {
+  padding-block: 18px 65px;
+  overflow-wrap: anywhere;
+}
+.setup-guide-heading {
+  margin-bottom: 29px;
+}
+.get-started-page .setup-guide-heading h2,
+.setup-faq h2 {
+  font-size: clamp(34px, 3.4vw, 46px);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+#setup-heading {
+  scroll-margin-top: 20px;
+}
+.setup-guide-heading > p,
+.setup-faq > div > p {
+  color: #b3becc;
+  font-size: 14px;
+  line-height: 1.9;
+  margin-top: 15px;
+}
+.setup-guide-shell {
+  border: 1px solid #ffffff20;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at top right, #c2a97709, transparent), #11161de8;
+  overflow: hidden;
+}
+.setup-guide-assistants {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 14px;
+  gap: 8px;
+  border-bottom: 1px solid #ffffff15;
+}
+.setup-guide-assistants button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+  padding: 15px 12px;
+  min-height: 52px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  font-size: 14px;
+  color: #bfc8d5;
+}
+.setup-guide-assistants button svg,
+.setup-guide-assistants button img {
+  flex-shrink: 0;
+}
+.setup-guide-assistants button[aria-pressed="true"] {
+  background: #c2a97712;
+  border-color: #c2a97765;
+  color: #ead7ae;
+}
+.setup-guide-body {
+  padding: 35px;
+}
+.setup-guide-context h3 {
+  font-size: 31px;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+.setup-guide-context p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #b9c3d0;
+}
+.setup-guide-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 25px 17px;
+}
+.setup-guide-methods button {
+  min-height: 44px;
+  padding: 9px 19px;
+  border: 1px solid #ffffff25;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #c6cfda;
+}
+.setup-guide-methods button[aria-pressed="true"] {
+  background: #c2a977;
+  border-color: #c2a977;
+  color: #171b21;
+}
+.setup-guide-requirements {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #abb8c9;
+  max-width: 840px;
+  margin-bottom: 30px;
+}
+.setup-guide-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 34px;
+}
+.setup-instructions,
+.setup-connection-check {
+  min-width: 0;
+}
+.setup-instructions > ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 25px;
+}
+.setup-instructions > ol > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+.setup-instruction-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid #c2a97750;
+  border-radius: 50%;
+  color: #d8c291;
+  font-size: 12px;
+  margin-top: 3px;
+}
+.setup-instructions h4 {
+  font-family: Inter, sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #e0dcd2;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.setup-instructions p {
+  font-size: 13px;
+  line-height: 1.9;
+  color: #b7c1cf;
+}
+.setup-connection-resource,
+.setup-package-resource {
+  border-top: 1px solid #ffffff1a;
+  padding-top: 23px;
+  margin-top: 27px;
+}
+.setup-connection-resource h4,
+.setup-package-resource h4 {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.setup-connection-resource h4 svg,
+.setup-package-resource h4 svg {
+  flex-shrink: 0;
+  color: #d0b788;
+}
+.installation-guide .setup-small-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 9px 15px;
+  margin-top: 14px;
+  border: 1px solid #c2a97770;
+  border-radius: 999px;
+  color: #ddc79f;
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: left;
+}
+.installation-guide .setup-small-action:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+.setup-instructions .setup-resource-note {
+  color: #a7b2c1;
+  font-size: 12px;
+  margin-top: 12px;
+}
+.setup-resource-address,
+.setup-check-prompt {
+  user-select: text;
+}
+.setup-connection-check {
+  padding: 25px;
+  border: 1px solid #c2a97730;
+  border-radius: 18px;
+  background: #c2a97706;
+}
+.setup-connection-check > svg {
+  color: #d4ba84;
+  margin-bottom: 17px;
+}
+.setup-connection-check h4 {
+  font-size: 26px;
+  line-height: 1.3;
+  margin-bottom: 15px;
+}
+.setup-connection-check p {
+  font-size: 12px;
+  color: #b9c3d0;
+  line-height: 1.9;
+}
+.setup-connection-check .setup-check-prompt {
+  font-size: 14px;
+  color: #e2d6bd;
+  line-height: 1.9;
+  margin-top: 17px;
+}
+.setup-connection-check ul {
+  padding-left: 17px;
+  margin-block: 23px 17px;
+  color: #bdc7d4;
+  font-size: 12px;
+  line-height: 1.9;
+}
+.setup-connection-check li + li {
+  margin-top: 10px;
+}
+.setup-connection-check .setup-check-note {
+  font-size: 11px;
+  color: #aab6c5;
+}
+.setup-guide-copy-status {
+  min-height: 24px;
+  margin-top: 13px;
+  color: #dbc391;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.setup-guide-bottom {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 25px;
+  padding-top: 17px;
+  border-top: 1px solid #ffffff16;
+}
+.setup-guide-bottom a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: #d7c098;
+  font-size: 12px;
+}
+.setup-guide-bottom > span {
+  font-size: 11px;
+  line-height: 1.9;
+  color: #a4afbf;
+}
+.setup-faq {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+  align-items: start;
+  gap: 65px;
+  padding-block: 15px 62px;
+  overflow-wrap: anywhere;
+}
+.setup-faq .stable-faq-list {
+  position: relative;
+  border-top: 1px solid #ffffff20;
+}
+.setup-faq details {
+  border-bottom: 1px solid #ffffff20;
+}
+.setup-faq summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding-block: 19px;
+  min-height: 60px;
+  font-size: 13px;
+  line-height: 1.8;
+  cursor: pointer;
+  color: #d1d7df;
+}
+.setup-faq summary::-webkit-details-marker {
+  display: none;
+}
+.setup-faq summary:after {
+  content: "+";
+  color: #c2a977;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.setup-faq details[open] summary:after {
+  content: "−";
+}
+.setup-faq .faq-answer {
+  padding: 0 25px 23px 0;
+  font-size: 13px;
+  line-height: 1.9;
+  color: #b4c0ce;
+}
+.installation-guide :is(a, button):focus-visible,
+#setup-heading:focus-visible,
+.setup-card-guide:focus-visible,
+.setup-faq summary:focus-visible {
+  outline: 2px solid #dfc58c;
+  outline-offset: 4px;
+}
+@media (max-width: 850px) {
+  .setup-guide-columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 30px;
+  }
+  .setup-faq {
+    gap: 30px;
+  }
+}
+@media (max-width: 600px) {
+  .installation-guide {
+    padding-bottom: 45px;
+  }
+  .setup-guide-assistants {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 11px;
+  }
+  .setup-guide-body {
+    padding: 25px 21px;
+  }
+  .setup-guide-context h3 {
+    font-size: 29px;
+  }
+  .setup-guide-heading h2,
+  .setup-faq h2 {
+    font-size: 34px;
+  }
+  .setup-guide-columns {
+    gap: 25px;
+  }
+  .setup-instructions > ol > li {
+    gap: 11px;
+  }
+  .setup-connection-check {
+    padding: 23px;
+  }
+  .setup-faq {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 25px;
+    padding-bottom: 40px;
+  }
+  .setup-guide-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.setup-guide-manage {
+  color: #aab6c5;
+  font-size: 12px;
+  line-height: 1.9;
+  margin-top: 27px;
+  padding-top: 22px;
+  border-top: 1px solid #ffffff15;
+}

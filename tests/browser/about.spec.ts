@@ -10,7 +10,7 @@ test("About tells the product story without invented services", async ({
     "Where Earth Looks Up",
   );
   await expect(page.getByRole("main")).toContainText(
-    "plugin for your AI assistant",
+    "plugin for ChatGPT, Claude, Gemini and Grok",
   );
   await expect(
     page.getByRole("main").getByRole("link", { name: /Explore sources/ }),

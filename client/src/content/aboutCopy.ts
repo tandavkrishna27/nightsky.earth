@@ -8,7 +8,7 @@ export const aboutCopy = {
     "NightSky brings those questions into a conversation, helping you connect information with what you want to learn, experience, or create.",
   ],
   product: [
-    "NightSky is a plugin for your AI assistant, launching first on ChatGPT. Ask for an explanation, explore a chosen night, compare alternatives, or work through how to prepare.",
+    "NightSky is a plugin for ChatGPT, Claude, Gemini and Grok. Ask for an explanation, explore a chosen night, compare alternatives, or work through how to prepare.",
     "You can begin with a question, a destination, an observing goal, or a creative idea. The conversation can grow from there.",
   ],
   principles: [
