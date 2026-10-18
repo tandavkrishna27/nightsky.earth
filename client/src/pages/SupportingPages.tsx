@@ -1,89 +1,95 @@
 import EditorialPage from "@/components/EditorialPage";
 import { SUPPORT_EMAIL } from "@shared/website";
+
+const effectiveDate = "18 October 2026";
+
 const content = {
   privacy: {
     eyebrow: "Privacy",
     title: "Your privacy, clearly explained.",
-    intro: "What NightSky’s website and connected service process, where information goes, and what still needs confirmation before publication.",
+    intro:
+      "What NightSky processes when you visit this website or use the connected service, and where that information goes.",
     sections: [
       [
         "Who operates NightSky",
-        "NightSky.earth is operated by Tandav Krishna (TK), based in Hyderabad, Telangana, India. For privacy questions or requests, contact the address at the end of this page.",
+        "NightSky.earth is operated by Tandav Krishna (TK), based in Hyderabad, Telangana, India. For privacy questions or requests, contact the email address at the end of this page.",
       ],
       [
-        "What NightSky processes",
-        "NightSky does not currently ask you to create a NightSky account. When you ask an AI assistant to use NightSky, the service may receive the information needed for that request, such as a place or coordinates, date and time, observing interests, optional equipment details, and settings you choose. Do not include information that is not needed for a sky-planning request. The AI platform separately processes your conversation under its own terms and privacy notice.",
+        "Information used to answer a request",
+        "NightSky does not require a separate NightSky account and does not keep request content, submitted locations, prompts or conversation history in a persistent NightSky user profile or request history. When you ask an AI assistant to use NightSky, the information needed to answer—such as a place or coordinates, date and time, observing interests, optional equipment details or a news search—may be processed while the request is answered. The AI platform you use separately processes your conversation under its own terms and privacy notice.",
       ],
       [
-        "Information sent to service providers",
-        "To answer a request, NightSky may send the relevant location, date range or query to providers that supply place, weather, climate or news information. Depending on the feature and configuration, these can include GeoNames or Geoapify for place lookup; MET Norway, WeatherAPI, OpenWeather or NOAA for weather; Open-Meteo for historical climate preparation; and the Spaceflight News API for news searches. Weather requests can include resolved coordinates, and some location inputs are rounded before they are sent. Each provider handles information under its own terms and privacy practices. The exact providers and transfers depend on the deployed configuration and must be checked before publication.",
+        "Information sent to data providers",
+        "Some features use independent data providers. Depending on the feature and service configuration, NightSky may send a relevant place, coordinates, date range or search query to providers for place, weather, climate or news information. These may include GeoNames or Geoapify for place lookup; MET Norway, WeatherAPI, OpenWeather or NOAA for weather; Open-Meteo for historical climate information; and the Spaceflight News API for news searches. For example, the website’s news search sends the search term and selected source filter through NightSky to the Spaceflight News API. Providers handle information under their own terms and privacy practices, and may process it in other countries.",
       ],
       [
-        "Service logs and retention",
-        "NightSky’s application logging records operational details such as a fixed route label, request method, response status and duration; it is designed not to record request bodies or query strings. Temporary rate-limit counters are held in memory. The service also keeps an operator-side quota ledger for provider usage. An optional climate API history feature can store request summaries and source evidence, but it is disabled by default. These implementation details do not establish the retention period for the production host, backups, infrastructure logs or support mailbox. Those settings and any configured history use must be confirmed before this draft is published; no deletion deadline is promised here.",
+        "Website storage, analytics and hosting",
+        "The Sky Events calendar saves your selected time zone and calendar view in local storage on your device. The website remembers that you entered the welcome screen for the current browser session. These preferences stay in your browser and are not sent to a NightSky account. The website code does not include third-party analytics or advertising trackers. The website also loads fonts from Google Fonts, which connects your browser to Google to retrieve font files. Netlify hosts this website and its news function; as part of delivering and securing the service, Netlify may process technical information such as network and request details and function logs. The Netlify dashboard makes function logs available for up to seven days depending on plan; this is not a confirmed deletion period for all hosting records. This hosting activity is separate from NightSky’s request-history storage.",
       ],
       [
-        "Website storage and analytics",
-        "The website stores selected calendar view and time-zone preferences in local storage on your device. The entered splash-screen state is kept in session storage for the current browser session. These preferences are not sent to a NightSky account. The website code does not add an analytics script. The production host may create its own technical logs; its logging, cookies and retention settings have not yet been confirmed. News searches send the search term and selected source filter to NightSky’s service so it can request matching results.",
-      ],
-      [
-        "Contacting NightSky",
-        "The contact link opens your email application; information is sent to NightSky only if you choose to send the message. Please leave out passwords, access keys and sensitive details that are not needed. Support-mailbox access and deletion practices need to be confirmed before publication. You can ask what information NightSky holds about you or request correction or deletion. We will assess requests against the information available to us and the laws that apply; copies held by an AI platform or an external provider must be addressed with that provider.",
+        "Email and privacy requests",
+        "If you choose to email NightSky at its Gmail address, Google processes the message as the email provider and the operator may keep it in the mailbox to respond and manage follow-up. Please leave out passwords, access keys and sensitive details that are not needed. You can ask what personal information NightSky holds about you, or request correction or deletion. NightSky does not keep a persistent request history; if your request concerns an email or information held by an AI platform, host or data provider, that information may need to be addressed with the relevant service. Requests will be handled under applicable law.",
       ],
       [
         "Age and children",
-        "NightSky is intended for adults aged 18 and older. NightSky does not ask for your date of birth or operate its own age-verification check. You must also meet the age and account requirements of the AI platform you use. If you believe someone under 18 has sent personal information to NightSky, contact us so we can review the request.",
+        "NightSky is intended for people aged 18 and older. NightSky does not ask for your date of birth or run its own age-verification check. You must also meet the age and account requirements of the AI platform you use.",
       ],
       [
-        "Jurisdiction, changes and effective date",
-        "Privacy rights, legal bases for processing, international-transfer details and complaint channels depend on the final hosting and provider arrangements and the laws that apply. They require review before publication. This draft has no effective date and does not make a final compliance or security assurance. The published policy will identify its effective date and explain any material changes.",
+        "Changes and effective date",
+        `This Privacy Policy is effective ${effectiveDate}. If NightSky’s data practices change, this page will be updated to explain the change and show a revised effective date.`,
       ],
     ],
   },
   terms: {
     eyebrow: "Terms",
     title: "Terms for using NightSky.",
-    intro: "The service, your responsibilities, and the limits to keep in mind while exploring the night sky with NightSky.",
+    intro:
+      "A clear guide to using NightSky, understanding its information and knowing what to expect from the service.",
     sections: [
       [
         "Operator and service",
-        "NightSky.earth is operated by Tandav Krishna (TK), based in Hyderabad, Telangana, India. NightSky provides information and tools to help people explore, understand and prepare for the night sky through supported AI platforms. It does not currently require a separate NightSky account. The service and its features may change as they are maintained.",
+        "NightSky.earth is operated by Tandav Krishna (TK), based in Hyderabad, Telangana, India. NightSky provides information and tools to help people explore, understand and prepare for the night sky through supported AI platforms. It does not require a separate NightSky account. The service and its features may change as they are maintained.",
       ],
       [
         "Eligibility and AI platforms",
-        "NightSky is intended for people aged 18 and older. You must also meet the age, account and use requirements of the AI platform through which you access it. The platform is a separate service, and its terms and privacy practices apply to your account and conversations.",
+        "NightSky is intended for people aged 18 and older. You must also meet the age, account and use requirements of the AI platform through which you access it. The AI platform is a separate service, and its terms and privacy practices apply to your account and conversations.",
+      ],
+      [
+        "Current price",
+        "NightSky is currently available without a NightSky fee. This does not promise that every future feature will remain free. If a paid feature or charge is introduced, its price and terms will be shown before you choose to use or purchase it.",
       ],
       [
         "Use the service responsibly",
-        "Use NightSky only for lawful purposes and do not interfere with, overload, probe or attempt to gain unauthorized access to the service or its providers. Do not use NightSky to make decisions that require guaranteed, real-time or professionally certified information. Do not submit secrets or personal information that is not needed for your request.",
+        "Use NightSky only for lawful purposes. Do not interfere with, overload, probe or attempt to gain unauthorized access to NightSky or its providers. Do not submit passwords, access keys or personal information that is not needed for your request. Do not use NightSky as a substitute for professional advice or information that must be guaranteed, real-time or certified.",
       ],
       [
-        "Information, conditions and safety",
-        "Astronomical calculations, forecasts, maps, event details and other results can be incomplete, delayed, approximate or unavailable. They are for general informational and educational use, not a guarantee of visibility, weather, access, safety or a particular outcome. Conditions can change quickly. Before travelling or observing, check current official notices and local access rules, use your own judgment, and follow appropriate safety practices. Never look directly at the Sun without proper certified protection.",
+        "Information and observing safety",
+        "Astronomical calculations, forecasts, maps, event details and other results can be incomplete, delayed, approximate or unavailable. They are for general informational and educational use and do not guarantee visibility, weather, access, safety or a particular outcome. Conditions can change quickly. Before travelling or observing, check current official notices and local access rules, use your own judgment and follow appropriate safety practices. Never look directly at the Sun without proper certified protection.",
       ],
       [
         "Third-party services and material",
-        "NightSky may rely on AI platforms and independent data providers. Their services, content, availability, terms and privacy practices are controlled by those providers and may change. Provider names, marks and content belong to their respective owners. Follow any applicable provider terms and source attributions shown with the service.",
+        "NightSky may rely on AI platforms and independent data providers. Their services, content, availability, terms and privacy practices are controlled by those providers and may change. Provider names, marks and materials belong to their respective owners. Follow applicable provider terms and any source attributions shown with the service.",
       ],
       [
         "Ownership and feedback",
-        "NightSky’s website, branding and original materials are owned by their respective rights holders and may not be copied or used in a way that violates applicable rights. These terms do not transfer ownership of material you provide or of third-party content. If you send feedback, you allow NightSky to consider and use it to improve the service without an obligation to you, subject to applicable law; do not send confidential material in feedback.",
+        "NightSky’s name, branding and original website materials belong to their respective rights holders. Third-party materials remain with their owners. These terms do not transfer ownership of material you provide. If you send feedback, you allow NightSky to consider and use it to improve the service, subject to applicable law; do not send confidential material in feedback.",
       ],
       [
-        "Availability, changes and pricing",
-        "NightSky is provided as currently made available and may be changed, suspended or discontinued to maintain or improve the service. Features and provider access can vary by AI platform. No permanent availability or price is promised by this draft; any charges or paid features will be presented before they apply.",
+        "Availability and changes",
+        "NightSky is provided as currently made available and may be changed, suspended or discontinued to maintain or improve the service. Features and provider access can vary by AI platform. To the extent permitted by law, NightSky does not promise uninterrupted availability or that every result will be error-free.",
       ],
       [
         "Liability and legal rights",
-        "Nothing in these terms removes rights or remedies that cannot be excluded under applicable consumer-protection law. The final terms must specify any lawful limits on responsibility and the applicable dispute and governing-law arrangements after legal review. Until then, this preview is not a final agreement and should not be treated as a waiver of your legal rights.",
+        "To the extent permitted by applicable law, NightSky is not responsible for indirect or consequential loss arising from use of the service or reliance on its general sky information. Nothing in these terms excludes or limits responsibility that cannot lawfully be excluded or limits any consumer right or remedy that cannot be waived. You remain responsible for checking conditions, official guidance and safety before acting on information provided by NightSky.",
       ],
       [
-        "Changes and contact",
-        "The published terms will include an effective date. Material changes will be reflected on this page with an updated date. Questions about these draft terms can be sent using the contact address below.",
+        "Applicable law, changes and effective date",
+        `These terms are governed by the laws of India, subject to any mandatory consumer protections and other rights that apply to you. Any dispute may be brought before a court or consumer forum with jurisdiction under applicable law. These Terms are effective ${effectiveDate}. Material changes will be reflected on this page with an updated effective date.`,
       ],
     ],
   },
-};
+} as const;
+
 export default function SupportingPage({
   kind,
 }: {
@@ -93,10 +99,38 @@ export default function SupportingPage({
   return (
     <EditorialPage eyebrow={page.eyebrow} title={page.title} intro={page.intro}>
       <div className="reading-column">
+        <p className="small-note">Effective date: {effectiveDate}</p>
         {page.sections.map(([title, body]) => (
           <section key={title}>
             <h2>{title}</h2>
             <p>{body}</p>
+            {title === "Website storage, analytics and hosting" && (
+              <p>
+                <a
+                  href="https://www.netlify.com/privacy/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Netlify Privacy Statement
+                </a>
+                {" · "}
+                <a
+                  href="https://docs.netlify.com/manage/monitoring/logs/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Netlify function-log details
+                </a>
+                {" · "}
+                <a
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Google Privacy Policy
+                </a>
+              </p>
+            )}
           </section>
         ))}
         <p>
