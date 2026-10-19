@@ -43,3 +43,11 @@ test('workflow is manual protected and serial, without deployment or publication
  for(const value of ['push:','pull_request:','packages: write','docker pull','nightsky-release deploy'])assert.ok(!s.includes(value),value);
  for(const match of s.matchAll(/uses: ([^\n]+)/g))assert.match(match[1].trim(),/@[a-f0-9]{40}$/);
 });
+
+test('safe transport diagnostics distinguish authentication and host identity without echoing stderr',()=>{
+  for(const [stderr,kind] of [
+    ['Permission denied (publickey).\nprivate marker','public-key authentication rejected'],
+    ['Host key verification failed.\nprivate marker','host identity rejected'],
+    ['Connection timed out\nprivate marker','connection failed'],
+  ]) assert.throws(()=>checkAccess(config,()=>({status:255,stdout:'',stderr})),new RegExp(`positive SSH: ${kind}$`));
+});
