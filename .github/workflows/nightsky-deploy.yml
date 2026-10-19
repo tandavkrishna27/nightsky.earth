@@ -1,0 +1,74 @@
+name: NightSky manual promotion
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected target environment
+        type: choice
+        options: [staging, production]
+        required: true
+      image_run:
+        description: Successful manual ARM64 image publication run ID for this exact commit
+        type: string
+        required: true
+      staging_run:
+        description: Successful staging promotion run ID (required for production)
+        type: string
+        required: false
+permissions:
+  contents: read
+  actions: read
+  packages: read
+concurrency:
+  group: nightsky-hetzner-host
+  cancel-in-progress: false
+jobs:
+  deploy:
+    name: deploy (${{ inputs.environment }})
+    if: github.ref == 'refs/heads/codex/plugin-v1' || github.ref == 'refs/heads/main'
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify publication, source CI and staging evidence
+        id: evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE_RUN: ${{ inputs.image_run }}
+          STAGING_RUN: ${{ inputs.staging_run }}
+          TARGET_ENV: ${{ inputs.environment }}
+        run: node scripts/deployment/verify-image.mjs evidence
+      - name: Promote verified digest through restricted SSH command
+        env:
+          DEPLOY_KEY: ${{ secrets.NIGHTSKY_DEPLOY_SSH_KEY }}
+          HOST: ${{ vars.NIGHTSKY_DEPLOY_HOST }}
+          PORT: ${{ vars.NIGHTSKY_DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.NIGHTSKY_DEPLOY_USER }}
+          KNOWN_HOSTS: ${{ vars.NIGHTSKY_DEPLOY_KNOWN_HOSTS }}
+          TARGET_ENV: ${{ inputs.environment }}
+          DIGEST: ${{ steps.evidence.outputs.digest }}
+          SOURCE_SHA: ${{ steps.evidence.outputs.sha }}
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_ENV" == staging || "$TARGET_ENV" == production ]]
+          [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$PORT" =~ ^[0-9]{1,5}$ ]] && (( 10#$PORT > 0 && 10#$PORT < 65536 ))
+          [[ "$DEPLOY_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ -n "$DEPLOY_KEY" && -n "$KNOWN_HOSTS" ]]
+          keydir=$(mktemp -d)
+          trap 'rm -rf -- "$keydir"' EXIT
+          chmod 700 "$keydir"
+          printf '%s\n' "$DEPLOY_KEY" > "$keydir/key"
+          printf '%s\n' "$KNOWN_HOSTS" > "$keydir/known_hosts"
+          chmod 600 "$keydir/key" "$keydir/known_hosts"
+          ssh -T -i "$keydir/key" -p "$PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$keydir/known_hosts" -o ConnectTimeout=20 "$DEPLOY_USER@$HOST" "nightsky-release deploy $TARGET_ENV $DIGEST"
+          if [[ "$TARGET_ENV" == staging ]]; then
+            printf 'NIGHTSKY_ACCEPTED_STAGING=%s %s\n' "$DIGEST" "$SOURCE_SHA"
+          else
+            printf 'NIGHTSKY_ACCEPTED_PRODUCTION=%s %s\n' "$DIGEST" "$SOURCE_SHA"
+          fi
