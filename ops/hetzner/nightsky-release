@@ -1,0 +1,166 @@
+#!/usr/bin/python3 -I
+"""Root-owned promotion helper. Install under /usr/local/sbin; no env overrides."""
+import json
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.request
+from pathlib import Path
+
+REPO = 'ghcr.io/tandavkrishna27/nightsky-mcp'
+BASE = Path('/var/lib/nightsky')
+NETWORK = 'nightsky'
+DIGEST = re.compile(r'sha256:[0-9a-f]{64}')
+
+def parse(args):
+    if len(args) == 2 and args[0] == 'rollback' and args[1] in ('staging','production'):
+        return args
+    if len(args) == 3 and args[0] == 'deploy' and args[1] in ('staging','production') and DIGEST.fullmatch(args[2]):
+        return args
+    raise ValueError('expected deploy staging|production sha256:<64 lowercase hex> or rollback staging|production')
+
+def docker(*args, timeout=120):
+    return subprocess.run(['/usr/bin/docker', *args], check=True, text=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, timeout=timeout,
+                          env={'PATH':'/usr/sbin:/usr/bin:/sbin:/bin','HOME':'/root','DOCKER_CONFIG':'/root/.docker'}).stdout.strip()
+
+def secure(path, directory=False, private=False):
+    """Reject symlinks and untrusted parent directories before root reads/writes."""
+    for item in [*reversed(path.parents),path]:
+        info=item.lstat()
+        if stat.S_ISLNK(info.st_mode) or info.st_uid != 0 or info.st_mode & 0o022:
+            raise RuntimeError('untrusted root configuration path: '+str(item))
+    mode=path.stat().st_mode
+    if directory and not stat.S_ISDIR(mode): raise RuntimeError('expected directory')
+    if not directory and not stat.S_ISREG(mode): raise RuntimeError('expected regular file')
+    if private and mode & 0o077: raise RuntimeError('configuration must be mode 0600')
+
+def read_record(env):
+    path=BASE/'releases'/f'{env}.json'
+    if not path.exists(): return {'current':None,'previous':None}
+    secure(path,private=True)
+    record=json.loads(path.read_text())
+    if set(record) != {'current','previous'} or any(x is not None and (not isinstance(x,str) or not DIGEST.fullmatch(x)) for x in record.values()):
+        raise RuntimeError('invalid release record')
+    return record
+
+def write_record(env, record):
+    path=BASE/'releases'/f'{env}.json'
+    fd,temporary=tempfile.mkstemp(prefix=f'.{env}-',suffix='.tmp',dir=path.parent)
+    try:
+        with os.fdopen(fd,'w') as output:
+            json.dump(record,output); output.flush(); os.fsync(output.fileno())
+        os.replace(temporary,path)
+    finally:
+        if os.path.exists(temporary): os.unlink(temporary)
+    directory=os.open(path.parent,os.O_RDONLY|os.O_DIRECTORY)
+    try: os.fsync(directory)
+    finally: os.close(directory)
+
+def check_network(env):
+    network=json.loads(docker('network','inspect',NETWORK if env=='production' else 'nightsky-staging'))[0]
+    configs=network.get('IPAM',{}).get('Config',[])
+    subnet='172.30.80' if env=='production' else '172.30.81'
+    if network.get('Driver') != 'bridge' or network.get('Internal') != (env=='staging') or configs != [{'Subnet':subnet+'.0/24','Gateway':subnet+'.1'}]:
+        raise RuntimeError('operator must provision the dedicated nightsky bridge')
+
+def check_runtime(env):
+    secure(BASE/'state'/env,directory=True)
+    info=(BASE/'state'/env/'runtime').lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid!=1000 or stat.S_IMODE(info.st_mode)!=0o700:
+        raise RuntimeError('runtime directory must be nonsymlink UID 1000 mode 0700')
+
+def check_disk():
+    if shutil.disk_usage(BASE).free < 2*1024**3:
+        raise RuntimeError('at least 2 GiB free disk required; operator cleanup needed')
+
+def start(env,digest):
+    address=['--ip','172.30.81.2'] if env=='staging' else ['--publish','127.0.0.1:5000:5000']
+    docker('run','-d','--name',f'nightsky-{env}','--restart=unless-stopped',
+           '--network',NETWORK if env=='production' else 'nightsky-staging',*address,
+           '--memory=768m','--memory-swap=768m','--cpus=1','--pids-limit=128','--user=1000:1000',
+           '--read-only','--tmpfs','/tmp:rw,noexec,nosuid,size=64m',
+           '--cap-drop=ALL','--security-opt=no-new-privileges:true',
+           '--log-driver=json-file','--log-opt=max-size=10m','--log-opt=max-file=3',
+           '--env-file',f'/etc/nightsky/{env}.env',
+           '--env','HOST=0.0.0.0','--env','PORT=5000','--env','NODE_ENV=production','--env',f'NIGHTSKY_DEPLOYMENT_ENV={env}',
+           '--volume',f'/var/lib/nightsky/state/{env}/runtime:/state',REPO+'@'+digest,
+           'node','--import','/app/ops/hetzner/runtime-guard.mjs','/app/dist/plugin.js')
+
+def probe(env):
+    for attempt in range(15):
+        try:
+            docker('exec',f'nightsky-{env}','node','/app/ops/hetzner/probe.mjs',timeout=15)
+            endpoint='172.30.81.2:5000' if env=='staging' else '127.0.0.1:5000'
+            # Explicit empty proxy handler: root must never use caller proxy env.
+            opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            with opener.open(f'http://{endpoint}/health',timeout=5) as response:
+                payload=json.loads(response.read(16385))
+                if response.status!=200 or payload.get('service')!='nightsky' or payload.get('status')!='ok':
+                    raise RuntimeError('published port health check failed')
+            return
+        except (subprocess.SubprocessError,RuntimeError,OSError,ValueError):
+            if attempt==14: raise
+            time.sleep(2)
+
+def remove(env):
+    name=f'nightsky-{env}'
+    # Missing container is expected on first deployment. Other errors must propagate.
+    names=docker('ps','-a','--format','{{.Names}}').splitlines()
+    if name in names:
+        docker('stop','--time','25',name)
+        docker('rm',name)
+
+def activate(env,digest,record):
+    check_network(env)
+    docker('pull','--platform','linux/arm64',REPO+'@'+digest,timeout=600)
+    identity=json.loads(docker('image','inspect','--format','{{json .}}',REPO+'@'+digest))
+    if identity.get('Os')!='linux' or identity.get('Architecture')!='arm64': raise RuntimeError('image must be linux/arm64')
+    check_disk()
+    previous=record['current']
+    remove(env)
+    try:
+        start(env,digest)
+        probe(env)
+        write_record(env,{'current':digest,'previous':record['previous'] if digest==previous else previous})
+    except Exception:
+        remove(env)
+        if previous:
+            start(env,previous)
+            probe(env)
+        raise
+
+def main():
+    args=parse(sys.argv[1:])
+    if os.geteuid()!=0: raise RuntimeError('root required')
+    # Import only on supported Linux execution; unit tests can import on Windows.
+    import fcntl
+    env=args[1]
+    secure(Path('/etc/nightsky')/f'{env}.env',private=True)
+    secure(BASE/'releases',directory=True)
+    check_runtime(env)
+    check_disk()
+    lock=BASE/'releases'/'release.lock'
+    fd=os.open(lock,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
+    with os.fdopen(fd,'r+') as handle:
+        secure(lock,private=True)
+        fcntl.flock(handle,fcntl.LOCK_EX)
+        record=read_record(env)
+        digest=args[2] if args[0]=='deploy' else record['previous']
+        if not digest: raise RuntimeError('no previous successful release')
+        if env=='production' and args[0]=='deploy' and read_record('staging')['current']!=digest:
+            raise RuntimeError('production digest must match healthy staging release')
+        activate(env,digest,record)
+        print(json.dumps({'environment':env,'digest':digest,'status':'healthy'}))
+
+if __name__=='__main__':
+    try: main()
+    except Exception as error:
+        # Never echo docker stderr: env/config secrets must stay out of CI logs.
+        print('release failed: '+(str(error) if isinstance(error,(ValueError,RuntimeError)) else type(error).__name__),file=sys.stderr)
+        sys.exit(1)

@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-19",
+  "baseCommit": "63a126b6de5b782704a37ede0ae63c4aa8ab94d0",
+  "offlineTests": {
+    "passed": 1891,
+    "failed": 0,
+    "skipped": 2
+  },
+  "deploymentPythonTests": 14,
+  "focusedNodeTests": 13,
+  "types": "passed",
+  "workflowYaml": "parsed",
+  "image": {
+    "id": "sha256:ffe71f1d8a925d56b13d5249a16cba0fa7d7143e6f3e840dc81d4a495b0102ad",
+    "architecture": "arm64",
+    "bytes": 682639044,
+    "localRuntime": "ARM64 executed under Docker Desktop AMD64 emulation; no networking",
+    "healthAndMcp": "passed; no tools/call",
+    "nativeLinuxHostBridge": "pending exact-commit CI"
+  },
+  "providersCalled": 0,
+  "serverContacted": false,
+  "registryPublished": false,
+  "deployed": false,
+  "installedPluginChanged": false,
+  "fileDigestBasis": "SHA256 local bytes; not normalized Git blobs",
+  "files": {
+    "Dockerfile.plugin": "0830ada715bb2b90bb5b36e6fa563d22d2931295a7efa7b2aac25fed5b444baa",
+    ".dockerignore": "5238074856d3f2788a25adba81f6ed2291dfd75278c5f1b8fd685f5b7002b573",
+    ".github/workflows/nightsky-image.yml": "d03c63c54f352935db22365d699a3f145ab77ba1486d3ccd938614f8cf6189e6",
+    ".github/workflows/nightsky-deploy.yml": "b32a5404d5d8a5b51c920dca78fc45f59f03492aa742b8bf164461cf1a668b9e",
+    "ops/hetzner/nightsky-release": "20acffbc7ed41e6307f54a0206a82d606dfe8d79989dcfce38b3df878aa44dac",
+    "ops/hetzner/nightsky-ssh-dispatch": "8d51207b62a42d3a02455c216284942286f425c24f555f1ed5ca6df3aa098805",
+    "ops/hetzner/runtime-guard.mjs": "2f7162e79a8c48c3c78234d3214b96b92f80fda6f8fba1d480587214ae213fc5",
+    "ops/hetzner/probe.mjs": "45518ff5447032073ecca4baa851b56e2025f9b3ec9f5290859756f5fbf34f65",
+    "scripts/deployment/verify-image.mjs": "f03da3ccc0831f7ded652fb6adf907a57d8c93bbdd8b45256d5d7dc1307cbbc5"
+  }
+}

@@ -1,10 +1,14 @@
 # Local release preparation and later deployment
 
-## Current API-only release planning — 19 October 2026
+## Active API-only Hetzner delivery — 19 October 2026
 
-Use [the hosting and cross-platform release plan](v1-hosting-cross-platform-release-plan-20261019.md) for the proposed V1 path. Hetzner is preferred, with local product readiness preceding infrastructure execution. Numerical historical preparation and owned bulk geography are outside V1. Sections below describing mounted GeoNames/OSM/climate artifacts document retained legacy modes, not mandatory launch prerequisites. The [product completion pass](v1-product-candidate-completion-20261019.md) fixes the explicit event asset list and verifies static packaging/built-process startup; actual pinned-image construction/start remains unverified because its base is not cached and was not downloaded. No hosting or deployment action is authorized by these notes.
+Use [the exact server/GitHub setup checklist](hetzner-setup-20261019.md) as the canonical V1 deployment contract. Hostnames are owner-confirmed: `mcp.nightsky.earth` and `mcp-staging.nightsky.earth`. The separate server session reports Tunes removed and ARM64 Docker/nginx hosting prepared. No NightSky deployment has occurred.
 
-The development branch is `codex/plugin-v1`. Deployment is deferred by the owner until local implementation and verification are reviewed. The backend uses read-only files and memory caches; it does not require a database.
+The reviewed implementation is on `codex/plugin-v1`, using `Dockerfile.plugin` -> `dist/plugin.js`. Explicit `NIGHTSKY_DISCOVERY_MODE=api` avoids the compatibility default of legacy mode. No database, mounted gazetteer, planet, OSM catalogue or historical baseline is required. Prepared examples and restricted helper live in `ops/hetzner/`; credentials stay in `/etc/nightsky/production.env`, state in the dedicated `/state` mount. Optional sources and their ledgers require admission/migration review before activation. Staging blocks external access and carries no provider keys.
+
+GitHub push/PR checks build and smoke a native ARM64 image. Publication and staging/production promotion are separate manual environment-gated actions; they are not triggered by this implementation push. Provider secrets never enter ordinary CI. The complete checklist documents exact GitHub names, SSH restrictions, proxy trust, private staging address, DNS/TLS, quota preservation and rollback limitations.
+
+The retained sections below are historical local/legacy evidence. Their GeoNames/OSM/climate settings must not be copied into the API-only deployment profile. Local image execution and later selected-host verification are distinct gates; see the current verification receipt in the setup record.
 
 ## Local release checks
 
@@ -15,7 +19,7 @@ The development branch is `codex/plugin-v1`. Deployment is deferred by the owner
 5. Build the rehearsal package and retain its file inventory/digest. Its example endpoint is not a deployable production URL and the builder explicitly reports unresolved submission gates.
 6. Commit/push only reviewed source, licensed small fixtures and documentation. Never include `.data`, credentials, private configuration, `.env`, build outputs or logs. Record CI conclusions against the exact pushed commit.
 
-## Required server configuration
+## Retained legacy configuration — not the API-only V1 profile
 
 | Setting | Meaning |
 |---|---|

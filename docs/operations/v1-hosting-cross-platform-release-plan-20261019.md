@@ -2,6 +2,10 @@
 
 **Status:** Hetzner is the owner's preferred hosting direction; exact plan, region and purchase remain pending. Product launch-readiness work comes first; CI/CD, website release work and hosting setup follow afterward. No deployment, new data allowance or publication authorization. Existing27ticket categories are unchanged. V1 remains API/search based, without a product database or bulk geography/history preparation. Start with ChatGPT; accept each additional client separately.
 
+## Implementation update — 19 October 2026
+
+The finite local pass is accepted with scoped limits. The owner has approved deployment preparation and confirmed `mcp.nightsky.earth` / `mcp-staging.nightsky.earth`. Another server session removed Tunes and prepared the host, but has not created the deployment account/key or deployed NightSky. Follow [the canonical setup checklist](hetzner-setup-20261019.md), which supersedes the proposed URLs/order below where more specific. Exact Hetzner plan/region and actual hosted acceptance are still unverified. This task prepares code/workflows only; registry publication, server activation and marketplace submission remain separate actions.
+
 ## Owner priority — finish the product before infrastructure
 
 This section supersedes the execution order in the earlier researched proposal below. Retain the infrastructure research as a later handoff, without making hosting choices a prerequisite for finishing local product work.

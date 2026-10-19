@@ -5,6 +5,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY server ./server
 COPY shared ./shared
+# Pure arithmetic source imported by the optional adapter; no acquisition CLI/data.
+COPY scripts/era5/aggregate.ts ./scripts/era5/
 COPY tsconfig.json ./
 RUN ./node_modules/.bin/esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js
 RUN npm prune --omit=dev --no-audit --no-fund
@@ -15,6 +17,7 @@ WORKDIR /app
 COPY --from=build /app/package.json /app/package-lock.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist/plugin.js ./dist/plugin.js
+COPY ops/hetzner/runtime-guard.mjs ops/hetzner/probe.mjs ./ops/hetzner/
 # Only reviewed public catalogs. Runtime climate/place artifacts are mounted
 # separately with explicit paths/digests; ignored operator data is never baked in.
 COPY data/events/meteor-evidence-inventory-v1.json data/events/meteor-radiants-gmn-2021.json data/events/meteor-peaks-nasa-2025.json data/events/meteor-peaks-nasa-2026.json data/events/meteor-peaks-nasa-2027.json ./data/events/

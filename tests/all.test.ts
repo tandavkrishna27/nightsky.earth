@@ -257,3 +257,5 @@ import "./operations/api-source-manifest.test.ts";
 import "./operations/v1-source-freeze.test.ts";
 import "./operations/local-artifact-freeze.test.ts";
 import "./operations/plugin-image-assets.test.ts";
+import "./deployment/runtime-guard.test.ts";
+import "./deployment/workflows.test.ts";

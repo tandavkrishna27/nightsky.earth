@@ -1,0 +1,22 @@
+# Hetzner delivery implementation plan
+
+**Goal:** Prepare reviewed deployment automation and exact operator handoff without contacting or deploying to the server.
+
+**Architecture:** Build the existing standalone image on native ARM64 GitHub runners. Offline image verification precedes publication to GHCR. Separate manual deployment promotes an immutable digest through staging to production using SSH with a root-owned restricted command. Provider configuration and persistent quota state never travel through CI or rollback. Hostnames confirmed by owner: mcp.nightsky.earth and mcp-staging.nightsky.earth.
+
+**Constraints:** Reuse codex/plugin-v1; preserve unrelated source-document edits. No server access, secrets inspection, provider calls, DNS, installation, registry publication or deployment in this task. Preparing workflow files is authorized. Staging forbids external fetch and uses no provider credentials; production uses explicit API-only configuration with separate source admission. One production process owns each account ledger. No bulk geography/history/database.
+
+**Review focus:** Untrusted workflow input and SSH command injection; arbitrary root execution; quota reset on rollback; first-deploy/failed-upgrade recovery; image identity and platform; proxy spoofing; staging outbound calls; disk/log retention and unrelated-image preservation.
+
+## Tasks
+
+- [x] A: Add root-owned restricted deployment/SSH dispatcher scripts, nginx templates and mocked command tests. Interface: `nightsky-release deploy staging|production sha256:<64lowerhex>` or `nightsky-release rollback staging|production`. Fixed image repository ghcr.io/tandavkrishna27/nightsky-mcp. Production port5000 loopback only; staging uses private internal bridge172.30.81.2:5000 without published port. Network gateway172.30.80.1, subnet172.30.80.0/24 (operator must check conflicts). Env files /etc/nightsky/staging.env and production.env. State /var/lib/nightsky/state/<environment>. Preserve quota state; fixed bounded resources and logs. Root helper verifies restricted inputs and root-owned configuration; failed health/protocol startup restores previous image. No automatic global pruning.
+- [x] B: Add native ARM64 image verification/build and manual deployment workflows. Secret-free PR image checks; publication manual only, immutable digest receipt. Deploy references GitHub environment staging/production, serializes host operations, verifies CI success/image publication/staging evidence before production. Dedicated SSH key, strict verified known_hosts. No automatic activation on this push. Test workflows and actual image where available.
+- [x] C: Add hosted preload guard, safe environment examples and comprehensive operator checklist. Container build includes guard and health/MCP probe. Guard enforces explicit API-only profile, no historical/browser configuration; staging disables external fetch and rejects secrets/account state. Runtime config provider choices remain unadmitted until reviewed. Pure/offline tests for guards and templates. Update canonical deployment doc, tracker and confirmed-hostname handoff.
+- [ ] D: Independent review, fix findings, affected tests/full checks, image smoke, commit/push and exact-commit CI. Explicitly report actual ARM64 image execution versus static/local checks. No deployment.
+
+## Rulings
+
+Owner explicitly requested implementation now after approving the hostnames and preceding delivery design. Continue through local preparation rather than repeating design approval. Existing Dockerfile is retained; no unnecessary host build tools. Use native ARM64 runner to avoid an emulator privilege requirement. Public GHCR visibility and environment protections must be configured before manual publication/deployment. The deploy key is a privileged promotion credential within a fixed image repository, not a general shell credential.
+
+Review rulings: initial actual ARM64 build exposed a missing pure aggregate source module in Docker context; narrow include added with RED/GREEN regression. Actual internal-network rehearsal exposed ignored port publication; staging now uses its fixed private bridge address with native CI host access verification. Two separate environment-restricted SSH keys prevent staging credentials authorizing production. Review fixes retain previous digest on repeated deploy, use unique atomic temp files, and disable inherited raw nginx logging.

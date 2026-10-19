@@ -9,6 +9,13 @@
 !server/**
 !shared/
 !shared/**
+!scripts/
+!scripts/era5/
+!scripts/era5/aggregate.ts
+!ops/
+!ops/hetzner/
+!ops/hetzner/runtime-guard.mjs
+!ops/hetzner/probe.mjs
 !data/
 !data/events/
 !data/events/*.json

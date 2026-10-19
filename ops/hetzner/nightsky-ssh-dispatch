@@ -1,0 +1,29 @@
+#!/usr/bin/python3 -I
+"""Forced SSH command: fixed grammar, argv execution, no shell or environment override."""
+import os
+import re
+import sys
+
+def parse(command):
+    if not re.fullmatch(r'nightsky-release (?:deploy (?:staging|production) sha256:[0-9a-f]{64}|rollback (?:staging|production))',command):
+        raise ValueError('unsupported SSH command')
+    return command.split(' ')[1:]
+
+def authorize(command, restriction):
+    # This argument comes from root-owned authorized_keys, never the SSH client.
+    if len(restriction)!=1 or restriction[0] not in ('staging','production'):
+        raise ValueError('forced command requires one fixed environment')
+    args=parse(command)
+    if args[1]!=restriction[0]:
+        raise ValueError('SSH key is not authorized for that environment')
+    return args
+
+def main():
+    args=authorize(os.environ.get('SSH_ORIGINAL_COMMAND',''),sys.argv[1:])
+    os.execve('/usr/bin/sudo',['sudo','-n','--','/usr/local/sbin/nightsky-release',*args],
+              {'PATH':'/usr/sbin:/usr/bin:/sbin:/bin','LANG':'C.UTF-8'})
+
+if __name__=='__main__':
+    try: main()
+    except ValueError as error:
+        print(str(error),file=sys.stderr); sys.exit(2)

@@ -12,6 +12,13 @@ const requiredEvents = [
   "meteor-peaks-nasa-2027.json",
 ];
 
+test('standalone build includes the pure aggregate module imported by the dormant history adapter',()=>{
+ const recipe=readFileSync('Dockerfile.plugin','utf8');
+ assert.match(recipe,/COPY scripts\/era5\/aggregate\.ts \.\/scripts\/era5\//);
+ const ignore=readFileSync('.dockerignore','utf8');
+ assert.ok(ignore.includes('!scripts/era5/aggregate.ts'));
+});
+
 test("standalone image copies every admitted startup event asset explicitly", () => {
   const recipe = readFileSync("Dockerfile.plugin", "utf8");
   const copies = recipe.split(/\r?\n/).filter(line => /^COPY data\/events\//.test(line));
