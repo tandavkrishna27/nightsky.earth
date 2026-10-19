@@ -20,6 +20,7 @@ const groups: { title: string; links: string[][] }[] = [
       ["/get-started", "Get started"],
       ["/contact", "Contact"],
       ["/sources", "Sources & coverage"],
+      ["/sky-map", "Sky Map"],
     ],
   },
   {

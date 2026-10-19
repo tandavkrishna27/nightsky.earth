@@ -39,7 +39,7 @@ test("Contact routes four topics into one correctly encoded email action and sup
 
 test("Sources explains source scope and exposes details through keyboard disclosures", async ({ page }) => {
   await page.goto("/sources");
-  await expect(page.locator(".coverage-card")).toHaveCount(5);
+  await expect(page.locator(".coverage-card")).toHaveCount(6);
   await expect(page.locator("main")).not.toContainText(/awaiting confirmation|will be added|Preview information/);
   await expect(page.locator("main .eyebrow")).toHaveCount(0);
   const first = page.locator(".coverage-card").first();

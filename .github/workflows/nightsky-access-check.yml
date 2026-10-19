@@ -1,0 +1,34 @@
+name: NightSky deployment access check
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Protected environment whose restricted key will be checked (no deployment)
+        type: choice
+        options: [staging, production]
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: nightsky-hetzner-host
+  cancel-in-progress: false
+jobs:
+  check:
+    name: access check (${{ inputs.environment }})
+    if: github.ref == 'refs/heads/codex/plugin-v1' || github.ref == 'refs/heads/main'
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check exact read-only receipt and cross-environment key restriction
+        env:
+          DEPLOY_KEY: ${{ secrets.NIGHTSKY_DEPLOY_SSH_KEY }}
+          HOST: ${{ vars.NIGHTSKY_DEPLOY_HOST }}
+          PORT: ${{ vars.NIGHTSKY_DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.NIGHTSKY_DEPLOY_USER }}
+          KNOWN_HOSTS: ${{ vars.NIGHTSKY_DEPLOY_KNOWN_HOSTS }}
+          TARGET_ENV: ${{ inputs.environment }}
+        run: node scripts/deployment/check-access.mjs

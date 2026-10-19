@@ -6,6 +6,9 @@ import "@/styles/support-pages.css";
 import "@/styles/sources.css";
 
 const icons = { moon: Moon, cloud: CloudMoon, orbit: Orbit, map: MapPin, sparkles: Sparkles };
+const coverageReviewDate = new Intl.DateTimeFormat("en-IN", {
+  day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+}).format(new Date(`${coverageReviewedAt}T00:00:00Z`));
 export default function Sources() {
   return <div className="support-page sources-page">
     <SEO title="Sources & coverage." description="Understand NightSky’s astronomy calculations, weather sources, event references, place data and coverage limits." />
@@ -27,7 +30,7 @@ export default function Sources() {
       <section className="coverage-reading" aria-labelledby="coverage-reading-title"><h2 id="coverage-reading-title">How to read your answer.</h2>
         <div className="coverage-reading-grid">{readingNotes.map(([title, body]) => <div key={title}><h3>{title}</h3><p>{body}</p></div>)}</div>
       </section>
-      <div className="coverage-closing"><p>Source descriptions reviewed <time dateTime={coverageReviewedAt}>18 October 2026</time>. The evidence returned with an answer gives its specific coverage.</p><Link className="text-link" href="/contact?topic=bugs">Suggest a correction <ArrowRight size={16} aria-hidden="true" /></Link></div>
+      <div className="coverage-closing"><p>Source descriptions reviewed <time dateTime={coverageReviewedAt}>{coverageReviewDate}</time>. The evidence returned with an answer gives its specific coverage.</p><Link className="text-link" href="/contact?topic=bugs">Suggest a correction <ArrowRight size={16} aria-hidden="true" /></Link></div>
     </div>
   </div>;
 }
