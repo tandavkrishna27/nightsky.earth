@@ -19,8 +19,8 @@
         "privacyPolicyURL": "https://nightsky.earth/privacy/",
         "termsOfServiceURL": "https://nightsky.earth/terms/",
         "capabilities": [],
-        "composerIcon": "./assets/composer.svg",
-        "logo": "./assets/logo.svg",
+        "composerIcon": "./assets/composer.png",
+        "logo": "./assets/logo.png",
         "defaultPrompt": [
           "Plan a beginner stargazing night from a named destination.",
           "Help me prepare for a meteor shower.",

@@ -35,8 +35,26 @@ test('package lint rejects secrets, machine paths, traversal, extra server and m
   const multi = structuredClone(clean);
   multi['mcp.json'] = new TextEncoder().encode(JSON.stringify({ mcpServers: { one: {type: 'streamable-http',url:'https://example.com/mcp'}, two: {type:'streamable-http',url:'https://example.com/mcp'} } }));
   assert.throws(() => validatePackageFiles(multi), /one remote/);
-  delete clean['assets/logo.svg'];
+  delete clean['assets/logo.png'];
   assert.throws(() => validatePackageFiles(clean), /asset/);
+});
+
+test('package includes submission-sized PNG artwork with intact signatures', () => {
+  const files = unzipSync(buildPluginPackage().zip);
+  const listing = JSON.parse(strFromU8(files['plugin.json'])).extensions['com.openai'].interface;
+  assert.equal(listing.logo, './assets/logo.png');
+  assert.equal(listing.composerIcon, './assets/composer.png');
+  for (const [path, minimum] of [['assets/logo.png', 256], ['assets/composer.png', 48]] as const) {
+    const png = files[path];
+    assert.ok(png.length < 5 * 1024 * 1024);
+    assert.deepEqual(Array.from(png.subarray(0, 8)), [137, 80, 78, 71, 13, 10, 26, 10]);
+    const dimensions = new DataView(png.buffer, png.byteOffset, png.byteLength);
+    const width = dimensions.getUint32(16), height = dimensions.getUint32(20);
+    assert.equal(width, height);
+    assert.ok(width >= minimum);
+    const broken = { ...files, [path]: new TextEncoder().encode('not a PNG') };
+    assert.throws(() => validatePackageFiles(broken), /PNG/);
+  }
 });
 
 

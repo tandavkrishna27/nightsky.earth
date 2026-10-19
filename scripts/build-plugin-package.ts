@@ -38,8 +38,15 @@ export function validatePackageFiles(files: Record<string, Uint8Array>): void {
   if (Object.values(files).reduce((total, bytes) => total + bytes.length, 0) > 32 * 1024 * 1024) throw Error('Package total bytes too large');
   for (const [path, bytes] of Object.entries(files)) {
     if (!/^(plugin\.json|mcp\.json|assets\/[\w.-]+|skills\/[\w-]+\/(?:[\w.-]+|references\/workflow\.md)|RELEASE-NOTES\.md)$/.test(path) || path.includes('..') || path.startsWith('skills/') && !skillNames.includes(path.split('/')[1])) throw Error(`Unsafe package path: ${path}`);
-    if (bytes.length > 1024 * 1024) throw Error('Package entry too large');
+    if (bytes.length > (path.endsWith('.png') ? 5 * 1024 * 1024 : 1024 * 1024)) throw Error('Package entry too large');
     if (!bytes.length) throw Error(`Empty package entry: ${path}`);
+    if (path.startsWith('assets/') && path.endsWith('.png')) {
+      const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+      if (bytes.length < 33 || !signature.every((value, i) => bytes[i] === value)) throw Error(`Invalid PNG asset: ${path}`);
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      if (view.getUint32(8) !== 13 || String.fromCharCode(...bytes.subarray(12, 16)) !== 'IHDR' || !view.getUint32(16) || view.getUint32(16) !== view.getUint32(20)) throw Error(`Invalid PNG dimensions: ${path}`);
+      continue;
+    }
     let content: string;
     try { content = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
     catch { throw Error(`Invalid UTF-8 in ${path}`); }
@@ -59,6 +66,10 @@ export function validatePackageFiles(files: Record<string, Uint8Array>): void {
   for (const field of ['composerIcon', 'logo']) {
     const path = presentation[field];
     if (typeof path !== 'string' || !path.startsWith('./assets/') || !files[path.slice(2)]) throw Error(`Missing required asset ${field}`);
+    if (!path.endsWith('.png')) throw Error(`Submission asset ${field} must be PNG`);
+    const bytes = files[path.slice(2)];
+    const size = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(16);
+    if (size < (field === 'logo' ? 256 : 48)) throw Error(`Submission PNG ${field} too small`);
   }
   const cases = extension.review?.test_cases;
   if (cases?.positive?.length !== 5 || cases?.negative?.length !== 3) throw Error('Review requires five positive and three negative cases');
