@@ -230,3 +230,47 @@ test('planet windows expose an explicitly formatted darkness overlap without sho
  assert.equal(row.darknessOverlapIntervals[0].endUtc,'2026-10-16T05:00:00.000Z');
  assert.match(row.darknessOverlapIntervals[0].localEnd,/06:00.*Europe\/London/);
 });
+
+test('planner excludes out-of-session instant samples from summaries and retains raw evidence', async () => {
+  const weather = conditions();
+  weather.forecasts[0]!.samples.unshift({ validAt: '2026-10-15T17:00:00Z', values: { totalCloudCover: { value: 99, unit: '%' }, windSpeed: { value: 42, unit: 'm/s' } } });
+  const result = await planObservingSession({ placeId, activity: 'general-stargazing', window }, services({ getNightConditions: async () => weather }));
+  const cloud = result.factors.find(f => /cloud and precipitation forecast/.test(f.name))!;
+  assert.match(cloud.assessment, /18 %/);
+  assert.doesNotMatch(cloud.assessment, /99|17:00:00/);
+  assert.match(cloud.assessment, /1 sample\(s\)/);
+  assert.doesNotMatch(result.summary, /99/);
+  assert.doesNotMatch(result.preparation.join(' '), /substantial cloud/i);
+  assert.equal(result.evidence.weather!.forecasts[0]!.samples.length, 2);
+});
+
+test('planner labels providers with only out-of-session samples instead of summarizing them', async () => {
+  const weather = conditions();
+  weather.forecasts[0]!.samples = [{ validAt: '2026-10-15T17:00:00Z', values: { totalCloudCover: { value: 99, unit: '%' } } }];
+  const result = await planObservingSession({ placeId, activity: 'general-stargazing', window }, services({ getNightConditions: async () => weather }));
+  assert.doesNotMatch(result.summary, /99/);
+  assert.ok(result.gaps.some(gap => /Fixture weather.*no.*samples.*requested.*window/i.test(gap)));
+});
+
+test('planner retains overlapping native periods without treating unrelated instant values as in-session', async () => {
+  const weather = conditions();
+  weather.forecasts[0]!.samples = [{ validAt: '2026-10-15T17:00:00Z', values: {
+    totalCloudCover: { value: 30, unit: '%', periodStartUtc: '2026-10-15T17:00:00Z', periodEndUtc: '2026-10-15T19:00:00Z' },
+    windSpeed: { value: 42, unit: 'm/s' },
+    precipitationAmount: { value: 7, unit: 'mm', periodStartUtc: '2026-10-15T16:00:00Z', periodEndUtc: window.startUtc },
+  } }];
+  const result = await planObservingSession({ placeId, activity: 'general-stargazing', window }, services({ getNightConditions: async () => weather }));
+  const assessments = result.factors.map(f => f.assessment).join(' ');
+  assert.match(assessments, /30 % \(2h\)/);
+  assert.doesNotMatch(assessments, /42 m\/s|7 mm/);
+  assert.match(assessments, /2026-10-15T19:00:00Z/);
+  assert.equal(result.evidence.weather!.forecasts[0]!.samples[0]!.values.windSpeed!.value, 42);
+});
+
+test('planner keeps preparation warnings for substantial cloud inside the session', async () => {
+  const weather = conditions();
+  weather.forecasts[0]!.samples[0]!.values.totalCloudCover!.value = 99;
+  const result = await planObservingSession({ placeId, activity: 'general-stargazing', window }, services({ getNightConditions: async () => weather }));
+  assert.ok(result.preparation.some(step => /supplied forecast shows substantial cloud/i.test(step)));
+  assert.ok(result.preparation.some(step => /Fixture weather includes substantial cloud/i.test(step)));
+});

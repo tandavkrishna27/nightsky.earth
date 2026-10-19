@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-19",
+  "sourceBaseCommit": "7784d36ef4b9ca7cc3003f30545458b96202f990",
+  "description": "Reviewed engineering candidate; base plus listed runtime source changes, not full native acceptance",
+  "apiSearchOnly": true,
+  "cardDefaultEnabled": false,
+  "productAcceptance": "partial",
+  "deploymentReady": false,
+  "publicSourceAdmissionGranted": false,
+  "containerImageExecuted": false,
+  "nativeCardRenderingAccepted": false,
+  "generatedSkillsLoadedInLatestModelBatch": false,
+  "offlineTests": {
+    "passed": 1875,
+    "failed": 0,
+    "skipped": 2,
+    "total": 1877
+  },
+  "modelBatch": {
+    "turns": 6,
+    "mcpCalls": 14,
+    "httpRequests": 32,
+    "providerAttempts": 0,
+    "allTurnsExitZero": true,
+    "remainingFindings": [
+      "final prose credit omissions",
+      "Milky Way maximum-altitude sample omitted",
+      "duplicate astronomy request",
+      "workflow file reads blocked by child CLI policy"
+    ]
+  },
+  "files": [
+    {
+      "path": "server/nightsky/planner.ts",
+      "sha256": "bda439ee63315c234cb49367aaff494b1a27c5f0f66ad090031ac116da7835b6"
+    },
+    {
+      "path": "server/mcp/resultCardView.ts",
+      "sha256": "245ea8cd843e83f8369db472484487ef2be7a1d895af19f524376795421fb4da"
+    },
+    {
+      "path": "server/mcp/answerText.ts",
+      "sha256": "c786ff7b3cd68aa4fa42bd1cba3bda4d1ba27d55a9588aeff70b37639ee172ae"
+    },
+    {
+      "path": "Dockerfile.plugin",
+      "sha256": "51985f9fecb29cdfabe04c4ab654cf2f11cf7722a5309e8ecdc2cc57b5982263"
+    },
+    {
+      "path": "plugins/nightsky/plugin.json",
+      "sha256": "f0ecb5d8d8a6249f202592d469aee0dcc7838a1ff4db6507dab91db43d22dfe2"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "19b7bdb65e1796c76d5a92d91f3796bd65565186780fabb4cb188649f800c898"
+    },
+    {
+      "path": "dist/plugin.js",
+      "sha256": "84fd2461cea06bb980cc85b79c10c80d10df4e4489238d6b81a1d6814adca2d1"
+    }
+  ],
+  "packages": [
+    {
+      "host": "codex",
+      "version": "1.0.36",
+      "sha256": "ff938835e205a786db0f6d0f0b96f1484ea00bb9171bfdb08547304f80850309",
+      "endpoint": "http://127.0.0.1:8773/mcp",
+      "fileCount": 15,
+      "submissionReady": false,
+      "installedChanged": false
+    },
+    {
+      "host": "claude",
+      "version": "1.0.36",
+      "sha256": "7757d701b01001201c735a98c5dd8669aee30fdf11b33a64f50032e60f159a42",
+      "endpoint": "http://127.0.0.1:8773/mcp",
+      "fileCount": 15,
+      "submissionReady": false,
+      "installedChanged": false
+    }
+  ],
+  "modelConfirmationAfterFormatterFix": {
+    "status": "blocked-model-at-capacity",
+    "mcpCalls": 0,
+    "providerAttempts": 0,
+    "retried": false,
+    "mode": "exact generated workflow supplied in model instructions; no completed model turn"
+  }
+}

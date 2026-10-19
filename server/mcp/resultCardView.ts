@@ -15,7 +15,8 @@ export const RESULT_CARD_HTML=String.raw`<!doctype html>
  const status=byId('status'),card=byId('card');
  const clear=message=>{card.hidden=true;status.hidden=false;status.textContent=message;for(const id of ['place','session','summary','facts','detail-lines','credits'])byId(id).replaceChildren();};
  const safeUrl=value=>{if(typeof value!=='string')throw Error();const url=new URL(value);if(!['https:','http:'].includes(url.protocol)||url.username||url.password)throw Error();return url.href;};
- const text=(value,max)=>{if(typeof value!=='string'||!value.trim()||value.length>max)throw Error();return value;};
+ // The complete UTF8 payload is already bounded to 32KiB; do not add smaller field limits that reject producer-accepted evidence.
+ const text=value=>{if(typeof value!=='string'||!value.trim())throw Error();return value;};
  const link=(label,url)=>{const a=document.createElement('a');a.textContent=label;a.href=safeUrl(url);a.target='_blank';a.rel='noopener noreferrer';return a;};
  const render=result=>{
   clear('The result card is unavailable. Use the text result and its source credits.');
@@ -25,10 +26,10 @@ export const RESULT_CARD_HTML=String.raw`<!doctype html>
    if(!data||data.status!=='available'||data.schemaVersion!==1||new TextEncoder().encode(JSON.stringify(data)).byteLength>32768)return;
    if(!Array.isArray(data.facts)||data.facts.length>8||!Array.isArray(data.sources)||!data.sources.length||data.sources.length>256)throw Error();
    const facts=document.createDocumentFragment(),credits=document.createDocumentFragment(),lines=document.createDocumentFragment();
-   for(const fact of data.facts){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=text(fact.label,100);dd.textContent=text(fact.value,2000);facts.append(dt,dd);}
-   for(const source of data.sources){const li=document.createElement('li');li.append(link(text(source.name,160),source.url),document.createTextNode(': '+text(source.attribution,2000)));if(source.modified===true)li.append(document.createTextNode(' Source record marks data modified.'));if(source.licenseUrl)li.append(document.createTextNode(' '),link('Licence',source.licenseUrl));credits.append(li);}
-   for(const line of text(data.details,24000).split('\n')){const p=document.createElement('p');p.textContent=line;lines.append(p);}
-   const place=text(data.place,160),session=text(data.session,2000),summary=text(data.summary,2000);
+   for(const fact of data.facts){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=text(fact.label);dd.textContent=text(fact.value);facts.append(dt,dd);}
+   for(const source of data.sources){const li=document.createElement('li');li.append(link(text(source.name),source.url),document.createTextNode(': '+text(source.attribution)));if(source.modified===true)li.append(document.createTextNode(' Source record marks data modified.'));if(source.licenseUrl)li.append(document.createTextNode(' '),link('Licence',source.licenseUrl));credits.append(li);}
+   for(const line of text(data.details).split('\n')){const p=document.createElement('p');p.textContent=line;lines.append(p);}
+   const place=text(data.place),session=text(data.session),summary=text(data.summary);
    byId('place').textContent=place;byId('session').textContent=session;byId('summary').textContent=summary;byId('facts').append(facts);byId('detail-lines').append(lines);byId('credits').append(credits);
    status.hidden=true;card.hidden=false;
   }catch{clear('The result card is unavailable. Use the text result and its source credits.');}

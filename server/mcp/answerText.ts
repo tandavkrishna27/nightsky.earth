@@ -102,7 +102,17 @@ function twilightPhases(outer: Interval[], inner: Interval[], window: PlanResult
 /** Quote positions at their actual instants; no interpolation or terrain claims. */
 export function orientationAnswerText(target: TargetVisibilityResult): string {
   const boundary = (value: string | undefined) => value === 'requested-window' ? 'requested-window cutoff (not rise/set)' : value === 'horizon-crossing' ? 'calculated geometric horizon crossing (not apparent rise/set)' : 'boundary unknown';
-  const intervalLines = (target.intervals ?? []).slice(0,1).map(row => `${plain(target.target.name)} geometric opportunity: ${plain(row.localStart)} (${boundary(row.startBoundary)}) to ${plain(row.localEnd)} (${boundary(row.endBoundary)}); not a useful-altitude or recommended-session window.`);
+  const intervalLines = (target.intervals ?? []).slice(0,1).flatMap(row => {
+    const lines = [`${plain(target.target.name)} geometric opportunity: ${plain(row.localStart)} (${boundary(row.startBoundary)}) to ${plain(row.localEnd)} (${boundary(row.endBoundary)}); not a useful-altitude or recommended-session window.`];
+    if (Number.isFinite(row.maximumAltitudeDegrees)) {
+      const time = row.maximumAltitudeAtUtc ? `at ${row.maximumAltitudeLocal ? plain(row.maximumAltitudeLocal) : 'local time unknown'} [UTC ${row.maximumAltitudeAtUtc}]` : 'at time unknown';
+      const bearing = row.azimuthBasis === 'maximum-altitude-sample' && row.maximumAltitudeAtUtc
+        ? `azimuth ${row.azimuthDegrees.toFixed(1)} degrees at that maximum sample only, not at other times`
+        : 'maximum-sample azimuth basis unknown; no bearing inferred';
+      lines.push(`${plain(target.target.name)} maximum sampled altitude ${row.maximumAltitudeDegrees.toFixed(1)} degrees ${time}; sampled maximum within this interval, not a continuous optimum or best observing conditions; ${bearing}.`);
+    }
+    return lines;
+  });
   const samples = target.orientationSamples ?? [];
   if (!samples.length) return [...intervalLines,'Time-specific orientation samples unavailable; use an on-site sky app without inferring a bearing.'].join('\n');
   const lines = [...intervalLines,'Orientation: returned instants only; azimuth is clockwise from true north, altitude is height above the geometric horizon. No refraction; observer elevation assumed zero; terrain and obstructions are not modelled.'];

@@ -109,6 +109,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
       gaps.push(`${capitalize(conditions.availability.status)}: ${conditions.availability.reason}`);
     }
     for (const forecast of conditions.forecasts) {
+      if (!forecastSamplesForWindow(forecast, input.window).length) gaps.push(`${forecast.source.name} supplies no forecast samples overlapping the requested window.`);
       for (const missing of forecast.missingFields) gaps.push(`${forecast.source.name}: ${humanize(missing.field)} is missing: ${missing.reason}`.slice(0, 400));
       if (forecast.availability.status === "out-of-horizon") gaps.push(`${forecast.source.name} does not forecast this date yet; no forecast is inferred.`);
     }
@@ -266,15 +267,15 @@ export async function planObservingSession(inputValue: unknown, services: Planne
   if (input.activity === "deep-sky-imaging" && !input.target) gaps.push("No rights-reviewed deep-sky catalog is enabled. Supply a supported target or use a specialist sky catalog; global deep-sky suggestions are unsupported.");
   if (input.target && targetVisibility && !isError(targetVisibility) && targetVisibility.availability.status !== "available") gaps.push(`Target visibility is ${targetVisibility.availability.status}: ${targetVisibility.availability.reason}`);
   if (input.activity === "eclipse") gaps.push("A general session interval cannot establish eclipse contacts or safe viewing; use the selected event's source-linked visibility and safety guidance.");
-  if (conditions && !isError(conditions) && conditions.forecasts.some(forecast => forecast.samples.some(sample => sample.values.totalCloudCover && !sample.values.totalCloudCover.periodEndUtc))) gaps.push("Cloud forecasts contain instant or sparse samples, not cloud coverage intervals; no continuous weather window is inferred.");
+  if (conditions && !isError(conditions) && conditions.forecasts.some(forecast => forecastSamplesForWindow(forecast, input.window).some(sample => sample.values.totalCloudCover && !sample.values.totalCloudCover.periodEndUtc))) gaps.push("Cloud forecasts contain instant or sparse samples, not cloud coverage intervals; no continuous weather window is inferred.");
   if (["meteor-shower", "deep-sky-imaging", "astrophotography", "aurora"].includes(input.activity) && !(astronomy && !isError(astronomy) && astronomy.moon.horizonBasis === "geometric-center-zero-degrees" && astronomy.moon.belowHorizonIntervals !== undefined)) gaps.push("Moon illumination is whole-session context; Moon-above-horizon timing is not supplied for the entire candidate window.");
   const weather = conditions && !isError(conditions) ? conditions : undefined;
   const onlyForecast = weather?.forecasts.length === 1 ? weather.forecasts[0] : undefined;
-  const cloudValues = onlyForecast && weather && usableWeatherForecast(weather, onlyForecast) ? onlyForecast.samples.flatMap(sample => sample.values.totalCloudCover?.unit === "%" ? [sample.values.totalCloudCover.value] : []) : [];
+  const cloudValues = onlyForecast && weather && usableWeatherForecast(weather, onlyForecast) ? forecastSamplesForWindow(onlyForecast, input.window).flatMap(sample => sample.values.totalCloudCover?.unit === "%" ? [sample.values.totalCloudCover.value] : []) : [];
   const cloudCoverMax = cloudValues.length ? Math.max(...cloudValues) : undefined;
   const checklist = getPreparationChecklist(input.activity, { experience: input.experience, equipment: input.equipment, cloudCoverMax });
   if ((weather?.forecasts.length ?? 0) > 1) checklist[2] = "Review each source's cloud forecast and valid times before departure; sources may disagree and are not combined.";
-  const sourceCloudWarnings = (weather?.forecasts ?? []).flatMap(forecast => usableWeatherForecast(weather!, forecast) && forecast.samples.some(sample => sample.values.totalCloudCover?.unit === "%" && sample.values.totalCloudCover.value >= 70) ? [`${forecast.source.name} includes substantial cloud in its samples; check the source's exact valid times before choosing a night.`] : []);
+  const sourceCloudWarnings = (weather?.forecasts ?? []).flatMap(forecast => usableWeatherForecast(weather!, forecast) && forecastSamplesForWindow(forecast, input.window).some(sample => sample.values.totalCloudCover?.unit === "%" && sample.values.totalCloudCover.value >= 70) ? [`${forecast.source.name} includes substantial cloud in its samples; check the source's exact valid times before choosing a night.`] : []);
   const prep = [...checklist, ...sourceCloudWarnings, ...(learningGuide?.guidance ?? [])].slice(0, 20);
   const summary = makeSummary(input.activity, factors, conditions && !isError(conditions) ? conditions.availability.status : "unavailable", gaps);
   const target = targetVisibility && !isError(targetVisibility) ? targetVisibility : undefined;
@@ -324,11 +325,29 @@ function moonInterpretation(activity: string, illumination: number): string {
 function moonImpact(_activity: string, _illumination: number): Factor["impact"] {
   return "unknown"; // Phase alone cannot establish observing impact; target geometry is assessed separately.
 }
+/** Summaries use only in-session instants or genuinely overlapping native periods.
+ * Preserve the original evidence and never shorten a period or rescale its value. */
+function forecastSamplesForWindow(forecast: NightConditionsResult["forecasts"][number], window: TimeWindow): NightConditionsResult["forecasts"][number]["samples"] {
+  const start = Date.parse(window.startUtc), end = Date.parse(window.endUtc);
+  return forecast.samples.flatMap(sample => {
+    const instantInWindow = Date.parse(sample.validAt) >= start && Date.parse(sample.validAt) <= end;
+    const values = Object.fromEntries(Object.entries(sample.values).filter(([, value]) => {
+      if (!value) return false;
+      return value.periodStartUtc && value.periodEndUtc
+        ? Date.parse(value.periodStartUtc) < end && Date.parse(value.periodEndUtc) > start
+        : instantInWindow;
+    }));
+    const bands = instantInWindow ? sample.bands : undefined;
+    return Object.keys(values).length || bands && Object.keys(bands).length
+      ? [{ ...sample, values, bands }] : [];
+  }).sort((a, b) => Date.parse(a.validAt) - Date.parse(b.validAt));
+}
 function weatherFactors(result: NightConditionsResult, activity: string, units: "metric" | "imperial", locale: string): Factor[] {
   const skyFields = ["totalCloudCover", "lowCloudCover", "mediumCloudCover", "highCloudCover", "precipitationProbability", "precipitationAmount"] as const;
   const otherFields = ["windSpeed", "windGust", "temperature", "dewPoint", "relativeHumidity", "visibility"] as const;
   const factors: Factor[] = [];
-  for (const forecast of result.forecasts) {
+  for (const original of result.forecasts) {
+    const forecast = { ...original, samples: forecastSamplesForWindow(original, result.window) };
     const usable = usableWeatherForecast(result, forecast);
     for (const group of [{label:"seeing and transparency",fields:["seeing","transparency"]}, {label:"cloud, wind and humidity categories",fields:["totalCloudCover","windSpeed","relativeHumidity"]}] as const) {
       const descriptions: string[] = [];

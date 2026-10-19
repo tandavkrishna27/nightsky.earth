@@ -50,6 +50,8 @@ Evidence names below refer to docs/operations unless prefixed server/, shared/ o
 
 ## Latest local evidence
 
+[Six-item product completion](v1-product-candidate-completion-20261019.md) adds reviewed forecast/preparation, card-size and explicit image-asset fixes. Final full offline1,875passed/0failed/2skipped, types/packages and compiled runtime probes pass. Six model turns used14calls and0providers, but generated workflow reads were policy-blocked; final credits and Milky Way maximum/repeated astronomy findings retain12B/15 as partial. Native card rendering and actual pinned-image execution are not claimed. Existing15/2/8/2 categories remain unchanged.
+
 [Final local wave](v1-final-local-wave-20261019.md) records Task0/8 local acceptance and keeps12B/15 open for the observed1.0.36 credit/reuse failures. Runtime credit loss is fixed; successful offline tests are not substituted for failed model acceptance.
 
 

@@ -1,5 +1,9 @@
 # Local release preparation and later deployment
 
+## Current API-only release planning — 19 October 2026
+
+Use [the hosting and cross-platform release plan](v1-hosting-cross-platform-release-plan-20261019.md) for the proposed V1 path. Hetzner is preferred, with local product readiness preceding infrastructure execution. Numerical historical preparation and owned bulk geography are outside V1. Sections below describing mounted GeoNames/OSM/climate artifacts document retained legacy modes, not mandatory launch prerequisites. The [product completion pass](v1-product-candidate-completion-20261019.md) fixes the explicit event asset list and verifies static packaging/built-process startup; actual pinned-image construction/start remains unverified because its base is not cached and was not downloaded. No hosting or deployment action is authorized by these notes.
+
 The development branch is `codex/plugin-v1`. Deployment is deferred by the owner until local implementation and verification are reviewed. The backend uses read-only files and memory caches; it does not require a database.
 
 ## Local release checks

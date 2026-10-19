@@ -68,3 +68,13 @@ test('card closes on standard teardown id1, cancellation clears results, and UTF
  h.send(result(payload()));assert.equal(h.ids.get('card')!.hidden,true);
  const bytes=harness();bytes.initialize();bytes.send(result({...payload(),details:'🌌'.repeat(10000)}));assert.equal(bytes.ids.get('card')!.hidden,true);
 });
+
+test('card renders long bounded evidence without imposing a smaller field budget than its producer',()=>{
+ const h=harness();h.initialize();
+ const data={...payload(),details:'Evidence '.repeat(2700),facts:[{label:'Astronomical darkness',value:'Calculated interval; '.repeat(120)}]};
+ assert.ok(new TextEncoder().encode(JSON.stringify(data)).byteLength<32768);
+ h.send(result(data));
+ assert.equal(h.ids.get('card')!.hidden,false,'a producer-sized card must not fall back because details exceed 24000 characters or one fact exceeds 2000');
+ assert.equal(h.ids.get('detail-lines')!.textContent,data.details);
+ assert.equal(h.ids.get('credits')!.children.length,1);
+});

@@ -374,3 +374,22 @@ test('plan basis distinguishes an API-selected source point from legacy city and
  assert.match(planAnswerText(make({catalogueRevision:'b'.repeat(64),timeZoneBasis:'explicit-display'}),{includeSourceLinks:false}),/Calculation basis: selected candidate representative point/);
  assert.match(planAnswerText(make({timeZoneBasis:'named-record'}),{includeSourceLinks:false}),/Calculation basis: named city record/);
 });
+
+test('target text preserves interval maximum sample separately from sparse orientation instants',async()=>{
+ const {orientationAnswerText}=await import('../../server/mcp/answerText');
+ const target:any={target:{name:'Milky Way core'},intervals:[{localStart:'21:00',localEnd:'05:00',maximumAltitudeDegrees:43.5834,maximumAltitudeAtUtc:'2026-06-15T21:40:00Z',maximumAltitudeLocal:'Jun 16, 2026, 3:10 AM IST',azimuthDegrees:180.2,azimuthBasis:'maximum-altitude-sample'}],orientationSamples:[{atUtc:'2026-06-15T23:29:00Z',localTime:'Jun 16, 2026, 4:59 AM IST',altitudeDegrees:35.9,azimuthDegrees:210}]};
+ const text=orientationAnswerText(target);
+ assert.match(text,/maximum sampled altitude 43\.6 degrees/);
+ assert.ok(text.includes('Jun 16, 2026, 3:10 AM IST'));
+ assert.ok(text.includes('UTC 2026-06-15T21:40:00Z'));
+ assert.match(text,/sampled maximum.*not a continuous optimum/);
+ assert.match(text,/azimuth 180\.2 degrees at that maximum sample only/);
+ assert.match(text,/altitude 35\.9 degrees;.*azimuth 210\.0 degrees/);
+ delete target.intervals[0].maximumAltitudeAtUtc;
+ delete target.intervals[0].maximumAltitudeLocal;
+ delete target.intervals[0].azimuthBasis;
+ const unknown=orientationAnswerText(target);
+ assert.match(unknown,/maximum sampled altitude 43\.6 degrees at time unknown/);
+ assert.match(unknown,/maximum-sample azimuth basis unknown/);
+ assert.doesNotMatch(unknown,/azimuth 180\.2/);
+});

@@ -28,7 +28,7 @@ The follow-up reused the resolved city and calculated22:00IST directions (Moon23
 
 Tasks12B/15 remain open. Categories stay15local accepted/2local remaining/8release dependent/2separate-deferred. This prototype does not close source/account/logo/public method URL, publication, actual native rendering or attribution-rights gates. Required notices are present in the tested card, but its presence beside an answer and its links must be verified in the actual intended host. No production switch or installation was changed.
 
-Minor review item deferred: the browser has stricter individual field lengths than the producer's total-card bound; exceptionally long fields can cause a safe text fallback despite a server-available card. This is not a guaranteed general Markdown/legal/display assessment. No other important review finding remains in this prototype's implementation.
+The later [product completion pass](v1-product-candidate-completion-20261019.md) resolves the individual-field mismatch with a RED/GREEN regression while retaining the32KiB UTF8 bound and safe rendering. The earlier aggregate-summary defect is also corrected in the underlying planner and preparation, not merely avoided in this card. Actual host display remains unverified; this is not a general Markdown/legal/display guarantee.
 
 References checked19October2026: [OpenAI UI guidance](https://developers.openai.com/plugins/build/chatgpt-ui), [tool-result reference](https://developers.openai.com/plugins/reference), [vanilla bridge example](https://developers.openai.com/plugins/build/app-quickstart), [MCP Apps protocol](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx).
 
