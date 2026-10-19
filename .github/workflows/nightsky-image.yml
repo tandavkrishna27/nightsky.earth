@@ -1,65 +1,16 @@
 name: NightSky ARM64 image
 on:
-  push:
-    branches: [codex/plugin-v1, main]
-  pull_request:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish verified image to GHCR (requires protected image-publication environment)
+        description: Publish verified image to GHCR from the reviewed plugin branch
         type: boolean
         default: false
 permissions:
   contents: read
-concurrency:
-  group: nightsky-image-${{ github.ref }}
-  cancel-in-progress: false
 jobs:
-  check:
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 30
+  registration:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - name: Build native ARM64 image
-        run: docker build --platform linux/arm64 -f Dockerfile.plugin -t nightsky-check .
-      - name: Verify actual image with --network none
-        run: node scripts/deployment/verify-image.mjs nightsky-check
-  publish:
-    if: github.event_name == 'workflow_dispatch' && inputs.publish && (github.ref == 'refs/heads/codex/plugin-v1' || github.ref == 'refs/heads/main')
-    needs: check
-    environment: image-publication
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      actions: read
-      packages: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - name: Require successful exact source CI
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/deployment/verify-image.mjs source-ci
-      - name: Build and verify publication image
-        run: |
-          docker build --platform linux/arm64 -f Dockerfile.plugin -t nightsky-release .
-          node scripts/deployment/verify-image.mjs nightsky-release
-      - name: Publish immutable digest receipt
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REGISTRY_USER: ${{ github.actor }}
-        run: |
-          set -euo pipefail
-          image="ghcr.io/tandavkrishna27/nightsky-mcp:run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$REGISTRY_USER" --password-stdin
-          trap 'docker logout ghcr.io >/dev/null 2>&1' EXIT
-          docker tag nightsky-release "$image"
-          docker push "$image"
-          digest=$(docker image inspect "$image" --format '{{index .RepoDigests 0}}' | cut -d@ -f2)
-          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
-          docker buildx imagetools inspect "ghcr.io/tandavkrishna27/nightsky-mcp@$digest"
-          printf 'NIGHTSKY_PUBLISHED_IMAGE=%s %s\n' "$digest" "$GITHUB_SHA"
+      - run: echo "Select the reviewed codex/plugin-v1 branch for image publication."
