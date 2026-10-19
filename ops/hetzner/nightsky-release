@@ -79,7 +79,7 @@ def check_disk():
     if shutil.disk_usage(BASE).free < 2*1024**3:
         raise RuntimeError('at least 2 GiB free disk required; operator cleanup needed')
 
-def start(env,digest):
+def start(env,digest,config_path=None):
     address=['--ip','172.30.81.2'] if env=='staging' else ['--publish','127.0.0.1:5000:5000']
     docker('run','-d','--name',f'nightsky-{env}','--restart=unless-stopped',
            '--network',NETWORK if env=='production' else 'nightsky-staging',*address,
@@ -87,7 +87,7 @@ def start(env,digest):
            '--read-only','--tmpfs','/tmp:rw,noexec,nosuid,size=64m',
            '--cap-drop=ALL','--security-opt=no-new-privileges:true',
            '--log-driver=json-file','--log-opt=max-size=10m','--log-opt=max-file=3',
-           '--env-file',f'/etc/nightsky/{env}.env',
+           '--env-file',str(config_path or f'/etc/nightsky/{env}.env'),
            '--env','HOST=0.0.0.0','--env','PORT=5000','--env','NODE_ENV=production','--env',f'NIGHTSKY_DEPLOYMENT_ENV={env}',
            '--volume',f'/var/lib/nightsky/state/{env}/runtime:/state',REPO+'@'+digest,
            'node','--import','/app/ops/hetzner/runtime-guard.mjs','/app/dist/plugin.js')
@@ -116,20 +116,44 @@ def remove(env):
         docker('stop','--time','25',name)
         docker('rm',name)
 
-def activate(env,digest,record):
+def restore_config(data, path):
+    fd, temporary=tempfile.mkstemp(prefix='.production-restore-',suffix='.tmp',dir=path.parent)
+    try:
+        os.fchmod(fd,0o600)
+        os.fchown(fd,0,0)
+        with os.fdopen(fd,'wb') as output:
+            output.write(data); output.flush(); os.fsync(output.fileno())
+        os.replace(temporary,path)
+    finally:
+        if os.path.exists(temporary): os.unlink(temporary)
+
+def activate(env,digest,record,pending=False):
     check_network(env)
     docker('pull','--platform','linux/arm64',REPO+'@'+digest,timeout=600)
     identity=json.loads(docker('image','inspect','--format','{{json .}}',REPO+'@'+digest))
     if identity.get('Os')!='linux' or identity.get('Architecture')!='arm64': raise RuntimeError('image must be linux/arm64')
     check_disk()
     previous=record['current']
+    active_config=Path('/etc/nightsky/production.env')
+    pending_config=Path('/etc/nightsky/production.env.pending') if pending else None
+    original_config=None
+    changed_config=False
+    if pending:
+        if env!='production': raise RuntimeError('pending config is production only')
+        secure(pending_config,private=True)
+        original_config=active_config.read_bytes()
     remove(env)
     try:
-        start(env,digest)
+        start(env,digest,pending_config)
         probe(env)
+        if pending:
+            os.replace(pending_config,active_config)
+            changed_config=True
         write_record(env,{'current':digest,'previous':record['previous'] if digest==previous else previous})
     except Exception:
         remove(env)
+        if changed_config:
+            restore_config(original_config,active_config)
         if previous:
             start(env,previous)
             probe(env)
@@ -159,7 +183,7 @@ def main():
         if not digest: raise RuntimeError('no previous successful release')
         if env=='production' and args[0]=='deploy' and read_record('staging')['current']!=digest:
             raise RuntimeError('production digest must match healthy staging release')
-        activate(env,digest,record)
+        activate(env,digest,record,pending=(env=='production' and args[0]=='deploy'))
         print(json.dumps({'environment':env,'digest':digest,'status':'healthy'}))
 
 if __name__=='__main__':

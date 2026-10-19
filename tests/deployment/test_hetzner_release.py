@@ -2,6 +2,7 @@ import importlib.machinery
 import importlib.util
 import pathlib
 import os
+import io
 import stat
 import tempfile
 from types import SimpleNamespace
@@ -18,6 +19,101 @@ def module(name):
     return result
 
 class ReleaseTests(unittest.TestCase):
+    def test_private_configuration_validation(self):
+        configure=module('nightsky-configure')
+        base='\n'.join(f'{name}={value}' for name,value in configure.FIXED.items())+'\n'
+        self.assertEqual(configure.validate(base.encode())['NIGHTSKY_DEPLOYMENT_ENV'],'production')
+        for data in (
+            base+'NODE_ENV=development\n',
+            base+'UNEXPECTED_SETTING=value\n',
+            base+'NIGHTSKY_GEOAPIFY_API_KEY=key\n',
+            base+'NIGHTSKY_QUOTA_STATE_PATH=/tmp/other.json\n',
+            base+'NIGHTSKY_GEOAPIFY_API_KEY=<paste-key>\n',
+            base.replace('NIGHTSKY_DISCOVERY_MODE=api','NIGHTSKY_DISCOVERY_MODE=legacy'),
+        ):
+            with self.assertRaises(ValueError): configure.validate(data.encode())
+        for data in (b'x'*(configure.MAX_BYTES+1), b'NODE_ENV=production\r\n', b'NODE_ENV=production\0'):
+            with self.assertRaises(ValueError): configure.validate(data)
+
+    def test_configure_rejects_wrong_hash_before_write(self):
+        configure=module('nightsky-configure')
+        with patch.object(configure.sys,'argv',['nightsky-configure','production','sha256:'+'a'*64]), patch.object(configure.os,'geteuid',return_value=0,create=True), patch.object(configure.sys,'stdin',SimpleNamespace(buffer=io.BytesIO(b'not matching'))), patch.object(configure,'install') as install:
+            with self.assertRaisesRegex(ValueError,'digest mismatch'): configure.main()
+        install.assert_not_called()
+
+    def test_production_candidate_uses_pending_config_until_probe_passes(self):
+        release=module('nightsky-release')
+        old='sha256:'+'b'*64
+        new='sha256:'+'a'*64
+        with patch.object(release,'check_network'), patch.object(release,'check_disk'), patch.object(release,'secure'), patch.object(pathlib.Path,'read_bytes',return_value=b'old config'), patch.object(release,'docker',side_effect=lambda *a,**k: '{"Os":"linux","Architecture":"arm64"}' if a[0]=='image' else ''), patch.object(release,'remove'), patch.object(release,'start') as start, patch.object(release,'probe') as probe, patch.object(release.os,'replace') as replace, patch.object(release,'write_record') as record:
+            release.activate('production',new,{'current':old,'previous':None},pending=True)
+        self.assertEqual(start.call_args.args,('production',new,pathlib.Path('/etc/nightsky/production.env.pending')))
+        probe.assert_called_once_with('production')
+        replace.assert_called_once_with(pathlib.Path('/etc/nightsky/production.env.pending'),pathlib.Path('/etc/nightsky/production.env'))
+        record.assert_called_once()
+
+    def test_failed_candidate_keeps_old_config_and_image(self):
+        release=module('nightsky-release')
+        old='sha256:'+'b'*64
+        new='sha256:'+'a'*64
+        with patch.object(release,'check_network'), patch.object(release,'check_disk'), patch.object(release,'secure'), patch.object(pathlib.Path,'read_bytes',return_value=b'old config'), patch.object(release,'docker',side_effect=lambda *a,**k: '{"Os":"linux","Architecture":"arm64"}' if a[0]=='image' else ''), patch.object(release,'remove'), patch.object(release,'start') as start, patch.object(release,'probe',side_effect=RuntimeError('unhealthy')), patch.object(release.os,'replace') as replace, patch.object(release,'restore_config') as restore, patch.object(release,'write_record') as record:
+            with self.assertRaises(RuntimeError): release.activate('production',new,{'current':old,'previous':None},pending=True)
+        self.assertEqual(start.call_args_list[-1].args,('production',old))
+        replace.assert_not_called()
+        restore.assert_not_called()
+        record.assert_not_called()
+
+    def test_record_failure_restores_old_config(self):
+        release=module('nightsky-release')
+        old='sha256:'+'b'*64
+        new='sha256:'+'a'*64
+        with patch.object(release,'check_network'), patch.object(release,'check_disk'), patch.object(release,'secure'), patch.object(pathlib.Path,'read_bytes',return_value=b'old config'), patch.object(release,'docker',side_effect=lambda *a,**k: '{"Os":"linux","Architecture":"arm64"}' if a[0]=='image' else ''), patch.object(release,'remove'), patch.object(release,'start') as start, patch.object(release,'probe'), patch.object(release.os,'replace') as replace, patch.object(release,'restore_config') as restore, patch.object(release,'write_record',side_effect=OSError('record failure')):
+            with self.assertRaises(OSError): release.activate('production',new,{'current':old,'previous':None},pending=True)
+        replace.assert_called_once()
+        restore.assert_called_once_with(b'old config',pathlib.Path('/etc/nightsky/production.env'))
+        self.assertEqual(start.call_args_list[-1].args,('production',old))
+
+    def test_configuration_install_is_atomic(self):
+        configure=module('nightsky-configure')
+        data=('\n'.join(f'{name}={value}' for name,value in configure.FIXED.items())+'\n').encode()
+        with tempfile.TemporaryDirectory(dir=ROOT) as folder:
+            target=pathlib.Path(folder)/'production.env'
+            target.write_bytes(b'old config')
+            target.chmod(0o600)
+            original_open=os.open
+            original_lstat=pathlib.Path.lstat
+            def root_lstat(path):
+                return SimpleNamespace(st_uid=0,st_mode=stat.S_IFREG|0o600,st_nlink=1) if path==target else original_lstat(path)
+            with patch.object(configure,'secure_directory'), patch.object(pathlib.Path,'lstat',root_lstat), patch.object(configure.os,'fchmod'), patch.object(configure.os,'fchown',create=True), patch.object(configure.os,'replace',side_effect=OSError('replace failed')):
+                with self.assertRaises(OSError): configure.install(data,target)
+            self.assertEqual(target.read_bytes(),b'old config')
+            def open_directory(path,*args,**kwargs):
+                return original_open(os.devnull,os.O_RDONLY) if pathlib.Path(path)==target.parent else original_open(path,*args,**kwargs)
+            with patch.object(configure,'secure_directory'), patch.object(pathlib.Path,'lstat',root_lstat), patch.object(configure.os,'fchmod'), patch.object(configure.os,'fchown',create=True), patch.object(configure.os,'fsync'), patch.object(configure.os,'O_DIRECTORY',0,create=True), patch.object(configure.os,'open',side_effect=open_directory):
+                configure.install(data,target)
+            self.assertEqual(target.read_bytes(),data)
+            self.assertFalse(list(pathlib.Path(folder).glob('.production-*.tmp')))
+
+    def test_configuration_dispatch_is_production_only(self):
+        dispatcher=module('nightsky-ssh-dispatch')
+        command='nightsky-configure production sha256:'+'a'*64
+        self.assertEqual(dispatcher.authorize(command,['production']),['configure','production','sha256:'+'a'*64])
+        with self.assertRaises(ValueError): dispatcher.authorize(command,['staging'])
+        for suffix in ('; id','\n',' extra'):
+            with self.assertRaises(ValueError): dispatcher.parse(command+suffix)
+        with patch.object(dispatcher.sys,'argv',['nightsky-ssh-dispatch','production']), patch.dict(dispatcher.os.environ,{'SSH_ORIGINAL_COMMAND':command}), patch.object(dispatcher.os,'execve') as execute:
+            dispatcher.main()
+        self.assertEqual(execute.call_args.args[1],['sudo','-n','--','/usr/local/sbin/nightsky-configure','production','sha256:'+'a'*64])
+
+    def test_protected_workflow_streams_config_only_for_production(self):
+        workflow=(ROOT/'.github/workflows/nightsky-deploy.yml').read_text()
+        section=workflow.split('- name: Install reviewed production configuration',1)[1].split('- name: Promote verified digest',1)[0]
+        for required in ("if: inputs.environment == 'production'",'secrets.NIGHTSKY_PRODUCTION_ENV',"printf '%s' \"$PRODUCTION_CONFIG\" | ssh -T",'nightsky-configure production $digest','StrictHostKeyChecking=yes'):
+            self.assertIn(required,section)
+        self.assertNotIn('set -x',section)
+        self.assertNotIn('echo "$PRODUCTION_CONFIG"',section)
+        self.assertNotIn('docker build',section)
+
     def test_same_digest_keeps_previous(self):
         release=module('nightsky-release')
         digest='sha256:'+'a'*64

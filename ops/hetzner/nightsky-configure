@@ -1,0 +1,133 @@
+#!/usr/bin/python3 -I
+"""Install a reviewed production Docker env-file received on restricted SSH stdin."""
+import hashlib
+import hmac
+import json
+import os
+import re
+import stat
+import sys
+import tempfile
+from pathlib import Path
+
+TARGET = Path('/etc/nightsky/production.env.pending')
+MAX_BYTES = 16384
+FIXED = {
+    'NODE_ENV': 'production',
+    'HOST': '0.0.0.0',
+    'PORT': '5000',
+    'NIGHTSKY_DEPLOYMENT_ENV': 'production',
+    'NIGHTSKY_DISCOVERY_MODE': 'api',
+    'NIGHTSKY_MCP_ALLOWED_HOSTS': 'mcp.nightsky.earth,localhost,127.0.0.1',
+    'NIGHTSKY_MCP_TRUSTED_PROXIES': '172.30.80.1',
+    'NIGHTSKY_PLANNING_CARD_ENABLED': 'false',
+    'NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED': 'false',
+}
+OPTIONAL = {
+    'NIGHTSKY_LOCATION_USER_AGENT', 'MET_NORWAY_USER_AGENT',
+    'NIGHTSKY_GEOAPIFY_API_KEY', 'NIGHTSKY_GEONAMES_USERNAME',
+    'NIGHTSKY_WEATHER_PROVIDERS', 'NIGHTSKY_WEATHER_ADMITTED_PROVIDERS',
+    'NIGHTSKY_WEATHERAPI_KEY', 'NIGHTSKY_OPENWEATHER_KEY',
+    'NIGHTSKY_LIGHT_POLLUTION_SOURCES', 'NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED',
+    'NIGHTSKY_DARKSKYSITES_API_KEY',
+    'NIGHTSKY_SKY_PROVIDERS', 'NIGHTSKY_SKY_ADMITTED_PROVIDERS',
+    'NIGHTSKY_ASTRONOMY_API_APP_ID', 'NIGHTSKY_ASTRONOMY_API_APP_SECRET',
+    'NIGHTSKY_NASA_API_KEY',
+}
+STATE_PATHS = {
+    'NIGHTSKY_QUOTA_STATE_PATH': '/state/provider-quota.json',
+    'NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH': '/state/light-pollution-quota.json',
+    'NIGHTSKY_SKY_QUOTA_STATE_PATH': '/state/sky-quota.json',
+    'NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH': '/state/public-universe-quota.json',
+}
+
+
+def validate(data):
+    if not 0 < len(data) <= MAX_BYTES or b'\r' in data or b'\0' in data:
+        raise ValueError('invalid size or control character')
+    try:
+        content = data.decode('utf-8')
+    except UnicodeDecodeError as error:
+        raise ValueError('invalid encoding') from error
+    entries = {}
+    for line in content.split('\n'):
+        if not line or line.startswith('#'):
+            continue
+        if '=' not in line:
+            raise ValueError('invalid env line')
+        name, value = line.split('=', 1)
+        if not re.fullmatch(r'[A-Z][A-Z0-9_]*', name) or name in entries:
+            raise ValueError('duplicate or invalid name')
+        if name not in FIXED and name not in OPTIONAL and name not in STATE_PATHS:
+            raise ValueError('unknown name')
+        if not value or any(ord(char) < 32 or ord(char) > 126 for char in value):
+            raise ValueError('invalid value')
+        entries[name] = value
+    for name, expected in {**FIXED, **{name: value for name, value in STATE_PATHS.items() if name in entries}}.items():
+        if entries.get(name) != expected:
+            raise ValueError('required production setting mismatch')
+    if any(('<' in value or '>' in value or value == 'CHANGE_ME') for name, value in entries.items() if name.endswith(('_KEY', '_SECRET', '_APP_ID'))):
+        raise ValueError('placeholder credential')
+    # Credentials alone do not activate a provider. A ledger path is mandatory
+    # before any quota-metered source is configured for runtime selection.
+    if 'NIGHTSKY_GEOAPIFY_API_KEY' in entries and 'NIGHTSKY_QUOTA_STATE_PATH' not in entries:
+        raise ValueError('missing provider state path')
+    if any(name in entries for name in ('NIGHTSKY_WEATHERAPI_KEY', 'NIGHTSKY_OPENWEATHER_KEY')) and 'NIGHTSKY_QUOTA_STATE_PATH' not in entries:
+        raise ValueError('missing provider state path')
+    if 'NIGHTSKY_DARKSKYSITES_API_KEY' in entries and 'NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH' not in entries:
+        raise ValueError('missing light pollution state path')
+    return entries
+
+
+def secure_directory(path):
+    for item in [*reversed(path.parents), path]:
+        info = item.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != 0 or info.st_mode & 0o022:
+            raise ValueError('untrusted destination')
+
+
+def install(data, target=TARGET):
+    validate(data)
+    secure_directory(target.parent)
+    if target.exists() or target.is_symlink():
+        info = target.lstat()
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or info.st_nlink != 1 or info.st_mode & 0o077:
+            raise ValueError('untrusted existing configuration')
+    fd, temporary = tempfile.mkstemp(prefix='.production-', suffix='.tmp', dir=target.parent)
+    try:
+        os.fchmod(fd, 0o600)
+        os.fchown(fd, 0, 0)
+        with os.fdopen(fd, 'wb') as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, target)
+        directory = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def main():
+    if len(sys.argv) != 3 or sys.argv[1] != 'production' or not re.fullmatch(r'sha256:[a-f0-9]{64}', sys.argv[2]):
+        raise ValueError('invalid command')
+    if os.geteuid() != 0:
+        raise ValueError('root required')
+    data = sys.stdin.buffer.read(MAX_BYTES + 1)
+    if not hmac.compare_digest(hashlib.sha256(data).hexdigest(), sys.argv[2][7:]):
+        raise ValueError('digest mismatch')
+    install(data)
+    print(json.dumps({'environment': 'production', 'status': 'staged', 'operation': 'configure'}))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception:
+        # Never echo input, parser exceptions, OS paths or Docker env values.
+        print('configuration rejected', file=sys.stderr)
+        sys.exit(1)

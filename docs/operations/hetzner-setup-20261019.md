@@ -24,6 +24,7 @@ The standalone service uses `Dockerfile.plugin` and `dist/plugin.js`, not the we
 | State | `/var/lib/nightsky/state/<environment>/runtime` -> `/state`; UID/GID10001:10001,0700; root-owned parents |
 | Deployment records/lock | `/var/lib/nightsky/releases`; root:root0700; separate from application-writable state |
 | Helper | `/usr/local/sbin/nightsky-release`; root:root0755 |
+| Private config helper | `/usr/local/sbin/nightsky-configure`; root:root0755; production only; writes `/etc/nightsky/production.env.pending` |
 | SSH forced command | `/usr/local/libexec/nightsky-ssh-dispatch`; root:root0755 |
 | Docker networks | `nightsky`:172.30.80.0/24,gateway172.30.80.1; `nightsky-staging`:172.30.81.0/24,gateway172.30.81.1,internal |
 
@@ -38,12 +39,13 @@ Use the reviewed files from the exact pushed commit. Do not install scripts from
 1. Verify existing SSH still works and check Hetzner firewall rules separately: only SSH/HTTP/HTTPS inbound, no public5000/5001. Do not alter the working root key. Confirm the proposed networks/ports and UID10001 filesystem ownership are suitable.
 2. Create `nightsky-deploy` with a locked password, normal `/bin/sh` command interpreter for the SSH forced command, and no supplementary sudo/docker membership. An `nologin` shell can prevent forced commands from running; constrain access through the SSH key instead.
 3. Create root-owned0700 `/etc/nightsky`, `/var/lib/nightsky/releases` and root-owned non-writable parent directories for `/var/lib/nightsky/state/staging` and `/var/lib/nightsky/state/production`. Create their `runtime` subdirectories as UID/GID10001:10001 mode0700. Keep parent ownership root so the application cannot replace the state mount or deployment records.
-4. Install the two Python helpers at the paths above. Install root-owned0600 environment files based on `ops/hetzner/*.env.example`. These files use Docker env-file syntax: literal `NAME=value`, no `export`, shell expansion or surrounding shell quotes. Never put actual values in the repo.
+4. Install the three Python helpers at the paths above. Install root-owned0600 environment files based on `ops/hetzner/*.env.example`. These files use Docker env-file syntax: literal `NAME=value`, no `export`, shell expansion or surrounding shell quotes. Never put actual values in the repo. The production configuration helper writes only a pending file; the release helper promotes it after a successful candidate probe.
 5. Create the two dedicated Docker bridges with the exact subnet/gateway/internal properties; the helper verifies them rather than creating networks implicitly.
 6. Install a sudoers drop-in using `visudo -cf` validation before enabling it. The minimal command set is:
 
 ```sudoers
 nightsky-deploy ALL=(root) NOPASSWD: /usr/local/sbin/nightsky-release deploy staging sha256\:*, /usr/local/sbin/nightsky-release deploy production sha256\:*, /usr/local/sbin/nightsky-release rollback staging, /usr/local/sbin/nightsky-release rollback production, /usr/local/sbin/nightsky-release check staging, /usr/local/sbin/nightsky-release check production
+nightsky-deploy ALL=(root) NOPASSWD: /usr/local/sbin/nightsky-configure production sha256\:*
 ```
 
 The helper independently validates argument count and lowercase digest grammar. Each forced SSH command also pins its key to exactly one environment, so the staging key cannot promote production. Do not allow `/bin/sh`, arbitrary Python, Docker, arbitrary env or general sudo. Treat this key as a privileged promotion credential within the fixed image repository; container isolation does not make arbitrary image publication harmless.
@@ -74,11 +76,11 @@ Set these on BOTH deployment environments (not `image-publication`):
 
 The reported ED25519 fingerprint is `SHA256:EI9Or5rTF3F3GVWjOHeAfml0SHQAm2mC7fywZRb6ZPk`. Reconfirm from the trusted existing connection. Do not replace verification with an unauthenticated `ssh-keyscan` result or `StrictHostKeyChecking=no`.
 
-Do not add a root key, `GITHUB_TOKEN`, provider API keys, SSH passphrase or release-root variable. GitHub supplies the short-lived workflow token. The fixed helper owns the release path; there is no arbitrary destination input.
+Do not add a root key, `GITHUB_TOKEN`, SSH passphrase or release-root variable. GitHub supplies the short-lived workflow token. The fixed helper owns the release path; there is no arbitrary destination input. The separately reviewed production configuration workflow uses one additional **production environment secret**, `NIGHTSKY_PRODUCTION_ENV`, containing the complete Docker env-file. It is never set on staging or image-publication. Install the updated forced-command dispatcher and `nightsky-configure` helper on the server and validate sudoers before running a production promotion with this secret.
 
 The GHCR package must be publicly pullable, or the server needs separately reviewed read-only registry authentication. Initial publication may create a private package: explicitly check/change package visibility after the authorized first publication. Never give the deployment account a registry write token. Publishing an image is a separate manual action from deploying it.
 
-## 3. Configure provider secrets privately on the server
+## 3. Configure provider secrets through the protected production environment
 
 The checked-in production example is a preparation profile. It does not activate optional providers. The built-in MET baseline can be used by existing tools when a suitable identity is configured; do not describe this profile as a zero-network production mode. Only staging is network-isolated.
 
@@ -86,7 +88,7 @@ Review `production.env.example` against the exact provider configuration modules
 
 For the previously tested location/weather/light-pollution providers, the private names are `NIGHTSKY_GEOAPIFY_API_KEY`, `NIGHTSKY_WEATHERAPI_KEY`, `NIGHTSKY_OPENWEATHER_KEY`, `NIGHTSKY_DARKSKYSITES_API_KEY`. Optional astronomy uses `NIGHTSKY_ASTRONOMY_API_APP_ID`, `NIGHTSKY_ASTRONOMY_API_APP_SECRET`, `NIGHTSKY_NASA_API_KEY`. Public Universe has a separate quota ledger, not an API secret. No GeoNames account is required when using Geoapify.
 
-Source selection, entitlements, credits and admission values must be reviewed before enabling each source. API keys stay in root-owned production.env; the non-root container receives only the selected runtime configuration. Do not pass keys as Docker build arguments, image labels, workflow inputs or ordinary CI secrets.
+Source selection, entitlements, credits and admission values must be reviewed before enabling each source. Populate `NIGHTSKY_PRODUCTION_ENV` only in GitHub's protected `production` environment with the **complete** newline-separated Docker env-file, using `ops/hetzner/production.github.env.example` as a template. Do not paste the local `providers.env` verbatim: it has Windows state paths and lacks server base settings. The manual promotion streams the secret through authenticated SSH stdin to `nightsky-configure`, which validates the SHA-256, fixed production settings, approved names and `/state` paths, then atomically stages root:root0600 `/etc/nightsky/production.env.pending`. The release helper starts the candidate image with this pending file and promotes it to active `/etc/nightsky/production.env` only after its health probe passes; a failed promotion restores the active file and previous image. The non-root container receives only this selected runtime configuration. Staging receives no provider secret. Do not pass keys as Docker build arguments, image labels, workflow inputs or command-line arguments. A changed GitHub secret takes effect on the next approved production promotion; rollback of an image does not roll back the current configuration.
 
 **Quota migration is a separate mandatory activation step.** Existing local accounts were used in tests. Do not initialize new zero counters or run another instance against the same accounts. Stop the old ledger owner, preserve usage/reservations, validate policies and migrate reviewed private ledger bytes into `/state` using the existing accounting tools/procedure. Path keys are `NIGHTSKY_QUOTA_STATE_PATH`, `NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH`, `NIGHTSKY_SKY_QUOTA_STATE_PATH`, `NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH`. Each selects a separate `/state/<name>.json`. Missing/locked/invalid ledgers fail closed; never delete a lock or reset state merely to force a start. No ledger or key was read/copied here.
 
