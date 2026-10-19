@@ -6,7 +6,9 @@
 
 ## Production transport verification — 19 October 2026
 
-[The deployment receipt](deployment.md#production-receipt--19-october-2026) records the exact reviewed commit, image digest and GitHub promotions. Production HTTPS `/health` is independently reachable with `status: ok`; the server operator reports successful MCP initialization through nginx. Staging remains externally denied. No live provider request, client connection, submission or user-pilot acceptance is inferred. The 15 / 0 / 10 / 2 work-location categories remain unchanged; hosted evidence advances parts of 3B and 14 without closing their full criteria.
+[The deployment receipt](deployment.md#production-receipt--19-october-2026) records the exact reviewed commit, image digest and GitHub promotions. Production HTTPS `/health` is independently reachable with `status: ok`; the server operator reports successful MCP initialization through nginx. Staging remains externally denied. At that transport checkpoint, no live provider request, client connection, submission or user-pilot acceptance was inferred. The 15 / 0 / 10 / 2 work-location categories remain unchanged; hosted evidence advances parts of 3B and 14 without closing their full criteria.
+
+[A bounded hosted source check](deployment.md#bounded-production-source-check--19-october-2026) subsequently confirmed one Geoapify resolution, one partial MET Norway forecast and one DarkSkySites city-point estimate through public MCP. No client-specific journey, sustained capacity or additional source activation is claimed. Category totals remain unchanged.
 
 ## HTTPS and access preparation - current wave
 
