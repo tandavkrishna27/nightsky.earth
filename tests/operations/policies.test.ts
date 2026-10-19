@@ -37,8 +37,9 @@ test("rendered privacy discloses configured API destinations and durable quota r
   assert.match(html, /persistent quota ledger/);
   assert.match(html, /provider account labels/);
   assert.doesNotMatch(html, /their query processing does not contact those source services/);
-  assert.match(html, /Verified publisher legal name/);
-  assert.match(html, /support-message retention.*pending/);
+  assert.match(html, /Tandav Krishna \(TK\)/);
+  assert.doesNotMatch(html, /Verified publisher legal name.*pending/);
+  assert.match(html, /support-message retention.*pending/i);
 });
 
 test("rendered privacy distinguishes operator history acquisition and durable location evidence", () => {
@@ -85,7 +86,7 @@ test('privacy describes optional configured API sharing without activating provi
 
 test('privacy discloses generated per-request diagnostic correlation without user tracking claims',()=>{
  const text=JSON.stringify(POLICY_PAGES.privacy);
- for(const phrase of ['generated per-request correlation ID','allowlisted protocol method and tool name','ingress/completion','not a user or session identifier','host retention'])assert.ok(text.includes(phrase),phrase);
+ for(const phrase of ['generated per-request correlation ID','allowlisted protocol method and tool name','ingress/completion','not a user or session identifier','Docker container logs are capped by size, not age','no configured age limit'])assert.ok(text.includes(phrase),phrase);
  assert.match(text,/exclude request or response bodies/);
  assert.match(text,/raw subjects/);
 });
