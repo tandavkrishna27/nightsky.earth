@@ -184,6 +184,12 @@ test('weather release evidence permits rollback subsets and distinguishes admiss
  c.releases.rollback.weather=weatherEvidence(['openweather']);assert.ok((await operatorPreflight(c,'.')).findings.includes('WEATHER_ADMISSION_EVIDENCE_MISSING'));
  delete c.runtimeEnvironment.NIGHTSKY_QUOTA_STATE_PATH;assert.ok((await operatorPreflight(c,'.')).findings.includes('WEATHER_QUOTA_CONFIGURATION_MISSING'));
 });
+test('7Timer can be declared in operator weather release evidence',async()=>{
+ const c=config();Object.assign(c.runtimeEnvironment,{NIGHTSKY_WEATHER_PROVIDERS:'met,seventimer',NIGHTSKY_WEATHER_ADMITTED_PROVIDERS:'seventimer'});
+ c.releases.current.weather=weatherEvidence(['met','seventimer'],['seventimer']);
+ c.releases.rollback.weather=weatherEvidence(['met']);
+ assert.equal((await operatorPreflight(c,'.')).status,'offline-pass');
+});
 test('weather private keys are excluded from operator JSON and reports',async()=>{
  const c=config();c.runtimeEnvironment.NIGHTSKY_WEATHERAPI_KEY='do-not-report';const result=await operatorPreflight(c,'.');assert.equal(result.status,'invalid');assert.ok(!JSON.stringify(result).includes('do-not-report'));
 });
