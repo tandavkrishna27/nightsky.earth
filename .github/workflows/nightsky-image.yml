@@ -1,0 +1,16 @@
+name: NightSky ARM64 image
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish verified image to GHCR from the reviewed plugin branch
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  registration:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Select the reviewed codex/plugin-v1 branch for image publication."
