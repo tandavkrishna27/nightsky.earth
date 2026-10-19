@@ -87,6 +87,11 @@ export const siteRoutes: readonly SiteRoute[] = [
     "Explore a reviewed selection of meteor showers, eclipses, Moon phases and planetary events, with clear timing and source information.",
   ],
   [
+    "/sky-map",
+    "Explore the sky.",
+    "Explore an interactive sky map from Stellarium Web. Load the map when you are ready to connect to the independent service.",
+  ],
+  [
     "/sources",
     "Sources & coverage.",
     "Understand NightSky’s astronomy calculations, weather sources, event references, place data and coverage limits.",

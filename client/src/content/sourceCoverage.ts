@@ -1,4 +1,4 @@
-export const coverageReviewedAt = "2026-10-18";
+export const coverageReviewedAt = "2026-10-19";
 
 export const coverageCards = [
   {
@@ -70,6 +70,22 @@ export const coverageCards = [
       "These estimates are separate from live weather and an on-site sky-brightness measurement. Missing data stays unavailable, and a darker modeled point still needs access and observing-condition checks.",
     ],
     sources: [{ name: "DarkSkySites — optional", url: "https://darkskysites.com/" }],
+  },
+  {
+    id: "sky-map", title: "Interactive sky map", icon: "map",
+    description: "An interactive planetarium is available from Stellarium Web after you choose how to connect and whether to allow device location.",
+    coverage: "This is a third-party hosted map, separate from NightSky’s own astronomy calculations and AI-plugin answers.",
+    details: [
+      "The map connects to Stellarium Web only after you choose a location option. Stellarium’s current web app uses IP-based location lookup and may request precise browser location when you opt in. It may use OpenStreetMap Nominatim to resolve detected or selected coordinates to a place name. These requests are made directly by your browser to the independent providers; NightSky’s app does not receive or store the map coordinates. Website hosting and third-party providers may separately process connection data such as IP addresses.",
+      "NightSky embeds the hosted service; it does not bundle or modify Stellarium Web Engine code. The engine project publishes its licensing information in its repository.",
+    ],
+    sources: [
+      { name: "Stellarium Web", url: "https://stellarium-web.org/" },
+      { name: "Stellarium Web Engine and license", url: "https://github.com/Stellarium/stellarium-web-engine" },
+      { name: "OpenStreetMap Nominatim", url: "https://nominatim.org/" },
+      { name: "Nominatim usage policy", url: "https://operations.osmfoundation.org/policies/nominatim/" },
+      { name: "OpenStreetMap Foundation privacy policy", url: "https://osmfoundation.org/wiki/Privacy_Policy" },
+    ],
   },
 ] as const;
 

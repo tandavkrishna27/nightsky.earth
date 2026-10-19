@@ -29,8 +29,11 @@ test("missing factual approvals block publication", () => {
   assert.ok(blockers.includes("Content rights approval"));
 });
 
-test("owner-approved website facts clear the website release gate", () => {
-  assert.deepEqual(releaseBlockers(releaseFacts, { published: false, url: null }), []);
+test("new sky-map provider keeps source, rights and policy approvals pending", () => {
+  assert.deepEqual(
+    releaseBlockers(releaseFacts, { published: false, url: null }),
+    ["Source inventory approval", "Content rights approval", "Policy approval"],
+  );
 });
 
 import { loadEnv } from "vite";

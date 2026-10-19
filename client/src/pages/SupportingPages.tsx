@@ -1,7 +1,7 @@
 import EditorialPage from "@/components/EditorialPage";
 import { SUPPORT_EMAIL } from "@shared/website";
 
-const effectiveDate = "18 October 2026";
+const effectiveDate = "19 October 2026";
 
 const content = {
   privacy: {
@@ -21,6 +21,10 @@ const content = {
       [
         "Information sent to data providers",
         "Some features use independent data providers. Depending on the feature and service configuration, NightSky may send a relevant place, coordinates, date range or search query to providers for place, weather, historical climate or news information. These may include GeoNames for place-name resolution; Geoapify for bounded place-candidate searches when enabled; MET Norway and NOAA for weather or space-weather data; 7Timer! ASTRO for optional forecast details; WeatherAPI only after its Free-plan status is confirmed; and Spaceflight News API for website news searches. OpenWeather remains disabled until its Free-product license and attribution obligations are cleared. Historical context may use locally stored, operator-prepared Copernicus ERA5 summaries; NightSky does not make a live Open-Meteo request for that feature. The website’s news search sends the search term and selected source filter through NightSky to the Spaceflight News API, and displays article metadata and links rather than article text or images. Providers handle information under their own terms and privacy practices, and may process it in other countries. Geoapify Free use also requires visible Geoapify credit and OpenStreetMap attribution; no retained OSM observing-place index is included.",
+      ],
+      [
+        "Interactive sky map",
+        "The Sky Map page shows a preview until you choose how to load the map. Stellarium Web is an independent third-party service. Its current web app requests an approximate location using your IP address whenever the map loads. If you choose Load with device location, the embedded app may also request precise device coordinates from your browser; this option is off unless you select it, and browser permission is required. If you decline or the browser blocks access, Stellarium falls back to its approximate IP-based estimate. Stellarium may send selected or detected coordinates to OpenStreetMap Nominatim to look up a place name. These connections are made by your browser directly to Stellarium and Nominatim; NightSky’s app does not receive or store the map coordinates. Website hosting and third-party providers may separately process connection data such as IP addresses under their own privacy practices. Stellarium and OpenStreetMap control their own processing, terms and privacy practices. The map may also use its own storage or cookies. You can open Stellarium Web directly instead of embedding it.",
       ],
       [
         "Website storage, analytics and hosting",
@@ -68,7 +72,7 @@ const content = {
       ],
       [
         "Third-party services and material",
-        "NightSky may rely on AI platforms and independent data providers. Their services, content, availability, terms and privacy practices are controlled by those providers and may change. Provider names, marks and materials belong to their respective owners. Follow applicable provider terms and any source attributions shown with the service.",
+        "NightSky may rely on AI platforms, independent data providers and Stellarium Web’s hosted interactive sky map. Their services, content, availability, terms and privacy practices are controlled by those providers and may change. Provider names, marks and materials belong to their respective owners. Follow applicable provider terms and any source attributions shown with the service.",
       ],
       [
         "Ownership and feedback",
@@ -136,6 +140,25 @@ export default function SupportingPage({
                   rel="noreferrer"
                 >
                   Google Analytics setup and data practices
+                </a>
+              </p>
+            )}
+            {title === "Interactive sky map" && (
+              <p>
+                <a href="https://stellarium-web.org/" target="_blank" rel="noopener noreferrer">
+                  Stellarium Web
+                </a>
+                {" · "}
+                <a href="https://github.com/Stellarium/stellarium-web-engine" target="_blank" rel="noopener noreferrer">
+                  Stellarium Web Engine project and license
+                </a>
+                {" · "}
+                <a href="https://operations.osmfoundation.org/policies/nominatim/" target="_blank" rel="noopener noreferrer">
+                  Nominatim usage policy
+                </a>
+                {" · "}
+                <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">
+                  OpenStreetMap Foundation privacy policy
                 </a>
               </p>
             )}
