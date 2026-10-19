@@ -4,7 +4,7 @@
 
 ## What already runs and what staging proves
 
-The last verified production profile selects Geoapify location resolution, MET Norway forecast, and DarkSkySites point light pollution. Astronomy Engine calculations run locally and need no API key. The staging image runs with `ops/hetzner/runtime-guard.mjs`, which rejects selected external providers and credentials. Its healthy result proves container/MCP startup, not live multi-provider behavior. GitHub cannot return the current secret value for comparison; verify the server's active provider **names** and ledger identity privately before changing it.
+The 20 October read-only production audit confirms Geoapify location resolution, MET Norway forecast, and DarkSkySites point light pollution; the WeatherAPI and OpenWeather credentials are absent. The general quota file contains valid WeatherAPI and OpenWeather policy records with preserved counters and its initialized marker has the expected runtime ownership. Astronomy Engine calculations run locally and need no API key. The staging image runs with `ops/hetzner/runtime-guard.mjs`, which rejects selected external providers and credentials. Its healthy result proves container/MCP startup, not live multi-provider behavior. GitHub cannot return the current secret value for comparison.
 
 ## Admission order
 
@@ -19,13 +19,15 @@ The last verified production profile selects Geoapify location resolution, MET N
 
 ## Environment entries after each source passes its gate
 
-Preserve the current Geoapify, MET, DarkSkySites and fixed host entries. Add only the appropriate rows below to the **existing** GitHub `production` environment secret `NIGHTSKY_PRODUCTION_ENV`:
+Preserve the current Geoapify, MET, DarkSkySites and fixed host entries. For WeatherAPI, put its key in the separate **GitHub `production` environment secret** `NIGHTSKY_WEATHERAPI_KEY` (not a repository secret). The production workflow composes that key and the required `met,weatherapi` selection with the existing complete `NIGHTSKY_PRODUCTION_ENV` in memory. It rejects a missing general quota path, an existing WeatherAPI key in the base profile, or unexpected weather selections. The original complete secret remains unchanged. Later provider additions still require their own reviewed admission and configuration path.
+
+The effective WeatherAPI entries are:
 
 ```dotenv
 # WeatherAPI admission: keep MET in the list.
 NIGHTSKY_WEATHER_PROVIDERS=met,weatherapi
 NIGHTSKY_WEATHER_ADMITTED_PROVIDERS=weatherapi
-NIGHTSKY_WEATHERAPI_KEY=<enter privately>
+NIGHTSKY_WEATHERAPI_KEY=<from the separate protected secret>
 
 # Add OpenWeather later, after its separate gate (replace the two lists above):
 # NIGHTSKY_WEATHER_PROVIDERS=met,weatherapi,openweather
@@ -45,7 +47,7 @@ The commented examples are **not** a complete secret; placeholders must never be
 
 1. On the host, report only active provider IDs, credential **presence**, configured ledger paths, checkpoint policy IDs and file integrity/ownership. Do not print key values or checkpoint contents. Compare against this packet and the operator's account dashboards. Preserve the root-only production configuration and runtime-owned state.
 2. Review the requested admission and source-credit rendering with a local fixture. Prepare and verify any missing quota migration while the relevant consumer is quiesced; preserve every prior counter and `.initialized` marker. Reject a missing, corrupt or differently labelled checkpoint rather than resetting it.
-3. The owner privately updates the existing GitHub production environment secret with the reviewed complete file. GitHub secrets cannot be read back; a local presence/configuration dry run and the host's restricted configure step must validate it without logging values.
+3. The owner privately adds the existing WeatherAPI key as the separate `NIGHTSKY_WEATHERAPI_KEY` secret under GitHub's protected **production environment**. The workflow composes the effective complete file only inside the runner and the host's restricted configure step validates it without logging values. Do not change `NIGHTSKY_PRODUCTION_ENV` for this admission.
 4. Use the verified immutable image and protected production promotion. A secret edit alone does not change a running container. Confirm image digest, `/health`, MCP initialization, selected provider IDs and existing quota ownership after promotion.
 5. Run one bounded production request per newly admitted provider, then a real planner journey with a failure fallback. Record request counts, available/partial/unavailable statuses, source issue/retrieval times, credits, and the exact image/configuration revision. No paid endpoint, retry fanout, bulk download or browser extraction is part of this packet.
 

@@ -45,13 +45,15 @@ jobs:
         if: inputs.environment == 'production'
         env:
           DEPLOY_KEY: ${{ secrets.NIGHTSKY_DEPLOY_SSH_KEY }}
-          PRODUCTION_CONFIG: ${{ secrets.NIGHTSKY_PRODUCTION_ENV }}
+          NIGHTSKY_BASE_PRODUCTION_CONFIG: ${{ secrets.NIGHTSKY_PRODUCTION_ENV }}
+          NIGHTSKY_WEATHERAPI_KEY: ${{ secrets.NIGHTSKY_WEATHERAPI_KEY }}
           HOST: ${{ vars.NIGHTSKY_DEPLOY_HOST }}
           PORT: ${{ vars.NIGHTSKY_DEPLOY_PORT }}
           DEPLOY_USER: ${{ vars.NIGHTSKY_DEPLOY_USER }}
           KNOWN_HOSTS: ${{ vars.NIGHTSKY_DEPLOY_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
+          PRODUCTION_CONFIG="$(python3 scripts/deployment/compose-production-env.py)"
           [[ -n "$PRODUCTION_CONFIG" && -n "$DEPLOY_KEY" && -n "$KNOWN_HOSTS" ]]
           [[ "$HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
           [[ "$PORT" =~ ^[0-9]{1,5}$ ]] && (( 10#$PORT > 0 && 10#$PORT < 65536 ))
