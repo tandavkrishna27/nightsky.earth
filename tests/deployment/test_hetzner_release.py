@@ -84,12 +84,12 @@ class ReleaseTests(unittest.TestCase):
             original_lstat=pathlib.Path.lstat
             def root_lstat(path):
                 return SimpleNamespace(st_uid=0,st_mode=stat.S_IFREG|0o600,st_nlink=1) if path==target else original_lstat(path)
-            with patch.object(configure,'secure_directory'), patch.object(pathlib.Path,'lstat',root_lstat), patch.object(configure.os,'fchmod'), patch.object(configure.os,'fchown',create=True), patch.object(configure.os,'replace',side_effect=OSError('replace failed')):
+            with patch.object(configure,'secure_directory'), patch.object(pathlib.Path,'lstat',root_lstat), patch.object(configure.os,'fchmod',create=True), patch.object(configure.os,'fchown',create=True), patch.object(configure.os,'replace',side_effect=OSError('replace failed')):
                 with self.assertRaises(OSError): configure.install(data,target)
             self.assertEqual(target.read_bytes(),b'old config')
             def open_directory(path,*args,**kwargs):
                 return original_open(os.devnull,os.O_RDONLY) if pathlib.Path(path)==target.parent else original_open(path,*args,**kwargs)
-            with patch.object(configure,'secure_directory'), patch.object(pathlib.Path,'lstat',root_lstat), patch.object(configure.os,'fchmod'), patch.object(configure.os,'fchown',create=True), patch.object(configure.os,'fsync'), patch.object(configure.os,'O_DIRECTORY',0,create=True), patch.object(configure.os,'open',side_effect=open_directory):
+            with patch.object(configure,'secure_directory'), patch.object(pathlib.Path,'lstat',root_lstat), patch.object(configure.os,'fchmod',create=True), patch.object(configure.os,'fchown',create=True), patch.object(configure.os,'fsync'), patch.object(configure.os,'O_DIRECTORY',0,create=True), patch.object(configure.os,'open',side_effect=open_directory):
                 configure.install(data,target)
             self.assertEqual(target.read_bytes(),data)
             self.assertFalse(list(pathlib.Path(folder).glob('.production-*.tmp')))
