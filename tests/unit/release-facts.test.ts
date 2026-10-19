@@ -30,10 +30,10 @@ test("missing factual approvals block publication", () => {
   assert.ok(blockers.includes("Content rights approval"));
 });
 
-test("sky-map source rights and policy approval keep publication pending", () => {
+test("owner-approved sources, content rights and policies clear their gates", () => {
   assert.deepEqual(
     releaseBlockers(releaseFacts, { published: false, url: null }),
-    ["Source inventory approval", "Content rights approval", "Policy approval"],
+    [],
   );
 });
 
@@ -117,3 +117,4 @@ test("Vite env-file listing requires setup verification before bundling", () => 
     false,
   );
 });
+

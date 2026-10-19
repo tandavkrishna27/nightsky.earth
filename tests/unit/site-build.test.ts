@@ -26,17 +26,18 @@ test("preview output is isolated from news and publication", () => {
   assert.equal(classifyPath("/meteor-shower/not-a-record").status, 404);
   assert.equal(classifyPath("/experiences").status, 410);
 });
-test("sky-map and other unapproved source rights keep release gates pending", () => {
-  assert.throws(() => buildWebsiteOutputs({
+test("owner-approved website facts allow a release build", () => {
+  const output = buildWebsiteOutputs({
       release: true,
       facts: releaseFacts,
       listing: { published: false, url: null },
       routes: siteRoutes,
-      events: [],
+      events: skyEvents,
       coverageMonths,
-      now: new Date("2026-10-16"),
+      now: new Date("2026-10-19"),
       legacyMeteorIds: [],
-    }), /Source inventory approval, Content rights approval, Policy approval/);
+    });
+  assert.ok(output.sitemap.includes("https://nightsky.earth/"));
 });
 
 test("a complete synthetic release has an indexable sitemap without preview headers", () => {
@@ -125,3 +126,4 @@ test("a complete synthetic release has an indexable sitemap without preview head
     /unreviewed sky-event months/,
   );
 });
+
