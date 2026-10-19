@@ -42,8 +42,10 @@ export function validateLocalPackageFiles(files: Record<string, Uint8Array>, hos
   // JSON properties must not hide credentials or machine paths from this scan.
   if (Object.values(files).reduce((total, bytes) => total + bytes.length, 0) > 32 * 1024 * 1024) throw Error('Local package total bytes too large');
   for (const [path, bytes] of Object.entries(files)) {
-    if (bytes.length > 1024 * 1024) throw Error('Local package entry too large');
+    if (bytes.length > (path.endsWith('.png') ? 5 * 1024 * 1024 : 1024 * 1024)) throw Error('Local package entry too large');
     if (!bytes.length) throw Error(`Empty local package entry: ${path}`);
+    // The portable validator below checks PNG signatures and dimensions.
+    if (path.startsWith('assets/') && path.endsWith('.png')) continue;
     let content: string;
     try { content = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
     catch { throw Error(`Invalid UTF-8 in ${path}`); }
@@ -76,7 +78,7 @@ export function validateLocalPackageFiles(files: Record<string, Uint8Array>, hos
   lintFiles['mcp.json'] = baseline['mcp.json'];
   validatePackageFiles(lintFiles);
   const skillNames = ['find-observing-place', 'plan-stargazing-night', 'plan-astrophotography', 'plan-sky-event', 'prepare-outing'];
-  const allowedPaths = ['plugin.json', 'mcp.json', 'RELEASE-NOTES.md', 'assets/logo.svg', 'assets/composer.svg', ...skillNames.flatMap(name => [`skills/${name}/SKILL.md`, `skills/${name}/references/workflow.md`])];
+  const allowedPaths = ['plugin.json', 'mcp.json', 'RELEASE-NOTES.md', 'assets/logo.svg', 'assets/composer.svg', 'assets/logo.png', 'assets/composer.png', ...skillNames.flatMap(name => [`skills/${name}/SKILL.md`, `skills/${name}/references/workflow.md`])];
   if (!isDeepStrictEqual(Object.keys(lintFiles).sort(), allowedPaths.sort())) throw Error('Unexpected or missing local package path');
   for (const [path, bytes] of Object.entries(lintFiles)) {
     if (path.endsWith('/references/workflow.md') && !isDeepStrictEqual(bytes, baseline[path])) throw Error(`Canonical workflow reference mismatch: ${path}`);

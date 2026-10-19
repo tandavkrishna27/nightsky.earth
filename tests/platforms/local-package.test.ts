@@ -46,7 +46,7 @@ for (const host of ['codex', 'claude'] as const) {
       assert.throws(() => validateLocalPackageFiles(missing, host), /workflow reference/);
       assert.throws(() => validateLocalPackageFiles({ ...files, [reference]: strToU8('different canonical bytes') }, host), /reference mismatch/);
     }
-    assert.ok(files['assets/logo.svg']); assert.ok(files['assets/composer.svg']);
+    assert.ok(files['assets/logo.png']); assert.ok(files['assets/composer.png']);
     assert.doesNotMatch(strFromU8(files['RELEASE-NOTES.md']), /uses an example endpoint/);
   });
   test(`${host} local validator rejects injected connections, paths and secrets`, () => {
