@@ -43,9 +43,12 @@ async function evidence() {
  docker('buildx','imagetools','inspect',`${repository}@${published.digest}`);
  appendFileSync(process.env.GITHUB_OUTPUT,`digest=${published.digest}\nsha=${published.sha}\n`);
 }
+export function verifyRuntimeIdentity(metadata) {
+ assert.equal(metadata.Architecture,'arm64');assert.equal(metadata.Os,'linux');assert.equal(metadata.Config.User,'10001:10001');
+}
 async function verifyImage(image) {
  assert.ok(image);const metadata=JSON.parse(docker('image','inspect',image))[0];
- assert.equal(metadata.Architecture,'arm64');assert.equal(metadata.Os,'linux');assert.ok(metadata.Config.User && !['root','0','0:0'].includes(metadata.Config.User));
+ verifyRuntimeIdentity(metadata);
  const name=`nightsky-offline-${process.pid}`;
  const runtimeArgs=['--read-only','--cap-drop','ALL','--security-opt','no-new-privileges','--pids-limit','128','--memory','512m','--tmpfs','/tmp:rw,noexec,nosuid,size=16m','-e','NODE_OPTIONS=--import=/app/ops/hetzner/runtime-guard.mjs','-e','NIGHTSKY_DEPLOYMENT_ENV=staging','-e','NIGHTSKY_DISCOVERY_MODE=api','-e','NIGHTSKY_PLANNING_CARD_ENABLED=false','-e','HOST=0.0.0.0','-e','PORT=5000','-e','NIGHTSKY_MCP_ALLOWED_HOSTS=mcp-staging.nightsky.earth,localhost,127.0.0.1','-e','NIGHTSKY_MCP_TRUSTED_PROXIES=172.30.81.1'];
  const command=[image,'node','--import','/app/ops/hetzner/runtime-guard.mjs','dist/plugin.js'];
@@ -53,7 +56,7 @@ async function verifyImage(image) {
   docker('run','--detach','--name',name,'--network','none',...runtimeArgs,...command);
   const probe=`
    const fs=await import('node:fs');
-   if(process.getuid()===0)throw Error('root');
+   if(process.getuid()!==10001||process.getgid()!==10001)throw Error('runtime identity must be 10001:10001');
    for(const path of ['/app/data/geonames','/app/data/osm','/app/.env','/app/.git','/app/data/era5'])if(fs.existsSync(path))throw Error('private data: '+path);
    if(fs.readdirSync('/app/data/events').length<5)throw Error('event assets absent');
    let ok=false;for(let i=0;i<100;i++){try{ok=(await fetch('http://127.0.0.1:5000/health')).ok;if(ok)break;}catch{}await new Promise(r=>setTimeout(r,100));}if(!ok)throw Error('health');

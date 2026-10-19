@@ -1,4 +1,6 @@
-# Next prompt for the server session
+# Original server preparation prompt (historical)
+
+The account/key preparation below was completed at4fd7835. Use [the HTTPS/access continuation](hetzner-https-access-handoff-20261019.md) next; do not repeat key generation or the superseded UID1000 ownership instructions.
 
 Use the exact reviewed commit supplied by the application session, not an unreviewed branch tip. This prompt prepares access/configuration only; it does not authorize publication or deployment.
 

@@ -77,3 +77,13 @@ test('host probe bounds response size and total request time',async()=>{
   await assert.rejects(hostProbeRequest(`${base}/hang`,{timeout:25}),/Host probe/);
  } finally {server.closeAllConnections();await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
 });
+
+
+test('image identity requires the isolated UID and GID',async()=>{
+ const {verifyRuntimeIdentity}=await import('../../scripts/deployment/verify-image.mjs');
+ assert.doesNotThrow(()=>verifyRuntimeIdentity({Architecture:'arm64',Os:'linux',Config:{User:'10001:10001'}}));
+ for(const user of ['node','1000:1000','10001:1000','0:0','10001'])assert.throws(()=>verifyRuntimeIdentity({Architecture:'arm64',Os:'linux',Config:{User:user}}));
+ const dockerfile=read('Dockerfile.plugin');
+ assert.ok(dockerfile.includes('--uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin'));
+ assert.ok(dockerfile.includes('USER 10001:10001'));
+});

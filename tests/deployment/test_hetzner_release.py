@@ -146,7 +146,51 @@ class ReleaseTests(unittest.TestCase):
         self.assertIn('--read-only',args)
         self.assertIn('/app/ops/hetzner/runtime-guard.mjs',args)
         self.assertIn('NIGHTSKY_DEPLOYMENT_ENV=production',args)
-        self.assertIn('--user=1000:1000',args)
+        self.assertIn('--user=10001:10001',args)
+
+    def test_read_only_check_validates_without_mutations(self):
+        release=module('nightsky-release')
+        for env in ('staging','production'):
+            with patch.object(release.sys,'argv',['nightsky-release','check',env]), patch.object(release.os,'geteuid',return_value=0,create=True), patch.object(release,'secure') as secure, patch.object(release,'check_runtime') as runtime, patch.object(release,'check_disk') as disk, patch.object(release,'check_network') as network, patch.object(release.os,'open',side_effect=AssertionError('must not create a lock')), patch.object(release,'read_record',side_effect=AssertionError('must not read records')), patch.object(release,'activate',side_effect=AssertionError('must not activate')), patch('builtins.print') as output:
+                release.main()
+            secure.assert_any_call(pathlib.Path('/etc/nightsky')/f'{env}.env',private=True)
+            runtime.assert_called_once_with(env)
+            disk.assert_called_once_with()
+            network.assert_called_once_with(env)
+            self.assertEqual(__import__('json').loads(output.call_args.args[0]),{'environment':env,'status':'ready','operation':'check'})
+
+    def test_check_fails_closed_without_mutating_on_validation_failure(self):
+        release=module('nightsky-release')
+        for failing in ('secure','check_runtime','check_disk','check_network'):
+            with patch.object(release.sys,'argv',['nightsky-release','check','staging']), patch.object(release.os,'geteuid',return_value=0,create=True), patch.object(release,'secure'), patch.object(release,'check_runtime'), patch.object(release,'check_disk'), patch.object(release,'check_network'), patch.object(release.os,'open',side_effect=AssertionError('must not create lock')), patch.object(release,'read_record',side_effect=AssertionError('must not read records')), patch('builtins.print') as output:
+                getattr(release,failing).side_effect=RuntimeError('invalid preparation')
+                with self.assertRaisesRegex(RuntimeError,'invalid preparation'): release.main()
+            output.assert_not_called()
+        with patch.object(release.sys,'argv',['nightsky-release','check','staging']), patch.object(release.os,'geteuid',return_value=1001,create=True), patch.object(release,'secure') as secure:
+            with self.assertRaisesRegex(RuntimeError,'root required'): release.main()
+        secure.assert_not_called()
+
+    def test_check_grammar_and_environment_binding(self):
+        release=module('nightsky-release')
+        dispatcher=module('nightsky-ssh-dispatch')
+        for env in ('staging','production'):
+            self.assertEqual(release.parse(['check',env]),['check',env])
+            self.assertEqual(dispatcher.authorize(f'nightsky-release check {env}',[env]),['check',env])
+            other='production' if env=='staging' else 'staging'
+            with self.assertRaisesRegex(ValueError,'SSH key is not authorized for that environment'):
+                dispatcher.authorize(f'nightsky-release check {env}',[other])
+        for args in [['check'],['check','other'],['check','staging','extra']]:
+            with self.assertRaises(ValueError): release.parse(args)
+        for suffix in ['; id','\n',' extra']:
+            with self.assertRaises(ValueError): dispatcher.parse('nightsky-release check staging'+suffix)
+
+    def test_runtime_directory_requires_dedicated_identity(self):
+        release=module('nightsky-release')
+        for uid,gid,mode in [(10001,10001,stat.S_IFDIR|0o700),(1000,1000,stat.S_IFDIR|0o700),(10001,1000,stat.S_IFDIR|0o700),(10001,10001,stat.S_IFLNK|0o700)]:
+            with patch.object(release,'secure'), patch.object(pathlib.Path,'lstat',return_value=SimpleNamespace(st_uid=uid,st_gid=gid,st_mode=mode)):
+                if uid==10001 and gid==10001 and stat.S_ISDIR(mode): release.check_runtime('staging')
+                else:
+                    with self.assertRaises(RuntimeError): release.check_runtime('staging')
 
     def test_runtime_directory_requires_node_owner(self):
         release=module('nightsky-release')

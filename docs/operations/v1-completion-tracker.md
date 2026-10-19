@@ -4,6 +4,10 @@
 
 [All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **15 local deliverables accepted under current scope; 0 original tickets primarily awaiting local work; 10 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
+## HTTPS and access preparation - current wave
+
+[Reviewed plan](../superpowers/plans/2026-10-19-https-access.md) adds a manual read-only SSH access check, dedicated runtime UID/GID10001 and ACME bootstrap/renewal configuration. [Server continuation](hetzner-https-access-handoff-20261019.md) records browser-verified environment protections, DNS configuration and applied Hetzner firewall. Both public names resolve through1.1.1.1 to37.27.221.101; server-side DNS confirmation, secret authentication, helper/ownership update and TLS remain pending. [Private migration](hetzner-private-migration-20261019.md) preserves existing account usage and is not performed now. Original categories remain **15 / 0 / 10 / 2**; no publication/deployment or provider activation follows.
+
 ## Deployment preparation implemented locally — 19 October 2026
 
 Owner confirmed both MCP hostnames and supplied the separate server cleanup handoff. [Canonical Hetzner setup](hetzner-setup-20261019.md) now defines manual image publication/promotion, restricted SSH, API-only runtime and persistent provider state. Preparing automation does not close hosted/client/policy or publication criteria; current categories remain15/0/10/2. No server access, DNS change, provider calls or deployment in this preparation pass. Local verification:1,891passed/0failed/2skipped,14Python and13focused Node checks, types/YAML and actual emulated ARM64 image smoke. Independent review is clean. Native host bridge verification belongs to exact-commit ARM64 CI; server acceptance remains open.

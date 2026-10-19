@@ -5,7 +5,7 @@ import re
 import sys
 
 def parse(command):
-    if not re.fullmatch(r'nightsky-release (?:deploy (?:staging|production) sha256:[0-9a-f]{64}|rollback (?:staging|production))',command):
+    if not re.fullmatch(r'nightsky-release (?:deploy (?:staging|production) sha256:[0-9a-f]{64}|(?:rollback|check) (?:staging|production))',command):
         raise ValueError('unsupported SSH command')
     return command.split(' ')[1:]
 

@@ -1,10 +1,16 @@
 # Hetzner setup and GitHub handoff — 19 October 2026
 
-## What is ready, and what is not
+## Current preparation update - HTTPS/access wave
+
+The [server continuation handoff](hetzner-https-access-handoff-20261019.md) records actual GitHub/DNS/Hetzner browser verification and the remaining root-side changes. The server was prepared at4fd7835; its existing runtime directories still use1000:1000. The updated contract below requires10001:10001 to avoid the privileged legacy deploy account. Apply the guarded empty-directory migration before the new helper is used. No application image has been published or deployed.
+
+A manual non-deploying access workflow validates each environment key and its cross-environment denial. It requires the updated helper and exact check sudoers entries; do not dispatch against the older helper. It validates SSH/config/network/disk/runtime metadata, not TLS, secrets, provider quota or application behavior. [Private migration checklist](hetzner-private-migration-20261019.md) remains a later activation gate.
+
+## Original preparation scope and architecture
 
 The owner confirmed `mcp.nightsky.earth` and `mcp-staging.nightsky.earth`. The separate server session removed Tunes; its handoff reports Ubuntu24.04 ARM64, Docker/nginx/Certbot, 3.7GiB RAM and9.3GiB disk free. That report is an input, not a fresh inspection by this session. No server connection, DNS change, registry publication, provider request or deployment is performed by preparing these files.
 
-The standalone service uses `Dockerfile.plugin` and `dist/plugin.js`, not the website entry point. It requires no database, GeoNames file, OSM download or historical dataset. API mode is explicit. The website remains separately hosted. Root owns the deployment helper and configuration; the application is UID1000 with a narrow writable `/state` mount. A dedicated deployment account has no unrestricted shell, general sudo or Docker-group access.
+The standalone service uses `Dockerfile.plugin` and `dist/plugin.js`, not the website entry point. It requires no database, GeoNames file, OSM download or historical dataset. API mode is explicit. The website remains separately hosted. Root owns the deployment helper and configuration; the application is UID10001 with a narrow writable `/state` mount. A dedicated deployment account has no unrestricted shell, general sudo or Docker-group access.
 
 ## Architecture and exact paths
 
@@ -15,7 +21,7 @@ The standalone service uses `Dockerfile.plugin` and `dist/plugin.js`, not the we
 | Staging | `https://mcp-staging.nightsky.earth/mcp`; private bridge `172.30.81.2:5000` from Linux host nginx; no published port; access denied until deliberately configured |
 | Container listener | `0.0.0.0:5000` inside each isolated container |
 | Runtime configuration | `/etc/nightsky/production.env`, `/etc/nightsky/staging.env`; root:root0600 |
-| State | `/var/lib/nightsky/state/<environment>/runtime` -> `/state`; UID1000:1000,0700; root-owned parents |
+| State | `/var/lib/nightsky/state/<environment>/runtime` -> `/state`; UID/GID10001:10001,0700; root-owned parents |
 | Deployment records/lock | `/var/lib/nightsky/releases`; root:root0700; separate from application-writable state |
 | Helper | `/usr/local/sbin/nightsky-release`; root:root0755 |
 | SSH forced command | `/usr/local/libexec/nightsky-ssh-dispatch`; root:root0755 |
@@ -29,15 +35,15 @@ Limits per container:768MiB RAM with no additional swap,1CPU,128PIDs, read-only 
 
 Use the reviewed files from the exact pushed commit. Do not install scripts from an unreviewed branch tip. The server session should inspect the files and verify their Git commit before root installation. Do not execute these installation operations in this application session.
 
-1. Verify existing SSH still works and check Hetzner firewall rules separately: only SSH/HTTP/HTTPS inbound, no public5000/5001. Do not alter the working root key. Confirm the proposed networks/ports and UID1000 filesystem ownership are suitable.
+1. Verify existing SSH still works and check Hetzner firewall rules separately: only SSH/HTTP/HTTPS inbound, no public5000/5001. Do not alter the working root key. Confirm the proposed networks/ports and UID10001 filesystem ownership are suitable.
 2. Create `nightsky-deploy` with a locked password, normal `/bin/sh` command interpreter for the SSH forced command, and no supplementary sudo/docker membership. An `nologin` shell can prevent forced commands from running; constrain access through the SSH key instead.
-3. Create root-owned0700 `/etc/nightsky`, `/var/lib/nightsky/releases` and root-owned non-writable parent directories for `/var/lib/nightsky/state/staging` and `/var/lib/nightsky/state/production`. Create their `runtime` subdirectories as UID1000:1000 mode0700. Keep parent ownership root so the application cannot replace the state mount or deployment records.
+3. Create root-owned0700 `/etc/nightsky`, `/var/lib/nightsky/releases` and root-owned non-writable parent directories for `/var/lib/nightsky/state/staging` and `/var/lib/nightsky/state/production`. Create their `runtime` subdirectories as UID/GID10001:10001 mode0700. Keep parent ownership root so the application cannot replace the state mount or deployment records.
 4. Install the two Python helpers at the paths above. Install root-owned0600 environment files based on `ops/hetzner/*.env.example`. These files use Docker env-file syntax: literal `NAME=value`, no `export`, shell expansion or surrounding shell quotes. Never put actual values in the repo.
 5. Create the two dedicated Docker bridges with the exact subnet/gateway/internal properties; the helper verifies them rather than creating networks implicitly.
 6. Install a sudoers drop-in using `visudo -cf` validation before enabling it. The minimal command set is:
 
 ```sudoers
-nightsky-deploy ALL=(root) NOPASSWD: /usr/local/sbin/nightsky-release deploy staging sha256\:*, /usr/local/sbin/nightsky-release deploy production sha256\:*, /usr/local/sbin/nightsky-release rollback staging, /usr/local/sbin/nightsky-release rollback production
+nightsky-deploy ALL=(root) NOPASSWD: /usr/local/sbin/nightsky-release deploy staging sha256\:*, /usr/local/sbin/nightsky-release deploy production sha256\:*, /usr/local/sbin/nightsky-release rollback staging, /usr/local/sbin/nightsky-release rollback production, /usr/local/sbin/nightsky-release check staging, /usr/local/sbin/nightsky-release check production
 ```
 
 The helper independently validates argument count and lowercase digest grammar. Each forced SSH command also pins its key to exactly one environment, so the staging key cannot promote production. Do not allow `/bin/sh`, arbitrary Python, Docker, arbitrary env or general sudo. Treat this key as a privileged promotion credential within the fixed image repository; container isolation does not make arbitrary image publication harmless.
@@ -54,7 +60,7 @@ Do not permit user-writable `authorized_keys`, SSH environment files or alternat
 
 ## 2. Enter GitHub settings
 
-Create environments **`image-publication`**, **`staging`**, **`production`** under repository Settings → Environments. Restrict them to the intended reviewed branch (`codex/plugin-v1` initially; `main` after merge). Require owner approval, including publication. For a solo owner, allow self-review rather than selecting “prevent self-review.” Check availability on the actual GitHub plan. No environment or secret has been created by this implementation.
+Create environments **`image-publication`**, **`staging`**, **`production`** under repository Settings → Environments. Restrict them to the intended reviewed branch (`codex/plugin-v1` initially; `main` after merge). Require owner approval, including publication. For a solo owner, allow self-review rather than selecting “prevent self-review.” Check availability on the actual GitHub plan. Browser verification now confirms these environments and secret names exist; secret contents remain unverified until the read-only access check.
 
 Set these on BOTH deployment environments (not `image-publication`):
 
@@ -86,7 +92,7 @@ Source selection, entitlements, credits and admission values must be reviewed be
 
 ## 4. DNS, TLS and nginx — later authorized server work
 
-Create DNS A records for the two confirmed names pointing to the verified IPv4 address. Add no AAAA record unless IPv6 listener/firewall routing is actually configured and tested. Check for DNS proxy/CDN behaviour before selecting a topology.
+Both DNS A records are configured and now resolve through1.1.1.1 to37.27.221.101. Reconfirm from the server and external client before certificate issuance. Add no AAAA record unless IPv6 listener/firewall routing is actually configured and tested. Check for DNS proxy/CDN behaviour before selecting a topology.
 
 Use the supplied nginx templates only after their certificate files exist. Obtain certificates with the server session's reviewed Certbot/ACME procedure; a template referencing nonexistent certificates will fail `nginx -t`. Staging defaults to deny access until an explicit restricted testing access rule is chosen. Never expose provider-free staging as a production service. An owner IP allowlist is suitable for CLI tests; ChatGPT-hosted access needs its own compatible access design and approval.
 
@@ -127,6 +133,13 @@ A separate internal-network experiment found no published-port binding; staging 
 
 The first sandboxed full-suite attempt encountered EPERM on atomic temporary-file renames. The complete authorized rerun outside that sandbox passed; no product logic was changed to hide that environmental failure. No server, provider, credential/ledger, installed plugin, publication or deployment changes occurred here.
 
-Use [the ready-to-copy server-session prompt](hetzner-server-session-prompt-20261019.md) after the exact pushed commit and CI result are supplied. Registry publication and deployment are still separate manual steps.
+Use [the ready-to-copy HTTPS/access continuation](hetzner-https-access-handoff-20261019.md) after the exact pushed commit and CI result are supplied. Registry publication and deployment are still separate manual steps.
 
 Native CI follow-up: the first ARM64 job passed image build/container-local checks but the host bridge MCP probe returned403. Actual wire tests confirmed Node fetch ignored its custom Host header. A bounded node:http probe now sends the reviewed hostname; hostname security is unchanged. Fifteen focused Node tests and14Python tests pass after correction; the final exact-commit CI is the follow-up acceptance evidence.
+
+
+## HTTPS/access wave local verification
+
+Full offline suite: **1,902 passed / 0 failed / 2 skipped**, 234.0 seconds. Independent plan and integrated code review found no material blocker. Affected Node deployment checks:21 passed; Python helper checks:18 passed. Type checks and actionlint for the new workflow pass. The rebuilt ARM64 image passes health, initialize, tools/list, exact10001:10001 identity and private-data exclusions under local emulation; native Linux host-bridge acceptance still belongs to CI. Actual local nginx accepts both HTTPS templates with temporary self-signed certificates, and its HTTP bootstrap serves the exact challenge200, unknown challenge404 and other paths403 for both names in an isolated container. This is not public certificate issuance or server acceptance.
+
+Public DNS lookup through1.1.1.1 now resolves both MCP hostnames to37.27.221.101. No administrative SSH, real certificate issuance, provider migration, image publication or deployment was performed by this wave. See the next commit's CI and safe server receipt before applying its prepared helper/UID/TLS changes.

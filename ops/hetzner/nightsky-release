@@ -18,11 +18,11 @@ NETWORK = 'nightsky'
 DIGEST = re.compile(r'sha256:[0-9a-f]{64}')
 
 def parse(args):
-    if len(args) == 2 and args[0] == 'rollback' and args[1] in ('staging','production'):
+    if len(args) == 2 and args[0] in ('rollback','check') and args[1] in ('staging','production'):
         return args
     if len(args) == 3 and args[0] == 'deploy' and args[1] in ('staging','production') and DIGEST.fullmatch(args[2]):
         return args
-    raise ValueError('expected deploy staging|production sha256:<64 lowercase hex> or rollback staging|production')
+    raise ValueError('expected deploy staging|production sha256:<64 lowercase hex> or rollback/check staging|production')
 
 def docker(*args, timeout=120):
     return subprocess.run(['/usr/bin/docker', *args], check=True, text=True, stdout=subprocess.PIPE,
@@ -72,8 +72,8 @@ def check_network(env):
 def check_runtime(env):
     secure(BASE/'state'/env,directory=True)
     info=(BASE/'state'/env/'runtime').lstat()
-    if not stat.S_ISDIR(info.st_mode) or info.st_uid!=1000 or stat.S_IMODE(info.st_mode)!=0o700:
-        raise RuntimeError('runtime directory must be nonsymlink UID 1000 mode 0700')
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid!=10001 or info.st_gid!=10001 or stat.S_IMODE(info.st_mode)!=0o700:
+        raise RuntimeError('runtime directory must be nonsymlink UID/GID 10001:10001 mode 0700')
 
 def check_disk():
     if shutil.disk_usage(BASE).free < 2*1024**3:
@@ -83,7 +83,7 @@ def start(env,digest):
     address=['--ip','172.30.81.2'] if env=='staging' else ['--publish','127.0.0.1:5000:5000']
     docker('run','-d','--name',f'nightsky-{env}','--restart=unless-stopped',
            '--network',NETWORK if env=='production' else 'nightsky-staging',*address,
-           '--memory=768m','--memory-swap=768m','--cpus=1','--pids-limit=128','--user=1000:1000',
+           '--memory=768m','--memory-swap=768m','--cpus=1','--pids-limit=128','--user=10001:10001',
            '--read-only','--tmpfs','/tmp:rw,noexec,nosuid,size=64m',
            '--cap-drop=ALL','--security-opt=no-new-privileges:true',
            '--log-driver=json-file','--log-opt=max-size=10m','--log-opt=max-file=3',
@@ -138,13 +138,17 @@ def activate(env,digest,record):
 def main():
     args=parse(sys.argv[1:])
     if os.geteuid()!=0: raise RuntimeError('root required')
-    # Import only on supported Linux execution; unit tests can import on Windows.
-    import fcntl
     env=args[1]
     secure(Path('/etc/nightsky')/f'{env}.env',private=True)
     secure(BASE/'releases',directory=True)
     check_runtime(env)
     check_disk()
+    if args[0]=='check':
+        check_network(env)
+        print(json.dumps({'environment':env,'status':'ready','operation':'check'}))
+        return
+    # Check is deliberately above Linux locking and all release/state mutations.
+    import fcntl
     lock=BASE/'releases'/'release.lock'
     fd=os.open(lock,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
     with os.fdopen(fd,'r+') as handle:

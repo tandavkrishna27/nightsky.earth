@@ -21,6 +21,7 @@ COPY ops/hetzner/runtime-guard.mjs ops/hetzner/probe.mjs ./ops/hetzner/
 # Only reviewed public catalogs. Runtime climate/place artifacts are mounted
 # separately with explicit paths/digests; ignored operator data is never baked in.
 COPY data/events/meteor-evidence-inventory-v1.json data/events/meteor-radiants-gmn-2021.json data/events/meteor-peaks-nasa-2025.json data/events/meteor-peaks-nasa-2026.json data/events/meteor-peaks-nasa-2027.json ./data/events/
-USER node
+RUN groupadd --gid 10001 nightsky && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin nightsky
+USER 10001:10001
 EXPOSE 5000
 CMD ["node", "dist/plugin.js"]
