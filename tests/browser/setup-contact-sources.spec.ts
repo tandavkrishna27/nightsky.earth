@@ -85,8 +85,8 @@ test("Contact provides a selectable address when clipboard permission is denied"
   await expect(copy).toBeFocused();
 });
 
-test("all three pages reflow at narrow widths and enlarged text", async ({ page }) => {
-  for (const path of ["/get-started", "/contact", "/sources"]) {
+test("key public pages reflow at narrow widths and enlarged text", async ({ page }) => {
+  for (const path of ["/get-started", "/contact", "/sources", "/privacy", "/terms"]) {
     for (const width of [320, 390, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(path);
@@ -101,6 +101,14 @@ test("all three pages reflow at narrow widths and enlarged text", async ({ page 
         if (Number.isFinite(line)) element.style.setProperty("line-height", `${line * 2}px`, "important");
       }
     });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    const overflow = await page.evaluate(() => ({
+      documentWidth: document.documentElement.scrollWidth,
+      viewportWidth: innerWidth,
+      elements: [...document.querySelectorAll("main *")]
+        .filter(element => element.getBoundingClientRect().right > innerWidth + 1)
+        .slice(0, 5)
+        .map(element => ({ tag: element.tagName, className: (element as HTMLElement).className, right: Math.round(element.getBoundingClientRect().right) })),
+    }));
+    expect(overflow.documentWidth, `${path} at 320px with enlarged text: ${JSON.stringify(overflow)}`).toBeLessThanOrEqual(overflow.viewportWidth);
   }
 });

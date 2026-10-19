@@ -13,8 +13,8 @@ export const coverageCards = [
   },
   {
     id: "weather", title: "Weather & aurora", icon: "cloud",
-    description: "Source-labelled forecasts help compare cloud, weather and short-term aurora outlooks for the selected place and time.",
-    coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. An aurora model is not a personal sighting probability.",
+    description: "Source-labelled forecasts help compare cloud and weather for the selected place and time.",
+    coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. No aurora forecast is active in the current production profile.",
     details: [
       "MET Norway is the active production forecast source. It preserves the forecast’s native sampling and accumulation periods. The current production profile does not include an aurora forecast.",
       "WeatherAPI, OpenWeather, NOAA OVATION and 7Timer! are researched sources, not part of the current production profile. Any later integration requires enabling the adapter and meeting its terms and attribution duties. Their products differ: WeatherAPI uses hourly samples, OpenWeather’s five-day product uses three-hour samples, NOAA OVATION is a short-term aurora outlook, and 7Timer! seeing and transparency values are categories or ranges rather than precise measurements.",
