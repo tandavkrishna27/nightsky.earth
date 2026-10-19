@@ -4,6 +4,7 @@ import {
   releaseFacts,
   releaseBlockers,
 } from "../../client/src/content/releaseFacts";
+import { coverageCards } from "../../client/src/content/sourceCoverage";
 test("missing factual approvals block publication", () => {
   const incomplete = {
     ...releaseFacts,
@@ -29,11 +30,28 @@ test("missing factual approvals block publication", () => {
   assert.ok(blockers.includes("Content rights approval"));
 });
 
-test("new sky-map provider keeps source, rights and policy approvals pending", () => {
+test("owner-approved sources, content rights and policies clear their gates", () => {
   assert.deepEqual(
     releaseBlockers(releaseFacts, { published: false, url: null }),
-    ["Source inventory approval", "Content rights approval", "Policy approval"],
+    [],
   );
+});
+
+test("live source and retention statements match the deployed profile", () => {
+  assert.match(releaseFacts.deletionProcess ?? "", /reviewed daily.*deleted 90 days after the last reply/i);
+  assert.match(releaseFacts.retention ?? "", /journald has no configured age limit/i);
+  assert.match(releaseFacts.retention ?? "", /no fixed deletion period.*host logs/i);
+  const places = coverageCards.find((card) => card.id === "places");
+  const weather = coverageCards.find((card) => card.id === "weather");
+  const light = coverageCards.find((card) => card.id === "light");
+  assert.ok(places);
+  assert.ok(weather);
+  assert.ok(light);
+  assert.match(`${places.description} ${places.details.join(" ")}`, /current production.*Geoapify.*OpenStreetMap/i);
+  assert.doesNotMatch(places.details.join(" "), /GeoNames supports named-city resolution/i);
+  assert.match(weather.details.join(" "), /not part of the current production profile/i);
+  assert.match(light.sources[0].name, /^DarkSkySites\.com/);
+  assert.match(light.details.join(" "), /active production.*visible linked credit/i);
 });
 
 import { loadEnv } from "vite";

@@ -13,19 +13,19 @@ export const coverageCards = [
   },
   {
     id: "weather", title: "Weather & aurora", icon: "cloud",
-    description: "Source-labelled forecasts help compare cloud, weather and short-term aurora outlooks for the selected place and time.",
-    coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. An aurora model is not a personal sighting probability.",
+    description: "Source-labelled forecasts help compare cloud and weather for the selected place and time.",
+    coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. No aurora forecast is active in the current production profile.",
     details: [
-      "MET Norway is the baseline weather integration. It preserves the forecast’s native sampling and accumulation periods. NOAA’s OVATION product is a short-term aurora outlook, typically 30–90 minutes, rather than a full-night forecast.",
-      "Additional integrations are conditional on provider access and the service’s enabled sources. WeatherAPI uses hourly samples and is shown only after the account is confirmed on its Free plan with required credit and disclaimer. OpenWeather’s five-day product uses three-hour samples, but remains disabled until its exact Free-product license and attribution obligations are approved. 7Timer! ASTRO may be used in free or paid software under its current published guidance; its seeing and transparency values are categories or ranges, not precise measurements.",
+      "MET Norway is the active production forecast source. It preserves the forecast’s native sampling and accumulation periods. The current production profile does not include an aurora forecast.",
+      "WeatherAPI, OpenWeather, NOAA OVATION and 7Timer! are researched sources, not part of the current production profile. Any later integration requires enabling the adapter and meeting its terms and attribution duties. Their products differ: WeatherAPI uses hourly samples, OpenWeather’s five-day product uses three-hour samples, NOAA OVATION is a short-term aurora outlook, and 7Timer! seeing and transparency values are categories or ranges rather than precise measurements.",
       "Your answer identifies the source and returned time window. Fetch time is retrieval time; a model issue time is shown only when supplied. Independent forecasts retain their disagreements and are not averaged into one score.",
     ],
     sources: [
       { name: "MET Norway", url: "https://api.met.no/" },
-      { name: "NOAA Space Weather Prediction Center", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
-      { name: "WeatherAPI — conditional on Free-plan confirmation", url: "https://www.weatherapi.com/terms.aspx" },
-      { name: "OpenWeather — disabled pending license review", url: "https://openweathermap.org/storage/app/media/documents/License_explainer_25%20Feb_25.pdf" },
-      { name: "7Timer! ASTRO — optional", url: "https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage" },
+      { name: "WeatherAPI — researched, inactive", url: "https://www.weatherapi.com/terms.aspx" },
+      { name: "OpenWeather — researched, inactive", url: "https://openweathermap.org/storage/app/media/documents/License_explainer_25%20Feb_25.pdf" },
+      { name: "NOAA OVATION — researched, inactive", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
+      { name: "7Timer! ASTRO — researched, inactive", url: "https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage" },
     ],
   },
   {
@@ -49,27 +49,29 @@ export const coverageCards = [
   },
   {
     id: "places", title: "Places & geography", icon: "map",
-    description: "Named-place resolution and source-labelled candidate searches help explore an area and select a point for a plan.",
+    description: "Geoapify place lookup and bounded OpenStreetMap-based candidate searches help explore an area and select a point for a plan.",
     coverage: "A resolved town and a candidate observing site have different coverage. A map point does not establish night access, parking, facilities, accessibility or safety.",
     details: [
-      "GeoNames supports named-city resolution. NightSky does not include or distribute a retained OpenStreetMap observing-place index. Where configured, observing candidates may come from bounded Geoapify API searches; Geoapify Free use requires visible Geoapify credit and OpenStreetMap attribution.",
+      "The current production service uses Geoapify for named-place lookup and bounded candidate searches using OpenStreetMap data. Geoapify Free use requires visible Geoapify credit and OpenStreetMap attribution. NightSky does not include or distribute a retained OpenStreetMap observing-place index; candidate records do not establish site access.",
+      "GeoNames is a researched source, not part of the current production profile.",
       "API searches are bounded samples with their own category and geographic limits. A worldwide place-name index does not imply a complete worldwide observing-site catalogue. Source identity and date remain attached to each result.",
       "A named city’s time zone is separate from an exact site’s time zone. Where site evidence is unavailable, NightSky asks for an explicit display time zone. Access and current restrictions need official local information.",
     ],
     sources: [
-      { name: "GeoNames", url: "https://www.geonames.org/" },
       { name: "Geoapify terms and attribution", url: "https://www.geoapify.com/terms-and-conditions/" },
+      { name: "OpenStreetMap copyright and license", url: "https://www.openstreetmap.org/copyright" },
+      { name: "GeoNames — researched, inactive", url: "https://www.geonames.org/" },
     ],
   },
   {
     id: "light", title: "Light pollution", icon: "sparkles",
-    description: "Optional point-specific estimates help compare modeled sky brightness when a supported source and dataset are available.",
+    description: "Active production estimates help compare modeled sky brightness for a selected point.",
     coverage: "SQM and Bortle estimates are model outputs. Keep the dataset age, selected coordinates and coverage quality in view; an unverified zero does not establish pristine darkness.",
     details: [
-      "The optional DarkSkySites API integration preserves the provider’s attribution, dataset and quality information with the selected point. Availability depends on the enabled source and returned coverage.",
+      "DarkSkySites.com is the active production source for point-specific modeled estimates. A visible linked credit accompanies returned values; availability still depends on its returned coverage.",
       "These estimates are separate from live weather and an on-site sky-brightness measurement. Missing data stays unavailable, and a darker modeled point still needs access and observing-condition checks.",
     ],
-    sources: [{ name: "DarkSkySites — optional", url: "https://darkskysites.com/" }],
+    sources: [{ name: "DarkSkySites.com — active production source", url: "https://darkskysites.com/" }],
   },
   {
     id: "sky-map", title: "Interactive sky map", icon: "map",

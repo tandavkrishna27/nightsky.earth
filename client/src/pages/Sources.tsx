@@ -14,7 +14,7 @@ export default function Sources() {
     <SEO title="Sources & coverage." description="Understand NightSky’s astronomy calculations, weather sources, event references, place data and coverage limits." />
     <div className="support-width">
       <header className="support-intro"><h1>Sources &amp; coverage.</h1><p>Know where your answer comes from, what it covers, and where uncertainty remains.</p></header>
-      <p className="coverage-introduction">Different questions need different evidence. NightSky keeps calculations, forecasts and model estimates connected to their sources. Available data depends on your place, date and the sources enabled for your conversation.</p>
+      <p className="coverage-introduction">The current production profile uses Astronomy Engine for local calculations, Geoapify with OpenStreetMap data for places, MET Norway for forecasts, and DarkSkySites.com for modeled light pollution. Other researched integrations listed below are not active unless separately enabled and reviewed.</p>
       <div className="coverage-grid">{coverageCards.map(card => {
         const Icon = icons[card.icon];
         return <article className="coverage-card" aria-labelledby={`coverage-${card.id}`} key={card.id}>
