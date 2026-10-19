@@ -4,6 +4,10 @@
 
 [All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **15 local deliverables accepted under current scope; 0 original tickets primarily awaiting local work; 10 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
 
+## Production transport verification — 19 October 2026
+
+[The deployment receipt](deployment.md#production-receipt--19-october-2026) records the exact reviewed commit, image digest and GitHub promotions. Production HTTPS `/health` is independently reachable with `status: ok`; the server operator reports successful MCP initialization through nginx. Staging remains externally denied. No live provider request, client connection, submission or user-pilot acceptance is inferred. The 15 / 0 / 10 / 2 work-location categories remain unchanged; hosted evidence advances parts of 3B and 14 without closing their full criteria.
+
 ## HTTPS and access preparation - current wave
 
 [Reviewed plan](../superpowers/plans/2026-10-19-https-access.md) adds a manual read-only SSH access check, dedicated runtime UID/GID10001 and ACME bootstrap/renewal configuration. [Server continuation](hetzner-https-access-handoff-20261019.md) records browser-verified environment protections, DNS configuration and applied Hetzner firewall. Both public names resolve through1.1.1.1 to37.27.221.101; server-side DNS confirmation, secret authentication, helper/ownership update and TLS remain pending. [Private migration](hetzner-private-migration-20261019.md) preserves existing account usage and is not performed now. Original categories remain **15 / 0 / 10 / 2**; no publication/deployment or provider activation follows.

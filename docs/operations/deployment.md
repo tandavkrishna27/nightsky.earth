@@ -2,7 +2,15 @@
 
 ## Active API-only Hetzner delivery — 19 October 2026
 
-Use [the exact server/GitHub setup checklist](hetzner-setup-20261019.md) as the canonical V1 deployment contract. Hostnames are owner-confirmed: `mcp.nightsky.earth` and `mcp-staging.nightsky.earth`. The separate server session reports Tunes removed and ARM64 Docker/nginx hosting prepared. No NightSky deployment has occurred.
+Use [the exact server/GitHub setup checklist](hetzner-setup-20261019.md) as the canonical V1 deployment contract. Hostnames are owner-confirmed: `mcp.nightsky.earth` and `mcp-staging.nightsky.earth`.
+
+### Production receipt — 19 October 2026
+
+Commit `d02628829e81ab8824b9c54a88f64b3201b04d03` was built and published as ARM64 image digest `sha256:9ee3592a882c287c01f5c7f6b1391d4131536113cfc6b2c3e2324efc3d2d72c7` by [image run 39273450492](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39273450492). [Staging promotion 39274063067](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39274063067) and [production promotion 39274522704](https://github.com/tandavkrishna27/nightsky.earth/actions/runs/39274522704) accepted that same digest after environment reviews.
+
+The server operator reported the production container healthy on `127.0.0.1:5000`, with no public host port. The operator backed up nginx to `/root/nightsky-production-nginx-20261019T150721Z.conf`, changed only `/etc/nginx/sites-available/nightsky-production.conf` from the bootstrap deny rule to the production proxy, passed `nginx -t`, and reloaded. Their external checks found HTTPS `/health` 200, successful MCP initialization, GET `/mcp` 405, empty POST `/mcp` 400, HTTP redirect, unknown ACME path 404, and staging `/mcp` 403. No provider API requests were made during that host check. An independent browser check found production `/health` returned `{"service":"nightsky","status":"ok"}` and staging `/mcp` returned nginx 403.
+
+This establishes public transport and production process reachability. It does not establish live provider responses, actual client integration, sustained capacity, public plugin submission, or a real-user pilot. Preserve the exact deployed digest when later documentation commits advance the branch.
 
 The reviewed implementation is on `codex/plugin-v1`, using `Dockerfile.plugin` -> `dist/plugin.js`. Explicit `NIGHTSKY_DISCOVERY_MODE=api` avoids the compatibility default of legacy mode. No database, mounted gazetteer, planet, OSM catalogue or historical baseline is required. Prepared examples and restricted helper live in `ops/hetzner/`; credentials stay in `/etc/nightsky/production.env`, state in the dedicated `/state` mount. Optional sources and their ledgers require admission/migration review before activation. Staging blocks external access and carries no provider keys.
 
