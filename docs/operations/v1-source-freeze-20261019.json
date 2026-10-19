@@ -132,9 +132,9 @@
       "operatorQuota": {
         "providerId": "astronomyapi",
         "accountLabel": "operator-astronomyapi",
-        "hourlyLimit": 20,
-        "dailyLimit": 100,
-        "monthlyLimit": 1000
+        "hourlyLimit": 10,
+        "dailyLimit": 10,
+        "monthlyLimit": 300
       },
       "creditContract": "Retain source attribution; actual allowance, billing and redistribution unresolved.",
       "externalAcceptance": [
