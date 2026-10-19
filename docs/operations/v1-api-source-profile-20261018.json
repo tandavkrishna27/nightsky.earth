@@ -193,9 +193,9 @@
       "operatorQuota": {
         "providerId": "astronomyapi",
         "accountLabel": "operator-astronomyapi",
-        "hourlyLimit": 20,
-        "dailyLimit": 100,
-        "monthlyLimit": 1000
+        "hourlyLimit": 10,
+        "dailyLimit": 10,
+        "monthlyLimit": 300
       },
       "evidence": [
         "docs/operations/api-sky-source-research-20261017.md",

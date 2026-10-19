@@ -6,6 +6,11 @@ import { join } from 'node:path';
 import { runSkyQuotaSetup, initializeSkyQuota, skyQuotaPoliciesForInitialization } from '../../scripts/initialize-sky-quota';
 import { createPersistentQuota } from '../../server/providers/quotaState';
 const config=(path:string)=>({NIGHTSKY_SKY_PROVIDERS:'darkskyplanner,astronomyapi,nasa-donki,jpl',NIGHTSKY_SKY_QUOTA_STATE_PATH:path,NIGHTSKY_SKY_QUOTA_VERIFIED_UNUSED_BUDGET:'yes',NIGHTSKY_SKY_QUOTA_VERIFICATION_EVIDENCE:'Synthetic operator verified unused allowance'});
+test('native AstronomyAPI uses a conservative NightSky operator ceiling',()=>{
+ assert.deepEqual(skyQuotaPoliciesForInitialization({NIGHTSKY_SKY_PROVIDERS:'astronomyapi'}),[{
+  providerId:'astronomyapi',accountLabel:'operator-astronomyapi',hourlyLimit:10,dailyLimit:10,monthlyLimit:300,
+ }]);
+});
 test('default proposal creates no ledger or markers and excludes private configuration',async t=>{
  const dir=await mkdtemp(join(tmpdir(),'sky-setup-'));t.after(()=>rm(dir,{recursive:true,force:true}));
  const result=await runSkyQuotaSetup([], {...config(join(dir,'quota.json')),NIGHTSKY_ASTRONOMY_API_APP_SECRET:'private-token'});

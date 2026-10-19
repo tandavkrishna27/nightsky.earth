@@ -20,7 +20,7 @@ function selection(raw: string | undefined): SkyProviderId[] {
   return ids as SkyProviderId[];
 }
 /** Operator ceilings, not claims about vendor entitlements. Admission is separate. */
-export const SKY_QUOTA_POLICIES: QuotaPolicy[] = LEGACY_IDS.map(providerId => ({providerId, accountLabel:`operator-${providerId}`, hourlyLimit:20, dailyLimit:100, monthlyLimit:1000}));
+export const SKY_QUOTA_POLICIES: QuotaPolicy[] = LEGACY_IDS.map(providerId => ({providerId, accountLabel:`operator-${providerId}`, hourlyLimit:providerId==='astronomyapi'?10:20, dailyLimit:providerId==='astronomyapi'?10:100, monthlyLimit:providerId==='astronomyapi'?300:1000}));
 export function parseSkyConfiguration(env: Environment) {
   const publicUniverseQuotaStatePath=publicUniverseQuotaPath(env);
   const selected = selection(env.NIGHTSKY_SKY_PROVIDERS);
