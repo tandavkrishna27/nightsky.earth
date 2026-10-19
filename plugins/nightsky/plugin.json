@@ -28,33 +28,33 @@
           "positive": [
             {
               "description": "Casual named-destination session",
-              "prompt": "Plan casual stargazing from London, United Kingdom on October 15, 2026. Suggest observing places if covered.",
+              "prompt": "Plan casual stargazing from London, United Kingdom tomorrow evening. Suggest outdoor observing candidates if covered.",
               "tools_triggered": "resolve_place, search_observing_locations, plan_observing_session",
               "expected_behavior": "Show local darkness and Moon, source-labeled forecast valid times and coverage gaps. Candidate coverage may be unavailable; never guarantee access, safety or darkness."
             },
             {
               "description": "Meteor shower with source gaps",
-              "prompt": "Plan Perseid watching from London, United Kingdom for August 12, 2026.",
+              "prompt": "Plan Perseid watching from London, United Kingdom for the next August 12–13 night. Tell me which year you are using.",
               "tools_triggered": "resolve_place, search_sky_events, plan_observing_session",
-              "expected_behavior": "Show supported event evidence, darkness, Moon and radiant evidence where licensed and available. Historical fixture forecast is not live weather. Mark absent event/forecast evidence rather than inventing it."
+              "expected_behavior": "Resolve the intended year, then show supported event evidence, darkness, Moon and radiant evidence where available. If the next season lacks a dated peak or forecast, label that gap rather than inventing one."
             },
             {
               "description": "Beginner visible targets and preparation",
-              "prompt": "What could a beginner see from London, United Kingdom on October 15, 2026 and how should I start?",
+              "prompt": "What could a beginner see from London, United Kingdom tomorrow evening, and how should I start?",
               "tools_triggered": "resolve_place, plan_observing_session",
               "expected_behavior": "Explain supported visible targets, local timing, Moon and beginner preparation. State source gaps and avoid visibility guarantees."
             },
             {
               "description": "First astrophotography session",
-              "prompt": "Plan a first Milky Way photo from London, United Kingdom on October 15, 2026.",
+              "prompt": "Plan a first Milky Way photo from London, United Kingdom on the next suitable May evening. Distinguish geometric rise from useful viewing height.",
               "tools_triggered": "resolve_place, get_target_visibility, get_night_conditions, plan_observing_session, recommend_specialist_tools",
               "expected_behavior": "Explain target, Moon and darkness timing and source-labeled forecasts. Ask for camera/lens before tailored settings; state seeing/transparency gaps and do not promise a usable photo."
             },
             {
               "description": "Two telescope nights",
-              "prompt": "Compare Jupiter observing from London, United Kingdom on October 15 and 16, 2026.",
+              "prompt": "Compare Jupiter observing from London, United Kingdom tomorrow evening and the following evening.",
               "tools_triggered": "resolve_place, compare_observing_options",
-              "expected_behavior": "Keep each night and target evidence separate, display local times, sources, availability and forecast horizon gaps. Rebase these dates within the live forecast horizon before production review and rerun every case."
+              "expected_behavior": "Resolve both local dates, keep each night and target evidence separate, and display local times, sources, availability and forecast horizon gaps. Do not turn isolated cloud samples into a clear-window claim."
             }
           ],
           "negative": [
@@ -82,7 +82,7 @@
       },
       "publication": {
         "countries": [],
-        "release_notes": "Local rehearsal of source-linked named-place observing workflows. Production identity, endpoint, policies and host evidence remain pending."
+        "release_notes": "Hosted NightSky observing plans with named-place resolution, calculated astronomy, bounded place discovery, MET Norway forecasts and point-specific modelled darkness where available. Optional sources may remain unavailable; site access and clear skies are never guaranteed."
       }
     }
   }
