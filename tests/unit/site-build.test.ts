@@ -126,4 +126,3 @@ test("a complete synthetic release has an indexable sitemap without preview head
     /unreviewed sky-event months/,
   );
 });
-

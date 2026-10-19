@@ -137,4 +137,3 @@ function validSource(source: ReleaseFacts["sources"][number]): boolean {
     return false;
   }
 }
-
