@@ -67,10 +67,10 @@ export const releaseFacts: ReleaseFacts = {
     { name: "Stellarium Web", url: "https://stellarium-web.org/", coverage: "Third-party hosted interactive sky map. Its current web frontend uses its own IP-based location service and can request browser device location when the visitor chooses the opt-in mode; it may use OpenStreetMap Nominatim to reverse geocode detected or selected coordinates. Browser requests go directly to the providers. NightSky embeds the hosted service and does not bundle or modify engine code. Device-location behavior and provider policies should be rechecked before release.", reviewedAt: "2026-10-19" },
     { name: "OpenStreetMap Nominatim", url: "https://nominatim.org/", coverage: "May receive coordinates from Stellarium Web for reverse geocoding when its interactive map loads. Stellarium controls this integration; the NightSky app does not call Nominatim for the sky map. Check OSMF's current Nominatim usage and privacy policies before release.", reviewedAt: "2026-10-19" },
   ],
-  sourcesApprovedAt: null,
+  sourcesApprovedAt: "2026-10-19",
   hostingVerifiedAt: "2026-10-19",
-  contentRightsApprovedAt: null,
-  policiesApprovedAt: null,
+  contentRightsApprovedAt: "2026-10-19",
+  policiesApprovedAt: "2026-10-19",
   setupVerifiedAt: null,
 };
 export function releaseBlockers(facts: ReleaseFacts, listing: ListingConfig) {
