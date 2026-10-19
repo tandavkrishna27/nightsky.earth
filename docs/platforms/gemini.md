@@ -26,3 +26,7 @@ Gemini consumer Connected Apps expose MCP tools; this does not establish that Op
 - [Google: Use and manage Connected Apps in Gemini](https://support.google.com/gemini/answer/13695044)
 - [Google AI: Using tools with Gemini API](https://ai.google.dev/gemini-api/docs/tools)
 - [Google AI: Building managed agents](https://ai.google.dev/gemini-api/docs/custom-agents)
+
+## Local handoff — 19 October 2026
+
+See the [final local acceptance record](../operations/v1-final-local-acceptance-20261019.md) and [host matrix](host-matrix.md). Local package rehearsals and Codex fixture evidence do not establish hosted ChatGPT, Claude or Gemini acceptance. The optional planning card defaults off; operator enablement and text-only credit limits are documented in the [delivery guide](../operations/v1-planning-card-delivery-20261019.md). Public endpoint/publisher/policy and actual-client checks remain release gates. No vendor eligibility recheck or publication occurred in this pass.

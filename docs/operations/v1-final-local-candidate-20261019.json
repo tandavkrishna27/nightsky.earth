@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-19",
+  "baseCommit": "0aeb5150b28ee1f1296e5cf5d13c0bc4fdb39bf2",
+  "digestBasis": "SHA256 of local file bytes; not normalized Git blobs",
+  "tests": {
+    "passed": 1880,
+    "failed": 0,
+    "skipped": 2
+  },
+  "providersCalled": 0,
+  "installedPackageChanged": false,
+  "packages": {
+    "codex": {
+      "sha256": "efbcb521fbd3992b272e5ab5787bd7324aacd6f5f8732d21aab62cd3cfb439ad",
+      "endpoint": "http://127.0.0.1:8765/mcp",
+      "submissionReady": false
+    },
+    "claude": {
+      "sha256": "18bb404326ba50d9dd605c9a20755498b57e0b9839531a8fc2a24760595f0c07",
+      "endpoint": "http://127.0.0.1:8765/mcp",
+      "submissionReady": false
+    },
+    "portable": {
+      "sha256": "04441c7d877441ba62a0c0e083977b0dc9908989f46c4a799fb38d328d6d5672",
+      "endpoint": "https://example.com/nightsky/mcp",
+      "submissionReady": false
+    }
+  },
+  "files": {
+    "server/mcp/resultCard.ts": "63c68eb27a2a8d06c337dee0373aae30de41e01837cae130b5b1d5c02feb92bd",
+    "server/mcp/resultCardView.ts": "3179e82103b54ae05e1ee91e5b9c42f00d6f10ed837e0f97cd53c9fa3db15837",
+    "server/plugin.ts": "cabcca08c90d70b94ca7de22b3148084f06877dab758385e68c9e6fa60f0f67a",
+    "dist/plugin.js": "8528a34551cd6596f2df4f85467faee066e1627221321de9634b66932f273e7d",
+    "package-lock.json": "19b7bdb65e1796c76d5a92d91f3796bd65565186780fabb4cb188649f800c898"
+  }
+}

@@ -27,7 +27,21 @@ export const RESULT_CARD_HTML=String.raw`<!doctype html>
    if(!Array.isArray(data.facts)||data.facts.length>8||!Array.isArray(data.sources)||!data.sources.length||data.sources.length>256)throw Error();
    const facts=document.createDocumentFragment(),credits=document.createDocumentFragment(),lines=document.createDocumentFragment();
    for(const fact of data.facts){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=text(fact.label);dd.textContent=text(fact.value);facts.append(dt,dd);}
-   for(const source of data.sources){const li=document.createElement('li');li.append(link(text(source.name),source.url),document.createTextNode(': '+text(source.attribution)));if(source.modified===true)li.append(document.createTextNode(' Source record marks data modified.'));if(source.licenseUrl)li.append(document.createTextNode(' '),link('Licence',source.licenseUrl));credits.append(li);}
+   const roleLabels={location:'Location evidence',calculation:'Calculated values',forecast:'Cloud samples/periods relevant to the requested session',history:'Historical sample values (not a forecast)','history-reference':'Historical reference; no historical values supplied',reference:'Reference/context; contribution to displayed values not established'};
+   const classified=Array.isArray(data.sourceUses)&&data.sourceUses.length===data.sources.length&&data.sourceUses.every(roles=>Array.isArray(roles)&&roles.length>0&&roles.length<=6&&roles.every(role=>Object.prototype.hasOwnProperty.call(roleLabels,role)));
+   const visible=new Map();
+   data.sources.forEach((source,index)=>{
+    const name=text(source.name),notice=text(source.attribution),url=safeUrl(source.url),licence=source.licenseUrl?safeUrl(source.licenseUrl):undefined;
+    const roles=classified?data.sourceUses[index]:['unclassified'];
+    // Collapse only the exact displayed notice/link/modification identity; raw records stay in the payload.
+    const key=JSON.stringify([name,notice,url,licence,source.modified===true]);
+    if(!visible.has(key))visible.set(key,{name,notice,url,licence,modified:source.modified===true,roles:new Set()});
+    for(const role of roles)visible.get(key).roles.add(role);
+   });
+   for(const row of visible.values()){
+    const li=document.createElement('li');li.append(link(row.name,row.url),document.createTextNode(': '+row.notice));if(row.modified)li.append(document.createTextNode(' Source record marks data modified.'));if(row.licence)li.append(document.createTextNode(' '),link('Licence',row.licence));
+    const use=document.createElement('p');use.className='note';use.textContent='Use: '+Array.from(row.roles,role=>role==='unclassified'?'Source use not classified':role==='reference'&&row.roles.size>1?'Additional reference/context':roleLabels[role]).join('; ')+'.';li.append(use);credits.append(li);
+   }
    for(const line of text(data.details).split('\n')){const p=document.createElement('p');p.textContent=line;lines.append(p);}
    const place=text(data.place),session=text(data.session),summary=text(data.summary);
    byId('place').textContent=place;byId('session').textContent=session;byId('summary').textContent=summary;byId('facts').append(facts);byId('detail-lines').append(lines);byId('credits').append(credits);

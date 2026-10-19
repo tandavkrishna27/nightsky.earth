@@ -2,9 +2,17 @@
 
 ## Current readiness summary — 19 October 2026
 
-[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **15 local deliverables accepted under current scope; 2 with local acceptance remaining; 8 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
+[All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **15 local deliverables accepted under current scope; 0 original tickets primarily awaiting local work; 10 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.
+
+## Final local pass accepted — 19 October 2026
+
+[Final criterion reconciliation](v1-final-local-acceptance-20261019.md) records **1,880 passed / 0 failed / 2 skipped**, types, compiled startup with the card off/on, three rehearsal packages and desktop/mobile visual checks. Exact duplicate visible credits merge without changing raw provenance; evidence-use labels distinguish actual values from reference material. Explicit operator enablement defaults off. Installed 1.0.36 and private configuration remain unchanged.
+
+Original ticket names are restored: **12B validates Claude/Gemini routes; 15 assembles the public review package**. Both move from primarily-local to release-dependent, **not Done**. Current categories are **15 / 0 / 10 / 2 = 27**. Hosted/client/source-credit, publisher, policy, operations and publication criteria remain. The sections below are dated evidence history, not current counts. Next: hosting/CI/CD/public URL planning, without deployment yet.
 
 ## Current local wave — source/discovery freeze and final model findings
+
+Owner [native follow-up](v1-owner-native-followup-20261019.md) now passes the targeted continuation:23:30Milky Way geometry, October synthetic forecast timestamps,22:00Moon/Saturn directions and an actual native planning-card screenshot with visible source/licence links. The outer local wrapper's200HTTP starvation is corrected;420HTTP/9tools including4preflight completed with0provider attempts. Duplicate visible GeoNames credits and background/method-source labelling need reconciliation; screenshot rendering is not all-provider/client compliance. No repeat of passed numerical cases is needed. No product/installation/provider change or ticket closure follows automatically; final12B/15 reconciliation remains.
 
 Latest [six-item product completion pass](v1-product-candidate-completion-20261019.md): forecast/preparation, card-size, image-asset and sampled-maximum text defects are corrected, independently reviewed, and verified with1,875passed/0failed/2skipped full offline checks, types, rebuilt packages and final compiled startup probes. Six bounded model turns completed with14MCPcalls and0provider attempts, but workflow reads were blocked by the child policy; the Milky Way answer missed a returned maximum, repeated an astronomy call, and final prose credits remain incomplete. Actual native card rendering and pinned-image execution remain unverified. Engineering evidence is frozen locally; **Tasks12B/15 remain open and totals15/2/8/2 are unchanged**. No deployment, download or installation change follows.
 

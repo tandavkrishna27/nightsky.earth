@@ -17,3 +17,7 @@ Before upload/review, reconcile [local package readiness](../operations/local-pa
 For each correction record the finding, implementation, affected cases rerun, new checksum and resolution. Keep reviewer credentials in the secure dashboard form, never in the ZIP. Approval and directory placement are not guaranteed. Recheck official rules immediately before authorized action.
 
 [Official submission documentation](https://developers.openai.com/plugins/deploy/submission)
+
+## Local handoff — 19 October 2026
+
+See the [final local acceptance record](../operations/v1-final-local-acceptance-20261019.md) and [host matrix](host-matrix.md). Local package rehearsals and Codex fixture evidence do not establish hosted ChatGPT, Claude or Gemini acceptance. The optional planning card defaults off; operator enablement and text-only credit limits are documented in the [delivery guide](../operations/v1-planning-card-delivery-20261019.md). Public endpoint/publisher/policy and actual-client checks remain release gates. No vendor eligibility recheck or publication occurred in this pass.

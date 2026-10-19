@@ -99,3 +99,37 @@ test('versioned MCP resource is self-contained with an empty external network po
  assert.doesNotMatch(resource.text,/<script[^>]+src=|fetch\(|localStorage|innerHTML|tools\/call/);
  assert.ok(Buffer.byteLength(resource.text)<24576);
 });
+
+test('card use labels follow available evidence, retain unavailable history and distinguish exact source notices',async()=>{
+ const {planningCardSourceUses}=await import('../../server/mcp/resultCard');
+ const source={name:'Shared',url:'https://example.test/shared',attribution:'First notice',dataClass:'context'};
+ const other={...source,attribution:'Another notice'};
+ const history={name:'C3S / ECMWF',url:'https://example.test/history',attribution:'Historical method credit',dataClass:'reanalysis'};
+ const plan:any={place:{sources:[source]},requestedWindow:{startUtc:'2026-10-19T15:00:00Z',endUtc:'2026-10-19T18:00:00Z'},evidence:{astronomy:{availability:{status:'available'},moon:{illuminationPercent:50},sources:[source]},history:{availability:{status:'unavailable'},sources:[source,history]},weather:{forecasts:[{availability:{status:'available'},source:other,samples:[{validAt:'2026-10-20T15:00:00Z',values:{totalCloudCover:{value:12}}}]}]}}};
+ assert.deepEqual(planningCardSourceUses(plan,[source,other,history]),[['location','calculation','history-reference'],['reference'],['history-reference']]);
+ plan.evidence.weather.forecasts[0].samples[0].validAt='2026-10-19T16:00:00Z';
+ assert.deepEqual(planningCardSourceUses(plan,[other]),[['forecast']]);
+ const sample=plan.evidence.weather.forecasts[0].samples[0];
+ sample.validAt='2026-10-19T14:00:00Z';
+ sample.values.totalCloudCover={value:12,unit:'%',periodStartUtc:'2026-10-19T14:00:00Z',periodEndUtc:'2026-10-19T16:00:00Z'};
+ assert.deepEqual(planningCardSourceUses(plan,[other]),[['forecast']],'native cloud period overlaps the session even when its anchor precedes it');
+ sample.values.totalCloudCover.periodEndUtc='2026-10-19T15:00:00Z';
+ assert.deepEqual(planningCardSourceUses(plan,[other]),[['reference']],'touching the start boundary is not aggregate overlap');
+ sample.validAt='2026-10-19T16:00:00Z';sample.values={};
+ assert.deepEqual(planningCardSourceUses(plan,[other]),[['reference']],'defensive helper must not infer values from an empty sample');
+ sample.bands={totalCloudCover:{code:2,range:'20–30',unit:'%'}};
+ assert.deepEqual(planningCardSourceUses(plan,[other]),[['forecast']],'a returned cloud category is supplied evidence without a numeric percentage');
+ plan.evidence.history.availability.status='partial';plan.evidence.history.summary={validEligibleSamples:12};
+ assert.deepEqual(planningCardSourceUses(plan,[history]),[['history']]);
+ plan.evidence.history.summary.validEligibleSamples=0;
+ assert.deepEqual(planningCardSourceUses(plan,[history]),[['history-reference']]);
+ plan.evidence.astronomy.availability.status='unavailable';delete plan.evidence.history;
+ assert.deepEqual(planningCardSourceUses(plan,[source]),[['location']],'unavailable astronomy must not add a calculated-values role');
+});
+
+test('card use helper defensively refuses a forecast role for a sample without values or bands',async()=>{
+ const {planningCardSourceUses}=await import('../../server/mcp/resultCard');
+ const source={name:'Weather',url:'https://example.test/weather',attribution:'Weather notice',dataClass:'forecast'};
+ const plan:any={place:{sources:[]},requestedWindow:{startUtc:'2026-10-19T15:00:00Z',endUtc:'2026-10-19T18:00:00Z'},evidence:{weather:{forecasts:[{availability:{status:'available'},source,samples:[{validAt:'2026-10-19T16:00:00Z',values:{}}]}]}}};
+ assert.deepEqual(planningCardSourceUses(plan,[source]),[['reference']]);
+});

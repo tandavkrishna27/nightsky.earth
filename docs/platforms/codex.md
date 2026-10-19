@@ -18,3 +18,7 @@ Ask for a named place if needed. For “near me,” ask before using a host loca
 - [OpenAI plugin submission](https://developers.openai.com/plugins/deploy/submission)
 - [OpenAI skills](https://developers.openai.com/plugins/concepts/skills)
 - [OpenAI Plugins overview](https://developers.openai.com/api/docs/guides/agents-api/tools/plugins)
+
+## Local handoff — 19 October 2026
+
+See the [final local acceptance record](../operations/v1-final-local-acceptance-20261019.md) and [host matrix](host-matrix.md). Local package rehearsals and Codex fixture evidence do not establish hosted ChatGPT, Claude or Gemini acceptance. The optional planning card defaults off; operator enablement and text-only credit limits are documented in the [delivery guide](../operations/v1-planning-card-delivery-20261019.md). Public endpoint/publisher/policy and actual-client checks remain release gates. No vendor eligibility recheck or publication occurred in this pass.

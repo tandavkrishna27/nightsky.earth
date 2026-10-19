@@ -240,6 +240,7 @@ import './mcp/resolver-action-text.test';
 import './mcp/answer-credit-acceptance.test';
 import './mcp/result-card.test';
 import './mcp/result-card-view.test';
+import './operations/planning-card-configuration.test';
 import './mcp/api-only-history-wording.test';
 
 import "./operations/v1-source-profile.test.ts";

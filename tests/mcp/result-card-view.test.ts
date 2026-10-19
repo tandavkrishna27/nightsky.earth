@@ -78,3 +78,26 @@ test('card renders long bounded evidence without imposing a smaller field budget
  assert.equal(h.ids.get('detail-lines')!.textContent,data.details);
  assert.equal(h.ids.get('credits')!.children.length,1);
 });
+
+test('visible credits collapse only identical displayed notices and combine evidence roles',()=>{
+ const h=harness();h.initialize();const data=payload();
+ data.sources.push({...data.sources[0],issuedAt:'2026-10-19T00:00:00Z'} as any);
+ h.send(result({...data,sourceUses:[['location'],['history-reference']]}));
+ assert.equal(h.ids.get('credits')!.children.length,1);
+ assert.match(h.ids.get('credits')!.textContent,/Location evidence/);
+ assert.match(h.ids.get('credits')!.textContent,/Historical reference; no historical values supplied/);
+ h.send(result({...data,sourceUses:[['location'],['reference']]}));
+ assert.match(h.ids.get('credits')!.textContent,/Location evidence; Additional reference\/context/);
+ assert.doesNotMatch(h.ids.get('credits')!.textContent,/contribution to displayed values not established/,'an additional reference must not negate an established location role');
+ const distinct={...data.sources[0],licenseUrl:'https://example.test/other-licence'};
+ h.send(result({...data,sources:[...data.sources,distinct],sourceUses:[['location'],['history-reference'],['reference']]}));
+ assert.equal(h.ids.get('credits')!.children.length,2,'different licence links must remain separate');
+ for(const sourceUses of [[['made-up-role'],['location']],[],[['location']], [[],['location']], [['location'],'reference'],null]){
+  h.send(result({...data,sourceUses}));assert.equal(h.ids.get('card')!.hidden,false,'malformed role metadata must not hide valid raw notices');
+  assert.match(h.ids.get('credits')!.textContent,/Source use not classified/);
+  assert.doesNotMatch(h.ids.get('credits')!.textContent,/Location evidence/);
+ }
+ h.send(result({...data,sources:[data.sources[0],{...data.sources[0],modified:false}],sourceUses:[['location'],['reference']]}));
+ assert.equal(h.ids.get('credits')!.children.length,2,'different modification notices remain separate');
+ h.send(result(payload()));assert.match(h.ids.get('credits')!.textContent,/Source use not classified/,'old schemaVersion1 payload is honest and renderable');
+});

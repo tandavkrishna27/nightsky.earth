@@ -21,3 +21,7 @@ MCP tool compatibility does not make OpenAI `SKILL.md` packaging automatically p
 - [Anthropic: Getting started with custom connectors using remote MCP](https://support.anthropic.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
 - [Anthropic: Building custom connectors via remote MCP servers](https://support.anthropic.com/en/articles/11503834-building-custom-integrations-via-remote-mcp-servers)
 - [Anthropic: When to use desktop and web connectors](https://support.anthropic.com/en/articles/11725091-when-to-use-desktop-and-web-connectors)
+
+## Local handoff — 19 October 2026
+
+See the [final local acceptance record](../operations/v1-final-local-acceptance-20261019.md) and [host matrix](host-matrix.md). Local package rehearsals and Codex fixture evidence do not establish hosted ChatGPT, Claude or Gemini acceptance. The optional planning card defaults off; operator enablement and text-only credit limits are documented in the [delivery guide](../operations/v1-planning-card-delivery-20261019.md). Public endpoint/publisher/policy and actual-client checks remain release gates. No vendor eligibility recheck or publication occurred in this pass.

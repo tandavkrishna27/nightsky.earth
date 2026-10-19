@@ -77,6 +77,13 @@ export function pluginListenerConfiguration(environment: {
         throw Error("Invalid plugin listener configuration.");
     return { host, port };
 }
+/** Optional planning card delivery; exact values prevent accidental activation. */
+export function pluginPlanningCardConfiguration(environment: { NIGHTSKY_PLANNING_CARD_ENABLED?: string }): boolean {
+    const enabled = environment.NIGHTSKY_PLANNING_CARD_ENABLED;
+    if (enabled === undefined || enabled === "false") return false;
+    if (enabled === "true") return true;
+    throw Error("Invalid planning card configuration.");
+}
 export function pluginToolMode(environment: { NIGHTSKY_MCP_TOOL_MODE?: string }): "full" | "resolver-only" {
     const mode = environment.NIGHTSKY_MCP_TOOL_MODE ?? "full";
     if (mode !== "full" && mode !== "resolver-only") throw Error("Invalid MCP tool mode.");
@@ -102,6 +109,7 @@ export function pluginApiHistoryConfiguration(environment: Record<string, string
 }
 /** Shared production artifact loading; callers own listener lifecycle. */
 export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAppDependencies, "fetcher" | "log"> = {}) {
+    const resultCardPrototype = pluginPlanningCardConfiguration({ NIGHTSKY_PLANNING_CARD_ENABLED: process.env.NIGHTSKY_PLANNING_CARD_ENABLED });
     const historyConfiguration = pluginApiHistoryConfiguration(process.env);
     const discoveryMode = pluginDiscoveryMode(process.env);
     climateArtifactConfiguration({NIGHTSKY_CLIMATE_ARTIFACT:process.env.NIGHTSKY_CLIMATE_ARTIFACT,NIGHTSKY_CLIMATE_SHA256:process.env.NIGHTSKY_CLIMATE_SHA256,NIGHTSKY_ERA5_RELEASE_MANIFEST:process.env.NIGHTSKY_ERA5_RELEASE_MANIFEST,NIGHTSKY_ERA5_RELEASE_SHA256:process.env.NIGHTSKY_ERA5_RELEASE_SHA256});
@@ -147,7 +155,7 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
             fetcher: overrides.fetcher,
             quota: quota ?? { reserve: async () => ({allowed:false,reason:"quota-state-unavailable"}) },
         });
-        return finish(createNightSkyPluginApp({ ...services, climateProvider, skyProviders, lightPollutionProviders, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
+        return finish(createNightSkyPluginApp({ ...services, resultCardPrototype, climateProvider, skyProviders, lightPollutionProviders, weatherCollection, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
     }
     const global = pluginGlobalConfiguration({NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST:process.env.NIGHTSKY_GLOBAL_CATALOGUE_MANIFEST,NIGHTSKY_GLOBAL_CATALOGUE_SHA256:process.env.NIGHTSKY_GLOBAL_CATALOGUE_SHA256,NIGHTSKY_OSM_REGIONAL_MANIFEST:process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST,NIGHTSKY_OSM_REGIONAL_SHA256:process.env.NIGHTSKY_OSM_REGIONAL_SHA256,NIGHTSKY_OSM_CANDIDATE_INDEX:process.env.NIGHTSKY_OSM_CANDIDATE_INDEX});
     const regional = pluginRegionalConfiguration({ NIGHTSKY_OSM_REGIONAL_MANIFEST: process.env.NIGHTSKY_OSM_REGIONAL_MANIFEST, NIGHTSKY_OSM_REGIONAL_SHA256: process.env.NIGHTSKY_OSM_REGIONAL_SHA256, NIGHTSKY_OSM_CANDIDATE_INDEX: process.env.NIGHTSKY_OSM_CANDIDATE_INDEX });
@@ -157,7 +165,7 @@ export async function createConfiguredNightSkyPluginApp(overrides: Pick<PluginAp
     const placeIndex = files ? await loadGeoNamesPlaceIndex() : undefined;
     if(files && !placeIndex) throw Error("Global catalogue requires the local GeoNames place index.");
     const catalogue = files && placeIndex ? createGlobalCatalogue(files,{cities:placeIndex}) : undefined;
-    return finish(createNightSkyPluginApp({ skyProviders, lightPollutionProviders, weatherCollection, catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
+    return finish(createNightSkyPluginApp({ resultCardPrototype, skyProviders, lightPollutionProviders, weatherCollection, catalogue, regionIndex:catalogue?.regions, placeIndex, allowedHosts: allowedHosts?.length ? allowedHosts : undefined, toolMode, candidateProvider, trustedProxyAddresses: process.env.NIGHTSKY_MCP_TRUSTED_PROXIES, ...overrides }));
     } catch (error) { try{await cleanup();}finally{throw error;} }
 }
 export async function startNightSkyPlugin(options: { gracefulSignals?: boolean; shutdownTimeoutMs?: number } = {}) {
