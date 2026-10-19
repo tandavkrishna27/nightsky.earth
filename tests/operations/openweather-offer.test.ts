@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 test('OpenWeather public alteration offer describes actual normalized fields and release boundary',()=>{
  const offer=JSON.parse(readFileSync('public/openweather-normalization-method.json','utf8'));
  assert.equal(offer.license,'https://opendatacommons.org/licenses/odbl/1-0/');
- assert.equal(offer.publiclyHosted,false);
+ assert.equal(offer.publiclyHosted,undefined); // Hosting is verified against the deployed URL, not asserted by a static file.
  assert.equal(offer.source.endpoint,'https://api.openweathermap.org/data/2.5/forecast');
  assert.deepEqual(offer.source.parameters,{units:'metric',cnt:40});
  assert.equal(offer.fields.precipitationAmount.expression,'(rain["3h"] ?? 0) + (snow["3h"] ?? 0)');

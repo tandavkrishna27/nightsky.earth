@@ -31,6 +31,7 @@ OPTIONAL = {
     'NIGHTSKY_LIGHT_POLLUTION_SOURCES', 'NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED',
     'NIGHTSKY_DARKSKYSITES_API_KEY',
     'NIGHTSKY_SKY_PROVIDERS', 'NIGHTSKY_SKY_ADMITTED_PROVIDERS',
+    'NIGHTSKY_PUBLICUNIVERSE_SCOPE',
     'NIGHTSKY_ASTRONOMY_API_APP_ID', 'NIGHTSKY_ASTRONOMY_API_APP_SECRET',
     'NIGHTSKY_NASA_API_KEY',
 }
@@ -76,6 +77,11 @@ def validate(data):
         raise ValueError('missing provider state path')
     if 'NIGHTSKY_DARKSKYSITES_API_KEY' in entries and 'NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH' not in entries:
         raise ValueError('missing light pollution state path')
+    if 'NIGHTSKY_PUBLICUNIVERSE_SCOPE' in entries and entries['NIGHTSKY_PUBLICUNIVERSE_SCOPE'] != 'starter-only':
+        raise ValueError('invalid Public Universe feature scope')
+    admitted_sky = entries.get('NIGHTSKY_SKY_ADMITTED_PROVIDERS', '').split(',')
+    if 'publicuniverse' in admitted_sky and (entries.get('NIGHTSKY_PUBLICUNIVERSE_SCOPE') != 'starter-only' or 'NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH' not in entries):
+        raise ValueError('Public Universe requires restricted scope and dedicated quota state')
     return entries
 
 

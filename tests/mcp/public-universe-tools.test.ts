@@ -6,17 +6,23 @@ import type { NightSkyDependencies } from '../../server/mcp/registerTools';
 import { createWeatherCollection } from '../../server/providers/weather/collection';
 import { createNightSkyPluginApp } from '../../server/plugin';
 import { createConfiguredSkyProviders } from '../../server/providers/skyConfiguration';
+import { createPublicUniverseProvider } from '../../server/providers/publicUniverse';
 import { GeoNamesPlaceIndex } from '../../server/places/geonames';
 const index = new GeoNamesPlaceIndex([{ geonameId: 1269843, name: 'Hyderabad', asciiName: 'Hyderabad', alternateNames: '', latitude: 17.361, longitude: 78.474, countryCode: 'IN', countryName: 'India', featureClass: 'P', featureCode: 'PPLA', population: 1, timeZone: 'Asia/Kolkata', modificationDate: '2026-10-01' }], 'synthetic');
 const names = ['search_reference_objects', 'get_reference_details', 'discover_observing_targets', 'get_catalogue_target_windows'];
 async function fixture(t: any, selected = false, admitted = false, upstream?: typeof fetch, dependencies: Partial<NightSkyDependencies> = {}) {
     let calls = 0;
-    const skyProviders = createConfiguredSkyProviders(selected ? { NIGHTSKY_SKY_PROVIDERS: 'publicuniverse', NIGHTSKY_SKY_ADMITTED_PROVIDERS: admitted ? 'publicuniverse' : '' } : {}, { publicUniverseQuota: { reserve: async () => ({ allowed: true, reason: 'fixture' }), setProviderState: async () => { } }, fetcher: async (...args) => {
+    const fetcher: typeof fetch = async (...args) => {
             calls++;
             if (upstream)
                 return upstream(...args);
             return Response.json({ query: 'Mars', results: [{ id: 'mars', name: 'Mars', object_type: 'planet' }] });
-        } });
+        };
+    // Legacy all-feature MCP contract fixtures use a direct provider. Configured
+    // runtime admission is starter-only and has separate restriction tests.
+    const skyProviders = admitted
+        ? { publicUniverse: createPublicUniverseProvider({ quota: { reserve: async () => ({ allowed: true, reason: 'fixture' }), setProviderState: async () => { } }, quotaOwner: 'fixture', admitted: true, scope: 'all', fetcher }), selected: ['publicuniverse'] } as ReturnType<typeof createConfiguredSkyProviders>
+        : createConfiguredSkyProviders(selected ? { NIGHTSKY_SKY_PROVIDERS: 'publicuniverse' } : {}, { publicUniverseQuota: { reserve: async () => ({ allowed: true, reason: 'fixture' }), setProviderState: async () => { } }, fetcher });
     const server = createServer(createNightSkyPluginApp({ ...dependencies, placeIndex: index, skyProviders, log: () => { } }));
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');

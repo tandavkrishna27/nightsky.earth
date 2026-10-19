@@ -26,12 +26,12 @@ for(const rejectingSourceLogger of [false,true])test(`configured source timing e
  try{
   const q=await createPersistentQuota({path,now:Date.now,policies:[PUBLIC_UNIVERSE_QUOTA_POLICY]});
   await q.initializeVerifiedBudget({verifiedUnusedBudget:true,evidence:'Synthetic temporary offline diagnostic budget'});await q.close();
-  await environment({NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_SKY_PROVIDERS:'publicuniverse',NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse',NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH:path},async()=>{
+  await environment({NIGHTSKY_DISCOVERY_MODE:'api',NIGHTSKY_SKY_PROVIDERS:'publicuniverse',NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse',NIGHTSKY_PUBLICUNIVERSE_SCOPE:'starter-only',NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH:path},async()=>{
    const logs:string[]=[];let calls=0;
-   const app=await createConfiguredNightSkyPluginApp({log:line=>{logs.push(line);if(rejectingSourceLogger&&line.startsWith('{"event":"publicuniverse.request"'))return Promise.reject(new Error('private-async-config-sink'));},fetcher:async()=>{calls++;return new Response('{"query":"private-query-value","results":[]}');}});
+   const app=await createConfiguredNightSkyPluginApp({log:line=>{logs.push(line);if(rejectingSourceLogger&&line.startsWith('{"event":"publicuniverse.request"'))return Promise.reject(new Error('private-async-config-sink'));},fetcher:async()=>{calls++;return new Response('{"available":true,"query":"private-query-value","results":[],"total":0,"limit":1,"offset":0,"sources":{},"coverage":"synthetic"}');}});
    const server=createServer(app);server.listen(0,'127.0.0.1');await once(server,'listening');const address=server.address();assert.ok(address&&typeof address!=='string');
    try{
-    const response=await fetch(`http://127.0.0.1:${address.port}/mcp?private-query-param=private-value`,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream',authorization:'Bearer private-header-value','x-request-id':'private-header-id','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:'private-client-id',method:'tools/call',params:{name:'search_reference_objects',arguments:{domain:'solar-system',query:'private-query-value',limit:1},_meta:{'openai/subject':'private-subject','openai/userLocation':{latitude:17.123456,longitude:78.654321}}}})});
+    const response=await fetch(`http://127.0.0.1:${address.port}/mcp?private-query-param=private-value`,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream',authorization:'Bearer private-header-value','x-request-id':'private-header-id','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:'private-client-id',method:'tools/call',params:{name:'search_reference_objects',arguments:{domain:'starter-targets',query:'private-query-value',limit:1},_meta:{'openai/subject':'private-subject','openai/userLocation':{latitude:17.123456,longitude:78.654321}}}})});
     const text=await response.text();assert.equal(response.status,200);const resultLine=text.split('\n').find(line=>line.startsWith('data: '));assert.ok(resultLine);assert.equal(JSON.parse(resultLine.slice(6)).result.structuredContent.status,'available');await new Promise<void>(resolve=>setImmediate(resolve));
     const id=response.headers.get('x-nightsky-request-id');assert.match(id!,/^[a-f0-9-]{36}$/);
     const events=logs.filter(line=>line.startsWith('{')).map(line=>JSON.parse(line));
@@ -60,7 +60,7 @@ test('configured Pub-only app never opens legacy ledger and closes dedicated own
     const dir = await mkdtemp(join(tmpdir(), 'nightsky-pub-config-'));
     try {
         const pub = join(dir, 'pub.json'), legacy = join(dir, 'nonexistent', 'legacy.json');
-        await environment({ NIGHTSKY_SKY_PROVIDERS: 'publicuniverse', NIGHTSKY_SKY_ADMITTED_PROVIDERS: 'publicuniverse', NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH: pub, NIGHTSKY_SKY_QUOTA_STATE_PATH: legacy }, async () => {
+        await environment({ NIGHTSKY_SKY_PROVIDERS: 'publicuniverse', NIGHTSKY_SKY_ADMITTED_PROVIDERS: 'publicuniverse', NIGHTSKY_PUBLICUNIVERSE_SCOPE:'starter-only', NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH: pub, NIGHTSKY_SKY_QUOTA_STATE_PATH: legacy }, async () => {
             let calls = 0;
             const app = await createConfiguredNightSkyPluginApp({ fetcher: async () => { calls++; throw Error('No dispatch'); }, log: () => { } });
             await closeConfiguredNightSkyPluginApp(app);
@@ -86,7 +86,7 @@ test('initialized legacy allocation survives selecting uninitialized Pub and onl
         await q.reserve('jpl', 1);
         await q.close();
         const before = await readFile(legacy, 'utf8');
-        await environment({ NIGHTSKY_SKY_PROVIDERS: 'jpl,publicuniverse', NIGHTSKY_SKY_ADMITTED_PROVIDERS: 'jpl,publicuniverse', NIGHTSKY_SKY_QUOTA_STATE_PATH: legacy, NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH: pub }, async () => { const app = await createConfiguredNightSkyPluginApp({ log: () => { } }); await closeConfiguredNightSkyPluginApp(app); });
+        await environment({ NIGHTSKY_SKY_PROVIDERS: 'jpl,publicuniverse', NIGHTSKY_SKY_ADMITTED_PROVIDERS: 'jpl,publicuniverse', NIGHTSKY_PUBLICUNIVERSE_SCOPE:'starter-only', NIGHTSKY_SKY_QUOTA_STATE_PATH: legacy, NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH: pub }, async () => { const app = await createConfiguredNightSkyPluginApp({ log: () => { } }); await closeConfiguredNightSkyPluginApp(app); });
         assert.equal(await readFile(legacy, 'utf8'), before);
         await assert.rejects(access(pub));
         q = await createPersistentQuota({ path: legacy, now: Date.now, policies: SKY_QUOTA_POLICIES.filter(p => p.providerId === 'jpl') });
@@ -109,7 +109,7 @@ test('dedicated path is absolute and distinct including Windows case aliases', (
 });
 test('selection, admission and dedicated budget are independently required; preparation is plan-only',async()=>{
  for(const admitted of [false,true])for(const budget of [false,true]){
-  let calls=0;const services=createConfiguredSkyProviders({NIGHTSKY_SKY_PROVIDERS:'publicuniverse',...(admitted?{NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse'}:{})},{publicUniverseQuota:budget?{reserve:async()=>({allowed:false,reason:'uninitialized'}),setProviderState:async()=>{}}:undefined,fetcher:async()=>{calls++;throw Error();}});
+  let calls=0;const services=createConfiguredSkyProviders({NIGHTSKY_SKY_PROVIDERS:'publicuniverse',...(admitted?{NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse',NIGHTSKY_PUBLICUNIVERSE_SCOPE:'starter-only'}:{})},{publicUniverseQuota:budget?{reserve:async()=>({allowed:false,reason:'uninitialized'}),setProviderState:async()=>{}}:undefined,fetcher:async()=>{calls++;throw Error();}});
   const result=await services!.publicUniverse!.searchReferenceObjects({domain:'solar-system',query:'Mars'});assert.equal(result.status,'unavailable');assert.equal(calls,0);await services!.publicUniverse!.close();
  }
  assert.throws(()=>parseSkyConfiguration({NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse'}));

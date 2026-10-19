@@ -45,7 +45,7 @@ const exactKeys = (v: Record<string, unknown>, keys: string[]) => Object.keys(v)
 function validImport(value: unknown): value is NonNullable<Entry['imported']> {
     if (!record(value) || !exactKeys(value,['policy','usage']) || !record(value.policy) || !record(value.usage)) return false;
     const p=value.policy, u=value.usage;
-    return exactKeys(p,['providerId','accountLabel','hourlyLimit','dailyLimit','monthlyLimit']) && safeName(p.providerId) && safeName(p.accountLabel) && positive(p.hourlyLimit) && positive(p.dailyLimit) && positive(p.monthlyLimit) &&
+    return (exactKeys(p,['providerId','accountLabel','hourlyLimit','dailyLimit']) || exactKeys(p,['providerId','accountLabel','hourlyLimit','dailyLimit','monthlyLimit'])) && safeName(p.providerId) && safeName(p.accountLabel) && positive(p.hourlyLimit) && positive(p.dailyLimit) && (p.monthlyLimit === undefined || positive(p.monthlyLimit)) &&
         exactKeys(u,['verifiedAllowance','verifiedAllAccountUsage','allConsumersQuiesced','evidence','observedAt','usedLast24Hours','usedCurrentMonth']) &&
         u.verifiedAllowance===true && u.verifiedAllAccountUsage===true && u.allConsumersQuiesced===true && typeof u.evidence==='string' && u.evidence.trim().length>=8 && u.evidence.length<=500 && validTime(u.observedAt) && nonnegative(u.usedLast24Hours) && nonnegative(u.usedCurrentMonth);
 }
@@ -87,7 +87,7 @@ function validate(raw: unknown, policies: QuotaPolicy[]): Checkpoint {
     return raw as unknown as Checkpoint;
 }
 
-export async function createPersistentQuota(options: { path: string; now: () => number; policies: QuotaPolicy[] }): Promise<PersistentQuota> {
+export async function createPersistentQuota(options: { path: string; now: () => number; policies: QuotaPolicy[]; /** Offline fault injection only; never set by runtime configuration. */ initializationFault?: () => Promise<void> }): Promise<PersistentQuota> {
     const path = options.path;
     const policies = structuredClone(options.policies);
     if (policies.length === 0 || policies.length > 16 || new Set(policies.map(p => p.providerId)).size !== policies.length || policies.some(p => !safeName(p.providerId) || !safeName(p.accountLabel) || !positive(p.hourlyLimit) || !positive(p.dailyLimit) || (p.monthlyLimit !== undefined && !positive(p.monthlyLimit)))) throw new Error('Invalid quota policies.');
@@ -131,12 +131,28 @@ export async function createPersistentQuota(options: { path: string; now: () => 
         } else mayInitialize = !(await exists(path + '.initialized'));
     } catch { failed = true; }
     async function initialize(next: Checkpoint) {
+        let createdMarker: {dev: bigint; ino: bigint} | undefined;
+        const markerBytes=`Verified budget initialization.\n${token}\n`;
         try {
             await ownership();
             const marker = await open(path + '.initialized', constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, 0o600);
-            try { await marker.writeFile('Verified budget initialization.\n'); await marker.sync(); } finally { await marker.close(); }
-            mayInitialize = false; await persist(next);
-        } catch (e) { failed = true; throw new Error('Quota initialization failed.'); }
+            const markerStat = await marker.stat({bigint:true}); createdMarker={dev:markerStat.dev,ino:markerStat.ino};
+            try { await marker.writeFile(markerBytes); await marker.sync(); } finally { await marker.close(); }
+            mayInitialize = false;
+            await options.initializationFault?.();
+            await persist(next);
+        } catch (e) {
+            // Only undo our own marker if no checkpoint or pending write exists.
+            // A renamed checkpoint or stranded .tmp is ambiguous and remains fail-closed.
+            if(createdMarker)try{
+                if(!(await exists(path))&&!(await exists(path+'.tmp'))){
+                    const current=await lstat(path+'.initialized',{bigint:true});
+                    if(current.isFile()&&!current.isSymbolicLink()&&current.nlink===BigInt(1)&&current.dev===createdMarker.dev&&current.ino===createdMarker.ino&&(await readFile(path+'.initialized','utf8'))===markerBytes)
+                        await unlink(path+'.initialized');
+                }
+            }catch{/* Preserve ambiguous state for operator recovery. */}
+            failed = true; throw new Error('Quota initialization failed.');
+        }
     }
     return {
         addVerifiedProvider(policyInput, usageInput) { return serialize(async () => {
@@ -144,7 +160,7 @@ export async function createPersistentQuota(options: { path: string; now: () => 
             const now = options.now();
             if (!checkpoint || failed || closed || policies.length >= 16 || Object.hasOwn(checkpoint.entries, p.providerId) ||
                 !validImport({policy:p,usage:u}) ||
-                !safeName(p.providerId) || !safeName(p.accountLabel) || !positive(p.hourlyLimit) || !positive(p.dailyLimit) || !positive(p.monthlyLimit) ||
+                !safeName(p.providerId) || !safeName(p.accountLabel) || !positive(p.hourlyLimit) || !positive(p.dailyLimit) || (p.monthlyLimit !== undefined && !positive(p.monthlyLimit)) ||
                 u?.verifiedAllowance !== true || u.verifiedAllAccountUsage !== true || u.allConsumersQuiesced !== true || typeof u.evidence !== 'string' || u.evidence.trim().length < 8 || u.evidence.length > 500 ||
                 !validTime(now) || now < checkpoint.lastNow || !validTime(u.observedAt) || u.observedAt > now || now-u.observedAt > 300000 ||
                 new Date(u.observedAt).toISOString().slice(0,7) !== new Date(now).toISOString().slice(0,7) ||

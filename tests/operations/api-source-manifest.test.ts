@@ -10,3 +10,15 @@ test('source manifest refuses secrets unknown flags and unresolved branches',()=
 test('source manifest requires actual parser correspondence and geometry evidence',()=>{const m=fixture();m.current.environment={NIGHTSKY_GEOMETRY_ENABLED:'yes',NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED:'yes'};assert.throws(()=>validateApiSourceManifest(m));Object.assign(m.current.evidence,{'geoapify-geometry':['selected details/full geometry and credit acceptance']});assert.ok(validateApiSourceManifest(m));});
 
 test('source manifest refuses missing default sources and ledger aliases',()=>{const m=fixture();delete (m.current.evidence as Record<string,string[]>).met;assert.throws(()=>validateApiSourceManifest(m));const n=fixture();n.current.environment={NIGHTSKY_QUOTA_STATE_PATH:'C:\\quota\\state.json',NIGHTSKY_SKY_QUOTA_STATE_PATH:'c:\\quota\\x\\..\\STATE.json'};assert.throws(()=>validateApiSourceManifest(n));});
+
+test('starter-only Public Universe manifest requires reviewed evidence and a distinct quota path',()=>{
+ const m=fixture();
+ m.current.environment={NIGHTSKY_SKY_PROVIDERS:'publicuniverse',NIGHTSKY_SKY_ADMITTED_PROVIDERS:'publicuniverse',NIGHTSKY_PUBLICUNIVERSE_SCOPE:'starter-only'};
+ assert.throws(()=>validateApiSourceManifest(m));
+ m.current.environment.NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH='C:\\quota\\public-universe.json';
+ assert.throws(()=>validateApiSourceManifest(m));
+ m.current.evidence['publicuniverse-starter-targets']=['BSC5P/OpenNGC reviewed lineage, original-source credits and rendered notice acceptance'];
+ assert.ok(validateApiSourceManifest(m));
+ m.current.environment.NIGHTSKY_QUOTA_STATE_PATH='c:\\QUOTA\\public-universe.json';
+ assert.throws(()=>validateApiSourceManifest(m));
+});

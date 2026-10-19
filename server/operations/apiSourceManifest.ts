@@ -3,7 +3,7 @@ import {isAbsolute, resolve, win32} from 'node:path';
 import {parseWeatherConfiguration} from '../providers/weather/configuration';
 import {parseSkyConfiguration} from '../providers/skyConfiguration';
 import {parseLightPollutionConfiguration} from '../providers/lightPollution/configuration';
-export const API_SOURCE_ENV_KEYS = ['NIGHTSKY_WEATHER_PROVIDERS','NIGHTSKY_WEATHER_ADMITTED_PROVIDERS','NIGHTSKY_QUOTA_STATE_PATH','NIGHTSKY_SKY_PROVIDERS','NIGHTSKY_SKY_ADMITTED_PROVIDERS','NIGHTSKY_SKY_QUOTA_STATE_PATH','NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH','NIGHTSKY_LIGHT_POLLUTION_SOURCES','NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED','NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH','NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED','NIGHTSKY_GEOMETRY_ENABLED','NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED'] as const;
+export const API_SOURCE_ENV_KEYS = ['NIGHTSKY_WEATHER_PROVIDERS','NIGHTSKY_WEATHER_ADMITTED_PROVIDERS','NIGHTSKY_QUOTA_STATE_PATH','NIGHTSKY_SKY_PROVIDERS','NIGHTSKY_SKY_ADMITTED_PROVIDERS','NIGHTSKY_SKY_QUOTA_STATE_PATH','NIGHTSKY_PUBLICUNIVERSE_SCOPE','NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH','NIGHTSKY_LIGHT_POLLUTION_SOURCES','NIGHTSKY_LIGHT_POLLUTION_API_ADMITTED','NIGHTSKY_LIGHT_POLLUTION_QUOTA_STATE_PATH','NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED','NIGHTSKY_GEOMETRY_ENABLED','NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED'] as const;
 const environmentSchema=z.object(Object.fromEntries(API_SOURCE_ENV_KEYS.map(k=>[k,z.string().max(4096).optional()]))).strict();
 export const apiSourceReleaseManifestSchema=z.object({environment:environmentSchema,discoveryProviders:z.array(z.enum(['geoapify','geonames'])).min(1).max(2),evidence:z.record(z.string(),z.array(z.string().trim().min(1).max(1024)).min(1))}).strict();
 export const apiSourceManifestSchema=z.object({schemaVersion:z.literal(1),current:apiSourceReleaseManifestSchema,rollback:apiSourceReleaseManifestSchema}).strict();
@@ -19,9 +19,12 @@ export function validateApiSourceReleaseManifest(input:unknown){
  const paths=API_SOURCE_ENV_KEYS.filter(k=>k.endsWith('QUOTA_STATE_PATH')).flatMap(k=>env[k]?[env[k]!]:[]);
  const normalized=paths.map(p=>{if(!isAbsolute(p)&&!win32.isAbsolute(p))throw Error('Absolute existing ledger scope required.');return win32.isAbsolute(p)?win32.resolve(p).toLowerCase():resolve(p);});
  if(new Set(normalized).size!==normalized.length)throw Error('Source ledger scopes must be distinct.');
- if(sky.admitted.includes('publicuniverse'))throw Error('Unresolved provider-wide Public Universe rights.');
+ if(sky.admitted.includes('publicuniverse')){
+  requireEvidence('publicuniverse-starter-targets');
+  if(!sky.publicUniverseQuotaStatePath)throw Error('Public Universe requires a dedicated preserved quota scope.');
+ }
  if(light.selected.includes('lightpollutionmap')||env.NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED && env.NIGHTSKY_LIGHT_POLLUTION_BROWSER_ENABLED!=='false')throw Error('Experimental browser source is not admitted in API-only V1.');
- if(sky.admitted.length)throw Error('Optional sky admission requires a separate reviewed feature contract.');
+ if(sky.admitted.some(id=>id!=='publicuniverse'))throw Error('Optional sky admission requires a separate reviewed feature contract.');
  for(const key of ['NIGHTSKY_GEOMETRY_ENABLED','NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED'])if(env[key]!==undefined&&!['yes','no'].includes(env[key]!))throw Error('Invalid geometry flag.');
  if(env.NIGHTSKY_GEOMETRY_ENABLED==='yes'){
   if(env.NIGHTSKY_GEOMETRY_SOURCE_ACCEPTED!=='yes'||!manifest.discoveryProviders.includes('geoapify'))throw Error('Geometry requires selected accepted Geoapify.');

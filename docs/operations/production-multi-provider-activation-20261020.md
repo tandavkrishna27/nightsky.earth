@@ -10,9 +10,9 @@ The last verified production profile selects Geoapify location resolution, MET N
 
 | Source | Key | Before adding to the production profile |
 | --- | --- | --- |
-| WeatherAPI.com | Existing private key | Confirm the account's current Free entitlement and hourly fields after trial transition; preserve the general quota checkpoint and its existing WeatherAPI policy/counters; check Free credit in a rendered client answer. |
+| WeatherAPI.com | Existing private key | Owner reports the dashboard shows **Free** on 20 October 2026. Preserve the general quota checkpoint and its existing WeatherAPI policy/counters; verify the key's Free three-day hourly response and visible credit in a bounded live acceptance. Do not infer remaining credits from the plan name. |
 | OpenWeather five-day forecast | Existing private key | Verify the exact subscribed Free product and render its required logo/link and derivative notice; use the implemented forecast endpoint only, not One Call. Preserve the same general quota checkpoint. |
-| Public Universe | None | Admit only screened record/feature classes and their original-source rights; prepare a **dedicated** `/state/public-universe-quota.json` checkpoint under a reviewed allocation and current public-IP usage evidence. `scripts/initialize-public-universe-quota.ts --plan` performs no initialization; selection before a valid checkpoint yields an unavailable source. |
+| Public Universe | None | Admit only the starter-only feature scope and its reviewed record lineage; prepare a **dedicated** `/state/public-universe-quota.json` checkpoint under a reviewed allocation and current public-IP usage evidence. The CLI `--plan` performs no initialization; the operator-only verified-usage import still needs host acceptance. Selection before a valid checkpoint yields an unavailable source. |
 | 7Timer | None | Review the source's current reuse/credit and categorical-field presentation; migrate the existing shared checkpoint using the explicit reviewed `migrate-seventimer-quota.ts` packet. Do not initialize a new checkpoint. |
 | AstronomyAPI | Existing private ID and secret | Confirm this account's ongoing free allowance and supported requests; prepare a separate `/state/sky-quota.json` checkpoint and rendered rights/credits. A locally successful diagnostic does not establish production entitlement. |
 | NASA DONKI, JPL, Dark Sky Planner | Key only for NASA | Keep unselected while live result, meaning/usage or reuse requirements remain unresolved. Their adapters can return unavailable without interrupting the core plan. |
@@ -35,6 +35,7 @@ NIGHTSKY_WEATHERAPI_KEY=<enter privately>
 # Add Public Universe only after its dedicated checkpoint and rights gate:
 # NIGHTSKY_SKY_PROVIDERS=publicuniverse
 # NIGHTSKY_SKY_ADMITTED_PROVIDERS=publicuniverse
+# NIGHTSKY_PUBLICUNIVERSE_SCOPE=starter-only
 # NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH=/state/public-universe-quota.json
 ```
 
@@ -50,13 +51,14 @@ The commented examples are **not** a complete secret; placeholders must never be
 
 If any admission gate fails, keep that provider unselected and continue with the already verified core. The later admin dashboard can read operational metrics; it does not replace durable quota enforcement or admission checks.
 
-## Public Universe: exact remaining starter-only lane
+## Public Universe: starter-only implementation and release gates
 
-The current `NIGHTSKY_SKY_ADMITTED_PROVIDERS=publicuniverse` switch admits the **whole** provider. That also exposes solar-system, exoplanet, meteor-reference and close-approach outputs whose original-record rights and complete visible credits have not been accepted. The reviewed BSC5P and OpenNGC starter records do not clear those features. Keep Public Universe unselected in the production secret until all of the following are complete:
+The deployed image's `NIGHTSKY_SKY_ADMITTED_PROVIDERS=publicuniverse` switch admits the **whole** provider. That also exposes solar-system, exoplanet, meteor-reference and close-approach outputs whose original-record rights and complete visible credits have not been accepted. The reviewed BSC5P and OpenNGC starter records do not clear those features. Keep Public Universe unselected in the production secret until the new branch code and the remaining acceptance items below are released:
 
-1. Implement an enforced starter-only runtime feature scope across search, selected detail, discovery and selected windows. Reject other domains and detail variants **before a provider request**, and ensure discovery cannot return unscreened solar-system records. Preserve the current general implementation for later separately reviewed features without making it reachable under starter-only admission.
-2. Require the returned starter source to match the reviewed BSC5P/OpenNGC subset lineage and carry its original licence URL, attribution and modification notice. A changed snapshot must fail closed until reviewed. Verify that the real ChatGPT answer and tool card render the notices adjacent to the values.
-3. Extend the source manifest and rollback validation to require the restricted scope, reviewed rights evidence and a dedicated nonaliasing ledger path. `scripts/initialize-public-universe-quota.ts` is **plan only**. Implement and review a separate bounded initializer or verified usage import before selecting the provider; preserve consumed usage and do not claim the public IP is unused without evidence.
-4. Update focused provider, MCP and manifest tests for allowed starter paths and denied other paths, including zero provider requests for denied features, altered lineage, partial results, and quota exhaustion. Run the full offline suite and exact-commit CI before a bounded live starter-record acceptance.
+1. **Implemented locally:** `NIGHTSKY_PUBLICUNIVERSE_SCOPE=starter-only` is required for configured admission. Search and details deny other domains/variants before transport; discovery omits unscreened solar-system target records. Direct internal provider tests retain the broader implementation for future feature reviews.
+2. **Implemented locally:** returned BSC5P/OpenNGC starter snapshots must match the reviewed subset hashes, source URLs, licence labels/URLs and attribution text. The normalized response adds a modification notice. Changed selected identity fails closed. **Still verify:** the actual live selected record values and the real ChatGPT answer/tool-card credit presentation.
+3. **Implemented locally:** source manifest requires starter rights evidence and a dedicated nonaliasing quota path. The production configure helper accepts only `NIGHTSKY_PUBLICUNIVERSE_SCOPE=starter-only` with a dedicated ledger path when this source is admitted. An operator-only `initializeVerifiedPublicUniverseQuota` function imports fresh, complete verified usage once; the command-line `--plan` remains read-only. **Still verify:** actual public-IP usage/other consumers and apply the reviewed import on the host; never claim an unused budget without evidence.
+   The quota store now removes only its own new marker if initialization fails before any checkpoint or temporary write exists. A checkpoint, temporary file, changed marker or otherwise ambiguous interrupted import remains fail-closed and requires an operator to inspect and recover it; never delete those files just to reset usage.
+4. **Locally checked:** focused scope, lineage, manifest, MCP, provider and quota tests passed. **Still required:** full offline suite, exact-commit CI, host helper installation, and bounded live BSC5P/OpenNGC/credit acceptance before enabling this source.
 
 No API key is needed for this lane. The current release can still use its local astronomy calculations and other admitted sources while this finite restriction is completed.

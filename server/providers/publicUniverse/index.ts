@@ -6,8 +6,12 @@ import { ReferenceStore, canonicalJson, type IdentitySnapshot, type Selection } 
 import { PublicUniverseTransport, PublicUniverseTransportError, ReferenceSuccessCache, type PublicUniverseRequest } from './transport';
 type Options = ConstructorParameters<typeof PublicUniverseTransport>[0] & {
     fetcher?: typeof fetch;
+    /** Configured production callers may admit only the reviewed starter subset. */
+    scope?: 'all' | 'starter-only';
 };
 class InputError extends Error {
+}
+class UnsupportedFeature extends Error {
 }
 function inputParse<T>(schema: {
     parse: (v: unknown) => T;
@@ -29,15 +33,43 @@ export function createPublicUniverseProvider(options: Options) {
     const transport = new PublicUniverseTransport({ ...options, fetch: options.fetcher ?? options.fetch }), now = options.now ?? Date.now, store = new ReferenceStore({ now }), cache = new ReferenceSuccessCache(now);
     const envelope = (operation: ReferenceOperation) => ({ provider: 'publicuniverse' as const, operation, status: 'available' as const, reason: null, errorCode: null, retrievedAt: new Date(now()).toISOString(), sources: [], limitations: [] as string[] });
     function failure(operation: ReferenceOperation, error: unknown) {
-        const code = error instanceof PublicUniverseTransportError ? error.code : error instanceof InputError ? 'invalid-input' : error instanceof Error && error.message === 'stale-selection' ? 'stale-selection' : 'invalid-response';
+        const code = error instanceof PublicUniverseTransportError ? error.code : error instanceof UnsupportedFeature ? 'unsupported-feature' : error instanceof InputError ? 'invalid-input' : error instanceof Error && error.message === 'stale-selection' ? 'stale-selection' : 'invalid-response';
         const status = code === 'stale-selection' ? 'stale' : error instanceof InputError ? 'invalid-input' : error instanceof PublicUniverseTransportError && error.status === 404 ? 'not-found' : 'unavailable';
         return { ...envelope(operation), status, reason: `Public Universe ${code}.`, errorCode: code, data: null };
     }
     const select = (item: Item) => ({ ...item.record, selection: store.put(item.identity) });
+    const reviewedSources: Record<string, {snapshot: string; sourceUrl: string; licence: string; licenceUrl: string; attribution: string}> = {
+        bsc5p: {
+            snapshot: '7fe926d80b535f9422ca81f8f3fee1d6422de29adaecfbd2f14b1a93fe5134b9',
+            sourceUrl: 'https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html',
+            licence: 'HEASARC data-use policy',
+            licenceUrl: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html',
+            attribution: 'Hoffleit & Warren (1991); NASA/GSFC HEASARC',
+        },
+        openngc: {
+            snapshot: 'd8517e8d195ce69700645b60f8d6603d2aebba0e8e21f47603a4d6a31fe667a1',
+            sourceUrl: 'https://github.com/mattiaverga/OpenNGC',
+            licence: 'CC BY-SA 4.0',
+            licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+            attribution: 'Mattia Verga / OpenNGC',
+        },
+    };
+    const reviewedStarter = (source: z.infer<typeof c.starterProvenanceSchema>) => {
+        if (options.scope !== 'starter-only') return;
+        const reviewed = reviewedSources[source.source];
+        if (!reviewed || source.snapshot_sha256 !== reviewed.snapshot || source.source_url !== reviewed.sourceUrl || source.license !== reviewed.licence || source.license_url !== reviewed.licenceUrl || source.attribution !== reviewed.attribution)
+            throw Error('Unreviewed starter source lineage or credit');
+    };
+    const exactStarterIdentity = (selection: Selection, remote: IdentitySnapshot) => {
+        const stored = store.get(selection);
+        const comparable = (value: IdentitySnapshot) => ({ domain: value.domain, upstreamId: value.upstreamId, upstreamSourceIdentity: value.upstreamSourceIdentity ?? null, coordinateFrame: value.coordinateFrame ?? null, coordinateEpoch: value.coordinateEpoch ?? null, motionModel: value.motionModel ?? null });
+        if (canonicalJson(comparable(stored)) !== canonicalJson(comparable(remote))) throw Error('stale-selection');
+    };
     const request = async (r: PublicUniverseRequest, deadline?: number) => transport.request(r, { deadline });
     async function searchReferenceObjects(value: unknown): Promise<ReferenceSearchResult> {
         try {
             const input = inputParse(searchReferenceObjectsInputSchema, value), key = 'search:' + canonicalJson(input), hit = cache.get(key);
+            if (options.scope === 'starter-only' && input.domain !== 'starter-targets') throw new UnsupportedFeature();
             let normalized: {
                 items: Item[];
                 total: number | null;
@@ -60,6 +92,7 @@ export function createPublicUniverseProvider(options: Options) {
                 const items: Item[] = parsed.results.map((row: any) => {
                     if (input.domain === 'starter-targets') {
                         const source = (parsed as z.infer<typeof c.starterSearchResponseSchema>).sources[row.source];
+                        reviewedStarter(source);
                         return { record: n.starterRecord(row, source), identity: n.starterIdentity(row, source) };
                     }
                     if (input.domain === 'exoplanets')
@@ -80,6 +113,7 @@ export function createPublicUniverseProvider(options: Options) {
         let operation: ReferenceOperation = 'object';
         try {
             const input = inputParse(getReferenceDetailsInputSchema, value), deadline = transport.operationDeadline(), limitations: string[] = ['Reference facts do not establish local viewing potential or transit predictions.'];
+            if (options.scope === 'starter-only' && input.kind !== 'selected-object') throw new UnsupportedFeature();
             let record: ReferenceRecord | null = null;
             const additionalSources:ReferenceRecord['sources']=[];
             let extra: Record<string, unknown> = {};
@@ -96,6 +130,7 @@ export function createPublicUniverseProvider(options: Options) {
             else {
                 const identity = store.get(input);
                 const domain = identity.domain;
+                if (options.scope === 'starter-only' && domain !== 'starter-targets') throw new UnsupportedFeature();
                 if (input.kind === 'close-approaches') {
                     operation = 'close-approaches';
                     if (domain !== 'solar-system')
@@ -132,8 +167,11 @@ export function createPublicUniverseProvider(options: Options) {
                     if (domain === 'starter-targets') {
                         const row = c.parseStarterDetail(response.value, identity.upstreamId);
                         const remote = n.starterIdentity(row, row.provenance);
+                        if (options.scope === 'starter-only') exactStarterIdentity(input, remote);
+                        reviewedStarter(row.provenance);
                         record = n.starterRecord(row, row.provenance);
                         record.remoteRevisionAssociation = store.compare(input, remote).association;
+                        if (options.scope === 'starter-only' && record.remoteRevisionAssociation !== 'verified') throw Error('stale-selection');
                         for (const section of input.sections)
                             sections.push({ section, status: 'unavailable', reason: 'Optional solar object section is unsupported for this domain.', records: [] });
                     }
@@ -221,6 +259,7 @@ export function createPublicUniverseProvider(options: Options) {
     async function observing(operation: 'discover' | 'night', value: unknown, coordinates: Coordinates): Promise<ReferenceObservingResult> {
         try {
             const input = operation === 'discover' ? inputParse(discoverObservingTargetsInputSchema, value) : inputParse(getCatalogueTargetWindowsInputSchema, value);
+            if (options.scope === 'starter-only' && operation === 'discover' && 'preference' in input && input.preference === 'solar_system') throw new UnsupportedFeature();
             const selections = operation === 'night' ? (input as GetCatalogueTargetWindowsInput).targets : [];
             const identities = selections.map(s => store.get(s));
             if (identities.some(s => s.domain !== 'starter-targets' || !c.isSupportedStarterId(s.upstreamId)))
@@ -237,8 +276,12 @@ export function createPublicUniverseProvider(options: Options) {
             const binding = { ...input, ...coordinates, ...(operation === 'night' ? { targetIds } : {}) };
             const discovery = operation === 'discover' ? c.parseDiscoveryResponse(response.value, binding) : null;
             const plan = discovery ? discovery.plan : c.parseNightResponse(response.value, binding);
+            if (options.scope === 'starter-only') {
+                for (const source of discovery?.discovery.source_snapshots ?? []) reviewedStarter(source);
+                for (const target of plan?.targets ?? []) if (target.catalogue) reviewedStarter(target.catalogue);
+            }
             const sources = discovery ? discovery.discovery.source_snapshots.map(n.starterSource) : [];
-            const targets = (plan?.targets ?? []).map(target => {
+            const targets = (plan?.targets ?? []).filter(target => options.scope !== 'starter-only' || !!target.catalogue).map(target => {
                 let record: ReferenceRecord = { domain: target.catalogue ? 'starter-targets' : 'solar-system', upstreamId: target.id, name: target.name, aliases: [], sources: target.catalogue ? [n.starterSource(target.catalogue)] : [], measurements: [], observingSupported: true };
                 if (operation === 'night') {
                     const i = targetIds.indexOf(target.id);
@@ -270,7 +313,7 @@ export function createPublicUniverseProvider(options: Options) {
             const moon = plan ? c.reduceChartSamples(plan.moon.samples, input.window) : null;
             const requestEcho = discovery?.request;
             const effective = plan?.observer ?? { lat: requestEcho!.lat, lon: requestEcho!.lon };
-            return referenceObservingResultSchema.parse({ ...envelope(operation), retrievedAt: response.retrievedAt, sources: [...sources, ...targets.flatMap(t => t.record.sources)].slice(0, 30), limitations: ['Provider coordinates are rounded to two decimals; geometry excludes terrain and does not guarantee detection.', 'Coarse screening is incomplete between samples; no matches is not an all-sky negative.', 'Moon phase is referenced to the full local-night midpoint.'], data: { requestedCoordinates: coordinates, effectiveCoordinates: { latitude: effective.lat, longitude: effective.lon }, localNightDate: input.localNightDate, timeZone: input.displayTimeZone, window: input.window, method: discovery?.method ?? plan!.method, constraints: plan?.constraints ?? null, night: plan?.night ?? null, darkness: plan?.darkness ?? null, moon: plan && moon ? { ...plan.moon, samples: moon.samples, sampling: { originalCount: moon.originalCount, inWindowCount: moon.inWindowCount, reduced: moon.reduced, sampleScope: moon.sampleScope } } : null, ...(discovery ? { discovery: Object.fromEntries(Object.entries(discovery.discovery).filter(([key]) => key !== 'options')) } : {}), targets } });
+            return referenceObservingResultSchema.parse({ ...envelope(operation), retrievedAt: response.retrievedAt, sources: [...sources, ...targets.flatMap(t => t.record.sources)].slice(0, 30), limitations: ['Provider coordinates are rounded to two decimals; geometry excludes terrain and does not guarantee detection.', 'Coarse screening is incomplete between samples; no matches is not an all-sky negative.', 'Moon phase is referenced to the full local-night midpoint.', ...(options.scope === 'starter-only' ? ['Unscreened solar-system target records were omitted from this catalogue enrichment.'] : [])], data: { requestedCoordinates: coordinates, effectiveCoordinates: { latitude: effective.lat, longitude: effective.lon }, localNightDate: input.localNightDate, timeZone: input.displayTimeZone, window: input.window, method: discovery?.method ?? plan!.method, constraints: plan?.constraints ?? null, night: plan?.night ?? null, darkness: plan?.darkness ?? null, moon: plan && moon ? { ...plan.moon, samples: moon.samples, sampling: { originalCount: moon.originalCount, inWindowCount: moon.inWindowCount, reduced: moon.reduced, sampleScope: moon.sampleScope } } : null, ...(discovery ? { discovery: Object.fromEntries(Object.entries(discovery.discovery).filter(([key]) => key !== 'options')) } : {}), targets } });
         }
         catch (error) {
             return referenceObservingResultSchema.parse(failure(operation, error));

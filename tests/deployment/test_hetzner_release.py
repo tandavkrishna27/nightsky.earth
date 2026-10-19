@@ -35,6 +35,16 @@ class ReleaseTests(unittest.TestCase):
         for data in (b'x'*(configure.MAX_BYTES+1), b'NODE_ENV=production\r\n', b'NODE_ENV=production\0'):
             with self.assertRaises(ValueError): configure.validate(data)
 
+    def test_public_universe_requires_restricted_scope_and_dedicated_ledger(self):
+        configure=module('nightsky-configure')
+        base='\n'.join(f'{name}={value}' for name,value in configure.FIXED.items())+'\n'
+        selection='NIGHTSKY_SKY_PROVIDERS=publicuniverse\nNIGHTSKY_SKY_ADMITTED_PROVIDERS=publicuniverse\n'
+        scoped='NIGHTSKY_PUBLICUNIVERSE_SCOPE=starter-only\n'
+        ledger='NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH=/state/public-universe-quota.json\n'
+        self.assertEqual(configure.validate((base+selection+scoped+ledger).encode())['NIGHTSKY_PUBLICUNIVERSE_SCOPE'],'starter-only')
+        for data in (base+selection+ledger,base+selection+scoped,base+selection+scoped.replace('starter-only','all')+ledger):
+            with self.assertRaises(ValueError): configure.validate(data.encode())
+
     def test_configure_rejects_wrong_hash_before_write(self):
         configure=module('nightsky-configure')
         with patch.object(configure.sys,'argv',['nightsky-configure','production','sha256:'+'a'*64]), patch.object(configure.os,'geteuid',return_value=0,create=True), patch.object(configure.sys,'stdin',SimpleNamespace(buffer=io.BytesIO(b'not matching'))), patch.object(configure,'install') as install:

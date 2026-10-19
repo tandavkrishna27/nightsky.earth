@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "node --import tsx -e \"process.env.NODE_ENV='development'; import('./server/index.ts')\"",
-    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:./viteDev.js && esbuild server/viteDev.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/viteDev.js && esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js && npm run build:light-pollution-browser",
+    "build": "vite build && node scripts/stage-openweather-method.mjs && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:./viteDev.js && esbuild server/viteDev.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/viteDev.js && esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js && npm run build:light-pollution-browser",
     "start": "node -e \"process.env.NODE_ENV='production'; import('./dist/index.js')\"",
     "start:plugin": "node dist/plugin.js",
     "build:plugin": "esbuild server/plugin.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/plugin.js && npm run build:light-pollution-browser",

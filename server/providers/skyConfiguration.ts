@@ -26,19 +26,22 @@ export function parseSkyConfiguration(env: Environment) {
   const selected = selection(env.NIGHTSKY_SKY_PROVIDERS);
   const admitted = selection(env.NIGHTSKY_SKY_ADMITTED_PROVIDERS);
   if (admitted.some(id => !selected.includes(id))) throw Error('Sky source admission requires selection.');
+  const publicUniverseScope = env.NIGHTSKY_PUBLICUNIVERSE_SCOPE;
+  if (publicUniverseScope !== undefined && publicUniverseScope !== 'starter-only') throw Error('Invalid Public Universe feature scope.');
+  if (admitted.includes('publicuniverse') && publicUniverseScope !== 'starter-only') throw Error('Public Universe admission requires starter-only scope.');
   for (const name of ['NIGHTSKY_NASA_API_KEY','NIGHTSKY_ASTRONOMY_API_APP_ID','NIGHTSKY_ASTRONOMY_API_APP_SECRET']) {
     const value = env[name];
     if (value !== undefined && (!value.length || value.length > 512 || /[\x00-\x20\x7f]/.test(value))) throw Error('Invalid sky credential configuration.');
   }
-  return {selected, admitted, publicUniverseQuotaStatePath};
+  return {selected, admitted, publicUniverseQuotaStatePath, publicUniverseScope};
 }
 export function createConfiguredSkyProviders(env: Environment, options: {quota?: ProviderQuota; publicUniverseQuota?:PublicUniverseQuota; fetcher?: typeof fetch; now?:()=>number; publicUniverseDiagnostics?:(event:PublicUniverseDiagnostic)=>void|Promise<void>} = {}) {
-  const {selected, admitted} = parseSkyConfiguration(env);
+  const {selected, admitted, publicUniverseScope} = parseSkyConfiguration(env);
   if (!selected.length) return undefined;
   const enabled = (id:SkyProviderId) => selected.includes(id) && admitted.includes(id) && !!options.quota;
   const common = {quota:options.quota ?? {reserve:async()=>({allowed:false,reason:'Sky source quota is unavailable.'})}, fetcher:options.fetcher, now:options.now, controls:new UpstreamControls({now:options.now??Date.now})};
   const services = {
-    publicUniverse:selected.includes('publicuniverse')?createPublicUniverseProvider({quota:options.publicUniverseQuota??unavailablePublicUniverseQuota,quotaOwner:'nightsky-publicuniverse',admitted:admitted.includes('publicuniverse'),fetcher:options.fetcher,now:options.now,onDiagnostic:options.publicUniverseDiagnostics}):undefined,
+    publicUniverse:selected.includes('publicuniverse')?createPublicUniverseProvider({quota:options.publicUniverseQuota??unavailablePublicUniverseQuota,quotaOwner:'nightsky-publicuniverse',admitted:admitted.includes('publicuniverse'),scope:publicUniverseScope === 'starter-only' ? 'starter-only' : 'all',fetcher:options.fetcher,now:options.now,onDiagnostic:options.publicUniverseDiagnostics}):undefined,
     darkSky: selected.includes('darkskyplanner') ? createDarkSkyPlannerProvider({...common,enabled:enabled('darkskyplanner')}) : undefined,
     astronomy: selected.includes('astronomyapi') ? createAstronomyApiProvider({...common,enabled:enabled('astronomyapi'),appId:env.NIGHTSKY_ASTRONOMY_API_APP_ID??"",appSecret:env.NIGHTSKY_ASTRONOMY_API_APP_SECRET??""}) : undefined,
     space: selected.some(id=>id==='jpl'||id==='nasa-donki') ? createSpaceProviders({...common,nasaEnabled:enabled('nasa-donki'),jplEnabled:enabled('jpl'),nasaApiKey:env.NIGHTSKY_NASA_API_KEY}) : undefined,
