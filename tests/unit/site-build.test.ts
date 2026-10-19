@@ -26,7 +26,7 @@ test("preview output is isolated from news and publication", () => {
   assert.equal(classifyPath("/meteor-shower/not-a-record").status, 404);
   assert.equal(classifyPath("/experiences").status, 410);
 });
-test("sky-map provider addition keeps release approval gates pending", () => {
+test("sky-map and other unapproved source rights keep release gates pending", () => {
   assert.throws(() => buildWebsiteOutputs({
       release: true,
       facts: releaseFacts,

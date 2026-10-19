@@ -51,6 +51,16 @@ test("Sources explains source scope and exposes details through keyboard disclos
   await expect(page.getByRole("link", { name: "Suggest a correction", exact: true })).toHaveAttribute("href", "/contact?topic=bugs");
 });
 
+test("Privacy policy states support-mail retention and current service limits", async ({ page }) => {
+  await page.goto("/privacy");
+  await expect(page.getByText(/support inbox is reviewed daily.*support messages are deleted 90 days after the last reply/i)).toBeVisible();
+  await expect(page.getByText(/general audiences aged 13 and older/i)).toBeVisible();
+  await expect(page.getByText(/Docker container logs are limited by size.*their age varies/i)).toBeVisible();
+  await expect(page.getByText(/system journal is persistent with no configured age limit/i)).toBeVisible();
+  await expect(page.getByText(/no fixed deletion period is promised for host logs or backups/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Interactive sky map" })).toHaveCount(1);
+});
+
 test("Contact supports keyboard topic selection and copying without opening email", async ({ page, context }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/contact?topic=setup");

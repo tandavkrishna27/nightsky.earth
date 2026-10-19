@@ -446,12 +446,6 @@ main {
   place-items: center;
   color: var(--gold);
 }
-.route-loading {
-  min-height: 60vh;
-  display: grid;
-  place-items: center;
-  color: var(--gold);
-}
 main:focus {
   outline: none;
 }
