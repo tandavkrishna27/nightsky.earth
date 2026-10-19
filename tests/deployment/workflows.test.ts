@@ -35,7 +35,7 @@ test('trusted promotion binds workflow path, source SHA, event, branch, job and 
 test('workflow actions are locked to full SHAs and shell inputs use environment indirection',()=>{
  for(const file of ['.github/workflows/nightsky-image.yml','.github/workflows/nightsky-deploy.yml']){
   const s=read(file);
-  for(const match of s.matchAll(/uses: ([^\n]+)/g))assert.match(match[1],/@[a-f0-9]{40}$/);
+  for(const match of s.matchAll(/uses: ([^\n]+)/g))assert.match(match[1].trim(),/@[a-f0-9]{40}$/);
   for(const block of s.split(/run: /).slice(1))assert.ok(!block.split(/\n      - /)[0].includes('${{ inputs.'),'no workflow input interpolated into shell');
  }
 });
@@ -44,4 +44,36 @@ test('native Linux verifies host reachability over an internal staging bridge wi
  const s=read('scripts/deployment/verify-image.mjs');
  for(const value of ["process.platform !== 'linux'","'--internal'","'--subnet','172.30.81.0/24'","'--gateway','172.30.81.1'","'--ip','172.30.81.2'",'network.Internal,true','http://172.30.81.2:5000','verifyProtocol(base)',"docker('network','rm',networkName)"]) assert.ok(s.includes(value),value);
  assert.ok(!s.includes("'--publish'"));
+});
+
+test('native host protocol probe sends exact reviewed Host over loopback transport', async()=>{
+ const {createServer}=await import('node:http');
+ const {verifyProtocol}=await import('../../scripts/deployment/verify-image.mjs');
+ assert.equal(typeof verifyProtocol,'function');
+ const seen:string[]=[];
+ const server=createServer((req,res)=>{
+  seen.push(req.headers.host??'');
+  if(req.headers.host!=='mcp-staging.nightsky.earth'){res.writeHead(403);res.end();return;}
+  if(req.url==='/health'){res.end('{"status":"ok"}');return;}
+  let text='';req.on('data',chunk=>text+=chunk);req.on('end',()=>{
+   const rpc=JSON.parse(text);res.setHeader('content-type','text/event-stream');
+   res.end(`data: ${JSON.stringify({jsonrpc:'2.0',id:rpc.id,result:rpc.method==='tools/list'?{tools:[{name:'resolve_place'}]}:{serverInfo:{name:'nightsky-earth'}}})}\n\n`);
+  });
+ });
+ await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try {const address=server.address();assert.ok(address&&typeof address!=='string');await verifyProtocol(`http://127.0.0.1:${address.port}`);assert.deepEqual(seen,Array(3).fill('mcp-staging.nightsky.earth'));}
+ finally {await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
+});
+
+
+test('host probe bounds response size and total request time',async()=>{
+ const {createServer}=await import('node:http');
+ const {hostProbeRequest}=await import('../../scripts/deployment/verify-image.mjs');
+ const server=createServer((req,res)=>{if(req.url==='/large')res.end('x'.repeat(1024*1024+1));});
+ await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try {
+  const address=server.address();assert.ok(address&&typeof address!=='string');const base=`http://127.0.0.1:${address.port}`;
+  await assert.rejects(hostProbeRequest(`${base}/large`),/Host probe/);
+  await assert.rejects(hostProbeRequest(`${base}/hang`,{timeout:25}),/Host probe/);
+ } finally {server.closeAllConnections();await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
 });

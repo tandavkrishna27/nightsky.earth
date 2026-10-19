@@ -128,3 +128,5 @@ A separate internal-network experiment found no published-port binding; staging 
 The first sandboxed full-suite attempt encountered EPERM on atomic temporary-file renames. The complete authorized rerun outside that sandbox passed; no product logic was changed to hide that environmental failure. No server, provider, credential/ledger, installed plugin, publication or deployment changes occurred here.
 
 Use [the ready-to-copy server-session prompt](hetzner-server-session-prompt-20261019.md) after the exact pushed commit and CI result are supplied. Registry publication and deployment are still separate manual steps.
+
+Native CI follow-up: the first ARM64 job passed image build/container-local checks but the host bridge MCP probe returned403. Actual wire tests confirmed Node fetch ignored its custom Host header. A bounded node:http probe now sends the reviewed hostname; hostname security is unchanged. Fifteen focused Node tests and14Python tests pass after correction; the final exact-commit CI is the follow-up acceptance evidence.

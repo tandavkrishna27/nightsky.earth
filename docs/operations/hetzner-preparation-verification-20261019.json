@@ -4,10 +4,11 @@
   "offlineTests": {
     "passed": 1891,
     "failed": 0,
-    "skipped": 2
+    "skipped": 2,
+    "scope": "Local full preparation suite before native host-probe follow-up; final exact-commit CI verifies follow-up"
   },
   "deploymentPythonTests": 14,
-  "focusedNodeTests": 13,
+  "focusedNodeTests": 15,
   "types": "passed",
   "workflowYaml": "parsed",
   "image": {
@@ -33,6 +34,11 @@
     "ops/hetzner/nightsky-ssh-dispatch": "8d51207b62a42d3a02455c216284942286f425c24f555f1ed5ca6df3aa098805",
     "ops/hetzner/runtime-guard.mjs": "2f7162e79a8c48c3c78234d3214b96b92f80fda6f8fba1d480587214ae213fc5",
     "ops/hetzner/probe.mjs": "45518ff5447032073ecca4baa851b56e2025f9b3ec9f5290859756f5fbf34f65",
-    "scripts/deployment/verify-image.mjs": "f03da3ccc0831f7ded652fb6adf907a57d8c93bbdd8b45256d5d7dc1307cbbc5"
+    "scripts/deployment/verify-image.mjs": "63fc0f72dddc85dcc59a454a40b95cfce9d5adda654b8c5b77068abcf4b188c0"
+  },
+  "nativeProbeFollowup": {
+    "cause": "Node fetch replaced explicit Host with private IP; native MCP returned403",
+    "fix": "Bounded node:http preserves reviewed Host; no allowlist relaxation",
+    "tests": "actual loopback Host/MCP/SSE and response size/time regressions passed"
   }
 }

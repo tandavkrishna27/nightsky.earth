@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { appendFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { request } from 'node:http';
 const repository = 'ghcr.io/tandavkrishna27/nightsky-mcp';
 const call=(command,args)=>execFileSync(command,args,{encoding:'utf8',maxBuffer:16*1024*1024}).trim();
 const docker=(...args)=>call('docker',args);
@@ -90,18 +91,35 @@ async function verifyImage(image) {
   finally {docker('network','rm',networkName);}
  }
 }
-async function verifyProtocol(base) {
+export function hostProbeRequest(url,{headers={},method='GET',body,timeout=5000}={}) {
+ return new Promise((resolve,reject)=>{
+  const req=request(url,{method,headers},response=>{
+   const chunks=[];let length=0;
+   response.on('data',chunk=>{
+    length+=chunk.length;
+    if(length>1024*1024){clearTimeout(timer);reject(Error('Host probe response exceeded its size bound.'));response.destroy();req.destroy();return;}
+    chunks.push(chunk);
+   });
+   response.on('error',()=>{clearTimeout(timer);reject(Error('Host probe response failed.'));});
+   response.on('end',()=>{clearTimeout(timer);resolve({status:response.statusCode,text:Buffer.concat(chunks).toString('utf8')});});
+  });
+  const timer=setTimeout(()=>req.destroy(Error('Host probe request timed out.')),timeout);
+  req.on('error',()=>{clearTimeout(timer);reject(Error('Host probe request failed.'));});
+  req.end(body);
+ });
+}
+export async function verifyProtocol(base) {
  const headers={host:'mcp-staging.nightsky.earth'};
  let healthy=false;
  for(let attempt=0;attempt<100;attempt++) {
-  try {healthy=(await fetch(`${base}/health`,{headers,signal:AbortSignal.timeout(500)})).ok;if(healthy)break;}catch{/* bounded startup */}
+  try {healthy=(await hostProbeRequest(`${base}/health`,{headers,timeout:500})).status===200;if(healthy)break;}catch{/* bounded startup */}
   await new Promise(resolve=>setTimeout(resolve,100));
  }
  assert.ok(healthy,'Native host cannot reach internal staging bridge health');
  for(const [id,method,params] of [[1,'initialize',{protocolVersion:'2025-11-25',capabilities:{},clientInfo:{name:'native-host-bridge-probe',version:'1'}}],[2,'tools/list',{}]]) {
-  const response=await fetch(`${base}/mcp`,{method:'POST',headers:{...headers,'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id,method,params}),signal:AbortSignal.timeout(5000)});
+  const response=await hostProbeRequest(`${base}/mcp`,{method:'POST',headers:{...headers,'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id,method,params})});
   assert.equal(response.status,200);
-  const text=await response.text();const event=text.split('\n').find(line=>line.startsWith('data: '));const body=JSON.parse(event?event.slice(6):text);
+  const text=response.text;const event=text.split('\n').find(line=>line.startsWith('data: '));const body=JSON.parse(event?event.slice(6):text);
   assert.equal(body.error,undefined);assert.ok(body.result);
   if(method==='tools/list')assert.ok(body.result.tools.length);
  }
