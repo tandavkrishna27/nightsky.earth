@@ -26,9 +26,13 @@ export function createWeatherCollection(entries: WeatherProviderEntry[], options
   return { async getForecasts(place, window, selection = { mode: "single" }) {
     const mode = selection.mode;
     if (!(["single", "compare", "all"] as const).includes(mode)) throw new TypeError("Invalid weather selection mode.");
-    const enabled = registry.filter(entry => entry.enabled);
-    const chosen = mode === "all" ? registry : enabled.slice(0, 2);
-    const considered = chosen.length ? chosen : registry.slice(0, 1);
+    const excluded = selection.excludedProviderIds ?? [];
+    if (!Array.isArray(excluded) || excluded.some(id => !weatherProviderIdSchema.safeParse(id).success)) throw new TypeError("Invalid excluded weather provider.");
+    const permitted = registry.filter(entry => !excluded.includes(entry.id));
+    const enabled = permitted.filter(entry => entry.enabled);
+    const chosen = mode === "all" ? permitted : enabled.slice(0, 2);
+    const considered = chosen.length ? chosen : permitted.slice(0, 1);
+    if (!considered.length) return { outcomes: [] };
     const results = considered.map(entry => unavailableWeather(entry.id, entry.enabled ? "The weather collection deadline expired before this source completed." : "This weather source is disabled or not configured."));
     let cursor = 0, closed = false, started = 0;
     const useful = (result: WeatherProviderResult) => result.forecast && ["available", "partial"].includes(result.status) && ["available", "partial"].includes(result.forecast.availability.status) && result.forecast.samples.some(sample => Date.parse(sample.validAt) >= Date.parse(window.startUtc) && Date.parse(sample.validAt) <= Date.parse(window.endUtc));

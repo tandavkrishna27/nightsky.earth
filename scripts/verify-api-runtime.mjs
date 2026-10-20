@@ -112,8 +112,8 @@ try {
     displayTimeZone: 'Asia/Kolkata', window: { startUtc: '2026-10-17T14:30:00Z', endUtc: '2026-10-17T18:30:00Z', timeZone: 'Asia/Kolkata' }, includeHourly: true, forecastMode: 'all' } });
   const weather = conditions.structuredContent;
   assert.equal(weather.availability.status, 'partial');
-  assert.deepEqual(weather.providerOutcomes.map(o => o.providerId), ['met', 'weatherapi', 'openweather']);
-  assert.equal(weather.providerOutcomes[2].status, 'unavailable');
+  // Direct forecast output has no visual card for OpenWeather's required logo.
+  assert.deepEqual(weather.providerOutcomes.map(o => o.providerId), ['met', 'weatherapi']);
   assert.equal(weather.forecasts.length, 2, JSON.stringify(weather.providerOutcomes));
   assert.deepEqual(weather.forecasts.map(f => f.samples[0].values.totalCloudCover.value), [0, 100]);
   let capacity;
@@ -164,7 +164,7 @@ try {
   assert.equal(requests.length, capacity?12:4);
   assert.ok(requests.every(r => Number.isFinite(r.elapsedMs) && r.elapsedMs >= 0 && r.responseUtf8Bytes > 0));
   console.log(JSON.stringify(report));
-  console.log('SYNTHETIC: built API-mode resolution, astronomy and three-source weather partial outage verified without local geography files or external requests. Not live-source acceptance.');
+  console.log('SYNTHETIC: built API-mode resolution, astronomy and cardless weather routing verified without local geography files or external requests. Not live-source acceptance.');
 } finally {
   if (rssTimer) clearInterval(rssTimer);
   if(server){server.closeAllConnections();await new Promise(done=>server.close(done));}

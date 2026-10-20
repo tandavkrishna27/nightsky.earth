@@ -64,9 +64,14 @@ def validate(data):
         if not value or any(ord(char) < 32 or ord(char) > 126 for char in value):
             raise ValueError('invalid value')
         entries[name] = value
-    for name, expected in {**FIXED, **{name: value for name, value in STATE_PATHS.items() if name in entries}}.items():
+    admitted_openweather = 'openweather' in entries.get('NIGHTSKY_WEATHER_ADMITTED_PROVIDERS', '').split(',')
+    selected_openweather = 'openweather' in entries.get('NIGHTSKY_WEATHER_PROVIDERS', '').split(',')
+    expected_fixed = {**FIXED, 'NIGHTSKY_PLANNING_CARD_ENABLED': 'true' if admitted_openweather else 'false'}
+    for name, expected in {**expected_fixed, **{name: value for name, value in STATE_PATHS.items() if name in entries}}.items():
         if entries.get(name) != expected:
             raise ValueError('required production setting mismatch')
+    if admitted_openweather and (not selected_openweather or 'NIGHTSKY_OPENWEATHER_KEY' not in entries):
+        raise ValueError('incomplete OpenWeather admission')
     if any(('<' in value or '>' in value or value == 'CHANGE_ME') for name, value in entries.items() if name.endswith(('_KEY', '_SECRET', '_APP_ID'))):
         raise ValueError('placeholder credential')
     # Credentials alone do not activate a provider. A ledger path is mandatory

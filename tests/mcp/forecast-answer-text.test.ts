@@ -1,11 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {forecastAnswerText} from '../../server/mcp/forecastAnswerText';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {forecastAnswerText,OPENWEATHER_BRAND_LOGO_URL} from '../../server/mcp/forecastAnswerText';
 import type {NightConditionsResult} from '../../shared/nightsky/weather';
 const window={startUtc:'2026-10-18T15:00:00.000Z',endUtc:'2026-10-18T18:00:00.000Z',timeZone:'Asia/Kolkata'};
 const source=(name:string)=>({name,url:'https://example.test/weather',attribution:'Synthetic test',dataClass:'forecast' as const});
 const forecast=(name:string,points:[string,number][])=>({source:source(name),availability:{status:'partial',reason:'Synthetic'},samples:points.map(([validAt,value])=>({validAt,values:{totalCloudCover:{value,unit:'%'}}})),missingFields:[],forecastHorizonHours:24});
 const result=(forecasts:any[],extra:any={})=>({window,forecasts,...extra}) as NightConditionsResult;
+
+test('static OpenWeather screen logo is the reviewed official image',()=>{
+ assert.equal(OPENWEATHER_BRAND_LOGO_URL,'https://nightsky.earth/openweather-logo.png');
+ const bytes=readFileSync('client/public/openweather-logo.png');
+ assert.equal(bytes.length,2929);
+ assert.equal(createHash('sha256').update(bytes).digest('hex'),'e18849f5f2d49f41ec54723ef2471abbbcdcd2d342bf16b4f51d53b7556f7cb8');
+});
+
+test('usable OpenWeather evidence carries visible linked credit and official rendered logo',()=>{
+ const open:any=forecast('OpenWeather',[['2026-10-18T16:00:00.000Z',25]]);
+ open.source.url='https://openweathermap.org/api/forecast5';
+ const text=forecastAnswerText(result([open])).join('\n');
+ assert.match(text,/\[Weather data provided by OpenWeather\]\(https:\/\/openweathermap\.org\/\)/);
+ assert.ok(text.includes(`![OpenWeather logo](<${OPENWEATHER_BRAND_LOGO_URL}>)`));
+ assert.doesNotMatch(forecastAnswerText(result([])).join('\n'),/OpenWeather visible attribution/);
+});
 
 test('WeatherAPI forecast keeps its end-user notice beside answer-ready samples',()=>{
  const weather:any=forecast('WeatherAPI.com',[['2026-10-18T16:00:00.000Z',25]]);

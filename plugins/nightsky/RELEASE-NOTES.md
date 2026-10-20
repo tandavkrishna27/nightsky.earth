@@ -1,3 +1,15 @@
+## V1 local revision 1.0.42 - synthetic OpenWeather visual card rehearsal
+
+The opt-in synthetic fixture now attaches the existing NightSky planning card to its OpenWeather plan. Its OpenWeather panel shows exact returned cloud samples with linked credit and the official logo loaded from the NightSky website. The panel hides its sample values if the logo cannot load. Production OpenWeather admission and the production planning card remain off while native rendering is checked.
+
+## V1 local revision 1.0.41 - static OpenWeather screen logo rehearsal
+
+The first synthetic native answer showed linked credit but a broken hotlinked logo. The answer-ready reference now points to the official white OpenWeather screen logo staged as a static NightSky website asset. OpenWeather remains disabled until the public asset and a new native answer both render correctly.
+
+## V1 local revision 1.0.40 - guarded OpenWeather attribution and admission
+
+OpenWeather's usable forecast rows now carry linked visible credit and an official hosted logo image instruction. All five workflows require that credit beside any answer using those rows; a client that cannot render the logo must omit the OpenWeather values. Production configuration can include the separately protected OpenWeather key only when the protected environment variable `NIGHTSKY_OPENWEATHER_ADMIT=yes` is set. The variable defaults to off. Offline checks do not establish native logo rendering or public activation.
+
 ## V1 local revision 1.0.39 - quota-aware forecast selection
 
 Ordinary plans request one useful weather source, with at most one fallback when its samples do not cover the selected window. Users can explicitly compare two sources or request all configured forecasts. Returned values retain their provider and valid times. The shared workflow and MCP tool descriptions explain this routing. Existing operator diagnostics still request all admitted providers for their own checks. This revision does not activate another provider or change production quotas.

@@ -2,10 +2,12 @@
 export const RESULT_CARD_HTML=String.raw`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NightSky planning result</title><style>
-:root{color-scheme:light dark;font-family:system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;padding:18px;color:light-dark(#172331,#edf2f7);background:light-dark(#fff,#141b25);font-size:14px;line-height:1.5;overflow-wrap:anywhere}h1{font-size:19px;margin:2px 0 5px}h2{font-size:13px;margin:0 0 10px}.brand{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:light-dark(#526579,#abbcd0)}p{margin:8px 0}.session{font-size:12px;color:light-dark(#526579,#abbcd0)}dl{display:grid;grid-template-columns:minmax(100px,1fr) 2fr;gap:8px 12px;padding:12px 0;border-block:1px solid light-dark(#dde4eb,#354355)}dt{font-weight:600}dd{margin:0}details{margin:14px 0}summary{cursor:pointer;font-weight:600}#detail-lines p{white-space:pre-wrap}footer{margin-top:16px;padding-top:12px;border-top:1px solid light-dark(#dde4eb,#354355);font-size:12px}ul{padding-left:18px;margin:6px 0}li{margin:7px 0}a{color:light-dark(#075bb5,#9dcbff)}a:focus-visible,summary:focus-visible{outline:2px solid currentColor;outline-offset:3px}.note{font-size:12px;color:light-dark(#526579,#abbcd0)}[hidden]{display:none!important}@media(max-width:380px){body{padding:12px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:7px}}
+:root{color-scheme:light dark;font-family:system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;padding:18px;color:light-dark(#172331,#edf2f7);background:light-dark(#fff,#141b25);font-size:14px;line-height:1.5;overflow-wrap:anywhere}h1{font-size:19px;margin:2px 0 5px}h2{font-size:13px;margin:0 0 10px}.brand{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:light-dark(#526579,#abbcd0)}p{margin:8px 0}.session{font-size:12px;color:light-dark(#526579,#abbcd0)}dl{display:grid;grid-template-columns:minmax(100px,1fr) 2fr;gap:8px 12px;padding:12px 0;border-block:1px solid light-dark(#dde4eb,#354355)}dt{font-weight:600}dd{margin:0}details{margin:14px 0}summary{cursor:pointer;font-weight:600}#detail-lines p{white-space:pre-wrap}.openweather-credit{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.openweather-credit img{display:block;flex:none}footer{margin-top:16px;padding-top:12px;border-top:1px solid light-dark(#dde4eb,#354355);font-size:12px}ul{padding-left:18px;margin:6px 0}li{margin:7px 0}a{color:light-dark(#075bb5,#9dcbff)}a:focus-visible,summary:focus-visible{outline:2px solid currentColor;outline-offset:3px}.note{font-size:12px;color:light-dark(#526579,#abbcd0)}[hidden]{display:none!important}@media(max-width:380px){body{padding:12px}dl{grid-template-columns:1fr;gap:3px}dd{margin-bottom:7px}}
 </style></head><body><main>
 <div class="brand">NightSky.earth</div><p id="status" role="status">Waiting for the planning result. The complete text response remains available in chat.</p>
 <article id="card" hidden><h1 id="place"></h1><p id="session" class="session"></p><p id="summary"></p><dl id="facts"></dl>
+<p id="openweather-status" class="note" hidden>OpenWeather card values are hidden until its official logo loads.</p>
+<section id="openweather" hidden aria-label="OpenWeather forecast evidence"><h2>OpenWeather forecast samples</h2><div id="openweather-rows"></div><p class="openweather-credit"><a id="openweather-credit" href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer">Weather data provided by OpenWeather</a><img id="openweather-logo" alt="OpenWeather logo" width="118" height="28"></p><p id="openweather-notice" class="note"></p></section>
 <details><summary>Calculated values and limitations</summary><div id="detail-lines"></div></details>
 <p class="note">Calculated opportunities and modelled conditions do not verify access, safety or visibility. Recheck conditions before travelling.</p>
 <footer><h2>Data credits</h2><ul id="credits"></ul></footer></article></main>
@@ -13,7 +15,7 @@ export const RESULT_CARD_HTML=String.raw`<!doctype html>
 (()=>{'use strict';
  const byId=id=>document.getElementById(id);let ready=false,closed=false,observer;
  const status=byId('status'),card=byId('card');
- const clear=message=>{card.hidden=true;status.hidden=false;status.textContent=message;for(const id of ['place','session','summary','facts','detail-lines','credits'])byId(id).replaceChildren();};
+ const clear=message=>{card.hidden=true;status.hidden=false;status.textContent=message;byId('openweather').hidden=true;byId('openweather-status').hidden=true;const logo=byId('openweather-logo');logo.onload=null;logo.onerror=null;logo.removeAttribute('src');for(const id of ['place','session','summary','facts','detail-lines','credits','openweather-rows','openweather-notice'])byId(id).replaceChildren();};
  const safeUrl=value=>{if(typeof value!=='string')throw Error();const url=new URL(value);if(!['https:','http:'].includes(url.protocol)||url.username||url.password)throw Error();return url.href;};
  // The complete UTF8 payload is already bounded to 32KiB; do not add smaller field limits that reject producer-accepted evidence.
  const text=value=>{if(typeof value!=='string'||!value.trim())throw Error();return value;};
@@ -45,6 +47,17 @@ export const RESULT_CARD_HTML=String.raw`<!doctype html>
    for(const line of text(data.details).split('\n')){const p=document.createElement('p');p.textContent=line;lines.append(p);}
    const place=text(data.place),session=text(data.session),summary=text(data.summary);
    byId('place').textContent=place;byId('session').textContent=session;byId('summary').textContent=summary;byId('facts').append(facts);byId('detail-lines').append(lines);byId('credits').append(credits);
+   const ow=data.openWeather;
+   if(ow){
+    if(!Array.isArray(ow.samples)||ow.samples.length<1||ow.samples.length>6||ow.logoUrl!=='https://nightsky.earth/openweather-logo.png')throw Error();
+    const rows=document.createDocumentFragment();
+    for(const sample of ow.samples){const p=document.createElement('p');p.textContent=text(sample.time)+' — '+text(sample.cloud);rows.append(p);}
+    byId('openweather-rows').append(rows);byId('openweather-notice').textContent=text(ow.notice);
+    byId('openweather-status').hidden=false;
+    const img=byId('openweather-logo');img.onload=()=>{byId('openweather-status').hidden=true;byId('openweather').hidden=false;reportSize();};
+    img.onerror=()=>{byId('openweather-status').textContent='OpenWeather logo could not load; forecast values are hidden in this card.';reportSize();};
+    img.src=ow.logoUrl;
+   }
    status.hidden=true;card.hidden=false;
   }catch{clear('The result card is unavailable. Use the text result and its source credits.');}
  };

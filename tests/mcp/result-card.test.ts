@@ -86,14 +86,14 @@ test('prototype switch leaves default and resolver-only registration unchanged',
  assert.throws(()=>createNightSkyMcpServer({resultCardPrototype:'yes' as any}),/prototype/i);
 });
 
-test('versioned MCP resource is self-contained with an empty external network policy',async()=>{
+test('versioned MCP resource is self-contained with only the logo asset domain allowed',async()=>{
  let registration:any;
  registerResultCardResource({registerResource:(...args:any[])=>{registration=args;}} as any);
  assert.equal(registration[1],RESULT_CARD_URI);
  const result=await registration[3](new URL(RESULT_CARD_URI));
  const resource=result.contents[0];
  assert.equal(resource.mimeType,'text/html;profile=mcp-app');
- assert.deepEqual(resource._meta.ui.csp,{connectDomains:[],resourceDomains:[]});
+ assert.deepEqual(resource._meta.ui.csp,{connectDomains:[],resourceDomains:['https://nightsky.earth']});
  assert.match(resource.text,/ui\/initialize/);
  assert.match(resource.text,/ui\/notifications\/tool-result/);
  assert.doesNotMatch(resource.text,/<script[^>]+src=|fetch\(|localStorage|innerHTML|tools\/call/);

@@ -46,6 +46,14 @@ test("explicit comparison uses two sources and all mode uses every enabled sourc
   assert.deepEqual(all.outcomes.map(o => o.providerId), ["met", "weatherapi", "openweather"]);
   assert.deepEqual(called.sort(), ["met", "openweather", "weatherapi"]);
 });
+test("exclusion prevents OpenWeather calls and output even in all mode", async () => {
+  const called: string[] = [];
+  const collection = createWeatherCollection((["met", "weatherapi", "openweather"] as const).map(id => ({ id, enabled: true, provider: { getForecast: async () => { called.push(id); return useful(id); } } })), { deadlineMs: 100 });
+  const result = await collection.getForecasts(place, window, { mode: "all", excludedProviderIds: ["openweather"] });
+  assert.deepEqual(called.sort(), ["met", "weatherapi"]);
+  assert.deepEqual(result.outcomes.map(o => o.providerId), ["met", "weatherapi"]);
+  await assert.rejects(() => collection.getForecasts(place, window, { mode: "all", excludedProviderIds: ["unknown" as any] }), /excluded weather provider/i);
+});
 test("bounded collection retains deterministic outcomes, failures, disabled sources and selected point", async () => {
   let active = 0, peak = 0;
   const provider = { getForecast: async (p: typeof place, w: typeof window) => { assert.deepEqual(p, place); assert.deepEqual(w, window); peak = Math.max(peak, ++active); await new Promise(resolve => setTimeout(resolve, 5)); active--; return { status: "out-of-horizon" as const, reason: "Synthetic horizon." }; } };

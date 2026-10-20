@@ -144,14 +144,14 @@ export function meteorTimingAnswerText(plan: PlanResult, target?: string): strin
 }
 
 /** A bounded answer-ready view. Detailed geometry remains available without becoming setup advice. */
-export function planAnswerText(plan: PlanResult, options: {target?: string; includeSourceLinks?: boolean} = {}): string {
+export function planAnswerText(plan: PlanResult, options: {target?: string; includeSourceLinks?: boolean; omitOpenWeatherRows?: boolean} = {}): string {
   const lines = [
     Array.from(plain(plan.summary)).slice(0,120).join('')+(plan.summary.length>120?' (full summary in structuredContent)':''),
     `Calculation basis: ${plan.place.sourceRevision ? 'selected API source point; representative coordinates, site suitability unverified' : plan.place.catalogueRevision ? 'selected candidate representative point' : 'named city record, not a selected observing site'}. Display time zone: ${plan.requestedWindow.timeZone}${plan.place.timeZoneBasis === 'explicit-display' ? '; actual site time zone remains unverified' : ''}.`,
     `Requested session: ${formatLocalInstant(plan.requestedWindow.startUtc, plan.requestedWindow.timeZone, 'en')} to ${formatLocalInstant(plan.requestedWindow.endUtc, plan.requestedWindow.timeZone, 'en')}.`,
   ];
   const weather=plan.evidence?.weather;
-  lines.push(...(weather?forecastAnswerText(weather):['Weather forecast values and issue times unknown; no continuous coverage is established.']));
+  lines.push(...(weather?forecastAnswerText(weather,{omitOpenWeather:options.omitOpenWeatherRows}):['Weather forecast values and issue times unknown; no continuous coverage is established.']));
   const astronomy = plan.evidence?.astronomy;
   const moon = astronomy?.moon;
   if (moon) lines.push(`Moon illumination ${moon.illuminationPercent.toFixed(1)}%; observing impact remains unknown. Geometric below-horizon timing does not establish minimal moonlight.`);

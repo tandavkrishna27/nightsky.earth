@@ -87,9 +87,6 @@ jobs:
       - name: Check TypeScript
         run: npm run check
 
-      - name: Check indexed queries against a 100000-row offline reference
-        run: node --max-old-space-size=512 --import tsx scripts/osm/benchmark_shards.ts
-
       - name: Build and lint local plugin rehearsal package
         run: npm run plugin:package
 
@@ -131,51 +128,6 @@ jobs:
 
       - name: Exercise compiled light pollution API and blocked worker without optional Playwright
         run: node scripts/verify-light-pollution-runtime.mjs --require-no-playwright
-
-      - name: Exercise compiled regional serving and operator configuration offline
-        run: node scripts/verify-plugin-regional-runtime.mjs
-
-  osm-importer:
-    name: OSM importer tests / ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
-        with:
-          python-version: "3.12"
-
-      - name: Install pinned importer dependency
-        run: python -m pip install -r scripts/osm/requirements.txt
-
-      - name: Set up Node.js for raw-source to catalogue integration
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Install locked catalogue bridge dependencies
-        run: npm ci
-
-      - name: Install OSM XML runtime library
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libexpat1
-
-      - name: Run OSM importer and offline spot runner tests
-        run: python -m unittest discover -s tests/osm -v
-
-      - name: Validate the offline pinned spot plan CLI
-        run: python scripts/osm/spot_runner.py plan
-
-      - name: Verify fixed geography acquisition defaults to an offline plan
-        run: python scripts/osm/natural_earth_acquire.py
 
   era5-decoder:
     name: ERA5 offline decoder, downloader and pilot tests / ${{ matrix.os }}

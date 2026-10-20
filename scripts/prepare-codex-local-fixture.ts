@@ -10,11 +10,11 @@ export function validateFixtureSessionSeconds(value=600) {
  if(!Number.isSafeInteger(value) || value<1 || value>1800)throw Error('Session seconds must be an integer from 1 to 1800');
  return value;
 }
-export async function prepareCodexLocalFixture(out:string, port=8765, serve=false, sessionSeconds=600, weatherApiNotice=false) {
+export async function prepareCodexLocalFixture(out:string, port=8765, serve=false, sessionSeconds=600, weatherApiNotice=false, openWeatherCredit=false) {
  validateFixtureSessionSeconds(sessionSeconds);
  if (!Number.isInteger(port) || port<0 || port>65535) throw Error('Invalid loopback port');
  const root=resolve(out);
- const server=await createFixtureServer(root,{mode:'api',port,weatherApiNotice});
+ const server=await createFixtureServer(root,{mode:'api',port,weatherApiNotice,openWeatherCredit});
  try {
   const tools=await server.rpc('tools/list',{});
   const toolNames=tools.result.tools.map((tool:{name:string})=>tool.name).sort();
@@ -32,7 +32,7 @@ export async function prepareCodexLocalFixture(out:string, port=8765, serve=fals
   writeFileSync(join(root,'nightsky-codex-local-rehearsal.zip'),pkg.zip);
   const {zip,...packageReport}=pkg;
   writeFileSync(join(root,'package-report.json'),JSON.stringify(packageReport,null,2)+'\n');
-  const report={version:JSON.parse(new TextDecoder().decode(files['plugin.json'])).version,endpoint:server.endpoint,sha256:pkg.sha256,toolNames,skillNames,fixtureMode:'api',weatherApiNotice,fixtureAttempts:server.fixtureAttempts(),externalAttempts:server.externalAttempts(),hostInstallationVerified:false,nativeSkillLoadingVerified:false,synthetic:true,fixtureClock:{start:fixtureClockStart,basis:'advancing simulated clock; independent of host wall clock; expiry enforced'},sessionSeconds,listenerRunning:serve};
+  const report={version:JSON.parse(new TextDecoder().decode(files['plugin.json'])).version,endpoint:server.endpoint,sha256:pkg.sha256,toolNames,skillNames,fixtureMode:'api',weatherApiNotice,openWeatherCredit,fixtureAttempts:server.fixtureAttempts(),externalAttempts:server.externalAttempts(),hostInstallationVerified:false,nativeSkillLoadingVerified:false,synthetic:true,fixtureClock:{start:fixtureClockStart,basis:'advancing simulated clock; independent of host wall clock; expiry enforced'},sessionSeconds,listenerRunning:serve};
   writeFileSync(join(root,'preparation-report.json'),JSON.stringify(report,null,2)+'\n');
   if(serve) {
    server.beginCase('native-preflight');
@@ -49,15 +49,16 @@ export async function prepareCodexLocalFixture(out:string, port=8765, serve=fals
 }
 
 if(process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
- const args=process.argv.slice(2);let serve=false,weatherApiNotice=false,port=8765,sessionSeconds=600,out='dist/codex-local-preparation-20261017';const seen=new Set<string>();
+ const args=process.argv.slice(2);let serve=false,weatherApiNotice=false,openWeatherCredit=false,port=8765,sessionSeconds=600,out='dist/codex-local-preparation-20261017';const seen=new Set<string>();
  for(let i=0;i<args.length;i++) {
   const flag=args[i];if(seen.has(flag))throw Error('Duplicate option');seen.add(flag);
   if(flag==='--serve')serve=true;
   else if(flag==='--weatherapi-notice')weatherApiNotice=true;
+  else if(flag==='--openweather-credit')openWeatherCredit=true;
   else if(flag==='--out' && args[i+1] && !args[i+1].startsWith('--'))out=args[++i];
   else if(flag==='--port' && /^\d+$/.test(args[i+1]??''))port=Number(args[++i]);
   else if(flag==='--session-seconds' && /^\d+$/.test(args[i+1]??''))sessionSeconds=validateFixtureSessionSeconds(Number(args[++i]));
-  else throw Error('Expected --serve, --weatherapi-notice, --out directory, --port number or --session-seconds number (1..1800)');
+  else throw Error('Expected --serve, --weatherapi-notice, --openweather-credit, --out directory, --port number or --session-seconds number (1..1800)');
  }
- console.log(JSON.stringify(await prepareCodexLocalFixture(out,port,serve,sessionSeconds,weatherApiNotice),null,2));
+ console.log(JSON.stringify(await prepareCodexLocalFixture(out,port,serve,sessionSeconds,weatherApiNotice,openWeatherCredit),null,2));
 }
