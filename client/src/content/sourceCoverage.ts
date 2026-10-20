@@ -1,4 +1,4 @@
-export const coverageReviewedAt = "2026-10-19";
+export const coverageReviewedAt = "2026-10-20";
 
 export const coverageCards = [
   {
@@ -13,19 +13,20 @@ export const coverageCards = [
   },
   {
     id: "weather", title: "Weather & aurora", icon: "cloud",
-    description: "Source-labelled forecasts help compare cloud, weather and short-term aurora outlooks for the selected place and time.",
-    coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. An aurora model is not a personal sighting probability.",
+    description: "Source-labelled forecasts help compare cloud and weather for the selected place and time.",
+    coverage: "MET Norway and WeatherAPI.com are active forecast sources. Their time intervals and available fields differ; missing cloud layers, seeing or transparency remain unknown. No aurora forecast is active in this production profile.",
     details: [
-      "MET Norway is the baseline weather integration. It preserves the forecast’s native sampling and accumulation periods. NOAA’s OVATION product is a short-term aurora outlook, typically 30–90 minutes, rather than a full-night forecast.",
-      "Additional integrations are conditional on provider access and the service’s enabled sources. WeatherAPI uses hourly samples and is shown only after the account is confirmed on its Free plan with required credit and disclaimer. OpenWeather’s five-day product uses three-hour samples, but remains disabled until its exact Free-product license and attribution obligations are approved. 7Timer! ASTRO may be used in free or paid software under its current published guidance; its seeing and transparency values are categories or ranges, not precise measurements.",
+      "MET Norway preserves its native forecast sampling and accumulation periods. WeatherAPI.com supplies hourly samples within its Free-plan three-day forecast horizon. Both supplied Hyderabad samples during the bounded production check on 20 October 2026; missing fields remained unknown. WeatherAPI.com answers include its credit and weather-uncertainty notice.",
+      "OpenWeather’s five-day product remains disabled pending its exact Free-product display and attribution obligations. 7Timer! ASTRO and NOAA’s short-term OVATION aurora outlook are not active in this production profile. Provider availability can vary by request, place and time.",
       "Your answer identifies the source and returned time window. Fetch time is retrieval time; a model issue time is shown only when supplied. Independent forecasts retain their disagreements and are not averaged into one score.",
     ],
     sources: [
       { name: "MET Norway", url: "https://api.met.no/" },
-      { name: "NOAA Space Weather Prediction Center", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
-      { name: "WeatherAPI — conditional on Free-plan confirmation", url: "https://www.weatherapi.com/terms.aspx" },
+      { name: "WeatherAPI.com — active forecast source", url: "https://www.weatherapi.com/" },
+      { name: "WeatherAPI.com terms and weather disclaimer", url: "https://www.weatherapi.com/terms.aspx" },
       { name: "OpenWeather — disabled pending license review", url: "https://openweathermap.org/storage/app/media/documents/License_explainer_25%20Feb_25.pdf" },
-      { name: "7Timer! ASTRO — optional", url: "https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage" },
+      { name: "7Timer! ASTRO — inactive", url: "https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage" },
+      { name: "NOAA SWPC OVATION — inactive", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
     ],
   },
   {
