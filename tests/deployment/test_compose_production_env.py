@@ -11,6 +11,7 @@ SPEC.loader.exec_module(MODULE)
 BASE = '\n'.join([
     'NODE_ENV=production',
     'NIGHTSKY_QUOTA_STATE_PATH=/state/provider-quota.json',
+    'NIGHTSKY_PLANNING_CARD_ENABLED=false',
     'NIGHTSKY_WEATHER_PROVIDERS=met',
     'NIGHTSKY_GEOAPIFY_API_KEY=existingprivatevalue',
 ])
@@ -37,6 +38,8 @@ class ComposeProductionEnvTests(unittest.TestCase):
         self.assertIn('NIGHTSKY_WEATHER_ADMITTED_PROVIDERS=weatherapi,openweather', result)
         self.assertIn(f'NIGHTSKY_WEATHERAPI_KEY={KEY}', result)
         self.assertIn(f'NIGHTSKY_OPENWEATHER_KEY={OPENWEATHER_KEY}', result)
+        self.assertIn('NIGHTSKY_PLANNING_CARD_ENABLED=true', result)
+        self.assertEqual(result.count('NIGHTSKY_PLANNING_CARD_ENABLED='), 1)
         self.assertEqual(result.count('NIGHTSKY_OPENWEATHER_KEY='), 1)
 
     def test_refuses_openweather_without_weatherapi_or_with_base_duplicate(self):
@@ -53,6 +56,7 @@ class ComposeProductionEnvTests(unittest.TestCase):
         result = MODULE.compose(BASE, KEY, OPENWEATHER_KEY)
         self.assertIn('NIGHTSKY_WEATHER_PROVIDERS=met,weatherapi', result)
         self.assertNotIn('NIGHTSKY_OPENWEATHER_KEY=', result)
+        self.assertIn('NIGHTSKY_PLANNING_CARD_ENABLED=false', result)
 
     def test_admission_without_key_fails_closed(self):
         with self.assertRaises(ValueError):

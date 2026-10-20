@@ -35,6 +35,15 @@ class ReleaseTests(unittest.TestCase):
         for data in (b'x'*(configure.MAX_BYTES+1), b'NODE_ENV=production\r\n', b'NODE_ENV=production\0'):
             with self.assertRaises(ValueError): configure.validate(data)
 
+    def test_openweather_requires_planning_card_and_complete_admission(self):
+        configure=module('nightsky-configure')
+        base='\n'.join(f'{name}={value}' for name,value in configure.FIXED.items())+'\n'
+        admission='NIGHTSKY_WEATHER_PROVIDERS=met,weatherapi,openweather\nNIGHTSKY_WEATHER_ADMITTED_PROVIDERS=weatherapi,openweather\nNIGHTSKY_OPENWEATHER_KEY=SyntheticNotARealCredentialValue\nNIGHTSKY_QUOTA_STATE_PATH=/state/provider-quota.json\n'
+        enabled=base.replace('NIGHTSKY_PLANNING_CARD_ENABLED=false','NIGHTSKY_PLANNING_CARD_ENABLED=true')
+        self.assertEqual(configure.validate((enabled+admission).encode())['NIGHTSKY_PLANNING_CARD_ENABLED'],'true')
+        for candidate in (base+admission,enabled,enabled+admission.replace('NIGHTSKY_OPENWEATHER_KEY=SyntheticNotARealCredentialValue\n',''),enabled+admission.replace('met,weatherapi,openweather','met,weatherapi')):
+            with self.subTest(candidate=candidate), self.assertRaises(ValueError): configure.validate(candidate.encode())
+
     def test_public_universe_requires_restricted_scope_and_dedicated_ledger(self):
         configure=module('nightsky-configure')
         base='\n'.join(f'{name}={value}' for name,value in configure.FIXED.items())+'\n'

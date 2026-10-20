@@ -37,6 +37,8 @@ def compose(base: str, weatherapi_key: str, openweather_key: str = "", openweath
 
     if entries.get("NIGHTSKY_QUOTA_STATE_PATH") != "/state/provider-quota.json":
         raise ValueError("general quota state is missing")
+    if entries.get("NIGHTSKY_PLANNING_CARD_ENABLED") != "false":
+        raise ValueError("unexpected base planning card setting")
     if entries.get("NIGHTSKY_WEATHER_PROVIDERS", "met") != "met":
         raise ValueError("unexpected weather provider selection")
     if entries.get("NIGHTSKY_WEATHER_ADMITTED_PROVIDERS", ""):
@@ -49,6 +51,7 @@ def compose(base: str, weatherapi_key: str, openweather_key: str = "", openweath
     for name, value in (
         ("NIGHTSKY_WEATHER_PROVIDERS", "met,weatherapi" + (",openweather" if openweather_admit else "")),
         ("NIGHTSKY_WEATHER_ADMITTED_PROVIDERS", "weatherapi" + (",openweather" if openweather_admit else "")),
+        ("NIGHTSKY_PLANNING_CARD_ENABLED", "true" if openweather_admit else "false"),
         ("NIGHTSKY_WEATHERAPI_KEY", weatherapi_key),
     ):
         line = f"{name}={value}"
