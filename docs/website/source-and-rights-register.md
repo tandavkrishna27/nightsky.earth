@@ -29,7 +29,7 @@ The website displays no OpenWeather or WeatherAPI forecast. The current producti
 | Source | Current status and conditions before any future display |
 |---|---|
 | OpenWeather 5-day / 3-hour Forecast API | Researched and inactive in production; no OpenWeather forecast is shown on the website. The public `public/openweather-normalization-method.json` is a machine-readable description of the normalization method for `https://api.openweathermap.org/data/2.5/forecast`. It contains no API key or forecast response. The file documents an ODbL 1.0 offer for the adapted sample component; this is distinct from OpenWeather's own product terms and is not evidence that the provider's data is currently used. Before displaying Free-plan OpenWeather data, confirm the exact product/license and show the required linked text “Weather data provided by OpenWeather” and an official, unmodified OpenWeather logo visibly beside the weather data. The Sources page alone would not satisfy an adjacent in-product credit. |
-| WeatherAPI.com | Researched and inactive in production; no WeatherAPI forecast is shown on the website. Its current API terms require credit by name or logo for Free API data and a clear, conspicuous end-user safety disclaimer wherever its data is displayed. Do not add that forecast notice to pages that do not show its data. |
+| WeatherAPI.com | Active production forecast source; no WeatherAPI forecast is shown on the website. Its current API terms require credit by name or logo for Free API data and a clear, conspicuous end-user safety disclaimer wherever its data is displayed. Do not add that forecast notice to pages that do not show its data. |
 | NOAA SWPC OVATION | Researched and inactive as a NightSky forecast source. Its product is a short-term aurora outlook, not a personal sighting probability. If integrated later, identify source and forecast time and explain that limitation. |
 | 7Timer! ASTRO, GeoNames and other researched adapters | Not part of the current production profile. Review the exact product, terms, rights, data flow, attribution and source-specific coverage before activation. |
 
@@ -58,7 +58,7 @@ The website displays no OpenWeather or WeatherAPI forecast. The current producti
 
 ## Open items before a future provider activation
 
-- Keep OpenWeather and WeatherAPI listed as inactive until their production switches, account status and live outputs are independently checked.
+- Keep OpenWeather listed as inactive until its production switch, account status and live outputs are independently checked. WeatherAPI.com is active in production and its weather notice must accompany returned forecast data.
 - Before any OpenWeather forecast is displayed, recheck the exact plan/product terms and obtain the official logo from OpenWeather's own asset source, then verify its unmodified appearance and the required linked attribution next to the data.
 - Before any WeatherAPI forecast is displayed, add its current required provider credit and full end-user weather/safety disclaimer beside the forecast and recheck current terms and plan limits.
 - Keep a support-email deletion schedule out of policy text until the owner verifies the daily handling process and completes its first sweep.
