@@ -13,18 +13,29 @@ function collection(results: Array<[WeatherProviderId, WeatherProviderResult]>) 
 test("conditions, plan and comparison retain disagreeing source evidence and exact missing status through DST", async () => {
   const tools = handlers({ weatherCollection: collection([["met", fixture("MET fixture", 0, ["2026-10-25T00:00:00Z", "2026-10-25T01:00:00Z"] )], ["weatherapi", fixture("WeatherAPI fixture", 100)], ["openweather", { status: "out-of-horizon", reason: "Synthetic horizon limit.", source: { name: "OpenWeather fixture", url: "https://example.test/openweather", attribution: "Synthetic", dataClass: "forecast" } }]]) });
   const direct = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true, forecastMode: "all" })).structuredContent;
-  assert.equal(direct.availability.status, "partial"); assert.equal(direct.providerOutcomes[2].status, "out-of-horizon"); assert.equal(direct.forecasts.length, 2);
+  assert.equal(direct.availability.status, "available"); assert.equal(direct.providerOutcomes.length, 2); assert.equal(direct.forecasts.length, 2);
   assert.equal(direct.forecasts[0].samples[0].values.lowCloudCover, undefined);
   const plan = (await tools.get("plan_observing_session")!({ ...input, forecastMode: "all" })).structuredContent;
   assert.deepEqual(plan.evidence.weather, direct); assert.match(plan.summary, /MET fixture/); assert.match(plan.summary, /WeatherAPI fixture/);
   assert.ok(plan.preparation.some((s: string) => /WeatherAPI fixture.*substantial cloud/.test(s)));
   const compare = (await tools.get("compare_observing_options")!({ options: [{ ...input, forecastMode: "all" }, { ...input, activity: "astrophotography", forecastMode: "all" }], locale: "en", units: "metric" })).structuredContent;
-  assert.deepEqual(compare.comparisons[0].evidence.weather, direct); assert.equal(compare.comparisons[0].evidence.weather.providerOutcomes[2].reason, "Synthetic horizon limit.");
+  assert.deepEqual(compare.comparisons[0].evidence.weather, direct); assert.ok(!JSON.stringify(compare).includes("OpenWeather fixture"));
 });
 test("invalid collection source does not discard usable independent source", async () => {
   const tools = handlers({ weatherCollection: { getForecasts: async () => ({ outcomes: [{ providerId: "met", result: fixture("Good source", 10) }, { providerId: "weatherapi", result: { status: "available", reason: "Invalid", forecast: {} } as any }] }) } });
   const result = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
   assert.equal(result.availability.status, "partial"); assert.equal(result.forecasts.length, 1); assert.equal(result.providerOutcomes[1].status, "unavailable"); assert.match(result.providerOutcomes[1].source.name, /weatherapi/); assert.ok(!result.sources.some((s: any) => /MET Norway/.test(s.name)));
+});
+test("only card-backed planning exposes OpenWeather while direct and comparison responses exclude it", async () => {
+  const tools = handlers({ resultCardPrototype: true, weatherCollection: collection([["met", fixture("MET fixture", 10)], ["weatherapi", fixture("WeatherAPI fixture", 20)], ["openweather", fixture("OpenWeather fixture", 30)]]) });
+  const direct = (await tools.get("get_night_conditions")!({ ...input, forecastMode: "all" })).structuredContent;
+  const plan = (await tools.get("plan_observing_session")!({ ...input, forecastMode: "all" })).structuredContent;
+  const compare = (await tools.get("compare_observing_options")!({ options: [input, { ...input, activity: "astrophotography" }], locale: "en", units: "metric" })).structuredContent;
+  assert.equal(direct.forecasts.length, 2);
+  assert.equal(plan.evidence.weather.forecasts.length, 3);
+  assert.equal(compare.comparisons[0].evidence.weather.forecasts.length, 1);
+  assert.ok(!JSON.stringify(direct).includes("OpenWeather fixture"));
+  assert.ok(!JSON.stringify(compare).includes("OpenWeather fixture"));
 });
 test("no usable samples remains unavailable and no-darkness samples remain visible", async () => {
   const tools = handlers({ weatherCollection: collection([["met", fixture("Day source", 0, ["2026-10-25T12:00:00Z"])]]) });
@@ -42,7 +53,7 @@ for (const count of [0, 1, 2, 3]) test(`collection with ${count} usable sources 
   const ids: WeatherProviderId[] = ["met", "weatherapi", "openweather"];
   const tools = handlers({ weatherCollection: collection(ids.slice(0, count).map(id => [id, fixture(`${id} fixture`, 10)])) });
   const result = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true, forecastMode: "all" })).structuredContent;
-  assert.equal(result.forecasts.length, count); assert.equal(result.availability.status, count ? "available" : "unavailable"); assert.equal(result.providerOutcomes.length, count);
+  assert.equal(result.forecasts.length, Math.min(count, 2)); assert.equal(result.availability.status, count ? "available" : "unavailable"); assert.equal(result.providerOutcomes.length, Math.min(count, 2));
 });
 test("all unavailable sources retain exact individual reasons and independent source records", async () => {
   const tools = handlers({ weatherCollection: collection([["met", { status: "unavailable", reason: "Synthetic outage" }], ["weatherapi", { status: "not-covered", reason: "Synthetic coverage gap" }]]) });
@@ -66,8 +77,9 @@ test("three maximum-length source records and full series retain factors and att
   });
   const tools = handlers({ weatherCollection: collection(results) });
   const plan = (await tools.get("plan_observing_session")!({ ...input, forecastMode: "all" })).structuredContent;
-  assert.equal(plan.evidence.weather.forecasts.length, 3); assert.equal(plan.factors.filter((f: any) => /forecast/.test(f.name)).length, 6);
-  for (const [, result] of results) assert.ok(plan.sources.some((s: any) => s.attribution === result.forecast!.source.attribution));
+  assert.equal(plan.evidence.weather.forecasts.length, 2); assert.equal(plan.factors.filter((f: any) => /forecast/.test(f.name)).length, 4);
+  for (const [, result] of results.slice(0, 2)) assert.ok(plan.sources.some((s: any) => s.attribution === result.forecast!.source.attribution));
+  assert.ok(!JSON.stringify(plan).includes("openweather attribution"));
   assert.ok(plan.summary.length <= 1200); assert.ok(plan.factors.length <= 20); assert.ok(plan.sources.length <= 64);
 });
 
