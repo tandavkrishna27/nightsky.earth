@@ -109,7 +109,7 @@ try {
   const astronomy=await rpc('tools/call',{name:'get_astronomy_window',arguments:{placeId:point.placeId,sourceRevision:point.sourceRevision,displayTimeZone:'Asia/Kolkata',window:{startUtc:'2026-10-17T14:30:00Z',endUtc:'2026-10-17T18:30:00Z',timeZone:'Asia/Kolkata'}}});
   assert.notEqual(astronomy.structuredContent.availability.status,'unavailable');
   const conditions = await rpc('tools/call', { name: 'get_night_conditions', arguments: { placeId: point.placeId, sourceRevision: point.sourceRevision,
-    displayTimeZone: 'Asia/Kolkata', window: { startUtc: '2026-10-17T14:30:00Z', endUtc: '2026-10-17T18:30:00Z', timeZone: 'Asia/Kolkata' }, includeHourly: true } });
+    displayTimeZone: 'Asia/Kolkata', window: { startUtc: '2026-10-17T14:30:00Z', endUtc: '2026-10-17T18:30:00Z', timeZone: 'Asia/Kolkata' }, includeHourly: true, forecastMode: 'all' } });
   const weather = conditions.structuredContent;
   assert.equal(weather.availability.status, 'partial');
   assert.deepEqual(weather.providerOutcomes.map(o => o.providerId), ['met', 'weatherapi', 'openweather']);
