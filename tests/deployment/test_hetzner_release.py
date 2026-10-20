@@ -118,7 +118,7 @@ class ReleaseTests(unittest.TestCase):
     def test_protected_workflow_streams_config_only_for_production(self):
         workflow=(ROOT/'.github/workflows/nightsky-deploy.yml').read_text()
         section=workflow.split('- name: Install reviewed production configuration',1)[1].split('- name: Promote verified digest',1)[0]
-        for required in ("if: inputs.environment == 'production'",'secrets.NIGHTSKY_PRODUCTION_ENV','secrets.NIGHTSKY_WEATHERAPI_KEY','compose-production-env.py',"printf '%s' \"$PRODUCTION_CONFIG\" | ssh -T",'nightsky-configure production $digest','StrictHostKeyChecking=yes'):
+        for required in ("if: inputs.environment == 'production'",'secrets.NIGHTSKY_PRODUCTION_ENV','secrets.NIGHTSKY_WEATHERAPI_KEY','secrets.NIGHTSKY_OPENWEATHER_KEY','vars.NIGHTSKY_OPENWEATHER_ADMIT','compose-production-env.py',"printf '%s' \"$PRODUCTION_CONFIG\" | ssh -T",'nightsky-configure production $digest','StrictHostKeyChecking=yes'):
             self.assertIn(required,section)
         self.assertNotIn('set -x',section)
         self.assertNotIn('echo "$PRODUCTION_CONFIG"',section)

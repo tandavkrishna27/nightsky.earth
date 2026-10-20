@@ -2,6 +2,8 @@ import type {NightConditionsResult} from '../../shared/nightsky/weather';
 import {formatLocalInstant} from '../../shared/nightsky/format';
 
 const MAX_BYTES=3200,MAX_ROWS=6;
+// This is the official site's rendered brand asset; no local copy is retained.
+export const OPENWEATHER_BRAND_LOGO_URL='https://openweather.co.uk/_next/image?url=%2Fapi%2Fmedia%2Ffile%2Fnew_logo_black.png%3Fv%3D1774605995547&w=256&q=75';
 const plain=(s:string)=>s.replace(/[\\[\]<>`*_~|\r\n]/g,' ').replace(/\s+/g,' ').trim();
 const name=(s:string)=>{const chars=Array.from(plain(s));return chars.slice(0,24).join('')+(chars.length>24?'...':'');};
 
@@ -26,7 +28,9 @@ export function forecastAnswerText(result:NightConditionsResult):string[]{
   return {label,rows,selected,shown:0,header:`Forecast ${index+1}: ${label}; status ${status}; issued ${issueLabel}; ${rows.length?`${rows.length} relevant cloud entries`:'cloud unknown (no relevant cloud entries)'}; ${forecast.missingFields.slice(0,3).map(f=>`${f.field} unknown`).join('; ')}.`};
  });
  const weatherApi=result.forecasts.find(f=>f.source.name==='WeatherAPI.com'&&f.source.url==='https://www.weatherapi.com/docs/forecast-api/'&&['available','partial'].includes(f.availability.status)&&f.samples.length>0);
- const headers=['Cloud evidence: exact native instants/periods only; not continuous coverage. Do not move values between times, interpolate, average providers or infer a best window from ranges.',...groups.map(g=>g.header),...(weatherApi?[`WeatherAPI.com weather notice: ${plain(weatherApi.source.attribution)}`]:[]),...(result.providerOutcomes??[]).map(o=>`Provider outcome: ${o.providerId} (${name(o.source.name)}); status ${o.status}.`)];
+ const openWeather=result.forecasts.find(f=>f.source.name==='OpenWeather'&&f.source.url==='https://openweathermap.org/api/forecast5'&&['available','partial'].includes(f.availability.status)&&f.samples.length>0);
+ const openWeatherCredit=openWeather?`OpenWeather visible attribution for every answer using its forecast: [Weather data provided by OpenWeather](https://openweathermap.org/) ![OpenWeather logo](<${OPENWEATHER_BRAND_LOGO_URL}>). Preserve both the linked text and rendered logo beside the forecast; a sources page alone is insufficient.`:undefined;
+ const headers=['Cloud evidence: exact native instants/periods only; not continuous coverage. Do not move values between times, interpolate, average providers or infer a best window from ranges.',...groups.map(g=>g.header),...(weatherApi?[`WeatherAPI.com weather notice: ${plain(weatherApi.source.attribution)}`]:[]),...(openWeatherCredit?[openWeatherCredit]:[]),...(result.providerOutcomes??[]).map(o=>`Provider outcome: ${o.providerId} (${name(o.source.name)}); status ${o.status}.`)];
  const omitted=(g:typeof groups[number],count:number)=>`${g.label}: omitted ${count} cloud entries from this text; full timestamped evidence remains in structuredContent.`;
  // Reserve complete metadata and worst-case omission notes before any data row.
  const reserved=groups.filter(g=>g.rows.length).reduce((n,g)=>n+Buffer.byteLength(omitted(g,g.rows.length)+'\n'),0);

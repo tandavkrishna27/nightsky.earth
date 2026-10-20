@@ -1,11 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {forecastAnswerText} from '../../server/mcp/forecastAnswerText';
+import {forecastAnswerText,OPENWEATHER_BRAND_LOGO_URL} from '../../server/mcp/forecastAnswerText';
 import type {NightConditionsResult} from '../../shared/nightsky/weather';
 const window={startUtc:'2026-10-18T15:00:00.000Z',endUtc:'2026-10-18T18:00:00.000Z',timeZone:'Asia/Kolkata'};
 const source=(name:string)=>({name,url:'https://example.test/weather',attribution:'Synthetic test',dataClass:'forecast' as const});
 const forecast=(name:string,points:[string,number][])=>({source:source(name),availability:{status:'partial',reason:'Synthetic'},samples:points.map(([validAt,value])=>({validAt,values:{totalCloudCover:{value,unit:'%'}}})),missingFields:[],forecastHorizonHours:24});
 const result=(forecasts:any[],extra:any={})=>({window,forecasts,...extra}) as NightConditionsResult;
+
+test('usable OpenWeather evidence carries visible linked credit and official rendered logo',()=>{
+ const open:any=forecast('OpenWeather',[['2026-10-18T16:00:00.000Z',25]]);
+ open.source.url='https://openweathermap.org/api/forecast5';
+ const text=forecastAnswerText(result([open])).join('\n');
+ assert.match(text,/\[Weather data provided by OpenWeather\]\(https:\/\/openweathermap\.org\/\)/);
+ assert.ok(text.includes(`![OpenWeather logo](<${OPENWEATHER_BRAND_LOGO_URL}>)`));
+ assert.doesNotMatch(forecastAnswerText(result([])).join('\n'),/OpenWeather visible attribution/);
+});
 
 test('WeatherAPI forecast keeps its end-user notice beside answer-ready samples',()=>{
  const weather:any=forecast('WeatherAPI.com',[['2026-10-18T16:00:00.000Z',25]]);

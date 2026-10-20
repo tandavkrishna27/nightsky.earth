@@ -1,8 +1,8 @@
 # V1 completion tracker
 
-## Quota-aware provider routing — 20 October 2026, in review
+## Quota-aware provider routing — 20 October 2026, deployed
 
-The [routing and admission record](quota-aware-provider-rollout-20261020.md) implements one useful weather source by default, at most one fallback, and explicit two-source or all-source requests. Offline types, targeted MCP and packaging checks pass; the final full suite passes **1,910 / 1,917 tests, 0 failed, 7 skipped** outside the sandbox (the skipped tests require optional installed artifacts). Exact-commit CI review, native conversation acceptance, and protected deployment remain open. OpenWeather, Public Universe, NASA DONKI and AstronomyAPI remain separate inactive admission lanes; a saved GitHub key does not activate a provider. This entry makes no new production capability or launch-readiness claim.
+The [routing and admission record](quota-aware-provider-rollout-20261020.md) implements one useful weather source by default, at most one fallback, and explicit two-source or all-source requests. The final offline suite passed **1,910 / 1,917 tests, 0 failed, 7 skipped** outside the sandbox. PR #17 and exact-commit CI passed; protected staging and production promotion deployed commit `f71cc8fec3f743d35b73e3d4f959976a8a1cfc25`, digest `sha256:12ca760e7a72fa9607da00bd06df14e9c48f67e5fbe9082afe43d89f45a4d146`. Public `/health` returned 200. A native production conversation check is still open. [OpenWeather preparation](openweather-activation-20261020.md) is a separate inactive admission lane; Public Universe, NASA DONKI and AstronomyAPI also remain inactive. Saved GitHub keys do not activate those sources.
 
 ## Current readiness summary — 19 October 2026
 

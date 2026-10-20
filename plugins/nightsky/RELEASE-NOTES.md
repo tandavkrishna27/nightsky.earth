@@ -1,3 +1,7 @@
+## V1 local revision 1.0.40 - guarded OpenWeather attribution and admission
+
+OpenWeather's usable forecast rows now carry linked visible credit and an official hosted logo image instruction. All five workflows require that credit beside any answer using those rows; a client that cannot render the logo must omit the OpenWeather values. Production configuration can include the separately protected OpenWeather key only when the protected environment variable `NIGHTSKY_OPENWEATHER_ADMIT=yes` is set. The variable defaults to off. Offline checks do not establish native logo rendering or public activation.
+
 ## V1 local revision 1.0.39 - quota-aware forecast selection
 
 Ordinary plans request one useful weather source, with at most one fallback when its samples do not cover the selected window. Users can explicitly compare two sources or request all configured forecasts. Returned values retain their provider and valid times. The shared workflow and MCP tool descriptions explain this routing. Existing operator diagnostics still request all admitted providers for their own checks. This revision does not activate another provider or change production quotas.

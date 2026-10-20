@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add the separately protected WeatherAPI key to a complete production env file.
+"""Add separately protected weather keys to a complete production env file.
 
 The result is written only to stdout for the deployment pipeline. Never log it.
 """
@@ -9,13 +9,17 @@ import re
 import sys
 
 
-def compose(base: str, weatherapi_key: str) -> str:
+def compose(base: str, weatherapi_key: str, openweather_key: str = "", openweather_admit: bool = False) -> str:
     if not base or "\r" in base or "\0" in base:
         raise ValueError("invalid base configuration")
     if not weatherapi_key:
+        if openweather_admit:
+            raise ValueError("OpenWeather requires the existing WeatherAPI composition")
         return base.rstrip("\n")
     if not re.fullmatch(r"[A-Za-z0-9]{16,128}", weatherapi_key):
         raise ValueError("invalid WeatherAPI credential format")
+    if openweather_admit and (not openweather_key or not re.fullmatch(r"[A-Za-z0-9]{16,128}", openweather_key)):
+        raise ValueError("invalid OpenWeather credential format")
 
     lines = base.rstrip("\n").split("\n")
     entries: dict[str, str] = {}
@@ -39,10 +43,12 @@ def compose(base: str, weatherapi_key: str) -> str:
         raise ValueError("unexpected admitted weather source")
     if "NIGHTSKY_WEATHERAPI_KEY" in entries:
         raise ValueError("WeatherAPI key already present in base configuration")
+    if "NIGHTSKY_OPENWEATHER_KEY" in entries:
+        raise ValueError("OpenWeather key already present in base configuration")
 
     for name, value in (
-        ("NIGHTSKY_WEATHER_PROVIDERS", "met,weatherapi"),
-        ("NIGHTSKY_WEATHER_ADMITTED_PROVIDERS", "weatherapi"),
+        ("NIGHTSKY_WEATHER_PROVIDERS", "met,weatherapi" + (",openweather" if openweather_admit else "")),
+        ("NIGHTSKY_WEATHER_ADMITTED_PROVIDERS", "weatherapi" + (",openweather" if openweather_admit else "")),
         ("NIGHTSKY_WEATHERAPI_KEY", weatherapi_key),
     ):
         line = f"{name}={value}"
@@ -50,6 +56,8 @@ def compose(base: str, weatherapi_key: str) -> str:
             lines[positions[name]] = line
         else:
             lines.append(line)
+    if openweather_admit:
+        lines.append(f"NIGHTSKY_OPENWEATHER_KEY={openweather_key}")
     return "\n".join(lines)
 
 
@@ -58,6 +66,8 @@ if __name__ == "__main__":
         result = compose(
             os.environ.get("NIGHTSKY_BASE_PRODUCTION_CONFIG", ""),
             os.environ.get("NIGHTSKY_WEATHERAPI_KEY", ""),
+            os.environ.get("NIGHTSKY_OPENWEATHER_KEY", ""),
+            os.environ.get("NIGHTSKY_OPENWEATHER_ADMIT", "") == "yes",
         )
         sys.stdout.write(result)
     except Exception:
