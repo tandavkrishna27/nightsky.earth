@@ -1,4 +1,4 @@
-export const coverageReviewedAt = "2026-10-19";
+export const coverageReviewedAt = "2026-10-20";
 
 export const coverageCards = [
   {
@@ -17,13 +17,17 @@ export const coverageCards = [
     coverage: "Forecast windows, time intervals and available fields differ by provider. Missing cloud layers, seeing or transparency remain unknown. No aurora forecast is active in the current production profile.",
     details: [
       "MET Norway is the active production forecast source. It preserves the forecast’s native sampling and accumulation periods. The current production profile does not include an aurora forecast.",
-      "WeatherAPI, OpenWeather, NOAA OVATION and 7Timer! are researched sources, not part of the current production profile. Any later integration requires enabling the adapter and meeting its terms and attribution duties. Their products differ: WeatherAPI uses hourly samples, OpenWeather’s five-day product uses three-hour samples, NOAA OVATION is a short-term aurora outlook, and 7Timer! seeing and transparency values are categories or ranges rather than precise measurements.",
+      "WeatherAPI, OpenWeather, NOAA OVATION and 7Timer! are researched sources, not part of the current production profile. The website itself displays no WeatherAPI or OpenWeather forecast. WeatherAPI requires source credit and a conspicuous end-user weather and safety disclaimer wherever its forecast data is displayed.",
+      "The published OpenWeather method document describes normalization for its five-day, three-hour forecast endpoint and includes an ODbL 1.0 offer for the adapted sample component. It contains no API key or forecast response. OpenWeather remains inactive. If OpenWeather forecast data is later displayed, its required visible, linked ‘Weather data provided by OpenWeather’ text and official logo must appear beside the data; this source list does not replace that adjacent credit.",
+      "NOAA OVATION is a short-term aurora outlook, and 7Timer! seeing and transparency values are categories or ranges rather than precise measurements. Any future integration requires enabling the provider and meeting its terms and attribution duties.",
       "Your answer identifies the source and returned time window. Fetch time is retrieval time; a model issue time is shown only when supplied. Independent forecasts retain their disagreements and are not averaged into one score.",
     ],
     sources: [
       { name: "MET Norway", url: "https://api.met.no/" },
       { name: "WeatherAPI — researched, inactive", url: "https://www.weatherapi.com/terms.aspx" },
-      { name: "OpenWeather — researched, inactive", url: "https://openweathermap.org/storage/app/media/documents/License_explainer_25%20Feb_25.pdf" },
+      { name: "OpenWeather alteration-method offer — ODbL 1.0; forecast inactive", url: "/openweather-normalization-method.json" },
+      { name: "Open Data Commons Open Database License 1.0", url: "https://opendatacommons.org/licenses/odbl/1-0/" },
+      { name: "OpenWeather attribution guidance", url: "https://openweathermap.org/faq#license" },
       { name: "NOAA OVATION — researched, inactive", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
       { name: "7Timer! ASTRO — researched, inactive", url: "https://github.com/Yeqzids/7timer-issues/wiki/Wiki#usage" },
     ],

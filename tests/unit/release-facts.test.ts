@@ -38,7 +38,8 @@ test("owner-approved sources, content rights and policies clear their gates", ()
 });
 
 test("live source and retention statements match the deployed profile", () => {
-  assert.match(releaseFacts.deletionProcess ?? "", /reviewed daily.*deleted 90 days after the last reply/i);
+  assert.match(releaseFacts.deletionProcess ?? "", /intends to delete support messages 90 days after the last reply.*not been verified.*no fixed support-email deletion period is currently promised/i);
+  assert.doesNotMatch(releaseFacts.deletionProcess ?? "", /support email is reviewed daily and deleted/i);
   assert.match(releaseFacts.retention ?? "", /journald has no configured age limit/i);
   assert.match(releaseFacts.retention ?? "", /no fixed deletion period.*host logs/i);
   const places = coverageCards.find((card) => card.id === "places");
@@ -50,6 +51,8 @@ test("live source and retention statements match the deployed profile", () => {
   assert.match(`${places.description} ${places.details.join(" ")}`, /current production.*Geoapify.*OpenStreetMap/i);
   assert.doesNotMatch(places.details.join(" "), /GeoNames supports named-city resolution/i);
   assert.match(weather.details.join(" "), /not part of the current production profile/i);
+  assert.match(weather.details.join(" "), /website itself displays no WeatherAPI or OpenWeather forecast/i);
+  assert.ok(weather.sources.some((source) => source.url === "/openweather-normalization-method.json"));
   assert.match(light.sources[0].name, /^DarkSkySites\.com/);
   assert.match(light.details.join(" "), /active production.*visible linked credit/i);
 });
