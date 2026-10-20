@@ -18,3 +18,7 @@ OpenWeather's five-day, three-hour forecast is a distinct optional source. Routi
 5. Only after those gates, set the protected production environment variable `NIGHTSKY_OPENWEATHER_ADMIT=yes`, promote through the existing protected production review, then make one separately approved bounded real request and inspect the returned issue/valid times, provider credit and quota increment. The variable must be removed again for rollback; keep existing counters.
 
 The separate key is passed only to the protected production composition step. The composition rejects a missing key, duplicate base key, invalid key format and missing general quota path. It preserves all base configuration lines. No provider requests, historical downloads or map scraping are required to prepare this change.
+
+## V1 geography scope
+
+Production candidate discovery uses the Geoapify API. It does not install or download an OSM candidate index. The offline OSM importer job is removed from the V1 release workflow because that data path is outside this launch scope; its source code and fixtures remain in the repository pending a separate cleanup. Geoapify responses still carry OpenStreetMap contributor attribution, which must remain visible where applicable.
