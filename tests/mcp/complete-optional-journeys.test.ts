@@ -28,14 +28,14 @@ test('Hyderabad journeys retain useful plans and independent forecasts with all 
   ['get_small_body_ephemeris',{placeId,spkId:'2000001',atUtc:window.startUtc,elevationMeters:0}],
  ] as const) assert.equal((await call(name,args)).status,'unavailable',name);
  for(const activity of ['meteor-shower','general-stargazing','astrophotography']){
-  const plan=await call('plan_observing_session',{placeId,window,activity,...(activity==='meteor-shower'?{target:'Geminids'}:{})});
+  const plan=await call('plan_observing_session',{placeId,window,activity,forecastMode:'compare',...(activity==='meteor-shower'?{target:'Geminids'}:{})});
   assert.equal(plan.place.timeZone,'Asia/Kolkata');
   assert.ok(plan.evidence.astronomy);
   assert.ok(plan.preparation.length);
   assert.deepEqual(plan.evidence.weather.forecasts.map((f:any)=>f.samples[0].values.totalCloudCover.value),[10,90]);
   assert.ok(plan.evidence.weather.sources.every((s:any)=>s.attribution==='Synthetic offline fixture'));
  }
- const comparison=await call('compare_observing_options',{options:[{placeId,window,activity:'general-stargazing'},{placeId,window,activity:'astrophotography'}],locale:'en',units:'metric'});
+ const comparison=await call('compare_observing_options',{options:[{placeId,window,activity:'general-stargazing',forecastMode:'compare'},{placeId,window,activity:'astrophotography',forecastMode:'compare'}],locale:'en',units:'metric'});
  assert.equal(comparison.comparisons.length,2);
  assert.ok(comparison.comparisons.every((p:any)=>p.evidence.weather.forecasts.length===2));
  assert.equal(externalAttempts,0);

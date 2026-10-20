@@ -12,13 +12,13 @@ function handlers(dependencies: NightSkyDependencies) { const tools = new Map<st
 function collection(results: Array<[WeatherProviderId, WeatherProviderResult]>) { return createWeatherCollection(results.map(([id, result]) => ({ id, enabled: true, provider: { getForecast: async (point, requested) => { assert.deepEqual(point, { placeId: input.placeId, latitude: 51.5, longitude: -0.12 }); assert.deepEqual(requested, window); return result; } } })), { deadlineMs: 100 }); }
 test("conditions, plan and comparison retain disagreeing source evidence and exact missing status through DST", async () => {
   const tools = handlers({ weatherCollection: collection([["met", fixture("MET fixture", 0, ["2026-10-25T00:00:00Z", "2026-10-25T01:00:00Z"] )], ["weatherapi", fixture("WeatherAPI fixture", 100)], ["openweather", { status: "out-of-horizon", reason: "Synthetic horizon limit.", source: { name: "OpenWeather fixture", url: "https://example.test/openweather", attribution: "Synthetic", dataClass: "forecast" } }]]) });
-  const direct = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
+  const direct = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true, forecastMode: "all" })).structuredContent;
   assert.equal(direct.availability.status, "partial"); assert.equal(direct.providerOutcomes[2].status, "out-of-horizon"); assert.equal(direct.forecasts.length, 2);
   assert.equal(direct.forecasts[0].samples[0].values.lowCloudCover, undefined);
-  const plan = (await tools.get("plan_observing_session")!(input)).structuredContent;
+  const plan = (await tools.get("plan_observing_session")!({ ...input, forecastMode: "all" })).structuredContent;
   assert.deepEqual(plan.evidence.weather, direct); assert.match(plan.summary, /MET fixture/); assert.match(plan.summary, /WeatherAPI fixture/);
   assert.ok(plan.preparation.some((s: string) => /WeatherAPI fixture.*substantial cloud/.test(s)));
-  const compare = (await tools.get("compare_observing_options")!({ options: [input, { ...input, activity: "astrophotography" }], locale: "en", units: "metric" })).structuredContent;
+  const compare = (await tools.get("compare_observing_options")!({ options: [{ ...input, forecastMode: "all" }, { ...input, activity: "astrophotography", forecastMode: "all" }], locale: "en", units: "metric" })).structuredContent;
   assert.deepEqual(compare.comparisons[0].evidence.weather, direct); assert.equal(compare.comparisons[0].evidence.weather.providerOutcomes[2].reason, "Synthetic horizon limit.");
 });
 test("invalid collection source does not discard usable independent source", async () => {
@@ -41,7 +41,7 @@ test("rejects conflicting collection and legacy injection; preserves legacy prov
 for (const count of [0, 1, 2, 3]) test(`collection with ${count} usable sources preserves independently labelled series`, async () => {
   const ids: WeatherProviderId[] = ["met", "weatherapi", "openweather"];
   const tools = handlers({ weatherCollection: collection(ids.slice(0, count).map(id => [id, fixture(`${id} fixture`, 10)])) });
-  const result = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true })).structuredContent;
+  const result = (await tools.get("get_night_conditions")!({ ...input, includeHourly: true, forecastMode: "all" })).structuredContent;
   assert.equal(result.forecasts.length, count); assert.equal(result.availability.status, count ? "available" : "unavailable"); assert.equal(result.providerOutcomes.length, count);
 });
 test("all unavailable sources retain exact individual reasons and independent source records", async () => {
@@ -65,7 +65,7 @@ test("three maximum-length source records and full series retain factors and att
     return [id, result];
   });
   const tools = handlers({ weatherCollection: collection(results) });
-  const plan = (await tools.get("plan_observing_session")!(input)).structuredContent;
+  const plan = (await tools.get("plan_observing_session")!({ ...input, forecastMode: "all" })).structuredContent;
   assert.equal(plan.evidence.weather.forecasts.length, 3); assert.equal(plan.factors.filter((f: any) => /forecast/.test(f.name)).length, 6);
   for (const [, result] of results) assert.ok(plan.sources.some((s: any) => s.attribution === result.forecast!.source.attribution));
   assert.ok(plan.summary.length <= 1200); assert.ok(plan.factors.length <= 20); assert.ok(plan.sources.length <= 64);

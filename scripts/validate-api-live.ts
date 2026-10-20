@@ -161,7 +161,8 @@ export async function runValidation(args:string[],environment:Record<string,stri
     if(!record){results.push({caseName:name,status:'skipped-selection-or-timezone'});} else {
     const selected=store.put(record);guard.selectCase(name,record);
     const requestedWindow={startUtc:new Date(start).toISOString(),endUtc:new Date(start+86400000).toISOString(),timeZone:'Asia/Kolkata'};
-    const forecasts=await collection.getForecasts({...selected,latitude:record.latitude,longitude:record.longitude},requestedWindow);
+    // This operator diagnostic explicitly validates every admitted source; user plans default to one.
+    const forecasts=await collection.getForecasts({...selected,latitude:record.latitude,longitude:record.longitude},requestedWindow,{mode:'all'});
     if(forecasts.outcomes.length===enabled.length&&forecasts.outcomes.every(({result})=>['available','partial'].includes(result.status)&&(result.forecast?.samples.length??0)>0))usableCases++;
     const selectedPoint={latitude:record.latitude,longitude:record.longitude};
     const requestedPoints=Object.fromEntries(enabled.filter(id=>guard!.attempts.some(attempt=>attempt.caseName===name&&attempt.provider===id)).map(id=>[id,id==='met'?roundedMetCoordinates(selectedPoint):selectedPoint]));

@@ -31,7 +31,7 @@ export interface WeatherCollection {
   outcomes: Array<{ providerId: WeatherProviderId; result: WeatherProviderResult }>;
 }
 export interface WeatherCollectionService {
-  getForecasts(place: WeatherPlace, window: { startUtc: string; endUtc: string; timeZone: string }): Promise<WeatherCollection>;
+  getForecasts(place: WeatherPlace, window: { startUtc: string; endUtc: string; timeZone: string }, selection?: { mode: "single" | "compare" | "all" }): Promise<WeatherCollection>;
 }
 export interface WeatherAdapterOptions {
   apiKey: string;

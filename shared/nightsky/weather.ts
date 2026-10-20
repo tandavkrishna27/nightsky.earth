@@ -23,7 +23,8 @@ export const weatherForecastSchema = z.strictObject({
 });
 export type WeatherForecast = z.infer<typeof weatherForecastSchema>;
 
-export const getNightConditionsInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, includeHourly: z.boolean().default(true) }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A night-conditions request may cover at most 24 hours so its darkness context stays specific to one observing night.");
+export const forecastModeSchema = z.enum(["single", "compare", "all"]);
+export const getNightConditionsInputSchema = z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional(), window: timeWindowSchema, includeHourly: z.boolean().default(true), forecastMode: forecastModeSchema.default("single").describe("Use compare only when the user requests independent forecasts; use all only when they request every available forecast. The default uses one useful source with at most one fallback.") }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A night-conditions request may cover at most 24 hours so its darkness context stays specific to one observing night.");
 export const weatherProviderIdSchema = z.enum(["met", "weatherapi", "openweather", "seventimer"]);
 export const weatherProviderOutcomeSchema = z.strictObject({
   providerId: weatherProviderIdSchema,

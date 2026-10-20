@@ -155,6 +155,7 @@ import "./providers/weather-api.test.ts";
 import "./providers/openweather.test.ts";
 
 import "./providers/weather-collection.test.ts";
+import "./providers/weather-selection-contract.test.ts";
 
 import "./mcp/multi-weather-planning.test.ts";
 
