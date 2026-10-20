@@ -1,5 +1,9 @@
 # V1 completion tracker
 
+## Quota-aware provider routing — 20 October 2026, in review
+
+The [routing and admission record](quota-aware-provider-rollout-20261020.md) implements one useful weather source by default, at most one fallback, and explicit two-source or all-source requests. Offline types, targeted MCP and packaging checks pass; the final full suite passes **1,910 / 1,917 tests, 0 failed, 7 skipped** outside the sandbox (the skipped tests require optional installed artifacts). Exact-commit CI review, native conversation acceptance, and protected deployment remain open. OpenWeather, Public Universe, NASA DONKI and AstronomyAPI remain separate inactive admission lanes; a saved GitHub key does not activate a provider. This entry makes no new production capability or launch-readiness claim.
+
 ## Current readiness summary — 19 October 2026
 
 [All 27 original headings are reconciled here](v1-remaining-ticket-release-matrix.md), with [final audit details](v1-final-reconciliation-20261018.md). Current work-location categories: **15 local deliverables accepted under current scope; 0 original tickets primarily awaiting local work; 10 release dependent; 2 separate/deferred items**. These are not replacement Done/Partial/Not-started counts. Older 12/9/6 and checkbox totals below are historical snapshots, not current launch-readiness percentages.

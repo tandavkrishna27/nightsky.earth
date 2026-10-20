@@ -1,3 +1,7 @@
+## V1 local revision 1.0.39 - quota-aware forecast selection
+
+Ordinary plans request one useful weather source, with at most one fallback when its samples do not cover the selected window. Users can explicitly compare two sources or request all configured forecasts. Returned values retain their provider and valid times. The shared workflow and MCP tool descriptions explain this routing. Existing operator diagnostics still request all admitted providers for their own checks. This revision does not activate another provider or change production quotas.
+
 ## V1 local revision 1.0.38 - complete WeatherAPI notice in native replies
 
 The synthetic native conversation kept the WeatherAPI notice beside its sample but shortened away the safety-critical-use limit and official-service advice. All five workflows now direct the host to copy the full returned notice into the final reply. This is a host instruction change; it does not activate WeatherAPI in production.

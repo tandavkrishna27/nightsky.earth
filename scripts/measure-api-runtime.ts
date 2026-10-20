@@ -147,7 +147,7 @@ export async function measureApiRuntime(options: {
                     },
                 } })), { deadlineMs: 100 });
                 const result = await collection.getForecasts({ placeId: 'fixture-selected-point', latitude: 12, longitude: 77 },
-                    { startUtc: '2026-10-25T00:00:00Z', endUtc: '2026-10-25T04:00:00Z', timeZone: 'Europe/London' });
+                    { startUtc: '2026-10-25T00:00:00Z', endUtc: '2026-10-25T04:00:00Z', timeZone: 'Europe/London' }, { mode: 'all' });
                 weatherFixtures.push({ operation, sources: result.outcomes.map(o => ({ providerId: o.providerId, status: o.result.status,
                     validTimesUtc: o.result.forecast?.samples.map(s => s.validAt) ?? [] })) });
                 return result.outcomes.every(o => o.result.status === 'available') ? 'available' : 'partial';

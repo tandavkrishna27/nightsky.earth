@@ -4,7 +4,7 @@ import { searchDiscoveryResultSchema } from "./discovery";
 import { ianaTimeZoneSchema } from "./common";
 import { MAX_COMPARISON_OPTIONS, MAX_RESULT_SOURCES, availabilitySchema, localeSchema, unitPreferenceSchema, placeIdSchema, resultSchema, sourceRecordSchema, timeWindowSchema, utcInstantSchema } from "./common";
 import { astronomyWindowResultSchema, targetVisibilityResultSchema } from "./astronomy";
-import { nightConditionsResultSchema, auroraOutlookResultSchema } from "./weather";
+import { nightConditionsResultSchema, auroraOutlookResultSchema, forecastModeSchema } from "./weather";
 import { conjunctionWindowSchema, skyEventsResultSchema } from "./events";
 import { climateContextResultSchema } from "./climate";
 import { meteorRadiantResultSchema } from "./meteors";
@@ -16,6 +16,7 @@ export const planObservingSessionInputSchema = z.strictObject({
   displayTimeZone: ianaTimeZoneSchema.optional().describe("For an unverified candidate site zone, the user must explicitly choose this display zone. Ask and wait before calling; do not infer user choice from a city or window.timeZone."),
   activity: z.enum(["general-stargazing", "visual-stargazing", "meteor-shower", "astrophotography", "deep-sky-imaging", "planet-observing", "moon-observing", "aurora", "eclipse", "learning"]),
   window: timeWindowSchema,
+  forecastMode: forecastModeSchema.default("single").describe("Use compare only when the user asks to compare forecast providers; use all only when they ask for every available forecast."),
   target: z.string().trim().min(1).max(120).optional(),
   experience: z.enum(["beginner", "intermediate", "advanced"]).optional(),
   equipment: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
@@ -23,7 +24,7 @@ export const planObservingSessionInputSchema = z.strictObject({
   units: unitPreferenceSchema.default("metric"),
 }).superRefine(selectionRevisionRefinement).refine(({ window }) => Date.parse(window.endUtc) - Date.parse(window.startUtc) <= 24 * 60 * 60 * 1000, "A single observing session may cover at most 24 hours.");
 export const compareObservingOptionsInputSchema = z.strictObject({
-  options: z.array(z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional().describe("For an unverified candidate site zone, the user must explicitly choose this display zone. Ask and wait before calling; do not infer user choice from a city or window.timeZone."), activity: planObservingSessionInputSchema.shape.activity, window: timeWindowSchema, target: z.string().trim().min(1).max(120).optional() })).min(2).max(MAX_COMPARISON_OPTIONS),
+  options: z.array(z.strictObject({ placeId: placeIdSchema, sourceRevision: z.string().regex(/^[a-f0-9]{64}$/).optional(), catalogueRevision: z.string().trim().min(1).max(100).optional(), displayTimeZone: ianaTimeZoneSchema.optional().describe("For an unverified candidate site zone, the user must explicitly choose this display zone. Ask and wait before calling; do not infer user choice from a city or window.timeZone."), activity: planObservingSessionInputSchema.shape.activity, window: timeWindowSchema, forecastMode: forecastModeSchema.default("single"), target: z.string().trim().min(1).max(120).optional() })).min(2).max(MAX_COMPARISON_OPTIONS),
   locale: localeSchema.default("en"),
   units: unitPreferenceSchema.default("metric"),
 }).superRefine(({ options }, ctx) => options.forEach(({ window }, index) => {

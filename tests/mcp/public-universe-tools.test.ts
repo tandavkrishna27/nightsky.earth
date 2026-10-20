@@ -117,7 +117,7 @@ test('complete meteor outing keeps independent forecasts, annual event evidence 
         return Response.json({ query: 'Mars', results: [{ id: 'mars', name: 'Mars', object_type: 'planet' }] }); return Response.json({ id: 'mars', name: 'Mars', object_type: 'planet', sources: [], physical: { mass_kg: 6.4e23 } }); };
     const selected = await fixture(t, true, true, source, dependencies);
     const off = await fixture(t, false, false, undefined, dependencies);
-    const args = { placeId: observing.placeId, window, activity: 'meteor-shower', target: 'Geminids' };
+    const args = { placeId: observing.placeId, window, activity: 'meteor-shower', target: 'Geminids', forecastMode: 'compare' };
     const plan = async (f: typeof selected) => { const response = await f.rpc('tools/call', { name: 'plan_observing_session', arguments: args }); assert.ok(response.result?.structuredContent, JSON.stringify(response)); return response.result.structuredContent; };
     const baseline = await plan(off);
     // Literal independent expectations prevent equality against an equally broken plan.

@@ -135,7 +135,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     index,
     resolveCalculationPlace: input => resolvePoint(input, index),
     getAstronomy: dependencies.plannerServices?.getAstronomy ?? ((place, window, point) => getAstronomyWindow(place, window, index, point)),
-    getNightConditions: dependencies.plannerServices?.getNightConditions ?? ((placeId, window, point) => getNightConditionsForPlan(placeId, window, index, dependencies, point)),
+    getNightConditions: dependencies.plannerServices?.getNightConditions ?? ((placeId, window, point, forecastMode) => getNightConditionsForPlan(placeId, window, index, dependencies, point, true, forecastMode)),
     searchEvents: dependencies.plannerServices?.searchEvents ?? ((placeId, window, point) => searchSkyEvents({ placeId, window, ...candidatePointMetadata(point) }, index, point)),
     getTargetVisibility: dependencies.plannerServices?.getTargetVisibility ?? ((place, target, window, point) => getTargetVisibility(target, place, window, index, point)),
     getLocationContext: dependencies.plannerServices?.getLocationContext ?? (async (placeId, point) => {
@@ -243,7 +243,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_night_conditions", {
     title: "Check forecast conditions during astronomical darkness",
-    description: "Read separate configured forecasts with server-formatted local/UTC cloud rows; use for focused sample inspection instead of repeating the aggregate planner. Reuse already-returned timestamped evidence when available. Fetch point forecasts at the actual selected named-place or revision-pinned candidate point. Candidate planning requires an explicit display time zone. The result keeps source fields and units separate, identifies missing variables, and adds the forecast steps overlapping calculated astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
+    description: "Read point forecasts with server-formatted local/UTC cloud rows; use for focused sample inspection instead of repeating the aggregate planner. Default forecastMode single queries one useful source, with at most one fallback if that source has no usable sample. Use compare when the user requests independent forecasts and all only when they request every available forecast. Reuse already-returned timestamped evidence when available. Fetch at the selected named-place or revision-pinned candidate point. Candidate planning requires an explicit display time zone. The result keeps source fields and units separate, identifies missing variables, and adds forecast steps overlapping astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
     inputSchema: getNightConditionsInputSchema,
     outputSchema: nightConditionsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_night_conditions,
@@ -252,7 +252,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index && !dependencies.selectedPlaceResolver) throw new Error("The local GeoNames place index is unavailable.");
     const coordinates = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     if (!coordinates) throw new RangeError("The selected place is unavailable in the current GeoNames index. Resolve it again.");
-    const result = await getNightConditionsForPlan(input.placeId, input.window, index, dependencies, coordinates, input.includeHourly);
+    const result = await getNightConditionsForPlan(input.placeId, input.window, index, dependencies, coordinates, input.includeHourly, input.forecastMode);
     return { content: [{ type: "text", text: dependencies.discoveryProvider ? apiAttributionText(forecastAnswerText(result).join('\n'),result.sources) : sourceLinkedText(forecastAnswerText(result).join('\n'),result.sources) }], structuredContent: result };
   });
 
@@ -370,7 +370,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("plan_observing_session", {
     title: "Plan a night-sky observing session",
-    description: "Combine the selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, weather forecasts, and activity-specific guidance. Resolve the place first. For an unverified candidate site zone, use a user-chosen display time zone; if the user has not chosen one, ask and wait before calling. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
+    description: "Combine the selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, a quota-saving forecast selection, and activity-specific guidance. Default forecastMode single uses one useful provider with at most one fallback; compare is for an explicit independent-forecast comparison and all is for a request for every configured forecast. Resolve the place first. For an unverified candidate site zone, use a user-chosen display time zone; if the user has not chosen one, ask and wait before calling. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
     inputSchema: planObservingSessionInputSchema,
     outputSchema: planResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.plan_observing_session,
@@ -387,7 +387,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("compare_observing_options", {
     title: "Compare observing nights or places",
-    description: "Compare two to five user-selected place/date/activity options. Keeps each forecast source separate, retains options with missing data, and shows activity-specific factors without inventing a winner or universal sky score.",
+    description: "Compare two to five user-selected place/date/activity options. Each option uses one useful forecast provider by default; set that option's forecastMode to compare or all only if the user also requests independent or every configured forecast. Keeps returned sources separate, retains options with missing data, and shows activity-specific factors without inventing a winner or universal sky score.",
     inputSchema: compareObservingOptionsInputSchema,
     outputSchema: compareObservingOptionsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.compare_observing_options,
@@ -410,7 +410,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
 }
 
-async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex | undefined, dependencies: NightSkyDependencies, point?: CalculationPlace, includeHourly = true) {
+async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex | undefined, dependencies: NightSkyDependencies, point?: CalculationPlace, includeHourly = true, forecastMode: "single" | "compare" | "all" = "single") {
   const coordinates = point ?? resolvedCoordinatesForPlace(index!, placeId);
   if (!coordinates) throw new RangeError("The selected named place is unavailable in the current GeoNames index. Resolve it again.");
   const astronomy = await getAstronomyWindow({ placeId, timeZone: window.timeZone }, window, index, point);
@@ -422,7 +422,7 @@ async function getNightConditionsForPlan(placeId: string, window: { startUtc: st
     const fallback = () => ({ outcomes: [{ providerId: "met" as const, result: { status: "unavailable" as const, reason: "The weather collection could not complete this request.", source: UNSPECIFIED_WEATHER_SOURCE } }] });
     try {
       collection = await Promise.race([
-        Promise.resolve().then(() => dependencies.weatherCollection!.getForecasts({ placeId, latitude: coordinates.latitude, longitude: coordinates.longitude }, window)).then(validateWeatherCollection),
+        Promise.resolve().then(() => dependencies.weatherCollection!.getForecasts({ placeId, latitude: coordinates.latitude, longitude: coordinates.longitude }, window, { mode: forecastMode })).then(validateWeatherCollection),
         new Promise<WeatherCollection>(resolve => { timer = setTimeout(() => resolve(fallback()), 12_000); }),
       ]);
     } catch { collection = fallback(); }

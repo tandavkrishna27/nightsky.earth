@@ -26,7 +26,7 @@ export interface PlannerServices {
   getPlaceRef?(input: CalculationPlaceInput): Promise<import("../../shared/nightsky/places").PlaceRef | import("../../shared/nightsky/places").ApiPlaceRef>;
   resolveCalculationPlace?(input: CalculationPlaceInput): Promise<CalculationPlace>;
   getAstronomy(place: CalculationObserverPlace, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<AstronomyWindowResult>;
-  getNightConditions(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<NightConditionsResult>;
+  getNightConditions(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace, forecastMode?: "single" | "compare" | "all"): Promise<NightConditionsResult>;
   searchEvents(placeId: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<EventResult>;
   getTargetVisibility(place: CalculationObserverPlace, target: string, window: TimeWindow, calculationPlace?: CalculationPlace): Promise<TargetVisibilityResult>;
   getLocationContext(placeId: string, calculationPlace?: CalculationPlace): Promise<GetLocationContextResult>;
@@ -51,7 +51,7 @@ export async function planObservingSession(inputValue: unknown, services: Planne
     : services.index!.toPlaceRef(services.index!.getById(Number(input.placeId.slice("place:v1:geonames:".length)))!);
   const [astronomy, conditions, events, locationContext, targetVisibility, aurora, candidates, climatology] = await Promise.all([
     settled(() => services.getAstronomy(observerPlace, input.window, calculation)),
-    settled(() => services.getNightConditions(input.placeId, input.window, calculation)),
+    settled(() => services.getNightConditions(input.placeId, input.window, calculation, input.forecastMode)),
     settled(() => services.searchEvents(input.placeId, input.window, calculation)),
     settled(() => services.getLocationContext(input.placeId, calculation)),
     input.target && input.activity !== "meteor-shower" ? settled(() => services.getTargetVisibility(observerPlace, input.target!, input.window, calculation)) : Promise.resolve(undefined),
