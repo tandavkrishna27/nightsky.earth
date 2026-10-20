@@ -47,13 +47,17 @@ test("Sources explains source scope and exposes details through keyboard disclos
   await page.keyboard.press("Enter");
   await expect(first.locator("details")).toHaveAttribute("open", "");
   await expect(first.getByRole("link", { name: /^Astronomy Engine/ })).toHaveAttribute("href", "https://github.com/cosinekitty/astronomy");
+  const weather = page.locator('.coverage-card[aria-labelledby="coverage-weather"]');
+  await weather.getByText("View source details", { exact: true }).click();
+  await expect(weather).toContainText("The website itself displays no WeatherAPI or OpenWeather forecast.");
+  await expect(weather.getByRole("link", { name: /OpenWeather alteration-method offer/ })).toHaveAttribute("href", "/openweather-normalization-method.json");
   await expect(page.locator(".coverage-reading")).toContainText("Historical");
   await expect(page.getByRole("link", { name: "Suggest a correction", exact: true })).toHaveAttribute("href", "/contact?topic=bugs");
 });
 
 test("Privacy policy states support-mail retention and current service limits", async ({ page }) => {
   await page.goto("/privacy");
-  await expect(page.getByText(/support inbox is reviewed daily.*support messages are deleted 90 days after the last reply/i)).toBeVisible();
+  await expect(page.getByText(/intends to delete support messages 90 days after the last reply.*daily review process and first deletion sweep have not yet been verified.*no fixed support-email deletion period is currently promised/i)).toBeVisible();
   await expect(page.getByText(/general audiences aged 13 and older/i)).toBeVisible();
   await expect(page.getByText(/Docker container logs are limited by size.*their age varies/i)).toBeVisible();
   await expect(page.getByText(/system journal is persistent with no configured age limit/i)).toBeVisible();

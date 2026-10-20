@@ -12,6 +12,7 @@ import { siteRoutes } from "../shared/website";
 import { legacyMeteorIds } from "../shared/meteorContent";
 import { releaseFacts } from "../client/src/content/releaseFacts";
 import { renderRouteHtml } from "../shared/seoHtml";
+import { stageOpenWeatherMethod } from "./stageOpenWeatherMethod";
 process.env.NODE_ENV = "production";
 const release = process.argv.includes("--release");
 const viteConfig = await resolveConfig({}, "build", "production", "production");
@@ -42,6 +43,7 @@ await esbuild({
   outdir: "dist",
 });
 await mkdir("dist/public", { recursive: true });
+await stageOpenWeatherMethod();
 const htmlTemplate = await readFile("dist/public/index.html", "utf8");
 for (const page of output.pages) {
   const relativePath = page.path === "/"

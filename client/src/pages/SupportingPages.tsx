@@ -1,7 +1,7 @@
 import EditorialPage from "@/components/EditorialPage";
 import { SUPPORT_EMAIL } from "@shared/website";
 
-const effectiveDate = "19 October 2026";
+const effectiveDate = "20 October 2026";
 
 const content = {
   privacy: {
@@ -32,7 +32,7 @@ const content = {
       ],
       [
         "Email and privacy requests",
-        "If you email NightSky at its Gmail address, Google processes the message as the email provider. The support inbox is reviewed daily, and support messages are deleted 90 days after the last reply; a new reply restarts that period. Please leave out passwords, access keys and sensitive details that are not needed. You can ask what personal information NightSky holds about you, or request correction or deletion. NightSky does not keep a persistent request history; if your request concerns an email or information held by an AI platform, host or data provider, that information may need to be addressed with the relevant service. Requests will be handled under applicable law.",
+        "If you email NightSky at its Gmail address, Google processes the message as the email provider. The operator intends to delete support messages 90 days after the last reply, but a daily review process and first deletion sweep have not yet been verified. No fixed support-email deletion period is currently promised. Please leave out passwords, access keys and sensitive details that are not needed. You can ask what personal information NightSky holds about you, or request correction or deletion. NightSky does not keep a persistent request history; if your request concerns an email or information held by an AI platform, host or data provider, that information may need to be addressed with the relevant service. Requests will be handled under applicable law.",
       ],
       [
         "Age and children",
