@@ -1,3 +1,7 @@
+## V1 local revision 1.0.38 - complete WeatherAPI notice in native replies
+
+The synthetic native conversation kept the WeatherAPI notice beside its sample but shortened away the safety-critical-use limit and official-service advice. All five workflows now direct the host to copy the full returned notice into the final reply. This is a host instruction change; it does not activate WeatherAPI in production.
+
 ## V1 local revision 1.0.37 - WeatherAPI notice placement
 
 Answer-ready WeatherAPI forecast evidence now carries its end-user weather notice beside the samples. All five packaged workflows and their canonical references instruct the host model to preserve that notice in final answers. The change does not activate a provider, alter forecast values or quotas, or claim native-client acceptance. OpenWeather remains gated on public method delivery and required logo placement.

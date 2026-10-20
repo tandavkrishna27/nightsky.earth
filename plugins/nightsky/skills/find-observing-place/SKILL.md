@@ -85,7 +85,7 @@ Use orientationSamples only at their returned timestamps, preserving true-north-
 
 ## Clear answers and compact credits
 
-When using WeatherAPI.com forecast data, keep its returned end-user notice visible beside the forecast or immediately below it. Preserve the notice's meaning: probabilistic forecasts, location/time uncertainty, safety-critical limits and official meteorological services. Do not bury it in a general sources list or drop it to meet a word budget.
+When using WeatherAPI.com forecast data, keep its returned end-user notice visible beside the forecast or immediately below it. In the final reply, copy the returned notice in full, including the safety-critical-use limit and instruction to consult official meteorological services; do not shorten or paraphrase it. Do not bury it in a general sources list or drop it to meet a word budget.
 
 Lead with the useful recommendation and values, followed by a short plain-language explanation. Keep values with their units; missing data stays unknown. Explain unfamiliar terms briefly on first use, then adapt to the user's experience rather than repeating a glossary. Bortle is an estimated darkness class from 1 (darkest) to 9 (brightest). Higher comparable SQM means darker sky; describe SQM as estimated sky brightness in mag/arcsec2, not a live meter reading. Retain dataset vintage and decision-relevant uncertainty, including unverified coverage. Exact retrieval timestamps, model codes and the complete evidence trail can be expanded on request; disclose stale or retained data immediately when it affects the decision.
 

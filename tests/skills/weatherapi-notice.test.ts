@@ -9,7 +9,7 @@ test('every packaged and canonical workflow preserves WeatherAPI end-user notice
   for(const path of [`plugins/nightsky/skills/${name}/SKILL.md`,`docs/product/workflows/${name}.md`]){
    const text=readFileSync(path,'utf8');
    assert.match(text,/When using WeatherAPI\.com forecast data, keep its returned end-user notice visible beside the forecast or immediately below it/,path);
-   assert.match(text,/probabilistic forecasts, location\/time uncertainty, safety-critical limits and official meteorological services/,path);
+   assert.match(text,/copy the returned notice in full, including the safety-critical-use limit and instruction to consult official meteorological services/,path);
   }
  }
 });
