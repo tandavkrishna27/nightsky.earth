@@ -25,6 +25,20 @@ test('preparation binds complete package to verified offline endpoint then close
  await assert.rejects(fetch(report.endpoint));
 });
 
+test('opt-in WeatherAPI-format fixture exposes its synthetic notice without provider access',async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'ns-weatherapi-notice-')),{mode:'api',weatherApiNotice:true});
+ try {
+  const resolved=await server.rpc('tools/call',{name:'resolve_place',arguments:{placeQuery:'Fictionvale'}});
+  const {placeId,sourceRevision}=resolved.result.structuredContent.matches[0];
+  const weather=await server.rpc('tools/call',{name:'get_night_conditions',arguments:{placeId,sourceRevision,window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-16T00:00:00Z',timeZone:'Europe/London'}}});
+  assert.equal(weather.result.isError,undefined);
+  const answer=weather.result.content[0].text;
+  assert.match(answer,/WeatherAPI\.com weather notice:.*Forecasts are probabilistic/);
+  assert.match(answer,/Synthetic fixture only; no WeatherAPI request or real forecast/);
+  assert.equal(server.externalAttempts(),0);
+ } finally {await server.close();}
+});
+
 test('native fixture declares synthetic provenance and clock while retaining expiry', async()=>{
  const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'ns-provenance-')),{mode:'api'});
  try {

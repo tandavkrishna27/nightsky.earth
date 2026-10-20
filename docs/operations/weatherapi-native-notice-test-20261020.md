@@ -1,0 +1,7 @@
+# WeatherAPI native notice check — 20 October 2026
+
+The owner-requested first acceptance stage uses a synthetic WeatherAPI-format forecast. It makes no WeatherAPI or other provider request and does not establish live forecast availability. The test keeps the installed hosted NightSky plugin at version 1.0.36 and creates a separate local 1.0.37 installation under `nightsky@nightsky-weatherapi-notice-20261020`.
+
+The opt-in fixture at `scripts/prepare-codex-local-fixture.ts --weatherapi-notice` serves a simulated 15 October 2026 location and cloud sample on loopback only. It includes the WeatherAPI.com end-user weather notice plus an explicit synthetic/no-real-forecast label. The normal fixture is unchanged. A focused MCP test proves that the answer-ready forecast includes both labels and that external provider attempts remain zero. The local package includes five workflows and the loopback MCP connection.
+
+The native client must be checked in a fresh normal chat with this exact test plugin selected. Ask for a Fictionvale 15 October 2026 evening plan, the synthetic cloud sample and the weather notice beside it. Review the complete final answer and tool trace for skill loading, exact time/value, visible notice placement and synthetic provenance. The installed package and passing offline test alone do not establish native final-answer acceptance. A later real-data production check requires its own bounded provider allowance and the protected promotion sequence; this fixture does not authorize either.
