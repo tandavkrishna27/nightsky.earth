@@ -1,3 +1,7 @@
+## V1 local revision 1.0.42 - synthetic OpenWeather visual card rehearsal
+
+The opt-in synthetic fixture now attaches the existing NightSky planning card to its OpenWeather plan. Its OpenWeather panel shows exact returned cloud samples with linked credit and the official logo loaded from the NightSky website. The panel hides its sample values if the logo cannot load. Production OpenWeather admission and the production planning card remain off while native rendering is checked.
+
 ## V1 local revision 1.0.41 - static OpenWeather screen logo rehearsal
 
 The first synthetic native answer showed linked credit but a broken hotlinked logo. The answer-ready reference now points to the official white OpenWeather screen logo staged as a static NightSky website asset. OpenWeather remains disabled until the public asset and a new native answer both render correctly.

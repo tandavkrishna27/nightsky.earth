@@ -50,6 +50,17 @@ test('opt-in OpenWeather fixture exposes visible linked credit and logo without 
   assert.match(answer,/Weather data provided by OpenWeather/);
   assert.match(answer,/!\[OpenWeather logo\]\(<https:\/\/nightsky\.earth\/openweather-logo\.png>\)/);
   assert.match(answer,/Synthetic fixture only; no OpenWeather request or real forecast/);
+  const tools=await server.rpc('tools/list',{});
+  assert.equal(tools.result.tools.find((tool:any)=>tool.name==='plan_observing_session')._meta.ui.resourceUri,'ui://nightsky/planning-card-v2.html');
+  const resource=await server.rpc('resources/read',{uri:'ui://nightsky/planning-card-v2.html'});
+  assert.match(resource.result.contents[0].text,/OpenWeather forecast samples/);
+  assert.deepEqual(resource.result.contents[0]._meta.ui.csp.resourceDomains,['https://nightsky.earth']);
+  const plan=await server.rpc('tools/call',{name:'plan_observing_session',arguments:{placeId,sourceRevision,activity:'general-stargazing',window:{startUtc:'2026-10-15T18:00:00Z',endUtc:'2026-10-15T22:00:00Z',timeZone:'Europe/London'}}});
+  const card=plan.result._meta.nightskyResultCard;
+  assert.equal(card.status,'available');
+  assert.deepEqual(card.openWeather.samples,[{time:'Oct 15, 2026, 23:00 (Europe/London) (instant)',cloud:'12% total cloud cover'}]);
+  assert.equal(card.openWeather.logoUrl,'https://nightsky.earth/openweather-logo.png');
+  assert.doesNotMatch(card.details,/12 %|12% total cloud cover/);
   assert.equal(server.externalAttempts(),0);
  } finally {await server.close();}
 });

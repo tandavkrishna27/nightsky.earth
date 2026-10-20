@@ -23,6 +23,10 @@ The 20 October synthetic Codex conversation returned the OpenWeather linked cred
 
 The approved unaltered logo was then published at `https://nightsky.earth/openweather-logo.png`. The Netlify preview and production URL both returned HTTP 200, `image/png`, 2,929 bytes and the SHA-256 recorded above. A second synthetic native conversation using NightSky 1.0.41 still rendered a broken image placeholder, while its credit link and synthetic-data notice displayed correctly. This isolates the remaining problem to client rendering of the answer image rather than delivery of the website asset. Gate 3 remains failed. The temporary 1.0.41 plugin was removed, hosted 1.0.38 restored, and the fixture server stopped. No live OpenWeather request or production activation was made. Investigate a host-supported MCP Apps visual card with the logo inside its declared resource domain, then retest in the actual chat host before any admission.
 
+### Visual-card experiment
+
+The existing opt-in planning card now has a versioned `planning-card-v2.html` resource. Only the synthetic OpenWeather fixture enables it. The card uses the tool's validated forecast samples, shows their native times, places the required linked credit and official logo beside those values, and allows only `https://nightsky.earth` as an image resource domain. The OpenWeather panel waits for the logo to load before showing its values. This tests the host-supported MCP Apps rendering path described in OpenAI's UI documentation; it does not prove native rendering yet. The production planning-card flag and OpenWeather admission flag stay off. If the native host omits the card or blocks its logo, gate 3 remains failed.
+
 The separate key is passed only to the protected production composition step. The composition rejects a missing key, duplicate base key, invalid key format and missing general quota path. It preserves all base configuration lines. No provider requests, historical downloads or map scraping are required to prepare this change.
 
 ## V1 geography scope

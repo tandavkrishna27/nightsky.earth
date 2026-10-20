@@ -4,15 +4,16 @@ import {runInNewContext} from 'node:vm';
 import {RESULT_CARD_HTML} from '../../server/mcp/resultCardView';
 
 class Element{
- children:Element[]=[];hidden=false;value='';href='';target='';rel='';
+ children:Element[]=[];hidden=false;value='';href='';target='';rel='';src='';onload?:()=>void;onerror?:()=>void;
  constructor(public tag='div'){}
  set textContent(value:string){this.children=[];this.value=value;}
  get textContent():string{return this.value+this.children.map(c=>c.textContent).join('');}
  append(...nodes:Element[]){for(const node of nodes)if(node.tag==='fragment')this.children.push(...node.children);else this.children.push(node);}
  replaceChildren(){this.children=[];this.value='';}
+ removeAttribute(name:string){if(name==='src')this.src='';}
 }
 function harness(){
- const ids=new Map<string,Element>();for(const id of ['status','card','place','session','summary','facts','detail-lines','credits'])ids.set(id,new Element());
+ const ids=new Map<string,Element>();for(const id of ['status','card','place','session','summary','facts','detail-lines','credits','openweather-status','openweather','openweather-rows','openweather-credit','openweather-logo','openweather-notice'])ids.set(id,new Element());
  ids.get('card')!.hidden=true;
  const sent:any[]=[];let listener:(event:any)=>void=()=>{},timeout=()=>{};
  const parent={postMessage:(message:any)=>sent.push(message)};
@@ -100,4 +101,20 @@ test('visible credits collapse only identical displayed notices and combine evid
  h.send(result({...data,sources:[data.sources[0],{...data.sources[0],modified:false}],sourceUses:[['location'],['reference']]}));
  assert.equal(h.ids.get('credits')!.children.length,2,'different modification notices remain separate');
  h.send(result(payload()));assert.match(h.ids.get('credits')!.textContent,/Source use not classified/,'old schemaVersion1 payload is honest and renderable');
+});
+
+test('OpenWeather card waits for the official logo before showing exact samples',()=>{
+ const h=harness();h.initialize();const data={...payload(),openWeather:{samples:[{time:'Oct 15, 2026, 23:00 (Europe/London) (instant)',cloud:'12% total cloud cover'}],logoUrl:'https://nightsky.earth/openweather-logo.png',notice:'Synthetic fixture only; no OpenWeather request or real forecast.'}};
+ h.send(result(data));
+ assert.equal(h.ids.get('openweather')!.hidden,true);
+ assert.equal(h.ids.get('openweather-status')!.hidden,false);
+ assert.equal(h.ids.get('openweather-logo')!.src,data.openWeather.logoUrl);
+ h.ids.get('openweather-logo')!.onload!();
+ assert.equal(h.ids.get('openweather')!.hidden,false);
+ assert.equal(h.ids.get('openweather-status')!.hidden,true);
+ assert.match(h.ids.get('openweather-rows')!.textContent,/23:00.*12% total cloud cover/);
+ assert.match(RESULT_CARD_HTML,/id="openweather-credit" href="https:\/\/openweathermap\.org\/"/);
+ h.send(result(data));h.ids.get('openweather-logo')!.onerror!();
+ assert.equal(h.ids.get('openweather')!.hidden,true);
+ assert.match(h.ids.get('openweather-status')!.textContent,/could not load/);
 });
