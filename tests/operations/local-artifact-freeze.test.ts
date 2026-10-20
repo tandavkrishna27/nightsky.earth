@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 test('historical local artifact freeze retains its reviewed receipt without claiming current package identity',()=>{
  const receipt=JSON.parse(readFileSync('docs/operations/v1-local-artifact-freeze-20261019.json','utf8'));
- assert.equal(receipt.pluginVersion,JSON.parse(readFileSync('plugins/nightsky/plugin.json','utf8')).version);
+ assert.equal(receipt.pluginVersion,'1.0.36');
  assert.equal(receipt.deploymentReady,false);
  assert.equal(receipt.publicSourceAdmissionGranted,false);
  assert.equal(receipt.claudeNativeAccepted,false);

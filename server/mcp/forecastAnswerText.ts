@@ -25,7 +25,8 @@ export function forecastAnswerText(result:NightConditionsResult):string[]{
   const selected=rows.length<=MAX_ROWS?rows:[...rows.slice(0,3),...rows.slice(-3)];
   return {label,rows,selected,shown:0,header:`Forecast ${index+1}: ${label}; status ${status}; issued ${issueLabel}; ${rows.length?`${rows.length} relevant cloud entries`:'cloud unknown (no relevant cloud entries)'}; ${forecast.missingFields.slice(0,3).map(f=>`${f.field} unknown`).join('; ')}.`};
  });
- const headers=['Cloud evidence: exact native instants/periods only; not continuous coverage. Do not move values between times, interpolate, average providers or infer a best window from ranges.',...groups.map(g=>g.header),...(result.providerOutcomes??[]).map(o=>`Provider outcome: ${o.providerId} (${name(o.source.name)}); status ${o.status}.`)];
+ const weatherApi=result.forecasts.find(f=>f.source.name==='WeatherAPI.com'&&f.source.url==='https://www.weatherapi.com/docs/forecast-api/'&&['available','partial'].includes(f.availability.status)&&f.samples.length>0);
+ const headers=['Cloud evidence: exact native instants/periods only; not continuous coverage. Do not move values between times, interpolate, average providers or infer a best window from ranges.',...groups.map(g=>g.header),...(weatherApi?[`WeatherAPI.com weather notice: ${plain(weatherApi.source.attribution)}`]:[]),...(result.providerOutcomes??[]).map(o=>`Provider outcome: ${o.providerId} (${name(o.source.name)}); status ${o.status}.`)];
  const omitted=(g:typeof groups[number],count:number)=>`${g.label}: omitted ${count} cloud entries from this text; full timestamped evidence remains in structuredContent.`;
  // Reserve complete metadata and worst-case omission notes before any data row.
  const reserved=groups.filter(g=>g.rows.length).reduce((n,g)=>n+Buffer.byteLength(omitted(g,g.rows.length)+'\n'),0);

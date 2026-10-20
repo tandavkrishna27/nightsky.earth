@@ -7,6 +7,16 @@ const source=(name:string)=>({name,url:'https://example.test/weather',attributio
 const forecast=(name:string,points:[string,number][])=>({source:source(name),availability:{status:'partial',reason:'Synthetic'},samples:points.map(([validAt,value])=>({validAt,values:{totalCloudCover:{value,unit:'%'}}})),missingFields:[],forecastHorizonHours:24});
 const result=(forecasts:any[],extra:any={})=>({window,forecasts,...extra}) as NightConditionsResult;
 
+test('WeatherAPI forecast keeps its end-user notice beside answer-ready samples',()=>{
+ const weather:any=forecast('WeatherAPI.com',[['2026-10-18T16:00:00.000Z',25]]);
+ weather.source.url='https://www.weatherapi.com/docs/forecast-api/';
+ weather.source.attribution='WeatherAPI.com. Weather information is for general information. Forecasts are probabilistic and may be inaccurate for your location or time. Never use as the sole basis for personal safety, aviation, marine navigation, emergency planning or other safety-critical decisions; consult official meteorological services and relevant authorities.';
+ const lines=forecastAnswerText(result([weather]));
+ assert.match(lines.join('\n'),/WeatherAPI\.com weather notice:.*Forecasts are probabilistic.*consult official meteorological services/);
+ assert.ok(lines.findIndex(line=>line.includes('weather notice'))<lines.findIndex(line=>line.includes('totalCloudCover 25 %')));
+ assert.doesNotMatch(forecastAnswerText(result([forecast('MET Norway',[['2026-10-18T16:00:00.000Z',25]])])).join('\n'),/WeatherAPI\.com weather notice/);
+});
+
 test('Hyderabad rows bind each provider value to exact native UTC and local time without invented slots',()=>{
  const data=result([forecast('MET Norway',[['2026-10-18T15:00:00.000Z',80.5],['2026-10-18T16:00:00.000Z',47.7],['2026-10-18T17:00:00.000Z',18],['2026-10-18T18:00:00.000Z',30.5]]),forecast('WeatherAPI',[['2026-10-18T15:30:00.000Z',62],['2026-10-18T16:30:00.000Z',6],['2026-10-18T17:30:00.000Z',50]]),forecast('OpenWeather',[['2026-10-18T15:00:00.000Z',100],['2026-10-18T18:00:00.000Z',77]])]);
  const before=JSON.stringify(data),lines=forecastAnswerText(data),text=lines.join('\n');

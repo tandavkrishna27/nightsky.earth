@@ -1,3 +1,7 @@
+## V1 local revision 1.0.37 - WeatherAPI notice placement
+
+Answer-ready WeatherAPI forecast evidence now carries its end-user weather notice beside the samples. All five packaged workflows and their canonical references instruct the host model to preserve that notice in final answers. The change does not activate a provider, alter forecast values or quotas, or claim native-client acceptance. OpenWeather remains gated on public method delivery and required logo placement.
+
 ## V1 local revision 1.0.36 - complete answer-ready source notices
 
 Corrects the legacy source-link formatter so answer-ready text retains returned attribution, safe licence links, modification indicators and distinct same-URL notices within its existing bound. Structured scientific evidence, numeric calculations, provider admission and quotas remain unchanged. Earlier1.0.34/1.0.35native credit failures are preserved; offline transport correction is not a universal final-answer compliance guarantee.

@@ -236,6 +236,7 @@ import './providers/public-universe-starter-evidence.test';
 import './mcp/native-admission.test';
 
 import './mcp/forecast-answer-text.test';
+import './skills/weatherapi-notice.test';
 import './mcp/resolver-action-text.test';
 import './mcp/answer-credit-acceptance.test';
 import './mcp/result-card.test';

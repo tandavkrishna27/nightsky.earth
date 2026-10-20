@@ -8,6 +8,8 @@ The 20 October read-only production audit confirms Geoapify location resolution,
 
 ## Admission order
 
+The local 1.0.37 plugin revision adds the WeatherAPI.com end-user weather notice to answer-ready forecast evidence and instructs each packaged workflow to keep it beside the forecast in its final reply. Focused offline tests and package validation pass. This is source-rendering preparation only: it does not prove native ChatGPT placement or activate WeatherAPI in production. Retain a final native answer and card review in the WeatherAPI admission gate.
+
 GitHub's protected `production` environment now lists separate secret names for WeatherAPI, OpenWeather, AstronomyAPI (ID and secret), and NASA. Secret-name presence does **not** verify a value or activate a provider. As of this packet, only the WeatherAPI secret is referenced by the promotion workflow; the other three remain unselected and are not sent to the production container. The source and ARM64 checks for commit `5c71bc0b9c5f9ef8b5627cee785df26f67bcdbdc` passed; no image from that commit has been published or promoted.
 
 | Source | Key | Before adding to the production profile |
