@@ -91,7 +91,6 @@ test("production route modules load separately and render on direct URLs", async
   await page.goto("/get-started");
   await expect(page.getByRole("heading", { name: "Get NightSky." })).toBeVisible();
   expect(scripts.size).toBeGreaterThan(initialScriptCount);
-
   await page.route("https://stellarium-web.org/**", (route) =>
     route.fulfill({ status: 200, contentType: "text/html", body: "<main>Mock Stellarium</main>" }),
   );
