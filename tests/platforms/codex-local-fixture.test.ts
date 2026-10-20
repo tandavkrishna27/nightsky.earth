@@ -48,7 +48,7 @@ test('opt-in OpenWeather fixture exposes visible linked credit and logo without 
   assert.equal(weather.result.isError,undefined);
   const answer=weather.result.content[0].text;
   assert.match(answer,/Weather data provided by OpenWeather/);
-  assert.match(answer,/!\[OpenWeather logo\]\(<https:\/\/openweather\.co\.uk\//);
+  assert.match(answer,/!\[OpenWeather logo\]\(<https:\/\/nightsky\.earth\/openweather-logo\.png>\)/);
   assert.match(answer,/Synthetic fixture only; no OpenWeather request or real forecast/);
   assert.equal(server.externalAttempts(),0);
  } finally {await server.close();}

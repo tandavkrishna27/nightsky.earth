@@ -2,8 +2,8 @@ import type {NightConditionsResult} from '../../shared/nightsky/weather';
 import {formatLocalInstant} from '../../shared/nightsky/format';
 
 const MAX_BYTES=3200,MAX_ROWS=6;
-// This is the official site's rendered brand asset; no local copy is retained.
-export const OPENWEATHER_BRAND_LOGO_URL='https://openweather.co.uk/_next/image?url=%2Fapi%2Fmedia%2Ffile%2Fnew_logo_black.png%3Fv%3D1774605995547&w=256&q=75';
+// Serve the unaltered official white logo from our website so chat hosts can render it reliably.
+export const OPENWEATHER_BRAND_LOGO_URL='https://nightsky.earth/openweather-logo.png';
 const plain=(s:string)=>s.replace(/[\\[\]<>`*_~|\r\n]/g,' ').replace(/\s+/g,' ').trim();
 const name=(s:string)=>{const chars=Array.from(plain(s));return chars.slice(0,24).join('')+(chars.length>24?'...':'');};
 

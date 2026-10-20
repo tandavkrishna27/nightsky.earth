@@ -1,3 +1,7 @@
+## V1 local revision 1.0.41 - static OpenWeather screen logo rehearsal
+
+The first synthetic native answer showed linked credit but a broken hotlinked logo. The answer-ready reference now points to the official white OpenWeather screen logo staged as a static NightSky website asset. OpenWeather remains disabled until the public asset and a new native answer both render correctly.
+
 ## V1 local revision 1.0.40 - guarded OpenWeather attribution and admission
 
 OpenWeather's usable forecast rows now carry linked visible credit and an official hosted logo image instruction. All five workflows require that credit beside any answer using those rows; a client that cannot render the logo must omit the OpenWeather values. Production configuration can include the separately protected OpenWeather key only when the protected environment variable `NIGHTSKY_OPENWEATHER_ADMIT=yes` is set. The variable defaults to off. Offline checks do not establish native logo rendering or public activation.
