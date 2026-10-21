@@ -1,0 +1,51 @@
+# ChatGPT source completion wave: NASA and Public Universe
+
+**Started 21 October 2026.** This is a release worklist, not provider admission, a request allowance, or a claim that ChatGPT submission is complete. Preserve the running production source set and existing quota checkpoints until each gate below passes. AstronomyAPI remains unselected for this version.
+
+The source checkout for this wave is commit `20d57aa78912340a95088c575d364f1b3fa5af51`, fetched from `codex/plugin-v1` on 21 October. It includes the OpenWeather activation release, the Public Universe starter-only scope gate and the production configure allowlist. The earlier local checkout was 16 commits behind; its unrelated edits remain untouched.
+
+**21 October read-only audit:** the local Public Universe checkpoint at `C:\Users\TK\AppData\Local\NightSky\publicuniverse-quota.json` exists with its `.initialized` marker. Its October month and bucket totals both record **17** requests, and its entry is not disabled. The older ten-request report is historical, not the current checkpoint total. The production host's checkpoint and other traffic from its public IP are still unknown. No quota file was changed.
+
+**Host report received later 21 October:** the production Public Universe checkpoint and marker are absent. The running production image is `sha256:2c44ff3642728d1bb78da635e9bbb6b7cb791bb21c7830b27a87727c20840ad9`; neither production nor staging selects Public Universe. The server operator found no other current matching app/service using that source from `37.27.221.101`, but could not prove historical egress usage. This does not justify declaring unused provider allowance. Prefer a private intact transfer of the existing checkpoint plus marker, after structural/hash/ownership checks, rather than a new zero allocation. Preserve originals and a recovery copy. The transfer itself has not occurred.
+
+## Product boundary
+
+- Keep the existing curated NASA meteor and eclipse evidence and locally calculated astronomy. These are already distinct from a live NASA API call; preserve their dates, source links and limitations.
+- Treat NASA DONKI as optional research context for space-weather events. NOAA remains the operational aurora outlook. A DONKI outage cannot block an ordinary observing plan or be described as a local aurora forecast.
+- Admit Public Universe only in the implemented `starter-only` scope for screened BSC5P/OpenNGC records. Use it for a requested catalogue target, detail or richer target discovery; the basic Moon, planet, darkness and meteor plan must not require a catalogue call.
+- Defer AstronomyAPI, broad Public Universe domains, JPL observer ephemerides and other optional sources. Their credentials or adapters alone are not admission evidence.
+
+Public documentation rechecked 21 October: [Public Universe API](https://sol.wickedsick.com/index.php/api) describes keyless access and approximate per-IP limits; its [source page](https://sol.wickedsick.com/index.php/about) points to original-source reuse terms. [HEASARC](https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html) describes its archive-use policy; [OpenNGC](https://github.com/mattiaverga/OpenNGC) identifies CC BY-SA 4.0 for its catalogue. These general pages do not verify the live selected record's current lineage or grant rights to the other Public Universe domains.
+
+NASA's [Open APIs catalogue](https://api.nasa.gov/) still documents the `api.nasa.gov/DONKI` route used by NightSky. The [CCMC DONKI migration notice](https://ccmc.gsfc.nasa.gov/tools/DONKI/) applies to an older CCMC route, so the two previous HTTP 503 GST responses cannot be attributed to an obsolete NightSky URL. A new response must be checked before changing the adapter. CCMC labels DONKI preliminary research context and NOAA the official forecast source.
+
+## Parallel read-only review, 21 October
+
+- The server configuration requires `starter-only` before Public Universe admission. Search/detail deny other domains before transport, selected detail verifies the earlier identity, and observing windows admit only supported BSC5P/OpenNGC IDs. Search may return starter catalogue records that lack observing geometry; those remain reference records rather than promised viewing targets. The source snapshot hash, source URL, licence and attribution are pinned in code. The named upstream-file hash map is validated and carried into selected identity; exact current live values still need a bounded check.
+- The dedicated Public Universe quota policy is 20/hour and 100/day, with a separate required path and fail-closed startup when no checkpoint exists. The production promotion workflow does not import a quota file; this is a separate operator operation. The private staging environment forbids upstream requests and cannot prove live source acceptance.
+- NASA DONKI is already bounded to FLR/GST, a 30-day input span, 10-second timeout and 1 MiB response. It reserves quota and returns unavailable on an upstream/schema error. Two prior GST requests returned 503. The current normalized result carries event ID/start and optional flare class, so its extra value is limited event chronology, not a local aurora or observing forecast.
+- The new checkout has the same package lock as the older worktree but no installed dependencies. An offline install stopped at missing `zod4`; zero tests ran. The older dependency directory was then linked through a permitted elevated Windows junction; no packages were downloaded.
+
+`npm run check` passed, both new diagnostic `--plan` modes completed without provider calls, 20 focused existing Public Universe/space-provider tests passed, and the seven new synthetic diagnostic tests passed. A first full-suite run hit Windows sandbox `EPERM` errors during existing temporary-file renames. With that filesystem restriction lifted, the complete offline suite passed: 1,923 passed, zero failed, seven skipped. No production or quota state changed.
+
+## Gates in order
+
+1. **Reconcile source and release state.** Compare the latest reviewed Git SHA, published image digest, running production image, current nonsecret source selections, package version and website disclosures. Do not apply this older worktree to production without that comparison. Preserve unrelated local edits.
+2. **Public Universe rights and scope.** Verify the live selected starter records against the reviewed source/snapshot hashes and their original-source credit and licence fields. Confirm the server rejects unscreened domains before transport and the ChatGPT answer/card shows the needed record credits. A changed source lineage fails closed.
+3. **Public Universe accounting.** Establish current usage for the actual public egress IP and any other consumers. Review and import the dedicated quota checkpoint without zeroing prior usage or changing the general weather/light-pollution ledgers. Keep the source off if usage cannot be verified.
+4. **NASA DONKI diagnosis.** Review the current NASA endpoint and source terms, then use a separately authorized bounded diagnostic to establish a valid response and rendered source context. Preserve the existing NASA key privately. If the endpoint still fails or its result adds no usable guidance, leave DONKI off and retain curated NASA/NOAA guidance.
+5. **Implementation and local verification.** Fix only evidenced gaps. Run focused and full offline checks, package checks, source-credit checks, unavailable-source fallback and an independent diff review. No live provider calls are implied by offline checks.
+6. **Release verification.** Use exact-commit CI, immutable image publication, private staging, protected production promotion and health checks. For each newly activated live source, obtain a fresh bounded request allowance; verify an actual successful response, credits, quota settlement and a native ChatGPT journey. Update Sources/Privacy only to reflect what is active.
+7. **ChatGPT submission.** Freeze the public MCP URL and verify domain/publisher identity, tool scan, package, privacy/terms/contact URLs, reviewer video and five positive/three negative examples against the deployed version. Submission and subsequent publication are distinct actions.
+
+## Exit decision
+
+Public Universe may be included in the ChatGPT submission only after gates 2, 3 and 6 pass. The submission may proceed with the existing NASA event guidance even if DONKI remains off; any live-DONKI claim requires gate 4 and gate 6. AstronomyAPI is explicitly outside this release.
+
+## Proposed live acceptance packets (not executed)
+
+The Public Universe packet is at most four free requests from this computer's existing 17-request checkpoint: one BSC5P starter search and its selected detail; one OpenNGC starter search and its selected detail, within five minutes. Cap each response at 1 MiB and accepted bodies together at 4 MiB; no retries, redirects, raw response files or broad catalogue download. Skip a dependent detail if its search identity fails. This local check does not establish Hetzner's remaining IP allowance. A fresh bounded production acceptance must follow quota migration and protected promotion.
+
+The separate NASA DONKI packet is one historical GST request within ten seconds and 1 MiB, with no retries or raw body, only after an existing initialized sky quota checkpoint is identified and a separate allowance is given. The checked local configuration has a NASA key but no sky quota checkpoint, so that diagnostic currently fails closed before transport. The chosen historical date has not been independently confirmed to contain a GST event; an empty successful response would validate transport/schema only, not useful event content. The synthetic request tests inject quota behavior because this Windows sandbox cannot atomically rename the test ledger; run a real-ledger preflight on a suitable host before any live request. Preserve usage counters even if a provider returns 503 or invalid data. Native ChatGPT journeys and production acceptance need their own release checks.
+
+Primary operating references: [production activation packet](production-multi-provider-activation-20261020.md), [provider rights and public pages](chatgpt-provider-rights-and-public-pages-20261019.md), [additional sky providers](additional-sky-providers-20261017.md).

@@ -211,6 +211,7 @@ import './operations/sky-quota-setup.test';
 import './operations/sky-live-probe.test';
 import './providers/sevenTimer-migration.test';
 import './operations/sky-continuation-probe.test';
+import './operations/nasa-gst-diagnostic.test';
 import './operations/native-bounded-session.test';
 import './operations/jpl-error-probe.test';
 import './providers/light-pollution-contract.test';
@@ -233,6 +234,7 @@ import './mcp/public-universe-tools.test';
 import './skills/public-universe-workflows.test';
 import './providers/public-universe-meteor-evidence.test';
 import './providers/public-universe-starter-evidence.test';
+import './operations/public-universe-live-validation.test';
 
 import './mcp/native-admission.test';
 
