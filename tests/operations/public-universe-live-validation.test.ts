@@ -52,6 +52,8 @@ test('synthetic selected-record diagnostic uses four GET routes, preserves quota
     assert.deepEqual(urls.map(x=>new URL(x).pathname),['/api/v1/starter-targets','/api/v1/starter-targets/bsc5p%3Ahr617','/api/v1/starter-targets','/api/v1/starter-targets/openngc%3ANGC1976']);
     assert.equal(report.records.length,2);
     assert(report.records.every(r=>r.searchStatus==='available'&&r.detailStatus==='available'&&r.revisionAssociation==='verified'));
+    assert.deepEqual(report.records[1].returnedIds,['openngc:NGC1981','openngc:NGC1976']);
+    assert.equal(report.records[1].searchTotal,2);
     assert.equal(JSON.stringify(report).includes('synthetic-secret-raw-body'),false);
     const after=JSON.parse(await readFile(path,'utf8'));
     assert.deepEqual(after.entries.publicuniverse.imported,before.entries.publicuniverse.imported);

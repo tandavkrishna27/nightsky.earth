@@ -43,13 +43,16 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
     return new Response(Buffer.concat(chunks),{status:response.status,headers:response.headers});
   }) as typeof fetch;
   const provider=createPublicUniverseProvider({quota,quotaOwner:'nightsky-publicuniverse',admitted:true,scope:'starter-only',fetcher});
-  const records:Array<{domain:string;searchStatus:string;detailStatus?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
+  const records:Array<{domain:string;searchStatus:string;searchErrorCode?:string;searchReason?:string;searchTotal?:number|null;returnedIds?:string[];detailStatus?:string;detailErrorCode?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
   try {
     for(const [source,query,expectedId] of [['bsc5p','HR 617','bsc5p:hr617'],['openngc','M42','openngc:NGC1976']] as const){
       if(Date.now()>=deadline)break;
       const search=await provider.searchReferenceObjects({domain:'starter-targets',query,limit:10});
       const match=search.data?.matches.find(row=>row.upstreamId===expectedId);
       const entry:typeof records[number]={domain:source,searchStatus:search.status};
+      if(search.errorCode) entry.searchErrorCode=search.errorCode;
+      if(search.reason) entry.searchReason=search.reason;
+      if(search.data){entry.searchTotal=search.data.total;entry.returnedIds=search.data.matches.slice(0,10).map(row=>row.upstreamId);}
       if(match?.selection) entry.selectedIdentityDigest=match.selection.revision;
       if(match?.selection) allowedDetails.add('/api/v1/starter-targets/'+encodeURIComponent(match.upstreamId));
       const foundCredit=match?.sources[0];
@@ -64,6 +67,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
       if(match?.selection && attempts<PLAN.requests && Date.now()<deadline){
         const detail=await provider.getReferenceDetails({kind:'selected-object',...match.selection,sections:[]});
         entry.detailStatus=detail.status;
+        if(detail.errorCode) entry.detailErrorCode=detail.errorCode;
         const credit=detail.sources[0];
         if(credit){
           entry.source=credit.url;
