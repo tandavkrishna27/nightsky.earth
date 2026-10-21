@@ -12,8 +12,12 @@ test('package rehearsal emits deterministic root ZIP, remote endpoint and digest
   assert.equal(Object.keys(JSON.parse(strFromU8(files['mcp.json'])).mcpServers).length, 1);
   assert.equal(a.submissionReady, false);
   assert.ok(a.gates.includes('publisher identity'));
-  const cases = JSON.parse(strFromU8(files['plugin.json'])).extensions['com.openai'].review.test_cases;
+  const extension = JSON.parse(strFromU8(files['plugin.json'])).extensions['com.openai'];
+  const cases = extension.review.test_cases;
   assert.equal(cases.positive.length, 5); assert.equal(cases.negative.length, 3);
+  assert.equal(extension.interface.category, 'Education & Research');
+  assert.equal(extension.review.prompts.length, 3);
+  assert.match(extension.publication.release_notes, /Public Universe/);
   assert.ok(a.inventory.every(x => x.bytes > 0 && /^[a-f0-9]{64}$/.test(x.sha256)));
 });
 

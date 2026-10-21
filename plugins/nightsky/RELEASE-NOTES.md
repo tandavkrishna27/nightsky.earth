@@ -1,3 +1,7 @@
+## V1 local revision 1.0.43 - ChatGPT submission metadata
+
+Adds the Education & Research category and three review prompts for the current hosted product. Public listing release notes now describe the active, bounded production sources and keep their visibility and access limits explicit. This is package metadata preparation; public review still needs a verified publisher identity, a real reviewer-accessible demo recording, and portal checks. No provider, quota, server or deployment behavior changes.
+
 ## V1 local revision 1.0.42 - synthetic OpenWeather visual card rehearsal
 
 The opt-in synthetic fixture now attaches the existing NightSky planning card to its OpenWeather plan. Its OpenWeather panel shows exact returned cloud samples with linked credit and the official logo loaded from the NightSky website. The panel hides its sample values if the logo cannot load. Production OpenWeather admission and the production planning card remain off while native rendering is checked.
