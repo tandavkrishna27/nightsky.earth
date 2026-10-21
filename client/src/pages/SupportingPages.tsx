@@ -1,7 +1,8 @@
 import EditorialPage from "@/components/EditorialPage";
 import { SUPPORT_EMAIL } from "@shared/website";
 
-const effectiveDate = "20 October 2026";
+const privacyEffectiveDate = "21 October 2026";
+const termsEffectiveDate = "20 October 2026";
 
 const content = {
   privacy: {
@@ -20,7 +21,7 @@ const content = {
       ],
       [
         "Information sent to data providers",
-        "Some features use independent data providers. Depending on the feature, NightSky may send a relevant place, coordinates, date range or search query to a provider. The deployed MCP service currently uses Geoapify with OpenStreetMap data for place lookup and candidate discovery, MET Norway and WeatherAPI.com for weather forecasts, and DarkSkySites.com for point-specific modeled light-pollution estimates. Astronomy Engine calculates sky geometry within the service. A chosen destination name or coordinates can be sent to these providers; DarkSkySites estimates are not live readings. GeoNames, NOAA OVATION, OpenWeather, Public Universe and 7Timer! are researched integrations, not active in the current production profile. The website separately uses Spaceflight News API for news searches. Historical context may use locally stored, operator-prepared Copernicus ERA5 summaries; NightSky does not make a live Open-Meteo request for that feature. The news search sends its search term and source filter through NightSky to Spaceflight News API, and displays article metadata and links rather than article text or images. Providers handle information under their own terms and privacy practices and may process it in other countries. Geoapify Free use requires visible Geoapify credit and OpenStreetMap attribution; NightSky does not include or distribute a retained OSM observing-place index.",
+        "Some features use independent data providers. Depending on the feature, NightSky may send a relevant place, coordinates, date range or search query to a provider. The deployed MCP service currently uses Geoapify with OpenStreetMap data for place lookup and candidate discovery, MET Norway and WeatherAPI.com for weather forecasts, OpenWeather for visual-card observing plans, and DarkSkySites.com for point-specific modeled light-pollution estimates. Astronomy Engine calculates sky geometry within the service. A chosen destination name or coordinates can be sent to these providers; DarkSkySites estimates are not live readings. GeoNames, NOAA OVATION, Public Universe and 7Timer! are researched integrations, not active in the current production profile. The website separately uses Spaceflight News API for news searches. Historical context may use locally stored, operator-prepared Copernicus ERA5 summaries; NightSky does not make a live Open-Meteo request for that feature. The news search sends its search term and source filter through NightSky to Spaceflight News API, and displays article metadata and links rather than article text or images. Providers handle information under their own terms and privacy practices and may process it in other countries. Geoapify Free use requires visible Geoapify credit and OpenStreetMap attribution; NightSky does not include or distribute a retained OSM observing-place index.",
       ],
       [
         "Interactive sky map",
@@ -40,7 +41,7 @@ const content = {
       ],
       [
         "Changes and effective date",
-        `This Privacy Policy is effective ${effectiveDate}. If NightSky’s data practices change, this page will be updated to explain the change and show a revised effective date.`,
+        `This Privacy Policy is effective ${privacyEffectiveDate}. If NightSky’s data practices change, this page will be updated to explain the change and show a revised effective date.`,
       ],
     ],
   },
@@ -88,7 +89,7 @@ const content = {
       ],
       [
         "Applicable law, changes and effective date",
-        `These terms are governed by the laws of India, subject to any mandatory consumer protections and other rights that apply to you. Any dispute may be brought before a court or consumer forum with jurisdiction under applicable law. These Terms are effective ${effectiveDate}. Material changes will be reflected on this page with an updated effective date.`,
+        `These terms are governed by the laws of India, subject to any mandatory consumer protections and other rights that apply to you. Any dispute may be brought before a court or consumer forum with jurisdiction under applicable law. These Terms are effective ${termsEffectiveDate}. Material changes will be reflected on this page with an updated effective date.`,
       ],
     ],
   },
@@ -103,7 +104,7 @@ export default function SupportingPage({
   return (
     <EditorialPage eyebrow={page.eyebrow} title={page.title} intro={page.intro}>
       <div className="reading-column">
-        <p className="small-note">Effective date: {effectiveDate}</p>
+        <p className="small-note">Effective date: {kind === "privacy" ? privacyEffectiveDate : termsEffectiveDate}</p>
         {page.sections.map(([title, body]) => (
           <section key={title}>
             <h2>{title}</h2>

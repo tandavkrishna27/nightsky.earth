@@ -49,7 +49,8 @@ test("Sources explains source scope and exposes details through keyboard disclos
   await expect(first.getByRole("link", { name: /^Astronomy Engine/ })).toHaveAttribute("href", "https://github.com/cosinekitty/astronomy");
   const weather = page.locator('.coverage-card[aria-labelledby="coverage-weather"]');
   await weather.getByText("View source details", { exact: true }).click();
-  await expect(weather).toContainText("The website itself displays no WeatherAPI or OpenWeather forecast.");
+  await expect(weather).toContainText("The website itself displays no forecast samples.");
+  await expect(weather).toContainText("OpenWeather's Free five-day forecast uses native three-hour samples.");
   await expect(weather.getByRole("link", { name: /OpenWeather alteration-method offer/ })).toHaveAttribute("href", "/openweather-normalization-method.json");
   await expect(page.locator(".coverage-reading")).toContainText("Historical");
   await expect(page.getByRole("link", { name: "Suggest a correction", exact: true })).toHaveAttribute("href", "/contact?topic=bugs");
