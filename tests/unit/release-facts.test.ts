@@ -50,8 +50,9 @@ test("live source and retention statements match the deployed profile", () => {
   assert.ok(light);
   assert.match(`${places.description} ${places.details.join(" ")}`, /current production.*Geoapify.*OpenStreetMap/i);
   assert.doesNotMatch(places.details.join(" "), /GeoNames supports named-city resolution/i);
-  assert.match(weather.details.join(" "), /not part of the current production profile/i);
-  assert.match(weather.details.join(" "), /website itself displays no WeatherAPI or OpenWeather forecast/i);
+  assert.match(weather.details.join(" "), /NOAA OVATION.*7Timer!.*remain inactive/i);
+  assert.match(weather.details.join(" "), /website itself displays no forecast samples/i);
+  assert.match(weather.details.join(" "), /OpenWeather.*enabled for plans with NightSky's visual card/i);
   assert.ok(weather.sources.some((source) => source.url === "/openweather-normalization-method.json"));
   assert.match(light.sources[0].name, /^DarkSkySites\.com/);
   assert.match(light.details.join(" "), /active production.*visible linked credit/i);

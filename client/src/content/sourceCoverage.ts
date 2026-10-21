@@ -1,4 +1,4 @@
-export const coverageReviewedAt = "2026-10-20";
+export const coverageReviewedAt = "2026-10-21";
 
 export const coverageCards = [
   {
@@ -14,11 +14,11 @@ export const coverageCards = [
   {
     id: "weather", title: "Weather & aurora", icon: "cloud",
     description: "Source-labelled forecasts help compare cloud and weather for the selected place and time.",
-    coverage: "MET Norway and WeatherAPI.com are active forecast sources. Their time intervals and available fields differ; missing cloud layers, seeing or transparency remain unknown. No aurora forecast is active in this production profile.",
+    coverage: "MET Norway, WeatherAPI.com and OpenWeather are enabled forecast sources. OpenWeather values are limited to visual-card plans. Their time intervals and available fields differ; missing cloud layers, seeing or transparency remain unknown. No aurora forecast is active in this production profile.",
     details: [
       "MET Norway preserves its native forecast sampling and accumulation periods. WeatherAPI.com supplies hourly samples within its Free-plan three-day forecast horizon. Both supplied Hyderabad samples during the bounded production check on 20 October 2026; missing fields remained unknown. WeatherAPI.com answers include its credit and weather-uncertainty notice.",
       "The website itself displays no forecast samples. WeatherAPI.com requires source credit and its weather and safety notice wherever its forecast data is displayed.",
-      "The published OpenWeather method document describes normalization for its five-day, three-hour forecast endpoint and includes an ODbL 1.0 offer for the adapted sample component. It contains no API key or forecast response. OpenWeather remains inactive. If OpenWeather forecast data is later displayed, its required visible, linked ‘Weather data provided by OpenWeather’ text and official logo must appear beside the data; this source list does not replace that adjacent credit.",
+      "OpenWeather's Free five-day forecast uses native three-hour samples. The provider is enabled for plans with NightSky's visual card; direct forecast and comparison tools exclude its values. The card shows the linked ‘Weather data provided by OpenWeather’ credit and official logo beside OpenWeather samples. The published normalization-method document offers the adapted sample component under ODbL 1.0 and contains no API key or forecast response. This source list does not replace the adjacent in-product credit.",
       "NOAA OVATION is a short-term aurora outlook, and 7Timer! seeing and transparency values are categories or ranges rather than precise measurements. Both remain inactive. Provider availability can vary by request, place and time.",
       "Your answer identifies the source and returned time window. Fetch time is retrieval time; a model issue time is shown only when supplied. Independent forecasts retain their disagreements and are not averaged into one score.",
     ],
@@ -26,7 +26,7 @@ export const coverageCards = [
       { name: "MET Norway", url: "https://api.met.no/" },
       { name: "WeatherAPI.com — active forecast source", url: "https://www.weatherapi.com/" },
       { name: "WeatherAPI.com terms and weather disclaimer", url: "https://www.weatherapi.com/terms.aspx" },
-      { name: "OpenWeather alteration-method offer — ODbL 1.0; forecast inactive", url: "/openweather-normalization-method.json" },
+      { name: "OpenWeather alteration-method offer — ODbL 1.0", url: "/openweather-normalization-method.json" },
       { name: "Open Data Commons Open Database License 1.0", url: "https://opendatacommons.org/licenses/odbl/1-0/" },
       { name: "OpenWeather attribution guidance", url: "https://openweathermap.org/faq#license" },
       { name: "NOAA OVATION — inactive", url: "https://www.swpc.noaa.gov/products/aurora-30-minute-forecast" },
