@@ -27,7 +27,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
     const search=url.pathname==='/api/v1/starter-targets';
     if(url.origin!==PUBLIC_UNIVERSE_ORIGIN||url.username||url.password||url.port||init?.method!=='GET'||
       !/^\/api\/v1\/starter-targets(?:\/(?:bsc5p%3Ahr\d+|openngc%3A(?:NGC|IC)\d+))?$/.test(url.pathname)||
-      (search ? (url.searchParams.size!==3||!['HR 617','M42'].includes(url.searchParams.get('q')??'')||url.searchParams.get('limit')!=='10'||url.searchParams.get('offset')!=='0'||usedSearches.has(url.searchParams.get('q')!)) : (url.search!==''||!allowedDetails.delete(url.pathname)))||
+      (search ? (url.searchParams.size!==3||!['bsc5p:hr617','openngc:NGC1976'].includes(url.searchParams.get('q')??'')||url.searchParams.get('limit')!=='10'||url.searchParams.get('offset')!=='0'||usedSearches.has(url.searchParams.get('q')!)) : (url.search!==''||!allowedDetails.delete(url.pathname)))||
       attempts>=PLAN.requests||Date.now()>=deadline) throw Error('Diagnostic request refused.');
     if(search) usedSearches.add(url.searchParams.get('q')!);
     attempts++;
@@ -45,7 +45,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
   const provider=createPublicUniverseProvider({quota,quotaOwner:'nightsky-publicuniverse',admitted:true,scope:'starter-only',fetcher});
   const records:Array<{domain:string;searchStatus:string;searchErrorCode?:string;searchReason?:string;searchTotal?:number|null;returnedIds?:string[];detailStatus?:string;detailErrorCode?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
   try {
-    for(const [source,query,expectedId] of [['bsc5p','HR 617','bsc5p:hr617'],['openngc','M42','openngc:NGC1976']] as const){
+    for(const [source,query,expectedId] of [['bsc5p','bsc5p:hr617','bsc5p:hr617'],['openngc','openngc:NGC1976','openngc:NGC1976']] as const){
       if(Date.now()>=deadline)break;
       const search=await provider.searchReferenceObjects({domain:'starter-targets',query,limit:10});
       const match=search.data?.matches.find(row=>row.upstreamId===expectedId);
@@ -80,6 +80,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
         entry.revisionAssociation=detail.data?.record?.remoteRevisionAssociation;
       }
       records.push(entry);
+      if(search.status!=='available') break;
     }
     return {attempts,totalBytes,elapsedMs:Date.now()-began,records,limitations:['Selected-record diagnostic only; no full-catalogue rights or observing accuracy claim.','No raw provider responses retained.']};
   } finally {try {await provider.close();} finally {await quota.close();}}
