@@ -62,6 +62,32 @@ class ComposeProductionEnvTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             MODULE.compose(BASE, KEY, '', True)
 
+    def test_public_universe_switch_adds_only_restricted_scope_and_dedicated_state(self):
+        result = MODULE.compose(BASE, KEY, OPENWEATHER_KEY, True, True)
+        self.assertIn('NIGHTSKY_SKY_PROVIDERS=publicuniverse', result)
+        self.assertIn('NIGHTSKY_SKY_ADMITTED_PROVIDERS=publicuniverse', result)
+        self.assertIn('NIGHTSKY_PUBLICUNIVERSE_SCOPE=starter-only', result)
+        self.assertIn('NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH=/state/public-universe-quota.json', result)
+        self.assertIn('NIGHTSKY_OPENWEATHER_KEY=' + OPENWEATHER_KEY, result)
+        self.assertEqual(result.count('NIGHTSKY_SKY_PROVIDERS='), 1)
+
+    def test_public_universe_switch_off_preserves_existing_profile(self):
+        result = MODULE.compose(BASE, KEY, OPENWEATHER_KEY, True)
+        self.assertNotIn('NIGHTSKY_SKY_PROVIDERS=', result)
+        self.assertNotIn('NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH=', result)
+
+    def test_public_universe_switch_rejects_base_admission_and_missing_weather_composition(self):
+        for addition in (
+            '\nNIGHTSKY_SKY_PROVIDERS=publicuniverse',
+            '\nNIGHTSKY_SKY_ADMITTED_PROVIDERS=publicuniverse',
+            '\nNIGHTSKY_PUBLICUNIVERSE_SCOPE=starter-only',
+            '\nNIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH=/state/public-universe-quota.json',
+        ):
+            with self.subTest(addition=addition), self.assertRaises(ValueError):
+                MODULE.compose(BASE + addition, KEY, OPENWEATHER_KEY, True, True)
+        with self.assertRaises(ValueError):
+            MODULE.compose(BASE, '', '', False, True)
+
     def test_refuses_missing_ledger(self):
         with self.assertRaises(ValueError):
             MODULE.compose(BASE.replace('NIGHTSKY_QUOTA_STATE_PATH=/state/provider-quota.json\n', ''), KEY)

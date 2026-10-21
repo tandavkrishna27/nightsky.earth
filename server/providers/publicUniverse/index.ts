@@ -29,6 +29,22 @@ type Item = {
     record: ReferenceRecord;
     identity: IdentitySnapshot;
 };
+export const REVIEWED_STARTER_SOURCES: Record<string, {snapshot: string; sourceUrl: string; licence: string; licenceUrl: string; attribution: string}> = {
+    bsc5p: {
+        snapshot: '7fe926d80b535f9422ca81f8f3fee1d6422de29adaecfbd2f14b1a93fe5134b9',
+        sourceUrl: 'https://heasarc.gsfc.nasa.gov/FTP/heasarc/dbase/tdat_files/heasarc_bsc5p.tdat.gz',
+        licence: 'NASA government-works; HEASARC free-use policy',
+        licenceUrl: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html',
+        attribution: 'Hoffleit and Warren (1991), Bright Star Catalog, 5th revised preliminary edition; NASA/GSFC HEASARC',
+    },
+    openngc: {
+        snapshot: 'd8517e8d195ce69700645b60f8d6603d2aebba0e8e21f47603a4d6a31fe667a1',
+        sourceUrl: 'https://github.com/mattiaverga/OpenNGC/tree/75ca7ff090e1d0081a5b08be70eb3bc45ccd9e06',
+        licence: 'CC-BY-SA-4.0',
+        licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        attribution: 'OpenNGC, copyright 2023 Mattia Verga; adapted by Public Universe: bounded selection and unit conversions; source row strings retained',
+    },
+};
 export function createPublicUniverseProvider(options: Options) {
     const transport = new PublicUniverseTransport({ ...options, fetch: options.fetcher ?? options.fetch }), now = options.now ?? Date.now, store = new ReferenceStore({ now }), cache = new ReferenceSuccessCache(now);
     const envelope = (operation: ReferenceOperation) => ({ provider: 'publicuniverse' as const, operation, status: 'available' as const, reason: null, errorCode: null, retrievedAt: new Date(now()).toISOString(), sources: [], limitations: [] as string[] });
@@ -38,25 +54,9 @@ export function createPublicUniverseProvider(options: Options) {
         return { ...envelope(operation), status, reason: `Public Universe ${code}.`, errorCode: code, data: null };
     }
     const select = (item: Item) => ({ ...item.record, selection: store.put(item.identity) });
-    const reviewedSources: Record<string, {snapshot: string; sourceUrl: string; licence: string; licenceUrl: string; attribution: string}> = {
-        bsc5p: {
-            snapshot: '7fe926d80b535f9422ca81f8f3fee1d6422de29adaecfbd2f14b1a93fe5134b9',
-            sourceUrl: 'https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html',
-            licence: 'HEASARC data-use policy',
-            licenceUrl: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html',
-            attribution: 'Hoffleit & Warren (1991); NASA/GSFC HEASARC',
-        },
-        openngc: {
-            snapshot: 'd8517e8d195ce69700645b60f8d6603d2aebba0e8e21f47603a4d6a31fe667a1',
-            sourceUrl: 'https://github.com/mattiaverga/OpenNGC',
-            licence: 'CC BY-SA 4.0',
-            licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
-            attribution: 'Mattia Verga / OpenNGC',
-        },
-    };
     const reviewedStarter = (source: z.infer<typeof c.starterProvenanceSchema>) => {
         if (options.scope !== 'starter-only') return;
-        const reviewed = reviewedSources[source.source];
+        const reviewed = REVIEWED_STARTER_SOURCES[source.source];
         if (!reviewed || source.snapshot_sha256 !== reviewed.snapshot || source.source_url !== reviewed.sourceUrl || source.license !== reviewed.licence || source.license_url !== reviewed.licenceUrl || source.attribution !== reviewed.attribution)
             throw Error('Unreviewed starter source lineage or credit');
     };
