@@ -19,6 +19,7 @@ Reviewed 21 October 2026 against the current website and the deployed production
 | Geoapify with OpenStreetMap data | Active place lookup and bounded candidate discovery. Show required Geoapify and OpenStreetMap credits with relevant results. A candidate does not establish access, safety or sky quality. No retained regional OSM candidate index is shipped. |
 | MET Norway Locationforecast | Active production weather forecast. Follow its attribution, CC BY 4.0, identifying User-Agent, caching and traffic conditions; preserve the forecast's source and time context. |
 | DarkSkySites.com | Active point-specific modeled zenith-brightness and Bortle estimates. These are not live measurements or access assessments; keep linked provider credit with returned values. |
+| Public Universe starter catalogues | Active only for requested BSC5P Bright Star Catalog and OpenNGC starter search and selected detail. Preserve original catalogue identity, licence, source revision, coordinate frame, epoch and attribution with returned records. Catalogue coordinates do not establish a current apparent position or local visibility. Wider Public Universe domains remain off. |
 | Spaceflight News API | Website news search returns article metadata and outbound links. Article text, summaries and images are not copied pending rights review. |
 | NASA MEO meteor reports, Global Meteor Network radiant fits, AstroPixels and other event references | Used only within the specific dataset, year and coverage described in the public Sources & Coverage page and event entries. Preserve source/version, attribution, license and modification/precision notices. AstroPixels reproduction uses its required exact credit. |
 
@@ -38,6 +39,7 @@ The website displays no forecast samples. Production forecast sources are MET No
 - Website photographs and the splash video are generated or owner-created, as confirmed by the owner.
 - Copernicus ERA5-derived summaries are operator-prepared historical context, not live weather or a forecast. Keep provenance, attribution, and the boundaries of the source material with any enabled output.
 - NASA meteor maxima, Global Meteor Network radiant fits, and AstroPixels almanac values are used only within their cited versions, periods and coverage; do not imply full activity seasons or local visibility where the source supports only a peak or model fit.
+- Public Universe's selected starter records retain the original Bright Star Catalog or OpenNGC credit and licence. NASA DONKI live space-weather access remains off; the NASA MEO meteor reports above are a separate source.
 - International Dark-Sky Places, IGN guidance and other linked resources are link-only unless a separate reuse permission or applicable license is documented. A website link does not grant rights to copy data, text, graphics or imagery.
 - Google Fonts and optional consent-gated Google Analytics are disclosed on the Privacy Policy page. This website register does not claim any MCP analytics product.
 
@@ -52,6 +54,9 @@ The website displays no forecast samples. Production forecast sources are MET No
 - [Geoapify terms](https://www.geoapify.com/terms-and-conditions/)
 - [Astronomy Engine repository and license](https://github.com/cosinekitty/astronomy)
 - [NASA MEO report archive](https://ntrs.nasa.gov/)
+- [Public Universe API](https://sol.wickedsick.com/index.php/api)
+- [HEASARC data policy](https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html)
+- [OpenNGC catalogue and licence](https://github.com/mattiaverga/OpenNGC)
 - [Global Meteor Network radiant-model paper](https://arxiv.org/html/2205.15423v1)
 - [AstroPixels almanacs and reproduction permission](https://www.astropixels.com/almanac/almanac.html)
 - [Netlify function-log documentation](https://docs.netlify.com/manage/monitoring/logs/)

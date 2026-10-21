@@ -52,6 +52,10 @@ test("Sources explains source scope and exposes details through keyboard disclos
   await expect(weather).toContainText("The website itself displays no forecast samples.");
   await expect(weather).toContainText("OpenWeather's Free five-day forecast uses native three-hour samples.");
   await expect(weather.getByRole("link", { name: /OpenWeather alteration-method offer/ })).toHaveAttribute("href", "/openweather-normalization-method.json");
+  const events = page.locator('.coverage-card[aria-labelledby="coverage-events"]');
+  await events.getByText("View source details", { exact: true }).click();
+  await expect(events).toContainText("Public Universe can search and return selected details");
+  await expect(events.getByRole("link", { name: /Public Universe — starter catalogue API/ })).toHaveAttribute("href", "https://sol.wickedsick.com/index.php/api");
   await expect(page.locator(".coverage-reading")).toContainText("Historical");
   await expect(page.getByRole("link", { name: "Suggest a correction", exact: true })).toHaveAttribute("href", "/contact?topic=bugs");
 });
@@ -64,6 +68,7 @@ test("Privacy policy states support-mail retention and current service limits", 
   await expect(page.getByText(/system journal is persistent with no configured age limit/i)).toBeVisible();
   await expect(page.getByText(/no fixed deletion period is promised for host logs or backups/i)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Interactive sky map" })).toHaveCount(1);
+  await expect(page.getByText(/Public Universe for requested searches and selected details from screened starter catalogues/i)).toBeVisible();
 });
 
 test("Contact supports keyboard topic selection and copying without opening email", async ({ page, context }) => {

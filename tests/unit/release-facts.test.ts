@@ -45,9 +45,11 @@ test("live source and retention statements match the deployed profile", () => {
   const places = coverageCards.find((card) => card.id === "places");
   const weather = coverageCards.find((card) => card.id === "weather");
   const light = coverageCards.find((card) => card.id === "light");
+  const events = coverageCards.find((card) => card.id === "events");
   assert.ok(places);
   assert.ok(weather);
   assert.ok(light);
+  assert.ok(events);
   assert.match(`${places.description} ${places.details.join(" ")}`, /current production.*Geoapify.*OpenStreetMap/i);
   assert.doesNotMatch(places.details.join(" "), /GeoNames supports named-city resolution/i);
   assert.match(weather.details.join(" "), /NOAA OVATION.*7Timer!.*remain inactive/i);
@@ -56,6 +58,9 @@ test("live source and retention statements match the deployed profile", () => {
   assert.ok(weather.sources.some((source) => source.url === "/openweather-normalization-method.json"));
   assert.match(light.sources[0].name, /^DarkSkySites\.com/);
   assert.match(light.details.join(" "), /active production.*visible linked credit/i);
+  assert.match(events.coverage, /Public Universe.*screened Bright Star Catalog and OpenNGC starter/i);
+  assert.match(events.details.join(" "), /NASA DONKI.*not enabled/i);
+  assert.ok(releaseFacts.sources.some((source) => source.name === "Public Universe starter catalogues"));
 });
 
 import { loadEnv } from "vite";

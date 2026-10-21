@@ -36,11 +36,13 @@ export const coverageCards = [
   {
     id: "events", title: "Sky events & targets", icon: "orbit",
     description: "Supported lunar phases, eclipses, planetary events and meteor-shower references connect an event with its timing and source.",
-    coverage: "Coverage is bounded by event, target and year. A meteor peak, a typical activity interval and a radiant model describe different things; they do not establish complete seasons or a personal meteor rate.",
+    coverage: "Coverage is bounded by event, target and year. Meteor peaks do not establish complete seasons or personal rates. Public Universe covers only screened Bright Star Catalog and OpenNGC starter references; catalogue coordinates are not a current sky position or visibility guarantee.",
     details: [
       "Lunar phases, seasons, eclipse geometry and supported planetary events use Astronomy Engine calculations. Local visibility still needs its own place, time, weather and horizon context.",
       "NASA Meteoroid Environment Office reports supply reviewed meteor maxima for 2025, 2026 and 2027. NightSky keeps each maximum attached to its original report and year, without repeating it into another year.",
       "Separate meteor-radiant fits from Moorhead, Clements and Vida are evaluated within their stated domains. Typical activity and civil-date guidance remain source-labelled context; they are not interchangeable with an exact UTC event.",
+      "Public Universe can search and return selected details from its screened BSC5P and OpenNGC starter subsets. A search or detail call is made for a requested catalogue task; an ordinary Moon, planet, darkness or meteor plan does not require it. Returned identities, source revisions, coordinate frames and original-catalogue credits stay attached to the result. Wider Public Universe domains are not admitted.",
+      "NASA DONKI live space-weather access is not enabled. NASA Meteoroid Environment Office reports used for dated meteor references are a separate, already reviewed source.",
     ],
     sources: [
       { name: "NASA MEO — 2025 maxima", url: "https://ntrs.nasa.gov/citations/20240012381" },
@@ -50,6 +52,9 @@ export const coverageCards = [
       { name: "Radiant-model license — CC BY 4.0", url: "https://creativecommons.org/licenses/by/4.0/" },
       { name: "IGN — meteor-shower guidance", url: "https://astronomia.ign.es/en/orionidas" },
       { name: "IGN — attribution and reuse terms", url: "https://www.ign.es/web/es/ign/portal/info-aviso-legal" },
+      { name: "Public Universe — starter catalogue API", url: "https://sol.wickedsick.com/index.php/api" },
+      { name: "Bright Star Catalog — NASA/GSFC HEASARC", url: "https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html" },
+      { name: "OpenNGC — CC BY-SA 4.0", url: "https://github.com/mattiaverga/OpenNGC" },
     ],
   },
   {
