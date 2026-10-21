@@ -63,6 +63,14 @@ test('synthetic selected-record diagnostic uses four GET routes, preserves quota
     assert.equal(urls.length,priorCalls+1);
     assert.equal(oneRequestReport.records.length,1);
     assert.equal(oneRequestReport.records[0].detailStatus,undefined);
+    const beforeTwo=urls.length;
+    const twoRequestReport=await runPublicUniverseDiagnostic(env,fake,2);
+    assert.equal(twoRequestReport.attempts,2);
+    assert.equal(urls.length,beforeTwo+2);
+    assert.equal(twoRequestReport.records.length,1);
+    assert.equal(twoRequestReport.records[0].searchStatus,'available');
+    assert.equal(twoRequestReport.records[0].detailStatus,'available');
+    assert.deepEqual(urls.slice(beforeTwo).map(x=>new URL(x).pathname),['/api/v1/starter-targets','/api/v1/starter-targets/bsc5p%3Ahr617']);
     const after=JSON.parse(await readFile(path,'utf8'));
     assert.deepEqual(after.entries.publicuniverse.imported,before.entries.publicuniverse.imported);
     assert.equal(after.entries.publicuniverse.disabled,false);

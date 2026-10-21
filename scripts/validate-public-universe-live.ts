@@ -15,7 +15,7 @@ async function regular(path:string) {
   if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1) throw Error('Existing regular quota files required.');
 }
 
-export async function runPublicUniverseDiagnostic(env:Record<string,string|undefined>, transport:typeof fetch=fetch, maxRequests:1|4=4) {
+export async function runPublicUniverseDiagnostic(env:Record<string,string|undefined>, transport:typeof fetch=fetch, maxRequests:1|2|4=4) {
   const path=publicUniverseQuotaPath(env);
   if(!path) throw Error('Dedicated quota path required.');
   await regular(path); await regular(path+'.initialized');
@@ -119,6 +119,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   if(process.argv.length===3&&process.argv[2]==='--plan') console.log(JSON.stringify(PLAN));
   else if(process.argv.length===3&&process.argv[2]==='--diagnose-bsc') runPublicUniverseDiagnostic(process.env,fetch,1).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
+  else if(process.argv.length===3&&process.argv[2]==='--diagnose-bsc-detail') runPublicUniverseDiagnostic(process.env,fetch,2).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
   else if(process.argv.length===3&&process.argv[2]==='--live') runPublicUniverseDiagnostic(process.env).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
-  else {console.error('Use --plan, --diagnose-bsc or --live.');process.exitCode=1;}
+  else {console.error('Use --plan, --diagnose-bsc, --diagnose-bsc-detail or --live.');process.exitCode=1;}
 }
