@@ -53,7 +53,8 @@ test('synthetic selected-record diagnostic uses four GET routes, preserves quota
     assert.deepEqual(urls.filter(x=>new URL(x).searchParams.has('q')).map(x=>new URL(x).searchParams.get('q')),['bsc5p:hr617','openngc:NGC1976']);
     assert.equal(report.records.length,2);
     assert(report.records.every(r=>r.searchStatus==='available'&&r.detailStatus==='available'&&r.revisionAssociation==='verified'));
-    assert.deepEqual(report.records[1].returnedIds,['openngc:NGC1981','openngc:NGC1976']);
+    assert(report.records.every(r=>r.httpStatus===200&&r.schemaStatus==='valid'));
+    assert(report.records.every(r=>r.expectedIdPresent&&r.pinChecks&&Object.values(r.pinChecks).every(Boolean)));
     assert.equal(report.records[1].searchTotal,2);
     assert.equal(JSON.stringify(report).includes('synthetic-secret-raw-body'),false);
     const after=JSON.parse(await readFile(path,'utf8'));
@@ -74,5 +75,22 @@ test('an unavailable first search stops before another provider request',async()
     assert.equal(report.attempts,1);
     assert.equal(report.records.length,1);
     assert.equal(report.records[0].searchStatus,'unavailable');
+    assert.equal(report.records[0].schemaStatus,'valid');
+  } finally {await rm(dir,{recursive:true,force:true});}
+});
+
+test('malformed source data reports bounded schema paths without raw values or a second request',async()=>{
+  const dir=await mkdtemp(join(process.cwd(),'nightsky-pu-runner-'));
+  const path=join(dir,'quota.json'),env={NIGHTSKY_PUBLICUNIVERSE_QUOTA_STATE_PATH:path};
+  const now=Date.now();
+  await initializeVerifiedPublicUniverseQuota(env,{verifiedAllowance:true,verifiedAllAccountUsage:true,allConsumersQuiesced:true,evidence:'Synthetic complete account usage fixture',observedAt:now,usedLast24Hours:2,usedCurrentMonth:2},()=>now);
+  let calls=0;
+  try {
+    const report=await runPublicUniverseDiagnostic(env,(async()=>{calls++;return Response.json({available:true,results:[{secretRaw:'never-report-this'}],sources:{'never-report-this':{bad:'x'}},coverage:'synthetic'});}) as typeof fetch);
+    assert.equal(calls,1);
+    assert.equal(report.records[0].searchErrorCode,'invalid-response');
+    assert.equal(report.records[0].schemaStatus,'invalid');
+    assert(report.records[0].schemaIssuePaths?.length);
+    assert.equal(JSON.stringify(report).includes('never-report-this'),false);
   } finally {await rm(dir,{recursive:true,force:true});}
 });

@@ -4,8 +4,9 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createPersistentQuota} from '../server/providers/quotaState';
 import {PUBLIC_UNIVERSE_QUOTA_POLICY, publicUniverseQuotaPath} from '../server/providers/publicUniverse/configuration';
-import {createPublicUniverseProvider} from '../server/providers/publicUniverse';
+import {createPublicUniverseProvider,REVIEWED_STARTER_SOURCES} from '../server/providers/publicUniverse';
 import {PUBLIC_UNIVERSE_ORIGIN} from '../server/providers/publicUniverse/transport';
+import {starterSearchResponseSchema} from '../server/providers/publicUniverse/contracts';
 
 export const PLAN = Object.freeze({requests:4,deadlineMs:300000,maxResponseBytes:1048576,totalResponseBytes:4194304,retries:0,domains:['bsc5p','openngc']});
 
@@ -22,6 +23,9 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
   const began=Date.now(), deadline=began+PLAN.deadlineMs;
   let attempts=0,totalBytes=0;
   const usedSearches=new Set<string>(),allowedDetails=new Set<string>();
+  type PinChecks={snapshot:boolean;sourceUrl:boolean;licence:boolean;licenceUrl:boolean;attribution:boolean};
+  type SearchDiagnostic={httpStatus:number;responseBytes:number;schemaStatus:'valid'|'invalid'|'not-json';issuePaths?:string[];resultCount?:number;expectedIdPresent?:boolean;pinChecks?:PinChecks};
+  const searchDiagnostics=new Map<string,SearchDiagnostic>();
   const fetcher=(async(input:RequestInfo|URL,init?:RequestInit)=>{
     const url=new URL(String(input));
     const search=url.pathname==='/api/v1/starter-targets';
@@ -40,19 +44,45 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
       if(bytes>PLAN.maxResponseBytes||totalBytes+bytes>PLAN.totalResponseBytes) throw Error('Response budget exceeded.');chunks.push(part.value);}
     } finally {await reader.cancel().catch(()=>{});reader.releaseLock();}
     totalBytes+=bytes;
-    return new Response(Buffer.concat(chunks),{status:response.status,headers:response.headers});
+    const body=Buffer.concat(chunks);
+    if(search){
+      const query=url.searchParams.get('q')!;
+      const diagnostic:SearchDiagnostic={httpStatus:response.status,responseBytes:bytes,schemaStatus:'not-json'};
+      try {
+        const parsed=starterSearchResponseSchema.safeParse(JSON.parse(body.toString('utf8')));
+        diagnostic.schemaStatus=parsed.success?'valid':'invalid';
+        if(!parsed.success) diagnostic.issuePaths=parsed.error.issues.slice(0,12).map(issue=>{
+          const first=issue.path[0];
+          const section=typeof first==='string'&&['available','results','total','limit','offset','sources','coverage'].includes(first)?first:'other';
+          return section+':'+issue.code;
+        });
+        else {
+          diagnostic.resultCount=parsed.data.results.length;
+          const row=parsed.data.results.find(item=>item.id===query);
+          diagnostic.expectedIdPresent=!!row;
+          if(row){
+            const source=parsed.data.sources[row.source],reviewed=REVIEWED_STARTER_SOURCES[row.source];
+            if(source&&reviewed) diagnostic.pinChecks={snapshot:source.snapshot_sha256===reviewed.snapshot,sourceUrl:source.source_url===reviewed.sourceUrl,licence:source.license===reviewed.licence,licenceUrl:source.license_url===reviewed.licenceUrl,attribution:source.attribution===reviewed.attribution};
+          }
+        }
+      } catch { /* Only the fixed diagnostic status is retained. */ }
+      searchDiagnostics.set(query,diagnostic);
+    }
+    return new Response(body,{status:response.status,headers:response.headers});
   }) as typeof fetch;
   const provider=createPublicUniverseProvider({quota,quotaOwner:'nightsky-publicuniverse',admitted:true,scope:'starter-only',fetcher});
-  const records:Array<{domain:string;searchStatus:string;searchErrorCode?:string;searchReason?:string;searchTotal?:number|null;returnedIds?:string[];detailStatus?:string;detailErrorCode?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
+  const records:Array<{domain:string;searchStatus:string;searchErrorCode?:string;searchReason?:string;httpStatus?:number;responseBytes?:number;schemaStatus?:'valid'|'invalid'|'not-json';schemaIssuePaths?:string[];resultCount?:number;expectedIdPresent?:boolean;pinChecks?:PinChecks;searchTotal?:number|null;detailStatus?:string;detailErrorCode?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
   try {
     for(const [source,query,expectedId] of [['bsc5p','bsc5p:hr617','bsc5p:hr617'],['openngc','openngc:NGC1976','openngc:NGC1976']] as const){
       if(Date.now()>=deadline)break;
       const search=await provider.searchReferenceObjects({domain:'starter-targets',query,limit:10});
       const match=search.data?.matches.find(row=>row.upstreamId===expectedId);
       const entry:typeof records[number]={domain:source,searchStatus:search.status};
+      const diagnostic=searchDiagnostics.get(query);
+      if(diagnostic){entry.httpStatus=diagnostic.httpStatus;entry.responseBytes=diagnostic.responseBytes;entry.schemaStatus=diagnostic.schemaStatus;entry.schemaIssuePaths=diagnostic.issuePaths;entry.resultCount=diagnostic.resultCount;entry.expectedIdPresent=diagnostic.expectedIdPresent;entry.pinChecks=diagnostic.pinChecks;}
       if(search.errorCode) entry.searchErrorCode=search.errorCode;
       if(search.reason) entry.searchReason=search.reason;
-      if(search.data){entry.searchTotal=search.data.total;entry.returnedIds=search.data.matches.slice(0,10).map(row=>row.upstreamId);}
+      if(search.data) entry.searchTotal=search.data.total;
       if(match?.selection) entry.selectedIdentityDigest=match.selection.revision;
       if(match?.selection) allowedDetails.add('/api/v1/starter-targets/'+encodeURIComponent(match.upstreamId));
       const foundCredit=match?.sources[0];
