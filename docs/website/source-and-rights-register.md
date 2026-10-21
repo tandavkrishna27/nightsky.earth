@@ -9,7 +9,7 @@ Reviewed 21 October 2026 against the current website and the deployed production
 - Hetzner Cloud in Helsinki hosts the deployed MCP service. Production nginx access logging is off and its error log is discarded. Docker logs are size-limited, so their age varies. Journald has no configured age limit. Automatic Hetzner backups are off and there are no server snapshots. Do not claim a fixed host-log deletion period.
 - The connected service does not persist prompts, user locations, conversation history or request records. It has bounded in-memory caches and a persistent provider-quota ledger for usage buckets. This is not a user conversation history.
 - The operator intends to delete support messages 90 days after the last reply. A daily review process and first deletion sweep have not been verified, so the public Privacy Policy makes no fixed support-email deletion promise.
-- The Privacy Policy and Terms are effective 21 October 2026. Optional website Google Analytics 4 loads after consent; its collection and retention details remain described on the Privacy Policy page.
+- The Privacy Policy is effective 21 October 2026; the Terms remain effective 20 October 2026. Optional website Google Analytics 4 loads after consent; its collection and retention details remain described on the Privacy Policy page.
 
 ## Active production sources
 

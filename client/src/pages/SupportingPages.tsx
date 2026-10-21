@@ -1,7 +1,8 @@
 import EditorialPage from "@/components/EditorialPage";
 import { SUPPORT_EMAIL } from "@shared/website";
 
-const effectiveDate = "21 October 2026";
+const privacyEffectiveDate = "21 October 2026";
+const termsEffectiveDate = "20 October 2026";
 
 const content = {
   privacy: {
@@ -40,7 +41,7 @@ const content = {
       ],
       [
         "Changes and effective date",
-        `This Privacy Policy is effective ${effectiveDate}. If NightSky’s data practices change, this page will be updated to explain the change and show a revised effective date.`,
+        `This Privacy Policy is effective ${privacyEffectiveDate}. If NightSky’s data practices change, this page will be updated to explain the change and show a revised effective date.`,
       ],
     ],
   },
@@ -88,7 +89,7 @@ const content = {
       ],
       [
         "Applicable law, changes and effective date",
-        `These terms are governed by the laws of India, subject to any mandatory consumer protections and other rights that apply to you. Any dispute may be brought before a court or consumer forum with jurisdiction under applicable law. These Terms are effective ${effectiveDate}. Material changes will be reflected on this page with an updated effective date.`,
+        `These terms are governed by the laws of India, subject to any mandatory consumer protections and other rights that apply to you. Any dispute may be brought before a court or consumer forum with jurisdiction under applicable law. These Terms are effective ${termsEffectiveDate}. Material changes will be reflected on this page with an updated effective date.`,
       ],
     ],
   },
@@ -103,7 +104,7 @@ export default function SupportingPage({
   return (
     <EditorialPage eyebrow={page.eyebrow} title={page.title} intro={page.intro}>
       <div className="reading-column">
-        <p className="small-note">Effective date: {effectiveDate}</p>
+        <p className="small-note">Effective date: {kind === "privacy" ? privacyEffectiveDate : termsEffectiveDate}</p>
         {page.sections.map(([title, body]) => (
           <section key={title}>
             <h2>{title}</h2>
