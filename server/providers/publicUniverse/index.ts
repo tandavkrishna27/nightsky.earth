@@ -39,10 +39,10 @@ export const REVIEWED_STARTER_SOURCES: Record<string, {snapshot: string; sourceU
     },
     openngc: {
         snapshot: 'd8517e8d195ce69700645b60f8d6603d2aebba0e8e21f47603a4d6a31fe667a1',
-        sourceUrl: 'https://github.com/mattiaverga/OpenNGC',
-        licence: 'CC BY-SA 4.0',
+        sourceUrl: 'https://github.com/mattiaverga/OpenNGC/tree/75ca7ff090e1d0081a5b08be70eb3bc45ccd9e06',
+        licence: 'CC-BY-SA-4.0',
         licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
-        attribution: 'Mattia Verga / OpenNGC',
+        attribution: 'OpenNGC, copyright 2023 Mattia Verga; adapted by Public Universe: bounded selection and unit conversions; source row strings retained',
     },
 };
 export function createPublicUniverseProvider(options: Options) {

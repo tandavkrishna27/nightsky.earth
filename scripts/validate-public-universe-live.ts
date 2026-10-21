@@ -15,7 +15,7 @@ async function regular(path:string) {
   if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1) throw Error('Existing regular quota files required.');
 }
 
-export async function runPublicUniverseDiagnostic(env:Record<string,string|undefined>, transport:typeof fetch=fetch, maxRequests:1|2|4=4) {
+export async function runPublicUniverseDiagnostic(env:Record<string,string|undefined>, transport:typeof fetch=fetch, maxRequests:1|2|4=4, target:'bsc5p'|'openngc'|'both'='both') {
   const path=publicUniverseQuotaPath(env);
   if(!path) throw Error('Dedicated quota path required.');
   await regular(path); await regular(path+'.initialized');
@@ -74,6 +74,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
   const records:Array<{domain:string;searchStatus:string;searchErrorCode?:string;searchReason?:string;httpStatus?:number;responseBytes?:number;schemaStatus?:'valid'|'invalid'|'not-json';schemaIssuePaths?:string[];resultCount?:number;expectedIdPresent?:boolean;pinChecks?:PinChecks;searchTotal?:number|null;detailStatus?:string;detailErrorCode?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
   try {
     for(const [source,query,expectedId] of [['bsc5p','bsc5p:hr617','bsc5p:hr617'],['openngc','openngc:NGC1976','openngc:NGC1976']] as const){
+      if(target!=='both'&&target!==source)continue;
       if(attempts>=maxRequests||Date.now()>=deadline)break;
       const search=await provider.searchReferenceObjects({domain:'starter-targets',query,limit:10});
       const match=search.data?.matches.find(row=>row.upstreamId===expectedId);
@@ -120,6 +121,7 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   if(process.argv.length===3&&process.argv[2]==='--plan') console.log(JSON.stringify(PLAN));
   else if(process.argv.length===3&&process.argv[2]==='--diagnose-bsc') runPublicUniverseDiagnostic(process.env,fetch,1).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
   else if(process.argv.length===3&&process.argv[2]==='--diagnose-bsc-detail') runPublicUniverseDiagnostic(process.env,fetch,2).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
+  else if(process.argv.length===3&&process.argv[2]==='--diagnose-openngc-detail') runPublicUniverseDiagnostic(process.env,fetch,2,'openngc').then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
   else if(process.argv.length===3&&process.argv[2]==='--live') runPublicUniverseDiagnostic(process.env).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
-  else {console.error('Use --plan, --diagnose-bsc, --diagnose-bsc-detail or --live.');process.exitCode=1;}
+  else {console.error('Use --plan, --diagnose-bsc, --diagnose-bsc-detail, --diagnose-openngc-detail or --live.');process.exitCode=1;}
 }

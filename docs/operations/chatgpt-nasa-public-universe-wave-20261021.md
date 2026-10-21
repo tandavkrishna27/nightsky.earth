@@ -60,6 +60,12 @@ A follow-up classifier now records HTTP status and byte count, JSON/schema statu
 
 Primary operating references: [production activation packet](production-multi-provider-activation-20261020.md), [provider rights and public pages](chatgpt-provider-rights-and-public-pages-20261019.md), [additional sky providers](additional-sky-providers-20261017.md).
 
+## HR 617 live selected-detail acceptance
+
+The subsequent exact-commit CI passed on both Windows and Ubuntu. Under the owner's two-request allowance, the corrected HR 617 search and exact selected detail both returned `available` with HTTP 200. The search contained exactly the expected ID and one result; all five reviewed source-pin checks were true. The selected detail had `revisionAssociation=verified`. Exactly two requests were made, 9,621 response bytes were accepted, no raw body was saved, and the local month ledger advanced from 21 to **23**. This proves the BSC selected-record path from this computer, not server egress or full-catalogue rights. Public Universe remains off in production.
+
+The [public OpenNGC starter file](https://github.com/Wicked-Sick-Ltd/solar-system-db/blob/main/solar_db/data/starter/openngc.json) and the same manifest show a 108-row snapshot with the previously pinned hash but a commit-pinned OpenNGC URL, `CC-BY-SA-4.0` label and fuller adaptation attribution. NightSky's OpenNGC credit pins and synthetic fixture have been aligned to that published metadata while retaining the same snapshot and selected-identity checks. A separate two-request OpenNGC search/detail mode now prevents an HR 617 request from consuming its allowance. The new mode needs exact-commit CI and a fresh bounded live check before admission.
+
 ## One-request source-credit diagnosis and correction, 21 October
 
 After exact-commit CI passed, the owner authorized one `--diagnose-bsc` request from the 20-request local ledger. The runner made exactly one request, received HTTP 200 and 6,391 bytes, and did not save or print the response body. Its fixed classifier found a schema-valid result with the expected `bsc5p:hr617` ID. The BSC snapshot hash and licence URL matched NightSky's pins; source URL, licence label and attribution did not. The provider correctly returned `invalid-response`. The local month ledger is now **21**; this allowance is closed. No detail or OpenNGC call occurred, and production remains unchanged.
