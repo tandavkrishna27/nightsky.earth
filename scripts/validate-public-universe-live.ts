@@ -15,7 +15,7 @@ async function regular(path:string) {
   if(!stat.isFile()||stat.isSymbolicLink()||stat.nlink!==1) throw Error('Existing regular quota files required.');
 }
 
-export async function runPublicUniverseDiagnostic(env:Record<string,string|undefined>, transport:typeof fetch=fetch) {
+export async function runPublicUniverseDiagnostic(env:Record<string,string|undefined>, transport:typeof fetch=fetch, maxRequests:1|4=4) {
   const path=publicUniverseQuotaPath(env);
   if(!path) throw Error('Dedicated quota path required.');
   await regular(path); await regular(path+'.initialized');
@@ -32,7 +32,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
     if(url.origin!==PUBLIC_UNIVERSE_ORIGIN||url.username||url.password||url.port||init?.method!=='GET'||
       !/^\/api\/v1\/starter-targets(?:\/(?:bsc5p%3Ahr\d+|openngc%3A(?:NGC|IC)\d+))?$/.test(url.pathname)||
       (search ? (url.searchParams.size!==3||!['bsc5p:hr617','openngc:NGC1976'].includes(url.searchParams.get('q')??'')||url.searchParams.get('limit')!=='10'||url.searchParams.get('offset')!=='0'||usedSearches.has(url.searchParams.get('q')!)) : (url.search!==''||!allowedDetails.delete(url.pathname)))||
-      attempts>=PLAN.requests||Date.now()>=deadline) throw Error('Diagnostic request refused.');
+      attempts>=maxRequests||Date.now()>=deadline) throw Error('Diagnostic request refused.');
     if(search) usedSearches.add(url.searchParams.get('q')!);
     attempts++;
     const signal=AbortSignal.any([AbortSignal.timeout(Math.max(1,deadline-Date.now())),...(init?.signal?[init.signal]:[])]);
@@ -74,7 +74,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
   const records:Array<{domain:string;searchStatus:string;searchErrorCode?:string;searchReason?:string;httpStatus?:number;responseBytes?:number;schemaStatus?:'valid'|'invalid'|'not-json';schemaIssuePaths?:string[];resultCount?:number;expectedIdPresent?:boolean;pinChecks?:PinChecks;searchTotal?:number|null;detailStatus?:string;detailErrorCode?:string;source?:string;sourceSnapshotSha256?:string;licence?:string;licenceUrl?:string;attribution?:string;modifications?:string;selectedIdentityDigest?:string;revisionAssociation?:string}>=[];
   try {
     for(const [source,query,expectedId] of [['bsc5p','bsc5p:hr617','bsc5p:hr617'],['openngc','openngc:NGC1976','openngc:NGC1976']] as const){
-      if(Date.now()>=deadline)break;
+      if(attempts>=maxRequests||Date.now()>=deadline)break;
       const search=await provider.searchReferenceObjects({domain:'starter-targets',query,limit:10});
       const match=search.data?.matches.find(row=>row.upstreamId===expectedId);
       const entry:typeof records[number]={domain:source,searchStatus:search.status};
@@ -94,7 +94,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
         entry.attribution=foundCredit.attribution??undefined;
         entry.modifications=foundCredit.modifications??undefined;
       }
-      if(match?.selection && attempts<PLAN.requests && Date.now()<deadline){
+      if(match?.selection && attempts<maxRequests && Date.now()<deadline){
         const detail=await provider.getReferenceDetails({kind:'selected-object',...match.selection,sections:[]});
         entry.detailStatus=detail.status;
         if(detail.errorCode) entry.detailErrorCode=detail.errorCode;
@@ -118,6 +118,7 @@ export async function runPublicUniverseDiagnostic(env:Record<string,string|undef
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   if(process.argv.length===3&&process.argv[2]==='--plan') console.log(JSON.stringify(PLAN));
+  else if(process.argv.length===3&&process.argv[2]==='--diagnose-bsc') runPublicUniverseDiagnostic(process.env,fetch,1).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
   else if(process.argv.length===3&&process.argv[2]==='--live') runPublicUniverseDiagnostic(process.env).then(x=>console.log(JSON.stringify(x)),()=>{console.error('Public Universe diagnostic stopped. No automatic retry.');process.exitCode=1;});
-  else {console.error('Use --plan or --live.');process.exitCode=1;}
+  else {console.error('Use --plan, --diagnose-bsc or --live.');process.exitCode=1;}
 }

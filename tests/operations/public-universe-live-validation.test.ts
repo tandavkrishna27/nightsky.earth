@@ -57,6 +57,12 @@ test('synthetic selected-record diagnostic uses four GET routes, preserves quota
     assert(report.records.every(r=>r.expectedIdPresent&&r.pinChecks&&Object.values(r.pinChecks).every(Boolean)));
     assert.equal(report.records[1].searchTotal,2);
     assert.equal(JSON.stringify(report).includes('synthetic-secret-raw-body'),false);
+    const priorCalls=urls.length;
+    const oneRequestReport=await runPublicUniverseDiagnostic(env,fake,1);
+    assert.equal(oneRequestReport.attempts,1);
+    assert.equal(urls.length,priorCalls+1);
+    assert.equal(oneRequestReport.records.length,1);
+    assert.equal(oneRequestReport.records[0].detailStatus,undefined);
     const after=JSON.parse(await readFile(path,'utf8'));
     assert.deepEqual(after.entries.publicuniverse.imported,before.entries.publicuniverse.imported);
     assert.equal(after.entries.publicuniverse.disabled,false);
