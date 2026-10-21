@@ -9,11 +9,11 @@ const reviewed = {
   source: 'bsc5p',
   snapshot_sha256: '7fe926d80b535f9422ca81f8f3fee1d6422de29adaecfbd2f14b1a93fe5134b9',
   upstream_sha256: 'b'.repeat(64),
-  source_url: 'https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html',
+  source_url: 'https://heasarc.gsfc.nasa.gov/FTP/heasarc/dbase/tdat_files/heasarc_bsc5p.tdat.gz',
   retrieved_at: '2026-10-18T12:00:00Z',
-  license: 'HEASARC data-use policy',
+  license: 'NASA government-works; HEASARC free-use policy',
   license_url: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html',
-  attribution: 'Hoffleit & Warren (1991); NASA/GSFC HEASARC',
+  attribution: 'Hoffleit and Warren (1991), Bright Star Catalog, 5th revised preliminary edition; NASA/GSFC HEASARC',
 };
 const star = { id: 'bsc5p:hr2491', name: 'Synthetic star', source: 'bsc5p', aliases: [], families: ['bright_star'], object_type: 'star', ra_deg: 1, dec_deg: 2, astrometry: { status: 'verified', frame: 'FK5', equinox: 'J2000', reference_epoch_jyear: 2000, observation_epoch_jyear: null, motion_model: 'static_catalogue_direction' } };
 

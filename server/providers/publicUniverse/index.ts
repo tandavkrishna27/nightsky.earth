@@ -32,10 +32,10 @@ type Item = {
 export const REVIEWED_STARTER_SOURCES: Record<string, {snapshot: string; sourceUrl: string; licence: string; licenceUrl: string; attribution: string}> = {
     bsc5p: {
         snapshot: '7fe926d80b535f9422ca81f8f3fee1d6422de29adaecfbd2f14b1a93fe5134b9',
-        sourceUrl: 'https://heasarc.gsfc.nasa.gov/W3Browse/star-catalog/bsc5p.html',
-        licence: 'HEASARC data-use policy',
+        sourceUrl: 'https://heasarc.gsfc.nasa.gov/FTP/heasarc/dbase/tdat_files/heasarc_bsc5p.tdat.gz',
+        licence: 'NASA government-works; HEASARC free-use policy',
         licenceUrl: 'https://heasarc.gsfc.nasa.gov/docs/heasarc/data_policy.html',
-        attribution: 'Hoffleit & Warren (1991); NASA/GSFC HEASARC',
+        attribution: 'Hoffleit and Warren (1991), Bright Star Catalog, 5th revised preliminary edition; NASA/GSFC HEASARC',
     },
     openngc: {
         snapshot: 'd8517e8d195ce69700645b60f8d6603d2aebba0e8e21f47603a4d6a31fe667a1',
