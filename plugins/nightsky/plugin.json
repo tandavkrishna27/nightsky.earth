@@ -49,10 +49,10 @@
               "expected_behavior": "Resolve the intended year, then show supported event evidence, darkness, Moon and radiant evidence where available. If the next season lacks a dated peak or forecast, label that gap rather than inventing one."
             },
             {
-              "description": "Selected starter catalogue reference",
-              "prompt": "Find the exact starter catalogue reference bsc5p:hr617. Explain its original catalogue source and coordinate frame, and whether those coordinates show me where to look tonight.",
-              "tools_triggered": "search_reference_objects",
-              "expected_behavior": "Use the exact returned bsc5p:hr617 identity. Preserve the Hoffleit and Warren/NASA HEASARC Bright Star Catalog credit and FK5 J2000 coordinate context. Explain that catalogue coordinates alone are not a current local sky position or visibility result. If a selected detail is available in the same turn, get_reference_details may add it using the returned reference and revision; do not invent it if unavailable."
+              "description": "Beginner visible targets and preparation",
+              "prompt": "What could a beginner see from London, United Kingdom on the next suitable evening and how should I start?",
+              "tools_triggered": "resolve_place, plan_observing_session",
+              "expected_behavior": "Explain supported visible targets, local timing, Moon and beginner preparation. State source gaps and avoid visibility guarantees."
             },
             {
               "description": "First astrophotography session",
