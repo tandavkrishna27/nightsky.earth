@@ -1,5 +1,7 @@
 # Claude remote MCP route
 
+The shared-server and client-specific release boundaries are recorded in the [multi-client release process](multi-client-release-process.md). Claude's package and directory review are independent of ChatGPT's package and listing.
+
 **Reviewed:** 22 October 2026 from Anthropic's directory documentation. Product availability and account policy can change; verify again before submission.
 
 ## Public directory path
