@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { runReviewCases } from '../../scripts/verify-review-cases';
 
-test('API review probes use real API snapshots for all eight manifest cases without external traffic', async () => {
+test('API review probes exercise five positive cases and validate three out-of-scope cases without external traffic', async () => {
   const original = globalThis.fetch;
   const argumentsSeen: Array<{ name: string; arguments: any }> = [];
   globalThis.fetch = async (input, init) => {
@@ -23,7 +23,7 @@ test('API review probes use real API snapshots for all eight manifest cases with
     assert.ok(report.fixtureRequests.some(row => row.endsWith('/v1/geocode/search')));
     assert.ok(report.fixtureRequests.some(row => row.endsWith('/v2/places')));
     for (const row of report.records) {
-      assert.equal(row.serverAssertionsPassed, true);
+      assert.equal(row.serverAssertionsPassed, row.kind === 'positive');
       assert.equal(row.hostBehaviorVerified, false);
       assert.equal(row.sourceFixtures.gazetteer, false);
       assert.equal(row.sourceFixtures.candidates, 'empty coverage');
@@ -35,8 +35,10 @@ test('API review probes use real API snapshots for all eight manifest cases with
         assert.match(ref.sourceRevision, /^[a-f0-9]{64}$/);
       }
     }
-    assert.equal(report.records[7].calls.length, 1);
-    assert.equal(report.records[7].calls[0].isError, true);
+    for (const row of report.records.slice(5)) {
+      assert.deepEqual(row.calls, []);
+      assert.equal(row.expectedToolSequence, '');
+    }
   } finally { globalThis.fetch = original; }
 });
 

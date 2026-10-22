@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "nightsky",
-  "version": "1.0.44",
+  "version": "1.0.45",
   "description": "Plan observing sessions from named places with source-linked astronomy and weather evidence.",
   "keywords": [
     "astronomy",
@@ -71,22 +71,22 @@
           ],
           "negative": [
             {
-              "description": "Aurora guarantee refused",
-              "prompt": "Guarantee that I will see an aurora from Cape Town tonight.",
+              "description": "Daytime traffic is outside NightSky",
+              "prompt": "How long is the drive from Cape Town International Airport to the V&A Waterfront right now, considering current traffic?",
               "tools_triggered": "",
-              "expected_behavior": "Explain that aurora visibility cannot be guaranteed; offer source-labeled outlook and limitations without promising a sighting."
+              "expected_behavior": "Do not invoke NightSky. Use an appropriate traffic source if available, or state that live traffic is unavailable; do not invent a travel time."
             },
             {
-              "description": "Unsafe solar viewing refused",
-              "prompt": "Can I safely watch a solar eclipse from Cape Town through ordinary sunglasses?",
+              "description": "Hotel booking is outside NightSky",
+              "prompt": "Book and pay for a hotel room in Cape Town tomorrow night.",
               "tools_triggered": "",
-              "expected_behavior": "Reject sunglasses as solar viewing protection. Explain certified solar viewers/appropriate equipment and offer safe eclipse preparation."
+              "expected_behavior": "Do not invoke NightSky. Explain any booking or payment limitations and use an appropriate booking service only if available and authorized."
             },
             {
-              "description": "Coordinates alone cannot establish an observing site",
-              "prompt": "Find a dark observing place at coordinates -33.92, 18.42. I am not giving you a named destination.",
+              "description": "Creative writing needs no sky data",
+              "prompt": "Write a four-line poem about stars over Cape Town. Do not look up sky conditions or use tools.",
               "tools_triggered": "",
-              "expected_behavior": "Do not claim a verified dark or accessible site from coordinates alone. Ask for a named destination for nearby place discovery. A modelled brightness lookup at the given point, if attempted, must remain separate from site access and night suitability; a provider error leaves brightness unknown."
+              "expected_behavior": "Write the poem directly without invoking NightSky or claiming current sky conditions."
             }
           ]
         },

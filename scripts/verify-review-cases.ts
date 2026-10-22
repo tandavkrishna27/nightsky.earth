@@ -84,21 +84,20 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
   try {
     await rpc('initialize', { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'nightsky-offline-review', version: '1.0.0' } });
     for (const [caseIndex, scenario] of [...cases.positive, ...cases.negative].entries()) {
-      const roles = ['casual', 'meteor', 'beginner', 'photography', 'two-night-comparison', 'aurora-guarantee', 'solar-sunglasses', 'typed-coordinates'];
-      const descriptions = ['Casual named-destination session', 'Meteor shower with source gaps', 'Beginner visible targets and preparation', 'First astrophotography session', 'Two telescope nights', 'Aurora guarantee refused', 'Unsafe solar viewing refused', 'Coordinates alone cannot establish an observing site'];
+      const roles = ['casual', 'meteor', 'beginner', 'photography', 'two-night-comparison', 'daytime-traffic', 'hotel-booking', 'creative-writing'];
+      const descriptions = ['Casual named-destination session', 'Meteor shower with source gaps', 'Beginner visible targets and preparation', 'First astrophotography session', 'Two telescope nights', 'Daytime traffic is outside NightSky', 'Hotel booking is outside NightSky', 'Creative writing needs no sky data'];
       assert.equal(scenario.description, descriptions[caseIndex], 'Review metadata case order changed; update fixture bindings deliberately');
-      const record: CaseRecord = { caseId: roles[caseIndex], role: caseIndex < 5 ? 'positive service sequence' : 'negative service probe; assistant behavior pending', serverProbeRationale: caseIndex < 5 ? 'Manually scripted positive tool sequence; assistant routing is untested.' : caseIndex === 7 ? 'Intentionally submit coordinate input directly to the named-place resolver to prove it rejects coordinates. The separate light-pollution tool does accept evaluated coordinate points; this probe does not test assistant routing or access claims.' : 'Intentionally request a supporting plan to inspect server evidence and safety instructions. This does not demonstrate an assistant refusal or tool routing.', kind: caseIndex < 5 ? 'positive' : 'negative', description: scenario.description, prompt: scenario.prompt, expectedToolSequence: scenario.tools_triggered, expectedHostBehavior: scenario.expected_behavior, serverAssertionsPassed: false, hostBehaviorVerified: false, assertions: [], calls: [], sourceFixtures: { gazetteer: !api, location: api ? 'api fixture responses' : 'synthetic local index', weather: true, aurora: true, candidates: 'empty coverage', history: 'unavailable', events: 'production catalog, rights gaps preserved', astronomy: 'production calculations' } };
+      const record: CaseRecord = { caseId: roles[caseIndex], role: caseIndex < 5 ? 'positive service sequence' : 'negative metadata only; assistant behavior pending', serverProbeRationale: caseIndex < 5 ? 'Manually scripted positive tool sequence; assistant routing is untested.' : 'This prompt is outside NightSky scope. No service call is made; only a normal ChatGPT host run can establish whether the plugin stays unused.', kind: caseIndex < 5 ? 'positive' : 'negative', description: scenario.description, prompt: scenario.prompt, expectedToolSequence: scenario.tools_triggered, expectedHostBehavior: scenario.expected_behavior, serverAssertionsPassed: false, hostBehaviorVerified: false, assertions: [], calls: [], sourceFixtures: { gazetteer: !api, location: api ? 'api fixture responses' : 'synthetic local index', weather: true, aurora: true, candidates: 'empty coverage', history: 'unavailable', events: 'production catalog, rights gaps preserved', astronomy: 'production calculations' } };
       async function call(toolName: string, args: unknown, expectError = false): Promise<any> {
         const response = await rpc('tools/call', { name: toolName, arguments: args });
         record.calls.push({ requestId: response.id, toolName, isError: response.result.isError === true, sourceNames: response.result.structuredContent?.sources?.map((source: SourceRecord) => source.name) ?? [] });
         assert.equal(response.result.isError === true, expectError, `${toolName} unexpected tool error: ${JSON.stringify(response.result)}`);
         return expectError ? response.result : response.result.structuredContent;
       }
-      if (caseIndex === 7) {
-        assert.equal(scenario.prompt, 'Find a dark observing place at coordinates -33.92, 18.42. I am not giving you a named destination.');
-        const rejected = await call('resolve_place', { placeQuery: '-33.92, 18.42' }, true);
-        assert.match(JSON.stringify(rejected), /named|coordinate/i);
-        record.assertions.push('coordinate-shaped tool input rejected; no planner or reverse geocoder');
+      if (caseIndex >= 5) {
+        assert.equal(scenario.tools_triggered, '');
+        assert.match(scenario.expected_behavior, /Do not invoke NightSky|without invoking NightSky/);
+        record.assertions.push('no NightSky tool call in offline fixture; host routing must be checked separately');
       } else {
         const resolved = await call('resolve_place', { placeQuery: 'Cape Town, South Africa' });
         assert.equal(resolved.matches[0].displayName, 'Cape Town, South Africa');
@@ -117,7 +116,7 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
           if (caseIndex === 1) { const events = await call('search_sky_events', { ...selection, window }); assert.ok(events.sources.length); assert.ok(events.caveats.length); record.assertions.push('event catalog returns source and rights/coverage caveats'); }
           if (caseIndex === 2) { const target = await call('get_target_visibility', { ...selection, targetQuery: 'Saturn', window }); assert.ok(target.sources.length); record.assertions.push('supported target has calculated orientation evidence'); }
           if (caseIndex === 3) { const target = await call('get_target_visibility', { ...selection, targetQuery: 'Milky Way', window }); assert.ok(target.sources.length); await call('get_night_conditions', { ...selection, window }); }
-          const activity = ['general-stargazing','meteor-shower','learning','astrophotography','','aurora','eclipse'][caseIndex];
+          const activity = ['general-stargazing','meteor-shower','learning','astrophotography'][caseIndex];
           const result = planResultSchema.parse(await call('plan_observing_session', { ...selection, activity, window, experience: 'beginner', ...(caseIndex === 3 ? { target: 'Milky Way' } : {}) }));
           assert.equal(result.place.placeId, placeId); assert.ok(result.evidence?.astronomy); assert.ok(result.factors.some(factor => /Moon/.test(factor.name))); assert.equal(result.evidence?.weather?.forecasts[0].source.name, fixtureSource.name);
           assert.equal(result.evidence?.weather?.forecasts[0].samples[0].validAt, window.startUtc.slice(0,10) + 'T22:00:00Z');
@@ -125,12 +124,10 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
           if (caseIndex === 1) { assert.ok(result.evidence?.events); record.assertions.push('meteor evidence or explicit catalog gap retained'); }
           if (caseIndex === 2) { assert.ok(result.preparation.length); assert.ok(result.suggestions?.length); record.assertions.push('beginner preparation and calculated target suggestions'); }
           if (caseIndex === 3) { assert.ok(result.preparation.some(step => /camera.*lens|lens.*camera/i.test(step))); assert.ok(result.caveats.some(caveat => /seeing.*transparency/i.test(caveat))); record.assertions.push('photography gear question and unsupported seeing/transparency limits'); }
-          if (caseIndex === 5) { if (api) { assert.equal(result.evidence?.aurora?.sourceRevision, selection.sourceRevision); assert.equal(result.evidence?.aurora?.displayTimeZone, window.timeZone); } assert.equal(result.evidence?.aurora?.outlook.status, 'not-covered'); assert.ok(result.factors.some(factor => factor.name === 'Aurora outlook' && /not-covered/i.test(factor.assessment))); assert.ok(!/guaranteed sighting|will see an aurora/i.test(result.summary)); record.assertions.push('aurora no coverage and weather kept separate; no guaranteed sighting in server summary'); }
-          if (caseIndex === 6) { assert.ok(result.preparation.some(step => /ISO 12312-2/.test(step) && /sunglasses are not safe/i.test(step))); assert.ok(result.preparation.some(step => /solar filter.*front aperture/i.test(step))); assert.ok(result.sources.some(source => source.url.includes('science.nasa.gov') && /safety/i.test(source.url))); record.assertions.push('solar safety and NASA provenance'); }
         }
       }
       if (caseIndex < 5) assert.deepEqual(record.calls.map(call => call.toolName), scenario.tools_triggered.split(',').map(name => name.trim()), 'Manifest expected positive sequence must match scripted probes');
-      record.serverAssertionsPassed = true; records.push(record);
+      record.serverAssertionsPassed = caseIndex < 5; records.push(record);
     }
     assert.equal(externalAttempts, 0, 'Unexpected external provider attempt');
     return { manifestSha256, locationMode: api ? 'api-fixture' as const : 'legacy-fixture' as const, gazetteerFilesUsed: false as const, fixtureRequests, mode: `offline ${api ? 'API fixture' : 'legacy fixture'} loopback MCP; manually scripted tool calls, no LLM`, manifestCases: { positive: 5, negative: 3 }, externalAttempts, hostBehaviorVerified: false, records };
@@ -141,5 +138,5 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const output = resolve(position < 0 ? 'dist/review-rehearsal' : args[position + 1]);
   const report = await runReviewCases({ offline: args.includes('--offline'), apiFixture: args.includes('--api-fixture') });
   mkdirSync(output, { recursive: true }); writeFileSync(join(output, 'review-case-report.json'), JSON.stringify(report, null, 2) + '\n');
-  console.log(`Offline review: ${report.records.length}/8 server assertion sets passed; external attempts ${report.externalAttempts}; host behavior pending.`);
+  console.log(`Offline review: ${report.records.filter(row => row.serverAssertionsPassed).length}/5 positive server probes passed; 3/3 negative definitions checked; external attempts ${report.externalAttempts}; ChatGPT routing pending.`);
 }
