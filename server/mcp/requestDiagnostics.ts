@@ -4,12 +4,13 @@ import type { RequestHandler } from 'express';
 import { V1_TOOL_ANNOTATIONS } from './registerTools';
 import { OPTIONAL_SKY_TOOL_NAMES } from './optionalSkyTools';
 import { LIGHT_POLLUTION_TOOL_NAMES } from './lightPollutionTools';
+import { RESULT_CARD_URI } from './resultCard';
 
 const methods = ['initialize', 'ping', 'tools/list', 'tools/call', 'notifications/initialized', 'notifications/cancelled', 'resources/list', 'resources/read', 'resources/templates/list', 'prompts/list', 'prompts/get', 'logging/setLevel', 'completion/complete'] as const;
 export type McpDiagnosticMethod = typeof methods[number] | 'OTHER';
 export type McpDiagnosticTool = keyof typeof V1_TOOL_ANNOTATIONS | typeof OPTIONAL_SKY_TOOL_NAMES[number] | typeof LIGHT_POLLUTION_TOOL_NAMES[number] | 'unknown';
 export type McpDiagnosticReason = 'completed' | 'client-disconnected' | 'global-limit' | 'tool-limit' | 'protocol-limit' | 'key-limit' | 'subject-limit' | 'concurrency-limit' | 'host-rejected' | 'proxy-rejected' | 'handler-failure' | 'unknown-rejection';
-type Labels = {requestId: string; method: McpDiagnosticMethod; tool: McpDiagnosticTool};
+type Labels = {requestId: string; method: McpDiagnosticMethod; tool: McpDiagnosticTool; resource: 'planning-card' | 'other' | 'none'};
 export type McpDiagnosticEvent =
  | (Labels & {kind: 'ingress'; status: null; elapsedMs: 0; reason: 'ingress'})
  | (Labels & {kind: 'completion'; status: number; elapsedMs: number; reason: McpDiagnosticReason});
@@ -32,7 +33,8 @@ export function mcpRequestDiagnostics(sink?: McpDiagnosticSink): {middleware: Re
   const method = methods.includes(rawMethod) ? rawMethod as McpDiagnosticMethod : 'OTHER';
   const name = method === 'tools/call' ? body?.params?.name : undefined;
   const tool = typeof name === 'string' && knownTools.has(name) ? name as McpDiagnosticTool : 'unknown';
-  const labels: Labels = {requestId, method, tool};
+  const resource = method === 'resources/read' ? body?.params?.uri === RESULT_CARD_URI ? 'planning-card' : 'other' : 'none';
+  const labels: Labels = {requestId, method, tool, resource};
   const start = performance.now(); let done = false;
   const complete = (closed: boolean) => {
    if (done) return; done = true;
