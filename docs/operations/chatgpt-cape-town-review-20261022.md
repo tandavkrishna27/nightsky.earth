@@ -10,7 +10,7 @@ ChatGPT described an HTTP 500 during the coordinates-only prompt. A read-only pr
 
 Version 1.0.45 keeps the five Cape Town positive cases and replaces the three negative cases with unrelated traffic, hotel-booking and creative-writing prompts. Each expects zero NightSky tool calls. Offline review probes execute the five positive service sequences and validate the three negative case definitions; they do not verify ChatGPT's routing behavior. The photography case does not require `recommend_specialist_tools`, which has a separate portal finding.
 
-The current video supports the five positive cases. It needs a replacement negative-case segment or new recording before final submission. In a normal ChatGPT chat with NightSky connected, run the three negative prompts without explicitly selecting or mentioning the NightSky plugin, and confirm the tool trace has no NightSky calls. Update the package recording URL to the final video before uploading the final ZIP.
+The [final four-minute video](https://youtu.be/Li6HToAcLpM) keeps the five positive Cape Town demonstrations and replaces the outdated ending with three normal ChatGPT chats for traffic, hotel booking and a poem. NightSky was connected but not explicitly selected or mentioned in those three prompts; no NightSky tool call appeared. The video was assembled from the two supplied recordings and decoded successfully before upload.
 
 ## Release decision
 
