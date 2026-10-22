@@ -1,7 +1,14 @@
 {
   "name": "nightsky",
+  "displayName": "NightSky.earth",
   "version": "1.0.0",
   "description": "Plan observing sessions from named places with source-linked astronomy and weather evidence.",
+  "homepage": "https://nightsky.earth/",
+  "repository": "https://github.com/tandavkrishna27/nightsky.earth",
+  "documentationUrl": "https://nightsky.earth/get-started/",
+  "privacyPolicyUrl": "https://nightsky.earth/privacy/",
+  "supportUrl": "https://nightsky.earth/contact/",
+  "termsOfServiceUrl": "https://nightsky.earth/terms/",
   "author": {
     "name": "Tandav Krishna",
     "url": "https://nightsky.earth/"
