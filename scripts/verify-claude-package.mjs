@@ -20,8 +20,8 @@ if (!existsSync(join(packageRoot, 'README.md')) || !existsSync(join(packageRoot,
   throw new Error('Claude package is missing its README or license.');
 }
 const servers = Object.values(connection.mcpServers ?? {});
-if (servers.length !== 1 || servers[0]?.type !== 'http' || servers[0]?.url !== 'https://mcp.nightsky.earth/mcp') {
-  throw new Error('Claude package must declare only the reviewed public HTTPS MCP endpoint.');
+if (servers.length !== 1 || servers[0]?.type !== 'http' || servers[0]?.url !== 'https://mcp.nightsky.earth/mcp?presentation=text') {
+  throw new Error('Claude package must declare only the reviewed text-mode HTTPS MCP endpoint.');
 }
 for (const name of expectedSkills) {
   for (const relative of ['SKILL.md', join('references', 'workflow.md')]) {
