@@ -74,7 +74,7 @@
               "description": "Daytime traffic is outside NightSky",
               "prompt": "How long is the drive from Cape Town International Airport to the V&A Waterfront right now, considering current traffic?",
               "tools_triggered": "",
-              "expected_behavior": "Do not invoke NightSky. Use an appropriate traffic source if available, or state that live traffic is unavailable; do not invent a travel time."
+              "expected_behavior": "Do not invoke NightSky. Do not claim live traffic without a live source; if unavailable, label any broad travel-time guidance as an estimate."
             },
             {
               "description": "Hotel booking is outside NightSky",
