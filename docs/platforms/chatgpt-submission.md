@@ -1,5 +1,7 @@
 # Submission status template
 
+**Current handoff, 22 October 2026:** The operator reported that the ChatGPT plugin was submitted for review. The directory decision has not been verified in this source document. The table below is the earlier preparation template, not the current live submission state. Keep ChatGPT's listing/version/reviewer correspondence separate from Claude's [release track](multi-client-release-process.md).
+
 Prepared 13 October 2026. Status: local preparation only; nothing uploaded, submitted or published.
 
 Before upload/review, reconcile [local package readiness](../operations/local-package-readiness.md), the exact artifact/report and the current official requirements. Verify publisher identity, eligible organization/project/residency, policy/support routes, fixed production endpoint, domain challenge, production scans, all five positive/three negative cases and accessible video. Preserve source/coverage limitations and approved scope dispositions.
