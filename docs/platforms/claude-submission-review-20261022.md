@@ -27,6 +27,8 @@ On 22 October, a private Claude chat loaded the 19 connected tools without a pro
 
 Claude displayed “There was a problem displaying content from NightSky.earth private test” where the planning card should appear, although its text answer used the successful plan response. Treat MCP App rendering as an open issue for Claude. Do not use the host's Retry button for diagnosis because that can repeat provider calls. Inspect the card's resource/protocol behavior and resolve or explicitly scope a Claude text-only route before public connector submission.
 
+The server logs showed a later `resources/read` completion at 11:49:55 UTC with HTTP 200 but did not record the URI, so it cannot be attributed to this card. The diagnostic plan at `docs/superpowers/plans/2026-10-22-claude-card-diagnosis.md` adds a fixed planning-card/other label before another observation. A successful generic resource read is not evidence that Claude rendered the NightSky card.
+
 ## Portal handoff
 
 - Connector listing: service name, concise purpose, icon, documentation, privacy and support URLs, no-auth public-data configuration, truthful provider/data-flow disclosures, and at least three working example prompts. Provide reviewer access details only through portal fields; do not publish credentials.
