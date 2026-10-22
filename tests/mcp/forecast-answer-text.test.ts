@@ -39,7 +39,7 @@ test('Hyderabad rows bind each provider value to exact native UTC and local time
  const data=result([forecast('MET Norway',[['2026-10-18T15:00:00.000Z',80.5],['2026-10-18T16:00:00.000Z',47.7],['2026-10-18T17:00:00.000Z',18],['2026-10-18T18:00:00.000Z',30.5]]),forecast('WeatherAPI',[['2026-10-18T15:30:00.000Z',62],['2026-10-18T16:30:00.000Z',6],['2026-10-18T17:30:00.000Z',50]]),forecast('OpenWeather',[['2026-10-18T15:00:00.000Z',100],['2026-10-18T18:00:00.000Z',77]])]);
  const before=JSON.stringify(data),lines=forecastAnswerText(data),text=lines.join('\n');
  for(const [provider,utc,local,value] of [['MET Norway','15:00','20:30','80.5'],['MET Norway','16:00','21:30','47.7'],['MET Norway','17:00','22:30','18'],['WeatherAPI','16:30','22:00','6'],['OpenWeather','18:00','23:30','77']])assert.ok(lines.some(l=>l.includes(provider)&&l.includes(`T${utc}:00.000Z`)&&l.includes(local)&&l.includes(`totalCloudCover ${value} %`)),`${provider} ${local}`);
- assert.doesNotMatch(text,/totalCloudCover 25 %|interpolated value/);assert.match(text,/not continuous/);assert.equal(JSON.stringify(data),before);
+ assert.doesNotMatch(text,/totalCloudCover 25 %|interpolated value/);assert.match(text,/not continuous/);assert.match(text,/Do not suggest an in-between time range from nearby samples/);assert.equal(JSON.stringify(data),before);
 });
 
 test('quarter-hour zones and repeated DST hours retain their UTC identity',()=>{
