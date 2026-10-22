@@ -21,6 +21,12 @@ Prepare two listings in the same Claude organization: the production NightSky MC
 5. Review `recommend_specialist_tools` against Anthropic's prohibition on ads, sponsored content and promotional tool descriptions. The current tool offers optional product listings. No finding has yet established a violation, but this deserves an independent policy decision before connector submission.
 6. Inspect whether Claude renders the planning card as an MCP App. If it does, prepare the directory's required UI screenshots.
 
+### First native connector observation
+
+On 22 October, a private Claude chat loaded the 19 connected tools without a provider call. A bounded Cape Town request then made one `resolve_place` call and one `plan_observing_session` call, each approved once. Claude reused the returned place ID and source revision, used `Africa/Johannesburg` for 24 October 20:00–23:00, and produced a readable plan with timestamped MET Norway samples and Geoapify, OpenStreetMap, Astronomy Engine and MET Norway credits. No retry was selected. This checks the private connector and text response; it does not exercise the five packaged Claude skills or the full tool surface.
+
+Claude displayed “There was a problem displaying content from NightSky.earth private test” where the planning card should appear, although its text answer used the successful plan response. Treat MCP App rendering as an open issue for Claude. Do not use the host's Retry button for diagnosis because that can repeat provider calls. Inspect the card's resource/protocol behavior and resolve or explicitly scope a Claude text-only route before public connector submission.
+
 ## Portal handoff
 
 - Connector listing: service name, concise purpose, icon, documentation, privacy and support URLs, no-auth public-data configuration, truthful provider/data-flow disclosures, and at least three working example prompts. Provide reviewer access details only through portal fields; do not publish credentials.
