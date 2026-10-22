@@ -18,8 +18,8 @@ interface CallRecord { requestId: number; toolName: string; isError: boolean; so
 interface CaseRecord { caseId: string; role: string; serverProbeRationale: string; kind: 'positive'|'negative'; description: string; prompt: string; expectedToolSequence: string; expectedHostBehavior: string; serverAssertionsPassed: boolean; hostBehaviorVerified: false; assertions: string[]; calls: CallRecord[]; sourceFixtures: { gazetteer: boolean; location: 'api fixture responses' | 'synthetic local index'; weather: true; aurora: true; candidates: 'empty coverage'; history: 'unavailable'; events: 'production catalog, rights gaps preserved'; astronomy: 'production calculations' } }
 const manifestPath = fileURLToPath(new URL('../plugins/nightsky/plugin.json', import.meta.url));
 const fixtureSource: SourceRecord = { name: 'Review fixture weather', url: 'https://example.test/review-weather', attribution: 'Synthetic deterministic review fixture; not real forecast evidence.', dataClass: 'forecast', product: 'Offline 48-hour fixture' };
-const index = new GeoNamesPlaceIndex([{ geonameId: 2643743, name: 'London', asciiName: 'London', alternateNames: '', latitude: 51.5, longitude: -0.12, countryCode: 'GB', countryName: 'United Kingdom', featureClass: 'P', featureCode: 'PPLC', population: 8_000_000, timeZone: 'Europe/London', modificationDate: '2026-10-01' }], 'synthetic-review-fixture-2026-10');
-const night = (date: string): TimeWindow => ({ startUtc: date + 'T18:00:00Z', endUtc: new Date(Date.parse(date + 'T18:00:00Z') + 12 * 3600000).toISOString().replace('.000Z','Z'), timeZone: 'Europe/London' });
+const index = new GeoNamesPlaceIndex([{ geonameId: 3369157, name: 'Cape Town', asciiName: 'Cape Town', alternateNames: '', latitude: -33.92, longitude: 18.42, countryCode: 'ZA', countryName: 'South Africa', featureClass: 'P', featureCode: 'PPLA', population: 4_700_000, timeZone: 'Africa/Johannesburg', modificationDate: '2026-10-01' }], 'synthetic-review-fixture-2026-10');
+const night = (date: string): TimeWindow => ({ startUtc: date + 'T18:00:00Z', endUtc: new Date(Date.parse(date + 'T18:00:00Z') + 12 * 3600000).toISOString().replace('.000Z','Z'), timeZone: 'Africa/Johannesburg' });
 export async function runReviewCases(options: { offline: boolean; apiFixture?: boolean }) {
   assert.equal(options.offline, true, 'Explicit --offline required');
   const manifestBytes = readFileSync(manifestPath);
@@ -37,8 +37,8 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
       fixtureRequests.push(route);
       if (route === 'https://secure.geonames.org/searchJSON') return Response.json({ geonames: [] });
       if (route === 'https://api.geoapify.com/v1/geocode/search') return Response.json({ features: [{
-        type: 'Feature', geometry: { type: 'Point', coordinates: [-0.12, 51.5] },
-        properties: { place_id: 'review-london', name: 'London, United Kingdom', country_code: 'gb', timezone: { name: 'Europe/London' } },
+        type: 'Feature', geometry: { type: 'Point', coordinates: [18.42, -33.92] },
+        properties: { place_id: 'review-cape-town', name: 'Cape Town, South Africa', country_code: 'za', timezone: { name: 'Africa/Johannesburg' } },
       }] });
       if (route === 'https://api.geoapify.com/v2/places') return Response.json({ features: [] });
       externalAttempts++;
@@ -85,9 +85,9 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
     await rpc('initialize', { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'nightsky-offline-review', version: '1.0.0' } });
     for (const [caseIndex, scenario] of [...cases.positive, ...cases.negative].entries()) {
       const roles = ['casual', 'meteor', 'beginner', 'photography', 'two-night-comparison', 'aurora-guarantee', 'solar-sunglasses', 'typed-coordinates'];
-      const descriptions = ['Casual named-destination session', 'Meteor shower with source gaps', 'Beginner visible targets and preparation', 'First astrophotography session', 'Two telescope nights', 'Aurora guarantee refused', 'Unsafe solar viewing refused', 'Typed coordinates require named destination'];
+      const descriptions = ['Casual named-destination session', 'Meteor shower with source gaps', 'Beginner visible targets and preparation', 'First astrophotography session', 'Two telescope nights', 'Aurora guarantee refused', 'Unsafe solar viewing refused', 'Coordinates alone cannot establish an observing site'];
       assert.equal(scenario.description, descriptions[caseIndex], 'Review metadata case order changed; update fixture bindings deliberately');
-      const record: CaseRecord = { caseId: roles[caseIndex], role: caseIndex < 5 ? 'positive service sequence' : 'negative service probe; assistant behavior pending', serverProbeRationale: caseIndex < 5 ? 'Manually scripted positive tool sequence; assistant routing is untested.' : caseIndex === 7 ? 'Intentionally submit coordinate input directly to the resolver to prove server rejection. Expected assistant behavior is to ask for a name without tool calls.' : 'Intentionally request a supporting plan to inspect server evidence and safety instructions. This does not demonstrate an assistant refusal or tool routing.', kind: caseIndex < 5 ? 'positive' : 'negative', description: scenario.description, prompt: scenario.prompt, expectedToolSequence: scenario.tools_triggered, expectedHostBehavior: scenario.expected_behavior, serverAssertionsPassed: false, hostBehaviorVerified: false, assertions: [], calls: [], sourceFixtures: { gazetteer: !api, location: api ? 'api fixture responses' : 'synthetic local index', weather: true, aurora: true, candidates: 'empty coverage', history: 'unavailable', events: 'production catalog, rights gaps preserved', astronomy: 'production calculations' } };
+      const record: CaseRecord = { caseId: roles[caseIndex], role: caseIndex < 5 ? 'positive service sequence' : 'negative service probe; assistant behavior pending', serverProbeRationale: caseIndex < 5 ? 'Manually scripted positive tool sequence; assistant routing is untested.' : caseIndex === 7 ? 'Intentionally submit coordinate input directly to the named-place resolver to prove it rejects coordinates. The separate light-pollution tool does accept evaluated coordinate points; this probe does not test assistant routing or access claims.' : 'Intentionally request a supporting plan to inspect server evidence and safety instructions. This does not demonstrate an assistant refusal or tool routing.', kind: caseIndex < 5 ? 'positive' : 'negative', description: scenario.description, prompt: scenario.prompt, expectedToolSequence: scenario.tools_triggered, expectedHostBehavior: scenario.expected_behavior, serverAssertionsPassed: false, hostBehaviorVerified: false, assertions: [], calls: [], sourceFixtures: { gazetteer: !api, location: api ? 'api fixture responses' : 'synthetic local index', weather: true, aurora: true, candidates: 'empty coverage', history: 'unavailable', events: 'production catalog, rights gaps preserved', astronomy: 'production calculations' } };
       async function call(toolName: string, args: unknown, expectError = false): Promise<any> {
         const response = await rpc('tools/call', { name: toolName, arguments: args });
         record.calls.push({ requestId: response.id, toolName, isError: response.result.isError === true, sourceNames: response.result.structuredContent?.sources?.map((source: SourceRecord) => source.name) ?? [] });
@@ -95,19 +95,19 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
         return expectError ? response.result : response.result.structuredContent;
       }
       if (caseIndex === 7) {
-        assert.equal(scenario.prompt, 'Find a dark spot at 12.97, 77.59.');
-        const rejected = await call('resolve_place', { placeQuery: '12.97, 77.59' }, true);
+        assert.equal(scenario.prompt, 'Find a dark observing place at coordinates -33.92, 18.42. I am not giving you a named destination.');
+        const rejected = await call('resolve_place', { placeQuery: '-33.92, 18.42' }, true);
         assert.match(JSON.stringify(rejected), /named|coordinate/i);
         record.assertions.push('coordinate-shaped tool input rejected; no planner or reverse geocoder');
       } else {
-        const resolved = await call('resolve_place', { placeQuery: 'London, United Kingdom' });
-        assert.equal(resolved.matches[0].displayName, 'London, United Kingdom');
+        const resolved = await call('resolve_place', { placeQuery: 'Cape Town, South Africa' });
+        assert.equal(resolved.matches[0].displayName, 'Cape Town, South Africa');
         const placeId = resolved.matches[0].placeId;
         const selection = { placeId, ...(api ? { sourceRevision: resolved.matches[0].sourceRevision } : {}) };
-        if (api) { assert.match(selection.sourceRevision, /^[a-f0-9]{64}$/); assert.equal(resolved.matches[0].timeZoneEvidence.status, 'verified'); assert.equal(resolved.matches[0].timeZone, 'Europe/London'); }
+        if (api) { assert.match(selection.sourceRevision, /^[a-f0-9]{64}$/); assert.equal(resolved.matches[0].timeZoneEvidence.status, 'verified'); assert.equal(resolved.matches[0].timeZone, 'Africa/Johannesburg'); }
         const window = night(caseIndex === 1 ? '2026-08-12' : '2026-10-15');
         if (caseIndex === 4) {
-          const result = compareObservingOptionsResultSchema.parse(await call('compare_observing_options', { options: [window, night('2026-10-16')].map(window => ({ ...selection, activity: 'planet-observing', target: 'Jupiter', window })) }));
+          const result = compareObservingOptionsResultSchema.parse(await call('compare_observing_options', { options: [window, night('2026-10-16')].map(window => ({ ...selection, activity: 'planet-observing', target: 'Saturn', window })) }));
           assert.equal(result.comparisons.length, 2);
           for (const item of result.comparisons) { assert.ok(item.evidence?.target); assert.equal(item.evidence?.weather?.forecasts[0].source.name, fixtureSource.name); assert.equal(item.evidence?.weather?.forecasts[0].forecastHorizonHours, 48); assert.ok(item.availability); assert.ok(item.sources.length); }
           assert.notEqual(result.comparisons[0].window.startUtc, result.comparisons[1].window.startUtc);
@@ -115,6 +115,7 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
         } else {
           if (caseIndex === 0) { const candidates = await call('search_observing_locations', { ...selection }); assert.equal(candidates.candidates.length, 0); if (!api) assert.notEqual(candidates.availability.status, 'available'); else assert.equal(candidates.discoveryCoverage.mappedFeatureCompleteness, 'unknown'); record.assertions.push(api ? 'empty bounded API candidate fixture; mapped completeness unknown; no site or safety claim' : 'candidate coverage unavailable; no real site or safety claim'); }
           if (caseIndex === 1) { const events = await call('search_sky_events', { ...selection, window }); assert.ok(events.sources.length); assert.ok(events.caveats.length); record.assertions.push('event catalog returns source and rights/coverage caveats'); }
+          if (caseIndex === 2) { const target = await call('get_target_visibility', { ...selection, targetQuery: 'Saturn', window }); assert.ok(target.sources.length); record.assertions.push('supported target has calculated orientation evidence'); }
           if (caseIndex === 3) { const target = await call('get_target_visibility', { ...selection, targetQuery: 'Milky Way', window }); assert.ok(target.sources.length); await call('get_night_conditions', { ...selection, window }); }
           const activity = ['general-stargazing','meteor-shower','learning','astrophotography','','aurora','eclipse'][caseIndex];
           const result = planResultSchema.parse(await call('plan_observing_session', { ...selection, activity, window, experience: 'beginner', ...(caseIndex === 3 ? { target: 'Milky Way' } : {}) }));
@@ -123,7 +124,7 @@ export async function runReviewCases(options: { offline: boolean; apiFixture?: b
           assert.ok(result.caveats.some(caveat => /access|safety/.test(caveat))); record.assertions.push('named place, astronomy/Moon and separately labeled partial fixture weather');
           if (caseIndex === 1) { assert.ok(result.evidence?.events); record.assertions.push('meteor evidence or explicit catalog gap retained'); }
           if (caseIndex === 2) { assert.ok(result.preparation.length); assert.ok(result.suggestions?.length); record.assertions.push('beginner preparation and calculated target suggestions'); }
-          if (caseIndex === 3) { assert.ok(result.preparation.some(step => /camera.*lens|lens.*camera/i.test(step))); assert.ok(result.caveats.some(caveat => /seeing.*transparency/i.test(caveat))); await call('recommend_specialist_tools', { activity: 'astrophotography', experience: 'beginner' }); record.assertions.push('photography gear question and unsupported seeing/transparency limits'); }
+          if (caseIndex === 3) { assert.ok(result.preparation.some(step => /camera.*lens|lens.*camera/i.test(step))); assert.ok(result.caveats.some(caveat => /seeing.*transparency/i.test(caveat))); record.assertions.push('photography gear question and unsupported seeing/transparency limits'); }
           if (caseIndex === 5) { if (api) { assert.equal(result.evidence?.aurora?.sourceRevision, selection.sourceRevision); assert.equal(result.evidence?.aurora?.displayTimeZone, window.timeZone); } assert.equal(result.evidence?.aurora?.outlook.status, 'not-covered'); assert.ok(result.factors.some(factor => factor.name === 'Aurora outlook' && /not-covered/i.test(factor.assessment))); assert.ok(!/guaranteed sighting|will see an aurora/i.test(result.summary)); record.assertions.push('aurora no coverage and weather kept separate; no guaranteed sighting in server summary'); }
           if (caseIndex === 6) { assert.ok(result.preparation.some(step => /ISO 12312-2/.test(step) && /sunglasses are not safe/i.test(step))); assert.ok(result.preparation.some(step => /solar filter.*front aperture/i.test(step))); assert.ok(result.sources.some(source => source.url.includes('science.nasa.gov') && /safety/i.test(source.url))); record.assertions.push('solar safety and NASA provenance'); }
         }

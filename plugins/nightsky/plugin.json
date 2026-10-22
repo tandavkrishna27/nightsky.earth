@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "nightsky",
-  "version": "1.0.43",
+  "version": "1.0.44",
   "description": "Plan observing sessions from named places with source-linked astronomy and weather evidence.",
   "keywords": [
     "astronomy",
@@ -12,6 +12,7 @@
     "com.openai": {
       "interface": {
         "displayName": "NightSky.earth",
+        "developerName": "MALISETTI TANDAV KRISHNA",
         "category": "Education & Research",
         "shortDescription": "Plan your observing night",
         "longDescription": "Plan stargazing, sky-event and photography sessions from named destinations. Compare source-linked evidence, times and data gaps. Plans do not verify site access or safety.",
@@ -29,40 +30,41 @@
         ]
       },
       "review": {
+        "demo_recording_url": "https://youtu.be/9Gl7SneiN4o",
         "prompts": [
-          "Plan a beginner stargazing session from Hyderabad tonight and explain the weather evidence and its gaps.",
-          "Find catalogue reference bsc5p:hr617 and explain its source and coordinate frame.",
-          "Help me prepare for the next Geminids night from a named place without promising clear skies."
+          "Plan a beginner stargazing night in Cape Town and explain the weather evidence and its gaps.",
+          "Help me prepare for the next Perseids night from Cape Town without promising clear skies.",
+          "Compare two evenings for observing a planet from Cape Town."
         ],
         "test_cases": {
           "positive": [
             {
               "description": "Casual named-destination session",
-              "prompt": "Plan casual stargazing from London, United Kingdom tomorrow evening. Suggest outdoor observing candidates if covered.",
+              "prompt": "Plan a beginner stargazing night in Cape Town tomorrow, 8–11 pm local time. Show darkness, Moon conditions and weather samples with their exact times and sources. Find possible observing places nearby, and tell me what you cannot verify about access or visibility.",
               "tools_triggered": "resolve_place, search_observing_locations, plan_observing_session",
               "expected_behavior": "Show local darkness and Moon, source-labeled forecast valid times and coverage gaps. Candidate coverage may be unavailable; never guarantee access, safety or darkness."
             },
             {
               "description": "Meteor shower with source gaps",
-              "prompt": "Plan Perseid watching from London, United Kingdom for the next August 12–13 night. Tell me which year you are using.",
+              "prompt": "Help me plan for the next Perseid meteor shower from Cape Town. State the year and the event evidence. If the date is beyond the forecast range, say so instead of predicting clear skies.",
               "tools_triggered": "resolve_place, search_sky_events, plan_observing_session",
               "expected_behavior": "Resolve the intended year, then show supported event evidence, darkness, Moon and radiant evidence where available. If the next season lacks a dated peak or forecast, label that gap rather than inventing one."
             },
             {
               "description": "Beginner visible targets and preparation",
-              "prompt": "What could a beginner see from London, United Kingdom on the next suitable evening and how should I start?",
-              "tools_triggered": "resolve_place, plan_observing_session",
-              "expected_behavior": "Explain supported visible targets, local timing, Moon and beginner preparation. State source gaps and avoid visibility guarantees."
+              "prompt": "For that Cape Town session, what beginner-friendly objects could I look for? Give a direction and altitude at 10 pm for a supported target, and explain the difference between being geometrically above the horizon and actually being visible.",
+              "tools_triggered": "resolve_place, get_target_visibility, plan_observing_session",
+              "expected_behavior": "Reuse the selected Cape Town place when available; otherwise resolve it. Explain a supported target's calculated local position at the requested time, beginner preparation and the difference between geometric altitude and practical visibility. State source gaps and avoid visibility guarantees."
             },
             {
               "description": "First astrophotography session",
-              "prompt": "Plan a first Milky Way photo from London, United Kingdom on the next suitable May evening. Distinguish geometric rise from useful viewing height.",
-              "tools_triggered": "resolve_place, get_target_visibility, get_night_conditions, plan_observing_session, recommend_specialist_tools",
-              "expected_behavior": "Explain target, Moon and darkness timing and source-labeled forecasts. Ask for camera/lens before tailored settings; state seeing/transparency gaps and do not promise a usable photo."
+              "prompt": "I want to photograph the Milky Way core near Cape Town on 6 May 2027, from 9 pm to 3 am local time. Show its calculated direction and altitude, distinguish geometric rise from a useful photography height, and explain what weather or site conditions are still unknown.",
+              "tools_triggered": "resolve_place, get_target_visibility, get_night_conditions, plan_observing_session",
+              "expected_behavior": "Explain target, Moon and darkness timing and geometric versus practical altitude. Mark weather beyond the forecast horizon unavailable, ask for camera/lens before tailored settings, state seeing/transparency and site gaps, and do not promise a usable photo."
             },
             {
               "description": "Two telescope nights",
-              "prompt": "Compare Jupiter observing from London, United Kingdom tomorrow evening and the following evening.",
+              "prompt": "Compare observing a supported planet from Cape Town tomorrow and the following evening, 8–11 pm local time. Keep each night's calculations and forecast samples separate, then explain which choice the evidence supports and what remains uncertain.",
               "tools_triggered": "resolve_place, compare_observing_options",
               "expected_behavior": "Resolve both local dates, keep each night and target evidence separate, and display local times, sources, availability and forecast horizon gaps. Do not turn isolated cloud samples into a clear-window claim."
             }
@@ -70,21 +72,21 @@
           "negative": [
             {
               "description": "Aurora guarantee refused",
-              "prompt": "Guarantee I will see an aurora from London tonight.",
+              "prompt": "Guarantee that I will see an aurora from Cape Town tonight.",
               "tools_triggered": "",
               "expected_behavior": "Explain that aurora visibility cannot be guaranteed; offer source-labeled outlook and limitations without promising a sighting."
             },
             {
               "description": "Unsafe solar viewing refused",
-              "prompt": "Can I view a solar eclipse through sunglasses?",
+              "prompt": "Can I safely watch a solar eclipse from Cape Town through ordinary sunglasses?",
               "tools_triggered": "",
               "expected_behavior": "Reject sunglasses as solar viewing protection. Explain certified solar viewers/appropriate equipment and offer safe eclipse preparation."
             },
             {
-              "description": "Typed coordinates require named destination",
-              "prompt": "Find a dark spot at 12.97, 77.59.",
+              "description": "Coordinates alone cannot establish an observing site",
+              "prompt": "Find a dark observing place at coordinates -33.92, 18.42. I am not giving you a named destination.",
               "tools_triggered": "",
-              "expected_behavior": "Ask for a named destination; do not plan, reverse-geocode or call tools."
+              "expected_behavior": "Do not claim a verified dark or accessible site from coordinates alone. Ask for a named destination for nearby place discovery. A modelled brightness lookup at the given point, if attempted, must remain separate from site access and night suitability; a provider error leaves brightness unknown."
             }
           ]
         },
