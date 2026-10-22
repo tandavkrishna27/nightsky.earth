@@ -8,7 +8,7 @@ Prepare two listings in the same Claude organization: the production NightSky MC
 
 - The bundle has five skills, and each canonical workflow is copied inside its own skill folder because installed users receive only the selected plugin folder.
 - `.mcp.json` points to the public HTTPS endpoint and contains no provider credentials.
-- The bundle includes a README, logo and MIT license. `scripts/sync-claude-plugin.mjs` regenerates version, connection, logo and skills from canonical sources.
+- The bundle includes a README, logo and MIT license. Claude owns its manifest, version, connection and skill instructions. `scripts/refresh-claude-workflows.mjs` updates only shared workflow reference copies when explicitly run and reviewed.
 - Local `claude plugin validate ./plugins/nightsky-claude` passed. This checks package structure only; the portal performs stronger validation.
 - Anthropic limits the scanned GitHub archive to under 50 MiB. The full NightSky branch is about 50.1 MiB compressed before this bundle, so the portal must track a small, dedicated public release branch containing only the reviewed Claude plugin folder. Do not point it at the full source branch and assume validation will pass.
 
