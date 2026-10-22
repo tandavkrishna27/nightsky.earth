@@ -58,6 +58,17 @@ test('diagnostics contain only bounded labels and generated IDs, including rejec
  for(const event of events){assert.match(event.requestId,/^[0-9a-f-]{36}$/);assert.ok(['tools/call','initialize','OTHER'].includes(event.method));}
  for(const reason of ['tool-limit','protocol-limit','host-rejected','proxy-rejected'])assert.ok(events.some(e=>e.reason===reason),reason);
 });
+test('resource diagnostics identify only the planning card without logging supplied URIs',async()=>{
+ const events:any[]=[];
+ await fixture({toolMode:'full',resultCardPrototype:true,onMcpDiagnostic:event=>{events.push(event);}},async send=>{
+  await send({...init,method:'resources/read',params:{uri:'ui://nightsky/planning-card-v2.html'}});
+  await send({...init,method:'resources/read',params:{uri:'https://hostile-canary.example/private?token=hostile-canary'}});
+  await send({...init,method:'resources/read',params:{uri:{secret:'hostile-canary'}}});
+ });
+ const reads=events.filter(event=>event.method==='resources/read');
+ assert.deepEqual(reads.map(event=>event.resource),['planning-card','planning-card','other','other','other','other']);
+ assert.doesNotMatch(JSON.stringify(reads),/hostile-canary|private\?token|planning-card-v2\.html/);
+});
 test('throwing diagnostics never interrupt responses and invalid protocol limits fail at mount',async()=>{
  await fixture({onMcpDiagnostic:()=>{throw Error('hostile-canary');}},async send=>assert.equal((await send(init)).status,200));
  await fixture({onMcpDiagnostic:async()=>{throw Error('hostile-canary');}},async send=>assert.equal((await send(init)).status,200));
