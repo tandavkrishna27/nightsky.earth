@@ -10,6 +10,7 @@ import {registerNightSkyTools} from '../../server/mcp/registerTools';
 import {GeoNamesPlaceIndex} from '../../server/places/geonames';
 import {createMcpHandler} from '@modelcontextprotocol/server';
 import {toNodeHandler} from '@modelcontextprotocol/node';
+import {mountMcpRoute} from '../../server/mcp/route';
 import express from 'express';
 import {createServer} from 'node:http';
 
@@ -45,6 +46,36 @@ test('actual stateless MCP advertises and serves a card only in the explicit ful
    assert.equal(external,0);
   }finally{server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));}
  }
+});
+
+test('text presentation omits the card while the default MCP endpoint retains it',async()=>{
+ const index=new GeoNamesPlaceIndex([[990001,'Hyderabad','Hyderabad','',17.385,78.4867,'IN','India',0,'Asia/Kolkata']],'card-text-fixture');
+ const app=express();app.use(express.json());
+ let excludedProviderIds:unknown;
+ mountMcpRoute(app,{resultCardPrototype:true,toolMode:'full',placeIndex:index,fetcher:async()=>{throw Error('External requests forbidden');},weatherCollection:{getForecasts:async(_place:any,_window:any,options:any)=>{excludedProviderIds=options.excludedProviderIds;throw Error('Offline fixture');}} as any});
+ const server=createServer(app).listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));
+ try{
+  const address=server.address();assert.ok(address&&typeof address!=='string');let id=0;
+  const rpc=async(path:string,method:string,params:unknown)=>{
+   const response=await fetch(`http://127.0.0.1:${address.port}${path}`,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params}),signal:AbortSignal.timeout(5000)});
+   assert.equal(response.status,200);const body=await response.text(),data=body.split('\n').find(line=>line.startsWith('data: '));return JSON.parse(data?data.slice(6):body);
+  };
+  const normal=await rpc('/mcp','tools/list',{});
+  assert.equal(normal.result.tools.find((tool:any)=>tool.name==='plan_observing_session')._meta.ui.resourceUri,RESULT_CARD_URI);
+  const textTools=await rpc('/mcp?presentation=text','tools/list',{});
+  assert.equal(textTools.result.tools.find((tool:any)=>tool.name==='plan_observing_session')._meta,undefined);
+  const textResources=await rpc('/mcp?presentation=text','resources/list',{});
+  assert.ok(textResources.error||Array.isArray(textResources.result?.resources)&&textResources.result.resources.length===0);
+  const normalResources=await rpc('/mcp','resources/list',{});
+  assert.equal(normalResources.result.resources[0].uri,RESULT_CARD_URI);
+  const caseVariant=await rpc('/mcp?presentation=TEXT','tools/list',{});
+  assert.equal(caseVariant.result.tools.find((tool:any)=>tool.name==='plan_observing_session')._meta.ui.resourceUri,RESULT_CARD_URI);
+  const result=await rpc('/mcp?presentation=text','tools/call',{name:'plan_observing_session',arguments:{placeId:'place:v1:geonames:990001',activity:'general-stargazing',window:{startUtc:'2026-10-18T15:00:00Z',endUtc:'2026-10-18T18:00:00Z',timeZone:'Asia/Kolkata'}}});
+  assert.equal(result.result.isError,undefined);
+  assert.equal(result.result._meta,undefined);
+  assert.ok(result.result.content[0].text);
+  assert.deepEqual(excludedProviderIds,['openweather']);
+ }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));}
 });
 
 test('planning card is server-owned, bounded, complete and independent of the text result',async()=>{

@@ -2,7 +2,7 @@
 
 ![NightSky.earth logo](assets/logo.png)
 
-NightSky helps you plan stargazing, sky-event, and astrophotography sessions for named places. Its five skills guide Claude through place selection, source-linked astronomy and weather evidence, practical preparation, and clear handling of missing data. The plugin connects to NightSky's public, read-only MCP service at `https://mcp.nightsky.earth/mcp`; it does not contain API keys or a local server.
+NightSky helps you plan stargazing, sky-event, and astrophotography sessions for named places. Its five skills guide Claude through place selection, source-linked astronomy and weather evidence, practical preparation, and clear handling of missing data. The plugin connects to NightSky's public, read-only MCP service at `https://mcp.nightsky.earth/mcp?presentation=text`; it does not contain API keys or a local server. This Claude presentation returns complete text results without the planning card and excludes OpenWeather values that require the card's linked logo.
 
 Start by asking, “Plan a beginner stargazing night in Cape Town this Friday.” You can then ask for nearby observing candidates, target directions at a specific time, or preparation steps. NightSky's calculations and forecasts do not verify site access, safety, or clear skies. Provider credits and valid times belong beside the data they support.
 

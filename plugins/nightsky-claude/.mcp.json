@@ -2,7 +2,7 @@
   "mcpServers": {
     "nightsky": {
       "type": "http",
-      "url": "https://mcp.nightsky.earth/mcp"
+      "url": "https://mcp.nightsky.earth/mcp?presentation=text"
     }
   }
 }

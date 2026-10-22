@@ -175,7 +175,13 @@ export function mountMcpRoute(app: Express, dependencies: McpRouteDependencies =
       pendingWork++; let done = false;
       return () => { if (!done) { done = true; pendingWork--; releaseAdmission(); } };
     };
-    const mcpHandler = toNodeHandler(createMcpHandler(() => createNightSkyMcpServer(dependencies, retainToolWork)));
+    // An explicit text presentation lets hosts that cannot display MCP Apps
+    // use the complete text result. The planner also excludes OpenWeather
+    // when the card is off, preserving its linked-logo display requirement.
+    const requestDependencies = req.query.presentation === 'text'
+      ? { ...dependencies, resultCardPrototype: false }
+      : dependencies;
+    const mcpHandler = toNodeHandler(createMcpHandler(() => createNightSkyMcpServer(requestDependencies, retainToolWork)));
     void Promise.resolve().then(() => mcpHandler(req, res, req.body))
       .catch(() => {
         diagnostics.reason(res, 'handler-failure');

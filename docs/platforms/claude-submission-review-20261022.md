@@ -2,7 +2,7 @@
 
 ## Decision and scope
 
-Prepare two listings in the same Claude organization: the production NightSky MCP connector, followed by the NightSky skill bundle at `plugins/nightsky-claude`. Both reference `https://mcp.nightsky.earth/mcp`. This source change does not deploy or submit either listing.
+Prepare two listings in the same Claude organization: the production NightSky MCP connector, followed by the NightSky skill bundle at `plugins/nightsky-claude`. The Claude release is planned to use `https://mcp.nightsky.earth/mcp?presentation=text` after that route is deployed and verified. The existing private connector still points at `/mcp`; editing source does not change or submit either listing.
 
 ## Prepared source
 
@@ -28,6 +28,14 @@ On 22 October, a private Claude chat loaded the 19 connected tools without a pro
 Claude displayed “There was a problem displaying content from NightSky.earth private test” where the planning card should appear, although its text answer used the successful plan response. Treat MCP App rendering as an open issue for Claude. Do not use the host's Retry button for diagnosis because that can repeat provider calls. Inspect the card's resource/protocol behavior and resolve or explicitly scope a Claude text-only route before public connector submission.
 
 The server logs showed a later `resources/read` completion at 11:49:55 UTC with HTTP 200 but did not record the URI, so it cannot be attributed to this card. The diagnostic plan at `docs/superpowers/plans/2026-10-22-claude-card-diagnosis.md` adds a fixed planning-card/other label before another observation. A successful generic resource read is not evidence that Claude rendered the NightSky card.
+
+### Fresh card observation and Claude text presentation
+
+On 22 October, a fresh Claude Cape Town chat called `resolve_place` once and `plan_observing_session` once. Both completed with HTTP 200. The production diagnostic recorded one `resources/read` labeled `planning-card`, also HTTP 200 in 3 ms. An independent public MCP probe confirmed that `tools/list` advertises the card, `resources/list` includes it, and `resources/read` returns the exact URI, `text/html;profile=mcp-app`, HTML, and CSP metadata. Claude nevertheless displayed only a text answer and stated that no card was available. This narrows the failure to the host-side rendering path after the resource fetch; it does not prove whether Claude rejected the HTML, failed its iframe handshake, or suppressed the view. Do not claim the MCP App works in Claude or submit UI screenshots from ChatGPT as Claude evidence.
+
+The text answer also proposed an observing window from sparse cloud instants despite the tool's explicit warning not to infer one. That answer is unsuitable as a positive review example. Recheck the next native Claude plan for this behavior before submission.
+
+The reviewed fallback is an exact `?presentation=text` MCP URL. It omits the card registration and result metadata for that request while retaining the complete source-linked text. The existing planner excludes OpenWeather when the card is off, so Claude does not receive values whose required logo it cannot display. Plain `/mcp` remains card-enabled for ChatGPT. Promote and verify the route before changing the private Claude connector or the directory draft. Verify that Claude preserves the URL query and shows the plan as text without a failed card, then refresh the dedicated Claude release branch from the reviewed plugin folder and rerun portal validation.
 
 ## Portal handoff
 
