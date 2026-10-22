@@ -15,7 +15,8 @@ test('package rehearsal emits deterministic root ZIP, remote endpoint and digest
   const extension = JSON.parse(strFromU8(files['plugin.json'])).extensions['com.openai'];
   const cases = extension.review.test_cases;
   assert.equal(cases.positive.length, 5); assert.equal(cases.negative.length, 3);
-  assert.ok(extension.review.prompts.some((item: string) => item.includes('bsc5p:hr617')));
+  assert.ok(extension.review.prompts.every((item: string) => item.includes('Cape Town')));
+  assert.ok(cases.negative.every((item: { tools_triggered: string }) => item.tools_triggered === ''));
   assert.equal(extension.interface.category, 'Education & Research');
   assert.equal(extension.review.prompts.length, 3);
   assert.match(extension.publication.release_notes, /Public Universe/);
