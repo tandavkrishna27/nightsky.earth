@@ -1,3 +1,11 @@
+## V1 local revision 1.0.45 - Outside-scope review cases
+
+The three negative OpenAI review cases now use Cape Town prompts for traffic, hotel booking and creative writing, where NightSky should not trigger. The preceding aurora, solar-safety and coordinate prompts are relevant to NightSky and remain product behavior examples, not no-trigger review cases. No hosted MCP behavior or provider configuration changed in this package revision.
+
+## V1 local revision 1.0.44 - Cape Town review evidence
+
+Updated the reviewer walkthrough URL and aligned the five positive and three negative review cases with the recorded Cape Town journey. The coordinates-only case now asks for a safe clarification about site discovery and does not misrepresent the separately supported coordinate-based light-pollution comparison. No hosted MCP behavior or provider configuration changed in this package revision.
+
 ## V1 local revision 1.0.43 - ChatGPT submission metadata
 
 Adds the Education & Research category and three review prompts for the current hosted product. Public listing release notes now describe the active, bounded production sources and keep their visibility and access limits explicit. This is package metadata preparation; public review still needs a verified publisher identity, a real reviewer-accessible demo recording, and portal checks. No provider, quota, server or deployment behavior changes.
