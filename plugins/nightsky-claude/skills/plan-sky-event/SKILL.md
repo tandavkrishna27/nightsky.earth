@@ -184,7 +184,7 @@ Do not infer moonrise, moonset or a moonless window from illumination or sampled
 
 ## Evidence contract for the final answer
 
-Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives and recommend_specialist_tools for a concrete specialist-app need. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
+Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
 
 For a complete session use aggregate planning evidence: resolve the named city, then call plan_observing_session with the requested activity/target/window. It already retrieves astronomy, weather, event, location and enabled optional evidence. Separate astronomy/weather/target/event tools are for focused questions, missing details or explicit refreshes; repeating every provider call is not required. Discovery and selected-candidate identity/timezone checks still apply before planning. If the user supplied an already resolved named place, reuse it only when its identity and timezone are current.
 

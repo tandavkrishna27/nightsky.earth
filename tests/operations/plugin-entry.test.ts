@@ -35,10 +35,9 @@ test("standalone plugin entry exposes only bounded health and MCP without websit
         };
         const initialized = await rpc(1, "initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "offline-entry", version: "1" } });
         assert.equal(initialized.serverInfo.name, "nightsky-earth");
-        assert.equal((await rpc(2, "tools/list", {})).tools.length, 14);
-        const result = await rpc(3, "tools/call", { name: "recommend_specialist_tools", arguments: { activity: "general-stargazing" } });
-        assert.equal(result.isError, undefined);
-        assert.ok(result.structuredContent.recommendations.length);
+        const tools = (await rpc(2, "tools/list", {})).tools;
+        assert.equal(tools.length, 13);
+        assert.ok(!tools.some((tool: { name: string }) => tool.name === "recommend_specialist_tools"));
         const malformed = await fetch(`${base}/mcp`, { method: "POST", headers: { "content-type": "application/json" }, body: "{ private-body-marker" });
         assert.equal(malformed.status, 400);
         assert.equal(await malformed.text(), JSON.stringify({ message: "Invalid request." }));

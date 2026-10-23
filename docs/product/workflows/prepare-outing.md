@@ -105,7 +105,7 @@ Turn an existing plan into practical preparation for a beginner, family, urban o
 
 ## Evidence contract for the final answer
 
-Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives and recommend_specialist_tools for a concrete specialist-app need. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
+Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
 
 For a complete session use aggregate planning evidence: resolve the named city, then call plan_observing_session with the requested activity/target/window. It already retrieves astronomy, weather, event, location and enabled optional evidence. Separate astronomy/weather/target/event tools are for focused questions, missing details or explicit refreshes; repeating every provider call is not required. Discovery and selected-candidate identity/timezone checks still apply before planning. If the user supplied an already resolved named place, reuse it only when its identity and timezone are current.
 
@@ -123,7 +123,6 @@ If a compound city query fails, retry the user's unambiguous bare city name with
 2. For a named-city plan or city-origin search: Resolve the place with `resolve_place` if no current place ID exists.
  For region-only discovery and selected-candidate planning, use the conditional flow below instead.
 3. Call `plan_observing_session` for the activity and window. If the user asks whether another place/night is better, ask for or confirm alternatives, then call `compare_observing_options`.
-4. Call `recommend_specialist_tools` only when an app would fill a concrete need such as sky orientation, target framing, or telescope control.
 5. Summarize preparation based on the plan's fields and the user's stated gear. For a family, keep the session short and discuss safe routes, lighting and supervision without claiming a site is safe.
 
 ## Checklist and partial data

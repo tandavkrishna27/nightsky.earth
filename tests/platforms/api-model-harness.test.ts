@@ -30,7 +30,7 @@ test('API rehearsal resolves immutable snapshots and plans discovered candidates
         return response.result.structuredContent;
     };
     try {
-        assert.equal((await server.rpc('tools/list', {})).result.tools.length, 14);
+        assert.equal((await server.rpc('tools/list', {})).result.tools.length, 13);
         assert.deepEqual(readdirSync(root), []);
         const resolved = await call('resolve_place', { placeQuery: 'Fictionvale' });
         const origin = resolved.matches[0];

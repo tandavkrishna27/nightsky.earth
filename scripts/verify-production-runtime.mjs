@@ -37,11 +37,9 @@ try {
   const initialized = await call(1, "initialize", { protocolVersion: "2025-11-25", capabilities: {}, clientInfo: { name: "production-runtime-check", version: "1" } });
   assert.equal(initialized.serverInfo.name, "nightsky-earth");
   const listed = await call(2, "tools/list", {});
-  for (const name of ["resolve_place", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]) assert.ok(listed.tools.some((tool) => tool.name === name));
-  const suggested = await call(3, "tools/call", { name: "recommend_specialist_tools", arguments: { activity: "general-stargazing" } });
-  assert.equal(suggested.isError, undefined);
-  assert.ok(suggested.structuredContent.recommendations.length > 0);
-  console.log(`Production runtime verified: health, MCP initialization, ${listed.tools.length} tools, and structured recommendations; no upstream provider calls.`);
+  for (const name of ["resolve_place", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options"]) assert.ok(listed.tools.some((tool) => tool.name === name));
+  assert.ok(!listed.tools.some((tool) => tool.name === "recommend_specialist_tools"));
+  console.log(`Production runtime verified: health, MCP initialization, and ${listed.tools.length} tools; no upstream provider calls.`);
 } finally {
   if (child.exitCode === null) {
     const exited = once(child, "exit");

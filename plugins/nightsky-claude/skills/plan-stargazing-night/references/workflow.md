@@ -107,7 +107,7 @@ Turn a named place, date window, and observing goal into a useful plan from loca
 
 ## Evidence contract for the final answer
 
-Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives and recommend_specialist_tools for a concrete specialist-app need. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
+Focused tools are get_astronomy_window for Sun/Moon geometry, get_night_conditions for forecasts, get_target_visibility for supported named bodies, search_sky_events for event discovery, get_aurora_outlook for near-term aurora and get_clear_sky_climatology for historical samples. Use compare_observing_options for user-selected alternatives. Invoke only the tools relevant to the request; the aggregate planner already combines supported session evidence.
 
 For a complete session use aggregate planning evidence: resolve the named city, then call plan_observing_session with the requested activity/target/window. It already retrieves astronomy, weather, event, location and enabled optional evidence. Separate astronomy/weather/target/event tools are for focused questions, missing details or explicit refreshes; repeating every provider call is not required. Discovery and selected-candidate identity/timezone checks still apply before planning. If the user supplied an already resolved named place, reuse it only when its identity and timezone are current.
 
@@ -126,7 +126,6 @@ If a compound city query fails, retry the user's unambiguous bare city name with
 3. For a complete plan, use the planner in step 5 for combined evidence. Use `get_astronomy_window`, `get_target_visibility` or `get_night_conditions` separately only for focused questions, missing details or refreshes.
 4. Use `search_sky_events` for independent event discovery and `get_location_context` for focused place evidence; a complete plan already includes these checks.
 5. Call `plan_observing_session` with the resolved place ID, exact activity, local timezone returned for that place, requested UTC interval, and supplied target/experience/equipment. Use `compare_observing_options` only after the user supplies two or more alternatives.
-6. Use `recommend_specialist_tools` only when an optional sky chart or other specialist app would help the stated activity.
 
 For seasonal trip planning, first ask for the season/date range and event or target goal. Use `search_sky_events` to find supported event dates within its range, then compare a small set of user-selected candidate nights with `compare_observing_options`; each compared window is one session of at most 24 hours. Do not present months-ahead weather or climatology unless a supported source returns it; historical context may be unavailable or a partial sample-only result.
 

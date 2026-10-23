@@ -25,7 +25,7 @@ test('optional sources expose six MCP tools, resolve coordinates internally and 
  const server=createServer(createNightSkyPluginApp({placeIndex:index,skyProviders,log:()=>{}}));server.listen(0,'127.0.0.1');await once(server,'listening');t.after(()=>new Promise<void>(done=>server.close(()=>done())));
  const address=server.address();assert.ok(address&&typeof address!=='string');let id=0;
  const rpc=async(method:string,params:unknown={})=>{const r=await fetch(`http://127.0.0.1:${address.port}/mcp`,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params})});assert.equal(r.status,200);const line=(await r.text()).split('\n').find(s=>s.startsWith('data: '));assert.ok(line);return JSON.parse(line.slice(6));};
- const list=await rpc('tools/list');assert.equal(list.result.tools.length,20);
+ const list=await rpc('tools/list');assert.equal(list.result.tools.length,19);
  const search=await rpc('tools/call',{name:'search_astronomy_objects',arguments:{term:'M42'}});assert.equal(search.result.structuredContent.status,'ok');assert.deepEqual(search.result.structuredContent.data.objects,[]);
  const events=await rpc('tools/call',{name:'get_space_weather_events',arguments:{eventType:'GST',startDate:'2026-10-16',endDate:'2026-10-17'}});assert.equal(events.result.structuredContent.status,'available');assert.ok(!JSON.stringify(events).includes('synthetic-nasa'));
  const args={placeId:'place:v1:geonames:1269843',startDate:'2026-12-13',endDate:'2026-12-14',startTime:'22:00',endTime:'04:00'};

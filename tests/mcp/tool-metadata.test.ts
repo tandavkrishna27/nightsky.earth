@@ -4,7 +4,7 @@ import { NIGHTSKY_SERVER_INSTRUCTIONS } from "../../server/mcp/index";
 import { V1_TOOL_ANNOTATIONS } from "../../server/mcp/registerTools";
 
 test("every frozen V1 tool has explicit safe annotation booleans", () => {
-  assert.equal(Object.keys(V1_TOOL_ANNOTATIONS).length, 14);
+  assert.equal(Object.keys(V1_TOOL_ANNOTATIONS).length, 13);
   for (const [name, annotations] of Object.entries(V1_TOOL_ANNOTATIONS)) {
     assert.ok(name.length > 0);
     assert.equal(typeof annotations.readOnlyHint, "boolean");
