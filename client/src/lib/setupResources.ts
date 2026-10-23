@@ -1,3 +1,6 @@
+/** The reviewed public NightSky MCP service shared by the manual setup guides. */
+export const NIGHTSKY_PUBLIC_MCP_URL = "https://mcp.nightsky.earth/mcp";
+
 /** Public NightSky resources only; optional configuration must never copy local/example addresses. */
 export function resolveSetupResource(
   kind: "endpoint" | "package",
@@ -30,3 +33,4 @@ export function resolveSetupResource(
     return null;
   }
 }
+
