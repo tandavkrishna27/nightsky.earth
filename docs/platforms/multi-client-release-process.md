@@ -27,6 +27,6 @@ The canonical planning workflows live in `docs/product/workflows`. `scripts/refr
 
 ## Current gate
 
-The Claude source package and release branch are prepared, and the portal draft is saved. The private Claude connector produced a useful Cape Town text answer, but its planning card failed to display in Claude. Resolve that presentation issue and complete the native review before connector and plugin submissions. The four portal compliance attestations remain for the account owner.
+The Claude source package and small release branch have draft portal entries. A private Cape Town plan and its planning card rendered in Claude. The saved connector draft still reflects the older 19-tool inventory; reconnect it after any server release. Public Universe currently reports a public connection issue, and its four exposed catalogue tools have not passed live acceptance. Keep both Claude submissions in draft until every exposed tool is checked through Inspector and Claude, the exact release branch validates, and the account owner reviews the portal acknowledgements. The ChatGPT listing remains a separate active review.
 
 See [Claude submission review](claude-submission-review-20261022.md), [Claude route](claude.md), [ChatGPT route](chatgpt.md) and [host case record](host-run-record-template.md).
