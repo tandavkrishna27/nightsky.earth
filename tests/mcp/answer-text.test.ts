@@ -5,6 +5,21 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createFixtureServer} from '../../scripts/complete-model-journey-test';
 
+test('standalone astronomy tool gives Claude darkness and Moon values in text',async()=>{
+ const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-astronomy-text-')));
+ try{
+  const response=await server.rpc('tools/call',{name:'get_astronomy_window',arguments:{placeId:'place:v1:geonames:990001',window:{startUtc:'2026-12-13T18:00:00Z',endUtc:'2026-12-14T06:00:00Z',timeZone:'Europe/London'}}});
+  const result=response.result.structuredContent;
+  const text=response.result.content.map((row:any)=>row.text??'').join('\n');
+  assert.equal(response.result.isError,undefined);
+  assert.match(text,/Astronomical darkness:/);
+  assert.match(text,/Moon illumination:/);
+  assert.ok(text.includes(result.moon.illuminationPercent.toFixed(1)));
+  assert.match(text,/clipped to the requested window/);
+  assert.equal(server.externalAttempts(),0);
+ }finally{await server.close();}
+});
+
 test('legacy plan answer retains the returned GeoNames attribution licence and modification notice',async()=>{
  const server=await createFixtureServer(mkdtempSync(join(tmpdir(),'nightsky-location-notices-')));
  try{
