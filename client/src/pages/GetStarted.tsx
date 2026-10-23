@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearch } from "wouter";
 import InstallationGuide from "@/components/setup/InstallationGuide";
+import McpAddressCard from "@/components/setup/McpAddressCard";
 import SetupFaqs from "@/components/setup/SetupFaqs";
 import { setupGuideHref } from "@/lib/setupGuideState";
 import { ArrowRight, Check, Copy, Sparkles } from "lucide-react";
@@ -74,6 +75,8 @@ export default function GetStarted() {
           <p>{getStartedCopy.intro}</p>
         </header>
 
+        <McpAddressCard placement="get-started" />
+
         <section
           className="setup-assistants"
           aria-labelledby="setup-assistants-title"
@@ -89,6 +92,9 @@ export default function GetStarted() {
               const reviewPending =
                 !href &&
                 (assistant.id === "chatgpt" || assistant.id === "claude");
+              const listingSoon =
+                !href &&
+                (assistant.id === "gemini" || assistant.id === "grok");
               return (
                 <li className="setup-assistant-card" key={assistant.id}>
                   <AssistantIcon
@@ -116,14 +122,18 @@ export default function GetStarted() {
                       aria-label={
                         reviewPending
                           ? `${assistant.name} directory review pending`
-                          : label
+                          : listingSoon
+                            ? `${assistant.name} directory listing coming soon`
+                            : label
                       }
                       disabled
                     >
                       {reviewPending
                         ? "Directory review pending"
-                        : "Get NightSky Plugin"}
-                      {!reviewPending && <Sparkles size={15} aria-hidden="true" />}
+                        : listingSoon
+                          ? "Listing coming soon"
+                          : "Get NightSky Plugin"}
+                      {!reviewPending && !listingSoon && <Sparkles size={15} aria-hidden="true" />}
                     </button>
                   )}
                   <a

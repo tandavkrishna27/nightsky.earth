@@ -6,6 +6,7 @@ import PluginAction from "@/components/PluginAction";
 import VideoBackground from "@/components/VideoBackground";
 import QuestionExplorer from "@/components/home/QuestionExplorer";
 import PlatformAvailability from "@/components/home/PlatformAvailability";
+import McpAddressCard from "@/components/setup/McpAddressCard";
 import UpcomingEvents from "@/components/sky-events/UpcomingEvents";
 import SEO from "@/components/SEO";
 import stars from "@assets/stock_images/starry_night_sky_met_675ba820.webp";
@@ -32,14 +33,14 @@ export default function Home() {
         <div className="hero-copy">
           <p className="eyebrow hero-free-badge">{homeCopy.hero.eyebrow}</p>
           <h1>
-            Where Earth <br />
-            meets <span>the stars.</span>
+            Know when, where, and how to <span>look up.</span>
           </h1>
           <p className="hero-description">{homeCopy.hero.body}</p>
           <div className="action-group">
             <PluginAction />
           </div>
           <PlatformAvailability />
+          <McpAddressCard placement="hero" />
         </div>
         <div className="hero-foot">
           <span>For the nights that stay with you.</span>

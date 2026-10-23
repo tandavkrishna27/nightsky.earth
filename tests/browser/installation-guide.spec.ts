@@ -30,10 +30,10 @@ test("assistant setup links select a guide, preserve history and expose only rea
       name: "Copy NightSky connection address",
       exact: true,
     }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   await expect(
     guide.getByRole("button", { name: "Download Claude package", exact: true }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await guide.getByRole("button", { name: "Gemini", exact: true }).click();
   await expect(
     guide.getByRole("button", { name: "Marketplace", exact: true }),

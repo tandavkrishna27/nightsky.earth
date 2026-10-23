@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test("homepage identifies NightSky as free to use without changing its destination", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".hero-copy > .eyebrow")).toHaveText("Free to use");
-  await expect(page.locator(".hero-description")).toContainText("astronomy plugin for your AI assistant");
+  await expect(page.locator(".hero-description")).toContainText("Plan a night under the stars with NightSky in your AI assistant");
   await expect(page.locator(".closing-section .pricing-note")).toHaveText("Start exploring for free.");
   await expect(page.locator(".hero-copy .action-primary")).toHaveAttribute("href", "/get-started");
 });
@@ -234,7 +234,7 @@ test.beforeEach(async ({ page }) => {
 test("shell, product story and examples", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Where Earth meets the stars.",
+    "Know when, where, and how to look up.",
   );
   await expect(page.getByRole("banner")).toHaveCount(1);
   await expect(page.getByRole("main")).toHaveCount(1);
@@ -365,7 +365,7 @@ test("route metadata is singular and archive copy is clean UTF-8", async ({
   await page.goto("/");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     "content",
-    /NightSky is an astronomy plugin for your AI assistant/,
+    /Plan a night under the stars with NightSky in your AI assistant/,
   );
   const websiteSchema = page.locator('script[type="application/ld+json"]');
   await expect(websiteSchema).toHaveCount(1);

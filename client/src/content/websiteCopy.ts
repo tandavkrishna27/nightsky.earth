@@ -7,8 +7,8 @@ export const pricingCopy = {
 export const homeCopy = {
   hero: {
     eyebrow: pricingCopy.badge,
-    headline: "Where Earth meets the stars.",
-    body: "NightSky is an astronomy plugin for your AI assistant. Plan a night under the stars, explore the universe, and follow your curiosity.",
+    headline: "Know when, where, and how to look up.",
+    body: "Plan a night under the stars with NightSky in your AI assistant. Explore sky timing, possible observing places, and practical ways to get started.",
   },
   journeys: {
     title: "Journeys Under the Infinite.",

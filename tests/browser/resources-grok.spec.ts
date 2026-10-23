@@ -13,7 +13,7 @@ test("Grok appears with the other launch assistants and has no invented setup de
   await page.goto("/get-started");
   await expect(page.locator(".setup-intro")).toContainText("ChatGPT, Claude, Gemini, or Grok");
   await expect(page.getByRole("heading", { name: "Grok", exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Get NightSky Plugin for Grok", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Grok directory listing coming soon", exact: true })).toBeDisabled();
   await expect(page.locator('a[href="#"], a[href^="mailto:"]')).toHaveCount(0);
 });
 
@@ -78,6 +78,7 @@ test("Resources and four assistants reflow at mobile widths and enlarged type", 
 test("desktop setup presents all four assistants together in one row", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/get-started");
+  await expect(page.locator(".setup-assistant-card")).toHaveCount(4);
   const cards = await page.locator(".setup-assistant-card").all();
   const boxes = await Promise.all(cards.map(card => card.boundingBox()));
   expect(boxes).toHaveLength(4);

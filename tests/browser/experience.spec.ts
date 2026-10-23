@@ -121,7 +121,7 @@ test("platform story, navigation and creative scope", async ({ page }) => {
     "Sky Map",
   ]);
   await expect(page.locator(".hero-copy")).toContainText(
-    "plugin for your AI assistant",
+    "NightSky in your AI assistant",
   );
   await expect(page.locator(".platform-availability")).not.toContainText(
     /Coming soon|Planned/,

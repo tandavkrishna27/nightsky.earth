@@ -9,7 +9,7 @@ test("Get Started is a direct launch page with a real acquisition button", async
   const main = page.getByRole("main");
   await expect(main.getByRole("heading", { level: 1 })).toHaveText("Get NightSky.");
   await expect(main).toContainText("Free to use");
-  await expect(main).not.toContainText(/coming soon|not live yet|not available yet|when (?:it becomes|NightSky becomes|NightSky is) available|planned/i);
+  await expect(main).not.toContainText(/not live yet|not available yet|when (?:it becomes|NightSky becomes|NightSky is) available|planned/i);
   await expect(main.getByRole("heading", { name: "ChatGPT", exact: true })).toBeVisible();
   if (test.info().config.metadata.listingLive) {
     const action = main.getByRole("link", { name: "Get NightSky Plugin for ChatGPT", exact: true });
@@ -17,13 +17,15 @@ test("Get Started is a direct launch page with a real acquisition button", async
     await expect(action).toHaveAttribute("target", "_blank");
     await expect(action).toHaveAttribute("rel", "noopener noreferrer");
   } else {
-    await expect(main.getByRole("button", { name: "Get NightSky Plugin for ChatGPT", exact: true })).toBeDisabled();
+    await expect(main.getByRole("button", { name: "ChatGPT directory review pending", exact: true })).toBeDisabled();
     await expect(main.getByRole("link", { name: "Get setup help", exact: true })).toHaveCount(0);
   }
   await expect(main.locator('a[href="/get-started"]')).toHaveCount(0);
   await expect(main.getByRole("heading", { name: "Your first steps.", exact: true })).toBeVisible();
   await expect(main.locator(".setup-step")).toHaveCount(3);
   await expect(main.locator(".setup-intro")).toContainText("ChatGPT, Claude, Gemini, or Grok");
+  await expect(main.getByRole("button", { name: "Gemini directory listing coming soon" })).toBeDisabled();
+  await expect(main.getByRole("button", { name: "Grok directory listing coming soon" })).toBeDisabled();
   await expect(main.locator(".eyebrow")).toHaveCount(0);
   await expect(main.getByRole("link", { name: "Contact NightSky", exact: true })).toHaveAttribute("href", "/contact?topic=setup");
 });
