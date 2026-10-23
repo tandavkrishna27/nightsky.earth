@@ -43,8 +43,9 @@ test('Public Universe stays absent by default and selected unadmitted tools are 
         const tool = tools.find((v: any) => v.name === name);
         assert.ok(tool);
         assert.equal(tool.inputSchema.type, 'object');
-        assert.deepEqual(tool.annotations, { readOnlyHint: true, destructiveHint: false, openWorldHint: true });
+        assert.deepEqual(tool.annotations, { title: tool.title, readOnlyHint: true, destructiveHint: false, openWorldHint: true });
     }
+    assert.doesNotMatch(tools.find((v: any) => v.name === names[0]).description, /use discover_observing_targets/i);
     for (const [name, args] of [[names[0], { domain: 'solar-system', query: 'Mars' }], [names[1], { kind: 'meteor-shower', code: 'PER' }], [names[2], observing], [names[3], { ...observing, equipment: undefined, preference: undefined, shortlistLimit: undefined, targets: [{ referenceId: 'forged', revision: 'a'.repeat(64) }] }]] as const) {
         const r = await on.rpc('tools/call', { name, arguments: args });
         assert.equal(r.result.structuredContent.status, name === names[3] ? 'stale' : 'unavailable', JSON.stringify(r));

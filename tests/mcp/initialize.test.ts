@@ -32,6 +32,11 @@ test("NightSky MCP initializes and lists completed domain tools", async () => {
     assert.equal(init.payload.result.serverInfo.name, "nightsky-earth");
     const listed = await post(base, { jsonrpc: "2.0", id: 2, method: "tools/list", params: {} });
     assert.deepEqual(listed.payload.result.tools.map((tool: { name: string }) => tool.name), ["resolve_place", "get_astronomy_window", "get_target_visibility", "get_night_conditions", "get_aurora_outlook", "search_sky_events", "search_observing_locations", "resolve_observing_region", "get_observing_location_details", "get_location_context", "get_clear_sky_climatology", "plan_observing_session", "compare_observing_options", "recommend_specialist_tools"]);
+    for (const tool of listed.payload.result.tools as Array<{ title: string; annotations: { title?: string; readOnlyHint: boolean; destructiveHint: boolean } }>) {
+      assert.equal(tool.annotations.title, tool.title);
+      assert.equal(tool.annotations.readOnlyHint, true);
+      assert.equal(tool.annotations.destructiveHint, false);
+    }
   } finally {
     server.close();
     await once(server, "close");
