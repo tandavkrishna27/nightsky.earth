@@ -185,6 +185,20 @@
 .collective-contribute .action svg {
   flex-shrink: 0;
 }
+.collective-instagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: fit-content;
+  min-height: 44px;
+  margin: 20px auto 0;
+  color: #c9c0ae;
+  font-size: 14px;
+}
+.collective-instagram:hover {
+  color: var(--gold);
+}
 .collective-page :is(a, button):focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 5px;

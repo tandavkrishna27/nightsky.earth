@@ -1,4 +1,5 @@
 export const SITE_ORIGIN = "https://nightsky.earth";
+export const INSTAGRAM_URL = "https://www.instagram.com/nightsky.earth/";
 export const SUPPORT_EMAIL = "NightSky.earth2026@gmail.com";
 export type ListingConfig = { published: boolean; url: string | null };
 export function resolvePluginAction(config: ListingConfig) {

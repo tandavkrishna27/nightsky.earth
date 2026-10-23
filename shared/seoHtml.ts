@@ -1,4 +1,4 @@
-import { canonicalUrl, SITE_ORIGIN } from "./website";
+import { canonicalUrl, INSTAGRAM_URL, SITE_ORIGIN } from "./website";
 
 export type RouteSeo = {
   path: string;
@@ -31,7 +31,15 @@ function jsonLd(route: RouteSeo, canonical: string) {
     name: route.path === "/" ? "NightSky.earth" : route.title,
     description: route.description,
     url: canonical,
-    ...(route.path === "/" ? { alternateName: "NightSky" } : {}),
+    ...(route.path === "/" ? {
+      alternateName: "NightSky",
+      publisher: {
+        "@type": "Organization",
+        name: "NightSky.earth",
+        url: SITE_ORIGIN,
+        sameAs: [INSTAGRAM_URL],
+      },
+    } : {}),
   };
   return `<script type="application/ld+json" data-nightsky-seo>${jsonForHtml(data)}</script>`;
 }
