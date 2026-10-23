@@ -12,6 +12,7 @@ test("approved homepage combines the journey and conversation, then events, Coll
 }) => {
   await page.goto("/");
   await expect(page.locator("main h2")).toHaveText([
+    "Connect manually",
     "Journeys Under the Infinite.",
     "What’s Happening in the Sky.",
     "Moments Beneath the Infinite.",
@@ -120,7 +121,7 @@ test.describe("hero motion", () => {
   }) => {
     await page.goto("/");
     const hero = page.locator(".home-hero");
-    await expect(hero.locator("button")).toHaveCount(0);
+    await expect(hero.getByRole("button", { name: "Copy", exact: true })).toHaveCount(1);
     await expect(hero.locator("video")).toHaveJSProperty("paused", false);
     await page
       .getByRole("contentinfo")

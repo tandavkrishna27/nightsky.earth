@@ -34,6 +34,26 @@
 .home-hero .platform-status {
   display: none;
 }
+.home-hero {
+  padding-block: 132px 90px;
+}
+.home-hero .hero-copy {
+  width: min(100%, 980px);
+  max-width: none;
+}
+.home-hero .hero-copy h1 {
+  max-width: 950px;
+  margin-inline: auto;
+  font-size: clamp(53px, 5.9vw, 82px);
+  line-height: 1.07;
+}
+.home-hero .hero-copy .hero-description {
+  max-width: 620px;
+}
+.home-hero .mcp-address-card--hero {
+  margin: 25px auto 0;
+  text-align: left;
+}
 .home-journey,
 .home-events,
 .home-collective-layout,
@@ -1013,6 +1033,23 @@
   }
   .home-event-content h3 {
     font-size: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-hero {
+    padding-block: 122px 82px;
+  }
+  .home-hero .hero-copy h1 {
+    max-width: 420px;
+    margin-block: 18px 21px;
+    font-size: clamp(38px, 10.7vw, 51px);
+  }
+  .home-hero .action-group {
+    margin-top: 24px;
+  }
+  .home-hero .mcp-address-card--hero {
+    margin-top: 25px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

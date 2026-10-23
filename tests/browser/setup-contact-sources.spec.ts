@@ -7,8 +7,7 @@ test("Get Started has one equal four-assistant choice and concise help", async (
   await expect(cards).toHaveCount(4);
   await expect(cards.locator("h3")).toHaveText(["ChatGPT", "Claude", "Gemini", "Grok"]);
   for (const card of await cards.all()) {
-    const action = card.getByRole("button", { name: /Get NightSky Plugin/ });
-    await expect(action).toBeDisabled();
+    await expect(card.locator(".setup-choice-action")).toBeDisabled();
   }
   await expect(page.locator(".setup-preview, .setup-other-section")).toHaveCount(0);
   await expect(page.locator("main")).not.toContainText("Open NightSky in Grok");

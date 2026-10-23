@@ -89,6 +89,6 @@ test.describe("word streaming", () => {
     expect(await visibleWords()).toBe(
       await answer.locator(".demo-word").count(),
     );
-    await expect(page.locator(".home-hero button")).toHaveCount(0);
+    await expect(page.locator(".home-hero button")).toHaveCount(1);
   });
 });

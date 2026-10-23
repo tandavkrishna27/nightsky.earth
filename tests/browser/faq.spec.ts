@@ -106,6 +106,7 @@ test("rapid FAQ selections keep the latest answer open exclusively", async ({
   page,
 }) => {
   await page.goto("/");
+  await expect(page.locator("#faq summary")).toHaveCount(8);
   await page.locator("#faq summary").evaluateAll((summaries) => {
     for (const index of [0, 1, 2]) (summaries[index] as HTMLElement).click();
   });
