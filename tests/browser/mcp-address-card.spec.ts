@@ -83,6 +83,32 @@ test("mobile copy feedback stays within the viewport with reduced motion", async
   ).toBe(true);
 });
 
+test("mobile hero shows the full connection card and centered copy button early", async ({
+  page,
+}) => {
+  for (const width of [320, 360, 390]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+    const card = page.locator(".home-hero .mcp-address-card");
+    const button = card.getByRole("button", { name: "Copy" });
+    await expect(page.locator(".home-hero .hero-free-badge")).toBeHidden();
+    await expect(page.locator(".home-hero .action-free-label")).toBeVisible();
+    const cardBox = (await card.boundingBox())!;
+    const buttonBox = (await button.boundingBox())!;
+    expect(cardBox.y + cardBox.height).toBeLessThan(800);
+    expect(Math.abs(buttonBox.x + buttonBox.width / 2 - (cardBox.x + cardBox.width / 2))).toBeLessThan(2);
+    expect(buttonBox.width).toBeGreaterThan(cardBox.width - 60);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  }
+});
+
+test("desktop hero retains its free badge", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/");
+  await expect(page.locator(".home-hero .hero-free-badge")).toBeVisible();
+  await expect(page.locator(".home-hero .action-free-label")).toBeHidden();
+});
+
 test("clipboard failure keeps the address selectable and offers retry", async ({
   page,
 }) => {

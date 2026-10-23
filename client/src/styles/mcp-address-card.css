@@ -205,13 +205,14 @@
     padding: 17px 16px 15px;
   }
   .mcp-address-card__row {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
   }
   .mcp-address-card__value {
-    flex-basis: 100%;
+    text-align: center;
     font-size: 12px;
   }
   .mcp-address-card__row button {
-    margin-left: auto;
+    width: 100%;
   }
 }
