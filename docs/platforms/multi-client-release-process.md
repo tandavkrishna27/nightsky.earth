@@ -27,6 +27,6 @@ The canonical planning workflows live in `docs/product/workflows`. `scripts/refr
 
 ## Current gate
 
-The Claude source package and release branch are prepared, and the portal draft is saved. The private Claude connector produced a useful Cape Town text answer, but its planning card failed to display in Claude. Resolve that presentation issue and complete the native review before connector and plugin submissions. The four portal compliance attestations remain for the account owner.
+The Claude source package and release branch are prepared, and the connector portal draft is saved. Claude displayed the NightSky planning card, and the standalone astronomy text correction has passed a bounded native check on the current production release. The portal now shows 19 tools without metadata suggestions. Public Universe timed out after quota reservations in the latest host report, and valid-call coverage of all 19 tools is incomplete. Complete the native review before connector and plugin submissions. The portal self-test and policy/legal acknowledgements remain unchecked for the account owner.
 
 See [Claude submission review](claude-submission-review-20261022.md), [Claude route](claude.md), [ChatGPT route](chatgpt.md) and [host case record](host-run-record-template.md).
