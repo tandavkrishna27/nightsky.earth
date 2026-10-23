@@ -149,7 +149,7 @@ export const setupFaqs = [
   ],
   [
     "Which installation method should I choose?",
-    "ChatGPT and Claude directory listings are under review. Use manual setup to connect their hosted NightSky service now. Choose the directory route after its listing is published.",
+    "ChatGPT’s directory listing is under review, and Claude’s listing is pending review. Use manual setup to connect the hosted NightSky service now. Choose the directory route after its listing is published.",
   ],
   [
     "Why isn’t NightSky appearing or responding?",
