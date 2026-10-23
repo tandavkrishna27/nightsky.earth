@@ -15,6 +15,13 @@ export default function SEO({
   const canonical = canonicalUrl(window.location.pathname);
   const preview = import.meta.env.VITE_WEBSITE_RELEASE !== "true";
   const image = `${SITE_ORIGIN}/splash-night-sky.jpg`;
+  const pageSchema = schema ?? {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: canonical,
+  };
   return (
     <Helmet>
       <title>{title} | NightSky.earth</title>
@@ -35,9 +42,7 @@ export default function SEO({
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
-      {schema && (
-        <script type="application/ld+json">{JSON.stringify(schema)}</script>
-      )}
+      <script type="application/ld+json">{JSON.stringify(pageSchema)}</script>
     </Helmet>
   );
 }

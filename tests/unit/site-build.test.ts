@@ -4,6 +4,13 @@ import assert from "node:assert/strict";
 import { buildWebsiteOutputs, classifyPath } from "../../shared/websiteBuild";
 import { siteRoutes } from "../../shared/website";
 import { releaseFacts } from "../../client/src/content/releaseFacts";
+import { homeCopy } from "../../client/src/content/websiteCopy";
+
+test("homepage crawler metadata matches the visible hero", () => {
+  const home = siteRoutes.find((route) => route.path === "/");
+  assert.equal(home?.title, homeCopy.hero.headline);
+  assert.equal(home?.description, homeCopy.hero.body);
+});
 test("preview output is isolated from news and publication", () => {
   const output = buildWebsiteOutputs({
     release: false,
@@ -77,11 +84,11 @@ test("a complete synthetic release has an indexable sitemap without preview head
     now: new Date("2026-10-16"),
     legacyMeteorIds: ["perseids"],
   });
-  assert.ok(output.sitemap.includes("https://nightsky.earth/resources"));
-  assert.ok(output.sitemap.includes("https://nightsky.earth/sky-map"));
+  assert.ok(output.sitemap.includes("<loc>https://nightsky.earth/resources/</loc>"));
+  assert.ok(output.sitemap.includes("<loc>https://nightsky.earth/sky-map/</loc>"));
   assert.ok(!output.headers.startsWith("/*\n  X-Robots-Tag"));
   assert.ok(!output.sitemap.includes("/meteor-nights"));
-  assert.ok(output.sitemap.includes("/sky-events/" + skyEvents[0].id));
+  assert.ok(output.sitemap.includes("/sky-events/" + skyEvents[0].id + "/</loc>"));
   assert.ok(!output.sitemap.includes("draft-2026"));
   assert.ok(!output.sitemap.includes("withdrawn-2026"));
   assert.ok(output.pages.some((page) => page.path === "/sky-events/" + skyEvents[0].id && !page.noindex));

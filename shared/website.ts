@@ -33,7 +33,7 @@ export function resolvePluginAction(config: ListingConfig) {
 export function canonicalUrl(path: string) {
   try {
     const pathname = new URL(path, SITE_ORIGIN).pathname;
-    const canonicalPath = pathname === "/" ? pathname : pathname.replace(/\/+$/, "");
+    const canonicalPath = pathname === "/" ? pathname : pathname.replace(/\/+$/, "") + "/";
     return SITE_ORIGIN + canonicalPath;
   } catch {
     return SITE_ORIGIN + "/";
@@ -48,8 +48,8 @@ export type SiteRoute = {
 export const siteRoutes: readonly SiteRoute[] = [
   [
     "/",
-    "Where Earth meets the stars.",
-    "NightSky is an astronomy plugin for your AI assistant. Plan a night under the stars, explore the universe, and follow your curiosity.",
+    "Know when, where, and how to look up.",
+    "Plan a night under the stars with NightSky in your AI assistant. Explore sky timing, possible observing places, and practical ways to get started.",
   ],
   [
     "/resources",

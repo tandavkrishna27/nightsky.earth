@@ -8,8 +8,8 @@ test('listing must be public and a specific safe official destination', () => {
   assert.equal(resolvePluginAction({published:false,url:'https://chatgpt.com/example'}).external,false);
 });
 test('canonical never inherits preview host or query', () => {
-  assert.equal(canonicalUrl('/resources?q=moon#results'),'https://nightsky.earth/resources');
-  assert.equal(canonicalUrl('/resources/'),'https://nightsky.earth/resources');
+  assert.equal(canonicalUrl('/resources?q=moon#results'),'https://nightsky.earth/resources/');
+  assert.equal(canonicalUrl('/resources/'),'https://nightsky.earth/resources/');
   assert.equal(canonicalUrl('/'),'https://nightsky.earth/');
-  assert.equal(canonicalUrl('https://preview.invalid/about?q=x'),'https://nightsky.earth/about');
+  assert.equal(canonicalUrl('https://preview.invalid/about?q=x'),'https://nightsky.earth/about/');
 });
