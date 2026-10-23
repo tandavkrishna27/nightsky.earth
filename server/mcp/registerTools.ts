@@ -6,7 +6,7 @@ import type { OptionalSkyProviders } from '../providers/skyConfiguration';
 import { apiAttributionText } from "../places/api/attribution";
 import type { DiscoveryProvider, SelectedPlaceResolver } from "../places/api/types";
 import {forecastAnswerText} from './forecastAnswerText';
-import { planAnswerText, planAnswerSources, sourceLinkedText, orientationAnswerText } from "./answerText";
+import { planAnswerText, planAnswerSources, sourceLinkedText, orientationAnswerText, astronomyWindowAnswerText } from "./answerText";
 import * as z from "zod4";
 import { CatalogueRevisionError } from "../places/globalCatalogue";
 import { normalizeDiscoveryInput, searchDiscoveryInputSchema, searchDiscoveryResultSchema, candidateRefSchema, discoveryCoverageSchema, discoveryScopeSchema, originBasisSchema, resolveObservingRegionInputSchema, resolveObservingRegionResultSchema, getObservingLocationDetailsInputSchema, getObservingLocationDetailsResultSchema, type CatalogueReader, type RegionIndex, type CalculationPlace } from "../../shared/nightsky/discovery";
@@ -224,7 +224,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     if (!index && !dependencies.selectedPlaceResolver) throw new Error("The local GeoNames place index is unavailable.");
     const point = await resolvePoint({ ...input, displayTimeZone: input.displayTimeZone ?? (input.placeId.startsWith("place:v1:geonames:") ? input.window.timeZone : undefined) }, index);
     const result = await getAstronomyWindow({ placeId: input.placeId, timeZone: input.window.timeZone }, input.window, index, point);
-    return { content: [{ type: "text", text: sourceLinkedText(`Astronomy Engine ${result.sources[0]?.vintage}. ${result.availability.reason}`, result.sources) }], structuredContent: result };
+    return { content: [{ type: "text", text: sourceLinkedText(astronomyWindowAnswerText(result), result.sources) }], structuredContent: result };
   });
 
   server.registerTool("get_target_visibility", {

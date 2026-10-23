@@ -1,4 +1,4 @@
-import type { TargetVisibilityResult } from '../../shared/nightsky/astronomy';
+import type { AstronomyWindowResult, TargetVisibilityResult } from '../../shared/nightsky/astronomy';
 import type { SourceRecord } from '../../shared/nightsky/common';
 import type { PlanResult } from '../../shared/nightsky/planning';
 import { formatLocalInstant } from '../../shared/nightsky/format';
@@ -8,6 +8,24 @@ import { resolveMeteorIdentity } from '../../shared/nightsky/meteors';
 const plain = (value: string) => value.replace(/[\\[\]<>`*_~\r\n]/g, ' ').replace(/\s+/g, ' ').trim();
 
 const sourceKey = (source: SourceRecord) => JSON.stringify(Object.entries(source).sort(([a], [b]) => a.localeCompare(b)));
+
+/** Keep the standalone astronomy tool useful to clients that read text only. */
+export function astronomyWindowAnswerText(result: AstronomyWindowResult): string {
+  const darkness = result.astronomicalDarkness;
+  const lines = [
+    `Astronomical darkness: ${darkness.status === 'available'
+      ? `${plain(darkness.localStart)} to ${plain(darkness.localEnd)}`
+      : `${darkness.status}; ${plain(darkness.reason)}`}. Coverage of the requested window: ${result.darknessState}.`,
+    `Moon illumination: ${result.moon.illuminationPercent.toFixed(1)}% at ${result.moon.phaseAtUtc}; observing impact remains unknown.`,
+    `Moon maximum sampled altitude: ${result.moon.maximumAltitudeDegrees.toFixed(1)} degrees at ${result.moon.maximumAltitudeAtUtc}; this is a sample, not a continuous optimum.`,
+  ];
+  for (const interval of (result.solarThresholdIntervals ?? []).slice(0, 6))
+    lines.push(`Sun below ${interval.sunAltitudeThresholdDegrees} degrees: ${plain(interval.localStart)} to ${plain(interval.localEnd)} (nested threshold interval).`);
+  const omitted = (result.solarThresholdIntervals?.length ?? 0) - 6;
+  if (omitted > 0) lines.push(`${omitted} more threshold intervals remain in structuredContent.`);
+  lines.push('All intervals are clipped to the requested window. Geometric Sun and Moon positions do not account for terrain or local horizon obstructions.');
+  return lines.join('\n');
+}
 
 /** Select answer references without deleting the full catalogue provenance.
  * Only event-inventory-only records are filtered; shared or distinct credits
