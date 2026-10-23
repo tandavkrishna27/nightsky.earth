@@ -8,8 +8,6 @@ type Guide = {
   manual: readonly SetupStep[];
   source: string;
   sourceName: string;
-  packageHost?: "claude" | "codex";
-  packageNote?: string;
 };
 export const setupGuides: Record<AssistantId, Guide> = {
   chatgpt: {
@@ -48,16 +46,13 @@ export const setupGuides: Record<AssistantId, Guide> = {
     ],
     source: "https://developers.openai.com/plugins/build/app-quickstart",
     sourceName: "ChatGPT connection guide",
-    packageHost: "codex",
-    packageNote:
-      "The Codex package is for Codex desktop or CLI local installation. It is not a ChatGPT browser upload. It connects to a separately running NightSky backend; downloading it does not start that backend.",
   },
   claude: {
     name: "Claude",
     devices:
-      "Web & desktop for remote connections · local extensions require a compatible desktop host.",
+      "Web & desktop for the hosted connection.",
     requirements:
-      "Claude plugins currently require a paid Claude plan. Organization settings can restrict installation. A local MCP server runs in supported Cowork or Claude Code environments, rather than ordinary chat.",
+      "Claude plugins currently require a paid Claude plan. Organization settings can restrict installation. The manual connector uses NightSky’s hosted service.",
     directory: [
       [
         "Find NightSky.",
@@ -74,24 +69,21 @@ export const setupGuides: Record<AssistantId, Guide> = {
     ],
     manual: [
       [
-        "Choose remote or local setup.",
-        "For the hosted service, open Customize → Connectors and add a custom connector using NightSky’s official connection address. Follow Claude’s connection prompts.",
+        "Open custom connectors.",
+        "In Claude, open Customize → Connectors and add a custom connector.",
       ],
       [
-        "For a downloaded plugin, use its matching host.",
-        "Use Claude’s custom plugin upload option where available, or the package’s documented local installation route. A plugin ZIP and a desktop extension are different formats; use the instructions for the file you have.",
+        "Add NightSky’s address.",
+        "Paste the hosted NightSky connection address below. NightSky does not require a separate account or OAuth sign-in.",
       ],
       [
-        "Keep local services running.",
-        "If the package points to a local NightSky backend, start that backend separately and keep it running. Installing the package alone does not provide the backend or establish web/mobile access.",
+        "Use NightSky in a conversation.",
+        "Finish Claude’s connection prompts, start a conversation, and ask Claude to use NightSky. Confirm that it calls a NightSky tool.",
       ],
     ],
     source:
       "https://support.claude.com/en/articles/13837440-use-plugins-in-claude",
     sourceName: "Claude plugin guide",
-    packageHost: "claude",
-    packageNote:
-      "This is a host-specific plugin ZIP, not a desktop extension installer. Its matching NightSky backend must be set up and started separately. Follow the package’s verified host instructions before importing it.",
   },
   gemini: {
     name: "Gemini",
@@ -153,18 +145,19 @@ export const setupFaqs = [
   ],
   [
     "Can I use NightSky on my phone?",
-    "Mobile availability depends on the assistant and connection method. A remote connection may work across supported devices; a local backend or desktop-only plugin does not automatically become available on your phone. Gemini custom apps are added on the web before use on eligible mobile accounts.",
+    "Mobile availability depends on the assistant and connection method. The hosted NightSky connection may work across supported devices. Gemini custom apps are added on the web before use on eligible mobile accounts.",
   ],
   [
-    "Which installation method or download should I choose?",
-    "Use the marketplace route where offered, or manually connect the hosted NightSky service using its official address. Downloaded packages are host-specific. Local packages need a separately running backend; they are not universal browser or phone installers.",
+    "Which installation method should I choose?",
+    "ChatGPT’s directory listing is under review, and Claude’s listing is pending review. Use manual setup to connect the hosted NightSky service now. Choose the directory route after its listing is published.",
   ],
   [
     "Why isn’t NightSky appearing or responding?",
-    "Check that NightSky is installed or connected, enabled for your conversation, and supported by your account and device. Try a new chat and explicitly ask the assistant to use NightSky. For local setup, confirm that the backend is running and reachable from the host. If it still fails, contact NightSky with the assistant name and error shown.",
+    "Check that NightSky is connected, enabled for your conversation, and supported by your account and device. Try a new chat and explicitly ask the assistant to use NightSky. If it still fails, contact NightSky with the assistant name and error shown.",
   ],
   [
     "What information is shared when I use NightSky?",
     "NightSky processes the destination, date, observing goal and optional equipment details sent to its tools. The AI assistant processes your conversation under its own policies, and enabled data providers may receive details needed for their results. See Sources & Coverage and the privacy information for the relevant service. Having no NightSky account does not mean no data is processed.",
   ],
 ] as const;
+

@@ -5,7 +5,6 @@ import {
   Check,
   CheckCircle2,
   Copy,
-  Download,
   Link2,
 } from "lucide-react";
 import AssistantIcon, {
@@ -13,28 +12,31 @@ import AssistantIcon, {
   type AssistantId,
 } from "@/components/AssistantIdentity";
 import { setupGuides, setupCheckPrompt } from "@/content/setupGuide";
+import { listingConfig } from "@/components/PluginAction";
 import {
   readSetupState,
   setupGuideHref,
   type SetupMode,
 } from "@/lib/setupGuideState";
-import { resolveSetupResource } from "@/lib/setupResources";
+import {
+  NIGHTSKY_PUBLIC_MCP_URL,
+  resolveSetupResource,
+} from "@/lib/setupResources";
 import "@/styles/setup-guide.css";
 
 export default function InstallationGuide() {
   const search = useSearch();
   const { assistant, mode } = readSetupState(search);
   const guide = setupGuides[assistant];
-  const endpoint = resolveSetupResource(
-    "endpoint",
-    import.meta.env.VITE_NIGHTSKY_MCP_URL,
-  );
-  const packageUrl = resolveSetupResource(
-    "package",
-    guide.packageHost === "claude"
-      ? import.meta.env.VITE_NIGHTSKY_CLAUDE_PACKAGE_URL
-      : import.meta.env.VITE_NIGHTSKY_CODEX_PACKAGE_URL,
-  );
+  const endpoint = resolveSetupResource("endpoint", NIGHTSKY_PUBLIC_MCP_URL);
+  const directoryPublished =
+    assistant === "chatgpt"
+      ? listingConfig.published && Boolean(listingConfig.url)
+      : assistant === "claude"
+        ? Boolean(import.meta.env.VITE_NIGHTSKY_CLAUDE_LISTING_URL)
+        : false;
+  const directoryPending =
+    mode === "directory" && Boolean(guide.directory) && !directoryPublished;
   const [copyStatus, setCopyStatus] = useState("");
   const copyRequest = useRef(0);
   useEffect(() => {
@@ -132,6 +134,23 @@ export default function InstallationGuide() {
             </button>
           </div>
           <p className="setup-guide-requirements">{guide.requirements}</p>
+          {directoryPending && (
+            <div className="setup-directory-pending">
+              <p>
+                {assistant === "chatgpt"
+                  ? "NightSky’s ChatGPT directory listing is under review."
+                  : "NightSky’s Claude directory listing is pending review."}{" "}
+                The steps below apply after it is published.
+              </p>
+              <button
+                type="button"
+                className="setup-small-action"
+                onClick={() => select(assistant, "manual")}
+              >
+                Use manual setup now
+              </button>
+            </div>
+          )}
           <div className="setup-guide-columns">
             <div className="setup-instructions">
               <ol>
@@ -176,46 +195,6 @@ export default function InstallationGuide() {
                   </button>
                 </div>
               )}
-              {mode === "manual" && guide.packageHost && (
-                <div className="setup-package-resource">
-                  <h4>
-                    <Download size={16} aria-hidden="true" />
-                    Local {guide.packageHost === "codex"
-                      ? "Codex"
-                      : "Claude"}{" "}
-                    package
-                  </h4>
-                  <p>{guide.packageNote}</p>
-                  {packageUrl ? (
-                    <a
-                      className="setup-small-action"
-                      href={packageUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Download{" "}
-                      {guide.packageHost === "codex" ? "Codex" : "Claude"}{" "}
-                      package <ArrowUpRight size={15} aria-hidden="true" />
-                    </a>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        className="setup-small-action"
-                        disabled
-                      >
-                        Download{" "}
-                        {guide.packageHost === "codex" ? "Codex" : "Claude"}{" "}
-                        package
-                      </button>
-                      <p className="setup-resource-note">
-                        A verified package download and matching backend
-                        instructions have not been added to this website.
-                      </p>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
             <aside
               className="setup-connection-check"
@@ -257,7 +236,7 @@ export default function InstallationGuide() {
           <p className="setup-guide-manage">
             To disconnect or remove NightSky, reopen its entry in your
             assistant’s Plugins or Connectors settings and follow the removal
-            controls shown. A local backend is managed separately.
+            controls shown.
           </p>
           <p className="setup-guide-copy-status" role="status">
             {copyStatus}
@@ -270,7 +249,7 @@ export default function InstallationGuide() {
             </a>
             <span>
               Instructions checked{" "}
-              <time dateTime="2026-10-18">18 October 2026</time>. Menus and
+              <time dateTime="2026-10-23">23 October 2026</time>. Menus and
               access can vary by account.
             </span>
           </div>
@@ -279,3 +258,4 @@ export default function InstallationGuide() {
     </section>
   );
 }
+
