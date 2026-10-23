@@ -1,4 +1,6 @@
 import { Link } from "wouter";
+import { Instagram } from "lucide-react";
+import { INSTAGRAM_URL } from "@shared/website";
 import { useReplayWelcome } from "./ExperienceShell";
 import { useAnalyticsPreferences } from "./AnalyticsConsent";
 import nightskyLogo from "@assets/nightsky-logo-dark.svg";
@@ -42,6 +44,15 @@ export default function Footer() {
             <img src={nightskyLogo} alt="" width={1397} height={205} />
           </Link>
           <p>Where Earth meets the stars.</p>
+          <a
+            className="footer-social"
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow NightSky.earth on Instagram"
+          >
+            <Instagram size={18} aria-hidden="true" /> Instagram
+          </a>
         </div>
         {groups.map((group) => (
           <div className="footer-column" key={group.title}>

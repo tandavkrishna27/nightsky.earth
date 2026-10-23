@@ -3,12 +3,13 @@ import {
   Camera,
   Leaf,
   Mail,
+  Instagram,
   Orbit,
   Telescope,
   Users,
 } from "lucide-react";
 import SEO from "@/components/SEO";
-import { SUPPORT_EMAIL } from "@shared/website";
+import { INSTAGRAM_URL, SUPPORT_EMAIL } from "@shared/website";
 import {
   collectiveAudiences,
   collectivePurposes,
@@ -137,6 +138,14 @@ export default function Community() {
           href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(contributionSubject)}`}
         >
           Email to contribute <Mail size={17} aria-hidden="true" />
+        </a>
+        <a
+          className="collective-instagram"
+          href={INSTAGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Instagram size={18} aria-hidden="true" /> Follow NightSky on Instagram
         </a>
       </section>
     </div>

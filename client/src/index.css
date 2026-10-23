@@ -962,6 +962,21 @@ main:focus {
   max-width: 100%;
   height: auto;
 }
+.footer-social {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  color: #bdbdb6;
+  font-size: 13px;
+}
+.footer-social:hover {
+  color: var(--gold);
+}
+.footer-social:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
 .email-link {
   font-size: 13px;
   word-break: break-word;
