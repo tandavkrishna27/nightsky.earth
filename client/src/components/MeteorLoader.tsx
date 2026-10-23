@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface MeteorLoaderProps {
   size?: "sm" | "md" | "lg";
@@ -6,6 +6,7 @@ interface MeteorLoaderProps {
 }
 
 export default function MeteorLoader({ size = "md", className = "" }: MeteorLoaderProps) {
+  const reducedMotion = useReducedMotion();
   const sizeConfig = {
     sm: { scale: 0.7, meteorSize: 24 },
     md: { scale: 1, meteorSize: 32 },
@@ -15,12 +16,16 @@ export default function MeteorLoader({ size = "md", className = "" }: MeteorLoad
   const config = sizeConfig[size];
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div
+      className={`relative flex items-center justify-center ${className}`}
+      style={{ width: config.meteorSize * 4, height: config.meteorSize * 3 }}
+      aria-hidden="true"
+    >
       {/* Complete meteor with flame - moving as one unit */}
       <motion.div
         className="relative"
         style={{ scale: config.scale }}
-        animate={{
+        animate={reducedMotion ? undefined : {
           x: [-40, 40, -40],
           y: [-25, 25, -25],
         }}
@@ -45,7 +50,7 @@ export default function MeteorLoader({ size = "md", className = "" }: MeteorLoad
             height={config.meteorSize * 3} 
             viewBox={`0 0 ${config.meteorSize * 4} ${config.meteorSize * 3}`} 
             className="absolute z-0"
-            style={{ transform: `translate(-${config.meteorSize * 3}px, -${config.meteorSize * 1.5}px) rotate(225deg)` }}
+            style={{ transform: `translate(-${config.meteorSize * 2}px, -${config.meteorSize * 1.5}px) rotate(225deg)` }}
           >
             {/* Outer flame envelope - smaller proportions */}
             <path
@@ -92,9 +97,10 @@ export default function MeteorLoader({ size = "md", className = "" }: MeteorLoad
               left: `${-config.meteorSize * 2}px`, 
               top: `${-config.meteorSize * 0.3}px`,
               width: `${config.meteorSize * 0.3}px`,
-              height: `${config.meteorSize * 0.3}px`
+              height: `${config.meteorSize * 0.3}px`,
+              display: reducedMotion ? "none" : undefined,
             }}
-            animate={{
+            animate={reducedMotion ? undefined : {
               scale: [0, 1, 0],
               opacity: [0, 0.8, 0],
               x: [0, -config.meteorSize * 0.4, -config.meteorSize * 0.7],
@@ -113,9 +119,10 @@ export default function MeteorLoader({ size = "md", className = "" }: MeteorLoad
               left: `${-config.meteorSize * 1.8}px`, 
               top: `${config.meteorSize * 0.3}px`,
               width: `${config.meteorSize * 0.25}px`,
-              height: `${config.meteorSize * 0.25}px`
+              height: `${config.meteorSize * 0.25}px`,
+              display: reducedMotion ? "none" : undefined,
             }}
-            animate={{
+            animate={reducedMotion ? undefined : {
               scale: [0, 1, 0],
               opacity: [0, 0.7, 0],
               x: [0, -config.meteorSize * 0.3, -config.meteorSize * 0.5],
@@ -145,7 +152,7 @@ export default function MeteorLoader({ size = "md", className = "" }: MeteorLoad
             height={config.meteorSize * 3} 
             viewBox={`0 0 ${config.meteorSize * 4} ${config.meteorSize * 3}`} 
             className="absolute z-10"
-            style={{ transform: `translate(-${config.meteorSize * 3}px, -${config.meteorSize * 1.5}px) rotate(225deg)` }}
+            style={{ transform: `translate(-${config.meteorSize * 2}px, -${config.meteorSize * 1.5}px) rotate(225deg)` }}
           >
             {/* Top flame detail */}
             <path
