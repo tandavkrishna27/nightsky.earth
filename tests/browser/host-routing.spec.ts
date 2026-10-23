@@ -26,7 +26,7 @@ test("production-shaped routes, metadata and independent sitemap", async ({
     if (path === "/resources") {
       const html = await response.text();
       expect(html).toContain('<title data-rh="true">Find what helps you look up. | NightSky.earth</title>');
-      expect(html).toContain('property="og:url" content="https://nightsky.earth/resources"');
+      expect(html).toContain('property="og:url" content="https://nightsky.earth/resources/"');
       expect(html).toContain('name="twitter:card" content="summary_large_image"');
       expect(html).toContain("<noscript><main><h1>Find what helps you look up.</h1>");
       expect(html).toContain('name="robots" content="noindex, nofollow"');
@@ -34,7 +34,7 @@ test("production-shaped routes, metadata and independent sitemap", async ({
     if (path === "/sky-map") {
       const html = await response.text();
       expect(html).toContain('<title data-rh="true">Explore the sky. | NightSky.earth</title>');
-      expect(html).toContain('property="og:url" content="https://nightsky.earth/sky-map"');
+      expect(html).toContain('property="og:url" content="https://nightsky.earth/sky-map/"');
       expect(html).toContain("<noscript><main><h1>Explore the sky.</h1>");
     }
   }
@@ -57,12 +57,12 @@ test("production-shaped routes, metadata and independent sitemap", async ({
   await page.goto("/resources?q=moon");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    "https://nightsky.earth/resources",
+    "https://nightsky.earth/resources/",
   );
   await page.goto("/resources/");
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
-    "https://nightsky.earth/resources",
+    "https://nightsky.earth/resources/",
   );
   await page.goto("/meteor-shower/perseids");
   await expect(

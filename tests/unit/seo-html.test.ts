@@ -16,7 +16,7 @@ test("route HTML has route-specific crawl and sharing metadata before scripts ru
   }, true);
 
   assert.match(html, /<title data-rh="true">Resources for looking up \| NightSky\.earth<\/title>/);
-  assert.match(html, /<link data-rh="true" rel="canonical" href="https:\/\/nightsky\.earth\/resources">/);
+  assert.match(html, /<link data-rh="true" rel="canonical" href="https:\/\/nightsky\.earth\/resources\/">/);
   assert.match(html, /property="og:title" content="Resources for looking up"/);
   assert.match(html, /name="twitter:card" content="summary_large_image"/);
   assert.match(html, /name="robots" content="index, follow"/);
@@ -37,7 +37,7 @@ test("preview and intentionally hidden routes stay noindex", () => {
       noindex,
     }, release);
     assert.match(html, /name="robots" content="noindex, nofollow"/);
-    assert.match(html, /property="og:url" content="https:\/\/nightsky\.earth\/sky-events\/withdrawn-record"/);
+    assert.match(html, /property="og:url" content="https:\/\/nightsky\.earth\/sky-events\/withdrawn-record\/"/);
   }
 });
 

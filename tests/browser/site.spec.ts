@@ -375,6 +375,12 @@ test("route metadata is singular and archive copy is clean UTF-8", async ({
   await page.goto("/resources");
   await expect(page.locator('meta[name="description"]')).toHaveCount(1);
   await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
+  const pageSchema = page.locator('script[type="application/ld+json"]');
+  await expect(pageSchema).toHaveCount(1);
+  expect(JSON.parse((await pageSchema.textContent()) || "{}")).toMatchObject({
+    "@type": "WebPage",
+    url: "https://nightsky.earth/resources/",
+  });
   await page.goto("/meteor-shower/perseids");
   await expect(
     page.getByRole("link", { name: "Explore sky events →", exact: true }),
