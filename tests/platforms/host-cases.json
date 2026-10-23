@@ -43,8 +43,7 @@
       "resolve_place",
       "get_astronomy_window",
       "get_night_conditions",
-      "plan_observing_session",
-      "recommend_specialist_tools"
+      "plan_observing_session"
     ],
     "requiredSignals": [
       "Moon and darkness",

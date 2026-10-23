@@ -17,7 +17,7 @@ test('Hyderabad journeys retain useful plans and independent forecasts with all 
  const weatherCollection=createWeatherCollection((['met','weatherapi'] as const).map((id,i)=>({id,enabled:true,provider:{getForecast:async()=>({status:'available' as const,reason:'Synthetic',forecast:{availability:{status:'available' as const,reason:'Synthetic'},source:{name:`${id} synthetic`,url:`https://example.test/${id}`,attribution:'Synthetic offline fixture',dataClass:'forecast' as const,issuedAt:'2026-12-13T12:00:00Z'},forecastHorizonHours:48,samples:[{validAt:'2026-12-13T18:00:00Z',values:{totalCloudCover:{value:i?90:10,unit:'%'}}}],missingFields:[]}})}})),{deadlineMs:100});
  const tools=new Map<string,(input:any)=>Promise<any>>();
  registerNightSkyTools({registerTool:(name:string,_options:unknown,handler:any)=>tools.set(name,handler)} as any,{placeIndex:index,skyProviders,weatherCollection,fetcher,osmCandidateIndexLoader:async()=>undefined,plannerServices:{getClimatology:async()=>{throw Error('Synthetic history unavailable');}}});
- assert.equal(tools.size,20);
+ assert.equal(tools.size,19);
  const call=async(name:string,args:unknown)=>(await tools.get(name)!(args)).structuredContent;
  for(const [name,args] of [
   ['find_moon_aware_windows',{placeId,startDate:'2026-12-13',endDate:'2026-12-14',startTime:'22:00',endTime:'04:00',moonIlluminationThresholdPercent:10}],

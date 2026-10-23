@@ -23,8 +23,8 @@ function registry(mode: 'full'|'resolver-only' = 'full', dependencies: NightSkyD
  registerNightSkyTools({registerTool(name: string, config: any, handler: any) {tools.set(name,{config,handler});}} as unknown as McpServer,{placeIndex:index,toolMode:mode,...dependencies});
  return tools;
 }
-test('full registry exposes fourteen genuine tools and resolver mode one', async () => {
- const tools=registry(); assert.equal(tools.size,14); assert.equal(registry('resolver-only').size,1);
+test('full registry exposes thirteen genuine tools and resolver mode one', async () => {
+ const tools=registry(); assert.equal(tools.size,13); assert.equal(registry('resolver-only').size,1);
  for(const name of ['resolve_observing_region','get_observing_location_details']) {
   const tool=tools.get(name)!; assert.equal(tool.config.annotations.readOnlyHint,true);
   const result=await tool.handler(name==='resolve_observing_region'?{regionQuery:'India'}:{placeQuery:'Test park'});
@@ -66,7 +66,7 @@ test('selected catalogue site reaches astronomy, forecast, aurora, plan and comp
   const app=express();app.use(express.json({limit:'32kb'}));mountMcpRoute(app,{...dependencies,allowedHosts:['127.0.0.1']});
   server=createServer(app).listen(0,'127.0.0.1');await once(server,'listening');const address=server.address();assert.ok(address&&typeof address!=='string');let id=0;
   const rpc=async(method:string,params:any)=>{const response=await fetch(`http://127.0.0.1:${address.port}/mcp`,{method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params})});const body=await response.text();const data=body.split('\n').find(line=>line.startsWith('data: '));return JSON.parse(data?data.slice(6):body);};
-  const listed=await rpc('tools/list',{});assert.equal(listed.result.tools.length,14);
+  const listed=await rpc('tools/list',{});assert.equal(listed.result.tools.length,13);
   const call=async(name:string,input:any)=>{const tool=tools.get(name)!;const parsed=tool.config.inputSchema.parse(input);const response=await rpc('tools/call',{name,arguments:parsed});const result=response.result;if(response.error||result?.isError)throw Error(response.error?.message??result.content[0].text);tool.config.outputSchema.parse(result.structuredContent);return result.structuredContent;};
   const window={startUtc:'2026-10-15T12:00:00Z',endUtc:'2026-10-16T00:00:00Z',timeZone:'Asia/Kolkata'};
   const selection={placeId:candidate.placeId,catalogueRevision:'fixture-v1',displayTimeZone:'Asia/Kolkata'};

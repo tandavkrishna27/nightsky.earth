@@ -42,7 +42,7 @@ test("resolver-only rehearsal exposes one guarded tool and never starts a provid
     assert.doesNotMatch(JSON.stringify(resolved), /latitude|longitude|32\.78943|78\.9962/);
     const coordinates = await rpc("tools/call", { name: "resolve_place", arguments: { placeQuery: "12.97, 77.59" } });
     assert.ok(coordinates.error || coordinates.result.isError);
-    for (const name of ["get_night_conditions", "plan_observing_session", "get_clear_sky_climatology", "recommend_specialist_tools"]) {
+    for (const name of ["get_night_conditions", "plan_observing_session", "get_clear_sky_climatology"]) {
       const blocked = await rpc("tools/call", { name, arguments: {} });
       assert.ok(blocked.error || blocked.result.isError, name);
     }

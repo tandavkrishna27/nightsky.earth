@@ -18,7 +18,7 @@ export async function prepareCodexLocalFixture(out:string, port=8765, serve=fals
  try {
   const tools=await server.rpc('tools/list',{});
   const toolNames=tools.result.tools.map((tool:{name:string})=>tool.name).sort();
-  if(toolNames.length!==14) throw Error('Expected fourteen tools');
+  if(toolNames.length!==13) throw Error('Expected thirteen tools');
   const probe=await server.rpc('tools/call',{name:'resolve_place',arguments:{placeQuery:'Fictionvale'}});
   if(probe.result.isError || !probe.result.structuredContent.matches.length) throw Error('Offline resolution failed');
   const pkg=buildLocalPluginPackage({host:'codex',endpoint:server.endpoint});

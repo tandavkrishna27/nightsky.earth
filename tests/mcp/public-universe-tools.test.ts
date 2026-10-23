@@ -35,10 +35,10 @@ async function fixture(t: any, selected = false, admitted = false, upstream?: ty
 const observing = { placeId: 'place:v1:geonames:1269843', displayTimeZone: 'Asia/Kolkata', localNightDate: '2026-10-18', window: { startUtc: '2026-10-18T18:00:00Z', endUtc: '2026-10-19T03:00:00Z' }, equipment: 'binocular', preference: 'balanced', shortlistLimit: 3 };
 test('Public Universe stays absent by default and selected unadmitted tools are explicit unavailable', async (t) => {
     const off = await fixture(t);
-    assert.equal((await off.rpc('tools/list')).result.tools.length, 14);
+    assert.equal((await off.rpc('tools/list')).result.tools.length, 13);
     const on = await fixture(t, true);
     const tools = (await on.rpc('tools/list')).result.tools;
-    assert.equal(tools.length, 18);
+    assert.equal(tools.length, 17);
     for (const name of names) {
         const tool = tools.find((v: any) => v.name === name);
         assert.ok(tool);

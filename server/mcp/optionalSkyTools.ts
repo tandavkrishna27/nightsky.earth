@@ -7,7 +7,7 @@ import { darkSkyPlanOutputSchema } from '../providers/sky/darkSkyPlanner';
 import { astronomySearchInputSchema, astronomySearchOutputSchema, astronomyPositionsOutputSchema } from '../providers/sky/astronomyApi';
 import { spaceWeatherInputSchema, spaceWeatherResultSchema, smallBodyInputSchema, smallBodyResultSchema, observerEphemerisResultSchema, observerEphemerisInputSchema } from '../providers/space';
 
-/** Source-optional inventory; these names are not part of the default fourteen tools. */
+/** Source-optional inventory; these names are not part of the default core tools. */
 export const OPTIONAL_SKY_TOOL_NAMES = ['find_moon_aware_windows','search_astronomy_objects','get_external_body_positions','get_space_weather_events','resolve_small_body','get_small_body_ephemeris',...PUBLIC_UNIVERSE_TOOL_NAMES] as const;
 const [moonWindowsTool,objectSearchTool,bodyPositionsTool,spaceWeatherTool,smallBodyTool,ephemerisTool] = OPTIONAL_SKY_TOOL_NAMES;
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(v=>Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0,10)===v);

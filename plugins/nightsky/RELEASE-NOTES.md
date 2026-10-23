@@ -1,3 +1,7 @@
+## V1 local revision 1.0.46 - Focused observing tools
+
+The optional third-party app recommendation tool has been removed from the public MCP inventory and both clients' workflow instructions. NightSky's place, astronomy, forecast, observing and source-credit tools remain. This addresses the review surface that received an unexplained further-review finding; it does not establish that OpenAI has cleared the finding. Production must be promoted before this package is uploaded as a replacement draft.
+
 ## V1 local revision 1.0.45 - Outside-scope review cases
 
 The three negative OpenAI review cases now use Cape Town prompts for traffic, hotel booking and creative writing, where NightSky should not trigger. The preceding aurora, solar-safety and coordinate prompts are relevant to NightSky and remain product behavior examples, not no-trigger review cases. No hosted MCP behavior or provider configuration changed in this package revision.

@@ -27,7 +27,7 @@ test('synthetic server exposes complete tools and local-only discovery evidence'
  const root=mkdtempSync(join(tmpdir(),'nightsky-complete-test-'));
  const server=await createFixtureServer(root);
  try {
-  const tools=await server.rpc('tools/list',{});assert.equal(tools.result.tools.length,14);
+  const tools=await server.rpc('tools/list',{});assert.equal(tools.result.tools.length,13);
   server.beginCase('fixture');
   const r=await server.rpc('tools/call',{name:'resolve_place',arguments:{placeQuery:'Fictionvale'}});
   assert.ok(r.result.structuredContent.matches.length);

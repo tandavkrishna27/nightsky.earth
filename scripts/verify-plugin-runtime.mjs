@@ -38,10 +38,10 @@ try{
     assert.equal(response.status,200);const body=await response.text();const event=body.split("\n").find(line=>line.startsWith("data: "));const payload=JSON.parse(event?event.slice(6):body);assert.equal(payload.error,undefined);return payload.result;
   };
   const initialized=await rpc(1,"initialize",{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"standalone-plugin-runtime-check",version:"1"}});assert.equal(initialized.serverInfo.name,"nightsky-earth");
-  const listed=await rpc(2,"tools/list",{});assert.equal(listed.tools.length,mode === "full" ? 14 : 1);
+  const listed=await rpc(2,"tools/list",{});assert.equal(listed.tools.length,mode === "full" ? 13 : 1);
   if (mode === "full") {
-  for(const name of ["resolve_place","get_clear_sky_climatology","plan_observing_session","compare_observing_options","recommend_specialist_tools"])assert.ok(listed.tools.some(tool=>tool.name===name));
-  const suggested=await rpc(3,"tools/call",{name:"recommend_specialist_tools",arguments:{activity:"general-stargazing"}});assert.equal(suggested.isError,undefined);assert.ok(suggested.structuredContent.recommendations.length);
+  for(const name of ["resolve_place","get_clear_sky_climatology","plan_observing_session","compare_observing_options"])assert.ok(listed.tools.some(tool=>tool.name===name));
+  assert.ok(!listed.tools.some(tool=>tool.name==="recommend_specialist_tools"));
   const meteor=await rpc(4,"tools/call",{name:"search_sky_events",arguments:{placeId:"place:v1:geonames:9999991",window:{startUtc:"2027-11-20T00:00:00Z",endUtc:"2027-11-21T00:00:00Z",timeZone:"Asia/Kolkata"},eventTypes:["meteor-shower"]}});
   assert.equal(meteor.isError,undefined,JSON.stringify(meteor));assert.equal(meteor.structuredContent.availability.status,"partial");
   const leonids=meteor.structuredContent.events.find(event=>event.name==="Leonids");

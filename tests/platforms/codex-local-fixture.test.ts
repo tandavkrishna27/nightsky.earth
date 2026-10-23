@@ -18,7 +18,7 @@ test('preparation binds complete package to verified offline endpoint then close
  const {prepareCodexLocalFixture}=await import('../../scripts/prepare-codex-local-fixture');
  const root=mkdtempSync(join(tmpdir(),'ns-prepare-'));
  const report=await prepareCodexLocalFixture(root,0);
- assert.equal(report.toolNames.length,14); assert.equal(report.skillNames.length,5);
+ assert.equal(report.toolNames.length,13); assert.equal(report.skillNames.length,5);
  assert.equal(report.externalAttempts,0); assert.equal(report.hostInstallationVerified,false);
  const config=JSON.parse(readFileSync(join(root,'plugin','mcp.json'),'utf8'));
  assert.equal(config.mcpServers.nightsky.url,report.endpoint);

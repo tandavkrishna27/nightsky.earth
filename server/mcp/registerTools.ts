@@ -35,9 +35,8 @@ import { getLocationContext } from "../places/context";
 import { getLocationContextInputSchema, getLocationContextResultSchema, searchObservingLocationsInputSchema, searchObservingLocationsResultSchema, type SearchObservingLocationsInput } from "../../shared/nightsky/places";
 import { planObservingSessionInputSchema, planResultSchema } from "../../shared/nightsky/planning";
 import { planObservingSession, type PlannerServices } from "../nightsky/planner";
-import { compareObservingOptionsInputSchema, compareObservingOptionsResultSchema, recommendSpecialistToolsInputSchema, specialistToolsResultSchema } from "../../shared/nightsky/planning";
+import { compareObservingOptionsInputSchema, compareObservingOptionsResultSchema } from "../../shared/nightsky/planning";
 import { compareObservingOptions } from "../nightsky/compare";
-import { getSpecialistToolRecommendations } from "../content/specialistTools";
 
 export interface CacheEntry<T> { value: T; expiresAt: number }
 export interface NightSkyCache {
@@ -94,7 +93,6 @@ export const V1_TOOL_ANNOTATIONS = {
   get_clear_sky_climatology: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
   plan_observing_session: { readOnlyHint: true, destructiveHint: false, openWorldHint: true },
   compare_observing_options: { readOnlyHint: true, destructiveHint: false, openWorldHint: true },
-  recommend_specialist_tools: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
 } as const;
 
 /** No domain tools are registered until their real handler and schema are ready. */
@@ -398,16 +396,6 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     return { content: [{ type: "text", text: `${result.comparisons.length} options compared. ${result.availability.reason}` }], structuredContent: result };
   });
 
-  server.registerTool("recommend_specialist_tools", {
-    title: "Suggest specialist sky tools",
-    description: "Suggest a small set of optional astronomy or photography tools for the selected activity. Each recommendation links to its reviewed product listing; price or platform support is marked unknown when it could not be verified.",
-    inputSchema: recommendSpecialistToolsInputSchema,
-    outputSchema: specialistToolsResultSchema,
-    annotations: V1_TOOL_ANNOTATIONS.recommend_specialist_tools,
-  }, async ({ activity, experience }) => {
-    const result = getSpecialistToolRecommendations(activity, experience);
-    return { content: [{ type: "text", text: result.availability.reason }], structuredContent: result };
-  });
 }
 
 async function getNightConditionsForPlan(placeId: string, window: { startUtc: string; endUtc: string; timeZone: string }, index: GeoNamesPlaceIndex | undefined, dependencies: NightSkyDependencies, point?: CalculationPlace, includeHourly = true, forecastMode: "single" | "compare" | "all" = "single", allowOpenWeather = false) {
