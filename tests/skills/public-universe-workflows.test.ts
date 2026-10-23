@@ -61,10 +61,10 @@ test('catalogue guidance recipes validate against the actual strict tool schemas
     }
 });
 
-test('all workflows preserve staged useful evidence and exact reference search', () => {
+test('all workflows preserve staged useful evidence and bounded catalogue lookup', () => {
     const descriptions = readFileSync('server/mcp/publicUniverseTools.ts', 'utf8');
-    assert.ok(descriptions.includes('For complete session planning, optional enrichment follows useful main-planner astronomy/weather evidence.'));
-    assert.ok(descriptions.includes('For a focused catalogue shortlist, call directly once place and session time are known; forecasts are not a prerequisite.'));
+    assert.ok(descriptions.includes('Optional catalogue shortlist for a selected place and session time, independent of a weather forecast.'));
+    assert.ok(descriptions.includes('Requires one resolved place snapshot, explicit shortlistLimit 1..6'));
     for (const name of readdirSync('plugins/nightsky/skills'))
         for (const path of [`plugins/nightsky/skills/${name}/SKILL.md`, `docs/product/workflows/${name}.md`]) {
             const text = readFileSync(path, 'utf8');
