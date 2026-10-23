@@ -214,6 +214,35 @@ test("playback failure stays silent and can be retried, audio survives routing",
   ).toBeVisible();
 });
 
+test("Get NightSky Plugin keeps music playing across the route", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    HTMLMediaElement.prototype.play = function () {
+      return Promise.resolve();
+    };
+  });
+  await page.goto("/");
+  await page
+    .getByRole("button", { name: "Enter the Night", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Mute music", exact: true }),
+  ).toBeVisible();
+  await page
+    .locator("audio")
+    .evaluate((audio) => audio.setAttribute("data-persistent", "yes"));
+  await page
+    .getByRole("banner")
+    .getByRole("link", { name: "Get NightSky Plugin" })
+    .click();
+  await expect(page).toHaveURL(/\/get-started\/?$/);
+  await expect(page.locator("audio")).toHaveAttribute("data-persistent", "yes");
+  await expect(
+    page.getByRole("button", { name: "Mute music", exact: true }),
+  ).toBeVisible();
+});
+
 test("blocked session storage does not prevent keyboard entry", async ({
   page,
 }) => {
