@@ -86,6 +86,9 @@ export default function GetStarted() {
                 destinations[assistant.id],
               );
               const label = `Get NightSky Plugin for ${assistant.name}`;
+              const reviewPending =
+                !href &&
+                (assistant.id === "chatgpt" || assistant.id === "claude");
               return (
                 <li className="setup-assistant-card" key={assistant.id}>
                   <AssistantIcon
@@ -110,11 +113,17 @@ export default function GetStarted() {
                     <button
                       className="action action-primary setup-choice-action"
                       data-testid={`${assistant.id}-listing-action`}
-                      aria-label={label}
+                      aria-label={
+                        reviewPending
+                          ? `${assistant.name} directory review pending`
+                          : label
+                      }
                       disabled
                     >
-                      Get NightSky Plugin
-                      <Sparkles size={15} aria-hidden="true" />
+                      {reviewPending
+                        ? "Directory review pending"
+                        : "Get NightSky Plugin"}
+                      {!reviewPending && <Sparkles size={15} aria-hidden="true" />}
                     </button>
                   )}
                   <a
@@ -251,3 +260,4 @@ export default function GetStarted() {
     </div>
   );
 }
+
