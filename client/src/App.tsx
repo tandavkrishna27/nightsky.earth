@@ -8,6 +8,7 @@ import BackgroundMusic from "./components/BackgroundMusic";
 import ExperienceShell from "./components/ExperienceShell";
 import CalendarPreferences from "./components/sky-events/CalendarPreferences";
 import AnalyticsConsent from "./components/AnalyticsConsent";
+import MeteorLoader from "./components/MeteorLoader";
 const Home = lazy(() => import("./pages/Home"));
 const SkyEvents = lazy(() => import("./pages/SkyEvents"));
 const SkyEventDetail = lazy(() => import("./pages/SkyEventDetail"));
@@ -35,7 +36,8 @@ export default function App() {
                   <Suspense
                     fallback={
                       <div className="route-loading" role="status">
-                        Loading page…
+                        <MeteorLoader size="lg" />
+                        <span>Loading page…</span>
                       </div>
                     }
                   >
