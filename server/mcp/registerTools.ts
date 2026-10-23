@@ -162,7 +162,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
   server.registerTool("resolve_place", {
     title: "Find a named observing place",
-    description: dependencies.discoveryProvider ? "Resolve a named place using the configured bounded GeoNames/Geoapify APIs. Keep sourceRevision and freshness for the selected match. Ask the user to choose among ambiguous matches and to choose an explicit display time zone when actual-site timezone evidence is unknown. Coordinates and street addresses are not accepted." : "Resolve a named city or observing area to one or more GeoNames places with an IANA time zone. If several places match, ask the user to choose. Use approximate host location only when the user explicitly asks for near-me results. Do not pass coordinates or street addresses.",
+    description: dependencies.discoveryProvider ? "Resolve a named place using the configured bounded GeoNames/Geoapify APIs. Results include sourceRevision and freshness. Ambiguous matches require a selected result; an unknown actual-site time zone requires an explicit display zone for later calculations. Coordinates and street addresses are not accepted." : "Resolve a named city or observing area to one or more GeoNames places with an IANA time zone. Ambiguous matches require a selected result. Approximate host location is available only for an explicit near-me request. Coordinates and street addresses are not accepted.",
     inputSchema: resolvePlaceInputSchema,
     outputSchema: resolvePlaceResultSchema,
     annotations: {...V1_TOOL_ANNOTATIONS.resolve_place,openWorldHint:Boolean(dependencies.discoveryProvider)},
@@ -229,7 +229,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_target_visibility", {
     title: "Check when a sky target is above the horizon",
-    description: "Reuse an already-returned orientation sample at the matching place/date/instant before recalculating. A window must have endUtc after startUtc, never identical endpoints. Verify the returned IANA local label matches the requested hour. Calculate geometric above-horizon intervals and up to three timestamped orientation samples for the Sun, Moon, planets, or the Milky Way core at a resolved named place or revision-pinned candidate with explicit display time zone. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
+    description: "Calculate geometric above-horizon intervals and up to three timestamped orientation samples for the Sun, Moon, planets, or Milky Way core at a resolved named place or revision-pinned candidate with an explicit display time zone. The window requires endUtc after startUtc. Returned samples include IANA local labels tied to their exact instants. Existing samples at the same place, date, and instant provide the same evidence. Terrain, obstructions, atmosphere, and equipment limits are not modeled.",
     inputSchema: getTargetVisibilityInputSchema,
     outputSchema: targetVisibilityResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_target_visibility,
@@ -243,7 +243,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_night_conditions", {
     title: "Check forecast conditions during astronomical darkness",
-    description: "Read point forecasts with server-formatted local/UTC cloud rows; use for focused sample inspection instead of repeating the aggregate planner. Default forecastMode single queries one useful source, with at most one fallback if that source has no usable sample. Use compare when the user requests independent forecasts and all only when they request every source this tool can display. OpenWeather values require the visual planning card and are excluded here, including in all mode. Reuse already-returned timestamped evidence when available. Fetch at the selected named-place or revision-pinned candidate point. Candidate planning requires an explicit display time zone. The result keeps source fields and units separate, identifies missing variables, and adds forecast steps overlapping astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
+    description: "Read point forecasts with server-formatted local/UTC cloud rows for focused sample inspection. Default forecastMode single queries one useful source, with at most one fallback if that source has no usable sample. Compare and all modes represent explicit requests for independent forecasts or every source this tool can display. OpenWeather values require the visual planning card and are excluded here, including in all mode. The selected named-place or revision-pinned candidate point is required; candidate planning also requires an explicit display time zone. Results keep source fields and units separate, identify missing variables, and include forecast steps overlapping astronomical darkness plus Moon illumination. Forecasts are not observations and may differ from local conditions.",
     inputSchema: getNightConditionsInputSchema,
     outputSchema: nightConditionsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_night_conditions,
@@ -258,7 +258,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_aurora_outlook", {
     title: "Check the short-range aurora outlook",
-    description: "Retrieve NOAA SWPC's short-horizon OVATION location/intensity forecast for a previously resolved place. The nearest coarse grid cell and forecast times are labeled. This is not a personal sighting probability; check darkness, clouds, horizon and local conditions separately.",
+    description: "Retrieve NOAA SWPC's short-horizon OVATION location/intensity forecast for a previously resolved place. The nearest coarse grid cell and forecast times are labeled. This is not a personal sighting probability and does not evaluate darkness, clouds, horizon, or local conditions.",
     inputSchema: getAuroraOutlookInputSchema,
     outputSchema: auroraOutlookResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_aurora_outlook,
@@ -276,7 +276,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("search_sky_events", {
     title: "Find sky events for this place and date range",
-    description: "Find calculated Moon phases, solar/lunar eclipses, equinoxes, solstices, outer-planet oppositions, explicitly defined inferior/superior solar alignments, Mercury/Venus greatest geocentric three-dimensional Sun-angle elongations, and numerically screened geocentric right-ascension planet-pair conjunctions for all 21 Mercury–Neptune pairs within 2025–2027, plus sourced year-specific meteor forecast maxima. Pair coverage is partial: exhaustive completeness and stationary/tangent contacts are not certified; preserve unresolved intervals. RA crossings, solar alignments, elongations and closest approaches are distinct. Planet local visibility, darkness and detectability are not established; never suggest unfiltered solar viewing. Lunar intervals carry model-conditional horizon bounds; solar contacts use the stated refraction model. Separate source-backed verbal calendar guidance describes typical annual periods, not exact dates, requested-window activity or radiant visibility. Meteor season and radiant coverage are limited. Unsupported classes and coverage gaps are explicit.",
+    description: "Find calculated Moon phases, solar/lunar eclipses, equinoxes, solstices, outer-planet oppositions, explicitly defined inferior/superior solar alignments, Mercury/Venus greatest geocentric three-dimensional Sun-angle elongations, and numerically screened geocentric right-ascension planet-pair conjunctions for all 21 Mercury–Neptune pairs within 2025–2027, plus sourced year-specific meteor forecast maxima. Pair coverage is partial: exhaustive completeness and stationary/tangent contacts are not certified; unresolved intervals are reported. RA crossings, solar alignments, elongations and closest approaches are distinct. Planet local visibility, darkness and detectability are not established; solar events do not authorize unfiltered solar viewing. Lunar intervals carry model-conditional horizon bounds; solar contacts use the stated refraction model. Separate source-backed verbal calendar guidance describes typical annual periods, not exact dates, requested-window activity or radiant visibility. Meteor season and radiant coverage are limited. Unsupported classes and coverage gaps are explicit.",
     inputSchema: searchSkyEventsInputSchema,
     outputSchema: skyEventsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.search_sky_events,
@@ -315,7 +315,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
   });
 
   server.registerTool("resolve_observing_region", {
-    title:"Resolve a country or state", description:dependencies.discoveryProvider ? "Resolve named countries or states into their own Geoapify boundary-filter identities. Keep each regionId and sourceRevision in scope.regionSelections; select ambiguous matches. Region centers are not observing points. Unsupported memberships and exclusions remain explicit." : "Resolve named administrative regions in the installed pinned boundary catalogue. Missing coverage is explicit; boundaries do not verify site access or safety.",
+    title:"Resolve a country or state", description:dependencies.discoveryProvider ? "Resolve named countries or states into Geoapify boundary-filter identities. Results include regionId and sourceRevision for scope.regionSelections; ambiguous matches require a selected result. Region centers are not observing points. Unsupported memberships and exclusions remain explicit." : "Resolve named administrative regions in the installed pinned boundary catalogue. Missing coverage is explicit; boundaries do not verify site access or safety.",
     inputSchema:resolveObservingRegionInputSchema,outputSchema:resolveObservingRegionResultSchema,annotations:{...V1_TOOL_ANNOTATIONS.resolve_observing_region,openWorldHint:Boolean(dependencies.discoveryProvider)},
   }, async input => {
     if (dependencies.discoveryProvider) {const result=await dependencies.discoveryProvider.resolveRegion(input);return {content:[{type:"text",text:apiAttributionText(result.availability.reason,result.sources)}],structuredContent:result};}
@@ -324,7 +324,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
     return {content:[{type:"text",text:result.availability.reason}],structuredContent:result};
   });
   server.registerTool("get_observing_location_details", {
-    title:"Inspect a selected observing candidate",description:dependencies.discoveryProvider ? "Inspect a selected immutable API source snapshot by placeId and sourceRevision. Expired or missing snapshots require new resolution/search. Source coordinates are retained exactly; unknown site timezones require an explicit display zone before calculations." : "Retrieve source geometry and access evidence for a candidate ID and exact catalogue revision, or resolve a named site within installed coverage. Missing or stale coverage is explicit; choose a display time zone before planning an unverified site zone.",
+    title:"Inspect a selected observing candidate",description:dependencies.discoveryProvider ? "Inspect a selected immutable API source snapshot by placeId and sourceRevision. Expired or missing snapshots require new resolution/search. Source coordinates are retained exactly; unknown site timezones require an explicit display zone for calculations." : "Retrieve source geometry and access evidence for a candidate ID and exact catalogue revision, or resolve a named site within installed coverage. Missing or stale coverage is explicit; an unverified site zone requires a selected display time zone for planning.",
     inputSchema:getObservingLocationDetailsInputSchema,outputSchema:getObservingLocationDetailsResultSchema,annotations:V1_TOOL_ANNOTATIONS.get_observing_location_details,
   }, async input => {
     if (dependencies.discoveryProvider) {if(!input.placeId||!input.sourceRevision) throw new CalculationPlaceClarificationError("resolve-again","Resolve a named API place first, then inspect its selected source revision.");const result=await dependencies.discoveryProvider.details({placeId:input.placeId,sourceRevision:input.sourceRevision});return {content:[{type:"text",text:apiAttributionText(result.availability.reason,result.sources)}],structuredContent:result};}
@@ -356,7 +356,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("get_clear_sky_climatology", {
     title: "Historical cloud patterns",
-    description: dependencies.discoveryProvider ? "Read optional approved historical cloud evidence for the selected API snapshot when configured. Without approved data, historical context remains unavailable; no acquisition or download is triggered. This is not a forecast or whole-night success probability. Preserve returned method, period, sample and coverage limits." : "Read locally installed ERA5 monthly historical cloud statistics for a resolved named place. Values describe modeled total cloud cover in hourly dark-time samples, with inclusive 10%, 25% and 50% thresholds. They are not a forecast or whole-night success probability. One-year artifacts remain sample-only and partial; unsupported coverage is explicit.",
+    description: dependencies.discoveryProvider ? "Read optional approved historical cloud evidence for the selected API snapshot when configured. Without approved data, historical context remains unavailable; no acquisition or download is triggered. This is not a forecast or whole-night success probability. Results include method, period, sample, and coverage limits." : "Read locally installed ERA5 monthly historical cloud statistics for a resolved named place. Values describe modeled total cloud cover in hourly dark-time samples, with inclusive 10%, 25% and 50% thresholds. They are not a forecast or whole-night success probability. One-year artifacts remain sample-only and partial; unsupported coverage is explicit.",
     inputSchema: getClearSkyClimatologyInputSchema,
     outputSchema: climateContextResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.get_clear_sky_climatology,
@@ -370,7 +370,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("plan_observing_session", {
     title: "Plan a night-sky observing session",
-    description: "Combine the selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, a quota-saving forecast selection, and activity-specific guidance. Default forecastMode single uses one useful provider with at most one fallback; compare is for an explicit independent-forecast comparison and all is for a request for every forecast this plan can display. OpenWeather samples are available only when the visual planning card is enabled. Resolve the place first. For an unverified candidate site zone, use a user-chosen display time zone; if the user has not chosen one, ask and wait before calling. The result keeps source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
+    description: "Combine a selected city or revision-pinned candidate point and display time zone, astronomical darkness, Moon conditions, sky events, a quota-saving forecast selection, and activity-specific guidance. Default forecastMode single uses one useful provider with at most one fallback; compare represents an explicit independent-forecast comparison and all represents a request for every forecast this plan can display. OpenWeather samples are available only when the visual planning card is enabled. A resolved place is required; an unverified candidate site zone also requires a user-chosen display time zone. Results keep source evidence and unknowns separate; forecast conditions are not guarantees, and access, seeing, transparency, and site safety are not inferred.",
     inputSchema: planObservingSessionInputSchema,
     outputSchema: planResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.plan_observing_session,
@@ -387,7 +387,7 @@ export function registerNightSkyTools(server: McpServer, dependencies: NightSkyD
 
   server.registerTool("compare_observing_options", {
     title: "Compare observing nights or places",
-    description: "Compare two to five user-selected place/date/activity options. Each option uses one useful forecast provider by default; set that option's forecastMode to compare or all only if the user also requests independent or every source this tool can display. OpenWeather values require the visual planning card and are excluded here, including in all mode. Keeps returned sources separate, retains options with missing data, and shows activity-specific factors without inventing a winner or universal sky score.",
+    description: "Compare two to five user-selected place/date/activity options. Each option uses one useful forecast provider by default; forecastMode compare or all represents an explicit request for independent or every source this tool can display. OpenWeather values require the visual planning card and are excluded here, including in all mode. Results keep sources separate, retain options with missing data, and show activity-specific factors without inventing a winner or universal sky score.",
     inputSchema: compareObservingOptionsInputSchema,
     outputSchema: compareObservingOptionsResultSchema,
     annotations: V1_TOOL_ANNOTATIONS.compare_observing_options,
