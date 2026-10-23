@@ -40,12 +40,16 @@ export function boundedToolRegistration(server: McpServer, retainToolWork?: () =
             return (name: unknown, config: unknown, callback: unknown) => {
                 if (typeof callback !== "function")
                     throw new TypeError("A tool callback is required.");
+                const toolConfig = config as { title?: unknown; annotations?: Record<string, unknown> } | undefined;
+                const titledConfig = typeof toolConfig?.title === "string" && toolConfig.title.trim()
+                    ? { ...toolConfig, annotations: { ...toolConfig.annotations, title: toolConfig.title } }
+                    : config;
                 const guarded = guardToolCallback(async (...args: unknown[]) => {
                     const release = retainToolWork?.();
                     try { return await Reflect.apply(callback, undefined, args); }
                     finally { release?.(); }
                 });
-                return Reflect.apply(target.registerTool, target, [name, config, guarded]);
+                return Reflect.apply(target.registerTool, target, [name, titledConfig, guarded]);
             };
         },
     });
