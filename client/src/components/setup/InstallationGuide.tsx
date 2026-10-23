@@ -137,8 +137,10 @@ export default function InstallationGuide() {
           {directoryPending && (
             <div className="setup-directory-pending">
               <p>
-                NightSky’s {guide.name} directory listing is under review. The
-                steps below apply after it is published.
+                {assistant === "chatgpt"
+                  ? "NightSky’s ChatGPT directory listing is under review."
+                  : "NightSky’s Claude directory listing is pending review."}{" "}
+                The steps below apply after it is published.
               </p>
               <button
                 type="button"
