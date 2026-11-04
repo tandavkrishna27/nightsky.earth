@@ -12,6 +12,16 @@
   [build.environment]
     NODE_VERSION = "20"
 
+# The verified public ChatGPT directory entry. Keep this in both production
+# and previews so the install path can be reviewed before release.
+[context.production.environment]
+  VITE_NIGHTSKY_LISTING_PUBLISHED = "true"
+  VITE_NIGHTSKY_LISTING_URL = "https://chatgpt.com/plugins/plugin_asdk_app_6ad9e640386481918ec734bb4d616193"
+
+[context.deploy-preview.environment]
+  VITE_NIGHTSKY_LISTING_PUBLISHED = "true"
+  VITE_NIGHTSKY_LISTING_URL = "https://chatgpt.com/plugins/plugin_asdk_app_6ad9e640386481918ec734bb4d616193"
+
 # Review and branch previews use the no-index preview build. Production keeps
 # the release build above, which stops until required factual approvals exist.
 [context.deploy-preview]
