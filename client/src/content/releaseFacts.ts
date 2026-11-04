@@ -74,7 +74,7 @@ export const releaseFacts: ReleaseFacts = {
   hostingVerifiedAt: "2026-10-19",
   contentRightsApprovedAt: "2026-10-19",
   policiesApprovedAt: "2026-10-19",
-  setupVerifiedAt: null,
+  setupVerifiedAt: "2026-11-04",
 };
 export function releaseBlockers(facts: ReleaseFacts, listing: ListingConfig) {
   const blockers: string[] = [];

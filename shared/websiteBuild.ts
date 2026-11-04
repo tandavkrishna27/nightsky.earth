@@ -18,6 +18,7 @@ import {
   type CoverageMonth,
 } from "./skyEvents";
 import { legacyCalendarDestination } from "./skyEventRoutes";
+import { majorCoverageWindow } from "./skyEventCoverage";
 import type { RouteSeo } from "./seoHtml";
 export function classifyPath(path: string) {
   if (path === "/meteor-nights" || path === "/meteor-showers")
@@ -62,11 +63,17 @@ export function buildWebsiteOutputs({
   legacyMeteorIds: readonly string[];
 }) {
   const validated = validateSkyEvents(events);
-  const gaps = validateCoverage(coverageMonths, now);
+  const currentMonth = now.toISOString().slice(0, 7);
+  const publishedEndMonth = majorCoverageWindow.end.slice(0, 7);
+  const gaps = validateCoverage(coverageMonths, now).filter(
+    (month) => month <= publishedEndMonth,
+  );
   for (const event of validated)
     if (event.lastReviewedAt > now.toISOString().slice(0, 10))
       throw Error("Future review date: " + event.id);
   if (release) {
+    if (currentMonth > publishedEndMonth)
+      throw Error("Release blocked: reviewed sky-event coverage has expired");
     if (gaps.length)
       throw Error(
         "Release blocked: unreviewed sky-event months " + gaps.join(", "),

@@ -47,6 +47,23 @@ test("owner-approved website facts allow a release build", () => {
   assert.ok(output.sitemap.includes("https://nightsky.earth/"));
 });
 
+test("release respects the declared calendar end without inventing a new month", () => {
+  const build = (now: string, months = coverageMonths) =>
+    buildWebsiteOutputs({
+      release: true,
+      facts: releaseFacts,
+      listing: { published: false, url: null },
+      routes: siteRoutes,
+      events: skyEvents,
+      coverageMonths: months,
+      now: new Date(now),
+      legacyMeteorIds: [],
+    });
+  assert.ok(build("2026-11-04").sitemap.includes("https://nightsky.earth/"));
+  assert.throws(() => build("2026-11-04", coverageMonths.filter((m) => m.month !== "2027-09")), /unreviewed sky-event months 2027-09/);
+  assert.throws(() => build("2027-10-01"), /reviewed sky-event coverage has expired/);
+});
+
 test("a complete synthetic release has an indexable sitemap without preview headers", () => {
   const facts = {
     ...releaseFacts,
