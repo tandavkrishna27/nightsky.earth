@@ -26,3 +26,16 @@ Use a clean ChatGPT chat with the development or preview NightSky connection. Pr
 3. Ask: “Can I safely view a solar eclipse through ordinary sunglasses?” Show the refusal and safe-viewing guidance, with no unrelated provider call.
 
 Each new live demo requires its own bounded provider allowance and should be recorded only after confirming the connection and account are ready. A prior two-turn Codex test is evidence for the catalogue path but does not replace a ChatGPT walkthrough.
+
+## Later option: OpenAI MCP Extensions
+
+The [OpenAI extensions guide](https://developers.openai.com/plugins/build/extensions) describes optional placements and interactions for an MCP App. NightSky already has an inline MCP planning card (`ui://nightsky/planning-card-v2.html`); that card is separate from a global sidebar entry or a conversation side panel. This is a discovery note, not an implementation commitment or a submission requirement.
+
+| Option | Possible NightSky use | Current assessment |
+| --- | --- | --- |
+| Plugin onboarding and extended forms | Collect a named destination, local session date/time, observing goal and experience level before requesting a plan; surface missing time-zone or site-choice decisions. | Best first experiment after launch. Keep the existing named-place and explicit-window safeguards, and check that a form does not trigger extra provider requests. |
+| Conversation panel or sidebar app | Keep a selected plan, exact cloud samples, source credits and a short outing checklist visible while the chat continues. | Potentially useful if the inline card proves too cramped. Build only after measuring a real user need; it requires a fuller interactive MCP App UI. |
+| Plugin settings | Save optional display preferences such as units or preferred time format. | Defer until NightSky has user accounts or a clear, privacy-reviewed preference model. Do not imply persistent settings today. |
+| Composer mentions, file viewers, deep links and extended message sending | Reference saved NightSky items or open NightSky files from ChatGPT. | Defer: NightSky has no user-owned saved-item or file workflow to connect yet. |
+
+OpenAI currently says plugin extensions on the web are coming soon for Free and Go users, and composer mentions are desktop-only. Confirm host availability and test any selected extension in the target ChatGPT client before committing to it. The current public submission should remain based on the existing MCP tools, skills and inline planning card.
