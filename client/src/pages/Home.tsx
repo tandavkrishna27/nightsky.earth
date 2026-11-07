@@ -44,7 +44,10 @@ export default function Home() {
           </h1>
           <p className="hero-description">{homeCopy.hero.body}</p>
           <div className="action-group">
-            <PluginAction mobileFree />
+            <PluginAction mobileFree heroChatGpt />
+            <Link className="hero-setup-link" href="/get-started">
+              Other assistants or manual setup <span aria-hidden="true">→</span>
+            </Link>
           </div>
           <PlatformAvailability />
           <McpAddressCard placement="hero" />
