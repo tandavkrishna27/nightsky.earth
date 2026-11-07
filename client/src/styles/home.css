@@ -54,6 +54,18 @@
   margin: 25px auto 0;
   text-align: left;
 }
+.home-hero .action-group {
+  flex-direction: column;
+  gap: 10px;
+}
+.home-hero .hero-setup-link {
+  color: #e7d3a8;
+  font-size: 13px;
+  text-underline-offset: 4px;
+}
+.home-hero .hero-setup-link:hover {
+  color: #fff;
+}
 .action-free-label {
   display: none;
 }
